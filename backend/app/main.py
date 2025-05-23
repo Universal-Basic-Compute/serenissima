@@ -1267,127 +1267,90 @@ async def execute_transaction(transaction_id: str, data: dict):
                 }
                 
                 # Update buyer's Ducats
-                citizens_table.update(buyer_record["id"], {
-                    "Ducats": buyer_compute - price
-                })
+                citizens_table.update(buyer_record["id"], {"Ducats": buyer_compute - price})
                 
                 # Update seller's Ducats
-                citizens_table.update(seller_record["id"], {
-                    "Ducats": seller_compute + price
-                })
+                citizens_table.update(seller_record["id"], {"Ducats": seller_compute + price})
                 
-                # Update transaction log status
                 transaction_log["status"] = "completed"
                 
-                # Add transaction log to TRANSACTIONS table
+                # Add transaction log (can still use transactions_table for logs or a dedicated log table)
                 try:
-                    transactions_table.create({
-                        "Type": "transfer",
-                        "Asset": "compute_token",
-                        "Seller": seller_username,
-                        "Buyer": buyer_username,
+                    transactions_table.create({ # Or a new logging mechanism
+                        "Type": "transfer_log", # Differentiate from main transactions
+                        "Asset": "compute_token_for_land_sale",
+                        "Seller": seller_username, # Person receiving ducats
+                        "Buyer": buyer_username, # Person paying ducats
                         "Price": price,
                         "CreatedAt": datetime.datetime.now().isoformat(),
-                        "UpdatedAt": datetime.datetime.now().isoformat(),
                         "ExecutedAt": datetime.datetime.now().isoformat(),
                         "Notes": json.dumps(transaction_log)
                     })
                 except Exception as tx_log_error:
-                    print(f"Warning: Failed to create transaction log: {str(tx_log_error)}")
+                    print(f"Warning: Failed to create transaction log for compute transfer: {str(tx_log_error)}")
                 
                 print(f"Transfer complete. New balances - Buyer: {buyer_compute - price}, Seller: {seller_compute + price}")
             except Exception as balance_error:
-                # Log the error but don't fail the transaction
                 print(f"ERROR updating compute balances: {str(balance_error)}")
                 traceback.print_exc(file=sys.stdout)
-                
-                # Create a record of the failed transaction for later reconciliation
-                try:
-                    failed_transaction = {
-                        "transaction_id": transaction_id,
-                        "buyer": buyer_username,
-                        "seller": seller_username,
-                        "price": price,
-                        "error": str(balance_error),
-                        "timestamp": datetime.datetime.now().isoformat(),
-                        "type": "compute_transfer_error"
-                    }
-                    
-                    # Add to TRANSACTIONS table as a failed transaction
-                    transactions_table.create({
-                        "Type": "error",
-                        "Asset": "compute_token",
-                        "Seller": seller_username,
-                        "Buyer": buyer_username,
-                        "Price": price,
-                        "CreatedAt": datetime.datetime.now().isoformat(),
-                        "UpdatedAt": datetime.datetime.now().isoformat(),
-                        "ExecutedAt": datetime.datetime.now().isoformat(),
-                        "Notes": json.dumps(failed_transaction)
-                    })
-                    
-                    print(f"Saved failed transaction record for later reconciliation")
-                except Exception as record_error:
-                    print(f"ERROR saving failed transaction record: {str(record_error)}")
-                    traceback.print_exc(file=sys.stdout)
+                # Potentially create a failed transaction log here as well
+                # For now, we'll let the overall transaction fail if compute transfer is critical
+                raise HTTPException(status_code=500, detail=f"Failed to transfer compute: {str(balance_error)}")
             
             print(f"Transferred {price} compute from {buyer_username} to {seller_username}")
-        
-        # Update the land ownership if it's a land transaction
-        if record["fields"].get("Type") == "land" and record["fields"].get("Asset"):
-            land_id = record["fields"].get("Asset")
-            print(f"Updating land ownership for asset {land_id} to {buyer_username}")
+
+        # Update the land ownership if it's a land sale contract
+        if contract_type == "land_sale" and record["fields"].get("ResourceType"):
+            land_id_from_contract = record["fields"].get("ResourceType") # This is the LandId
+            print(f"Updating land ownership for asset {land_id_from_contract} to {buyer_username}")
             
-            # Check if land exists in Airtable
             try:
-                land_formula = f"{{LandId}}='{land_id}'"
-                print(f"Searching for land with formula: {land_formula}")
+                land_formula = f"{{LandId}}='{land_id_from_contract}'"
                 land_records = lands_table.all(formula=land_formula)
                 
                 if land_records:
-                    # Update existing land record
-                    land_record = land_records[0]
-                    print(f"Found existing land record: {land_record['id']}")
-                    
-                    # Update the owner with username
-                    lands_table.update(land_record["id"], {
-                        "Citizen": buyer_username
-                    })
+                    land_airtable_record = land_records[0]
+                    lands_table.update(land_airtable_record["id"], {"Citizen": buyer_username})
                     print(f"Updated land owner in Airtable to {buyer_username}")
                 else:
-                    # Create new land record
-                    print(f"Land record not found, creating new record for {land_id}")
-                    lands_table.create({
-                        "LandId": land_id,
-                        "Citizen": buyer_username
-                    })
+                    print(f"Land record not found for {land_id_from_contract}, creating new record.")
+                    lands_table.create({"LandId": land_id_from_contract, "Citizen": buyer_username})
                     print(f"Created new land record with owner {buyer_username}")
             except Exception as land_error:
                 print(f"ERROR updating land ownership in Airtable: {str(land_error)}")
                 traceback.print_exc(file=sys.stdout)
-                # Continue execution even if land update fails
-        
-        # Update the transaction with buyer and executed_at timestamp
+                # Decide if this is a fatal error for the transaction
+                raise HTTPException(status_code=500, detail=f"Failed to update land ownership: {str(land_error)}")
+
+        # Update the contract with buyer, executed_at timestamp, and status
         now = datetime.datetime.now().isoformat()
-        updated_record = transactions_table.update(transaction_id, {
-            "Buyer": buyer_username,  # Use username instead of wallet address
+        updated_contract_record = contracts_table.update(transaction_id, { # transaction_id is ContractId
+            "Buyer": buyer_username,
             "ExecutedAt": now,
+            "Status": "executed",
             "UpdatedAt": now
         })
         
+        notes_data = {}
+        if "Notes" in updated_contract_record["fields"]:
+            try:
+                notes_data = json.loads(updated_contract_record["fields"].get("Notes", "{}"))
+            except json.JSONDecodeError:
+                pass
+
         return {
-            "id": updated_record["id"],
-            "type": updated_record["fields"].get("Type", ""),
-            "asset": updated_record["fields"].get("Asset", ""),
-            "seller": updated_record["fields"].get("Seller", ""),
-            "buyer": updated_record["fields"].get("Buyer", None),
-            "price": updated_record["fields"].get("Price", 0),
-            "historical_name": updated_record["fields"].get("HistoricalName", None),
-            "english_name": updated_record["fields"].get("EnglishName", None),
-            "description": updated_record["fields"].get("Description", None),
-            "created_at": updated_record["fields"].get("CreatedAt", ""),
-            "updated_at": updated_record["fields"].get("UpdatedAt", ""),
-            "executed_at": updated_record["fields"].get("ExecutedAt", None)
+            "id": updated_contract_record["id"],
+            "type": updated_contract_record["fields"].get("Type", ""),
+            "asset": updated_contract_record["fields"].get("ResourceType", ""), # LandId
+            "seller": updated_contract_record["fields"].get("Seller", ""),
+            "buyer": updated_contract_record["fields"].get("Buyer", None),
+            "price": updated_contract_record["fields"].get("PricePerResource", 0),
+            "historical_name": notes_data.get("historical_name"),
+            "english_name": notes_data.get("english_name"),
+            "description": notes_data.get("description"),
+            "created_at": updated_contract_record["fields"].get("CreatedAt", ""),
+            "updated_at": updated_contract_record["fields"].get("UpdatedAt", ""),
+            "executed_at": updated_contract_record["fields"].get("ExecutedAt", None)
         }
     except HTTPException:
         raise
