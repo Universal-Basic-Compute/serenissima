@@ -1246,6 +1246,60 @@ export class InteractionService {
   }
 
   /**
+   * Helper function to find the building clicked by the mouse
+   */
+  private findClickedBuilding(
+    mousePosition: { x: number, y: number },
+    buildings: any[],
+    scale: number,
+    offset: { x: number, y: number },
+    canvasWidth: number,
+    canvasHeight: number
+  ): any | null {
+    const { x: mouseX, y: mouseY } = mousePosition;
+
+    for (const building of buildings) {
+      if (!building.position) continue;
+
+      let position;
+      if (typeof building.position === 'string') {
+        try {
+          position = JSON.parse(building.position);
+        } catch (e) {
+          continue;
+        }
+      } else {
+        position = building.position;
+      }
+
+      let worldX, worldY;
+      if ('lat' in position && 'lng' in position) {
+        worldX = (position.lng - 12.3326) * 20000;
+        worldY = (position.lat - 45.4371) * 20000;
+      } else if ('x' in position && 'z' in position) {
+        worldX = position.x;
+        worldY = position.z;
+      } else {
+        continue;
+      }
+
+      const isoPos = CoordinateService.worldToScreen(worldX, worldY, scale, offset, canvasWidth, canvasHeight);
+      const size = this.getBuildingSize(building.type);
+      const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+
+      if (
+        mouseX >= isoPos.x - squareSize / 2 &&
+        mouseX <= isoPos.x + squareSize / 2 &&
+        mouseY >= isoPos.y - squareSize / 2 &&
+        mouseY <= isoPos.y + squareSize / 2
+      ) {
+        return building;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Helper function to find which polygon contains this building point
    */
   private findPolygonIdForPoint(point: {lat: number, lng: number}, polygons: any[]): string {
