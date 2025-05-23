@@ -60,6 +60,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pyairtable import Api, Table
 from dotenv import load_dotenv
 
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+log = logging.getLogger("process_activities")
+
 # Attempt to import helper functions from other engine scripts
 try:
     from backend.engine.createimportactivities import get_building_types as get_building_type_definitions_from_api
@@ -83,23 +90,8 @@ except ImportError:
     def get_resource_definitions_from_api():
         raise NotImplementedError("get_resource_definitions_from_api is not available")
 
-
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-log = logging.getLogger("process_activities")
-
 # Load environment variables
 load_dotenv()
-
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-log = logging.getLogger("process_activities")
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
 
