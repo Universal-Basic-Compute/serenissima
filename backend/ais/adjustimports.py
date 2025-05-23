@@ -39,7 +39,7 @@ def initialize_airtable():
 
 def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
-    return value.replace("'", "\\'")
+    return value
 
 def _get_citizen_building_problems(tables: Dict[str, Table], username: str, limit: int = 100) -> List[Dict]:
     """Get latest 100 PROBLEMS where AssetType='building' AND Citizen=Username."""
@@ -269,7 +269,7 @@ def prepare_import_strategy_data(
     # Process existing import contracts
     existing_contracts = []
     for contract in citizen_contracts:
-        if contract["fields"].get("Seller") == "Italia":  # Only include import contracts
+        if contract["fields"].get("Type") == "import":  # Only include import contracts
             existing_contracts.append({
                 "id": contract["fields"].get("ContractId", ""),
                 "resource_type": contract["fields"].get("ResourceType", ""),

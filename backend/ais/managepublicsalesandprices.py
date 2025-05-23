@@ -16,7 +16,7 @@ from app.citizen_utils import find_citizen_by_identifier
 def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
     if isinstance(value, str):
-        return value.replace("'", "\\'")
+        return value
     return str(value) # Ensure it's a string if not already
 
 def initialize_airtable():

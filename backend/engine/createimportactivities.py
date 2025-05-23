@@ -42,7 +42,7 @@ load_dotenv()
 def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
     if isinstance(value, str):
-        return value.replace("'", "\\'")
+        return value
     return str(value)
 
 def is_dock_working_hours() -> bool:
