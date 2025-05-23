@@ -19,6 +19,7 @@ import TransportDebugPanel from '../UI/TransportDebugPanel';
 import TransportErrorMessage from '../UI/TransportErrorMessage';
 import ProblemMarkers from './ProblemMarkers';
 import ProblemDetailsPanel from '../UI/ProblemDetailsPanel';
+import BuildingCreationPanel from './BuildingCreationPanel';
 import { renderService } from '@/lib/services/RenderService';
 
 interface IsometricViewerProps {
