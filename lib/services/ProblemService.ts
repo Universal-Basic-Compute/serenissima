@@ -501,6 +501,7 @@ export class ProblemService {
         const buildingName = building.name || building.type || 'Unnamed Building';
         const rentAmount = building.rentAmount; // Can be number, null, or undefined
         const ranBy = building.ranBy && typeof building.ranBy === 'string' ? building.ranBy.trim() : null;
+        const occupant = building.occupant && typeof building.occupant === 'string' ? building.occupant.trim() : null; // Get and trim occupant
 
         let skipReason = "";
 
@@ -538,12 +539,19 @@ export class ProblemService {
 
         if (category === 'home') {
           if (rentAmount === 0 || rentAmount === null || rentAmount === undefined) {
-            problemTypeSpecific = 'zero_rent_home';
-            title = 'Zero Rent for Home';
-            description = `Your residential property, **${buildingName}** (ID: ${buildingId}), currently has its rent set to 0 Ducats. While this might be intentional (e.g., for personal use), it means you are not generating rental income if the property were to be leased to another citizen.`;
-            solutions = `Consider the following actions:\n- If you intend to rent this property, set a competitive rent amount based on market conditions.\n- If the property is for personal use or other non-rental purposes, you can ignore this notification.\n- Review your property management strategy to ensure rents are set appropriately for income generation.`;
-            severity = 'low';
-            generateProblem = true;
+            if (owner === occupant) {
+              // Log if owner is occupant and rent is zero - this is fine, not a problem.
+              if (username || processedCount < 10 || (Object.keys(problems).length < 5 && processedCount < 50)) {
+                console.log(`[ProblemService] detectZeroRentAmountBuildings (Processed: ${processedCount}): SKIPPING Zero Rent for Home problem for Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}) because Owner is also Occupant ('${occupant}'). Rent is ${rentAmount}.`);
+              }
+            } else {
+              problemTypeSpecific = 'zero_rent_home';
+              title = 'Zero Rent for Home';
+              description = `Your residential property, **${buildingName}** (ID: ${buildingId}), currently has its rent set to 0 Ducats. This property is not occupied by you. While this might be intentional (e.g., for a friend/family), it means you are not generating rental income if the property were to be leased to another citizen. If you intend to use it personally, ensure you are listed as the occupant.`;
+              solutions = `Consider the following actions:\n- If you intend to rent this property to someone else, set a competitive rent amount.\n- If the property is for your personal use, ensure your citizen record is set as the 'Occupant' of this building. Then, this notification can be ignored.\n- If this is a special arrangement (e.g., free housing for an ally), you can ignore this notification.\n- Review your property management strategy.`;
+              severity = 'low';
+              generateProblem = true;
+            }
           }
         } else if (category === 'business') {
           // For businesses, problem only if Owner is not RanBy
@@ -573,7 +581,7 @@ export class ProblemService {
             title,
             description,
             solutions,
-            notes: `Building Category: ${category}. Owner: ${owner}. RanBy: ${ranBy || 'N/A'}. RentAmount: ${rentAmount === undefined ? 'undefined' : rentAmount === null ? 'null' : rentAmount}.`,
+            notes: `Building Category: ${category}. Owner: ${owner}. Occupant: ${occupant || 'N/A'}. RanBy: ${ranBy || 'N/A'}. RentAmount: ${rentAmount === undefined ? 'undefined' : rentAmount === null ? 'null' : rentAmount}.`,
             position: building.position || null,
           };
         }
