@@ -76,7 +76,19 @@ def get_polygons_data() -> Optional[Dict]:
         data = response.json()
         if data.get("success"):
             log.info(f"Successfully fetched polygon data (version: {data.get('version')}).")
-            return data.get("polygons", {})
+            polygons_list = data.get("polygons")
+            if isinstance(polygons_list, list):
+                # Transform the list of polygon objects into a dictionary keyed by polygon ID (LandId)
+                polygons_dict = {
+                    poly.get('id'): poly 
+                    for poly in polygons_list 
+                    if poly and isinstance(poly, dict) and poly.get('id')
+                }
+                log.info(f"Transformed polygon list into a dictionary with {len(polygons_dict)} entries.")
+                return polygons_dict
+            else:
+                log.warning(f"Polygons data from API is not a list as expected. Received: {type(polygons_list)}")
+                return {} # Return empty dict if structure is not as expected
         else:
             log.error(f"API error when fetching polygons: {data.get('error', 'Unknown error')}")
             return None
