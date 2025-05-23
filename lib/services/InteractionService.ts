@@ -782,60 +782,8 @@ export class InteractionService {
       
       // Original loop for buildings (now part of the logic above)
       // for (const building of data.buildings) {
-      //   if (!building.position) continue;
-        
-      //   let position;
-        if (typeof building.position === 'string') {
-          try {
-            position = JSON.parse(building.position);
-          } catch (e) {
-            continue;
-          }
-        } else {
-          position = building.position;
-        }
-        
-        // Convert lat/lng to isometric coordinates
-        let x, y;
-        if ('lat' in position && 'lng' in position) {
-          x = (position.lng - 12.3326) * 20000;
-          y = (position.lat - 45.4371) * 20000;
-        } else if ('x' in position && 'z' in position) {
-          x = position.x;
-          y = position.z;
-        } else {
-          continue;
-        }
-        
-        const isoPos = {
-          x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
-          y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
-        };
-        
-        // Get building size
-        const size = this.getBuildingSize(building.type);
-        const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
-        
-        // Check if click is on this building
-        if (
-          mouseX >= isoPos.x - squareSize/2 &&
-          mouseX <= isoPos.x + squareSize/2 &&
-          mouseY >= isoPos.y - squareSize/2 &&
-          mouseY <= isoPos.y + squareSize/2
-        ) {
-          // Set the selected building and show details panel
-          this.state.selectedBuildingId = building.id;
-          setters.setSelectedBuildingId(building.id);
-          setters.setShowBuildingDetailsPanel(true);
-      
-          // Dispatch an event for other components to respond to
-          window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
-            detail: { buildingId: building.id }
-          }));
-      
-          return;
-        }
-      }
+      // ... (original loop content was here and is now integrated above)
+      // }
       
       // Handle clicks in land view
       if (activeView === 'land') {
