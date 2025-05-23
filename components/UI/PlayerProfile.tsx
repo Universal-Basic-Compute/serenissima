@@ -43,6 +43,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     coatOfArmsImageUrl: string | null;
     familyMotto?: string;
     Ducats?: number; // Add this to the state
+    socialClass?: string; // Add socialClass to the state type
   } | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
@@ -144,7 +145,8 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   if (isLoading) {
     return (
       <div className={`flex flex-col items-center ${dim.container} ${className}`}>
-        <div className={`${dim.image} rounded-lg border-2 border-amber-300 bg-amber-50 flex items-center justify-center aspect-square`}>
+        {/* Use a generic placeholder for the image area during loading */}
+        <div className={`w-full aspect-square rounded-lg border-2 border-amber-300 bg-amber-50 flex items-center justify-center`}>
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-700"></div>
         </div>
         <div className={`${dim.username} text-center mt-1 text-gray-400`}>Loading...</div>
@@ -169,7 +171,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     coatOfArmsImageUrl: coatOfArmsImageUrl,
     familyMotto: familyMotto,
     Ducats: Ducats,
-    socialClass: undefined // Social class typically comes from fetched/event data
+    socialClass: undefined // Social class typically comes from fetched/event data or props
   };
 
   // Consolidate and provide final defaults for displayData

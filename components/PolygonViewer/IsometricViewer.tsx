@@ -21,6 +21,7 @@ import ProblemMarkers from './ProblemMarkers';
 import ProblemDetailsPanel from '../UI/ProblemDetailsPanel';
 import BuildingCreationPanel from './BuildingCreationPanel';
 import { renderService } from '@/lib/services/RenderService';
+import { CoordinateService } from '@/lib/services/CoordinateService'; // Import CoordinateService
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
