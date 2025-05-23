@@ -63,6 +63,150 @@ def is_dock_working_hours() -> bool:
         # Default to True in case of error to ensure imports still happen
         return True
 
+# --- New Helper Functions ---
+
+def get_polygons_data() -> Optional[Dict]:
+    """Fetches polygon data from the /api/get-polygons endpoint."""
+    try:
+        api_base_url = os.getenv("API_BASE_URL", "https://serenissima.ai")
+        url = f"{api_base_url}/api/get-polygons"
+        log.info(f"Fetching polygon data from API: {url}")
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success"):
+            log.info(f"Successfully fetched polygon data (version: {data.get('version')}).")
+            return data.get("polygons", {})
+        else:
+            log.error(f"API error when fetching polygons: {data.get('error', 'Unknown error')}")
+            return None
+    except requests.exceptions.RequestException as e:
+        log.error(f"Request exception fetching polygon data: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        log.error(f"JSON decode error fetching polygon data: {e}")
+        return None
+
+def get_public_docks(tables: Dict[str, Table]) -> List[Dict]:
+    """Fetches all buildings of type 'public_dock'."""
+    try:
+        formula = "{Type} = 'public_dock'"
+        docks = tables['buildings'].all(formula=formula)
+        log.info(f"Found {len(docks)} public_dock buildings.")
+        return docks
+    except Exception as e:
+        log.error(f"Error fetching public_docks: {e}")
+        return []
+
+def select_best_dock(docks: List[Dict]) -> Optional[Dict]:
+    """Selects the public_dock with the highest 'Wages'."""
+    if not docks:
+        return None
+    
+    best_dock = None
+    max_wages = -1.0 
+
+    for dock in docks:
+        wages = float(dock['fields'].get('Wages', 0) or 0) # Ensure wages is float, default to 0
+        if wages > max_wages:
+            max_wages = wages
+            best_dock = dock
+            
+    if best_dock:
+        log.info(f"Selected best public_dock: {best_dock['fields'].get('BuildingId', best_dock['id'])} with Wages: {max_wages}")
+    else:
+        # If no dock has wages > 0, pick the first one as a fallback
+        best_dock = docks[0] if docks else None
+        if best_dock:
+            log.warning(f"No public_dock with positive wages found. Fallback to first dock: {best_dock['fields'].get('BuildingId', best_dock['id'])}")
+        else:
+            log.warning("No public_docks found to select from.")
+            
+    return best_dock
+
+def get_dock_water_coordinates(dock_record: Dict, polygons_data: Dict) -> Optional[Dict[str, float]]:
+    """Extracts the water point coordinates for a given dock using polygon data."""
+    if not dock_record or not polygons_data:
+        return None
+        
+    dock_building_id = dock_record['fields'].get('BuildingId') # This is the nodeID for canalPoints
+    dock_land_id = dock_record['fields'].get('LandId') # LandId of the dock
+
+    if not dock_building_id or not dock_land_id:
+        log.warning(f"Dock {dock_record.get('id')} is missing BuildingId or LandId.")
+        return None
+
+    land_polygon_data = polygons_data.get(dock_land_id)
+    if not land_polygon_data:
+        log.warning(f"No polygon data found for LandId: {dock_land_id}")
+        return None
+        
+    canal_points = land_polygon_data.get('canalPoints', {})
+    dock_canal_point_data = canal_points.get(dock_building_id) # dock_building_id is the key here
+
+    if not dock_canal_point_data:
+        log.warning(f"No canalPoint data found for dock BuildingId: {dock_building_id} on LandId: {dock_land_id}")
+        return None
+        
+    water_coords = dock_canal_point_data.get('water')
+    if water_coords and isinstance(water_coords, dict) and 'lat' in water_coords and 'lng' in water_coords:
+        log.info(f"Found water coordinates for dock {dock_building_id}: {water_coords}")
+        return {'lat': float(water_coords['lat']), 'lng': float(water_coords['lng'])}
+    else:
+        log.warning(f"Water coordinates missing or invalid for dock {dock_building_id} on LandId: {dock_land_id}. Data: {water_coords}")
+        return None
+
+def create_or_get_merchant_galley(
+    tables: Dict[str, Table], 
+    galley_building_id: str, 
+    position_coords: Dict[str, float], 
+    owner_username: str = "Italia", 
+    dry_run: bool = False
+) -> Optional[Dict]:
+    """Creates or gets the temporary merchant galley building."""
+    formula = f"{{BuildingId}} = '{_escape_airtable_value(galley_building_id)}'"
+    try:
+        existing_galleys = tables['buildings'].all(formula=formula, max_records=1)
+        if existing_galleys:
+            log.info(f"Found existing merchant_galley: {galley_building_id}")
+            # Optionally, update its Owner or UpdatedAt if needed
+            # For now, just return it.
+            return existing_galleys[0]
+
+        if dry_run:
+            log.info(f"[DRY RUN] Would create merchant_galley: {galley_building_id} at {position_coords}")
+            return {
+                "id": "dry_run_galley_airtable_id",
+                "fields": {
+                    "BuildingId": galley_building_id,
+                    "Type": "merchant_galley",
+                    "Owner": owner_username,
+                    "RunBy": owner_username,
+                    "Position": json.dumps(position_coords),
+                    "Name": f"Merchant Galley at {galley_building_id}"
+                }
+            }
+
+        galley_payload = {
+            "BuildingId": galley_building_id,
+            "Type": "merchant_galley",
+            "Name": f"Merchant Galley at {galley_building_id}",
+            "Owner": owner_username,
+            "RunBy": owner_username, # Italia also "runs" it
+            "Position": json.dumps(position_coords),
+            "Category": "Transport", # Assuming a category for such buildings
+            "CreatedAt": datetime.now(timezone.utc).isoformat(),
+            # No Occupant, Wages, RentAmount initially
+        }
+        created_galley = tables['buildings'].create(galley_payload)
+        log.info(f"Created new merchant_galley: {galley_building_id} (Airtable ID: {created_galley['id']})")
+        return created_galley
+    except Exception as e:
+        log.error(f"Error creating/getting merchant_galley {galley_building_id}: {e}")
+        return None
+
+# --- End of New Helper Functions ---
+
 def initialize_airtable():
     """Initialize Airtable connection."""
     api_key = os.environ.get('AIRTABLE_API_KEY')
@@ -97,10 +241,10 @@ def get_active_contracts(tables) -> List[Dict]:
         # Sort by CreatedAt
         contracts.sort(key=lambda x: x['fields'].get('CreatedAt', ''))
         
-        log.info(f"Found {len(contracts)} active import contracts")
+        log.info(f"Found {len(contracts)} active import contracts for Seller='Italia'")
         return contracts
     except Exception as e:
-        log.error(f"Error getting active contracts: {e}")
+        log.error(f"Error getting active import contracts: {e}")
         return []
 
 def get_building_types() -> Dict:
@@ -194,6 +338,19 @@ def get_building_resources(tables, building_id: str) -> List[Dict]:
         log.error(f"Error getting resources for building {building_id}: {e}")
         return []
 
+def get_building_current_storage(tables: Dict[str, Table], building_custom_id: str) -> float:
+    """Calculates the total count of resources currently in a building."""
+    formula = f"AND({{Asset}} = '{_escape_airtable_value(building_custom_id)}', {{AssetType}} = 'building')"
+    total_stored_volume = 0
+    try:
+        resources_in_building = tables['resources'].all(formula=formula)
+        for resource in resources_in_building:
+            total_stored_volume += float(resource['fields'].get('Count', 0))
+        log.info(f"Building {building_custom_id} currently stores {total_stored_volume} units of resources.")
+    except Exception as e:
+        log.error(f"Error calculating current storage for building {building_custom_id}: {e}")
+    return total_stored_volume
+    
 def get_citizen_balance(tables, username: str) -> float:
     """Get the compute balance for a citizen."""
     try:
@@ -359,105 +516,102 @@ def generate_new_citizen(tables: Dict[str, Table], dry_run: bool = False) -> Opt
 def create_delivery_activity(tables, citizen: Dict, buyer_building_id: str,
                              resources_to_deliver: List[Dict[str, Any]],
                              contract_ids: List[str]) -> Optional[Dict]:
-    """Create a single delivery activity for all resources for a building."""
-    if not resources_to_deliver or not contract_ids:
-        log.warning(f"No resources or contract IDs to create activity for building {buyer_building_id}")
+    """Create a single delivery activity for the merchant galley."""
+    if not resources_in_galley_manifest or not galley_building_id:
+        log.warning(f"No resources or galley_building_id to create activity for galley {galley_building_id}")
         return None
 
-    total_items = sum(r['Amount'] for r in resources_to_deliver)
-    resource_summary = ", ".join([f"{r['Amount']:.1f} {r['ResourceId']}" for r in resources_to_deliver])
-    log.info(f"Creating delivery activity for {total_items} total units ({resource_summary}) to building {buyer_building_id}")
+    resource_summary = ", ".join([f"{r['Amount']:.1f} {r['ResourceId']}" for r in resources_in_galley_manifest])
+    log.info(f"Creating delivery activity for galley {galley_building_id} with resources: {resource_summary}")
 
     try:
         citizen_username = citizen['fields'].get('Username')
         if not citizen_username:
-            log.error("Missing Username in citizen record for delivery activity")
+            log.error("Missing Username in citizen record for galley delivery activity")
             return None
 
-        start_position = {"lat": 45.43015357142857, "lng": 12.390025} # Fixed start
-
-        building_record = get_building_info(tables, buyer_building_id)
-        if not building_record:
-            log.warning(f"Destination building {buyer_building_id} not found for activity.")
+        # Conceptual start for a galley arriving from sea
+        # This might need to be adjusted based on map boundaries or a fixed "sea entry point"
+        start_position = {"lat": 45.40, "lng": 12.45} # Example: South-East of Venice in the lagoon
+        
+        galley_building_record = tables['buildings'].all(formula=f"{{BuildingId}}='{_escape_airtable_value(galley_building_id)}'", max_records=1)
+        if not galley_building_record:
+            log.error(f"Galley building {galley_building_id} not found for activity.")
             return None
         
-        end_position = None
+        end_position_str = galley_building_record[0]['fields'].get('Position')
+        if not end_position_str:
+            log.error(f"Galley building {galley_building_id} has no Position data.")
+            return None
         try:
-            position_str = building_record['fields'].get('Position')
-            if position_str:
-                end_position = json.loads(position_str)
-            if not end_position:
-                point_str = building_record['fields'].get('Point')
-                if point_str and isinstance(point_str, str):
-                    parts = point_str.split('_')
-                    if len(parts) >= 3:
-                        lat, lng = float(parts[1]), float(parts[2])
-                        end_position = {"lat": lat, "lng": lng}
-        except Exception as e_pos:
-            log.warning(f"Error parsing position for building {buyer_building_id}: {e_pos}")
-
-        if not end_position:
-            log.warning(f"No position found for building {buyer_building_id}, cannot create activity.")
+            end_position = json.loads(end_position_str)
+        except json.JSONDecodeError:
+            log.error(f"Failed to parse Position JSON for galley {galley_building_id}: {end_position_str}")
             return None
 
         path_data = None
         try:
             api_base_url = os.getenv("API_BASE_URL", "https://serenissima.ai")
             url = f"{api_base_url}/api/transport"
+            # Pathfinding mode for ships might be 'water_only' or a specific mode for ships
             response = requests.post(
                 url,
                 json={
                     "startPoint": start_position, "endPoint": end_position,
-                    "startDate": datetime.now().isoformat()
+                    "startDate": datetime.now(timezone.utc).isoformat(),
+                    "pathfindingMode": "water_only" # Explicitly use water_only for ship
                 }
             )
             if response.status_code == 200:
                 path_data = response.json()
-                if not path_data.get('success'): path_data = None
+                if not path_data.get('success'): 
+                    log.warning(f"Transport API call for galley path was not successful: {path_data.get('error')}")
+                    path_data = None
             else:
-                log.warning(f"Transport API error: {response.status_code}")
+                log.warning(f"Transport API error for galley path: {response.status_code} - {response.text}")
         except Exception as e_api:
-            log.error(f"Error calling transport API: {e_api}")
+            log.error(f"Error calling transport API for galley path: {e_api}")
 
         if not path_data or not path_data.get('path'):
-            log.warning("Path finding failed, creating simple path for activity.")
+            log.warning(f"Path finding for galley to {galley_building_id} failed. Creating simple path.")
             path_data = {
-                "path": [start_position, end_position],
-                "timing": {"startDate": datetime.now().isoformat(),
-                           "endDate": (datetime.now() + timedelta(hours=1)).isoformat(),
-                           "durationSeconds": 3600}
+                "path": [start_position, end_position], # Simple straight line
+                "timing": {"startDate": datetime.now(timezone.utc).isoformat(),
+                           "endDate": (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(), # Assume 2 hours for simple path
+                           "durationSeconds": 7200}
             }
 
-        now = datetime.now()
-        travel_time_minutes = path_data['timing'].get('durationSeconds', 3600) / 60
-        end_time = now + timedelta(minutes=travel_time_minutes)
-        activity_id = f"import_batch_{buyer_building_id}_{uuid.uuid4()}"
+        now_utc = datetime.now(timezone.utc)
+        # Use duration from path_data if available, otherwise default
+        travel_duration_seconds = path_data['timing'].get('durationSeconds', 7200) # Default 2 hours
+        end_time_utc = now_utc + timedelta(seconds=travel_duration_seconds)
         
-        # Use the first contract's string ID for the ContractId field
-        # All contract IDs will be in Notes.
-        primary_contract_id_str = contract_ids[0] if contract_ids else None
+        activity_id_str = f"import_galley_delivery_{galley_building_id}_{uuid.uuid4()}"
+        
+        # Use the first original contract's string ID for the ContractId field for reference
+        primary_original_contract_id_str = original_contract_ids[0] if original_contract_ids else None
 
         activity_payload = {
-            "ActivityId": activity_id,
-            "Type": "deliver_resource_batch", # New type for batched delivery
+            "ActivityId": activity_id_str,
+            "Type": "deliver_resource_batch", 
             "Citizen": citizen_username,
-            "ContractId": primary_contract_id_str, # First contract ID
-            "ToBuilding": buyer_building_id,
-            "Resources": json.dumps(resources_to_deliver), # JSON string of resource list
-            "TransportMode": "merchant_galley", # Added TransportMode
-            "CreatedAt": now.isoformat(),
-            "StartDate": now.isoformat(),
-            "EndDate": end_time.isoformat(),
+            "ContractId": primary_original_contract_id_str, 
+            "ToBuilding": galley_building_id, # Target is the galley itself
+            "Resources": json.dumps(resources_in_galley_manifest), 
+            "TransportMode": "merchant_galley",
+            "CreatedAt": now_utc.isoformat(),
+            "StartDate": path_data['timing'].get('startDate', now_utc.isoformat()), # Use start date from path if available
+            "EndDate": path_data['timing'].get('endDate', end_time_utc.isoformat()),   # Use end date from path if available
             "Path": json.dumps(path_data.get('path', [])),
-            "Notes": f"🚢 Delivering batch of resources ({resource_summary}) from Italia to {building_record['fields'].get('Name', buyer_building_id)}. Involves Contract IDs: {', '.join(contract_ids)}"
+            "Notes": f"🚢 Piloting merchant galley with imported resources ({resource_summary}) to {galley_building_id}. Original Contract IDs: {', '.join(original_contract_ids)}"
         }
         
         activity = tables['activities'].create(activity_payload)
-        log.info(f"🚢 Created batch delivery activity: **{activity['id']}** for building {buyer_building_id}")
+        log.info(f"🚢 Created galley delivery activity: **{activity['id']}** to galley building {galley_building_id}")
         return activity
     except Exception as e:
-        log.error(f"Error creating batch delivery activity for {buyer_building_id}: {e}")
-        return False
+        log.error(f"Error creating galley delivery activity for {galley_building_id}: {e}")
+        return None # Return None on error
 
 def process_imports(dry_run: bool = False, night_mode: bool = False):
     """Main function to process import contracts."""
@@ -488,203 +642,259 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
     if not resource_types:
         log.error("Failed to get resource types, exiting")
         return
-    
-    # Get active import contracts
-    contracts = get_active_contracts(tables)
-    
-    if not contracts:
-        log.info("No active import contracts found, exiting")
+
+    # Get polygon data for dock water points
+    polygons_data = get_polygons_data()
+    if not polygons_data:
+        log.error("Failed to get polygon data, exiting.")
+        return
+
+    # Get active import contracts (Seller="Italia")
+    all_active_import_contracts = get_active_contracts(tables)
+    if not all_active_import_contracts:
+        log.info("No active import contracts found, exiting.")
+        return
+
+    # Find the best public dock
+    public_docks = get_public_docks(tables)
+    if not public_docks:
+        log.error("No public_docks found. Cannot determine galley location. Exiting.")
         return
     
-    # Group contracts by BuyerBuilding
-    contracts_by_building: Dict[str, List[Dict]] = {}
-    for contract_record in contracts:
-        buyer_building_id = contract_record['fields'].get('BuyerBuilding')
-        if buyer_building_id:
-            if buyer_building_id not in contracts_by_building:
-                contracts_by_building[buyer_building_id] = []
-            contracts_by_building[buyer_building_id].append(contract_record)
+    best_dock = select_best_dock(public_docks)
+    if not best_dock:
+        log.error("Could not select a best public_dock. Exiting.")
+        return
+        
+    galley_water_coords = get_dock_water_coordinates(best_dock, polygons_data)
+    if not galley_water_coords:
+        log.error(f"Could not determine water coordinates for dock {best_dock['fields'].get('BuildingId', best_dock['id'])}. Exiting.")
+        return
+        
+    galley_building_id = f"water_{galley_water_coords['lat']}_{galley_water_coords['lng']}"
+    
+    # Create or get the merchant galley building
+    merchant_galley_building = create_or_get_merchant_galley(tables, galley_building_id, galley_water_coords, "Italia", dry_run)
+    if not merchant_galley_building:
+        log.error(f"Failed to create or get merchant galley building {galley_building_id}. Exiting.")
+        return
 
-    log.info(f"Grouped {len(contracts)} active contracts into {len(contracts_by_building)} building-specific import batches.")
+    # Aggregate resources from contracts, respecting the 1000 unit cap for the galley
+    # The galley's storageCapacity should ideally come from its building_type definition
+    galley_capacity = 1000.0 
+    # Try to get actual capacity from building_types
+    galley_def = building_types.get("merchant_galley", {})
+    if galley_def and galley_def.get('productionInformation') and 'storageCapacity' in galley_def['productionInformation']:
+        galley_capacity = float(galley_def['productionInformation']['storageCapacity'])
+        log.info(f"Merchant galley capacity set to: {galley_capacity} from definition.")
+    else:
+        log.warning(f"Merchant galley type definition or its storageCapacity not found. Defaulting to {galley_capacity}.")
 
-    total_activities_created = 0
-    processed_buildings_count = 0
 
-    for buyer_building_id, building_contracts_list in contracts_by_building.items():
-        processed_buildings_count += 1
-        log.info(f"🏢 Processing import batch for building: **{buyer_building_id}** ({len(building_contracts_list)} contracts)")
+    batched_resources_for_galley: List[Dict[str, Any]] = [] # For RESOURCES table: {'Type': str, 'Amount': float}
+    final_galley_manifest_for_activity: List[Dict[str, Any]] = [] # For Activity.Resources: {'ResourceId': str, 'Amount': float}
+    
+    involved_original_contracts_info: List[Dict[str, Any]] = [] 
+    # For transactions & notes: {'contract_id': str, 'buyer': str, 'resource_type': str, 'amount': float, 'cost': float, 'original_buyer_building': str}
+    
+    current_galley_load = 0.0
+    processed_contract_airtable_ids = set()
 
-        if not building_contracts_list:
+    # Sort contracts by CreatedAt to process older ones first
+    all_active_import_contracts.sort(key=lambda x: x['fields'].get('CreatedAt', ''))
+
+    for contract_record in all_active_import_contracts:
+        if current_galley_load >= galley_capacity:
+            log.info(f"Galley reached capacity ({current_galley_load}/{galley_capacity}). Stopping contract aggregation for this run.")
+            break
+
+        fields = contract_record['fields']
+        contract_airtable_id = contract_record['id']
+        contract_custom_id = fields.get('ContractId', contract_airtable_id)
+        buyer_username = fields.get('Buyer')
+        resource_type = fields.get('ResourceType')
+        hourly_amount = float(fields.get('HourlyAmount', 0))
+        price_per_resource = float(fields.get('PricePerResource', 0))
+        original_buyer_building_id = fields.get('BuyerBuilding') # Custom ID of final destination
+
+        if not all([buyer_username, resource_type, original_buyer_building_id]) or hourly_amount <= 0 or price_per_resource < 0:
+            log.warning(f"Contract {contract_custom_id} has invalid/missing data. Skipping.")
             continue
 
-        # Determine the effective buyer (first contract's buyer or building's RunBy)
-        # This assumes all contracts for a building have the same intended buyer logic
-        first_contract_fields = building_contracts_list[0]['fields']
-        buyer_username = first_contract_fields.get('Buyer')
+        amount_to_take_from_contract = hourly_amount
+        if current_galley_load + hourly_amount > galley_capacity:
+            amount_to_take_from_contract = galley_capacity - current_galley_load
+            log.info(f"Contract {contract_custom_id} for {hourly_amount} {resource_type} exceeds galley capacity. Taking partial amount: {amount_to_take_from_contract}")
         
-        building_info = get_building_info(tables, buyer_building_id)
-        if not building_info:
-            log.warning(f"Building {buyer_building_id} not found, skipping its contracts.")
-            continue
+        if amount_to_take_from_contract <= 0.001: # Epsilon for float
+            continue # No space left for this resource from this contract
+
+        cost_for_this_part = price_per_resource * amount_to_take_from_contract
         
-        building_operator = building_info['fields'].get('RunBy')
-        if building_operator and building_operator != buyer_username:
-            log.info(f"Building {buyer_building_id} is run by {building_operator}, using as effective buyer.")
-            buyer_username = building_operator
-        
-        if not buyer_username:
-            log.warning(f"No valid buyer could be determined for building {buyer_building_id}, skipping.")
-            continue
-
-        # Consolidated checks
-        total_cost_for_building = 0
-        total_import_amount_for_building = 0
-        aggregated_resources_for_activity: List[Dict[str, Any]] = []
-        contract_ids_for_activity: List[str] = []
-
-        for contract_record in building_contracts_list:
-            fields = contract_record['fields']
-            resource_type = fields.get('ResourceType')
-            hourly_amount = float(fields.get('HourlyAmount', 0))
-            price_per_resource = float(fields.get('PricePerResource', 0))
-            contract_id_str = fields.get('ContractId') # Assuming ContractId field exists with the string ID
-
-            if not resource_type or hourly_amount <= 0 or not contract_id_str:
-                log.warning(f"Skipping invalid contract data for building {buyer_building_id}: {contract_record.get('id')}")
-                continue
-
-            total_cost_for_building += hourly_amount * price_per_resource
-            total_import_amount_for_building += hourly_amount
-            
-            # Aggregate resources for the activity payload
-            found_resource = False
-            for res_agg in aggregated_resources_for_activity:
-                if res_agg['ResourceId'] == resource_type:
-                    res_agg['Amount'] += hourly_amount
-                    found_resource = True
-                    break
-            if not found_resource:
-                aggregated_resources_for_activity.append({'ResourceId': resource_type, 'Amount': hourly_amount})
-            
-            contract_ids_for_activity.append(contract_id_str)
-
+        # Check buyer balance before adding to batch
         buyer_balance = get_citizen_balance(tables, buyer_username)
-        if buyer_balance < total_cost_for_building:
-            log.warning(f"Buyer {buyer_username} has insufficient funds ({buyer_balance:,.2f}) for total import cost ({total_cost_for_building:,.2f}) for building {buyer_building_id}.")
-            continue
+        if buyer_balance < cost_for_this_part:
+            log.warning(f"Buyer {buyer_username} has insufficient funds ({buyer_balance:,.2f}) for contract {contract_custom_id} part (cost: {cost_for_this_part:,.2f}). Skipping this contract for now.")
+            continue # Skip this contract, try next one
 
-        building_type_str = building_info['fields'].get('Type')
-        building_def = building_types.get(building_type_str)
-        if not building_def or not building_def.get('productionInformation') or 'storageCapacity' not in building_def['productionInformation']:
-            log.warning(f"Building type {building_type_str} for {buyer_building_id} has no storage capacity defined.")
-            continue
-        
-        storage_capacity = building_def['productionInformation']['storageCapacity']
-        current_stored_resources = get_building_resources(tables, buyer_building_id)
-        total_stored_volume = sum(float(r['fields'].get('Count', 0)) for r in current_stored_resources)
+        # Add to batch
+        current_galley_load += amount_to_take_from_contract
+        processed_contract_airtable_ids.add(contract_airtable_id)
 
-        if total_stored_volume + total_import_amount_for_building > storage_capacity:
-            log.warning(f"Building {buyer_building_id} insufficient storage (used: {total_stored_volume:.1f}, capacity: {storage_capacity:.1f}, needed for batch: {total_import_amount_for_building:.1f}).")
-            continue
-        
-        log.info(f"Checks passed for building {buyer_building_id}. Aggregated {len(aggregated_resources_for_activity)} resource types.")
+        involved_original_contracts_info.append({
+            'contract_id': contract_custom_id, # Store custom ID
+            'buyer': buyer_username,
+            'resource_type': resource_type,
+            'amount': amount_to_take_from_contract,
+            'cost': cost_for_this_part,
+            'original_buyer_building': original_buyer_building_id
+        })
 
-        if dry_run:
-            log.info(f"🧪 **[DRY RUN]** Would process imports for building {buyer_building_id}.")
-            mock_delivery_citizen_asset = f"dry_run_ctz_for_{buyer_building_id.replace('.', '_')}"
-            log.info(f"  [DRY RUN] Would find/generate citizen (e.g., {mock_delivery_citizen_asset}) and set InVenice=True.")
-            for resource_item_dry_run in aggregated_resources_for_activity:
-                 res_type_id_dry_run = resource_item_dry_run['ResourceId']
-                 res_amount_dry_run = resource_item_dry_run['Amount']
-                 res_def_dry_run = resource_types.get(res_type_id_dry_run, {})
-                 res_name_dry_run = res_def_dry_run.get('name', res_type_id_dry_run)
-                 res_cat_dry_run = res_def_dry_run.get('category', 'Unknown')
-                 log.info(f"  [DRY RUN] Would ensure import-tracking resource record for {res_type_id_dry_run} (Name: {res_name_dry_run}, Category: {res_cat_dry_run}, Count: {res_amount_dry_run}) with Asset: {mock_delivery_citizen_asset}, AssetType: citizen, Owner: Italia.")
-            log.info(f"  [DRY RUN] Would create one delivery activity for {buyer_building_id} with resources: {json.dumps(aggregated_resources_for_activity)} and contract IDs: {', '.join(contract_ids_for_activity)} assigned to citizen {mock_delivery_citizen_asset}.")
-            total_activities_created +=1 # Simulate activity creation
-            continue
+        # Aggregate for galley's manifest (for activity and resource creation)
+        found_in_batch = False
+        for item in batched_resources_for_galley:
+            if item['Type'] == resource_type:
+                item['Amount'] += amount_to_take_from_contract
+                found_in_batch = True
+                break
+        if not found_in_batch:
+            batched_resources_for_galley.append({'Type': resource_type, 'Amount': amount_to_take_from_contract})
 
-        # Find or generate a citizen for delivery
-        delivery_citizen = find_available_citizen(tables)
-        if not delivery_citizen:
-            log.info(f"No available citizen for building {buyer_building_id}, generating new one.")
-            delivery_citizen = generate_new_citizen(tables, dry_run=dry_run) # dry_run is False here
-            if not delivery_citizen:
-                log.error(f"Failed to generate new citizen for delivery to {buyer_building_id}.")
-                continue
-        
-        # Set InVenice to True for the selected/generated citizen
-        delivery_citizen_record_id = delivery_citizen['id']
-        delivery_citizen_asset = delivery_citizen['fields'].get('CitizenId', delivery_citizen['fields'].get('Username'))
+    if not involved_original_contracts_info:
+        log.info("No contracts could be processed for the galley batch (due to capacity, funds, or no contracts). Exiting.")
+        return
 
-        if not delivery_citizen_asset:
-            log.error(f"Delivery citizen {delivery_citizen_record_id} has no CitizenId or Username. Skipping.")
-            continue
-        
+    # Prepare manifest for activity's "Resources" field
+    final_galley_manifest_for_activity = [{'ResourceId': item['Type'], 'Amount': item['Amount']} for item in batched_resources_for_galley]
+    
+    log.info(f"Galley batch: {len(batched_resources_for_galley)} resource types, total volume: {current_galley_load:.2f}. Involving {len(involved_original_contracts_info)} contract parts.")
+
+    if dry_run:
+        log.info(f"🧪 **[DRY RUN]** Would process import batch for galley {galley_building_id} at {galley_water_coords}.")
+        log.info(f"  [DRY RUN] Galley manifest: {json.dumps(final_galley_manifest_for_activity)}")
+        for contract_info_dry_run in involved_original_contracts_info:
+            log.info(f"  [DRY RUN] Would process payment for contract {contract_info_dry_run['contract_id']}: Buyer {contract_info_dry_run['buyer']} pays {contract_info_dry_run['cost']:.2f} to Italia.")
+        for res_item_dry_run in batched_resources_for_galley:
+            log.info(f"  [DRY RUN] Would create/update resource {res_item_dry_run['Type']} (Amount: {res_item_dry_run['Amount']:.2f}) in galley {galley_building_id}, owned by Italia.")
+        log.info(f"  [DRY RUN] Would find/generate citizen and create one delivery activity to galley {galley_building_id}.")
+        log.info(f"🚢 Import processing complete (DRY RUN).")
+        return
+
+    # --- Perform Actual Operations ---
+
+    # 1. Financial Transactions
+    for contract_info in involved_original_contracts_info:
+        buyer_citizen_rec = get_citizen_record(tables, contract_info['buyer'])
+        # Seller is "Italia"
+        italia_citizen_rec = get_citizen_record(tables, "Italia") # Assuming "Italia" is a citizen record
+
+        if not buyer_citizen_rec or not italia_citizen_rec:
+            log.error(f"Buyer {contract_info['buyer']} or Seller Italia not found for transaction of contract {contract_info['contract_id']}. Critical error, stopping.")
+            # Ideally, implement rollback or more robust error handling here.
+            return
+
         try:
-            tables['citizens'].update(delivery_citizen_record_id, {"InVenice": True})
-            log.info(f"Set InVenice=True for delivery citizen {delivery_citizen_asset} ({delivery_citizen_record_id}).")
-        except Exception as e_inv:
-            log.error(f"Failed to set InVenice=True for citizen {delivery_citizen_asset}: {e_inv}")
-            # Continue processing, but this is a potential issue.
+            buyer_ducats = float(buyer_citizen_rec['fields'].get('Ducats', 0))
+            italia_ducats = float(italia_citizen_rec['fields'].get('Ducats', 0))
 
-        # Create/Update "import-tracking" RESOURCES records for all involved resource types
-        all_resource_records_managed = True
-        for resource_item in aggregated_resources_for_activity:
-            resource_type_id = resource_item['ResourceId']
-            resource_amount = resource_item['Amount']
-            resource_definition = resource_types.get(resource_type_id, {})
-            
-            try:
-                # For citizen-carried resources (AssetType='citizen'), Asset field uses Username.
-                # delivery_citizen_asset here is the Username.
-                resource_formula = f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', {{Asset}}='{_escape_airtable_value(delivery_citizen_asset)}', {{AssetType}}='citizen', {{Owner}}='Italia')"
-                existing_resources = tables["resources"].all(formula=resource_formula, max_records=1)
-                
-                current_time_iso = datetime.now().isoformat()
-                resource_data_fields = {
-                    "Type": resource_type_id, 
-                    "Name": resource_definition.get('name', resource_type_id),
-                    # "Category": resource_definition.get('category', 'Unknown'), # Removed Category
-                    "Asset": delivery_citizen_asset, # Use Username of delivery person
-                    "AssetType": "citizen",
-                    "Owner": "Italia", 
-                    "Count": resource_amount
+            tables['citizens'].update(buyer_citizen_rec['id'], {'Ducats': buyer_ducats - contract_info['cost']})
+            tables['citizens'].update(italia_citizen_rec['id'], {'Ducats': italia_ducats + contract_info['cost']})
+
+            transaction_payload = {
+                "Type": "import_payment_to_galley",
+                "AssetType": "contract",
+                "Asset": contract_info['contract_id'], # Custom ContractId
+                "Seller": "Italia",
+                "Buyer": contract_info['buyer'],
+                "Price": contract_info['cost'],
+                "Details": json.dumps({
+                    "resource_type": contract_info['resource_type'],
+                    "amount": contract_info['amount'],
+                    "galley_id": galley_building_id,
+                    "original_buyer_building": contract_info['original_buyer_building']
+                }),
+                "CreatedAt": datetime.now(timezone.utc).isoformat(),
+                "ExecutedAt": datetime.now(timezone.utc).isoformat()
+            }
+            tables['transactions'].create(transaction_payload)
+            log.info(f"Processed financial transaction for contract {contract_info['contract_id']}. Cost: {contract_info['cost']:.2f}")
+        except Exception as e_finance:
+            log.error(f"Error processing financial transaction for contract {contract_info['contract_id']}: {e_finance}. Stopping.")
+            return
+
+    # 2. Create/Update Resources in the Galley Building
+    galley_position_str = merchant_galley_building['fields'].get('Position', '{}')
+    for res_item in batched_resources_for_galley:
+        res_type_id = res_item['Type']
+        res_amount = res_item['Amount']
+        res_def = resource_types.get(res_type_id, {})
+        
+        # Resources in a building: Asset=BuildingId, AssetType='building'
+        formula = f"AND({{Type}}='{_escape_airtable_value(res_type_id)}', {{Asset}}='{_escape_airtable_value(galley_building_id)}', {{AssetType}}='building', {{Owner}}='Italia')"
+        try:
+            existing_galley_res = tables["resources"].all(formula=formula, max_records=1)
+            if existing_galley_res:
+                # This assumes we are replacing the stock, not adding. If adding, fetch current count.
+                # For imports, it's usually a fresh load for this batch.
+                tables["resources"].update(existing_galley_res[0]["id"], {"Count": res_amount})
+                log.info(f"Updated resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id}.")
+            else:
+                new_res_payload = {
+                    "ResourceId": f"resource-{uuid.uuid4()}",
+                    "Type": res_type_id,
+                    "Name": res_def.get('name', res_type_id),
+                    "Asset": galley_building_id,
+                    "AssetType": "building",
+                    "Owner": "Italia",
+                    "Count": res_amount,
+                    "Position": galley_position_str, # Position of the galley
+                    "CreatedAt": datetime.now(timezone.utc).isoformat()
                 }
-                # Removed "BuildingId"
-                if existing_resources:
-                    # Update only Count, UpdatedAt is computed
-                    tables["resources"].update(existing_resources[0]["id"], {"Count": resource_amount})
-                    log.info(f"Updated import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset}.")
-                else:
-                    resource_data_fields["ResourceId"] = f"resource-{uuid.uuid4()}" # This is the custom ID for the resource stack
-                    resource_data_fields["CreatedAt"] = current_time_iso
-                    # UpdatedAt is computed on create
-                    tables["resources"].create(resource_data_fields)
-                    log.info(f"Created new import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset}.")
-            except Exception as e_res_track:
-                log.error(f"Error managing import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset}: {e_res_track}")
-                all_resource_records_managed = False
-                break # Stop processing this building if a tracking record fails
-        
-        if not all_resource_records_managed:
-            continue
-        
-        # Create one delivery activity for the building (delivery_citizen already obtained and InVenice updated)
-        activity_created = create_delivery_activity(
-            tables, delivery_citizen, buyer_building_id,
-            aggregated_resources_for_activity, contract_ids_for_activity
-        )
-        if activity_created:
-            total_activities_created += 1
-            log.info(f"✅ Successfully created delivery activity for building {buyer_building_id}.")
-        else:
-            log.error(f"Failed to create delivery activity for building {buyer_building_id}.")
+                tables["resources"].create(new_res_payload)
+                log.info(f"Created resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id}.")
+        except Exception as e_res_galley:
+            log.error(f"Error creating/updating resource {res_type_id} in galley {galley_building_id}: {e_res_galley}. Stopping.")
+            return
 
-    log.info(f"🚢 Import processing complete. Processed {processed_buildings_count} buildings. Created/Simulated {total_activities_created} delivery activities.")
+    # 3. Find/Generate Citizen for Delivery Activity
+    delivery_citizen = find_available_citizen(tables)
+    if not delivery_citizen:
+        log.info(f"No available citizen for galley delivery, generating new one.")
+        delivery_citizen = generate_new_citizen(tables, dry_run=dry_run) # dry_run is False here
+        if not delivery_citizen:
+            log.error(f"Failed to generate new citizen for galley delivery. Stopping.")
+            return
+            
+    try:
+        tables['citizens'].update(delivery_citizen['id'], {"InVenice": True})
+        log.info(f"Set InVenice=True for delivery citizen {delivery_citizen['fields'].get('Username')}.")
+    except Exception as e_inv:
+        log.error(f"Failed to set InVenice=True for citizen {delivery_citizen['fields'].get('Username')}: {e_inv}")
+        # Continue, but this is an issue.
+
+    # 4. Create Single Delivery Activity
+    original_contract_custom_ids_for_notes = [info['contract_id'] for info in involved_original_contracts_info]
+    activity_created = create_delivery_activity(
+        tables, 
+        delivery_citizen, 
+        galley_building_id, # Target is the galley
+        final_galley_manifest_for_activity, # What's in the galley
+        original_contract_custom_ids_for_notes # For notes
+    )
+
+    if activity_created:
+        log.info(f"✅ Successfully created galley delivery activity to {galley_building_id}.")
+        # Mark processed contracts as "Status": "processing_in_galley" or similar?
+        # For now, we assume they are consumed by being part of this batch.
+        # If partial amounts were taken, the original contract might need adjustment or be left for a future run.
+        # Current logic implies full or partial (to fill galley) consumption of a contract's amount for this run.
+    else:
+        log.error(f"Failed to create galley delivery activity to {galley_building_id}.")
+
+    log.info(f"🚢 Import processing complete. Galley {galley_building_id} prepared.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process import contracts.")
+    parser = argparse.ArgumentParser(description="Process import contracts into a central galley.")
     parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
     parser.add_argument("--night", action="store_true", help="Process imports regardless of time of day")
