@@ -168,6 +168,18 @@ def get_building_public_sell_contracts(tables: Dict[str, Table], seller_username
         # print(f"Error getting public_sell contracts for seller {seller_username}, building {seller_building_id}: {str(e)}")
         return []
 
+def get_all_active_public_sell_contracts(tables: Dict[str, Table]) -> List[Dict]:
+    """Get all active public_sell contracts from all sellers."""
+    try:
+        now = datetime.now().isoformat()
+        formula = f"AND({{Type}}='public_sell', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        contracts = tables["contracts"].all(formula=formula)
+        print(f"Found {len(contracts)} active public_sell contracts globally.")
+        return contracts
+    except Exception as e:
+        print(f"Error getting all active public_sell contracts: {str(e)}")
+        return []
+
 def get_kinos_api_key() -> str:
     """Get the Kinos API key from environment variables."""
     load_dotenv()
@@ -177,10 +189,32 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_price_setting_data(tables: Dict[str, Table], ai_citizen: Dict, 
-                              citizen_buildings: List[Dict], 
-                              building_definitions: Dict, resource_types: Dict) -> Dict:
+def prepare_price_setting_data(tables: Dict[str, Table], ai_citizen: Dict,
+                              citizen_buildings: List[Dict],
+                              building_definitions: Dict, resource_types: Dict,
+                              all_buildings: List[Dict], # Add all_buildings for LandId lookup
+                              all_active_public_sell_contracts: List[Dict] # Add all active public sell contracts
+                              ) -> Dict:
     """Prepare a comprehensive data package for the AI to set resource prices."""
+    
+    # Create a mapping from BuildingId to LandId for all buildings
+    building_id_to_land_id_map = {
+        b["fields"].get("BuildingId"): b["fields"].get("LandId")
+        for b in all_buildings if b["fields"].get("BuildingId") and b["fields"].get("LandId")
+    }
+
+    # Calculate global average prices for each resource type
+    global_prices_by_resource: Dict[str, List[float]] = defaultdict(list)
+    for contract in all_active_public_sell_contracts:
+        res_type = contract["fields"].get("ResourceType")
+        price = contract["fields"].get("PricePerResource")
+        if res_type and price is not None:
+            global_prices_by_resource[res_type].append(float(price))
+    
+    global_average_prices = {
+        res: sum(prices) / len(prices) if prices else 0
+        for res, prices in global_prices_by_resource.items()
+    }
     
     # Extract citizen information
     username = ai_citizen["fields"].get("Username", "")
@@ -191,6 +225,7 @@ def prepare_price_setting_data(tables: Dict[str, Table], ai_citizen: Dict,
     for building in citizen_buildings:
         building_id = building["fields"].get("BuildingId", "")
         building_type = building["fields"].get("Type", "")
+        building_land_id = building["fields"].get("LandId") # Direct LandId string from building record
         
         # Get current prices from active public_sell contracts for this building and seller
         current_prices = {}
@@ -224,21 +259,41 @@ def prepare_price_setting_data(tables: Dict[str, Table], ai_citizen: Dict,
                     if output_id not in outputs:
                         outputs.append(output_id)
         
+        # Calculate land-specific average prices for each resource type
+        land_prices_by_resource: Dict[str, List[float]] = defaultdict(list)
+        if building_land_id: # Only if the current AI's building has a LandId
+            for contract in all_active_public_sell_contracts:
+                seller_bldg_id_contract = contract["fields"].get("SellerBuilding")
+                res_type_contract = contract["fields"].get("ResourceType")
+                price_contract = contract["fields"].get("PricePerResource")
+
+                if seller_bldg_id_contract and res_type_contract and price_contract is not None:
+                    seller_bldg_land_id = building_id_to_land_id_map.get(seller_bldg_id_contract)
+                    if seller_bldg_land_id == building_land_id:
+                        land_prices_by_resource[res_type_contract].append(float(price_contract))
+            
+        land_average_prices = {
+            res: sum(prices) / len(prices) if prices else 0
+            for res, prices in land_prices_by_resource.items()
+        }
+
         # Get resource information for each output
         output_resources = []
         for output_id in outputs:
-            resource_info = resource_types.get(output_id, {})
-            # current_price is now derived from active_sell_contracts
-            current_price = current_prices.get(output_id, 0) # Default to 0 if no active contract for this resource
-            import_price = resource_info.get("importPrice", 0)
+            resource_info_def = resource_types.get(output_id, {})
+            # current_price is now derived from active_sell_contracts for this specific building
+            current_price_for_building = current_prices.get(output_id, 0) 
+            import_price_def = resource_info_def.get("importPrice", 0)
             
             output_resources.append({
                 "id": output_id,
-                "name": resource_info.get("name", output_id),
-                "category": resource_info.get("category", "Unknown"),
-                "description": resource_info.get("description", ""),
-                "importPrice": import_price,
-                "currentPrice": current_price
+                "name": resource_info_def.get("name", output_id),
+                "category": resource_info_def.get("category", "Unknown"),
+                "description": resource_info_def.get("description", ""),
+                "importPrice": import_price_def,
+                "currentPriceInThisBuilding": current_price_for_building,
+                "globalAverageSellPrice": global_average_prices.get(output_id, 0),
+                "landAverageSellPrice": land_average_prices.get(output_id, 0) if building_land_id else 0
             })
         
         # Only include buildings that have outputs
@@ -340,13 +395,17 @@ Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
 
 When developing your pricing strategy:
-1. Analyze each resource's import price as a reference point
-2. Consider setting prices slightly below import price to be competitive
-3. For rare or high-demand resources, you might set prices closer to or even above import price
-4. Balance between maximizing profit and ensuring your goods will sell
-5. Consider the location and type of each building when setting prices
-6. Create a specific, actionable plan with building IDs and resource prices
-7. Provide brief reasoning for your pricing decisions
+1. Analyze each resource's `importPrice` as a baseline.
+2. Compare your `currentPriceInThisBuilding` with `globalAverageSellPrice` and `landAverageSellPrice`.
+3. If your price is much higher than averages, you might not sell. If much lower, you might be losing profit.
+4. Use `landAverageSellPrice` to understand immediate local competition.
+5. Use `globalAverageSellPrice` for broader market understanding.
+6. Consider setting prices slightly below the relevant average(s) to be competitive, or slightly above if your costs are high or you perceive high demand.
+7. For rare or high-demand resources, you might set prices closer to or even above import price if market conditions support it.
+8. Balance between maximizing profit and ensuring your goods will sell.
+9. Consider the location and type of each building when setting prices.
+10. Create a specific, actionable plan with building IDs and resource prices.
+11. Provide brief reasoning for your pricing decisions, referencing the provided price points.
 
 Your decision should be specific, data-driven, and focused on maximizing your income through strategic pricing.
 
@@ -555,6 +614,16 @@ def process_ai_price_settings(dry_run: bool = False):
     if not building_definitions:
         print("No building definitions found, exiting")
         return
+
+    # Get all buildings for LandId mapping
+    all_buildings = get_all_buildings(tables)
+    if not all_buildings:
+        print("No buildings found for LandId mapping, exiting")
+        return
+
+    # Get all active public sell contracts for market price analysis
+    all_active_public_sell_contracts = get_all_active_public_sell_contracts(tables)
+    # It's okay if this is empty, averages will be 0.
     
     # Filter AI citizens to only those who own buildings that can sell resources
     filtered_ai_citizens = []
@@ -625,7 +694,11 @@ def process_ai_price_settings(dry_run: bool = False):
             continue
         
         # Prepare the data package for the AI
-        data_package = prepare_price_setting_data(tables, ai_citizen, citizen_buildings, building_definitions, resource_types)
+        data_package = prepare_price_setting_data(
+            tables, ai_citizen, citizen_buildings, 
+            building_definitions, resource_types,
+            all_buildings, all_active_public_sell_contracts # Pass new data
+        )
         
         # Check if there are any buildings with outputs
         if not data_package["buildings"]:
