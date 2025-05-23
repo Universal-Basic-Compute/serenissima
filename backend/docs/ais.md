@@ -349,6 +349,54 @@ The consolidated AI public sell and price management system:
 -   Simulates merchant activity, including pricing strategies, crucial to Venice's economy.
 -   Allows AI citizens to adapt their pricing and sales strategy based on their own economic situation (e.g., problems, relevancies).
 
+#### Detailed Workflow and Key Functions:
+
+The `managepublicsalesandprices.py` script orchestrates the AI's public sales and pricing strategy through several key steps and functions:
+
+1.  **Initialization (`process_ai_sales_and_price_strategies` function):**
+    *   Connects to Airtable using `initialize_airtable()`.
+    *   Fetches global definitions:
+        *   Building types/definitions via `get_building_types_from_api()`.
+        *   Resource type definitions via `get_resource_types_from_api()`.
+    *   Fetches global market data:
+        *   All building records via `get_all_buildings()` (used for mapping BuildingIds to LandIds for localized price analysis).
+        *   All currently active public sell contracts from all sellers via `get_all_active_public_sell_contracts()` (used for global price analysis).
+    *   Retrieves a list of AI citizens using `get_ai_citizens()`.
+
+2.  **Per-AI Citizen Processing Loop (`process_ai_sales_and_price_strategies`):**
+    For each AI citizen identified:
+    *   **Data Gathering for the AI:**
+        *   `get_citizen_buildings()`: Fetches buildings run by this specific AI.
+        *   `get_citizen_resources()`: Fetches all resources currently owned by this AI.
+        *   `get_citizen_active_contracts()`: Fetches this AI's existing active public sell contracts.
+    *   **Data Preparation (`prepare_sales_and_price_strategy_data` function):** This crucial function assembles a comprehensive data package for the Kinos AI. It includes:
+        *   The AI's basic information (username, ducats).
+        *   A list of the AI's buildings that can sell resources (`sellable_buildings_with_market_data`). Each building entry details:
+            *   The resources it can sell.
+            *   For each sellable resource: its import price, the AI's current selling price in that building, the global average selling price, and the average selling price on the same land parcel.
+        *   A summary of all resources owned by the AI (`citizen_owned_resources_summary`).
+        *   A list of the AI's current active public sell contracts (`existing_ai_public_sell_contracts`), including their `contract_id`, resource type, price, and quantity.
+        *   The AI's latest relevancies (fetched via `get_citizen_relevancies_from_api()`) and active problems (fetched via `get_citizen_problems_from_api()`), providing context for strategic decisions.
+    *   **AI Decision Making (`send_sales_and_price_strategy_request` function):**
+        *   If the AI has sellable buildings, the prepared data package is sent to the Kinos Engine API.
+        *   A detailed prompt instructs the AI to analyze the data and decide on:
+            *   `contracts_to_create_or_update`: A list of resources to sell, specifying the `building_id`, `resource_type`, desired `price_per_resource`, `hourly_amount`, and `reasoning`.
+            *   `contracts_to_end`: A list of existing `contract_id`s to terminate, along with a `reason`.
+        *   The function parses the AI's JSON response.
+    *   **Executing AI Decisions (within `process_ai_sales_and_price_strategies`):**
+        *   If decisions are received from the AI (and not in `dry_run` mode):
+            *   **Create/Update Contracts:** Each item in `contracts_to_create_or_update` is validated by `validate_create_or_update_contract_decision()`. If valid, `create_or_update_public_sell_contract_from_decision()` is called. This function:
+                *   Generates a deterministic `ContractId` (format: `contract-public-sell-{SELLER_USERNAME}-{SELLER_BUILDING_ID}-{RESOURCE_TYPE}`). This ensures only one active public sell contract exists per resource, per building, for that AI.
+                *   If a contract with this ID exists, it's updated (price, quantity, end date).
+                *   Otherwise, a new contract is created with a 47-hour duration.
+            *   **End Contracts:** Each item in `contracts_to_end` is validated by `validate_end_contract_decision()`. If valid, `end_public_sell_contract()` is called, which sets the `EndAt` field of the specified contract to the current time, effectively terminating it.
+    *   **Result Tracking:** The outcomes (contracts created/updated/ended) for each AI are tracked.
+
+3.  **Admin Notification (`create_admin_notification` function):**
+    *   After processing all AIs, if any actions were taken (and not in `dry_run`), a summary notification is sent to `ConsiglioDeiDieci`. This message details the number of contracts managed by each AI and lists the specifics of created/updated and ended contracts.
+
+This workflow allows AI citizens to dynamically manage their public sales, adjusting prices and offerings based on market conditions, their own inventory, and strategic considerations derived from their problems and relevancies.
+
 ## AI Citizen Management
 
 AI citizens are created and managed through the Airtable database:
