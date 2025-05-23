@@ -5,7 +5,7 @@ import { FaTimes } from 'react-icons/fa';
 interface BuildingType {
   type: string;
   name: string;
-  tier: number;
+  buildTier: number; // Changed from tier to buildTier
   pointType: string | null; // Can be 'land', 'canal', 'bridge', or null (assume 'land')
   constructionCosts?: {
     ducats?: number;
@@ -84,10 +84,10 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
   const buildingsByTier = useMemo(() => {
     const grouped: { [key: number]: BuildingType[] } = {};
     filteredBuildingTypes.forEach(bt => {
-      if (!grouped[bt.tier]) {
-        grouped[bt.tier] = [];
+      if (!grouped[bt.buildTier]) { // Changed from bt.tier to bt.buildTier
+        grouped[bt.buildTier] = []; // Changed from bt.tier to bt.buildTier
       }
-      grouped[bt.tier].push(bt);
+      grouped[bt.buildTier].push(bt); // Changed from bt.tier to bt.buildTier
     });
     // Sort buildings within each tier alphabetically by name
     for (const tier in grouped) {
