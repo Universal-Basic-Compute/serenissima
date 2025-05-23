@@ -421,21 +421,23 @@ def get_idle_citizens(tables) -> List[Dict]:
         active_activities_formula = f"AND({{StartDate}} <= '{now}', {{EndDate}} >= '{now}')"
         active_activities = tables['activities'].all(formula=active_activities_formula)
         
-        # Extract citizen IDs with active activities - use CitizenId field
-        busy_citizen_ids = set()
+        # Extract citizen Usernames with active activities
+        busy_citizen_usernames = set()
         for activity in active_activities:
-            citizen_id = activity['fields'].get('CitizenId')
-            if citizen_id:
-                busy_citizen_ids.add(citizen_id)
+            # The 'Citizen' field in ACTIVITIES table stores the Username
+            username = activity['fields'].get('Citizen') 
+            if username:
+                busy_citizen_usernames.add(username)
         
-        # Filter out citizens with active activities using CitizenId
+        # Filter out citizens with active activities using Username
         idle_citizens = []
-        for citizen in all_citizens:
-            citizen_id = citizen['fields'].get('CitizenId')
-            if citizen_id and citizen_id not in busy_citizen_ids:
-                idle_citizens.append(citizen)
+        for citizen_record in all_citizens:
+            username = citizen_record['fields'].get('Username')
+            # Ensure citizen has a username and is not in the busy set
+            if username and username not in busy_citizen_usernames:
+                idle_citizens.append(citizen_record)
         
-        log.info(f"Found {len(idle_citizens)} idle citizens")
+        log.info(f"Found {len(idle_citizens)} idle citizens (after checking Usernames against active activities)")
         return idle_citizens
     except Exception as e:
         log.error(f"Error fetching idle citizens: {e}")
