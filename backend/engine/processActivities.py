@@ -72,6 +72,13 @@ logging.basicConfig(
 )
 log = logging.getLogger("process_activities")
 
+# Placeholder for activities that are processed by expiring or simple state change
+def process_placeholder_activity_fn(tables, activity_record, building_type_defs, resource_defs):
+    activity_guid = activity_record['fields'].get('ActivityId', activity_record['id'])
+    activity_type = activity_record['fields'].get('Type')
+    log.info(f"Activity {activity_guid} (type: {activity_type}) processed by placeholder (e.g., expired or simple state change).")
+    return True
+
 # Attempt to import helper functions from other engine scripts
 try:
     from backend.engine.createimportactivities import get_building_types as get_building_type_definitions_from_api
@@ -110,6 +117,8 @@ except ImportError:
         raise NotImplementedError("process_eat_fn is not available due to import error")
     def process_fetch_from_galley_fn(tables, activity_record, building_type_defs, resource_defs):
         raise NotImplementedError("process_fetch_from_galley_fn is not available due to import error")
+    def process_placeholder_activity_fn(tables, activity_record, building_type_defs, resource_defs): # Placeholder for idle/rest
+        raise NotImplementedError("process_placeholder_activity_fn is not available due to import error")
 
 # Load environment variables
 load_dotenv()
@@ -310,6 +319,8 @@ def main(dry_run: bool = False):
         "eat_at_home": process_eat_fn,        # Dispatch to generic eat processor
         "eat_at_tavern": process_eat_fn,      # Dispatch to generic eat processor
         "fetch_from_galley": process_fetch_from_galley_fn, # Register new processor
+        "idle": process_placeholder_activity_fn, # Handle idle activities
+        "rest": process_placeholder_activity_fn, # Handle rest activities
         # Add other activity type processors here as they are created
     }
 
@@ -452,15 +463,55 @@ def main(dry_run: bool = False):
 
                         if building_record_for_pos and citizen_record_for_pos:
                             building_position_str = building_record_for_pos['fields'].get('Position')
-                        
+                            
+                            # If Position field is empty, try to parse from BuildingId or Point
+                            if not building_position_str:
+                                log.info(f"Building {to_building_custom_id} 'Position' field is empty. Attempting to parse from BuildingId or Point.")
+                                parsed_pos_coords = None
+                                
+                                # Try parsing from BuildingId (e.g., "building_lat_lng..." or "canal_lat_lng...")
+                                building_id_str_for_parse = building_record_for_pos['fields'].get('BuildingId', '')
+                                parts = building_id_str_for_parse.split('_')
+                                if len(parts) >= 3: # e.g. building_45.43_12.35 or canal_45.43_12.35
+                                    try:
+                                        lat = float(parts[1])
+                                        lng = float(parts[2])
+                                        parsed_pos_coords = {"lat": lat, "lng": lng}
+                                        log.info(f"Parsed position {parsed_pos_coords} from BuildingId '{building_id_str_for_parse}'.")
+                                    except (ValueError, IndexError):
+                                        log.debug(f"Could not parse lat/lng from BuildingId '{building_id_str_for_parse}'.")
+                                        # Continue to try Point field
+
+                                # If not found in BuildingId, try parsing from Point field
+                                if not parsed_pos_coords:
+                                    point_field_str = building_record_for_pos['fields'].get('Point', '')
+                                    if point_field_str and isinstance(point_field_str, str): # Ensure Point is a string
+                                        point_parts = point_field_str.split('_')
+                                        if len(point_parts) >= 3: # e.g. building_45.43_12.35 or canal_45.43_12.35
+                                            try:
+                                                lat = float(point_parts[1])
+                                                lng = float(point_parts[2])
+                                                parsed_pos_coords = {"lat": lat, "lng": lng}
+                                                log.info(f"Parsed position {parsed_pos_coords} from Point field '{point_field_str}'.")
+                                            except (ValueError, IndexError):
+                                                log.debug(f"Could not parse lat/lng from Point field '{point_field_str}'.")
+                                        else:
+                                            log.debug(f"Point field '{point_field_str}' not in expected format for parsing.")
+                                    else:
+                                        log.debug(f"Point field is empty or not a string for building {to_building_custom_id}.")
+                                
+                                if parsed_pos_coords:
+                                    building_position_str = json.dumps(parsed_pos_coords)
+
                             if building_position_str:
                                 update_payload = {
                                     'Position': building_position_str
+                                    # 'UpdatedAt' is automatically handled by Airtable on record update
                                 }
                                 tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
                                 log.info(f"Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Custom ID: {to_building_custom_id}).")
                             else:
-                                log.warning(f"Building {to_building_custom_id} is missing Position. Cannot update citizen {citizen_username_for_pos} position.")
+                                log.warning(f"Building {to_building_custom_id} is missing a parsable Position, BuildingId, or Point. Cannot update citizen {citizen_username_for_pos} position.")
                         else: 
                             if not building_record_for_pos:
                                 log.warning(f"Target building (Custom ID: {to_building_custom_id}) not found. Cannot update citizen {citizen_username_for_pos} position.")
