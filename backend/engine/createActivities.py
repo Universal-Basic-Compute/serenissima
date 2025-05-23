@@ -1493,48 +1493,58 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
     success_count = 0
     
     # Attempt to create final delivery activities for citizens at galleys first
-    # This pool will be modified by process_final_deliveries_from_galley
-    citizens_available_for_general_activities = list(citizens_to_process_list)
-    # now_venice_dt is defined at the start of create_activities
+    # Start with the full list of citizens to process. This list will be modified by the processing functions.
+    citizens_remaining_idle = list(citizens_to_process_list) 
+
     if not dry_run:
-        final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_available_for_general_activities, now_venice_dt) # Pass now_venice_dt
-        success_count += final_delivery_activities_created
+        # Attempt final deliveries first
+        if citizens_remaining_idle: # Check if there's anyone to process
+            final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_remaining_idle, now_venice_dt)
+            success_count += final_delivery_activities_created
+            # citizens_remaining_idle is modified in place by process_final_deliveries_from_galley
 
-    # Then, attempt to assign citizens to fetch from galleys
-    # This pool will be modified by process_galley_unloading_activities
-    citizens_still_available_after_final_delivery = list(citizens_available_for_general_activities)
-    
-    galley_fetch_activities_created = 0 # Initialize here
-    if not target_citizen_username: # Galley tasks are for general pool, not specific citizen run
-        if not dry_run:
-            galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_still_available_after_final_delivery, now_venice_dt) # Pass now_venice_dt
+        # Then, attempt galley unloading for citizens still idle
+        if citizens_remaining_idle: # Check if there's anyone left
+            galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_remaining_idle, now_venice_dt)
             success_count += galley_fetch_activities_created
-        elif dry_run and citizens_to_process_list: # If dry run, simulate checking for galley tasks
-            log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for merchant galleys with pending deliveries (fetch tasks).{LogColors.ENDC}")
-            log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for citizens at galleys ready for final delivery tasks.{LogColors.ENDC}")
+            # citizens_remaining_idle is modified in place by process_galley_unloading_activities
+    
+    elif dry_run and citizens_to_process_list: # Dry run logging
+        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for citizens at galleys ready for final delivery tasks.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for merchant galleys with pending deliveries (fetch tasks).{LogColors.ENDC}")
+        # Note: success_count for dry_run in galley tasks isn't explicitly added here,
+        # as the functions themselves aren't run to return a count.
+        # The main loop's dry_run success_count will cover citizens considered for general activities.
 
+    # Finally, process general activities for any citizens still idle
+    # If dry_run, citizens_remaining_idle will be the original list unless target_citizen_username was handled by a (simulated) galley task.
+    # If not dry_run, it will be those not assigned galley tasks.
+    if citizens_remaining_idle:
+        if target_citizen_username and not dry_run: # Check if the target citizen was processed by galley tasks
+            # If target_citizen_username was set, citizens_remaining_idle should be empty if they got a galley task.
+            # If it's not empty, it means they are still idle and need general processing.
+            if any(c['fields'].get('Username') == target_citizen_username for c in citizens_remaining_idle):
+                 log.info(f"{LogColors.OKBLUE}Processing general activity for target citizen: {target_citizen_username} (was not assigned a galley task).{LogColors.ENDC}")
+            # else: target citizen was assigned a galley task, no general processing needed for them.
+        elif not target_citizen_username: # General run
+            log.info(f"{LogColors.OKBLUE}Processing general activities for {len(citizens_remaining_idle)} remaining idle citizens.{LogColors.ENDC}")
 
-    # Finally, process general activities for any remaining idle citizens
-    citizens_for_general_processing = list(citizens_still_available_after_final_delivery) # Use the latest available pool
-    if target_citizen_username and citizens_to_process_list: # If specific citizen, only process them
-        citizens_for_general_processing = citizens_to_process_list
-        log.info(f"{LogColors.OKBLUE}Processing general activity for target citizen: {target_citizen_username}.{LogColors.ENDC}")
-    else:
-        log.info(f"{LogColors.OKBLUE}Processing general activities for {len(citizens_for_general_processing)} remaining idle citizens.{LogColors.ENDC}")
-
-    for citizen_record in citizens_for_general_processing:
-        if dry_run:
-            # Avoid double counting if already simulated for galley tasks in dry_run
-            if not (citizens_to_process_list and galley_fetch_activities_created > 0 and not target_citizen_username): # Simplified check
+        for citizen_record in citizens_remaining_idle:
+            # If target_citizen_username is set, this loop will only run if that citizen is still in citizens_remaining_idle.
+            if dry_run:
                  log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create general activity for citizen {citizen_record['fields'].get('Username', citizen_record['id'])}{LogColors.ENDC}")
-                 success_count +=1 # Add to dry run success count
-        else:
-            activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time, resource_defs)
-            if activity_created_for_citizen:
-                success_count += 1
+                 success_count +=1 
+            else:
+                # For a targeted run, ensure we only process the target citizen here if they are still idle.
+                if target_citizen_username and citizen_record['fields'].get('Username') != target_citizen_username:
+                    continue # Skip if it's a targeted run and this isn't the target
+
+                activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time, resource_defs)
+                if activity_created_for_citizen:
+                    success_count += 1
     
     total_citizens_considered = len(citizens_to_process_list)
-    summary_color = LogColors.OKGREEN if success_count == total_citizens_considered else LogColors.WARNING if success_count > 0 else LogColors.FAIL
+    summary_color = LogColors.OKGREEN if success_count >= total_citizens_considered and total_citizens_considered > 0 else LogColors.WARNING if success_count > 0 else LogColors.FAIL
     log.info(f"{summary_color}Activity creation process complete. Total activities created or simulated: {success_count} for {total_citizens_considered} citizen(s) considered.{LogColors.ENDC}")
 
 
