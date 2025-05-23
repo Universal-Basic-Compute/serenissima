@@ -112,9 +112,20 @@ def process(
         return False
         
     contract_fields = contract_record['fields']
-    buyer_username = contract_fields.get('Buyer') # This is the ultimate owner of the resource
+    buyer_username_from_contract = contract_fields.get('Buyer') # This is the ultimate owner of the resource
     seller_username_from_contract = contract_fields.get('Seller') # Operator of FromBuilding (as per contract)
     price_per_resource = float(contract_fields.get('PricePerResource', 0))
+
+    # Determine the effective buyer
+    if buyer_username_from_contract and buyer_username_from_contract.lower() == 'public':
+        effective_buyer_username = carrier_username # The citizen doing the activity is the buyer
+        log.info(f"Public sell contract for activity {activity_guid}. Effective buyer is carrier: {effective_buyer_username}")
+    else:
+        effective_buyer_username = buyer_username_from_contract
+    
+    if not effective_buyer_username:
+        log.error(f"Could not determine effective buyer for activity {activity_guid}. Contract Buyer: {buyer_username_from_contract}, Carrier: {carrier_username}")
+        return False
 
     # Fetch source building record using its custom BuildingId from the activity
     from_building_record = get_building_record(tables, from_building_custom_id_from_activity)
@@ -135,11 +146,11 @@ def process(
         log.error(f"Source building {from_building_custom_id} has no operator/owner.")
         return False
 
-    buyer_citizen_record = get_citizen_record(tables, buyer_username)
+    buyer_citizen_record = get_citizen_record(tables, effective_buyer_username) # Use effective_buyer_username
     seller_citizen_record = get_citizen_record(tables, effective_seller_username)
 
     if not buyer_citizen_record:
-        log.error(f"Buyer citizen {buyer_username} not found.")
+        log.error(f"Effective buyer citizen {effective_buyer_username} not found.")
         return False
     if not seller_citizen_record:
         log.error(f"Seller citizen {effective_seller_username} not found.")
@@ -168,7 +179,7 @@ def process(
 
     max_affordable_by_buyer = (buyer_ducats / price_per_resource) if price_per_resource > 0 else float('inf')
     if amount_to_purchase > max_affordable_by_buyer:
-        log.info(f"Amount {amount_to_purchase} of {resource_id_to_fetch} exceeds buyer {buyer_username} affordability ({max_affordable_by_buyer}). Limiting to affordable.")
+        log.info(f"Amount {amount_to_purchase} of {resource_id_to_fetch} exceeds buyer {effective_buyer_username} affordability ({max_affordable_by_buyer}). Limiting to affordable.")
         amount_to_purchase = max_affordable_by_buyer
     
     amount_to_purchase = float(f"{amount_to_purchase:.4f}") # Standardize precision
@@ -195,14 +206,14 @@ def process(
         # Financial transaction
         tables['citizens'].update(buyer_citizen_record['id'], {'Ducats': buyer_ducats - total_cost})
         tables['citizens'].update(seller_citizen_record['id'], {'Ducats': seller_ducats + total_cost})
-        log.info(f"Transferred {total_cost} ducats from buyer {buyer_username} to seller {effective_seller_username}.")
+        log.info(f"Transferred {total_cost} ducats from buyer {effective_buyer_username} to seller {effective_seller_username}.")
 
         transaction_payload = {
             "Type": "resource_purchase_on_fetch",
             "AssetType": "contract", # Could be 'resource'
             "Asset": contract_record['fields'].get('ContractId', contract_airtable_id), # Custom ContractId if available
             "Seller": effective_seller_username,
-            "Buyer": buyer_username,
+            "Buyer": effective_buyer_username, # Use effective_buyer_username
             "Price": total_cost,
             "Details": json.dumps({
                 "resource_type": resource_id_to_fetch,
@@ -240,7 +251,7 @@ def process(
         carrier_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_id_to_fetch)}', "
                                f"{{Asset}}='{_escape_airtable_value(carrier_username)}', " # Asset -> Asset, use Username
                                f"{{AssetType}}='citizen', "
-                               f"{{Owner}}='{_escape_airtable_value(buyer_username)}')") # Owned by the contract buyer
+                               f"{{Owner}}='{_escape_airtable_value(effective_buyer_username)}')") # Owned by the effective_buyer_username
         existing_carrier_res = tables['resources'].all(formula=carrier_res_formula, max_records=1)
         res_def_details = resource_defs.get(resource_id_to_fetch, {})
 
@@ -248,7 +259,7 @@ def process(
             carrier_res_record = existing_carrier_res[0]
             new_carrier_count = float(carrier_res_record['fields'].get('Count', 0)) + amount_to_purchase
             tables['resources'].update(carrier_res_record['id'], {'Count': new_carrier_count})
-            log.info(f"Updated {resource_id_to_fetch} for carrier {carrier_username} to {new_carrier_count} (owned by {buyer_username}).")
+            log.info(f"Updated {resource_id_to_fetch} for carrier {carrier_username} to {new_carrier_count} (owned by {effective_buyer_username}).")
         else:
             new_carrier_res_payload = {
                 "ResourceId": f"resource-{uuid.uuid4()}",
@@ -257,13 +268,13 @@ def process(
                 # "Category": res_def_details.get('category', 'Unknown'), # Removed Category
                 "Asset": carrier_username, # Asset -> Asset, use Username
                 "AssetType": "citizen",
-                "Owner": buyer_username, # Resources on citizen are owned by the contract's buyer
+                "Owner": effective_buyer_username, # Resources on citizen are owned by the effective_buyer_username
                 "Count": amount_to_purchase,
                 "Position": from_building_position_str, # Citizen is at FromBuilding
                 "CreatedAt": now_iso
             }
             tables['resources'].create(new_carrier_res_payload)
-            log.info(f"Created {amount_to_purchase} of {resource_id_to_fetch} for carrier {carrier_username} (owned by {buyer_username}).")
+            log.info(f"Created {amount_to_purchase} of {resource_id_to_fetch} for carrier {carrier_username} (owned by {effective_buyer_username}).")
 
         # Update carrier's position to FromBuilding
         tables['citizens'].update(carrier_airtable_id, {

@@ -73,7 +73,12 @@ TRANSPORT_API_URL = "http://localhost:3000/api/transport"
 VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
 NIGHT_START_HOUR = 22  # 10 PM
 NIGHT_END_HOUR = 6     # 6 AM
+SHOPPING_START_HOUR = 17 # 5 PM
+SHOPPING_END_HOUR = 20   # 8 PM
 IDLE_ACTIVITY_DURATION_HOURS = 1
+CITIZEN_CARRY_CAPACITY = 10.0
+SOCIAL_CLASS_VALUE = {"Nobili": 4, "Cittadini": 3, "Popolani": 2, "Facchini": 1, "Forestieri": 2}
+
 
 def initialize_airtable():
     """Initialize Airtable connection."""
@@ -489,6 +494,19 @@ def _calculate_distance_meters(pos1: Optional[Dict[str, float]], pos2: Optional[
     distance_degrees = sqrt(pow(lat1 - lat2, 2) + pow(lng1 - lng2, 2))
     return distance_degrees * 111000  # Rough approximation (1 degree ~ 111km)
 
+def get_citizen_current_load(tables: Dict[str, Table], citizen_username: str) -> float:
+    """Calculates the total count of resources currently carried by a citizen."""
+    formula = f"AND({{Asset}}='{_escape_airtable_value(citizen_username)}', {{AssetType}}='citizen')"
+    current_load = 0.0
+    try:
+        resources_carried = tables['resources'].all(formula=formula)
+        for resource in resources_carried:
+            current_load += float(resource['fields'].get('Count', 0))
+        log.debug(f"Citizen {citizen_username} current load: {current_load}")
+    except Exception as e:
+        log.error(f"Error calculating current load for citizen {citizen_username}: {e}")
+    return current_load
+
 def get_closest_inn(tables: Dict[str, Table], citizen_position: Dict[str, float]) -> Optional[Dict]:
     """Finds the closest building of type 'inn' to the citizen's position."""
     log.info(f"Searching for the closest inn to position: {citizen_position}")
@@ -580,6 +598,11 @@ def is_nighttime() -> bool:
     hour = now.hour
     
     return hour >= NIGHT_START_HOUR or hour < NIGHT_END_HOUR
+
+def is_shopping_time() -> bool:
+    """Check if it's currently shopping time in Venice (5 PM to 8 PM)."""
+    now_venice = datetime.datetime.now(VENICE_TIMEZONE)
+    return SHOPPING_START_HOUR <= now_venice.hour < SHOPPING_END_HOUR
 
 def get_path_between_points(start_position: Dict, end_position: Dict) -> Optional[Dict]:
     """Get a path between two points using the transport API."""
@@ -982,7 +1005,136 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
         log.warning(f"Citizen {citizen_username} is hungry but no eating option was successfully created. Proceeding to other activities.")
     
     # --- END HUNGER CHECK ---
-    
+
+    # --- SHOPPING LOGIC ---
+    # This comes after hunger, but before general night/day work/home logic.
+    # It's a daytime/evening activity.
+    if not is_hungry and is_shopping_time() and not is_night: # Ensure not hungry, it's shopping time, and not deep night
+        log.info(f"Citizen {citizen_username} - It's shopping time.")
+        current_load = get_citizen_current_load(tables, citizen_username)
+        remaining_capacity = CITIZEN_CARRY_CAPACITY - current_load
+        citizen_social_class = citizen['fields'].get('SocialClass', 'Facchini')
+        citizen_max_tier_access = SOCIAL_CLASS_VALUE.get(citizen_social_class, 1)
+        citizen_ducats = float(citizen['fields'].get('Ducats', 0))
+
+        home = get_citizen_home(tables, citizen_custom_id) # For depositing or as ToBuilding
+
+        if remaining_capacity <= 0.1: # Inventory is full (using a small epsilon)
+            log.info(f"Citizen {citizen_username}'s inventory is full. Attempting to go home.")
+            if home:
+                home_position = _get_building_position_coords(home)
+                home_custom_id = home['fields'].get('BuildingId', home['id'])
+                if citizen_position and home_position and _calculate_distance_meters(citizen_position, home_position) > 20:
+                    path_to_home_for_deposit = get_path_between_points(citizen_position, home_position)
+                    if path_to_home_for_deposit and path_to_home_for_deposit.get('success'):
+                        if try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_to_home_for_deposit):
+                            return True # Activity created to go home and deposit
+                    else:
+                        log.warning(f"Path to home for deposit failed for {citizen_username}.")
+                # If already at home, or path failed, they will likely become idle or rest if night.
+            else:
+                log.warning(f"Citizen {citizen_username} inventory full but no home to deposit items.")
+        elif home: # Inventory has space, and citizen has a home (to use as ToBuilding)
+            log.info(f"Citizen {citizen_username} has {remaining_capacity:.2f} inventory space. Looking for items to shop.")
+            potential_purchases = []
+            
+            # Filter resource definitions by tier access
+            shoppable_resources_defs = {
+                res_id: res_data for res_id, res_data in resource_defs.items()
+                if int(res_data.get('tier', 0) or 0) <= citizen_max_tier_access and int(res_data.get('tier', 0) or 0) > 0
+            }
+            log.debug(f"Citizen {citizen_username} (Class: {citizen_social_class}, MaxTier: {citizen_max_tier_access}) can shop for {len(shoppable_resources_defs)} resource types.")
+
+            if shoppable_resources_defs:
+                # Fetch active public_sell contracts
+                active_sell_contracts_formula = f"AND({{Type}}='public_sell', {{EndAt}}>'{now_utc_dt.isoformat()}', {{CreatedAt}}<='{now_utc_dt.isoformat()}', {{Amount}}>0)"
+                try:
+                    all_public_sell_contracts = tables['contracts'].all(formula=active_sell_contracts_formula)
+                    log.debug(f"Found {len(all_public_sell_contracts)} active public_sell contracts.")
+
+                    for res_id, res_data in shoppable_resources_defs.items():
+                        contracts_for_this_resource = [
+                            c for c in all_public_sell_contracts if c['fields'].get('ResourceType') == res_id
+                        ]
+                        if not contracts_for_this_resource:
+                            continue
+
+                        for contract_record in contracts_for_this_resource:
+                            seller_building_custom_id = contract_record['fields'].get('SellerBuilding')
+                            if not seller_building_custom_id: continue
+
+                            seller_building_record = get_building_record(tables, seller_building_custom_id)
+                            if not seller_building_record: continue
+                            
+                            seller_building_pos = _get_building_position_coords(seller_building_record)
+                            if not citizen_position or not seller_building_pos: continue
+
+                            distance = _calculate_distance_meters(citizen_position, seller_building_pos)
+                            if distance == float('inf') or distance == 0: distance = 100000 # Avoid division by zero, penalize far/same loc
+                            
+                            import_price = float(res_data.get('importPrice', 0))
+                            price_multiplier = 2.0 if res_data.get('subcategory') == 'food' else 1.0
+                            priority_score = (import_price * price_multiplier) / distance
+
+                            potential_purchases.append({
+                                "score": priority_score,
+                                "resource_id": res_id,
+                                "resource_name": res_data.get('name', res_id),
+                                "contract_record": contract_record,
+                                "seller_building_record": seller_building_record,
+                                "distance": distance
+                            })
+                    
+                    potential_purchases.sort(key=lambda x: x['score'], reverse=True)
+                    log.info(f"Citizen {citizen_username} has {len(potential_purchases)} potential shopping items, sorted by priority.")
+
+                    for purchase_candidate in potential_purchases:
+                        contract = purchase_candidate['contract_record']
+                        seller_building = purchase_candidate['seller_building_record']
+                        resource_id_to_buy = purchase_candidate['resource_id']
+                        
+                        price_per_unit = float(contract['fields'].get('PricePerResource', 0))
+                        contract_amount_available = float(contract['fields'].get('Amount', 0))
+
+                        if price_per_unit <= 0: continue
+
+                        max_affordable_units = citizen_ducats / price_per_unit
+                        
+                        amount_to_buy = min(remaining_capacity, contract_amount_available, max_affordable_units)
+                        amount_to_buy = float(f"{amount_to_buy:.4f}") # Standardize precision, ensure it's not too small
+
+                        if amount_to_buy >= 0.1: # Buy at least 0.1 units
+                            log.info(f"Citizen {citizen_username} attempting to buy {amount_to_buy:.2f} of {resource_id_to_buy} from {seller_building['fields'].get('BuildingId')}.")
+                            seller_building_pos = _get_building_position_coords(seller_building) # Already fetched
+                            
+                            path_to_seller = get_path_between_points(citizen_position, seller_building_pos)
+                            if path_to_seller and path_to_seller.get('success'):
+                                home_custom_id_for_delivery = home['fields'].get('BuildingId', home['id'])
+                                # Create fetch_resource: citizen goes to seller, buys, item goes to inventory.
+                                # ToBuilding is home, as that's the eventual destination.
+                                if try_create_resource_fetching_activity(
+                                    tables, citizen_airtable_record_id, citizen_custom_id, citizen_username,
+                                    contract['id'], # Airtable ID of the public_sell contract
+                                    seller_building['fields'].get('BuildingId'), # Custom ID of seller building
+                                    home_custom_id_for_delivery, # Custom ID of citizen's home
+                                    resource_id_to_buy, amount_to_buy, path_to_seller
+                                ):
+                                    log.info(f"Shopping activity (fetch_resource) created for {citizen_username} to buy {resource_id_to_buy}.")
+                                    return True # Shopping activity created
+                            else:
+                                log.warning(f"Path to seller {seller_building['fields'].get('BuildingId')} failed for {citizen_username}.")
+                        else:
+                            log.debug(f"Calculated amount_to_buy for {resource_id_to_buy} is too small ({amount_to_buy:.4f}). Skipping.")
+                except Exception as e_shop_contracts:
+                    log.error(f"Error during shopping contract processing for {citizen_username}: {e_shop_contracts}")
+            else: # No shoppable resource definitions
+                log.info(f"No shoppable resource definitions for {citizen_username} based on tier access.")
+        else: # No home to use as ToBuilding
+            log.info(f"Citizen {citizen_username} has no home, cannot determine 'ToBuilding' for shopping fetch. Skipping shopping.")
+            
+        log.info(f"Citizen {citizen_username} did not create a shopping activity this cycle.")
+    # --- END SHOPPING LOGIC ---
+
     home_city = citizen['fields'].get('HomeCity') # Check if citizen is a visitor
     log.info(f"Citizen {citizen_username} HomeCity: '{home_city}'")
 
