@@ -44,6 +44,13 @@ from backend.engine.activity_creators import (
     try_create_fetch_from_galley_activity # Import new creator
 )
 from dotenv import load_dotenv
+# Attempt to import helper functions from other engine scripts
+try:
+    from backend.engine.createimportactivities import get_resource_types as get_resource_definitions_from_api
+except ImportError:
+    log.warning("Could not import get_resource_definitions_from_api directly.")
+    def get_resource_definitions_from_api():
+        raise NotImplementedError("get_resource_definitions_from_api is not available")
 
 # Set up logging
 logging.basicConfig(
@@ -766,7 +773,7 @@ def create_idle_activity(tables, citizen_custom_id: str, citizen_username: str, 
         log.error(f"Error creating idle activity for {citizen_username}: {e}")
         return None
 
-def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
+def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_defs: Dict) -> bool:
     """Process activity creation for a single citizen."""
     # Get citizen identifiers
     citizen_custom_id = citizen['fields'].get('CitizenId') # The custom ID, e.g., ctz_...
@@ -1160,6 +1167,13 @@ def create_activities(dry_run: bool = False):
     
     tables = initialize_airtable()
     now_utc_dt = datetime.datetime.now(pytz.UTC) # Define now_utc_dt here
+    
+    # Fetch resource definitions once
+    resource_defs = get_resource_definitions_from_api()
+    if not resource_defs:
+        log.error("Failed to fetch resource definitions. Exiting activity creation.")
+        return
+
     idle_citizens = get_idle_citizens(tables)
     
     if not idle_citizens:
