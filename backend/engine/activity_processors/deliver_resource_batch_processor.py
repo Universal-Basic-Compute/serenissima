@@ -90,6 +90,11 @@ def process(
         return False
 
     all_resources_transferred = True
+    
+    VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+    now_venice = datetime.now(VENICE_TIMEZONE)
+    now_iso = now_venice.isoformat()
+
     for item in resources_to_deliver:
         resource_type_id = item.get('ResourceId')
         amount = float(item.get('Amount', 0))
