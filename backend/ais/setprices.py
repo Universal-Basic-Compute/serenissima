@@ -169,6 +169,58 @@ def get_building_public_sell_contracts(tables: Dict[str, Table], seller_username
         # print(f"Error getting public_sell contracts for seller {seller_username}, building {seller_building_id}: {str(e)}")
         return []
 
+def get_citizen_relevancies_from_api(username: str, limit: int = 100) -> List[Dict]:
+    """Get the latest relevancies for a citizen from the API."""
+    try:
+        api_base_url = os.getenv("API_BASE_URL", "https://serenissima.ai")
+        url = f"{api_base_url}/api/relevancies?relevantToCitizen={username}&limit={limit}"
+        print(f"Fetching relevancies for {username} from API: {url}")
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success") and "relevancies" in data:
+                relevancies = data["relevancies"]
+                print(f"Successfully fetched {len(relevancies)} relevancies for {username}.")
+                return relevancies
+            else:
+                print(f"Unexpected API response format for relevancies: {data}")
+                return []
+        else:
+            print(f"Error fetching relevancies from API: {response.status_code} - {response.text}")
+            return []
+    except Exception as e:
+        print(f"Exception fetching relevancies from API for {username}: {str(e)}")
+        return []
+
+def get_citizen_problems_from_api(username: str, limit: int = 100) -> List[Dict]:
+    """Get the latest active problems for a citizen from the API."""
+    try:
+        api_base_url = os.getenv("API_BASE_URL", "https://serenissima.ai")
+        # Fetch active problems, sorted by most recent (assuming API supports this or returns all and we filter/sort if needed)
+        url = f"{api_base_url}/api/problems?citizen={username}&status=active&limit={limit}&sort=-createdAt"
+        print(f"Fetching problems for {username} from API: {url}")
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            # The /api/problems endpoint returns an array of problems directly, not nested under a 'problems' key.
+            if isinstance(data, list):
+                problems = data
+                print(f"Successfully fetched {len(problems)} problems for {username}.")
+                return problems
+            else: # Check for a success wrapper if the API structure changes
+                if data.get("success") and "problems" in data:
+                    problems = data["problems"]
+                    print(f"Successfully fetched {len(problems)} problems for {username} (wrapped structure).")
+                    return problems
+                print(f"Unexpected API response format for problems: {data}")
+                return []
+        else:
+            print(f"Error fetching problems from API: {response.status_code} - {response.text}")
+            return []
+    except Exception as e:
+        print(f"Exception fetching problems from API for {username}: {str(e)}")
+        return []
+
 def get_all_active_public_sell_contracts(tables: Dict[str, Table]) -> List[Dict]:
     """Get all active public_sell contracts from all sellers."""
     try:
@@ -220,6 +272,10 @@ def prepare_price_setting_data(tables: Dict[str, Table], ai_citizen: Dict,
     # Extract citizen information
     username = ai_citizen["fields"].get("Username", "")
     ducats = ai_citizen["fields"].get("Ducats", 0)
+
+    # Fetch latest relevancies and problems for the citizen
+    latest_relevancies = get_citizen_relevancies_from_api(username)
+    latest_problems = get_citizen_problems_from_api(username)
     
     # Process buildings data
     buildings_data = []
@@ -316,6 +372,8 @@ def prepare_price_setting_data(tables: Dict[str, Table], ai_citizen: Dict,
             "total_buildings": len(buildings_data)
         },
         "buildings": buildings_data,
+        "latest_relevancies": latest_relevancies,
+        "latest_problems": latest_problems,
         "timestamp": datetime.now().isoformat()
     }
     
@@ -396,6 +454,10 @@ You are {ai_username}, an AI building owner in La Serenissima. You make your own
 
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
+
+Contextual data available:
+- `latest_relevancies`: Shows recent opportunities or threats relevant to you. These might influence demand for certain resources or highlight buildings needing price adjustments.
+- `latest_problems`: Shows active problems affecting you or your assets. For example, a "Building Lacks Resources" problem might suggest increasing the price of that resource if you sell it, or decreasing if you need to buy it.
 
 When developing your pricing strategy:
 1. Analyze each resource's `importPrice` as a baseline.
