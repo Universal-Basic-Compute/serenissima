@@ -1520,26 +1520,37 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
     # Finally, process general activities for any citizens still idle
     # If dry_run, citizens_remaining_idle will be the original list unless target_citizen_username was handled by a (simulated) galley task.
     # If not dry_run, it will be those not assigned galley tasks.
+    
+    citizens_to_process_general = []
     if citizens_remaining_idle:
-        if target_citizen_username and not dry_run: # Check if the target citizen was processed by galley tasks
-            # If target_citizen_username was set, citizens_remaining_idle should be empty if they got a galley task.
-            # If it's not empty, it means they are still idle and need general processing.
-            if any(c['fields'].get('Username') == target_citizen_username for c in citizens_remaining_idle):
-                 log.info(f"{LogColors.OKBLUE}Processing general activity for target citizen: {target_citizen_username} (was not assigned a galley task).{LogColors.ENDC}")
-            # else: target citizen was assigned a galley task, no general processing needed for them.
-        elif not target_citizen_username: # General run
-            log.info(f"{LogColors.OKBLUE}Processing general activities for {len(citizens_remaining_idle)} remaining idle citizens.{LogColors.ENDC}")
-
-        for citizen_record in citizens_remaining_idle:
-            # If target_citizen_username is set, this loop will only run if that citizen is still in citizens_remaining_idle.
+        if target_citizen_username:
+            # Check if the target citizen is still in the list of idle citizens
+            target_still_idle = any(c['fields'].get('Username') == target_citizen_username for c in citizens_remaining_idle)
             if dry_run:
-                 log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create general activity for citizen {citizen_record['fields'].get('Username', citizen_record['id'])}{LogColors.ENDC}")
-                 success_count +=1 
-            else:
-                # For a targeted run, ensure we only process the target citizen here if they are still idle.
-                if target_citizen_username and citizen_record['fields'].get('Username') != target_citizen_username:
-                    continue # Skip if it's a targeted run and this isn't the target
+                if target_still_idle:
+                    log.info(f"{LogColors.OKCYAN}[DRY RUN] Target citizen {target_citizen_username} would be considered for general activity if not assigned a (simulated) galley task.{LogColors.ENDC}")
+                    citizens_to_process_general = [c for c in citizens_remaining_idle if c['fields'].get('Username') == target_citizen_username]
+                # else: target was not in initial list or dry run implies they might have gotten a galley task.
+            elif not dry_run: # Actual run
+                if target_still_idle:
+                    log.info(f"{LogColors.OKBLUE}Processing general activity for target citizen: {target_citizen_username} (was not assigned a galley task).{LogColors.ENDC}")
+                    citizens_to_process_general = [c for c in citizens_remaining_idle if c['fields'].get('Username') == target_citizen_username]
+                else:
+                    log.info(f"{LogColors.OKBLUE}Target citizen {target_citizen_username} was assigned a galley task or is no longer idle. Skipping general activity processing for them.{LogColors.ENDC}")
+                    # citizens_to_process_general remains empty
+        else: # General run (not targeted)
+            log.info(f"{LogColors.OKBLUE}Processing general activities for {len(citizens_remaining_idle)} remaining idle citizens.{LogColors.ENDC}")
+            citizens_to_process_general = citizens_remaining_idle
 
+        for citizen_record in citizens_to_process_general: # Iterate over the correctly filtered list
+            if dry_run:
+                 # For dry_run with target_citizen_username, specific log is handled above.
+                 # This logs for general dry_run or if target is in citizens_to_process_general.
+                log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create general activity for citizen {citizen_record['fields'].get('Username', citizen_record['id'])}{LogColors.ENDC}")
+                success_count +=1 
+            else:
+                # No need for the 'if target_citizen_username and ... != target_citizen_username:' check
+                # because citizens_to_process_general is already filtered.
                 activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time, resource_defs)
                 if activity_created_for_citizen:
                     success_count += 1
@@ -1731,13 +1742,14 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
     Identifies merchant galleys with pending deliveries and creates 'fetch_from_galley'
     activities for idle citizens to unload them.
     Returns the number of 'fetch_from_galley' activities created.
+    Modifies `idle_citizens` list in place by removing citizens assigned a task.
     """
     # now_utc_dt is now_venice_dt in the calling scope of create_activities
     VENICE_TIMEZONE_GALLEY_UNLOAD = pytz.timezone('Europe/Rome')
     current_time_venice_gu = now_utc_dt # Assuming now_utc_dt from caller is already Venice time
 
     activities_created_count = 0
-    if not idle_citizens:
+    if not idle_citizens: # Check the list passed by reference
         log.info(f"{LogColors.OKBLUE}No idle citizens available to process galley unloading.{LogColors.ENDC}")
         return 0
 
@@ -1747,10 +1759,11 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
         arrived_galleys = tables['buildings'].all(formula=formula_arrived_galleys)
         log.info(f"{LogColors.OKBLUE}Found {len(arrived_galleys)} arrived merchant galleys.{LogColors.ENDC}")
 
-        available_citizens_pool = list(idle_citizens) # Make a mutable copy
+        # We will operate directly on the idle_citizens list passed by reference.
+        # available_citizens_pool = list(idle_citizens) # REMOVE: No longer operate on a copy
 
         for galley_record in arrived_galleys:
-            if not available_citizens_pool:
+            if not idle_citizens: # Check the original list
                 log.info(f"{LogColors.OKBLUE}No more idle citizens available for further galley unloading tasks.{LogColors.ENDC}")
                 break
 
@@ -1782,7 +1795,7 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
             log.info(f"{LogColors.OKBLUE}Processing galley {galley_custom_id} with {len(pending_import_contracts)} pending import contracts.{LogColors.ENDC}")
 
             for contract_to_fetch in pending_import_contracts:
-                if not available_citizens_pool:
+                if not idle_citizens: # Check the original list
                     log.info(f"{LogColors.OKBLUE}No more idle citizens for items in galley {galley_custom_id}.{LogColors.ENDC}")
                     break # Break from contracts loop for this galley
 
@@ -1827,8 +1840,11 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                 except Exception as e_check_existing:
                     log.error(f"{LogColors.FAIL}Error checking for existing fetch_from_galley activities: {e_check_existing}{LogColors.ENDC}")
                     # Proceed with caution or skip, might create duplicate if this fails
-
-                citizen_for_task = available_citizens_pool.pop(0) # Assign an idle citizen
+                
+                if not idle_citizens: # Double check before pop, though outer loops should catch this
+                    log.info(f"{LogColors.OKBLUE}No idle citizens left for contract {original_contract_id} in galley {galley_custom_id}.{LogColors.ENDC}")
+                    break
+                citizen_for_task = idle_citizens.pop(0) # Assign an idle citizen from the main list
                 
                 citizen_custom_id = citizen_for_task['fields'].get('CitizenId')
                 citizen_username = citizen_for_task['fields'].get('Username', citizen_custom_id)
@@ -1841,12 +1857,12 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                         citizen_current_pos = json.loads(citizen_current_pos_str)
                     except json.JSONDecodeError:
                         log.warning(f"{LogColors.WARNING}Could not parse current position for citizen {citizen_username}. Cannot pathfind to galley.{LogColors.ENDC}")
-                        available_citizens_pool.append(citizen_for_task) # Put back if cannot pathfind
+                        idle_citizens.append(citizen_for_task) # Put back into the main list
                         continue 
                 
                 if not citizen_current_pos: # If still no position
                     log.warning(f"{LogColors.WARNING}Citizen {citizen_username} has no current position. Cannot pathfind to galley.{LogColors.ENDC}")
-                    available_citizens_pool.append(citizen_for_task) # Put back
+                    idle_citizens.append(citizen_for_task) # Put back into the main list
                     continue
 
                 path_to_galley = get_path_between_points(citizen_current_pos, galley_position)
@@ -1866,12 +1882,14 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                     if activity_created:
                         activities_created_count += 1
                         log.info(f"{LogColors.OKGREEN}Created 'fetch_from_galley' for {citizen_username} to galley {galley_custom_id} for {amount} of {resource_type}.{LogColors.ENDC}")
-                        # The processor for fetch_from_galley should update PendingDeliveriesData on the galley.
+                        # Citizen already removed from idle_citizens by pop().
                     else:
-                        available_citizens_pool.append(citizen_for_task) # Put back if failed
+                        idle_citizens.append(citizen_for_task) # Put back into the main list if failed
+                        log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} put back into idle pool after failing to create fetch_from_galley activity.{LogColors.ENDC}")
                 else:
                     log.warning(f"{LogColors.WARNING}Pathfinding to galley {galley_custom_id} failed for citizen {citizen_username}. Contract: {contract_to_fetch['fields'].get('ContractId', 'N/A')}{LogColors.ENDC}")
-                    available_citizens_pool.append(citizen_for_task) # Put back
+                    idle_citizens.append(citizen_for_task) # Put back into the main list
+                    log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} put back into idle pool after pathfinding failure to galley.{LogColors.ENDC}")
 
     except Exception as e:
         log.error(f"{LogColors.FAIL}Error processing galley unloading activities: {e}{LogColors.ENDC}")
