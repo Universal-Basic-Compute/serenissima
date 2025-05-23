@@ -1444,6 +1444,7 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
     
     tables = initialize_airtable()
     now_utc_dt = datetime.datetime.now(pytz.UTC) # Define now_utc_dt here
+    now_venice_dt = datetime.datetime.now(VENICE_TIMEZONE) # Define now_venice_dt here
     
     # Fetch resource definitions once
     resource_defs = get_resource_definitions_from_api()
