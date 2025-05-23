@@ -1784,7 +1784,7 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                     else:
                         available_citizens_pool.append(citizen_for_task) # Put back if failed
                 else:
-                    log.warning(f"{LogColors.WARNING}Pathfinding to galley {galley_custom_id} failed for citizen {citizen_username}. Item: {item_to_fetch}{LogColors.ENDC}")
+                    log.warning(f"{LogColors.WARNING}Pathfinding to galley {galley_custom_id} failed for citizen {citizen_username}. Contract: {contract_to_fetch['fields'].get('ContractId', 'N/A')}{LogColors.ENDC}")
                     available_citizens_pool.append(citizen_for_task) # Put back
 
     except Exception as e:
