@@ -153,8 +153,16 @@ def get_dock_water_coordinates(dock_record: Dict, polygons_data: Dict) -> Option
         log.warning(f"No polygon data found for LandId: {dock_land_id}")
         return None
         
-    canal_points = land_polygon_data.get('canalPoints', {})
-    dock_canal_point_data = canal_points.get(dock_building_id) # dock_building_id is the key here
+    canal_points_list = land_polygon_data.get('canalPoints', []) # This is a list
+    dock_canal_point_data = None
+    if isinstance(canal_points_list, list):
+        for point in canal_points_list:
+            if isinstance(point, dict) and point.get('nodeId') == dock_building_id:
+                dock_canal_point_data = point
+                break
+    else:
+        log.warning(f"canalPoints for LandId {dock_land_id} is not a list as expected. Type: {type(canal_points_list)}")
+        return None
 
     if not dock_canal_point_data:
         log.warning(f"No canalPoint data found for dock BuildingId: {dock_building_id} on LandId: {dock_land_id}")
