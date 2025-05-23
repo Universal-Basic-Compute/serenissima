@@ -49,9 +49,13 @@ Here are the types of problems currently managed by the system:
 -   **Detection**: The system checks each citizen with `inVenice = true`. It parses their `AteAt` timestamp and compares it to the current time. If the difference exceeds 24 hours, a "Hungry Citizen" problem is generated.
 -   **Impact/Severity**: Medium. Hunger can affect a citizen's well-being and reduce their work productivity by up to 50%.
 -   **Suggested Solutions**:
-    -   Ensure the citizen has access to food (e.g., by visiting a tavern or having food resources).
-    -   Verify that game mechanics for eating are functioning and the `AteAt` field is being updated correctly.
-    -   If the citizen is an AI, ensure their behavior scripts include routines for obtaining and consuming food.
+    -   Ensure the citizen has food resources in their personal inventory.
+    -   Ensure the citizen has food resources stored in their home (if applicable, and they own those resources).
+    -   Ensure the citizen has sufficient Ducats to purchase a meal at a tavern.
+    -   Check if the citizen can pathfind to their home or a tavern if food is available there.
+    -   The `createActivities.py` script will attempt to make the citizen eat if `AteAt` is too old, by creating `eat_from_inventory`, `eat_at_home` (possibly after a `goto_home`), or `eat_at_tavern` (possibly after a `goto_tavern`) activities.
+    -   Verify that game mechanics for eating are functioning and the `AteAt` field is being updated correctly by the respective "eat" activity processors.
+    -   If the citizen is an AI, ensure their behavior scripts (if any beyond the core engine) don't interfere with the engine's eating logic.
 
 ### 5. Hungry Employee Impact
 

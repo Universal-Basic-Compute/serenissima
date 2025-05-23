@@ -64,14 +64,16 @@ try:
     from backend.engine.createimportactivities import get_building_types as get_building_type_definitions_from_api
     from backend.engine.createimportactivities import get_resource_types as get_resource_definitions_from_api
     # Import processors
-    from backend.engine.activity_processors.deliver_resource_batch_processor import process as process_deliver_resource_batch_fn
-    from backend.engine.activity_processors.goto_home_processor import process as process_goto_home_fn
-    from backend.engine.activity_processors.goto_work_processor import process as process_goto_work_fn
-    from backend.engine.activity_processors.production_processor import process as process_production_fn
-    from backend.engine.activity_processors.fetch_resource_processor import process as process_fetch_resource_fn
+    from backend.engine.activity_processors import (
+        process_deliver_resource_batch as process_deliver_resource_batch_fn,
+        process_goto_home as process_goto_home_fn,
+        process_goto_work as process_goto_work_fn,
+        process_production as process_production_fn,
+        process_fetch_resource as process_fetch_resource_fn,
+        process_eat as process_eat_fn 
+    )
 except ImportError:
     # Fallback if the script is run in a context where backend.engine is not directly importable
-    # This might happen if script is run directly from its own directory without backend being a package
     print("Warning: Could not import helper functions directly. Ensure PYTHONPATH is set correctly or run as part of the application.")
     # Define placeholder functions or exit if these are critical
     def get_building_type_definitions_from_api():
@@ -164,17 +166,18 @@ def get_contract_record(tables: Dict[str, Table], contract_id: str) -> Optional[
         log.error(f"Error fetching contract record for {contract_id}: {e}")
         return None
 
-def get_building_current_storage(tables: Dict[str, Table], building_id: str) -> float:
+def get_building_current_storage(tables: Dict[str, Table], building_custom_id: str) -> float:
     """Calculates the total count of resources currently in a building."""
-    formula = f"AND({{BuildingId}} = '{_escape_airtable_value(building_id)}', {{AssetType}} = 'building')"
+    # Assumes Asset field stores BuildingId for AssetType='building'
+    formula = f"AND({{Asset}} = '{_escape_airtable_value(building_custom_id)}', {{AssetType}} = 'building')"
     total_stored_volume = 0
     try:
         resources_in_building = tables['resources'].all(formula=formula)
         for resource in resources_in_building:
             total_stored_volume += float(resource['fields'].get('Count', 0))
-        log.info(f"Building {building_id} currently stores {total_stored_volume} units of resources.")
+        log.info(f"Building {building_custom_id} currently stores {total_stored_volume} units of resources.")
     except Exception as e:
-        log.error(f"Error calculating current storage for building {building_id}: {e}")
+        log.error(f"Error calculating current storage for building {building_custom_id}: {e}")
     return total_stored_volume
 
 # Removed process_deliver_resource_batch function from here. It's now in its own module.
@@ -198,8 +201,10 @@ def main(dry_run: bool = False):
         "goto_work": process_goto_work_fn,
         "production": process_production_fn,
         "fetch_resource": process_fetch_resource_fn,
+        "eat_from_inventory": process_eat_fn, # Dispatch to generic eat processor
+        "eat_at_home": process_eat_fn,        # Dispatch to generic eat processor
+        "eat_at_tavern": process_eat_fn,      # Dispatch to generic eat processor
         # Add other activity type processors here as they are created
-        # "another_activity_type": process_another_activity_type_fn,
     }
 
     tables = initialize_airtable()
@@ -259,47 +264,45 @@ def main(dry_run: bool = False):
 
             # Update citizen's position and UpdatedAt if ToBuilding is present,
             # UNLESS the activity type handles its own position update (e.g., fetch_resource)
-            if activity_type != 'fetch_resource':
-                to_building_airtable_id = activity_record['fields'].get('ToBuilding')
-                citizen_username = activity_record['fields'].get('Citizen')
+            # or if the activity doesn't involve changing location (e.g. eat_from_inventory, eat_at_home, eat_at_tavern if already there)
+            no_pos_update_types = ['fetch_resource', 'eat_from_inventory', 'eat_at_home', 'eat_at_tavern', 'production', 'rest', 'idle']
+            if activity_type not in no_pos_update_types:
+                to_building_airtable_id = activity_record['fields'].get('ToBuilding') # This is Airtable Record ID
+                citizen_username_for_pos = activity_record['fields'].get('Citizen')
 
-                if to_building_airtable_id and citizen_username and not dry_run:
+                if to_building_airtable_id and citizen_username_for_pos and not dry_run:
                     try:
+                        # building_record_for_pos is fetched using Airtable Record ID
                         building_record_for_pos = tables['buildings'].get(to_building_airtable_id)
-                        citizen_record_for_pos = get_citizen_record(tables, citizen_username)
+                        citizen_record_for_pos = get_citizen_record(tables, citizen_username_for_pos)
 
                         if building_record_for_pos and citizen_record_for_pos:
-                            # All logic depending on building_record_for_pos and citizen_record_for_pos being valid goes here
                             building_position_str = building_record_for_pos['fields'].get('Position')
-                            building_custom_id = building_record_for_pos['fields'].get('BuildingId') # We still get it for logging
+                            # building_custom_id_for_log = building_record_for_pos['fields'].get('BuildingId') # For logging
                         
                             if building_position_str:
                                 update_payload = {
                                     'Position': building_position_str,
-                                    # 'CurrentBuildingId': building_custom_id, # Field does not exist
                                     'UpdatedAt': datetime.now(timezone.utc).isoformat()
                                 }
                                 tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
-                                log.info(f"Updated citizen {citizen_username} Position to {building_position_str} (Building: {building_custom_id}) and UpdatedAt.")
+                                log.info(f"Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Airtable ID: {to_building_airtable_id}) and UpdatedAt.")
                             else:
-                                log_msg = f"Building {to_building_airtable_id}"
-                                if building_custom_id: # Safely use building_custom_id
-                                    log_msg += f" (Custom ID: {building_custom_id})"
-                                log_msg += f" is missing Position. Cannot update citizen {citizen_username} position."
-                                log.warning(log_msg)
-                        else: # This else corresponds to: if building_record_for_pos and citizen_record_for_pos:
+                                log.warning(f"Building {to_building_airtable_id} is missing Position. Cannot update citizen {citizen_username_for_pos} position.")
+                        else: 
                             if not building_record_for_pos:
-                                log.warning(f"Target building {to_building_airtable_id} not found. Cannot update citizen {citizen_username} position.")
-                            # This check is important if building_record_for_pos was True, but citizen_record_for_pos was False.
-                            # Or if both were False, this will also log.
+                                log.warning(f"Target building (Airtable ID: {to_building_airtable_id}) not found. Cannot update citizen {citizen_username_for_pos} position.")
                             if not citizen_record_for_pos: 
-                                log.warning(f"Citizen {citizen_username} not found. Cannot update citizen position.")
+                                log.warning(f"Citizen {citizen_username_for_pos} not found. Cannot update citizen position.")
                     except Exception as e_update_pos:
-                        log.error(f"Error updating citizen {citizen_username} position after activity {activity_guid}: {e_update_pos}")
-            elif dry_run and to_building_airtable_id and citizen_username: # This elif corresponds to the 'if not dry_run'
-                log.info(f"[DRY RUN] Would update citizen {citizen_username} position based on ToBuilding {to_building_airtable_id}.")
+                        log.error(f"Error updating citizen {citizen_username_for_pos} position after activity {activity_guid}: {e_update_pos}")
+            elif dry_run and activity_type not in no_pos_update_types:
+                to_building_airtable_id_dry = activity_record['fields'].get('ToBuilding')
+                citizen_username_dry = activity_record['fields'].get('Citizen')
+                if to_building_airtable_id_dry and citizen_username_dry:
+                    log.info(f"[DRY RUN] Would update citizen {citizen_username_dry} position based on ToBuilding (Airtable ID: {to_building_airtable_id_dry}).")
 
-        else:
+        else: # if not success
             update_activity_status(tables, activity_id_airtable, "failed")
             failed_count += 1
         

@@ -98,7 +98,8 @@ def get_home_buildings(tables: Dict[str, Table]) -> List[Dict]:
 def get_resources_in_home_for_occupant(tables: Dict[str, Table], building_custom_id: str, occupant_username: str) -> List[Dict]:
     """Fetch resources stored in a specific home building and owned by the occupant."""
     log.info(f"Fetching resources in building '{building_custom_id}' for occupant '{occupant_username}'...")
-    formula = f"AND({{AssetId}}='{_escape_airtable_value(building_custom_id)}', {{AssetType}}='building', {{Owner}}='{_escape_airtable_value(occupant_username)}')"
+    # For building resources, Asset field stores BuildingId
+    formula = f"AND({{Asset}}='{_escape_airtable_value(building_custom_id)}', {{AssetType}}='building', {{Owner}}='{_escape_airtable_value(occupant_username)}')"
     try:
         resources = tables[RESOURCES_TABLE_NAME].all(formula=formula)
         log.info(f"Found {len(resources)} resources for occupant '{occupant_username}' in building '{building_custom_id}'.")

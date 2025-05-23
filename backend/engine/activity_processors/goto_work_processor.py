@@ -72,15 +72,15 @@ def process(
     workplace_building_def = building_type_defs.get(workplace_building_type_str, {})
     storage_capacity = workplace_building_def.get('productionInformation', {}).get('storageCapacity', 0)
 
-    # Get resources carried by the citizen (AssetType='citizen', AssetId=citizen_custom_id)
+    # Get resources carried by the citizen (AssetType='citizen', Asset=citizen_username)
     # AND owned by the workplace operator (Owner=workplace_operator_username)
     citizen_resources_formula = (f"AND({{AssetType}}='citizen', "
-                                 f"{{AssetId}}='{_escape_airtable_value(citizen_custom_id)}', "
+                                 f"{{Asset}}='{_escape_airtable_value(citizen_username)}', "
                                  f"{{Owner}}='{_escape_airtable_value(workplace_operator_username)}')")
     try:
         citizen_carried_resources = tables['resources'].all(formula=citizen_resources_formula)
     except Exception as e_fetch_res:
-        log.error(f"Error fetching resources for citizen {citizen_username} (owned by {workplace_operator_username}): {e_fetch_res}")
+        log.error(f"Error fetching resources carried by citizen {citizen_username} (owned by {workplace_operator_username}): {e_fetch_res}")
         return False
 
     if not citizen_carried_resources:
@@ -113,9 +113,9 @@ def process(
             log.warning(f"Skipping invalid resource item from citizen {citizen_username}: {res_record_citizen_carried.get('id')}")
             continue
 
-        # Deposit into workplace building (AssetType='building', AssetId=workplace_building_custom_id, Owner=workplace_operator_username)
+        # Deposit into workplace building (AssetType='building', Asset=workplace_building_custom_id, Owner=workplace_operator_username)
         workplace_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', "
-                                 f"{{AssetId}}='{_escape_airtable_value(workplace_building_custom_id)}', "
+                                 f"{{Asset}}='{_escape_airtable_value(workplace_building_custom_id)}', "
                                  f"{{AssetType}}='building', "
                                  f"{{Owner}}='{_escape_airtable_value(workplace_operator_username)}')")
         try:
@@ -136,7 +136,7 @@ def process(
                     "Name": res_def.get('name', resource_type_id),
                     "Category": res_def.get('category', 'Unknown'),
                     "BuildingId": workplace_building_custom_id, # Store the custom BuildingId
-                    "AssetId": workplace_building_custom_id,   # AssetId is the custom BuildingId
+                    "Asset": workplace_building_custom_id,   # Asset is the custom BuildingId
                     "AssetType": "building",
                     "Owner": workplace_operator_username, # Workplace operator owns these resources
                     "Count": amount_to_deposit,

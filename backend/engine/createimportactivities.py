@@ -636,7 +636,9 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
             resource_definition = resource_types.get(resource_type_id, {})
             
             try:
-                resource_formula = f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', {{AssetId}}='{_escape_airtable_value(delivery_citizen_asset_id)}', {{AssetType}}='citizen', {{Owner}}='Italia')"
+                # For citizen-carried resources (AssetType='citizen'), Asset field uses Username.
+                # delivery_citizen_asset_id here is the Username.
+                resource_formula = f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', {{Asset}}='{_escape_airtable_value(delivery_citizen_asset_id)}', {{AssetType}}='citizen', {{Owner}}='Italia')"
                 existing_resources = tables["resources"].all(formula=resource_formula, max_records=1)
                 
                 current_time_iso = datetime.now().isoformat()
@@ -644,7 +646,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                     "Type": resource_type_id, 
                     "Name": resource_definition.get('name', resource_type_id),
                     "Category": resource_definition.get('category', 'Unknown'),
-                    "AssetId": delivery_citizen_asset_id, # Use CitizenId (or Username) of delivery person
+                    "Asset": delivery_citizen_asset_id, # Use Username of delivery person
                     "AssetType": "citizen",
                     "Owner": "Italia", 
                     "Count": resource_amount, 
@@ -653,14 +655,14 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                 # Removed "BuildingId"
                 if existing_resources:
                     tables["resources"].update(existing_resources[0]["id"], resource_data_fields)
-                    log.info(f"Updated import-tracking resource record for {resource_type_id} in {buyer_building_id}.")
+                    log.info(f"Updated import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset_id}.")
                 else:
-                    resource_data_fields["ResourceId"] = f"resource-{uuid.uuid4()}"
+                    resource_data_fields["ResourceId"] = f"resource-{uuid.uuid4()}" # This is the custom ID for the resource stack
                     resource_data_fields["CreatedAt"] = current_time_iso
                     tables["resources"].create(resource_data_fields)
-                    log.info(f"Created new import-tracking resource record for {resource_type_id} in {buyer_building_id}.")
+                    log.info(f"Created new import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset_id}.")
             except Exception as e_res_track:
-                log.error(f"Error managing import-tracking resource record for {resource_type_id} in {buyer_building_id}: {e_res_track}")
+                log.error(f"Error managing import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset_id}: {e_res_track}")
                 all_resource_records_managed = False
                 break # Stop processing this building if a tracking record fails
         

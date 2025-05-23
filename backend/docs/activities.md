@@ -22,6 +22,14 @@ The activity system tracks what citizens are doing at any given time, creating a
         - Resource is added to the citizen's inventory, marked as owned by the contract's `Buyer`.
         - Citizen's position is updated to `FromBuilding`.
     - *Post-processing*: `createActivities.py` should then ideally create a new travel activity for the citizen to take the fetched resources from `FromBuilding` to the original `ToBuilding` (ultimate destination).
+- **Eating Activities**: Triggered when a citizen's `AteAt` timestamp is older than 12 hours.
+    - **`eat_from_inventory`**: Citizen consumes a food item they are carrying.
+        - *Processor*: Decrements the food resource from the citizen's personal inventory. Updates `AteAt`.
+    - **`eat_at_home`**: Citizen consumes a food item stored in their home building, which they own.
+        - *Processor*: Decrements the food resource from the home building's inventory (owned by the citizen). Updates `AteAt`.
+    - **`eat_at_tavern`**: Citizen consumes a meal at a tavern.
+        - *Processor*: Deducts Ducats from the citizen for the meal cost. Credits the tavern operator. Updates `AteAt`.
+    - *Note*: Travel to home (`goto_home`) or tavern (`goto_tavern`, often using `goto_inn` type) might precede `eat_at_home` or `eat_at_tavern` if the citizen is not already at the location. These travel activities are standard.
 - **Idle**: Waiting for their next scheduled activity
 
 Activities are managed by the `createActivities.py` script, which runs periodically to ensure citizens always have something to do. This system applies equally to both AI and human citizens, creating a unified simulation where all citizens follow the same daily patterns and routines.
@@ -112,7 +120,17 @@ The `createActivities.py` script follows this process:
      - Else (citizen is a resident):
        - If at home: create `rest` activity at home.
        - Else: create `goto_home` activity.
-   - If it's daytime:
+   - If hungry (AteAt > 12 hours ago):
+     - Attempt to create an "eat" activity (from inventory, at home, or at a tavern). This has high priority.
+     - If an "eat" activity is created (or a "goto" activity to facilitate eating), the process for this citizen for this cycle may conclude.
+   - If not eating, and it's nighttime:
+     - If the citizen is a visitor (has `HomeCity`):
+       - If at an inn: create `rest` activity at the inn.
+       - Else: create `goto_inn` activity to the closest available inn.
+     - Else (citizen is a resident):
+       - If at home: create `rest` activity at home.
+       - Else: create `goto_home` activity.
+   - If not eating, and it's daytime:
      - If the citizen has a workplace:
        - If at workplace:
          - Attempt to create `production` activity if inputs for a recipe are available.
@@ -120,7 +138,7 @@ The `createActivities.py` script follows this process:
          - Else, create `idle` activity.
        - Else (not at workplace): create `goto_work` activity.
      - Else (no workplace): create `idle` activity.
-   - If pathfinding for any travel activity fails, or no other suitable activity can be determined: create an `idle` activity.
+   - If pathfinding for any travel activity fails, or no other suitable activity can be determined (and not eating): create an `idle` activity.
 
 ### Pathfinding for Travel Activities
 

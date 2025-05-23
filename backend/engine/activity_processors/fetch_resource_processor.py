@@ -33,17 +33,18 @@ def get_building_record_by_airtable_id(tables: Dict[str, Any], airtable_record_i
         log.error(f"Error fetching building record by Airtable ID {airtable_record_id}: {e}")
         return None
 
-def get_citizen_current_load(tables: Dict[str, Any], citizen_custom_id: str) -> float:
+def get_citizen_current_load(tables: Dict[str, Any], citizen_username: str) -> float:
     """Calculates the total count of resources currently carried by a citizen."""
-    formula = f"AND({{AssetId}}='{_escape_airtable_value(citizen_custom_id)}', {{AssetType}}='citizen')"
+    # Assumes Asset field stores Username for AssetType='citizen'
+    formula = f"AND({{Asset}}='{_escape_airtable_value(citizen_username)}', {{AssetType}}='citizen')"
     current_load = 0.0
     try:
         resources_carried = tables['resources'].all(formula=formula)
         for resource in resources_carried:
             current_load += float(resource['fields'].get('Count', 0))
-        log.info(f"Citizen {citizen_custom_id} is currently carrying {current_load} units of resources.")
+        log.info(f"Citizen {citizen_username} is currently carrying {current_load} units of resources.")
     except Exception as e:
-        log.error(f"Error calculating current load for citizen {citizen_custom_id}: {e}")
+        log.error(f"Error calculating current load for citizen {citizen_username}: {e}")
     return current_load
 
 def get_source_building_resource_stock(
@@ -94,11 +95,9 @@ def process(
     if not carrier_citizen_record:
         log.error(f"Carrier citizen {carrier_username} not found for activity {activity_guid}.")
         return False
-    carrier_custom_id = carrier_citizen_record['fields'].get('CitizenId')
+    # carrier_custom_id = carrier_citizen_record['fields'].get('CitizenId') # Still useful for logging if needed
     carrier_airtable_id = carrier_citizen_record['id']
-    if not carrier_custom_id:
-        log.error(f"Carrier citizen {carrier_username} is missing CitizenId.")
-        return False
+    # Username (carrier_username) is now the primary key for Asset field for citizen resources
 
     # The contract_airtable_id is the Airtable Record ID, not the custom ContractId string.
     # We need to fetch the contract by its Airtable Record ID.
@@ -146,7 +145,7 @@ def process(
     seller_ducats = float(seller_citizen_record['fields'].get('Ducats', 0)) # For crediting
 
     # 2. Calculate capacity and availability
-    carrier_current_load = get_citizen_current_load(tables, carrier_custom_id)
+    carrier_current_load = get_citizen_current_load(tables, carrier_username) # Use username
     carrier_remaining_capacity = max(0, CITIZEN_STORAGE_CAPACITY - carrier_current_load)
 
     raw_stock_at_source = get_source_building_resource_stock(tables, from_building_custom_id, resource_id_to_fetch, effective_seller_username)
@@ -217,7 +216,7 @@ def process(
 
         # Decrement resource from source building
         source_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_id_to_fetch)}', "
-                              f"{{AssetId}}='{_escape_airtable_value(from_building_custom_id)}', "
+                              f"{{Asset}}='{_escape_airtable_value(from_building_custom_id)}', " # AssetId -> Asset
                               f"{{AssetType}}='building', "
                               f"{{Owner}}='{_escape_airtable_value(effective_seller_username)}')")
         source_res_records = tables['resources'].all(formula=source_res_formula, max_records=1)
@@ -235,7 +234,7 @@ def process(
 
         # Add resource to carrier citizen's inventory
         carrier_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_id_to_fetch)}', "
-                               f"{{AssetId}}='{_escape_airtable_value(carrier_custom_id)}', "
+                               f"{{Asset}}='{_escape_airtable_value(carrier_username)}', " # AssetId -> Asset, use Username
                                f"{{AssetType}}='citizen', "
                                f"{{Owner}}='{_escape_airtable_value(buyer_username)}')") # Owned by the contract buyer
         existing_carrier_res = tables['resources'].all(formula=carrier_res_formula, max_records=1)
@@ -252,7 +251,7 @@ def process(
                 "Type": resource_id_to_fetch,
                 "Name": res_def_details.get('name', resource_id_to_fetch),
                 "Category": res_def_details.get('category', 'Unknown'),
-                "AssetId": carrier_custom_id,
+                "Asset": carrier_username, # AssetId -> Asset, use Username
                 "AssetType": "citizen",
                 "Owner": buyer_username, # Resources on citizen are owned by the contract's buyer
                 "Count": amount_to_purchase,

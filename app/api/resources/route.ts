@@ -75,24 +75,55 @@ export async function GET(request: Request) {
       
       // Parse position if AssetType is 'building'
       const assetType = record.get('AssetType');
-      const assetId = record.get('AssetId');
+      const assetValue = record.get('Asset'); // Changed from AssetId to Asset
       
-      if (assetType === 'building' && assetId && typeof assetId === 'string') {
-        const parts = assetId.split('_');
-        // Expecting format like "building_LAT_LNG" or "prefix_LAT_LNG"
-        // Using parts[1] for lat and parts[2] for lng based on parseBuildingId example
-        if (parts.length >= 3) {
-          const lat = parseFloat(parts[1]);
-          const lng = parseFloat(parts[2]);
-          
-          if (!isNaN(lat) && !isNaN(lng)) {
-            outputRecord.position = { lat, lng };
-            // console.log(`Parsed position from AssetId ${assetId} for building:`, outputRecord.position);
-          } else {
-            // console.warn(`Could not parse lat/lng from AssetId ${assetId}`);
-          }
-        } else {
-          // console.warn(`AssetId ${assetId} does not have enough parts to parse lat/lng`);
+      // If AssetType is 'building', the 'Asset' field should contain the BuildingId (e.g. building_lat_lng_variant)
+      // The 'Position' field on the RESOURCES table itself should ideally store the parsed JSON coordinates.
+      // However, if we must parse from 'Asset' field for buildings:
+      if (assetType === 'building' && assetValue && typeof assetValue === 'string') {
+        // Attempt to parse from the 'Position' field of the resource record first
+        const resourcePositionStr = record.get('Position');
+        if (resourcePositionStr && typeof resourcePositionStr === 'string') {
+            try {
+                const parsedPos = JSON.parse(resourcePositionStr);
+                if (parsedPos && typeof parsedPos.lat === 'number' && typeof parsedPos.lng === 'number') {
+                    outputRecord.position = parsedPos;
+                }
+            } catch (e) {
+                // console.warn(`Could not parse Position JSON string: ${resourcePositionStr} for resource ${outputRecord.id}`);
+            }
+        }
+
+        // Fallback to parsing from Asset field if position is still empty
+        if (Object.keys(outputRecord.position).length === 0) {
+            const parts = assetValue.split('_');
+            if (parts.length >= 3) {
+              const lat = parseFloat(parts[1]);
+              const lng = parseFloat(parts[2]);
+              
+              if (!isNaN(lat) && !isNaN(lng)) {
+                outputRecord.position = { lat, lng };
+                // console.log(`Parsed position from Asset field ${assetValue} for building:`, outputRecord.position);
+              } else {
+                // console.warn(`Could not parse lat/lng from Asset field ${assetValue}`);
+              }
+            } else {
+              // console.warn(`Asset field ${assetValue} does not have enough parts to parse lat/lng`);
+            }
+        }
+      } else if (assetType === 'citizen') {
+        // For citizens, try to get their position from the CITIZENS table if needed,
+        // or expect the 'Position' field on the RESOURCES table to be populated.
+        const resourcePositionStr = record.get('Position');
+         if (resourcePositionStr && typeof resourcePositionStr === 'string') {
+            try {
+                const parsedPos = JSON.parse(resourcePositionStr);
+                 if (parsedPos && typeof parsedPos.lat === 'number' && typeof parsedPos.lng === 'number') {
+                    outputRecord.position = parsedPos;
+                }
+            } catch (e) {
+                // console.warn(`Could not parse Position JSON string for citizen resource: ${resourcePositionStr}`);
+            }
         }
       }
       
@@ -175,13 +206,14 @@ export async function POST(request: Request) {
     // Create a record in Airtable - ensure position is stored as a string
     const record = await new Promise((resolve, reject) => {
       base('RESOURCES').create({
-        ResourceId: data.id,
+        ResourceId: data.id, // Custom ID for the resource stack
         Type: data.type,
         Name: data.name || data.type,
         Category: data.category || 'unknown',
-        Position: JSON.stringify(position),
+        Position: JSON.stringify(position), // Position of the resource itself
         Count: data.count || 1,
-        LandId: data.landId || '',
+        Asset: data.asset || '', // BuildingId, Username, or LandId depending on AssetType
+        AssetType: data.assetType || 'unknown', // 'building', 'citizen', 'land'
         Owner: data.owner || 'system',
         CreatedAt: data.createdAt || new Date().toISOString()
       }, function(err, record) {
@@ -204,7 +236,8 @@ export async function POST(request: Request) {
         Category: string;
         Position: string;
         Count: number;
-        LandId: string;
+        Asset: string;      // Renamed from LandId, more generic
+        AssetType: string;  // Added AssetType
         Owner: string;
         CreatedAt: string;
       };

@@ -51,10 +51,8 @@ def process(
     if not delivery_person_citizen_record:
         log.error(f"Delivery person (citizen) {delivery_person_username} not found for activity {activity_guid}.")
         return False
-    delivery_person_citizen_id = delivery_person_citizen_record['fields'].get('CitizenId')
-    if not delivery_person_citizen_id:
-        log.error(f"Delivery person {delivery_person_username} is missing CitizenId field.")
-        return False
+    # delivery_person_citizen_id (custom ctz_ id) is not directly used in resource query with Asset field.
+    # Username (delivery_person_username) will be used for the Asset field.
 
     dest_building_record = get_building_record(tables, to_building_id)
     if not dest_building_record:
@@ -86,27 +84,32 @@ def process(
             log.warning(f"Invalid resource item in activity {activity_guid}: {item}")
             continue
 
+        # For citizen-carried resources (AssetType='citizen'), Asset field uses Username.
         tracking_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', "
-                                f"{{AssetId}}='{_escape_airtable_value(delivery_person_citizen_id)}', "
+                                f"{{Asset}}='{_escape_airtable_value(delivery_person_username)}', " # AssetId -> Asset, use Username
                                 f"{{AssetType}}='citizen', {{Owner}}='Italia')")
         try:
             tracking_resources = tables['resources'].all(formula=tracking_res_formula, max_records=1)
             if tracking_resources:
                 tracking_res_record = tracking_resources[0]
                 current_tracking_count = float(tracking_res_record['fields'].get('Count', 0))
-                if current_tracking_count > amount:
-                    tables['resources'].update(tracking_res_record['id'], {'Count': current_tracking_count - amount})
-                else:
+                if current_tracking_count > amount: # Assuming amount is what's being delivered from this tracking stock
+                    tables['resources'].update(tracking_res_record['id'], {'Count': current_tracking_count - amount, 'UpdatedAt': datetime.now(timezone.utc).isoformat()})
+                else: # Delivered all or more than was tracked (or exactly tracked amount)
                     tables['resources'].delete(tracking_res_record['id'])
                 log.info(f"Adjusted import-tracking resource {resource_type_id} for delivery citizen {delivery_person_username}.")
             else:
-                log.warning(f"Import-tracking resource {resource_type_id} not found for delivery citizen {delivery_person_citizen_id}. This might indicate a prior issue.")
+                log.warning(f"Import-tracking resource {resource_type_id} not found for delivery citizen {delivery_person_username}. This might indicate a prior issue.")
         except Exception as e_track:
             log.error(f"Error adjusting import-tracking resource {resource_type_id} for {delivery_person_username}: {e_track}")
             all_resources_transferred = False; break
 
+        # For building resources (AssetType='building'), Asset field uses BuildingId.
+        # The Owner is the target_owner_username (RunBy or Owner of the building).
+        # BuildingId field is also present for convenience.
         building_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', "
-                                f"{{BuildingId}}='{_escape_airtable_value(to_building_id)}', "
+                                f"{{Asset}}='{_escape_airtable_value(to_building_id)}', " # AssetId -> Asset
+                                f"{{AssetType}}='building', "
                                 f"{{Owner}}='{_escape_airtable_value(target_owner_username)}')")
         try:
             existing_building_resources = tables['resources'].all(formula=building_res_formula, max_records=1)
@@ -125,8 +128,8 @@ def process(
                     "Type": resource_type_id,
                     "Name": res_def.get('name', resource_type_id),
                     "Category": res_def.get('category', 'Unknown'),
-                    "BuildingId": to_building_id,
-                    "AssetId": to_building_id,
+                    "BuildingId": to_building_id, # Custom BuildingId
+                    "Asset": to_building_id,      # Asset field stores BuildingId for AssetType='building'
                     "AssetType": "building",
                     "Owner": target_owner_username,
                     "Count": amount,

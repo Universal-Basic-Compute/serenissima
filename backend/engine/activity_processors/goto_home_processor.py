@@ -63,20 +63,23 @@ def process(
     home_building_def = building_type_defs.get(home_building_type_str, {})
     storage_capacity = home_building_def.get('productionInformation', {}).get('storageCapacity', 0)
     
-    # Get resources owned by the citizen (AssetType='citizen', Owner=citizen_username)
-    # The AssetId for citizen-owned resources is the CitizenId (custom ID like ctz_...).
-    citizen_custom_id = citizen_record['fields'].get('CitizenId')
-    if not citizen_custom_id:
-        log.error(f"Citizen {citizen_username} is missing CitizenId field.")
-        return False
+    # Get resources owned by the citizen (AssetType='citizen', Owner=citizen_username, Asset=citizen_username)
+    # The 'Asset' field for citizen-owned resources now stores the Username.
+    # The 'Owner' field also stores the Username for self-owned items.
+    
+    # citizen_custom_id is still useful for logging or other non-query purposes if needed.
+    # citizen_custom_id = citizen_record['fields'].get('CitizenId')
+    # if not citizen_custom_id:
+    #     log.error(f"Citizen {citizen_username} is missing CitizenId field for logging.")
+        # Not returning False, as username is primary for query now.
 
     citizen_resources_formula = (f"AND({{AssetType}}='citizen', "
                                  f"{{Owner}}='{_escape_airtable_value(citizen_username)}', "
-                                 f"{{AssetId}}='{_escape_airtable_value(citizen_custom_id)}')")
+                                 f"{{Asset}}='{_escape_airtable_value(citizen_username)}')")
     try:
         citizen_owned_resources = tables['resources'].all(formula=citizen_resources_formula)
     except Exception as e_fetch_res:
-        log.error(f"Error fetching resources for citizen {citizen_username} (ID: {citizen_custom_id}): {e_fetch_res}")
+        log.error(f"Error fetching resources for citizen {citizen_username} (Asset: {citizen_username}): {e_fetch_res}")
         return False
 
     if not citizen_owned_resources:
@@ -105,9 +108,9 @@ def process(
             log.warning(f"Skipping invalid resource item from citizen {citizen_username}: {res_record_citizen_owned.get('id')}")
             continue
 
-        # Deposit into home building (AssetType='building', AssetId=home_building_custom_id, Owner=citizen_username)
+        # Deposit into home building (AssetType='building', Asset=home_building_custom_id, Owner=citizen_username)
         home_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', "
-                            f"{{AssetId}}='{_escape_airtable_value(home_building_custom_id)}', "
+                            f"{{Asset}}='{_escape_airtable_value(home_building_custom_id)}', "
                             f"{{AssetType}}='building', "
                             f"{{Owner}}='{_escape_airtable_value(citizen_username)}')")
         try:
@@ -128,7 +131,7 @@ def process(
                     "Name": res_def.get('name', resource_type_id),
                     "Category": res_def.get('category', 'Unknown'),
                     "BuildingId": home_building_custom_id, # Store the custom BuildingId
-                    "AssetId": home_building_custom_id,   # AssetId is the custom BuildingId
+                    "Asset": home_building_custom_id,   # Asset is the custom BuildingId
                     "AssetType": "building",
                     "Owner": citizen_username, # Citizen owns the resources in their home
                     "Count": amount_to_deposit,
