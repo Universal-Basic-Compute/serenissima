@@ -68,13 +68,7 @@ def try_create(
         
         if activity and activity.get('id'):
             log.info(f"Created resource fetching activity: {activity['id']}")
-            try:
-                # VENICE_TIMEZONE is already defined above
-                updated_at_ts = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
-                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
-            except Exception as e_update:
-                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            # Citizen's UpdatedAt is automatically handled by Airtable when other fields are updated.
             return activity
         else:
             log.error(f"Failed to create resource fetching activity for {citizen_username}")

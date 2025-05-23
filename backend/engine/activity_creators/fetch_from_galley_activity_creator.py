@@ -66,12 +66,7 @@ def try_create(
         
         if activity and activity.get('id'):
             log.info(f"Created 'fetch_from_galley' activity: {activity['id']}")
-            # Update citizen's UpdatedAt (optional, Airtable might do this)
-            try:
-                # VENICE_TIMEZONE is defined above
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': datetime.datetime.now(VENICE_TIMEZONE).isoformat()})
-            except Exception as e_update_citizen:
-                log.warning(f"Could not update citizen {citizen_username} UpdatedAt: {e_update_citizen}")
+            # Citizen's UpdatedAt is automatically handled by Airtable when other fields are updated.
             return activity
         else:
             log.error(f"Failed to create 'fetch_from_galley' activity for {citizen_username}")
