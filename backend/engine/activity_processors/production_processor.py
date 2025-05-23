@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Any
 
 from backend.engine.processActivities import (
     get_building_record, # Already fetches by custom BuildingId, need one for Airtable ID
+    get_citizen_record, # Added for fetching operator's citizen record
     _escape_airtable_value,
     # We'll need a way to get building by Airtable Record ID if not already available
     # For now, assuming `tables['buildings'].get(airtable_record_id)` works.
@@ -166,7 +167,45 @@ def process(
     # Produce Outputs
 
     # Calculate production ratio based on actual activity duration vs recipe's craft minutes
-    production_ratio = 1.0  # Default to full production (current behavior)
+    # Also apply penalties for homelessness and hunger.
+    production_penalty_modifier = 1.0
+    operator_citizen_record = get_citizen_record(tables, operator_username)
+
+    if operator_citizen_record:
+        # Check for homelessness
+        home_building_links = operator_citizen_record['fields'].get('HomeBuilding')
+        if not home_building_links or len(home_building_links) == 0:
+            log.info(f"Operator {operator_username} is homeless. Applying 50% production penalty.")
+            production_penalty_modifier *= 0.5
+
+        # Check for hunger
+        ate_at_str = operator_citizen_record['fields'].get('AteAt')
+        activity_end_date_str = activity_fields.get('EndDate')
+        if ate_at_str and activity_end_date_str:
+            try:
+                ate_at_dt = datetime.fromisoformat(ate_at_str)
+                activity_end_dt = datetime.fromisoformat(activity_end_date_str)
+                
+                # Ensure timezone awareness (assume UTC if naive)
+                if ate_at_dt.tzinfo is None:
+                    ate_at_dt = ate_at_dt.replace(tzinfo=timezone.utc)
+                if activity_end_dt.tzinfo is None:
+                    activity_end_dt = activity_end_dt.replace(tzinfo=timezone.utc)
+
+                if (activity_end_dt - ate_at_dt).total_seconds() > 24 * 3600:
+                    log.info(f"Operator {operator_username} has not eaten in over 24 hours (AteAt: {ate_at_str}). Applying 50% production penalty.")
+                    production_penalty_modifier *= 0.5
+            except ValueError:
+                log.warning(f"Could not parse AteAt timestamp '{ate_at_str}' for operator {operator_username}.")
+        elif not ate_at_str:
+            # If AteAt is not set, consider them hungry as a default penalty, or log and skip.
+            # For now, let's assume hungry if not set, to encourage this data point.
+            log.info(f"Operator {operator_username} AteAt timestamp is not set. Applying 50% production penalty for hunger.")
+            production_penalty_modifier *= 0.5
+    else:
+        log.warning(f"Could not fetch citizen record for operator {operator_username}. Cannot apply penalties.")
+
+    duration_based_ratio = 1.0  # Default to full production if duration calculation fails
     recipe_craft_minutes_val = activity_fields.get('RecipeCraftMinutes')
 
     if recipe_craft_minutes_val is not None:
@@ -189,24 +228,29 @@ def process(
                     
                     if actual_duration_minutes < 0: actual_duration_minutes = 0.0 # Safety for negative duration
 
-                    production_ratio = actual_duration_minutes / recipe_duration_minutes
-                    production_ratio = min(1.0, max(0.0, production_ratio)) # Clamp between 0.0 and 1.0
-                    log.info(f"Activity {activity_guid}: Actual duration {actual_duration_minutes:.2f}m, Recipe craft minutes {recipe_duration_minutes:.2f}m. Production ratio: {production_ratio:.4f}")
+                    duration_based_ratio = actual_duration_minutes / recipe_duration_minutes
+                    # log.info already includes duration_based_ratio effectively through production_ratio log later
                 else:
-                    log.warning(f"Activity {activity_guid} missing StartDate or EndDate. Assuming full production ratio.")
+                    log.warning(f"Activity {activity_guid} missing StartDate or EndDate. Assuming full duration-based ratio.")
             else:
-                log.warning(f"RecipeCraftMinutes is {recipe_duration_minutes} for activity {activity_guid}. Assuming full production ratio.")
+                log.warning(f"RecipeCraftMinutes is {recipe_duration_minutes} for activity {activity_guid}. Assuming full duration-based ratio.")
         except ValueError:
-            log.warning(f"Invalid RecipeCraftMinutes value '{recipe_craft_minutes_val}' for activity {activity_guid}. Assuming full production ratio.")
+            log.warning(f"Invalid RecipeCraftMinutes value '{recipe_craft_minutes_val}' for activity {activity_guid}. Assuming full duration-based ratio.")
     else:
-        log.info(f"RecipeCraftMinutes not found for activity {activity_guid}. Assuming full production ratio (old behavior).")
+        log.info(f"RecipeCraftMinutes not found for activity {activity_guid}. Assuming full duration-based ratio (old behavior).")
+
+    # Apply penalties to the duration-based ratio
+    production_ratio = duration_based_ratio * production_penalty_modifier
+    production_ratio = min(1.0, max(0.0, production_ratio)) # Clamp final ratio
+
+    log.info(f"Activity {activity_guid}: DurationRatio={duration_based_ratio:.4f}, PenaltyMod={production_penalty_modifier:.4f}, FinalProdRatio={production_ratio:.4f}")
 
     for res_type, base_produced_amount_str in recipe_outputs.items():
         base_produced_amount = float(base_produced_amount_str)
         final_produced_amount = base_produced_amount * production_ratio
 
         if final_produced_amount <= 0.00001: # Effectively zero or negligible
-            log.info(f"Calculated produced amount for {res_type} is negligible ({final_produced_amount:.4f}). Skipping output.")
+            log.info(f"Calculated produced amount for {res_type} is negligible ({final_produced_amount:.4f}) due to ratio {production_ratio:.4f}. Skipping output.")
             continue
 
         output_res_record = get_specific_building_resource(tables, building_custom_id, res_type, operator_username)
