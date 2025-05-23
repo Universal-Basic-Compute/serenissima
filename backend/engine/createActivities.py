@@ -30,6 +30,7 @@ import requests
 import pytz
 import uuid
 import re # Added import for regular expressions
+import random # Added for selecting random building point
 from collections import defaultdict
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
@@ -893,6 +894,20 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
     except (json.JSONDecodeError, TypeError) as e:
         log.warning(f"Invalid position data for citizen {citizen_custom_id}: {citizen['fields'].get('Position')} - Error: {str(e)}")
 
+    if not citizen_position:
+        log.info(f"Citizen {citizen_custom_id} has no position. Attempting to assign a random starting position.")
+        new_position = _fetch_and_assign_random_starting_position(tables, citizen)
+        if new_position:
+            citizen_position = new_position
+            # Update the citizen record in Airtable with the new position string
+            # The helper function _fetch_and_assign_random_starting_position already does this.
+            log.info(f"Assigned random starting position {citizen_position} to citizen {citizen_custom_id}")
+        else:
+            log.warning(f"Failed to assign a random starting position to citizen {citizen_custom_id}. Creating idle activity.")
+            idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+            try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No position data and failed to assign random position.")
+            return True # Activity created (idle)
+
     if is_hungry:
         log.info(f"Citizen {citizen_username} is hungry. Attempting to create eat activity.")
         food_resource_types = ["bread", "fish", "preserved_fish"] # Example food types
@@ -1009,6 +1024,21 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
         log.warning(f"Citizen {citizen_username} is hungry but no eating option was successfully created. Proceeding to other activities.")
     
     # --- END HUNGER CHECK ---
+
+    # Re-check citizen_position after hunger logic, as it might have been set if they went home to eat.
+    # However, the primary assignment of random position happens before hunger check if initially null.
+    # This re-check is more for ensuring subsequent logic has a position if one was determined during hunger resolution.
+    if not citizen_position:
+        # Attempt to re-fetch from citizen record if it was updated by an eat_at_home -> goto_home sequence.
+        # This is a bit complex as process_citizen_activity doesn't re-fetch the whole citizen record mid-flow.
+        # For now, we rely on the initial position check or the random assignment.
+        # If still no position here, it means random assignment also failed or wasn't triggered appropriately.
+        log.warning(f"Citizen {citizen_custom_id} still has no position data after hunger check. This might lead to issues for subsequent activities.")
+        # Fallback to idle if absolutely no position can be determined.
+        idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+        try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No position data available after hunger check.")
+        return True
+
 
     # --- SHOPPING LOGIC ---
     # This comes after hunger, but before general night/day work/home logic.
@@ -1701,3 +1731,63 @@ if __name__ == "__main__":
         logging.getLogger().setLevel(logging.DEBUG)
     
     create_activities(dry_run=args.dry_run)
+
+def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen_record: Dict) -> Optional[Dict[str, float]]:
+    """
+    Fetches polygon data, selects a random buildingPoint, assigns it to the citizen,
+    and updates their record in Airtable.
+    Returns the new position {lat, lng} or None.
+    """
+    citizen_custom_id = citizen_record['fields'].get('CitizenId', citizen_record['id'])
+    log.info(f"Attempting to fetch random building point for citizen {citizen_custom_id}.")
+
+    try:
+        api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000") # Use API_BASE_URL
+        polygons_url = f"{api_base_url}/api/get-polygons"
+        response = requests.get(polygons_url)
+        response.raise_for_status()
+        data = response.json()
+
+        if not data.get("success") or not data.get("polygons"):
+            log.error(f"Failed to fetch or parse polygons data from {polygons_url}. Response: {data}")
+            return None
+
+        all_building_points = []
+        for polygon in data["polygons"]:
+            if "buildingPoints" in polygon and isinstance(polygon["buildingPoints"], list):
+                all_building_points.extend(polygon["buildingPoints"])
+        
+        if not all_building_points:
+            log.warning(f"No buildingPoints found in polygons data from {polygons_url}.")
+            return None
+
+        random_point = random.choice(all_building_points)
+        
+        if "lat" in random_point and "lng" in random_point:
+            new_position_coords = {
+                "lat": float(random_point["lat"]),
+                "lng": float(random_point["lng"])
+            }
+            new_position_str = json.dumps(new_position_coords)
+
+            # Update citizen record in Airtable
+            try:
+                tables['citizens'].update(citizen_record['id'], {'Position': new_position_str})
+                log.info(f"Successfully updated citizen {citizen_custom_id} (Airtable ID: {citizen_record['id']}) with new random position: {new_position_str}")
+                return new_position_coords
+            except Exception as e_update:
+                log.error(f"Failed to update citizen {citizen_custom_id} position in Airtable: {e_update}")
+                return None
+        else:
+            log.warning(f"Selected random building point is missing lat/lng: {random_point}")
+            return None
+
+    except requests.exceptions.RequestException as e_req:
+        log.error(f"Request error fetching polygons for random position: {e_req}")
+        return None
+    except json.JSONDecodeError as e_json:
+        log.error(f"JSON decode error fetching polygons for random position: {e_json}")
+        return None
+    except Exception as e_general:
+        log.error(f"General error fetching or assigning random position for {citizen_custom_id}: {e_general}")
+        return None
