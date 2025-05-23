@@ -203,7 +203,7 @@ def create_or_get_merchant_galley(
                     "Type": "merchant_galley", # Type is the primary descriptor
                     "Owner": merchant_username,
                     "RunBy": merchant_username,
-                    "Position": json.dumps(position_coords)
+                    "Point": galley_building_id # Use BuildingId (water_lat_lng) for Point field
                     # "Name" field removed as it's not in the Airtable schema
                 }
             }
@@ -214,7 +214,7 @@ def create_or_get_merchant_galley(
             # "Name" field removed as it's not in the Airtable schema
             "Owner": merchant_username,
             "RunBy": merchant_username, 
-            "Position": json.dumps(position_coords),
+            "Point": galley_building_id, # Use BuildingId (water_lat_lng) for Point field
             "Category": "Transport", # Assuming a category for such buildings
             "CreatedAt": datetime.now(timezone.utc).isoformat(),
             "IsConstructed": False, # Galley is "arriving"
