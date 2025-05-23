@@ -1,0 +1,64 @@
+{
+  "name": "Luxury Bakery",
+  "pointType": "building",
+  "category": "business",
+  "subcategory": "Luxury Goods",
+  "tier": 3,
+  "size": "Small",
+  "unlockCondition": "Master Baker qualification, access to fine ingredients (sugar, spices)",
+  "calculationsAnalysis": "The Luxury Bakery produces high-value pastries for a discerning clientele. Higher construction costs reflect finer equipment and decor. Income is substantial due to premium pricing, though input costs (flour, sugar) are also higher. Employs highly skilled pastry chefs.",
+  "shortDescription": "Creates exquisite pastries and baked sweets for the affluent.",
+  "fullDescription": "A Luxury Bakery caters to the refined tastes of Venice's elite, producing delicate pastries, cakes, and sweetmeats. These establishments use high-quality ingredients like fine flour and imported sugar, showcasing the baker's artistry.",
+  "flavorText": "Where flour and sugar are transformed by art into fleeting moments of pure delight.",
+  "constructionCosts": {
+    "ducats": 600000,
+    "timber": 50,
+    "bricks": 250,
+    "stone": 150,
+    "iron": 15
+  },
+  "maintenanceCost": 700,
+  "constructionTime": 432000000,
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "flour": 2,
+          "sugar": 1,
+          "olive_oil": 0.5, 
+          "fuel": 1
+        },
+        "outputs": {
+          "pastries": 1
+        },
+        "craftMinutes": 180
+      }
+    ],
+    "storageCapacity": 100,
+    "stores": [
+      "flour",
+      "sugar",
+      "olive_oil",
+      "fuel",
+      "pastries"
+    ],
+    "sells": [
+      "pastries"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Gentle oven sounds, delicate mixing, hushed conversations",
+    "activitySounds": "Intricate decoration work, careful packaging, polite customer service",
+    "musicTheme": "Salotti Veneziani"
+  },
+  "seasonalEffects": {
+    "carnival": "Specialty carnival pastries and masks made of sugar",
+    "weddings": "Elaborate wedding cakes and confections"
+  },
+  "aiInteractionPoints": [
+    "Display cases",
+    "Preparation area",
+    "Sales counter",
+    "Consultation area for special orders"
+  ]
+}

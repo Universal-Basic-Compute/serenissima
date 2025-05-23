@@ -1,0 +1,60 @@
+{
+  "name": "Butcher Shop",
+  "pointType": "building",
+  "category": "business",
+  "subcategory": "Food Industry",
+  "tier": 2,
+  "size": "Medium",
+  "unlockCondition": "Butchers' Guild membership, livestock supply chain",
+  "calculationsAnalysis": "The Butcher Shop processes imported livestock into various cuts of meat. Construction requires specialized tools and hygiene facilities. Income is derived from meat sales, with significant maintenance for waste disposal and tool upkeep. Employs skilled butchers and assistants.",
+  "shortDescription": "Processes livestock into meat cuts and sells them to the public.",
+  "fullDescription": "Butcher shops are vital for supplying the city with fresh meat. Livestock arrives from the mainland and is processed here by skilled butchers into various cuts. These shops adhere to guild regulations for quality and hygiene.",
+  "flavorText": "A sharp knife and a strong arm carve sustenance and satisfaction from the bounty of the herds.",
+  "constructionCosts": {
+    "ducats": 450000,
+    "timber": 60,
+    "bricks": 200,
+    "stone": 100,
+    "iron": 20
+  },
+  "maintenanceCost": 600,
+  "constructionTime": 345600000,
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "livestock": 1,
+          "salt": 0.2
+        },
+        "outputs": {
+          "meat": 2 
+        },
+        "craftMinutes": 90
+      }
+    ],
+    "storageCapacity": 200,
+    "stores": [
+      "livestock",
+      "meat",
+      "salt"
+    ],
+    "sells": [
+      "meat"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Cleaver chopping, knives sharpening, low hum of activity",
+    "activitySounds": "Meat cutting, customer orders, deliveries",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "summer": "Increased need for ice/cooling to preserve meat",
+    "festivals": "Higher demand for specific cuts of meat"
+  },
+  "aiInteractionPoints": [
+    "Cutting blocks",
+    "Meat display",
+    "Sales counter",
+    "Delivery entrance"
+  ]
+}

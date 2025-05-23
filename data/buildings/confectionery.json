@@ -1,0 +1,62 @@
+{
+  "name": "Confectionery",
+  "pointType": "building",
+  "category": "business",
+  "subcategory": "Luxury Goods",
+  "tier": 3,
+  "size": "Medium",
+  "unlockCondition": "Master Confectioner status, reliable supply of sugar and spices",
+  "calculationsAnalysis": "The Confectionery produces exquisite sugar treats, a mark of luxury. High construction costs for specialized tools and presentation. Premium pricing leads to high income, but input costs (sugar, spices, fruits) are also significant. Employs master confectioners and artisans.",
+  "shortDescription": "Creates fine sugar confections, candied fruits, and marzipan.",
+  "fullDescription": "A Confectionery is where sugar is spun into art. These workshops produce a dazzling array of sweets, from delicate candied fruits and marzipan figures to elaborate sugar sculptures for banquets. Access to refined sugar and exotic spices is crucial for their creations.",
+  "flavorText": "Sweetness sculpted, a fleeting taste of paradise for those who can afford it.",
+  "constructionCosts": {
+    "ducats": 900000,
+    "timber": 80,
+    "bricks": 300,
+    "stone": 200,
+    "iron": 25
+  },
+  "maintenanceCost": 1000,
+  "constructionTime": 604800000,
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "sugar": 2,
+          "spices": 0.5,
+          "fruit": 1 
+        },
+        "outputs": {
+          "sugar_confections": 1
+        },
+        "craftMinutes": 240
+      }
+    ],
+    "storageCapacity": 120,
+    "stores": [
+      "sugar",
+      "spices",
+      "fruit", 
+      "sugar_confections"
+    ],
+    "sells": [
+      "sugar_confections"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Gentle simmering, careful stirring, artistic molding sounds",
+    "activitySounds": "Sugar pulling, fruit dicing, elaborate decorating",
+    "musicTheme": "Feste Veneziane"
+  },
+  "seasonalEffects": {
+    "festivals": "High demand for elaborate confections and sugar sculptures",
+    "fruit_harvests": "Availability of fresh fruits for candying"
+  },
+  "aiInteractionPoints": [
+    "Work tables for sugar art",
+    "Cooling racks",
+    "Display and sales area",
+    "Ingredient storage"
+  ]
+}
