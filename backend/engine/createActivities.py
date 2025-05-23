@@ -1338,10 +1338,21 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                             try_create_production_activity(tables, citizen_airtable_record_id, citizen_custom_id, citizen_username, workplace_custom_id, selected_recipe) # Pass custom BuildingId
                             return True
                 
-                contracts = get_citizen_contracts(tables, citizen_username) # Use username for contracts
-                if contracts:
-                    for contract in contracts:
-                        from_building_id_contract = contract['fields'].get('SellerBuilding') # Custom ID
+                # Fetch contracts for the workplace operator (RunBy)
+                workplace_operator_username = workplace['fields'].get('RunBy')
+                if not workplace_operator_username:
+                    log.warning(f"{LogColors.WARNING}Workplace {workplace_custom_id} has no operator (RunBy). Cannot fetch contracts for it.{LogColors.ENDC}")
+                else:
+                    log.info(f"{LogColors.OKBLUE}Fetching contracts for workplace operator: {workplace_operator_username}{LogColors.ENDC}")
+                    contracts = get_citizen_contracts(tables, workplace_operator_username) # Use workplace operator's username
+                    if contracts:
+                        for contract in contracts:
+                            # Ensure the contract's BuyerBuilding is this workplace
+                            if contract['fields'].get('BuyerBuilding') != workplace_custom_id:
+                                log.debug(f"Skipping contract {contract['id']} for operator {workplace_operator_username} as its BuyerBuilding ({contract['fields'].get('BuyerBuilding')}) is not the current workplace ({workplace_custom_id}).")
+                                continue
+
+                            from_building_id_contract = contract['fields'].get('SellerBuilding') # Custom ID
                         to_building_id_contract = contract['fields'].get('BuyerBuilding')   # Custom ID
                         
                         if from_building_id_contract and to_building_id_contract:
