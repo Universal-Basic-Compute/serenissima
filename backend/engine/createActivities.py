@@ -108,7 +108,8 @@ except ImportError:
 load_dotenv()
 
 # Constants
-TRANSPORT_API_URL = "http://localhost:3000/api/transport"
+TRANSPORT_API_URL = os.getenv("TRANSPORT_API_URL", "http://localhost:3000/api/transport")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000") # Define API_BASE_URL
 VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
 NIGHT_START_HOUR = 22  # 10 PM
 NIGHT_END_HOUR = 6     # 6 AM
