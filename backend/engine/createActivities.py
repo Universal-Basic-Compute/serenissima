@@ -1269,10 +1269,10 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No inn found for visitor.")
 
         else: # Resident logic
-            log.info(f"{LogColors.OKCYAN}Citizen {citizen_username} is a resident or HomeCity is not set. Finding home.{LogColors.ENDC}")
+            log.info(f"{LogColors.OKCYAN}Citizen {citizen_username} is a resident or HomeCity is not set. Evaluating home situation.{LogColors.ENDC}")
             home = get_citizen_home(tables, citizen_custom_id)
             if not home:
-                log.warning(f"{LogColors.WARNING}Citizen {citizen_custom_id} has no home, creating idle activity{LogColors.ENDC}")
+                log.warning(f"{LogColors.WARNING}Resident {citizen_custom_id} has no home, creating idle activity.{LogColors.ENDC}")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No home assigned.")
                 return True
