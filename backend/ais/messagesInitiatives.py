@@ -156,16 +156,27 @@ def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, t
     try:
         safe_relevant_to_username = _escape_airtable_value(relevant_to_username)
         safe_target_username = _escape_airtable_value(target_username)
-        # Formule simplifiée pour le débogage : ne vérifie que la correspondance exacte.
-        # Si RelevantToCitizen ou TargetCitizen peuvent être des listes de liens, cette formule ne fonctionnera pas correctement
-        # et nécessitera une approche différente (par exemple, plusieurs requêtes ou une logique de jointure côté client).
-        # Utiliser FIND pour plus de robustesse
-        formula = (
-            f"AND("
-            f"FIND('{safe_relevant_to_username}', ARRAYJOIN({{RelevantToCitizen}})) > 0,"
-            f"FIND('{safe_target_username}', ARRAYJOIN({{TargetCitizen}})) > 0"
-            f")"
-        )
+        
+        conditions = []
+        if safe_relevant_to_username:
+            conditions.append(f"FIND('{safe_relevant_to_username}', ARRAYJOIN({{RelevantToCitizen}})) > 0")
+        else:
+            # Si le nom d'utilisateur est vide, cette condition ne peut pas être remplie de manière significative avec FIND.
+            # On pourrait ajouter une condition qui est toujours fausse, ou omettre, selon la logique souhaitée.
+            # Pour l'instant, on l'omet, ce qui signifie que si le nom est vide, ce critère n'est pas appliqué.
+            pass # Ou conditions.append("FALSE()") si on veut que ça échoue si le nom est vide.
+
+        if safe_target_username:
+            conditions.append(f"FIND('{safe_target_username}', ARRAYJOIN({{TargetCitizen}})) > 0")
+        else:
+            pass # Idem
+
+        if not conditions: # Si les deux noms d'utilisateur sont vides, retourner une liste vide.
+            print(f"Les deux noms d'utilisateur pour la recherche de pertinences sont vides. Retour d'une liste vide.")
+            return []
+
+        formula = f"AND({', '.join(conditions)})"
+        
         records = tables["relevancies"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
