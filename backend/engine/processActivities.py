@@ -94,6 +94,13 @@ log = logging.getLogger("process_activities")
 # Load environment variables
 load_dotenv()
 
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+log = logging.getLogger("process_activities")
+
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
