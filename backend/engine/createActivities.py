@@ -943,12 +943,18 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             try:
                 inventory_food = tables['resources'].all(formula=formula, max_records=1)
                 if inventory_food and float(inventory_food[0]['fields'].get('Count', 0)) >= 1.0:
-                    log.info(f"{LogColors.OKGREEN}Found {food_type} in {citizen_username}'s inventory.{LogColors.ENDC}")
+                    log.info(f"{LogColors.OKGREEN}Found {food_type} in {citizen_username}'s inventory. Attempting to create 'eat_from_inventory'.{LogColors.ENDC}")
                     if try_create_eat_from_inventory_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, food_type, 1.0):
+                        log.info(f"{LogColors.OKGREEN}Successfully created 'eat_from_inventory' for {food_type}.{LogColors.ENDC}")
                         return True # Activity created
+                    else:
+                        log.warning(f"{LogColors.WARNING}Failed to create 'eat_from_inventory' for {food_type} despite being found.{LogColors.ENDC}")
+                else:
+                    log.info(f"{LogColors.OKBLUE}Food type {food_type} not found or insufficient in {citizen_username}'s inventory.{LogColors.ENDC}")
             except Exception as e_inv_food:
                 log.error(f"{LogColors.FAIL}Error checking inventory food for {citizen_username}: {e_inv_food}{LogColors.ENDC}")
         
+        log.info(f"{LogColors.OKBLUE}Finished checking inventory for food. Proceeding to check home.{LogColors.ENDC}")
         home = get_citizen_home(tables, citizen_custom_id) # Uses custom_id
         home_position = _get_building_position_coords(home) if home else None
         is_at_home = (citizen_position and home_position and 
@@ -970,22 +976,30 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                     if home_food and float(home_food[0]['fields'].get('Count', 0)) >= 1.0:
                         has_food_at_home = True
                         food_type_at_home = food_type
+                        log.info(f"{LogColors.OKGREEN}Found {food_type_at_home} at home {home_building_id} for {citizen_username}.{LogColors.ENDC}")
                         break
+                    else:
+                        log.info(f"{LogColors.OKBLUE}Food type {food_type} not found or insufficient in home {home_building_id} for {citizen_username}.{LogColors.ENDC}")
                 except Exception as e_home_food:
                     log.error(f"{LogColors.FAIL}Error checking home food for {citizen_username} in {home_building_id}: {e_home_food}{LogColors.ENDC}")
             
             if has_food_at_home and food_type_at_home:
+                log.info(f"{LogColors.OKBLUE}Attempting to create activity to eat {food_type_at_home} at home {home_building_id}. Citizen is_at_home: {is_at_home}.{LogColors.ENDC}")
                 # Determine path_data only if not at home
                 path_data_for_eat_sequence = None
                 if not is_at_home:
                     if citizen_position and home_position:
-                        log.info(f"{LogColors.OKBLUE}Home {home_building_id} has {food_type_at_home}. Citizen {citizen_username} is not at home. Calculating path to home to eat.{LogColors.ENDC}")
+                        log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is not at home. Calculating path to home {home_building_id} to eat.{LogColors.ENDC}")
                         path_data_for_eat_sequence = get_path_between_points(citizen_position, home_position)
                         if not (path_data_for_eat_sequence and path_data_for_eat_sequence.get('success')):
                             log.warning(f"{LogColors.WARNING}Path finding to home {home_building_id} failed for {citizen_username} to eat. Path data: {path_data_for_eat_sequence}{LogColors.ENDC}")
                             # path_data_for_eat_sequence will be None or invalid, try_create_eat_at_home_activity should handle this
+                        else:
+                            log.info(f"{LogColors.OKGREEN}Path to home {home_building_id} found for {citizen_username} to eat.{LogColors.ENDC}")
                     else:
                         log.warning(f"{LogColors.WARNING}Citizen {citizen_username} not at home, but citizen_position or home_position is missing. Cannot pathfind to home to eat.{LogColors.ENDC}")
+                else:
+                    log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is already at home {home_building_id}. No pathfinding needed to eat at home.{LogColors.ENDC}")
                 
                 # Call the modified try_create_eat_at_home_activity
                 # It will internally decide to create 'goto_home' or 'eat_at_home'
@@ -1002,11 +1016,16 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                     path_data_for_eat_sequence # Path data, or None if at home or path failed
                 )
                 if activity_created:
-                    log.info(f"{LogColors.OKGREEN}Activity ({activity_created['fields'].get('Type')}) created for {citizen_username} regarding eating at home.{LogColors.ENDC}")
+                    log.info(f"{LogColors.OKGREEN}Activity ({activity_created['fields'].get('Type')}) created for {citizen_username} regarding eating {food_type_at_home} at home.{LogColors.ENDC}")
                     return True # Activity (either goto_home or eat_at_home) created
                 else:
-                    log.warning(f"{LogColors.WARNING}Failed to create any activity for {citizen_username} regarding eating at home {home_building_id}.{LogColors.ENDC}")
+                    log.warning(f"{LogColors.WARNING}Failed to create 'eat_at_home' or 'goto_home' (to eat) activity for {citizen_username} at {home_building_id}.{LogColors.ENDC}")
+            else:
+                log.info(f"{LogColors.OKBLUE}No food found at home {home_building_id} for {citizen_username}.{LogColors.ENDC}")
+        else:
+            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} has no home. Cannot eat at home.{LogColors.ENDC}")
 
+        log.info(f"{LogColors.OKBLUE}Finished checking home for food. Proceeding to check taverns.{LogColors.ENDC}")
         # Option 3: Eat at tavern (if citizen has enough ducats)
         citizen_ducats = float(citizen['fields'].get('Ducats', 0))
         TAVERN_MEAL_COST_ESTIMATE = 10 # Estimate, actual cost in processor
@@ -1021,17 +1040,24 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                     if tavern_position_coords:
                         is_at_tavern = _calculate_distance_meters(citizen_position, tavern_position_coords) < 20
                         if is_at_tavern:
-                            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is at tavern {tavern_custom_id}. Creating eat_at_tavern activity.{LogColors.ENDC}")
+                            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is at tavern {tavern_custom_id}. Attempting to create 'eat_at_tavern' activity.{LogColors.ENDC}")
                             if try_create_eat_at_tavern_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, tavern_custom_id): # Pass custom_id
+                                log.info(f"{LogColors.OKGREEN}Successfully created 'eat_at_tavern' for {citizen_username} at {tavern_custom_id}.{LogColors.ENDC}")
                                 return True
+                            else:
+                                log.warning(f"{LogColors.WARNING}Failed to create 'eat_at_tavern' for {citizen_username} at {tavern_custom_id} despite being there.{LogColors.ENDC}")
                         else: # Not at tavern, create goto_tavern
                             log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} not at tavern {tavern_custom_id}. Finding path to tavern.{LogColors.ENDC}")
                             path_data = get_path_between_points(citizen_position, tavern_position_coords)
                             if path_data and path_data.get('success'):
+                                log.info(f"{LogColors.OKGREEN}Path to tavern {tavern_custom_id} found. Attempting to create 'travel_to_inn' (for tavern).{LogColors.ENDC}")
                                 # Create a generic goto_inn, assuming it can be used for taverns too
                                 # try_create_travel_to_inn_activity expects custom BuildingId for inn_id
                                 if try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, tavern_custom_id, path_data): 
+                                    log.info(f"{LogColors.OKGREEN}Successfully created 'travel_to_inn' (for tavern) for {citizen_username} to {tavern_custom_id}.{LogColors.ENDC}")
                                     return True
+                                else:
+                                    log.warning(f"{LogColors.WARNING}Failed to create 'travel_to_inn' (for tavern) for {citizen_username} to {tavern_custom_id}.{LogColors.ENDC}")
                             else:
                                 log.warning(f"{LogColors.WARNING}Path finding to tavern {tavern_custom_id} failed for {citizen_username}.{LogColors.ENDC}")
                     else:
@@ -1041,9 +1067,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             else:
                 log.warning(f"{LogColors.WARNING}Citizen {citizen_username} is hungry but has no position data to find a tavern.{LogColors.ENDC}")
         else:
-            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is hungry but has insufficient ducats ({citizen_ducats}) for a tavern meal.{LogColors.ENDC}")
+            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is hungry but has insufficient ducats ({citizen_ducats}) for a tavern meal (cost: {TAVERN_MEAL_COST_ESTIMATE}).{LogColors.ENDC}")
 
         log.warning(f"{LogColors.WARNING}Citizen {citizen_username} is hungry but no eating option was successfully created. Proceeding to other activities.{LogColors.ENDC}")
+    else: # Not hungry
+        log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is not hungry. Skipping hunger logic.{LogColors.ENDC}")
     
     # --- END HUNGER CHECK ---
 
@@ -1202,6 +1230,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
     
     # If it's nighttime, handle nighttime activities
     if is_night:
+        log.info(f"{LogColors.OKCYAN}It is nighttime. Evaluating nighttime activities for {citizen_username}.{LogColors.ENDC}")
         if home_city and home_city.strip(): # Visitor logic
             log.info(f"{LogColors.OKCYAN}Citizen {citizen_username} is a visitor from {home_city}. Finding an inn.{LogColors.ENDC}")
             closest_inn = get_closest_inn(tables, citizen_position)
@@ -1266,19 +1295,24 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 else:
                     end_time_venice = (venice_now + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
                 stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
+                log.info(f"{LogColors.OKBLUE}Resident {citizen_username} is at home {home_custom_id}. Creating stay activity.{LogColors.ENDC}")
                 try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, stay_location_type="home", end_time_utc_iso=stay_end_time_utc_iso) # Pass custom BuildingId
             else:
+                log.info(f"{LogColors.OKBLUE}Resident {citizen_username} is not at home {home_custom_id}. Finding path home.{LogColors.ENDC}")
                 path_data = get_path_between_points(citizen_position, home_position)
                 if path_data and path_data.get('success'):
+                    log.info(f"{LogColors.OKGREEN}Path to home {home_custom_id} found. Creating 'goto_home' activity.{LogColors.ENDC}")
                     try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_data) # Pass custom BuildingId
                 else:
                     log.warning(f"{LogColors.WARNING}Path finding to home failed for resident {citizen_custom_id}. Creating idle activity.{LogColors.ENDC}")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                     try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message=f"Pathfinding to home {home_custom_id} failed.")
-    else: 
+    else: # Daytime
+        log.info(f"{LogColors.OKCYAN}It is daytime. Evaluating daytime activities for {citizen_username}.{LogColors.ENDC}")
         # Daytime activities
         workplace = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
         if workplace:
+            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} has a workplace: {workplace['fields'].get('BuildingId', workplace['id'])}.{LogColors.ENDC}")
             workplace_position = _get_building_position_coords(workplace)
             workplace_custom_id = workplace['fields'].get('BuildingId', workplace['id']) 
             workplace_airtable_id = workplace['id'] # Airtable Record ID
@@ -1341,10 +1375,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                                                 return True
                                             else:
                                                 log.warning(f"{LogColors.WARNING}Missing custom BuildingId for contract buildings: From={from_building_custom_id_contract}, To={to_building_custom_id_contract}{LogColors.ENDC}")
-                log.info(f"{LogColors.OKBLUE}No production or fetching for {citizen_custom_id} at {workplace_custom_id}. Creating idle.{LogColors.ENDC}")
+                log.info(f"{LogColors.OKBLUE}No production or fetching tasks available for {citizen_custom_id} at workplace {workplace_custom_id}. Creating idle activity.{LogColors.ENDC}")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No production or fetching tasks available at workplace.")
             else: # Not at workplace, needs to go to work
+                log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is not at workplace. Evaluating travel to work.{LogColors.ENDC}")
                 # Check if citizen is at home before creating goto_work
                 home_for_departure_check = get_citizen_home(tables, citizen_custom_id) # Re-fetch or use existing `home` if available
                 is_at_home_for_work_departure = False
@@ -1371,12 +1406,13 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         is_at_home_for_work_departure, # Pass is_at_home status
                         citizen_pos_str_for_pickup # Pass citizen's current position string
                     )
+                    log.info(f"{LogColors.OKGREEN}Created 'goto_work' activity for {citizen_username} to {workplace_custom_id}.{LogColors.ENDC}")
                 else:
-                    log.warning(f"{LogColors.WARNING}Path to workplace {workplace_custom_id} failed for {citizen_custom_id}. Creating idle.{LogColors.ENDC}")
+                    log.warning(f"{LogColors.WARNING}Path to workplace {workplace_custom_id} failed for {citizen_custom_id}. Creating idle activity.{LogColors.ENDC}")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                     try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message=f"Pathfinding to workplace {workplace_custom_id} failed.")
         else: # No workplace
-            log.info(f"{LogColors.OKBLUE}No workplace for citizen {citizen_username}. Creating idle activity.{LogColors.ENDC}")
+            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} has no workplace. Creating idle activity.{LogColors.ENDC}")
             idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
             try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No workplace assigned.")
     return True
