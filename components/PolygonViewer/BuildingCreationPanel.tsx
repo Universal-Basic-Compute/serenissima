@@ -244,7 +244,7 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
           </div>
         </div>
 
-        <div className="overflow-y-auto p-6 flex-grow">
+        <div className={detailedBuildingType ? "flex-grow" : "overflow-y-auto p-6 flex-grow"}>
           {!detailedBuildingType ? (
             <>
               {availableTiers.length > 0 && buildingsByTier[activeTier] ? (
