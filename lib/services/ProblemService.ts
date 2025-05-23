@@ -521,20 +521,26 @@ export class ProblemService {
 
   private async fetchAllCitizens(username?: string): Promise<any[]> { // Using any for now for citizen structure
     const apiUrl = username
-      ? `${this.getBaseUrl()}/api/citizens?username=${encodeURIComponent(username)}`
+      ? `${this.getBaseUrl()}/api/citizens/${encodeURIComponent(username)}` // Corrected URL for single citizen
       : `${this.getBaseUrl()}/api/citizens`; // Fetches all citizens
     const response = await fetch(apiUrl, { cache: 'no-store' });
     if (!response.ok) {
       throw new Error(`Failed to fetch citizens: ${response.status} ${await response.text()}`);
     }
     const data = await response.json();
+    // For single user, API /api/citizens/[username] returns { success: true, citizen: {...} }
+    // For all users, API /api/citizens returns { success: true, citizens: [...] }
     const citizensList = username && data.citizen ? [data.citizen] : (data.citizens || []);
-
+    
+    console.log(`[ProblemService] fetchAllCitizens: API URL: ${apiUrl}`);
     console.log(`[ProblemService] fetchAllCitizens: Received ${citizensList.length} citizen records from API.`);
     if (citizensList.length > 0) {
-      console.log(`[ProblemService] fetchAllCitizens: Sample of first 2 citizen records (raw from API): ${JSON.stringify(citizensList.slice(0, 2), null, 2)}`);
+      // Log the first citizen if list is not empty, otherwise log that it's empty.
+      console.log(`[ProblemService] fetchAllCitizens: Sample of first citizen record (raw from API): ${JSON.stringify(citizensList[0], null, 2)}`);
+    } else {
+      console.log(`[ProblemService] fetchAllCitizens: No citizen records returned from API.`);
     }
-
+    
     return citizensList;
   }
 
@@ -743,18 +749,19 @@ export class ProblemService {
             }
         });
         
-        // Ensure inVenice is true
-        const inVenice = c.inVenice === true || (c as any).invenice === true; // Check both casings
-        if (!inVenice) {
-            console.log(`[ProblemService] detectHungryCitizens: Citizen ${c.Username} is not in Venice. Skipping hunger check.`);
+        // Ensure inVenice is true. The API should provide 'inVenice' as camelCase.
+        const inVeniceStatus = c.inVenice === true; 
+        if (!inVeniceStatus) {
+            // This log can be very verbose if many citizens are not in Venice.
+            // console.log(`[ProblemService] detectHungryCitizens Filter: Citizen ${c.Username || effectiveUsername} (ID: ${c.CitizenId || (c as any).citizenId || c.id}) is NOT in Venice (inVenice field value: ${c.inVenice}). Excluding.`);
             return false;
         }
-
+        // console.log(`[ProblemService] detectHungryCitizens Filter: Citizen ${c.Username || effectiveUsername} (ID: ${c.CitizenId || (c as any).citizenId || c.id}) IS in Venice (inVenice field value: ${c.inVenice}). Proceeding with hunger check.`);
         return true;
       });
 
       if (citizens.length === 0) {
-        console.log(`No citizens in Venice with valid Usernames to check for hunger (user: ${username || 'all'}). Original count: ${allFetchedCitizens.length}`);
+        console.log(`No citizens in Venice with valid Usernames to check for hunger (user: ${username || 'all'}). Original count from API: ${allFetchedCitizens.length}. Check 'inVenice' status in Airtable and API response.`);
         return {};
       }
       console.log(`[ProblemService] detectHungryCitizens: Processing ${citizens.length} citizens in Venice with valid usernames.`);
@@ -766,29 +773,37 @@ export class ProblemService {
 
       citizens.forEach(citizen => {
         // Expect 'ateAt' from camelCased fields from API
-        const ateAtTimestamp = citizen.ateAt || (citizen as any).AteAt; 
+        const ateAtTimestamp = citizen.ateAt || (citizen as any).AteAt; // Fallback for PascalCase, though API should provide camelCase
         
-        if (!ateAtTimestamp) {
-          console.warn(`[ProblemService] detectHungryCitizens: Citizen ${citizen.Username} has no 'ateAt' timestamp. Assuming hungry.`);
-          // If no timestamp, assume hungry by default or handle as per game rules (e.g., new citizens)
-          // For now, let's create a problem if it's missing, implying they've never eaten.
-        }
-
-        let isHungry = !ateAtTimestamp; // Hungry if never eaten
-
-        if (ateAtTimestamp) {
-          try {
-            const lastMealTime = new Date(ateAtTimestamp).getTime();
-            if (now - lastMealTime > twentyFourHoursInMs) {
-              isHungry = true;
+        console.log(`[ProblemService] detectHungryCitizens Loop: Processing citizen ${citizen.Username} (ID: ${citizen.CitizenId || citizen.id}). AteAt raw: '${ateAtTimestamp}' (type: ${typeof ateAtTimestamp})`);
+        
+        let isHungry;
+        if (!ateAtTimestamp) { // Covers null, undefined, empty string, 0, false
+            console.log(`[ProblemService] detectHungryCitizens: Citizen ${citizen.Username} IS hungry due to missing or falsy ateAtTimestamp ('${ateAtTimestamp}').`);
+            isHungry = true;
+        } else {
+            try {
+                const lastMealTime = new Date(ateAtTimestamp).getTime();
+                if (isNaN(lastMealTime)) {
+                    console.error(`[ProblemService] detectHungryCitizens: Parsed ateAt timestamp '${ateAtTimestamp}' for citizen ${citizen.Username} resulted in NaN. Assuming hungry.`);
+                    isHungry = true;
+                } else {
+                    if (now - lastMealTime > twentyFourHoursInMs) {
+                        isHungry = true;
+                        console.log(`[ProblemService] detectHungryCitizens: Citizen ${citizen.Username} IS hungry. Last meal: ${new Date(lastMealTime).toISOString()}, Now: ${new Date(now).toISOString()}, Difference (ms): ${now - lastMealTime}`);
+                    } else {
+                        isHungry = false;
+                        console.log(`[ProblemService] detectHungryCitizens: Citizen ${citizen.Username} is NOT hungry. Last meal: ${new Date(lastMealTime).toISOString()}, Now: ${new Date(now).toISOString()}, Difference (ms): ${now - lastMealTime}`);
+                    }
+                }
+            } catch (e) {
+                console.error(`[ProblemService] detectHungryCitizens: Error during date processing for ateAt timestamp '${ateAtTimestamp}' for citizen ${citizen.Username}. Assuming hungry. Error: ${e}`);
+                isHungry = true;
             }
-          } catch (e) {
-            console.error(`[ProblemService] detectHungryCitizens: Error parsing ateAt timestamp '${ateAtTimestamp}' for citizen ${citizen.Username}. Assuming hungry. Error: ${e}`);
-            isHungry = true; // Assume hungry if timestamp is invalid
-          }
         }
 
         if (isHungry) {
+          console.log(`[ProblemService] detectHungryCitizens: CONFIRMED HUNGRY - Citizen ${citizen.Username}. Creating problem.`);
           const problemId = `hungry_${citizen.CitizenId || citizen.id}_${Date.now()}`;
           problems[problemId] = {
             problemId,
