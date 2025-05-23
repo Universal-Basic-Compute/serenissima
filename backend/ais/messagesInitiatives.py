@@ -109,12 +109,12 @@ def get_top_relationships_for_ai(tables: Dict[str, Table], ai_username: str, lim
 # --- Fonctions d'assistance pour récupérer les données contextuelles (copiées/adaptées de answertomessages.py) ---
 
 def _escape_airtable_value(value: Any) -> str:
-    """Échappe les apostrophes pour les formules Airtable et s'assure que la valeur est une chaîne."""
-    # S'assurer que la valeur est une chaîne avant toute manipulation
+    """Échappe les apostrophes et les guillemets pour les formules Airtable et s'assure que la valeur est une chaîne."""
     if not isinstance(value, str):
-        value = str(value)
-    # Échapper les apostrophes
-    return value.replace("'", "\\'")
+        value = str(value)  # Convertit en chaîne d'abord
+    value = value.replace("'", "\\'") # Échappe les apostrophes
+    value = value.replace('"', '\\"') # Échappe les guillemets doubles
+    return value
 
 def _get_citizen_data(tables: Dict[str, Table], username: str) -> Optional[Dict]:
     try:
