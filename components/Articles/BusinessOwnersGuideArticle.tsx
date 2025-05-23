@@ -467,6 +467,59 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
               </p>
             </div>
           </div>
+
+          <h3 className="text-2xl font-serif text-amber-700 mb-4">The Importation Process: Bringing Goods to Venice</h3>
+          <p className="mb-4">
+            Importing goods is a vital aspect of Venetian commerce, connecting the city to global markets. The system in La Serenissima simulates this complex process, involving specialized merchants and logistical steps:
+          </p>
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Initiating Import Contracts</h4>
+            <p className="mb-3 text-sm">
+              Import needs are typically identified by AI-driven demand or system-level economic simulations. When a need for specific foreign goods arises for a Venetian buyer (often an AI-run business), an import contract is created. Initially, this contract will have its `Seller` field empty, indicating it's awaiting a merchant to manage the import.
+            </p>
+
+            <h4 className="text-xl font-serif text-amber-800 mt-4 mb-2">The Role of Forestieri Merchants</h4>
+            <p className="mb-3 text-sm">
+              Wealthy foreign merchants (`Forestieri` with significant capital, e.g., &gt; 1,000,000 Ducats) play a crucial role. The system selects an available AI Forestieri merchant to handle a batch of these pending import contracts. This merchant becomes the `Seller` on these contracts.
+            </p>
+
+            <h4 className="text-xl font-serif text-amber-800 mt-4 mb-2">The Merchant Galley</h4>
+            <p className="mb-3 text-sm">
+              Once a merchant is assigned:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-sm mb-3">
+              <li>A temporary `merchant_galley` building is created (or an existing one identified) at a water point near a high-activity public dock. This galley is owned and operated by the selected merchant.</li>
+              <li>Resources from the assigned import contracts (up to the galley's capacity of 1000 units) are virtually loaded into this galley, under the ownership of the merchant.</li>
+              <li>An activity is created for a citizen to "pilot" this galley to its designated dock, simulating its arrival. The galley's `ConstructionDate` is set to the activity's end time, and `IsConstructed` is initially `False`.</li>
+            </ul>
+
+            <h4 className="text-xl font-serif text-amber-800 mt-4 mb-2">Unloading the Galley</h4>
+            <p className="mb-3 text-sm">
+              When the galley's `ConstructionDate` passes, its `IsConstructed` status becomes `True`, signaling its arrival.
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-sm mb-3">
+              <li>The system then creates high-priority `fetch_from_galley` activities for available citizens.</li>
+              <li>These citizens travel to the galley, pick up specific batches of resources (corresponding to the original import contracts), and these resources become owned by the merchant while in transit by the citizen.</li>
+            </ul>
+            
+            <h4 className="text-xl font-serif text-amber-800 mt-4 mb-2">Final Delivery and Payment</h4>
+            <p className="mb-3 text-sm">
+              After a citizen has fetched resources from the galley:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text_sm mb-3">
+              <li>A `deliver_resource_batch` activity is created for that citizen to transport the goods from the galley to the original buyer's building.</li>
+              <li>Upon successful delivery to the buyer's building:
+                <ul className="list-disc pl-5 space-y-1 text-sm ml-5">
+                  <li>The buyer pays the full contract price to the merchant.</li>
+                  <li>The merchant then pays 50% of this amount to "Italia" (representing the cost of goods sourced from outside Venice).</li>
+                  <li>The merchant retains the remaining 50% as their profit (a 100% markup on their effective cost).</li>
+                </ul>
+              </li>
+            </ul>
+            <p className="text-sm">
+              This multi-step process, involving specialized merchants and simulated logistics, adds depth to the import economy and provides opportunities for players to engage as buyers or, potentially in the future, as import merchants themselves.
+            </p>
+          </div>
           
           <h3 className="text-2xl font-serif text-amber-700 mb-4">Growth & Expansion Strategies</h3>
           
