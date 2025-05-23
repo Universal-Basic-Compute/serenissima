@@ -254,7 +254,7 @@ export class InteractionService {
       waterRouteMode?: boolean;
       waterRouteStartPoint?: any;
       waterRouteIntermediatePoints?: any[];
-      orientBridgeModeActive?: boolean; // New param
+      orientBridgeModeActive?: boolean; 
     },
     setters: {
       setMousePosition: (position: { x: number, y: number }) => void;
@@ -273,8 +273,7 @@ export class InteractionService {
       screenToLatLng: (screenX: number, screenY: number, scale: number, offset: {x: number, y: number}, canvasWidth: number, canvasHeight: number) => {lat: number, lng: number};
       saveWaterPoint?: (point: {lat: number, lng: number}) => void;
       handleWaterRouteClick?: (point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => void;
-      // New callbacks for bridge orientation
-      setOrientBridgeModeActive: (active: boolean) => void; // Add this line
+      // Callbacks for bridge orientation (setOrientBridgeModeActive removed)
       setSelectedBridgeForOrientationId: (id: string | null) => void;
       setOrientingBridgeAngle: (angle: number | null) => void;
     }

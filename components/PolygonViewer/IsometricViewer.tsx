@@ -101,11 +101,14 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   const [currentHoverState, setCurrentHoverState] = useState<HoverState>(hoverStateService.getState());
   // const [fullWaterGraphData, setFullWaterGraphData] = useState<{ waterPoints: any[] } | null>(null); // State removed, will come from props
   
-  // State for bridge orientation
-  const [orientBridgeModeActive, setOrientBridgeModeActive] = useState<boolean>(false);
+  // State for bridge orientation (now part of interactionMode)
   const [selectedBridgeForOrientationId, setSelectedBridgeForOrientationId] = useState<string | null>(null);
   const [orientingBridgeAngle, setOrientingBridgeAngle] = useState<number | null>(null);
   const [isUserConsiglioDeiDieci, setIsUserConsiglioDeiDieci] = useState<boolean>(false);
+
+  // New state for unified interaction mode
+  type InteractionMode = 'normal' | 'orient_bridge' | 'place_water_point' | 'create_water_route';
+  const [interactionMode, setInteractionMode] = useState<InteractionMode>('normal');
   
   // Add handler function for closing the transport debug panel
   const handleTransportDebugPanelClose = () => {
@@ -246,16 +249,14 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
   const [pathfindingMode, setPathfindingMode] = useState<'all' | 'real'>('real'); // Default to 'real' mode
   
-  // Water point mode state
-  const [waterPointMode, setWaterPointMode] = useState<boolean>(false);
+  // Water point mode state (now part of interactionMode)
   // const [waterPoints, setWaterPoints] = useState<any[]>([]); // Removed: waterPoints will come from fullWaterGraphData prop
 
   // Refs for immersive loading text
   const loadingTitleRef = useRef<string>('');
   const loadingSubtitleRef = useRef<string>('');
   
-  // Water route mode state
-  const [waterRouteMode, setWaterRouteMode] = useState<boolean>(false);
+  // Water route mode state (now part of interactionMode)
   const [waterRouteStartPoint, setWaterRouteStartPoint] = useState<any>(null);
   const [waterRouteEndPoint, setWaterRouteEndPoint] = useState<any>(null);
   const [waterRouteIntermediatePoints, setWaterRouteIntermediatePoints] = useState<any[]>([]);
@@ -1572,11 +1573,11 @@ number => {
   // Handle mouse up for bridge orientation saving
   useEffect(() => {
     const handleMouseUpGlobal = async () => {
-      if (orientBridgeModeActive && selectedBridgeForOrientationId && orientingBridgeAngle !== null) {
+      if (interactionMode === 'orient_bridge' && selectedBridgeForOrientationId && orientingBridgeAngle !== null) {
         const bridgeIdToSave = selectedBridgeForOrientationId;
         const angleToSave = orientingBridgeAngle;
 
-        console.log(`IsometricViewer: MouseUp - Attempting to save orientation for bridge ${bridgeIdToSave}: ${angleToSave} radians`);
+        console.log(`IsometricViewer: MouseUp - Attempting to save orientation for bridge ${bridgeIdToSave}: ${angleToSave} radians (Mode: ${interactionMode})`);
 
         try {
           const response = await fetch(`/api/bridges/${bridgeIdToSave}/orient`, {
@@ -1621,7 +1622,7 @@ number => {
     return () => {
       window.removeEventListener('mouseup', handleMouseUpGlobal);
     };
-  }, [orientBridgeModeActive, selectedBridgeForOrientationId, orientingBridgeAngle, buildings]); // Added buildings to dependencies for setBuildings
+  }, [interactionMode, selectedBridgeForOrientationId, orientingBridgeAngle, buildings]); // Added buildings to dependencies for setBuildings
 
   // Pre-calculate building positions when buildings are loaded
   useEffect(() => {
@@ -2011,11 +2012,11 @@ number => {
         transportStartPoint,
         transportEndPoint,
         waterPoints: fullWaterGraphData?.waterPoints || [], // Use prop for water points
-        waterPointMode,
-        waterRouteMode,
+        waterPointMode: interactionMode === 'place_water_point',
+        waterRouteMode: interactionMode === 'create_water_route',
         waterRouteStartPoint,
         waterRouteIntermediatePoints,
-        orientBridgeModeActive // Add orientBridgeModeActive here
+        orientBridgeModeActive: interactionMode === 'orient_bridge' // Pass derived boolean
       },
       {
         setMousePosition,
@@ -2045,8 +2046,7 @@ number => {
         screenToLatLng,
         saveWaterPoint,
         handleWaterRouteClick,
-        // Add bridge orientation callbacks
-        setOrientBridgeModeActive,
+        // Add bridge orientation callbacks (setOrientBridgeModeActive is removed as mode is controlled by dropdown)
         setSelectedBridgeForOrientationId,
         setOrientingBridgeAngle
       }
@@ -2059,8 +2059,7 @@ number => {
     scale, 
     offset, 
     transportMode, 
-    waterPointMode,
-    waterRouteMode,
+    interactionMode, // Added interactionMode
     waterRouteStartPoint,
     waterRouteIntermediatePoints,
     polygonsToRender, 
@@ -2070,10 +2069,8 @@ number => {
     citizensByBuilding,
     transportStartPoint,
     transportEndPoint,
-    // waterPoints, // Removed from dependencies, using fullWaterGraphData now
-    fullWaterGraphData, // Added fullWaterGraphData as a dependency
-    handleWaterRouteClick,
-    orientBridgeModeActive // Add orientBridgeModeActive to dependencies
+    fullWaterGraphData, 
+    handleWaterRouteClick
   ]);
 
   // Helper function to check if a point is inside a polygon
@@ -3986,74 +3983,8 @@ number => {
             {transportMode ? 'Disable Transport Mode' : 'Enable Transport Mode'}
           </button>
           
-          {/* Water Point Mode Toggle - only visible in transport view for ConsiglioDeiDieci */}
-          {activeView === 'transport' && isUserConsiglioDeiDieci && (
-            <button
-              onClick={() => {
-                console.log('Toggling water point mode from:', waterPointMode);
-                setWaterPointMode(!waterPointMode);
-                if (transportMode) {
-                  // Disable transport mode when enabling water point mode
-                  setTransportMode(false);
-                }
-                if (waterRouteMode) {
-                  // Disable water route mode when enabling water point mode
-                  setWaterRouteMode(false);
-                }
-                // Load existing water points when enabling - This is now handled by fullWaterGraphData prop
-                // if (!waterPointMode) {
-                //  fetchWaterPoints();
-                // }
-              }}
-              className={`absolute bottom-52 left-20 ${
-                waterPointMode ? 'bg-blue-600' : 'bg-amber-600'
-              } text-white px-3 py-1 rounded text-sm flex items-center`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12a8 8 0 01-8 8m0 0a8 8 0 01-8-8m8 8a8 8 0 018-8m-8 0a8 8 0 00-8 8m8-8v14m0-14v14" />
-              </svg>
-              {waterPointMode ? 'Disable Water Point Mode' : 'Enable Water Point Mode'}
-            </button>
-          )}
-          
-          {/* Water Route Mode Toggle - only visible in transport view for ConsiglioDeiDieci */}
-          {isUserConsiglioDeiDieci && (
-            <button
-              onClick={() => {
-                console.log('Toggling water route mode from:', waterRouteMode);
-                setWaterRouteMode(!waterRouteMode);
-                if (!waterRouteMode) {
-                  // Reset water route state when enabling
-                  setWaterRouteStartPoint(null);
-                  setWaterRouteEndPoint(null);
-                  setWaterRouteIntermediatePoints([]);
-                  setWaterRoutePath([]);
-                }
-                // Disable other modes when enabling water route mode
-                if (transportMode) {
-                  setTransportMode(false);
-                }
-                if (waterPointMode) {
-                  setWaterPointMode(false);
-                }
-                // Load existing water points when enabling - This is now handled by fullWaterGraphData prop
-                // if (!waterRouteMode) {
-                //   fetchWaterPoints(); 
-                // }
-              }}
-              className={`absolute bottom-64 left-20 ${
-                waterRouteMode ? 'bg-blue-600' : 'bg-amber-600'
-              } text-white px-3 py-1 rounded text-sm flex items-center`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
-              {waterRouteMode ? 'Finish Water Route' : 'Create Water Route'}
-            </button>
-          )}
-          
           {/* Water Route Cancel Button - only visible when creating a route for ConsiglioDeiDieci */}
-          {activeView === 'transport' && waterRouteMode && waterRouteStartPoint && isUserConsiglioDeiDieci && (
+          {activeView === 'transport' && interactionMode === 'create_water_route' && waterRouteStartPoint && isUserConsiglioDeiDieci && (
             <button
               onClick={() => {
                 console.log('Canceling water route creation');
@@ -4116,6 +4047,30 @@ number => {
         </button>
       )}
       
+      {/* Interaction Mode Dropdown - Visible for ConsiglioDeiDieci */}
+      {isUserConsiglioDeiDieci && (activeView === 'buildings' || activeView === 'transport') && (
+        <div className="absolute bottom-52 left-20 bg-black/70 text-white p-2 rounded-lg shadow-lg flex items-center space-x-2">
+          <label htmlFor="interaction-mode-select" className="text-sm font-serif">Mode:</label>
+          <select
+            id="interaction-mode-select"
+            value={interactionMode}
+            onChange={handleInteractionModeChange}
+            className="bg-gray-800 text-white p-1 rounded text-sm border border-amber-500 focus:ring-amber-400 focus:border-amber-400"
+          >
+            <option value="normal">Normal</option>
+            {activeView === 'buildings' && (
+              <option value="orient_bridge">Orient Bridge</option>
+            )}
+            {activeView === 'transport' && (
+              <>
+                <option value="place_water_point">Place Water Point</option>
+                <option value="create_water_route">Create Water Route</option>
+              </>
+            )}
+          </select>
+        </div>
+      )}
+
       {/* Transport Debug Panel - Only render when showTransportDebugPanel is true */}
       {showTransportDebugPanel && (
         <TransportDebugPanel 
