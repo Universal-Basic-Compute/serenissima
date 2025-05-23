@@ -1152,27 +1152,47 @@ export class InteractionService {
       }
 
       // Only update state if we're actually dragging for map panning
-      if (this.isDraggingRef) {
+      if (this.isDraggingRef) { // For map panning
         this.state.isDragging = false;
         this.isDraggingRef = false;
-        
-        // Emit event
         eventBus.emit(EventTypes.INTERACTION_DRAG_END, null);
+      }
+    };
+
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      if (!data.orientBridgeModeActive) return;
+
+      const clickedBuilding = this.findClickedBuilding({ x: mouseX, y: mouseY }, data.buildings, scale, offset, canvas.width, canvas.height);
+      if (clickedBuilding && (clickedBuilding.type?.toLowerCase().includes('bridge') || clickedBuilding.category?.toLowerCase() === 'bridge')) {
+        setters.setSelectedBridgeForOrientationId(clickedBuilding.id);
+        setters.setOrientingBridgeAngle(clickedBuilding.orientation || clickedBuilding.rotation || 0);
+        console.log(`InteractionService: Right-click selected bridge ${clickedBuilding.id} for orientation.`);
+      } else {
+        // If right-click is not on a bridge, clear any bridge selection for orientation
+        setters.setSelectedBridgeForOrientationId(null);
+        setters.setOrientingBridgeAngle(null);
       }
     };
     
     // Attach event listeners
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('click', handleClick);
+    canvas.addEventListener('contextmenu', handleContextMenu); // New listener
     canvas.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mouseup', handleMouseUp); // Changed to window for global mouseup
     
     // Return a cleanup function
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
+      canvas.removeEventListener('contextmenu', handleContextMenu); // Cleanup
       canvas.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mouseup', handleMouseUp); // Cleanup
       
       // Clean up the throttled/debounced functions if they have cancel methods
       if (typeof handleMouseMove.cancel === 'function') {
