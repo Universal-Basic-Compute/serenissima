@@ -62,9 +62,20 @@ from backend.engine.utils.activity_helpers import (
     _has_recent_failed_activity_for_contract,
     _get_building_position_coords,
     _calculate_distance_meters,
-    is_nighttime as is_nighttime_helper, # Rename to avoid conflict with local var
-    is_shopping_time as is_shopping_time_helper, # Rename
-    get_path_between_points as get_path_between_points_helper # Rename
+    is_nighttime as is_nighttime_helper, 
+    is_shopping_time as is_shopping_time_helper, 
+    get_path_between_points as get_path_between_points_helper,
+    get_citizen_current_load,
+    get_closest_inn,
+    get_citizen_workplace,
+    get_citizen_home,
+    get_building_type_info,
+    get_building_resources,
+    can_produce_output,
+    find_path_between_buildings,
+    get_citizen_contracts,
+    get_idle_citizens,
+    _fetch_and_assign_random_starting_position
 )
 
 # Set up logging
@@ -469,119 +480,13 @@ def get_idle_citizens(tables) -> List[Dict]:
 # Removed create_resource_fetching_activity and create_production_activity as they are imported.
 
 # _escape_airtable_value, _has_recent_failed_activity_for_contract, 
-# _get_building_position_coords, _calculate_distance_meters are now in activity_helpers.py
+# _get_building_position_coords, _calculate_distance_meters,
+# get_citizen_current_load, get_closest_inn, get_citizen_workplace, get_citizen_home,
+# get_building_type_info, get_building_resources, can_produce_output,
+# find_path_between_buildings, get_citizen_contracts, get_idle_citizens,
+# _fetch_and_assign_random_starting_position, is_nighttime_helper, is_shopping_time_helper,
+# get_path_between_points_helper are now in activity_helpers.py
 
-def get_citizen_current_load(tables: Dict[str, Table], citizen_username: str) -> float:
-    """Calculates the total count of resources currently carried by a citizen."""
-    formula = f"AND({{Asset}}='{_escape_airtable_value(citizen_username)}', {{AssetType}}='citizen')"
-    current_load = 0.0
-    try:
-        resources_carried = tables['resources'].all(formula=formula)
-        for resource in resources_carried:
-            current_load += float(resource['fields'].get('Count', 0))
-        log.debug(f"{LogColors.OKBLUE}Citizen {citizen_username} current load: {current_load}{LogColors.ENDC}")
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error calculating current load for citizen {citizen_username}: {e}{LogColors.ENDC}")
-    return current_load
-
-# is_nighttime, is_shopping_time, get_path_between_points are now in activity_helpers.py
-# We will call them as is_nighttime_helper, is_shopping_time_helper, get_path_between_points_helper
-
-def get_closest_inn(tables: Dict[str, Table], citizen_position: Dict[str, float]) -> Optional[Dict]:
-    """Finds the closest building of type 'inn' to the citizen's position."""
-    log.info(f"{LogColors.OKBLUE}Searching for the closest inn to position: {citizen_position}{LogColors.ENDC}")
-    try:
-        inns = tables['buildings'].all(formula="{Type}='inn'")
-        if not inns:
-            log.info(f"{LogColors.OKBLUE}No inns found in the database.{LogColors.ENDC}")
-            return None
-
-        closest_inn = None
-        min_distance = float('inf')
-
-        for inn_record in inns:
-            inn_position = _get_building_position_coords(inn_record)
-            if inn_position:
-                distance = _calculate_distance_meters(citizen_position, inn_position)
-                if distance < min_distance:
-                    min_distance = distance
-                    closest_inn = inn_record
-            else:
-                log.warning(f"{LogColors.WARNING}Inn {inn_record.get('id')} has no valid position data.{LogColors.ENDC}")
-        
-        if closest_inn:
-            inn_id_log = closest_inn['fields'].get('BuildingId', closest_inn['id'])
-            log.info(f"{LogColors.OKGREEN}Closest inn found: {inn_id_log} at distance {min_distance:.2f}m.{LogColors.ENDC}")
-        else:
-            log.info(f"{LogColors.OKBLUE}No inns with valid positions found.{LogColors.ENDC}")
-        return closest_inn
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error finding closest inn: {e}{LogColors.ENDC}")
-        return None
-
-def get_citizen_workplace(tables, citizen_id: str, citizen_username: str) -> Optional[Dict]:
-    """Find the workplace building for a citizen."""
-    log.info(f"{LogColors.OKBLUE}Finding workplace for citizen {citizen_id} (Username: {citizen_username}){LogColors.ENDC}")
-    
-    try:
-        # Get buildings where this citizen is the occupant and the category is business
-        formula = f"AND({{Occupant}}='{_escape_airtable_value(citizen_username)}', {{Category}}='business')"
-        
-        workplaces = tables['buildings'].all(formula=formula)
-        
-        if workplaces:
-            # Check if the workplace has a BuildingId
-            building_id = workplaces[0]['fields'].get('BuildingId')
-            if not building_id:
-                log.warning(f"{LogColors.WARNING}Workplace found for citizen {citizen_id} but missing BuildingId: {workplaces[0]['id']}{LogColors.ENDC}")
-            else:
-                log.info(f"{LogColors.OKGREEN}Found workplace for citizen {citizen_id}: {building_id}{LogColors.ENDC}")
-            return workplaces[0]
-        else:
-            log.info(f"{LogColors.OKBLUE}No workplace found for citizen {citizen_id}{LogColors.ENDC}")
-            return None
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error finding workplace for citizen {citizen_id}: {e}{LogColors.ENDC}")
-        return None
-
-def get_citizen_home(tables, citizen_id: str) -> Optional[Dict]:
-    """Find the home building for a citizen."""
-    log.info(f"{LogColors.OKBLUE}Finding home for citizen {citizen_id}{LogColors.ENDC}")
-    
-    try:
-        
-        # Get buildings where this citizen is the occupant and the type is a housing type
-        housing_types = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage']
-        type_conditions = [f"{{Type}}='{housing_type}'" for housing_type in housing_types]
-        formula = f"AND({{Occupant}}='{_escape_airtable_value(citizen_id)}', OR({', '.join(type_conditions)}))"
-        
-        homes = tables['buildings'].all(formula=formula)
-        
-        if homes:
-            # Check if the home has a BuildingId
-            building_id = homes[0]['fields'].get('BuildingId')
-            if not building_id:
-                log.warning(f"{LogColors.WARNING}Home found for citizen {citizen_id} but missing BuildingId: {homes[0]['id']}{LogColors.ENDC}")
-            else:
-                log.info(f"{LogColors.OKGREEN}Found home for citizen {citizen_id}: {building_id}{LogColors.ENDC}")
-            return homes[0]
-        else:
-            log.warning(f"{LogColors.WARNING}No home found for citizen {citizen_id}{LogColors.ENDC}")
-            return None
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error finding home for citizen {citizen_id}: {e}{LogColors.ENDC}")
-        return None
-
-def is_nighttime() -> bool:
-    """Check if it's currently nighttime in Venice."""
-    now = datetime.datetime.now(VENICE_TIMEZONE)
-    hour = now.hour
-    
-    return hour >= NIGHT_START_HOUR or hour < NIGHT_END_HOUR
-
-def is_shopping_time() -> bool:
-    """Check if it's currently shopping time in Venice (5 PM to 8 PM)."""
-    now_venice = datetime.datetime.now(VENICE_TIMEZONE)
 # --- Removed create_stay_activity ---
 # --- Removed create_goto_work_activity ---
 # --- Removed create_goto_home_activity ---

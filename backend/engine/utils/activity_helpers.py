@@ -160,3 +160,302 @@ def get_path_between_points(start_position: Dict, end_position: Dict, transport_
     except Exception as e:
         log.error(f"{LogColors.FAIL}Error calling transport API: {e}{LogColors.ENDC}")
         return None
+
+def get_citizen_current_load(tables: Dict[str, Table], citizen_username: str) -> float:
+    """Calculates the total count of resources currently carried by a citizen."""
+    formula = f"AND({{Asset}}='{_escape_airtable_value(citizen_username)}', {{AssetType}}='citizen')"
+    current_load = 0.0
+    try:
+        resources_carried = tables['resources'].all(formula=formula)
+        for resource in resources_carried:
+            current_load += float(resource['fields'].get('Count', 0))
+        log.debug(f"{LogColors.OKBLUE}Citizen {citizen_username} current load: {current_load}{LogColors.ENDC}")
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error calculating current load for citizen {citizen_username}: {e}{LogColors.ENDC}")
+    return current_load
+
+def get_closest_inn(tables: Dict[str, Table], citizen_position: Dict[str, float]) -> Optional[Dict]:
+    """Finds the closest building of type 'inn' to the citizen's position."""
+    log.info(f"{LogColors.OKBLUE}Searching for the closest inn to position: {citizen_position}{LogColors.ENDC}")
+    try:
+        inns = tables['buildings'].all(formula="{Type}='inn'")
+        if not inns:
+            log.info(f"{LogColors.OKBLUE}No inns found in the database.{LogColors.ENDC}")
+            return None
+
+        closest_inn = None
+        min_distance = float('inf')
+
+        for inn_record in inns:
+            inn_position = _get_building_position_coords(inn_record)
+            if inn_position:
+                distance = _calculate_distance_meters(citizen_position, inn_position)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_inn = inn_record
+            else:
+                log.warning(f"{LogColors.WARNING}Inn {inn_record.get('id')} has no valid position data.{LogColors.ENDC}")
+        
+        if closest_inn:
+            inn_id_log = closest_inn['fields'].get('BuildingId', closest_inn['id'])
+            log.info(f"{LogColors.OKGREEN}Closest inn found: {inn_id_log} at distance {min_distance:.2f}m.{LogColors.ENDC}")
+        else:
+            log.info(f"{LogColors.OKBLUE}No inns with valid positions found.{LogColors.ENDC}")
+        return closest_inn
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error finding closest inn: {e}{LogColors.ENDC}")
+        return None
+
+def get_citizen_workplace(tables: Dict[str, Table], citizen_custom_id: str, citizen_username: str) -> Optional[Dict]:
+    """Find the workplace building for a citizen."""
+    log.info(f"{LogColors.OKBLUE}Finding workplace for citizen {citizen_custom_id} (Username: {citizen_username}){LogColors.ENDC}")
+    
+    try:
+        # Get buildings where this citizen is the occupant and the category is business
+        formula = f"AND({{Occupant}}='{_escape_airtable_value(citizen_username)}', {{Category}}='business')"
+        
+        workplaces = tables['buildings'].all(formula=formula)
+        
+        if workplaces:
+            # Check if the workplace has a BuildingId
+            building_id = workplaces[0]['fields'].get('BuildingId')
+            if not building_id:
+                log.warning(f"{LogColors.WARNING}Workplace found for citizen {citizen_custom_id} but missing BuildingId: {workplaces[0]['id']}{LogColors.ENDC}")
+            else:
+                log.info(f"{LogColors.OKGREEN}Found workplace for citizen {citizen_custom_id}: {building_id}{LogColors.ENDC}")
+            return workplaces[0]
+        else:
+            log.info(f"{LogColors.OKBLUE}No workplace found for citizen {citizen_custom_id}{LogColors.ENDC}")
+            return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error finding workplace for citizen {citizen_custom_id}: {e}{LogColors.ENDC}")
+        return None
+
+def get_citizen_home(tables: Dict[str, Table], citizen_custom_id: str) -> Optional[Dict]:
+    """Find the home building for a citizen."""
+    log.info(f"{LogColors.OKBLUE}Finding home for citizen {citizen_custom_id}{LogColors.ENDC}")
+    
+    try:
+        
+        # Get buildings where this citizen is the occupant and the type is a housing type
+        housing_types = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage']
+        type_conditions = [f"{{Type}}='{housing_type}'" for housing_type in housing_types]
+        formula = f"AND({{Occupant}}='{_escape_airtable_value(citizen_custom_id)}', OR({', '.join(type_conditions)}))"
+        
+        homes = tables['buildings'].all(formula=formula)
+        
+        if homes:
+            # Check if the home has a BuildingId
+            building_id = homes[0]['fields'].get('BuildingId')
+            if not building_id:
+                log.warning(f"{LogColors.WARNING}Home found for citizen {citizen_custom_id} but missing BuildingId: {homes[0]['id']}{LogColors.ENDC}")
+            else:
+                log.info(f"{LogColors.OKGREEN}Found home for citizen {citizen_custom_id}: {building_id}{LogColors.ENDC}")
+            return homes[0]
+        else:
+            log.warning(f"{LogColors.WARNING}No home found for citizen {citizen_custom_id}{LogColors.ENDC}")
+            return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error finding home for citizen {citizen_custom_id}: {e}{LogColors.ENDC}")
+        return None
+
+def get_building_type_info(building_type: str, api_base_url: str) -> Optional[Dict]:
+    """Get building type information from the API."""
+    try:
+        url = f"{api_base_url}/api/building-types"
+        log.info(f"{LogColors.OKBLUE}Fetching building type info for {building_type} from API: {url}{LogColors.ENDC}")
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success") and "buildingTypes" in data:
+                building_types = data["buildingTypes"]
+                for bt in building_types:
+                    if bt.get("type") == building_type:
+                        log.info(f"{LogColors.OKGREEN}Found building type info for {building_type}{LogColors.ENDC}")
+                        return bt
+                log.warning(f"{LogColors.WARNING}Building type {building_type} not found in API response{LogColors.ENDC}")
+                return None
+            else:
+                log.error(f"{LogColors.FAIL}Unexpected API response format: {data}{LogColors.ENDC}")
+                return None
+        else:
+            log.error(f"{LogColors.FAIL}Error fetching building types from API: {response.status_code} - {response.text}{LogColors.ENDC}")
+            return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Exception fetching building type info: {str(e)}{LogColors.ENDC}")
+        return None
+
+def get_building_resources(tables: Dict[str, Table], building_id: str) -> Dict[str, float]:
+    """Get all resources in a building, returned as a dictionary of resource_type -> count."""
+    try:
+        escaped_building_id = _escape_airtable_value(building_id)
+        formula = f"AND({{Asset}}='{escaped_building_id}', {{AssetType}}='building')"
+        resources = tables['resources'].all(formula=formula)
+        
+        resource_dict = {}
+        for resource in resources:
+            resource_type = resource['fields'].get('Type', '')
+            count = float(resource['fields'].get('Count', 0) or 0)
+            resource_dict[resource_type] = count
+        
+        log.info(f"{LogColors.OKGREEN}Found {len(resources)} resources in building {building_id}{LogColors.ENDC}")
+        return resource_dict
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error getting resources for building {building_id}: {e}{LogColors.ENDC}")
+        return {}
+
+def can_produce_output(resources: Dict[str, float], recipe: Dict) -> bool:
+    """Check if there are enough resources to produce the output according to the recipe."""
+    if not recipe or 'inputs' not in recipe:
+        return False
+    
+    for input_type, input_amount in recipe['inputs'].items():
+        if input_type not in resources or resources[input_type] < input_amount:
+            return False
+    return True
+
+def find_path_between_buildings(from_building: Dict, to_building: Dict, api_base_url: str) -> Optional[Dict]:
+    """Find a path between two buildings using the transport API."""
+    try:
+        from_position = _get_building_position_coords(from_building)
+        to_position = _get_building_position_coords(to_building)
+        
+        if not from_position or not to_position:
+            log.warning(f"{LogColors.WARNING}Missing position data for buildings in find_path_between_buildings{LogColors.ENDC}")
+            return None
+        
+        url = f"{api_base_url}/api/transport"
+        log.info(f"{LogColors.OKBLUE}Finding path between buildings using API: {url}{LogColors.ENDC}")
+        
+        response = requests.post(
+            url,
+            json={
+                "startPoint": from_position,
+                "endPoint": to_position,
+                "startDate": datetime.datetime.now(pytz.UTC).isoformat()
+            }
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success") and "path" in data:
+                log.info(f"{LogColors.OKGREEN}Found path between buildings with {len(data['path'])} points{LogColors.ENDC}")
+                return data
+            else:
+                log.warning(f"{LogColors.WARNING}No path found between buildings: {data.get('error', 'Unknown error')}{LogColors.ENDC}")
+                return None
+        else:
+            log.error(f"{LogColors.FAIL}Error finding path between buildings: {response.status_code} - {response.text}{LogColors.ENDC}")
+            return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Exception finding path between buildings: {str(e)}{LogColors.ENDC}")
+        return None
+
+def get_citizen_contracts(tables: Dict[str, Table], citizen_id: str) -> List[Dict]:
+    """Get all active contracts where the citizen is the buyer, sorted by priority."""
+    log.info(f"{LogColors.OKBLUE}Fetching contracts for citizen {citizen_id}{LogColors.ENDC}")
+    
+    try:
+        now_venice_contracts = datetime.datetime.now(VENICE_TIMEZONE)
+        now_iso_venice = now_venice_contracts.isoformat()
+        
+        formula = f"AND({{Buyer}}='{_escape_airtable_value(citizen_id)}', {{Type}}='recurrent', {{CreatedAt}}<='{now_iso_venice}', {{EndAt}}>='{now_iso_venice}')"
+        contracts = tables['contracts'].all(formula=formula)
+        
+        contracts.sort(key=lambda x: int(x['fields'].get('Priority', 0) or 0), reverse=True)
+        
+        log.info(f"{LogColors.OKGREEN}Found {len(contracts)} active contracts for citizen {citizen_id}{LogColors.ENDC}")
+        return contracts
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error getting contracts for citizen {citizen_id}: {e}{LogColors.ENDC}")
+        return []
+
+def get_idle_citizens(tables: Dict[str, Table]) -> List[Dict]:
+    """Fetch all citizens who are currently idle (no active activities)."""
+    log.info(f"{LogColors.OKBLUE}Fetching idle citizens...{LogColors.ENDC}")
+    
+    try:
+        all_citizens = tables['citizens'].all()
+        log.info(f"{LogColors.OKBLUE}Found {len(all_citizens)} total citizens{LogColors.ENDC}")
+        
+        now_iso_utc = datetime.datetime.now(pytz.UTC).isoformat()
+        active_activities_formula = f"AND({{StartDate}} <= '{now_iso_utc}', {{EndDate}} >= '{now_iso_utc}')"
+        active_activities = tables['activities'].all(formula=active_activities_formula)
+        
+        busy_citizen_usernames = set()
+        for activity in active_activities:
+            username = activity['fields'].get('Citizen') 
+            if username:
+                busy_citizen_usernames.add(username)
+        
+        idle_citizens = []
+        for citizen_record in all_citizens:
+            username = citizen_record['fields'].get('Username')
+            if username and username not in busy_citizen_usernames:
+                idle_citizens.append(citizen_record)
+        
+        log.info(f"{LogColors.OKGREEN}Found {len(idle_citizens)} idle citizens (after checking Usernames against active activities){LogColors.ENDC}")
+        return idle_citizens
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error fetching idle citizens: {e}{LogColors.ENDC}")
+        return []
+
+def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen_record: Dict, api_base_url: str) -> Optional[Dict[str, float]]:
+    """
+    Fetches polygon data, selects a random buildingPoint, assigns it to the citizen,
+    and updates their record in Airtable.
+    Returns the new position {lat, lng} or None.
+    """
+    import random # Ensure random is imported here
+    citizen_custom_id = citizen_record['fields'].get('CitizenId', citizen_record['id'])
+    log.info(f"{LogColors.OKBLUE}Attempting to fetch random building point for citizen {citizen_custom_id}.{LogColors.ENDC}")
+
+    try:
+        polygons_url = f"{api_base_url}/api/get-polygons"
+        response = requests.get(polygons_url)
+        response.raise_for_status()
+        data = response.json()
+
+        if not data.get("success") or not data.get("polygons"):
+            log.error(f"{LogColors.FAIL}Failed to fetch or parse polygons data from {polygons_url}. Response: {data}{LogColors.ENDC}")
+            return None
+
+        all_building_points = []
+        for polygon in data["polygons"]:
+            if "buildingPoints" in polygon and isinstance(polygon["buildingPoints"], list):
+                all_building_points.extend(polygon["buildingPoints"])
+        
+        if not all_building_points:
+            log.warning(f"{LogColors.WARNING}No buildingPoints found in polygons data from {polygons_url}.{LogColors.ENDC}")
+            return None
+
+        random_point = random.choice(all_building_points)
+        
+        if "lat" in random_point and "lng" in random_point:
+            new_position_coords = {
+                "lat": float(random_point["lat"]),
+                "lng": float(random_point["lng"])
+            }
+            new_position_str = json.dumps(new_position_coords)
+
+            try:
+                tables['citizens'].update(citizen_record['id'], {'Position': new_position_str})
+                log.info(f"{LogColors.OKGREEN}Successfully updated citizen {citizen_custom_id} (Airtable ID: {citizen_record['id']}) with new random position: {new_position_str}{LogColors.ENDC}")
+                return new_position_coords
+            except Exception as e_update:
+                log.error(f"{LogColors.FAIL}Failed to update citizen {citizen_custom_id} position in Airtable: {e_update}{LogColors.ENDC}")
+                return None
+        else:
+            log.warning(f"{LogColors.WARNING}Selected random building point is missing lat/lng: {random_point}{LogColors.ENDC}")
+            return None
+
+    except requests.exceptions.RequestException as e_req:
+        log.error(f"{LogColors.FAIL}Request error fetching polygons for random position: {e_req}{LogColors.ENDC}")
+        return None
+    except json.JSONDecodeError as e_json:
+        log.error(f"{LogColors.FAIL}JSON decode error fetching polygons for random position: {e_json}{LogColors.ENDC}")
+        return None
+    except Exception as e_general:
+        log.error(f"{LogColors.FAIL}General error fetching or assigning random position for {citizen_custom_id}: {e_general}{LogColors.ENDC}")
+        return None
