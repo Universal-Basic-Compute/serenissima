@@ -71,7 +71,8 @@ try:
         process_goto_work as process_goto_work_fn,
         process_production as process_production_fn,
         process_fetch_resource as process_fetch_resource_fn,
-        process_eat as process_eat_fn 
+        process_eat as process_eat_fn,
+        process_fetch_from_galley as process_fetch_from_galley_fn # Import new processor
     )
 except ImportError:
     # Fallback if the script is run in a context where backend.engine is not directly importable
@@ -262,6 +263,7 @@ def main(dry_run: bool = False):
         "eat_from_inventory": process_eat_fn, # Dispatch to generic eat processor
         "eat_at_home": process_eat_fn,        # Dispatch to generic eat processor
         "eat_at_tavern": process_eat_fn,      # Dispatch to generic eat processor
+        "fetch_from_galley": process_fetch_from_galley_fn, # Register new processor
         # Add other activity type processors here as they are created
     }
 
@@ -385,9 +387,9 @@ def main(dry_run: bool = False):
 
 
             # Update citizen's position and UpdatedAt if ToBuilding is present,
-            # UNLESS the activity type handles its own position update (e.g., fetch_resource)
+            # UNLESS the activity type handles its own position update (e.g., fetch_resource, fetch_from_galley)
             # or if the activity doesn't involve changing location (e.g. eat_from_inventory, eat_at_home, eat_at_tavern if already there)
-            no_pos_update_types = ['fetch_resource', 'eat_from_inventory', 'eat_at_home', 'eat_at_tavern', 'production', 'rest', 'idle']
+            no_pos_update_types = ['fetch_resource', 'fetch_from_galley', 'eat_from_inventory', 'eat_at_home', 'eat_at_tavern', 'production', 'rest', 'idle']
             if activity_type not in no_pos_update_types:
                 to_building_airtable_id = activity_record['fields'].get('ToBuilding') # This is Airtable Record ID
                 citizen_username_for_pos = activity_record['fields'].get('Citizen')

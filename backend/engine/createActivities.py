@@ -39,7 +39,8 @@ from backend.engine.activity_creators import (
     try_create_resource_fetching_activity,
     try_create_eat_from_inventory_activity,
     try_create_eat_at_home_activity,
-    try_create_eat_at_tavern_activity
+    try_create_eat_at_tavern_activity,
+    try_create_fetch_from_galley_activity # Import new creator
 )
 from dotenv import load_dotenv
 
@@ -1145,15 +1146,158 @@ def create_activities(dry_run: bool = False):
     
     # Process each idle citizen
     success_count = 0
-    for citizen in idle_citizens:
+    citizens_still_idle_after_main_logic = []
+
+    for citizen_record in idle_citizens:
         if dry_run:
-            log.info(f"[DRY RUN] Would create activity for citizen {citizen['id']}")
+            log.info(f"[DRY RUN] Would create activity for citizen {citizen_record['id']}")
             success_count += 1
         else:
-            if process_citizen_activity(tables, citizen, night_time):
+            activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time)
+            if activity_created_for_citizen:
                 success_count += 1
+            else:
+                # If no regular activity was created, citizen might be available for galley unloading
+                citizens_still_idle_after_main_logic.append(citizen_record)
     
-    log.info(f"Activity creation process complete. Created activities for {success_count} out of {len(idle_citizens)} idle citizens")
+    log.info(f"Main activity creation loop complete. Created activities for {success_count} citizens.")
+
+    # Now, process galley unloading with remaining idle citizens
+    if not dry_run and citizens_still_idle_after_main_logic:
+        log.info(f"Attempting to assign {len(citizens_still_idle_after_main_logic)} remaining idle citizens to galley unloading tasks.")
+        galley_activities_created = process_galley_unloading_activities(tables, citizens_still_idle_after_main_logic, now_utc_dt)
+        success_count += galley_activities_created # Add to total count of activities created
+    elif dry_run and idle_citizens: # If dry run, simulate checking for galley tasks
+        log.info(f"[DRY RUN] Would check for merchant galleys with pending deliveries and assign idle citizens.")
+
+
+    log.info(f"Activity creation process complete. Total activities created or simulated: {success_count} for {len(idle_citizens)} initially idle citizens.")
+
+
+def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens: List[Dict], now_utc_dt: datetime.datetime) -> int:
+    """
+    Identifies merchant galleys with pending deliveries and creates 'fetch_from_galley'
+    activities for idle citizens to unload them.
+    Returns the number of 'fetch_from_galley' activities created.
+    """
+    activities_created_count = 0
+    if not idle_citizens:
+        log.info("No idle citizens available to process galley unloading.")
+        return 0
+
+    try:
+        galleys_with_pending = tables['buildings'].all(formula="AND({Type}='merchant_galley', {PendingDeliveriesData}!='')")
+        log.info(f"Found {len(galleys_with_pending)} merchant galleys with PendingDeliveriesData.")
+
+        available_citizens_pool = list(idle_citizens) # Make a mutable copy
+
+        for galley_record in galleys_with_pending:
+            if not available_citizens_pool:
+                log.info("No more idle citizens available for further galley unloading tasks.")
+                break
+
+            galley_airtable_id = galley_record['id']
+            galley_custom_id = galley_record['fields'].get('BuildingId')
+            galley_position_str = galley_record['fields'].get('Position')
+            pending_data_str = galley_record['fields'].get('PendingDeliveriesData', '[]')
+
+            if not galley_custom_id or not galley_position_str:
+                log.warning(f"Galley {galley_airtable_id} missing BuildingId or Position. Skipping.")
+                continue
+            
+            try:
+                galley_position = json.loads(galley_position_str)
+                pending_deliveries = json.loads(pending_data_str)
+            except json.JSONDecodeError:
+                log.error(f"Could not parse Position or PendingDeliveriesData for galley {galley_custom_id}. Skipping.")
+                continue
+
+            if not pending_deliveries:
+                # log.info(f"Galley {galley_custom_id} has no pending deliveries in its data. Skipping.")
+                continue
+            
+            log.info(f"Processing galley {galley_custom_id} with {len(pending_deliveries)} items in PendingDeliveriesData.")
+
+            for item_to_fetch in pending_deliveries:
+                if not available_citizens_pool:
+                    log.info(f"No more idle citizens for items in galley {galley_custom_id}.")
+                    break # Break from items loop for this galley
+
+                original_contract_id = item_to_fetch.get('contract_id')
+                resource_type = item_to_fetch.get('resource_type')
+                amount = float(item_to_fetch.get('amount', 0))
+
+                if not all([original_contract_id, resource_type]) or amount <= 0:
+                    log.warning(f"Invalid item in PendingDeliveriesData for galley {galley_custom_id}: {item_to_fetch}")
+                    continue
+
+                # Check if an active fetch_from_galley activity already exists for this specific item
+                # This is a simplified check; a more robust check might involve a unique hash of the item.
+                activity_exists_formula = (f"AND({{Type}}='fetch_from_galley', "
+                                           f"{{FromBuilding}}='{galley_airtable_id}', "
+                                           f"{{OriginalContractId}}='{_escape_airtable_value(original_contract_id)}', "
+                                           f"{{ResourceId}}='{_escape_airtable_value(resource_type)}', "
+                                           f"{{Status}}!='processed', {{Status}}!='failed')")
+                try:
+                    existing_activities = tables['activities'].all(formula=activity_exists_formula, max_records=1)
+                    if existing_activities:
+                        log.info(f"Active 'fetch_from_galley' already exists for contract {original_contract_id}, resource {resource_type} from galley {galley_custom_id}. Skipping.")
+                        continue
+                except Exception as e_check_existing:
+                    log.error(f"Error checking for existing fetch_from_galley activities: {e_check_existing}")
+                    # Proceed with caution or skip
+
+                citizen_for_task = available_citizens_pool.pop(0) # Assign an idle citizen
+                
+                citizen_custom_id = citizen_for_task['fields'].get('CitizenId')
+                citizen_username = citizen_for_task['fields'].get('Username', citizen_custom_id)
+                citizen_airtable_id = citizen_for_task['id']
+                
+                citizen_current_pos_str = citizen_for_task['fields'].get('Position')
+                citizen_current_pos = None
+                if citizen_current_pos_str:
+                    try:
+                        citizen_current_pos = json.loads(citizen_current_pos_str)
+                    except json.JSONDecodeError:
+                        log.warning(f"Could not parse current position for citizen {citizen_username}. Cannot pathfind to galley.")
+                        available_citizens_pool.append(citizen_for_task) # Put back if cannot pathfind
+                        continue 
+                
+                if not citizen_current_pos: # If still no position
+                    log.warning(f"Citizen {citizen_username} has no current position. Cannot pathfind to galley.")
+                    available_citizens_pool.append(citizen_for_task) # Put back
+                    continue
+
+                path_to_galley = get_path_between_points(citizen_current_pos, galley_position)
+                if path_to_galley and path_to_galley.get('success'):
+                    activity_created = try_create_fetch_from_galley_activity(
+                        tables,
+                        citizen_airtable_id,
+                        citizen_custom_id,
+                        citizen_username,
+                        galley_airtable_id,
+                        galley_custom_id,
+                        original_contract_id,
+                        resource_type,
+                        amount,
+                        path_to_galley
+                    )
+                    if activity_created:
+                        activities_created_count += 1
+                        log.info(f"Created 'fetch_from_galley' for {citizen_username} to galley {galley_custom_id} for {amount} of {resource_type}.")
+                        # The processor for fetch_from_galley should update PendingDeliveriesData on the galley.
+                    else:
+                        available_citizens_pool.append(citizen_for_task) # Put back if failed
+                else:
+                    log.warning(f"Pathfinding to galley {galley_custom_id} failed for citizen {citizen_username}. Item: {item_to_fetch}")
+                    available_citizens_pool.append(citizen_for_task) # Put back
+
+    except Exception as e:
+        log.error(f"Error processing galley unloading activities: {e}")
+    
+    log.info(f"Created {activities_created_count} 'fetch_from_galley' activities.")
+    return activities_created_count
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create activities for idle citizens.")

@@ -196,6 +196,7 @@ def create_or_get_merchant_galley(
             "Position": json.dumps(position_coords),
             "Category": "Transport", # Assuming a category for such buildings
             "CreatedAt": datetime.now(timezone.utc).isoformat(),
+            "PendingDeliveriesData": json.dumps([]), # Initialize with empty list
             # No Occupant, Wages, RentAmount initially
         }
         created_galley = tables['buildings'].create(galley_payload)
@@ -895,10 +896,18 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
 
     if activity_created:
         log.info(f"✅ Successfully created galley delivery activity to {galley_building_id}.")
-        # Mark processed contracts as "Status": "processing_in_galley" or similar?
-        # For now, we assume they are consumed by being part of this batch.
-        # If partial amounts were taken, the original contract might need adjustment or be left for a future run.
-        # Current logic implies full or partial (to fill galley) consumption of a contract's amount for this run.
+        # Store involved_original_contracts_info in the galley's PendingDeliveriesData
+        if involved_original_contracts_info and not dry_run:
+            try:
+                tables['buildings'].update(merchant_galley_building['id'], {
+                    "PendingDeliveriesData": json.dumps(involved_original_contracts_info)
+                })
+                log.info(f"Stored PendingDeliveriesData for galley {galley_building_id} (Airtable ID: {merchant_galley_building['id']}).")
+            except Exception as e_update_galley:
+                log.error(f"Error updating PendingDeliveriesData for galley {galley_building_id}: {e_update_galley}")
+        elif dry_run:
+            log.info(f"[DRY RUN] Would store PendingDeliveriesData for galley {galley_building_id}: {json.dumps(involved_original_contracts_info)}")
+
     else:
         log.error(f"Failed to create galley delivery activity to {galley_building_id}.")
 

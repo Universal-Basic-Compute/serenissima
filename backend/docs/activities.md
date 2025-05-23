@@ -22,6 +22,15 @@ The activity system tracks what citizens are doing at any given time, creating a
         - Resource is added to the citizen's inventory, marked as owned by the contract's `Buyer`.
         - Citizen's position is updated to `FromBuilding`.
     - *Post-processing*: `createActivities.py` should then ideally create a new travel activity for the citizen to take the fetched resources from `FromBuilding` to the original `ToBuilding` (ultimate destination).
+- **Fetch From Galley**: Citizen travels to a `merchant_galley` building to pick up a specific batch of resources (related to an original import contract).
+    - *Fields*: `FromBuilding` (galley's Airtable ID), `OriginalContractId` (custom ID of the original import contract), `ResourceId`, `Amount`.
+    - *Processor (executes upon arrival at galley)*:
+        - Verifies resource availability in the galley (owned by "Italia").
+        - Checks citizen's carrying capacity.
+        - Transfers the specified `Amount` of `ResourceId` from the galley's resources to the citizen's inventory. The resources in the citizen's inventory become owned by the `Buyer` of the `OriginalContractId`.
+        - Updates the galley's `PendingDeliveriesData` to reflect the picked-up amount.
+        - Citizen's position is updated to the galley's position.
+    - *Post-processing*: `createActivities.py` should then create a `deliver_resource_batch` activity for the citizen to take these resources from the galley to the original buyer's building.
 - **Eating Activities**: Triggered when a citizen's `AteAt` timestamp is older than 12 hours.
     - **`eat_from_inventory`**: Citizen consumes a food item they are carrying.
         - *Processor*: Decrements the food resource from the citizen's personal inventory. Updates `AteAt`.
@@ -33,6 +42,8 @@ The activity system tracks what citizens are doing at any given time, creating a
 - **Idle**: Waiting for their next scheduled activity
 
 Activities are managed by the `createActivities.py` script, which runs periodically to ensure citizens always have something to do. This system applies equally to both AI and human citizens, creating a unified simulation where all citizens follow the same daily patterns and routines.
+
+The `createActivities.py` script also handles the creation of `fetch_from_galley` activities. When a `merchant_galley` arrives (created by `createimportactivities.py`), it contains `PendingDeliveriesData` listing the resources and their original contract details. `createActivities.py` will assign idle citizens to go to these galleys, pick up the specified resources, and then subsequently create `deliver_resource_batch` activities to take these resources to their final buyer destinations.
 
 ### Unified Citizen Activity Model
 

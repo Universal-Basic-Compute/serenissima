@@ -13,3 +13,4 @@ from .eat_activity_creator import (
     try_create_eat_at_home_activity,
     try_create_eat_at_tavern_activity
 )
+from .fetch_from_galley_activity_creator import try_create as try_create_fetch_from_galley_activity
