@@ -2,7 +2,11 @@
 import os
 import sys
 # Add the project root to sys.path to allow imports from backend.engine
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+# os.path.dirname(__file__) -> backend/engine
+# os.path.join(..., '..') -> backend/engine/.. -> backend
+# os.path.join(..., '..', '..') -> backend/engine/../../ -> serenissima (project root)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, PROJECT_ROOT)
 
 """
 Create Activities script for La Serenissima.
@@ -51,6 +55,18 @@ from backend.engine.activity_creators import (
 )
 from dotenv import load_dotenv
 
+# Define ANSI color codes for logging
+class LogColors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
@@ -63,7 +79,7 @@ try:
     from backend.engine.createimportactivities import get_resource_types as get_resource_definitions_from_api
     from backend.engine.processActivities import get_building_record # Import get_building_record
 except ImportError:
-    log.warning("Could not import get_resource_definitions_from_api or get_building_record directly.")
+    log.warning(f"{LogColors.WARNING}Could not import get_resource_definitions_from_api or get_building_record directly.{LogColors.ENDC}")
     def get_resource_definitions_from_api():
         raise NotImplementedError("get_resource_definitions_from_api is not available")
     def get_building_record(tables, building_id_custom: str): # Add a fallback definition
@@ -91,7 +107,7 @@ def initialize_airtable():
     base_id = os.environ.get('AIRTABLE_BASE_ID')
     
     if not api_key or not base_id:
-        log.error("Missing Airtable credentials. Set AIRTABLE_API_KEY and AIRTABLE_BASE_ID environment variables.")
+        log.error(f"{LogColors.FAIL}Missing Airtable credentials. Set AIRTABLE_API_KEY and AIRTABLE_BASE_ID environment variables.{LogColors.ENDC}")
         sys.exit(1)
     
     try:
@@ -104,12 +120,12 @@ def initialize_airtable():
             'resources': Table(api_key, base_id, 'RESOURCES')
         }
     except Exception as e:
-        log.error(f"Failed to initialize Airtable: {e}")
+        log.error(f"{LogColors.FAIL}Failed to initialize Airtable: {e}{LogColors.ENDC}")
         sys.exit(1)
 
 def get_citizen_contracts(tables, citizen_id: str) -> List[Dict]:
     """Get all active contracts where the citizen is the buyer, sorted by priority."""
-    log.info(f"Fetching contracts for citizen {citizen_id}")
+    log.info(f"{LogColors.OKBLUE}Fetching contracts for citizen {citizen_id}{LogColors.ENDC}")
     
     try:
         # Get current time
@@ -122,10 +138,10 @@ def get_citizen_contracts(tables, citizen_id: str) -> List[Dict]:
         # Sort by Priority in descending order
         contracts.sort(key=lambda x: int(x['fields'].get('Priority', 0) or 0), reverse=True)
         
-        log.info(f"Found {len(contracts)} active contracts for citizen {citizen_id}")
+        log.info(f"{LogColors.OKGREEN}Found {len(contracts)} active contracts for citizen {citizen_id}{LogColors.ENDC}")
         return contracts
     except Exception as e:
-        log.error(f"Error getting contracts for citizen {citizen_id}: {e}")
+        log.error(f"{LogColors.FAIL}Error getting contracts for citizen {citizen_id}: {e}{LogColors.ENDC}")
         return []
 
 def get_building_type_info(building_type: str) -> Optional[Dict]:
@@ -137,7 +153,7 @@ def get_building_type_info(building_type: str) -> Optional[Dict]:
         # Construct the API URL
         url = f"{api_base_url}/api/building-types"
         
-        log.info(f"Fetching building type info for {building_type} from API: {url}")
+        log.info(f"{LogColors.OKBLUE}Fetching building type info for {building_type} from API: {url}{LogColors.ENDC}")
         
         # Make the API request
         response = requests.get(url)
@@ -152,19 +168,19 @@ def get_building_type_info(building_type: str) -> Optional[Dict]:
                 # Find the specific building type
                 for bt in building_types:
                     if bt.get("type") == building_type:
-                        log.info(f"Found building type info for {building_type}")
+                        log.info(f"{LogColors.OKGREEN}Found building type info for {building_type}{LogColors.ENDC}")
                         return bt
                 
-                log.warning(f"Building type {building_type} not found in API response")
+                log.warning(f"{LogColors.WARNING}Building type {building_type} not found in API response{LogColors.ENDC}")
                 return None
             else:
-                log.error(f"Unexpected API response format: {data}")
+                log.error(f"{LogColors.FAIL}Unexpected API response format: {data}{LogColors.ENDC}")
                 return None
         else:
-            log.error(f"Error fetching building types from API: {response.status_code} - {response.text}")
+            log.error(f"{LogColors.FAIL}Error fetching building types from API: {response.status_code} - {response.text}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Exception fetching building type info: {str(e)}")
+        log.error(f"{LogColors.FAIL}Exception fetching building type info: {str(e)}{LogColors.ENDC}")
         return None
 
 def get_building_resources(tables, building_id: str) -> Dict[str, float]:
@@ -180,10 +196,10 @@ def get_building_resources(tables, building_id: str) -> Dict[str, float]:
             count = float(resource['fields'].get('Count', 0) or 0)
             resource_dict[resource_type] = count
         
-        log.info(f"Found {len(resources)} resources in building {building_id}")
+        log.info(f"{LogColors.OKGREEN}Found {len(resources)} resources in building {building_id}{LogColors.ENDC}")
         return resource_dict
     except Exception as e:
-        log.error(f"Error getting resources for building {building_id}: {e}")
+        log.error(f"{LogColors.FAIL}Error getting resources for building {building_id}: {e}{LogColors.ENDC}")
         return {}
 
 def can_produce_output(resources: Dict[str, float], recipe: Dict) -> bool:
@@ -227,9 +243,9 @@ def find_path_between_buildings(from_building: Dict, to_building: Dict) -> Optio
                             lat = float(parts[1])
                             lng = float(parts[2])
                             from_position = {"lat": lat, "lng": lng}
-                            log.info(f"Extracted position from Point field for building {from_building['fields'].get('BuildingId', from_building['id'])}: {from_position}")
+                            log.info(f"{LogColors.OKBLUE}Extracted position from Point field for building {from_building['fields'].get('BuildingId', from_building['id'])}: {from_position}{LogColors.ENDC}")
                         except (ValueError, IndexError):
-                            log.warning(f"Failed to parse coordinates from Point field: {from_point_str}")
+                            log.warning(f"{LogColors.WARNING}Failed to parse coordinates from Point field: {from_point_str}{LogColors.ENDC}")
             
             if not to_position:
                 to_point_str = to_building['fields'].get('Point')
@@ -240,21 +256,21 @@ def find_path_between_buildings(from_building: Dict, to_building: Dict) -> Optio
                             lat = float(parts[1])
                             lng = float(parts[2])
                             to_position = {"lat": lat, "lng": lng}
-                            log.info(f"Extracted position from Point field for building {to_building['fields'].get('BuildingId', to_building['id'])}: {to_position}")
+                            log.info(f"{LogColors.OKBLUE}Extracted position from Point field for building {to_building['fields'].get('BuildingId', to_building['id'])}: {to_position}{LogColors.ENDC}")
                         except (ValueError, IndexError):
-                            log.warning(f"Failed to parse coordinates from Point field: {to_point_str}")
+                            log.warning(f"{LogColors.WARNING}Failed to parse coordinates from Point field: {to_point_str}{LogColors.ENDC}")
         except (json.JSONDecodeError, TypeError) as e:
-            log.warning(f"Invalid position data for buildings: {e}")
+            log.warning(f"{LogColors.WARNING}Invalid position data for buildings: {e}{LogColors.ENDC}")
             return None
         
         if not from_position or not to_position:
-            log.warning(f"Missing position data for buildings")
+            log.warning(f"{LogColors.WARNING}Missing position data for buildings{LogColors.ENDC}")
             return None
         
         # Construct the API URL
         url = f"{api_base_url}/api/transport"
         
-        log.info(f"Finding path between buildings using API: {url}")
+        log.info(f"{LogColors.OKBLUE}Finding path between buildings using API: {url}{LogColors.ENDC}")
         
         # Make the API request
         response = requests.post(
@@ -271,16 +287,16 @@ def find_path_between_buildings(from_building: Dict, to_building: Dict) -> Optio
             data = response.json()
             
             if data.get("success") and "path" in data:
-                log.info(f"Found path between buildings with {len(data['path'])} points")
+                log.info(f"{LogColors.OKGREEN}Found path between buildings with {len(data['path'])} points{LogColors.ENDC}")
                 return data
             else:
-                log.warning(f"No path found between buildings: {data.get('error', 'Unknown error')}")
+                log.warning(f"{LogColors.WARNING}No path found between buildings: {data.get('error', 'Unknown error')}{LogColors.ENDC}")
                 return None
         else:
-            log.error(f"Error finding path between buildings: {response.status_code} - {response.text}")
+            log.error(f"{LogColors.FAIL}Error finding path between buildings: {response.status_code} - {response.text}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Exception finding path between buildings: {str(e)}")
+        log.error(f"{LogColors.FAIL}Exception finding path between buildings: {str(e)}{LogColors.ENDC}")
         return None
 
 def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, from_building: Dict, to_building: Dict, path: Dict) -> Optional[Dict]:
@@ -293,10 +309,10 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
         if not citizen_username: # Fallback if username is somehow missing
             citizen_username = citizen_custom_id
         if not citizen_custom_id: # Should not happen if process_citizen_activity validates
-             log.error(f"Missing CitizenId for citizen record {citizen_airtable_record_id}")
+             log.error(f"{LogColors.FAIL}Missing CitizenId for citizen record {citizen_airtable_record_id}{LogColors.ENDC}")
              return None
         if not citizen_username: # Should not happen
-             log.error(f"Missing Username for citizen record {citizen_airtable_record_id}")
+             log.error(f"{LogColors.FAIL}Missing Username for citizen record {citizen_airtable_record_id}{LogColors.ENDC}")
              return None
 
         contract_id = contract['id']
@@ -338,14 +354,14 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
         activity = tables['activities'].create(activity_payload)
         
         if activity and activity.get('id'):
-            log.info(f"Created resource fetching activity: {activity['id']}")
+            log.info(f"{LogColors.OKGREEN}Created resource fetching activity: {activity['id']}{LogColors.ENDC}")
             # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
-            log.error(f"Failed to create resource fetching activity for {citizen_username}")
+            log.error(f"{LogColors.FAIL}Failed to create resource fetching activity for {citizen_username}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Error creating resource fetching activity for {citizen_username}: {e}")
+        log.error(f"{LogColors.FAIL}Error creating resource fetching activity for {citizen_username}: {e}{LogColors.ENDC}")
         return None
 
 def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Dict) -> Optional[Dict]:
@@ -358,10 +374,10 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
         if not citizen_username: # Fallback if username is somehow missing
             citizen_username = citizen_custom_id
         if not citizen_custom_id: # Should not happen if process_citizen_activity validates
-             log.error(f"Missing CitizenId for citizen record {citizen_airtable_record_id}")
+             log.error(f"{LogColors.FAIL}Missing CitizenId for citizen record {citizen_airtable_record_id}{LogColors.ENDC}")
              return None
         if not citizen_username: # Should not happen
-             log.error(f"Missing Username for citizen record {citizen_airtable_record_id}")
+             log.error(f"{LogColors.FAIL}Missing Username for citizen record {citizen_airtable_record_id}{LogColors.ENDC}")
              return None
 
         building_id = building['id']
@@ -397,24 +413,24 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
         activity = tables['activities'].create(activity_payload)
         
         if activity and activity.get('id'):
-            log.info(f"Created production activity: {activity['id']}")
+            log.info(f"{LogColors.OKGREEN}Created production activity: {activity['id']}{LogColors.ENDC}")
             # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
-            log.error(f"Failed to create production activity for {citizen_username}")
+            log.error(f"{LogColors.FAIL}Failed to create production activity for {citizen_username}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Error creating production activity for {citizen_username}: {e}")
+        log.error(f"{LogColors.FAIL}Error creating production activity for {citizen_username}: {e}{LogColors.ENDC}")
         return None
 
 def get_idle_citizens(tables) -> List[Dict]:
     """Fetch all citizens who are currently idle (no active activities)."""
-    log.info("Fetching idle citizens...")
+    log.info(f"{LogColors.OKBLUE}Fetching idle citizens...{LogColors.ENDC}")
     
     try:
         # First, get all citizens
         all_citizens = tables['citizens'].all()
-        log.info(f"Found {len(all_citizens)} total citizens")
+        log.info(f"{LogColors.OKBLUE}Found {len(all_citizens)} total citizens{LogColors.ENDC}")
         
         # Then, get all active activities
         now_utc = datetime.datetime.now(pytz.UTC) # Use UTC for consistent time comparison
@@ -439,10 +455,10 @@ def get_idle_citizens(tables) -> List[Dict]:
             if username and username not in busy_citizen_usernames:
                 idle_citizens.append(citizen_record)
         
-        log.info(f"Found {len(idle_citizens)} idle citizens (after checking Usernames against active activities)")
+        log.info(f"{LogColors.OKGREEN}Found {len(idle_citizens)} idle citizens (after checking Usernames against active activities){LogColors.ENDC}")
         return idle_citizens
     except Exception as e:
-        log.error(f"Error fetching idle citizens: {e}")
+        log.error(f"{LogColors.FAIL}Error fetching idle citizens: {e}{LogColors.ENDC}")
         return []
 
 def _escape_airtable_value(value: str) -> str:
@@ -474,13 +490,13 @@ def _get_building_position_coords(building_record: Dict) -> Optional[Dict[str, f
                         lat, lng = float(lat_str), float(lng_str)
                         position = {"lat": lat, "lng": lng}
                     else:
-                        log.warning(f"Non-numeric lat/lng parts in Point field: {point_str} for building {building_record.get('id', 'N/A')}")
+                        log.warning(f"{LogColors.WARNING}Non-numeric lat/lng parts in Point field: {point_str} for building {building_record.get('id', 'N/A')}{LogColors.ENDC}")
                 else:
-                    log.warning(f"Point field format not recognized for coordinate extraction: {point_str} for building {building_record.get('id', 'N/A')}")
+                    log.warning(f"{LogColors.WARNING}Point field format not recognized for coordinate extraction: {point_str} for building {building_record.get('id', 'N/A')}{LogColors.ENDC}")
             # else: Point field is also empty or not a string
     except (json.JSONDecodeError, TypeError, ValueError, IndexError) as e:
         building_id_log = building_record.get('id', 'N/A')
-        log.warning(f"Could not parse position for building {building_id_log}: {e}. Position string: '{position_str}', Point string: '{building_record['fields'].get('Point')}'")
+        log.warning(f"{LogColors.WARNING}Could not parse position for building {building_id_log}: {e}. Position string: '{position_str}', Point string: '{building_record['fields'].get('Point')}'{LogColors.ENDC}")
     
     if position and isinstance(position, dict) and 'lat' in position and 'lng' in position:
         return position
@@ -496,7 +512,7 @@ def _calculate_distance_meters(pos1: Optional[Dict[str, float]], pos2: Optional[
         lat1, lng1 = float(pos1['lat']), float(pos1['lng'])
         lat2, lng2 = float(pos2['lat']), float(pos2['lng'])
     except (ValueError, TypeError):
-        log.warning(f"Invalid coordinate types for distance calculation: pos1={pos1}, pos2={pos2}")
+        log.warning(f"{LogColors.WARNING}Invalid coordinate types for distance calculation: pos1={pos1}, pos2={pos2}{LogColors.ENDC}")
         return float('inf')
 
     from math import sqrt, pow # Keep import local if not used elsewhere globally
@@ -511,18 +527,18 @@ def get_citizen_current_load(tables: Dict[str, Table], citizen_username: str) ->
         resources_carried = tables['resources'].all(formula=formula)
         for resource in resources_carried:
             current_load += float(resource['fields'].get('Count', 0))
-        log.debug(f"Citizen {citizen_username} current load: {current_load}")
+        log.debug(f"{LogColors.OKBLUE}Citizen {citizen_username} current load: {current_load}{LogColors.ENDC}")
     except Exception as e:
-        log.error(f"Error calculating current load for citizen {citizen_username}: {e}")
+        log.error(f"{LogColors.FAIL}Error calculating current load for citizen {citizen_username}: {e}{LogColors.ENDC}")
     return current_load
 
 def get_closest_inn(tables: Dict[str, Table], citizen_position: Dict[str, float]) -> Optional[Dict]:
     """Finds the closest building of type 'inn' to the citizen's position."""
-    log.info(f"Searching for the closest inn to position: {citizen_position}")
+    log.info(f"{LogColors.OKBLUE}Searching for the closest inn to position: {citizen_position}{LogColors.ENDC}")
     try:
         inns = tables['buildings'].all(formula="{Type}='inn'")
         if not inns:
-            log.info("No inns found in the database.")
+            log.info(f"{LogColors.OKBLUE}No inns found in the database.{LogColors.ENDC}")
             return None
 
         closest_inn = None
@@ -536,21 +552,21 @@ def get_closest_inn(tables: Dict[str, Table], citizen_position: Dict[str, float]
                     min_distance = distance
                     closest_inn = inn_record
             else:
-                log.warning(f"Inn {inn_record.get('id')} has no valid position data.")
+                log.warning(f"{LogColors.WARNING}Inn {inn_record.get('id')} has no valid position data.{LogColors.ENDC}")
         
         if closest_inn:
             inn_id_log = closest_inn['fields'].get('BuildingId', closest_inn['id'])
-            log.info(f"Closest inn found: {inn_id_log} at distance {min_distance:.2f}m.")
+            log.info(f"{LogColors.OKGREEN}Closest inn found: {inn_id_log} at distance {min_distance:.2f}m.{LogColors.ENDC}")
         else:
-            log.info("No inns with valid positions found.")
+            log.info(f"{LogColors.OKBLUE}No inns with valid positions found.{LogColors.ENDC}")
         return closest_inn
     except Exception as e:
-        log.error(f"Error finding closest inn: {e}")
+        log.error(f"{LogColors.FAIL}Error finding closest inn: {e}{LogColors.ENDC}")
         return None
 
 def get_citizen_workplace(tables, citizen_id: str, citizen_username: str) -> Optional[Dict]:
     """Find the workplace building for a citizen."""
-    log.info(f"Finding workplace for citizen {citizen_id} (Username: {citizen_username})")
+    log.info(f"{LogColors.OKBLUE}Finding workplace for citizen {citizen_id} (Username: {citizen_username}){LogColors.ENDC}")
     
     try:
         # Get buildings where this citizen is the occupant and the category is business
@@ -562,20 +578,20 @@ def get_citizen_workplace(tables, citizen_id: str, citizen_username: str) -> Opt
             # Check if the workplace has a BuildingId
             building_id = workplaces[0]['fields'].get('BuildingId')
             if not building_id:
-                log.warning(f"Workplace found for citizen {citizen_id} but missing BuildingId: {workplaces[0]['id']}")
+                log.warning(f"{LogColors.WARNING}Workplace found for citizen {citizen_id} but missing BuildingId: {workplaces[0]['id']}{LogColors.ENDC}")
             else:
-                log.info(f"Found workplace for citizen {citizen_id}: {building_id}")
+                log.info(f"{LogColors.OKGREEN}Found workplace for citizen {citizen_id}: {building_id}{LogColors.ENDC}")
             return workplaces[0]
         else:
-            log.info(f"No workplace found for citizen {citizen_id}")
+            log.info(f"{LogColors.OKBLUE}No workplace found for citizen {citizen_id}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Error finding workplace for citizen {citizen_id}: {e}")
+        log.error(f"{LogColors.FAIL}Error finding workplace for citizen {citizen_id}: {e}{LogColors.ENDC}")
         return None
 
 def get_citizen_home(tables, citizen_id: str) -> Optional[Dict]:
     """Find the home building for a citizen."""
-    log.info(f"Finding home for citizen {citizen_id}")
+    log.info(f"{LogColors.OKBLUE}Finding home for citizen {citizen_id}{LogColors.ENDC}")
     
     try:
         
@@ -590,15 +606,15 @@ def get_citizen_home(tables, citizen_id: str) -> Optional[Dict]:
             # Check if the home has a BuildingId
             building_id = homes[0]['fields'].get('BuildingId')
             if not building_id:
-                log.warning(f"Home found for citizen {citizen_id} but missing BuildingId: {homes[0]['id']}")
+                log.warning(f"{LogColors.WARNING}Home found for citizen {citizen_id} but missing BuildingId: {homes[0]['id']}{LogColors.ENDC}")
             else:
-                log.info(f"Found home for citizen {citizen_id}: {building_id}")
+                log.info(f"{LogColors.OKGREEN}Found home for citizen {citizen_id}: {building_id}{LogColors.ENDC}")
             return homes[0]
         else:
-            log.warning(f"No home found for citizen {citizen_id}")
+            log.warning(f"{LogColors.WARNING}No home found for citizen {citizen_id}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Error finding home for citizen {citizen_id}: {e}")
+        log.error(f"{LogColors.FAIL}Error finding home for citizen {citizen_id}: {e}{LogColors.ENDC}")
         return None
 
 def is_nighttime() -> bool:
@@ -615,7 +631,7 @@ def is_shopping_time() -> bool:
 
 def get_path_between_points(start_position: Dict, end_position: Dict) -> Optional[Dict]:
     """Get a path between two points using the transport API."""
-    log.info(f"Getting path from {start_position} to {end_position}")
+    log.info(f"{LogColors.OKBLUE}Getting path from {start_position} to {end_position}{LogColors.ENDC}")
     
     try:
         # Call the transport API
@@ -629,18 +645,18 @@ def get_path_between_points(start_position: Dict, end_position: Dict) -> Optiona
         )
         
         if response.status_code != 200:
-            log.error(f"Transport API error: {response.status_code} {response.text}")
+            log.error(f"{LogColors.FAIL}Transport API error: {response.status_code} {response.text}{LogColors.ENDC}")
             return None
         
         result = response.json()
         
         if not result.get('success'):
-            log.error(f"Transport API returned error: {result.get('error')}")
+            log.error(f"{LogColors.FAIL}Transport API returned error: {result.get('error')}{LogColors.ENDC}")
             return None
         
         return result
     except Exception as e:
-        log.error(f"Error calling transport API: {e}")
+        log.error(f"{LogColors.FAIL}Error calling transport API: {e}{LogColors.ENDC}")
         return None
 
 # --- Removed create_stay_activity ---
@@ -654,7 +670,7 @@ def get_path_between_points(start_position: Dict, end_position: Dict) -> Optiona
 
 def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, workplace_id: str, path_data: Dict) -> Optional[Dict]:
     """Create a goto_work activity for a citizen."""
-    log.info(f"Creating goto_work activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to workplace {workplace_id}")
+    log.info(f"{LogColors.OKCYAN}Creating goto_work activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to workplace {workplace_id}{LogColors.ENDC}")
     
     try:
         now = datetime.datetime.now(pytz.UTC)
@@ -686,19 +702,19 @@ def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: 
         activity = tables['activities'].create(activity_payload)
         
         if activity and activity.get('id'):
-            log.info(f"Created goto_work activity: {activity['id']}")
+            log.info(f"{LogColors.OKGREEN}Created goto_work activity: {activity['id']}{LogColors.ENDC}")
             # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
-            log.error(f"Failed to create goto_work activity for {citizen_username}")
+            log.error(f"{LogColors.FAIL}Failed to create goto_work activity for {citizen_username}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Error creating goto_work activity for {citizen_username}: {e}")
+        log.error(f"{LogColors.FAIL}Error creating goto_work activity for {citizen_username}: {e}{LogColors.ENDC}")
         return None
 
 def create_goto_home_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, home_id: str, path_data: Dict) -> Optional[Dict]:
     """Create a goto_home activity for a citizen."""
-    log.info(f"Creating goto_home activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to home {home_id}")
+    log.info(f"{LogColors.OKCYAN}Creating goto_home activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to home {home_id}{LogColors.ENDC}")
     
     try:
         now = datetime.datetime.now(pytz.UTC)
@@ -730,19 +746,19 @@ def create_goto_home_activity(tables, citizen_custom_id: str, citizen_username: 
         activity = tables['activities'].create(activity_payload)
 
         if activity and activity.get('id'):
-            log.info(f"Created goto_home activity: {activity['id']}")
+            log.info(f"{LogColors.OKGREEN}Created goto_home activity: {activity['id']}{LogColors.ENDC}")
             # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
-            log.error(f"Failed to create goto_home activity for {citizen_username}")
+            log.error(f"{LogColors.FAIL}Failed to create goto_home activity for {citizen_username}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Error creating goto_home activity for {citizen_username}: {e}")
+        log.error(f"{LogColors.FAIL}Error creating goto_home activity for {citizen_username}: {e}{LogColors.ENDC}")
         return None
 
 def create_travel_to_inn_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, inn_id: str, path_data: Dict) -> Optional[Dict]:
     """Create a travel_to_inn activity for a citizen."""
-    log.info(f"Creating travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_id}")
+    log.info(f"{LogColors.OKCYAN}Creating travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_id}{LogColors.ENDC}")
     
     try:
         now = datetime.datetime.now(pytz.UTC)
@@ -770,19 +786,19 @@ def create_travel_to_inn_activity(tables, citizen_custom_id: str, citizen_userna
         activity = tables['activities'].create(activity_payload)
 
         if activity and activity.get('id'):
-            log.info(f"Created travel_to_inn activity: {activity['id']}")
+            log.info(f"{LogColors.OKGREEN}Created travel_to_inn activity: {activity['id']}{LogColors.ENDC}")
             # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
-            log.error(f"Failed to create travel_to_inn activity for {citizen_username}")
+            log.error(f"{LogColors.FAIL}Failed to create travel_to_inn activity for {citizen_username}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Error creating travel_to_inn activity for {citizen_username}: {e}")
+        log.error(f"{LogColors.FAIL}Error creating travel_to_inn activity for {citizen_username}: {e}{LogColors.ENDC}")
         return None
 
 def create_idle_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str) -> Optional[Dict]:
     """Create an idle activity for a citizen."""
-    log.info(f"Creating idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id})")
+    log.info(f"{LogColors.OKCYAN}Creating idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id}){LogColors.ENDC}")
     
     try:
         now = datetime.datetime.now(pytz.UTC)
@@ -801,14 +817,14 @@ def create_idle_activity(tables, citizen_custom_id: str, citizen_username: str, 
         activity = tables['activities'].create(activity_payload)
         
         if activity and activity.get('id'):
-            log.info(f"Created idle activity: {activity['id']}")
+            log.info(f"{LogColors.OKGREEN}Created idle activity: {activity['id']}{LogColors.ENDC}")
             # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
-            log.error(f"Failed to create idle activity for {citizen_username}")
+            log.error(f"{LogColors.FAIL}Failed to create idle activity for {citizen_username}{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"Error creating idle activity for {citizen_username}: {e}")
+        log.error(f"{LogColors.FAIL}Error creating idle activity for {citizen_username}: {e}{LogColors.ENDC}")
         return None
 
 def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_defs: Dict) -> bool:
@@ -820,14 +836,14 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
 
     # Validate essential identifiers
     if not citizen_custom_id:
-        log.error(f"Missing CitizenId in citizen record: {citizen_airtable_record_id}")
+        log.error(f"{LogColors.FAIL}Missing CitizenId in citizen record: {citizen_airtable_record_id}{LogColors.ENDC}")
         return False
     if not citizen_username:
-        log.warning(f"Citizen {citizen_custom_id} (Record ID: {citizen_airtable_record_id}) has no Username, using CitizenId as fallback for username.")
+        log.warning(f"{LogColors.WARNING}Citizen {citizen_custom_id} (Record ID: {citizen_airtable_record_id}) has no Username, using CitizenId as fallback for username.{LogColors.ENDC}")
         citizen_username = citizen_custom_id
     
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
-    log.info(f"Processing activity for citizen {citizen_name} (CustomID: {citizen_custom_id}, Username: {citizen_username}, RecordID: {citizen_airtable_record_id})")
+    log.info(f"{LogColors.HEADER}Processing activity for citizen {citizen_name} (CustomID: {citizen_custom_id}, Username: {citizen_username}, RecordID: {citizen_airtable_record_id}){LogColors.ENDC}")
     
     now_utc_dt = datetime.datetime.now(pytz.UTC)
 
@@ -848,10 +864,10 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             if (now_utc_dt - ate_at_dt) > datetime.timedelta(hours=12):
                 is_hungry = True
         except ValueError as ve:
-            log.warning(f"Could not parse AteAt timestamp '{ate_at_str}' for citizen {citizen_username}. Error: {ve}. Assuming hungry.")
+            log.warning(f"{LogColors.WARNING}Could not parse AteAt timestamp '{ate_at_str}' for citizen {citizen_username}. Error: {ve}. Assuming hungry.{LogColors.ENDC}")
             is_hungry = True 
     else: 
-        log.info(f"Citizen {citizen_username} has no AteAt timestamp. Assuming hungry.")
+        log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} has no AteAt timestamp. Assuming hungry.{LogColors.ENDC}")
         is_hungry = True
 
     # Get citizen's position - needed for hunger logic too
@@ -873,11 +889,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         lat = float(parts[1])
                         lng = float(parts[2])
                         citizen_position = {"lat": lat, "lng": lng}
-                        log.info(f"Extracted position from Point field for citizen {citizen_custom_id}: {citizen_position}")
+                        log.info(f"{LogColors.OKBLUE}Extracted position from Point field for citizen {citizen_custom_id}: {citizen_position}{LogColors.ENDC}")
                     except (ValueError, IndexError):
-                        log.warning(f"Failed to parse coordinates from Point field: {point_str}")
+                        log.warning(f"{LogColors.WARNING}Failed to parse coordinates from Point field: {point_str}{LogColors.ENDC}")
     except (json.JSONDecodeError, TypeError) as e:
-        log.warning(f"Invalid position data for citizen {citizen_custom_id}: {citizen['fields'].get('Position')} - Error: {str(e)}")
+        log.warning(f"{LogColors.WARNING}Invalid position data for citizen {citizen_custom_id}: {citizen['fields'].get('Position')} - Error: {str(e)}{LogColors.ENDC}")
     
     citizen_position = None
     try:
@@ -894,26 +910,26 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         lng = float(parts[2])
                         citizen_position = {"lat": lat, "lng": lng}
                     except (ValueError, IndexError):
-                        log.warning(f"Failed to parse coordinates from Point field: {point_str} for citizen {citizen_custom_id}")
+                        log.warning(f"{LogColors.WARNING}Failed to parse coordinates from Point field: {point_str} for citizen {citizen_custom_id}{LogColors.ENDC}")
     except (json.JSONDecodeError, TypeError) as e:
-        log.warning(f"Invalid position data for citizen {citizen_custom_id}: {citizen['fields'].get('Position')} - Error: {str(e)}")
+        log.warning(f"{LogColors.WARNING}Invalid position data for citizen {citizen_custom_id}: {citizen['fields'].get('Position')} - Error: {str(e)}{LogColors.ENDC}")
 
     if not citizen_position:
-        log.info(f"Citizen {citizen_custom_id} has no position. Attempting to assign a random starting position.")
+        log.info(f"{LogColors.OKBLUE}Citizen {citizen_custom_id} has no position. Attempting to assign a random starting position.{LogColors.ENDC}")
         new_position = _fetch_and_assign_random_starting_position(tables, citizen)
         if new_position:
             citizen_position = new_position
             # Update the citizen record in Airtable with the new position string
             # The helper function _fetch_and_assign_random_starting_position already does this.
-            log.info(f"Assigned random starting position {citizen_position} to citizen {citizen_custom_id}")
+            log.info(f"{LogColors.OKGREEN}Assigned random starting position {citizen_position} to citizen {citizen_custom_id}{LogColors.ENDC}")
         else:
-            log.warning(f"Failed to assign a random starting position to citizen {citizen_custom_id}. Creating idle activity.")
+            log.warning(f"{LogColors.WARNING}Failed to assign a random starting position to citizen {citizen_custom_id}. Creating idle activity.{LogColors.ENDC}")
             idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
             try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No position data and failed to assign random position.")
             return True # Activity created (idle)
 
     if is_hungry:
-        log.info(f"Citizen {citizen_username} is hungry. Attempting to create eat activity.")
+        log.info(f"{LogColors.OKCYAN}Citizen {citizen_username} is hungry. Attempting to create eat activity.{LogColors.ENDC}")
         food_resource_types = ["bread", "fish", "preserved_fish"] # Example food types
         # In a real scenario, get this from resource_defs by category 'food'
 
@@ -925,11 +941,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             try:
                 inventory_food = tables['resources'].all(formula=formula, max_records=1)
                 if inventory_food and float(inventory_food[0]['fields'].get('Count', 0)) >= 1.0:
-                    log.info(f"Found {food_type} in {citizen_username}'s inventory.")
+                    log.info(f"{LogColors.OKGREEN}Found {food_type} in {citizen_username}'s inventory.{LogColors.ENDC}")
                     if try_create_eat_from_inventory_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, food_type, 1.0):
                         return True # Activity created
             except Exception as e_inv_food:
-                log.error(f"Error checking inventory food for {citizen_username}: {e_inv_food}")
+                log.error(f"{LogColors.FAIL}Error checking inventory food for {citizen_username}: {e_inv_food}{LogColors.ENDC}")
         
         home = get_citizen_home(tables, citizen_custom_id) # Uses custom_id
         home_position = _get_building_position_coords(home) if home else None
@@ -954,20 +970,20 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         food_type_at_home = food_type
                         break
                 except Exception as e_home_food:
-                    log.error(f"Error checking home food for {citizen_username} in {home_building_id}: {e_home_food}")
+                    log.error(f"{LogColors.FAIL}Error checking home food for {citizen_username} in {home_building_id}: {e_home_food}{LogColors.ENDC}")
             
             if has_food_at_home and food_type_at_home:
                 # Determine path_data only if not at home
                 path_data_for_eat_sequence = None
                 if not is_at_home:
                     if citizen_position and home_position:
-                        log.info(f"Home {home_building_id} has {food_type_at_home}. Citizen {citizen_username} is not at home. Calculating path to home to eat.")
+                        log.info(f"{LogColors.OKBLUE}Home {home_building_id} has {food_type_at_home}. Citizen {citizen_username} is not at home. Calculating path to home to eat.{LogColors.ENDC}")
                         path_data_for_eat_sequence = get_path_between_points(citizen_position, home_position)
                         if not (path_data_for_eat_sequence and path_data_for_eat_sequence.get('success')):
-                            log.warning(f"Path finding to home {home_building_id} failed for {citizen_username} to eat. Path data: {path_data_for_eat_sequence}")
+                            log.warning(f"{LogColors.WARNING}Path finding to home {home_building_id} failed for {citizen_username} to eat. Path data: {path_data_for_eat_sequence}{LogColors.ENDC}")
                             # path_data_for_eat_sequence will be None or invalid, try_create_eat_at_home_activity should handle this
                     else:
-                        log.warning(f"Citizen {citizen_username} not at home, but citizen_position or home_position is missing. Cannot pathfind to home to eat.")
+                        log.warning(f"{LogColors.WARNING}Citizen {citizen_username} not at home, but citizen_position or home_position is missing. Cannot pathfind to home to eat.{LogColors.ENDC}")
                 
                 # Call the modified try_create_eat_at_home_activity
                 # It will internally decide to create 'goto_home' or 'eat_at_home'
@@ -984,10 +1000,10 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                     path_data_for_eat_sequence # Path data, or None if at home or path failed
                 )
                 if activity_created:
-                    log.info(f"Activity ({activity_created['fields'].get('Type')}) created for {citizen_username} regarding eating at home.")
+                    log.info(f"{LogColors.OKGREEN}Activity ({activity_created['fields'].get('Type')}) created for {citizen_username} regarding eating at home.{LogColors.ENDC}")
                     return True # Activity (either goto_home or eat_at_home) created
                 else:
-                    log.warning(f"Failed to create any activity for {citizen_username} regarding eating at home {home_building_id}.")
+                    log.warning(f"{LogColors.WARNING}Failed to create any activity for {citizen_username} regarding eating at home {home_building_id}.{LogColors.ENDC}")
 
         # Option 3: Eat at tavern (if citizen has enough ducats)
         citizen_ducats = float(citizen['fields'].get('Ducats', 0))
@@ -1003,11 +1019,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                     if tavern_position_coords:
                         is_at_tavern = _calculate_distance_meters(citizen_position, tavern_position_coords) < 20
                         if is_at_tavern:
-                            log.info(f"Citizen {citizen_username} is at tavern {tavern_custom_id}. Creating eat_at_tavern activity.")
+                            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is at tavern {tavern_custom_id}. Creating eat_at_tavern activity.{LogColors.ENDC}")
                             if try_create_eat_at_tavern_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, tavern_custom_id): # Pass custom_id
                                 return True
                         else: # Not at tavern, create goto_tavern
-                            log.info(f"Citizen {citizen_username} not at tavern {tavern_custom_id}. Finding path to tavern.")
+                            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} not at tavern {tavern_custom_id}. Finding path to tavern.{LogColors.ENDC}")
                             path_data = get_path_between_points(citizen_position, tavern_position_coords)
                             if path_data and path_data.get('success'):
                                 # Create a generic goto_inn, assuming it can be used for taverns too
@@ -1015,17 +1031,17 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                                 if try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, tavern_custom_id, path_data): 
                                     return True
                             else:
-                                log.warning(f"Path finding to tavern {tavern_custom_id} failed for {citizen_username}.")
+                                log.warning(f"{LogColors.WARNING}Path finding to tavern {tavern_custom_id} failed for {citizen_username}.{LogColors.ENDC}")
                     else:
-                        log.warning(f"Closest tavern {tavern_custom_id} has no position data.")
+                        log.warning(f"{LogColors.WARNING}Closest tavern {tavern_custom_id} has no position data.{LogColors.ENDC}")
                 else:
-                    log.info(f"No taverns found for {citizen_username} to eat at.")
+                    log.info(f"{LogColors.OKBLUE}No taverns found for {citizen_username} to eat at.{LogColors.ENDC}")
             else:
-                log.warning(f"Citizen {citizen_username} is hungry but has no position data to find a tavern.")
+                log.warning(f"{LogColors.WARNING}Citizen {citizen_username} is hungry but has no position data to find a tavern.{LogColors.ENDC}")
         else:
-            log.info(f"Citizen {citizen_username} is hungry but has insufficient ducats ({citizen_ducats}) for a tavern meal.")
+            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is hungry but has insufficient ducats ({citizen_ducats}) for a tavern meal.{LogColors.ENDC}")
 
-        log.warning(f"Citizen {citizen_username} is hungry but no eating option was successfully created. Proceeding to other activities.")
+        log.warning(f"{LogColors.WARNING}Citizen {citizen_username} is hungry but no eating option was successfully created. Proceeding to other activities.{LogColors.ENDC}")
     
     # --- END HUNGER CHECK ---
 
@@ -1037,7 +1053,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
         # This is a bit complex as process_citizen_activity doesn't re-fetch the whole citizen record mid-flow.
         # For now, we rely on the initial position check or the random assignment.
         # If still no position here, it means random assignment also failed or wasn't triggered appropriately.
-        log.warning(f"Citizen {citizen_custom_id} still has no position data after hunger check. This might lead to issues for subsequent activities.")
+        log.warning(f"{LogColors.WARNING}Citizen {citizen_custom_id} still has no position data after hunger check. This might lead to issues for subsequent activities.{LogColors.ENDC}")
         # Fallback to idle if absolutely no position can be determined.
         idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
         try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No position data available after hunger check.")
@@ -1048,7 +1064,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
     # This comes after hunger, but before general night/day work/home logic.
     # It's a daytime/evening activity.
     if not is_hungry and is_shopping_time() and not is_night: # Ensure not hungry, it's shopping time, and not deep night
-        log.info(f"Citizen {citizen_username} - It's shopping time.")
+        log.info(f"{LogColors.OKCYAN}Citizen {citizen_username} - It's shopping time.{LogColors.ENDC}")
         current_load = get_citizen_current_load(tables, citizen_username)
         remaining_capacity = CITIZEN_CARRY_CAPACITY - current_load
         citizen_social_class = citizen['fields'].get('SocialClass', 'Facchini')
@@ -1058,7 +1074,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
         home = get_citizen_home(tables, citizen_custom_id) # For depositing or as ToBuilding
 
         if remaining_capacity <= 0.1: # Inventory is full (using a small epsilon)
-            log.info(f"Citizen {citizen_username}'s inventory is full. Attempting to go home.")
+            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username}'s inventory is full. Attempting to go home.{LogColors.ENDC}")
             if home:
                 home_position = _get_building_position_coords(home)
                 home_custom_id = home['fields'].get('BuildingId', home['id'])
@@ -1068,12 +1084,12 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         if try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_to_home_for_deposit):
                             return True # Activity created to go home and deposit
                     else:
-                        log.warning(f"Path to home for deposit failed for {citizen_username}.")
+                        log.warning(f"{LogColors.WARNING}Path to home for deposit failed for {citizen_username}.{LogColors.ENDC}")
                 # If already at home, or path failed, they will likely become idle or rest if night.
             else:
-                log.warning(f"Citizen {citizen_username} inventory full but no home to deposit items.")
+                log.warning(f"{LogColors.WARNING}Citizen {citizen_username} inventory full but no home to deposit items.{LogColors.ENDC}")
         elif home: # Inventory has space, and citizen has a home (to use as ToBuilding)
-            log.info(f"Citizen {citizen_username} has {remaining_capacity:.2f} inventory space. Looking for items to shop.")
+            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} has {remaining_capacity:.2f} inventory space. Looking for items to shop.{LogColors.ENDC}")
             potential_purchases = []
             
             # Filter resource definitions by tier access
@@ -1124,7 +1140,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                             })
                     
                     potential_purchases.sort(key=lambda x: x['score'], reverse=True)
-                    log.info(f"Citizen {citizen_username} has {len(potential_purchases)} potential shopping items, sorted by priority.")
+                    log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} has {len(potential_purchases)} potential shopping items, sorted by priority.{LogColors.ENDC}")
 
                     for purchase_candidate in potential_purchases:
                         contract = purchase_candidate['contract_record']
@@ -1142,7 +1158,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         amount_to_buy = float(f"{amount_to_buy:.4f}") # Standardize precision, ensure it's not too small
 
                         if amount_to_buy >= 0.1: # Buy at least 0.1 units
-                            log.info(f"Citizen {citizen_username} attempting to buy {amount_to_buy:.2f} of {resource_id_to_buy} from {seller_building['fields'].get('BuildingId')}.")
+                            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} attempting to buy {amount_to_buy:.2f} of {resource_id_to_buy} from {seller_building['fields'].get('BuildingId')}.{LogColors.ENDC}")
                             seller_building_pos = _get_building_position_coords(seller_building) # Already fetched
                             
                             path_to_seller = get_path_between_points(citizen_position, seller_building_pos)
@@ -1157,27 +1173,27 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                                     home_custom_id_for_delivery, # Custom ID of citizen's home
                                     resource_id_to_buy, amount_to_buy, path_to_seller
                                 ):
-                                    log.info(f"Shopping activity (fetch_resource) created for {citizen_username} to buy {resource_id_to_buy}.")
+                                    log.info(f"{LogColors.OKGREEN}Shopping activity (fetch_resource) created for {citizen_username} to buy {resource_id_to_buy}.{LogColors.ENDC}")
                                     return True # Shopping activity created
                             else:
-                                log.warning(f"Path to seller {seller_building['fields'].get('BuildingId')} failed for {citizen_username}.")
+                                log.warning(f"{LogColors.WARNING}Path to seller {seller_building['fields'].get('BuildingId')} failed for {citizen_username}.{LogColors.ENDC}")
                         else:
-                            log.debug(f"Calculated amount_to_buy for {resource_id_to_buy} is too small ({amount_to_buy:.4f}). Skipping.")
+                            log.debug(f"{LogColors.OKBLUE}Calculated amount_to_buy for {resource_id_to_buy} is too small ({amount_to_buy:.4f}). Skipping.{LogColors.ENDC}")
                 except Exception as e_shop_contracts:
-                    log.error(f"Error during shopping contract processing for {citizen_username}: {e_shop_contracts}")
+                    log.error(f"{LogColors.FAIL}Error during shopping contract processing for {citizen_username}: {e_shop_contracts}{LogColors.ENDC}")
             else: # No shoppable resource definitions
-                log.info(f"No shoppable resource definitions for {citizen_username} based on tier access.")
+                log.info(f"{LogColors.OKBLUE}No shoppable resource definitions for {citizen_username} based on tier access.{LogColors.ENDC}")
         else: # No home to use as ToBuilding
-            log.info(f"Citizen {citizen_username} has no home, cannot determine 'ToBuilding' for shopping fetch. Skipping shopping.")
+            log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} has no home, cannot determine 'ToBuilding' for shopping fetch. Skipping shopping.{LogColors.ENDC}")
             
-        log.info(f"Citizen {citizen_username} did not create a shopping activity this cycle.")
+        log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} did not create a shopping activity this cycle.{LogColors.ENDC}")
     # --- END SHOPPING LOGIC ---
 
     home_city = citizen['fields'].get('HomeCity') # Check if citizen is a visitor
-    log.info(f"Citizen {citizen_username} HomeCity: '{home_city}'")
+    log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} HomeCity: '{home_city}'{LogColors.ENDC}")
 
     if not citizen_position: # Re-check after hunger logic if position was needed but missing
-        log.warning(f"Citizen {citizen_custom_id} has no position data, creating idle activity")
+        log.warning(f"{LogColors.WARNING}Citizen {citizen_custom_id} has no position data, creating idle activity{LogColors.ENDC}")
         idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
         try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No position data available.")
         return True
@@ -1185,7 +1201,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
     # If it's nighttime, handle nighttime activities
     if is_night:
         if home_city and home_city.strip(): # Visitor logic
-            log.info(f"Citizen {citizen_username} is a visitor from {home_city}. Finding an inn.")
+            log.info(f"{LogColors.OKCYAN}Citizen {citizen_username} is a visitor from {home_city}. Finding an inn.{LogColors.ENDC}")
             closest_inn = get_closest_inn(tables, citizen_position)
             if closest_inn:
                 inn_position_coords = _get_building_position_coords(closest_inn)
@@ -1195,7 +1211,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 if inn_position_coords:
                     is_at_inn = _calculate_distance_meters(citizen_position, inn_position_coords) < 20
                     if is_at_inn:
-                        log.info(f"Citizen {citizen_username} is already at inn {inn_custom_id}. Creating stay activity.")
+                        log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is already at inn {inn_custom_id}. Creating stay activity.{LogColors.ENDC}")
                         venice_now = now_utc_dt.astimezone(VENICE_TIMEZONE)
                         if venice_now.hour < NIGHT_END_HOUR:
                             end_time_venice = venice_now.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
@@ -1204,28 +1220,28 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
                         try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, stay_location_type="inn", end_time_utc_iso=stay_end_time_utc_iso) # Pass custom BuildingId
                     else:
-                        log.info(f"Citizen {citizen_username} is not at inn {inn_custom_id}. Finding path to inn.")
+                        log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is not at inn {inn_custom_id}. Finding path to inn.{LogColors.ENDC}")
                         path_data = get_path_between_points(citizen_position, inn_position_coords)
                         if path_data and path_data.get('success'):
                             try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, path_data) # Pass custom BuildingId
                         else:
-                            log.warning(f"Path finding to inn {inn_custom_id} failed for {citizen_username}. Creating idle activity.")
+                            log.warning(f"{LogColors.WARNING}Path finding to inn {inn_custom_id} failed for {citizen_username}. Creating idle activity.{LogColors.ENDC}")
                             idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                             try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message=f"Pathfinding to inn {inn_custom_id} failed.")
                 else:
-                    log.warning(f"Inn {closest_inn['id'] if closest_inn else 'N/A'} has no position data. Creating idle activity for {citizen_username}.")
+                    log.warning(f"{LogColors.WARNING}Inn {closest_inn['id'] if closest_inn else 'N/A'} has no position data. Creating idle activity for {citizen_username}.{LogColors.ENDC}")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                     try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="Inn has no position data.")
             else:
-                log.warning(f"No inn found for visitor {citizen_username}. Creating idle activity.")
+                log.warning(f"{LogColors.WARNING}No inn found for visitor {citizen_username}. Creating idle activity.{LogColors.ENDC}")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No inn found for visitor.")
 
         else: # Resident logic
-            log.info(f"Citizen {citizen_username} is a resident or HomeCity is not set. Finding home.")
+            log.info(f"{LogColors.OKCYAN}Citizen {citizen_username} is a resident or HomeCity is not set. Finding home.{LogColors.ENDC}")
             home = get_citizen_home(tables, citizen_custom_id)
             if not home:
-                log.warning(f"Citizen {citizen_custom_id} has no home, creating idle activity")
+                log.warning(f"{LogColors.WARNING}Citizen {citizen_custom_id} has no home, creating idle activity{LogColors.ENDC}")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No home assigned.")
                 return True
@@ -1235,7 +1251,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             home_airtable_id = home['id'] # Airtable Record ID
 
             if not home_position:
-                log.warning(f"Home {home_custom_id} has no position data, creating idle for resident {citizen_custom_id}")
+                log.warning(f"{LogColors.WARNING}Home {home_custom_id} has no position data, creating idle for resident {citizen_custom_id}{LogColors.ENDC}")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="Home has no position data.")
                 return True
@@ -1254,7 +1270,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 if path_data and path_data.get('success'):
                     try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_data) # Pass custom BuildingId
                 else:
-                    log.warning(f"Path finding to home failed for resident {citizen_custom_id}. Creating idle activity.")
+                    log.warning(f"{LogColors.WARNING}Path finding to home failed for resident {citizen_custom_id}. Creating idle activity.{LogColors.ENDC}")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                     try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message=f"Pathfinding to home {home_custom_id} failed.")
     else: 
@@ -1266,14 +1282,14 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             workplace_airtable_id = workplace['id'] # Airtable Record ID
 
             if not workplace_position:
-                log.warning(f"Workplace {workplace_custom_id} has no position data, creating idle activity")
+                log.warning(f"{LogColors.WARNING}Workplace {workplace_custom_id} has no position data, creating idle activity{LogColors.ENDC}")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="Workplace has no position data.")
                 return True
             
             is_at_workplace = _calculate_distance_meters(citizen_position, workplace_position) < 20
             if is_at_workplace: # Citizen is at their workplace
-                log.info(f"Citizen {citizen_custom_id} is at workplace {workplace_custom_id}. Checking for production/fetching.")
+                log.info(f"{LogColors.OKBLUE}Citizen {citizen_custom_id} is at workplace {workplace_custom_id}. Checking for production/fetching.{LogColors.ENDC}")
                 building_type = workplace['fields'].get('Type')
                 building_type_info = get_building_type_info(building_type)
                 if building_type_info and 'productionInformation' in building_type_info:
@@ -1322,8 +1338,8 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                                                 )
                                                 return True
                                             else:
-                                                log.warning(f"Missing custom BuildingId for contract buildings: From={from_building_custom_id_contract}, To={to_building_custom_id_contract}")
-                log.info(f"No production or fetching for {citizen_custom_id} at {workplace_custom_id}. Creating idle.")
+                                                log.warning(f"{LogColors.WARNING}Missing custom BuildingId for contract buildings: From={from_building_custom_id_contract}, To={to_building_custom_id_contract}{LogColors.ENDC}")
+                log.info(f"{LogColors.OKBLUE}No production or fetching for {citizen_custom_id} at {workplace_custom_id}. Creating idle.{LogColors.ENDC}")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No production or fetching tasks available at workplace.")
             else: # Not at workplace, needs to go to work
@@ -1337,7 +1353,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                     if home_pos_for_departure_check:
                         is_at_home_for_work_departure = _calculate_distance_meters(citizen_position, home_pos_for_departure_check) < 20
                 
-                log.info(f"Citizen {citizen_username} needs to go to work. Is at home: {is_at_home_for_work_departure}.")
+                log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} needs to go to work. Is at home: {is_at_home_for_work_departure}.{LogColors.ENDC}")
 
                 path_data = get_path_between_points(citizen_position, workplace_position)
                 if path_data and path_data.get('success'):
@@ -1354,18 +1370,18 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         citizen_pos_str_for_pickup # Pass citizen's current position string
                     )
                 else:
-                    log.warning(f"Path to workplace {workplace_custom_id} failed for {citizen_custom_id}. Creating idle.")
+                    log.warning(f"{LogColors.WARNING}Path to workplace {workplace_custom_id} failed for {citizen_custom_id}. Creating idle.{LogColors.ENDC}")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                     try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message=f"Pathfinding to workplace {workplace_custom_id} failed.")
         else: # No workplace
-            log.info(f"No workplace for citizen {citizen_username}. Creating idle activity.")
+            log.info(f"{LogColors.OKBLUE}No workplace for citizen {citizen_username}. Creating idle activity.{LogColors.ENDC}")
             idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
             try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No workplace assigned.")
     return True
 
 def create_activities(dry_run: bool = False):
     """Main function to create activities for idle citizens."""
-    log.info(f"Starting activity creation process (dry_run: {dry_run})")
+    log.info(f"{LogColors.HEADER}Starting activity creation process (dry_run: {dry_run}){LogColors.ENDC}")
     
     tables = initialize_airtable()
     now_utc_dt = datetime.datetime.now(pytz.UTC) # Define now_utc_dt here
@@ -1373,18 +1389,18 @@ def create_activities(dry_run: bool = False):
     # Fetch resource definitions once
     resource_defs = get_resource_definitions_from_api()
     if not resource_defs:
-        log.error("Failed to fetch resource definitions. Exiting activity creation.")
+        log.error(f"{LogColors.FAIL}Failed to fetch resource definitions. Exiting activity creation.{LogColors.ENDC}")
         return
 
     idle_citizens = get_idle_citizens(tables)
     
     if not idle_citizens:
-        log.info("No idle citizens found. Activity creation process complete.")
+        log.info(f"{LogColors.OKBLUE}No idle citizens found. Activity creation process complete.{LogColors.ENDC}")
         return
     
     # Check if it's nighttime in Venice
     night_time = is_nighttime()
-    log.info(f"Current time in Venice: {'Night' if night_time else 'Day'}")
+    log.info(f"{LogColors.OKBLUE}Current time in Venice: {'Night' if night_time else 'Day'}{LogColors.ENDC}")
     
     # Process each idle citizen
     success_count = 0
@@ -1403,26 +1419,27 @@ def create_activities(dry_run: bool = False):
         galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_still_available_after_final_delivery, now_utc_dt)
         success_count += galley_fetch_activities_created
     elif dry_run and idle_citizens: # If dry run, simulate checking for galley tasks
-        log.info(f"[DRY RUN] Would check for merchant galleys with pending deliveries (fetch tasks).")
-        log.info(f"[DRY RUN] Would check for citizens at galleys ready for final delivery tasks.")
+        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for merchant galleys with pending deliveries (fetch tasks).{LogColors.ENDC}")
+        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for citizens at galleys ready for final delivery tasks.{LogColors.ENDC}")
 
 
     # Finally, process general activities for any remaining idle citizens
     citizens_for_general_processing = list(citizens_still_available_after_final_delivery) # Use the latest available pool
-    log.info(f"Processing general activities for {len(citizens_for_general_processing)} remaining idle citizens.")
+    log.info(f"{LogColors.OKBLUE}Processing general activities for {len(citizens_for_general_processing)} remaining idle citizens.{LogColors.ENDC}")
 
     for citizen_record in citizens_for_general_processing:
         if dry_run:
             # Avoid double counting if already simulated for galley tasks in dry_run
             if not (idle_citizens and galley_fetch_activities_created > 0): # Simplified check
-                 log.info(f"[DRY RUN] Would create general activity for citizen {citizen_record['id']}")
+                 log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create general activity for citizen {citizen_record['id']}{LogColors.ENDC}")
                  success_count +=1 # Add to dry run success count
         else:
             activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time, resource_defs)
             if activity_created_for_citizen:
                 success_count += 1
     
-    log.info(f"Activity creation process complete. Total activities created or simulated: {success_count} for {len(idle_citizens)} initially idle citizens.")
+    summary_color = LogColors.OKGREEN if success_count == len(idle_citizens) else LogColors.WARNING if success_count > 0 else LogColors.FAIL
+    log.info(f"{summary_color}Activity creation process complete. Total activities created or simulated: {success_count} for {len(idle_citizens)} initially idle citizens.{LogColors.ENDC}")
 
 
 def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool: List[Dict], now_utc_dt: datetime.datetime) -> int:
@@ -1441,7 +1458,7 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
     try:
         arrived_galleys = tables['buildings'].all(formula="AND({Type}='merchant_galley', {IsConstructed}=TRUE())")
         if not arrived_galleys:
-            # log.info("No arrived merchant galleys found for final delivery processing.")
+            # log.info(f"{LogColors.OKBLUE}No arrived merchant galleys found for final delivery processing.{LogColors.ENDC}")
             return 0
         
         galley_locations_map = {
@@ -1449,7 +1466,7 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
             for galley in arrived_galleys if _get_building_position_coords(galley) and galley['fields'].get('BuildingId')
         }
         if not galley_locations_map:
-            log.info("No arrived galleys with valid positions found.")
+            log.info(f"{LogColors.OKBLUE}No arrived galleys with valid positions found.{LogColors.ENDC}")
             return 0
 
         for citizen_record in list(citizens_pool): # Iterate over a copy for safe removal
@@ -1485,7 +1502,7 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
             try:
                 carried_resources_records = tables['resources'].all(formula=carried_res_formula)
             except Exception as e_fetch_carried:
-                log.error(f"Error fetching carried resources for {citizen_username} at galley: {e_fetch_carried}")
+                log.error(f"{LogColors.FAIL}Error fetching carried resources for {citizen_username} at galley: {e_fetch_carried}{LogColors.ENDC}")
                 continue
 
             resources_for_delivery_by_contract: Dict[str, List[Dict]] = defaultdict(list)
@@ -1508,13 +1525,13 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                             if buyer_building_custom_id:
                                 contract_to_buyer_building_map[original_contract_id] = buyer_building_custom_id
                             else:
-                                log.warning(f"Original contract {original_contract_id} does not have a BuyerBuilding. Cannot create final delivery.")
+                                log.warning(f"{LogColors.WARNING}Original contract {original_contract_id} does not have a BuyerBuilding. Cannot create final delivery.{LogColors.ENDC}")
                         else:
-                             log.warning(f"Could not fetch original contract details for {original_contract_id}. Cannot create final delivery.")
+                             log.warning(f"{LogColors.WARNING}Could not fetch original contract details for {original_contract_id}. Cannot create final delivery.{LogColors.ENDC}")
 
 
             if not resources_for_delivery_by_contract:
-                # log.info(f"Citizen {citizen_username} at galley {current_galley_custom_id} but no resources marked 'Fetched for contract'.")
+                # log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} at galley {current_galley_custom_id} but no resources marked 'Fetched for contract'.{LogColors.ENDC}")
                 continue
 
             # Create one deliver_resource_batch activity per original contract
@@ -1523,12 +1540,12 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
 
                 buyer_building_custom_id = contract_to_buyer_building_map.get(original_contract_id)
                 if not buyer_building_custom_id:
-                    log.warning(f"No BuyerBuilding found for contract {original_contract_id} for citizen {citizen_username}. Skipping this batch.")
+                    log.warning(f"{LogColors.WARNING}No BuyerBuilding found for contract {original_contract_id} for citizen {citizen_username}. Skipping this batch.{LogColors.ENDC}")
                     continue
 
                 buyer_building_record_list = tables['buildings'].all(formula=f"{{BuildingId}}='{_escape_airtable_value(buyer_building_custom_id)}'", max_records=1)
                 if not buyer_building_record_list:
-                    log.warning(f"BuyerBuilding {buyer_building_custom_id} for contract {original_contract_id} not found. Skipping delivery for {citizen_username}.")
+                    log.warning(f"{LogColors.WARNING}BuyerBuilding {buyer_building_custom_id} for contract {original_contract_id} not found. Skipping delivery for {citizen_username}.{LogColors.ENDC}")
                     continue
                 
                 buyer_building_record = buyer_building_record_list[0]
@@ -1536,7 +1553,7 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                 buyer_building_pos = _get_building_position_coords(buyer_building_record)
 
                 if not buyer_building_pos:
-                    log.warning(f"BuyerBuilding {buyer_building_custom_id} has no position. Skipping delivery for {citizen_username}.")
+                    log.warning(f"{LogColors.WARNING}BuyerBuilding {buyer_building_custom_id} has no position. Skipping delivery for {citizen_username}.{LogColors.ENDC}")
                     continue
 
                 path_to_buyer = get_path_between_points(citizen_current_pos, buyer_building_pos)
@@ -1573,27 +1590,27 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                     try:
                         created_activity = tables['activities'].create(final_delivery_payload)
                         if created_activity and created_activity.get('id'):
-                            log.info(f"Created final deliver_resource_batch activity {created_activity['id']} for {citizen_username} from galley {current_galley_custom_id} to {buyer_building_custom_id}.")
+                            log.info(f"{LogColors.OKGREEN}Created final deliver_resource_batch activity {created_activity['id']} for {citizen_username} from galley {current_galley_custom_id} to {buyer_building_custom_id}.{LogColors.ENDC}")
                             activities_created_count += 1
                             citizens_assigned_delivery.append(citizen_record) # Mark citizen as assigned
                             # Break from this citizen's resource processing for now, they have a task.
                             # More complex logic could batch multiple contract deliveries if path is similar.
                             break 
                         else:
-                            log.error(f"Failed to create final deliver_resource_batch for {citizen_username}.")
+                            log.error(f"{LogColors.FAIL}Failed to create final deliver_resource_batch for {citizen_username}.{LogColors.ENDC}")
                     except Exception as e_create_final:
-                        log.error(f"Error creating final deliver_resource_batch for {citizen_username}: {e_create_final}")
+                        log.error(f"{LogColors.FAIL}Error creating final deliver_resource_batch for {citizen_username}: {e_create_final}{LogColors.ENDC}")
                 else:
-                    log.warning(f"Pathfinding from galley {current_galley_custom_id} to buyer building {buyer_building_custom_id} failed for {citizen_username}.")
+                    log.warning(f"{LogColors.WARNING}Pathfinding from galley {current_galley_custom_id} to buyer building {buyer_building_custom_id} failed for {citizen_username}.{LogColors.ENDC}")
             
             if citizen_record in citizens_assigned_delivery and citizen_record in citizens_pool : # If assigned, remove from pool
                  citizens_pool.remove(citizen_record)
 
 
     except Exception as e:
-        log.error(f"Error in process_final_deliveries_from_galley: {e}")
+        log.error(f"{LogColors.FAIL}Error in process_final_deliveries_from_galley: {e}{LogColors.ENDC}")
     
-    log.info(f"Created {activities_created_count} final delivery activities from galleys.")
+    log.info(f"{LogColors.OKGREEN}Created {activities_created_count} final delivery activities from galleys.{LogColors.ENDC}")
     return activities_created_count
 
 
@@ -1605,20 +1622,20 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
     """
     activities_created_count = 0
     if not idle_citizens:
-        log.info("No idle citizens available to process galley unloading.")
+        log.info(f"{LogColors.OKBLUE}No idle citizens available to process galley unloading.{LogColors.ENDC}")
         return 0
 
     try:
         # Only consider galleys that have "arrived" (IsConstructed = True)
         formula_galleys = "AND({Type}='merchant_galley', {PendingDeliveriesData}!='', {IsConstructed}=TRUE())"
         galleys_with_pending = tables['buildings'].all(formula=formula_galleys)
-        log.info(f"Found {len(galleys_with_pending)} merchant galleys that have arrived and have PendingDeliveriesData.")
+        log.info(f"{LogColors.OKBLUE}Found {len(galleys_with_pending)} merchant galleys that have arrived and have PendingDeliveriesData.{LogColors.ENDC}")
 
         available_citizens_pool = list(idle_citizens) # Make a mutable copy
 
         for galley_record in galleys_with_pending:
             if not available_citizens_pool:
-                log.info("No more idle citizens available for further galley unloading tasks.")
+                log.info(f"{LogColors.OKBLUE}No more idle citizens available for further galley unloading tasks.{LogColors.ENDC}")
                 break
 
             galley_airtable_id = galley_record['id']
@@ -1627,25 +1644,25 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
             pending_data_str = galley_record['fields'].get('PendingDeliveriesData', '[]')
 
             if not galley_custom_id or not galley_position_str:
-                log.warning(f"Galley {galley_airtable_id} missing BuildingId or Position. Skipping.")
+                log.warning(f"{LogColors.WARNING}Galley {galley_airtable_id} missing BuildingId or Position. Skipping.{LogColors.ENDC}")
                 continue
             
             try:
                 galley_position = json.loads(galley_position_str)
                 pending_deliveries = json.loads(pending_data_str)
             except json.JSONDecodeError:
-                log.error(f"Could not parse Position or PendingDeliveriesData for galley {galley_custom_id}. Skipping.")
+                log.error(f"{LogColors.FAIL}Could not parse Position or PendingDeliveriesData for galley {galley_custom_id}. Skipping.{LogColors.ENDC}")
                 continue
 
             if not pending_deliveries:
-                # log.info(f"Galley {galley_custom_id} has no pending deliveries in its data. Skipping.")
+                # log.info(f"{LogColors.OKBLUE}Galley {galley_custom_id} has no pending deliveries in its data. Skipping.{LogColors.ENDC}")
                 continue
             
-            log.info(f"Processing galley {galley_custom_id} with {len(pending_deliveries)} items in PendingDeliveriesData.")
+            log.info(f"{LogColors.OKBLUE}Processing galley {galley_custom_id} with {len(pending_deliveries)} items in PendingDeliveriesData.{LogColors.ENDC}")
 
             for item_to_fetch in pending_deliveries:
                 if not available_citizens_pool:
-                    log.info(f"No more idle citizens for items in galley {galley_custom_id}.")
+                    log.info(f"{LogColors.OKBLUE}No more idle citizens for items in galley {galley_custom_id}.{LogColors.ENDC}")
                     break # Break from items loop for this galley
 
                 original_contract_id = item_to_fetch.get('contract_id')
@@ -1653,7 +1670,7 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                 amount = float(item_to_fetch.get('amount', 0))
 
                 if not all([original_contract_id, resource_type]) or amount <= 0:
-                    log.warning(f"Invalid item in PendingDeliveriesData for galley {galley_custom_id}: {item_to_fetch}")
+                    log.warning(f"{LogColors.WARNING}Invalid item in PendingDeliveriesData for galley {galley_custom_id}: {item_to_fetch}{LogColors.ENDC}")
                     continue
 
                 # Check if an active fetch_from_galley activity already exists for this specific item
@@ -1666,10 +1683,10 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                 try:
                     existing_activities = tables['activities'].all(formula=activity_exists_formula, max_records=1)
                     if existing_activities:
-                        log.info(f"Active 'fetch_from_galley' already exists for contract {original_contract_id}, resource {resource_type} from galley {galley_custom_id}. Skipping.")
+                        log.info(f"{LogColors.OKBLUE}Active 'fetch_from_galley' already exists for contract {original_contract_id}, resource {resource_type} from galley {galley_custom_id}. Skipping.{LogColors.ENDC}")
                         continue
                 except Exception as e_check_existing:
-                    log.error(f"Error checking for existing fetch_from_galley activities: {e_check_existing}")
+                    log.error(f"{LogColors.FAIL}Error checking for existing fetch_from_galley activities: {e_check_existing}{LogColors.ENDC}")
                     # Proceed with caution or skip
 
                 citizen_for_task = available_citizens_pool.pop(0) # Assign an idle citizen
@@ -1684,12 +1701,12 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                     try:
                         citizen_current_pos = json.loads(citizen_current_pos_str)
                     except json.JSONDecodeError:
-                        log.warning(f"Could not parse current position for citizen {citizen_username}. Cannot pathfind to galley.")
+                        log.warning(f"{LogColors.WARNING}Could not parse current position for citizen {citizen_username}. Cannot pathfind to galley.{LogColors.ENDC}")
                         available_citizens_pool.append(citizen_for_task) # Put back if cannot pathfind
                         continue 
                 
                 if not citizen_current_pos: # If still no position
-                    log.warning(f"Citizen {citizen_username} has no current position. Cannot pathfind to galley.")
+                    log.warning(f"{LogColors.WARNING}Citizen {citizen_username} has no current position. Cannot pathfind to galley.{LogColors.ENDC}")
                     available_citizens_pool.append(citizen_for_task) # Put back
                     continue
 
@@ -1709,18 +1726,18 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                     )
                     if activity_created:
                         activities_created_count += 1
-                        log.info(f"Created 'fetch_from_galley' for {citizen_username} to galley {galley_custom_id} for {amount} of {resource_type}.")
+                        log.info(f"{LogColors.OKGREEN}Created 'fetch_from_galley' for {citizen_username} to galley {galley_custom_id} for {amount} of {resource_type}.{LogColors.ENDC}")
                         # The processor for fetch_from_galley should update PendingDeliveriesData on the galley.
                     else:
                         available_citizens_pool.append(citizen_for_task) # Put back if failed
                 else:
-                    log.warning(f"Pathfinding to galley {galley_custom_id} failed for citizen {citizen_username}. Item: {item_to_fetch}")
+                    log.warning(f"{LogColors.WARNING}Pathfinding to galley {galley_custom_id} failed for citizen {citizen_username}. Item: {item_to_fetch}{LogColors.ENDC}")
                     available_citizens_pool.append(citizen_for_task) # Put back
 
     except Exception as e:
-        log.error(f"Error processing galley unloading activities: {e}")
+        log.error(f"{LogColors.FAIL}Error processing galley unloading activities: {e}{LogColors.ENDC}")
     
-    log.info(f"Created {activities_created_count} 'fetch_from_galley' activities.")
+    log.info(f"{LogColors.OKGREEN}Created {activities_created_count} 'fetch_from_galley' activities.{LogColors.ENDC}")
     return activities_created_count
 
 
@@ -1743,7 +1760,7 @@ def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen
     Returns the new position {lat, lng} or None.
     """
     citizen_custom_id = citizen_record['fields'].get('CitizenId', citizen_record['id'])
-    log.info(f"Attempting to fetch random building point for citizen {citizen_custom_id}.")
+    log.info(f"{LogColors.OKBLUE}Attempting to fetch random building point for citizen {citizen_custom_id}.{LogColors.ENDC}")
 
     try:
         api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000") # Use API_BASE_URL
@@ -1753,7 +1770,7 @@ def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen
         data = response.json()
 
         if not data.get("success") or not data.get("polygons"):
-            log.error(f"Failed to fetch or parse polygons data from {polygons_url}. Response: {data}")
+            log.error(f"{LogColors.FAIL}Failed to fetch or parse polygons data from {polygons_url}. Response: {data}{LogColors.ENDC}")
             return None
 
         all_building_points = []
@@ -1762,7 +1779,7 @@ def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen
                 all_building_points.extend(polygon["buildingPoints"])
         
         if not all_building_points:
-            log.warning(f"No buildingPoints found in polygons data from {polygons_url}.")
+            log.warning(f"{LogColors.WARNING}No buildingPoints found in polygons data from {polygons_url}.{LogColors.ENDC}")
             return None
 
         random_point = random.choice(all_building_points)
@@ -1777,21 +1794,21 @@ def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen
             # Update citizen record in Airtable
             try:
                 tables['citizens'].update(citizen_record['id'], {'Position': new_position_str})
-                log.info(f"Successfully updated citizen {citizen_custom_id} (Airtable ID: {citizen_record['id']}) with new random position: {new_position_str}")
+                log.info(f"{LogColors.OKGREEN}Successfully updated citizen {citizen_custom_id} (Airtable ID: {citizen_record['id']}) with new random position: {new_position_str}{LogColors.ENDC}")
                 return new_position_coords
             except Exception as e_update:
-                log.error(f"Failed to update citizen {citizen_custom_id} position in Airtable: {e_update}")
+                log.error(f"{LogColors.FAIL}Failed to update citizen {citizen_custom_id} position in Airtable: {e_update}{LogColors.ENDC}")
                 return None
         else:
-            log.warning(f"Selected random building point is missing lat/lng: {random_point}")
+            log.warning(f"{LogColors.WARNING}Selected random building point is missing lat/lng: {random_point}{LogColors.ENDC}")
             return None
 
     except requests.exceptions.RequestException as e_req:
-        log.error(f"Request error fetching polygons for random position: {e_req}")
+        log.error(f"{LogColors.FAIL}Request error fetching polygons for random position: {e_req}{LogColors.ENDC}")
         return None
     except json.JSONDecodeError as e_json:
-        log.error(f"JSON decode error fetching polygons for random position: {e_json}")
+        log.error(f"{LogColors.FAIL}JSON decode error fetching polygons for random position: {e_json}{LogColors.ENDC}")
         return None
     except Exception as e_general:
-        log.error(f"General error fetching or assigning random position for {citizen_custom_id}: {e_general}")
+        log.error(f"{LogColors.FAIL}General error fetching or assigning random position for {citizen_custom_id}: {e_general}{LogColors.ENDC}")
         return None
