@@ -55,17 +55,17 @@ from backend.engine.activity_creators import (
 )
 from dotenv import load_dotenv
 
-# Define ANSI color codes for logging
-class LogColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+# Import helpers from the new module
+from backend.engine.utils.activity_helpers import (
+    LogColors,
+    _escape_airtable_value,
+    _has_recent_failed_activity_for_contract,
+    _get_building_position_coords,
+    _calculate_distance_meters,
+    is_nighttime as is_nighttime_helper, # Rename to avoid conflict with local var
+    is_shopping_time as is_shopping_time_helper, # Rename
+    get_path_between_points as get_path_between_points_helper # Rename
+)
 
 # Set up logging
 logging.basicConfig(
@@ -569,6 +569,9 @@ def get_citizen_current_load(tables: Dict[str, Table], citizen_username: str) ->
         log.error(f"{LogColors.FAIL}Error calculating current load for citizen {citizen_username}: {e}{LogColors.ENDC}")
     return current_load
 
+# is_nighttime, is_shopping_time, get_path_between_points are now in activity_helpers.py
+# We will call them as is_nighttime_helper, is_shopping_time_helper, get_path_between_points_helper
+
 def get_closest_inn(tables: Dict[str, Table], citizen_position: Dict[str, float]) -> Optional[Dict]:
     """Finds the closest building of type 'inn' to the citizen's position."""
     log.info(f"{LogColors.OKBLUE}Searching for the closest inn to position: {citizen_position}{LogColors.ENDC}")
@@ -664,38 +667,6 @@ def is_nighttime() -> bool:
 def is_shopping_time() -> bool:
     """Check if it's currently shopping time in Venice (5 PM to 8 PM)."""
     now_venice = datetime.datetime.now(VENICE_TIMEZONE)
-    return SHOPPING_START_HOUR <= now_venice.hour < SHOPPING_END_HOUR
-
-def get_path_between_points(start_position: Dict, end_position: Dict) -> Optional[Dict]:
-    """Get a path between two points using the transport API."""
-    log.info(f"{LogColors.OKBLUE}Getting path from {start_position} to {end_position}{LogColors.ENDC}")
-    
-    try:
-        # Call the transport API
-        response = requests.post(
-            TRANSPORT_API_URL,
-            json={
-                "startPoint": start_position,
-                "endPoint": end_position,
-                "startDate": datetime.datetime.now(pytz.UTC).isoformat() # Send UTC start date
-            }
-        )
-        
-        if response.status_code != 200:
-            log.error(f"{LogColors.FAIL}Transport API error: {response.status_code} {response.text}{LogColors.ENDC}")
-            return None
-        
-        result = response.json()
-        
-        if not result.get('success'):
-            log.error(f"{LogColors.FAIL}Transport API returned error: {result.get('error')}{LogColors.ENDC}")
-            return None
-        
-        return result
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error calling transport API: {e}{LogColors.ENDC}")
-        return None
-
 # --- Removed create_stay_activity ---
 # --- Removed create_goto_work_activity ---
 # --- Removed create_goto_home_activity ---
