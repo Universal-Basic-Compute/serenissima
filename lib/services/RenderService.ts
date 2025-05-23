@@ -654,12 +654,22 @@ export class RenderService {
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
         const typeIndicator = building.type.charAt(0).toUpperCase();
         
-        // Determine the effective rotation: use 'orientation' for bridges if available, otherwise 'rotation'
+        // Determine the effective rotation:
+        let effectiveRotation = building.rotation; // Default to building.rotation
         const isBridgeType = building.type && building.type.toLowerCase().includes('bridge');
-        const effectiveRotation = (isBridgeType && typeof building.orientation === 'number') 
-          ? building.orientation 
-          : building.rotation;
 
+        if (isBridgeType) {
+          // If it's the bridge currently being oriented, use the live orientingBridgeAngle
+          if (interactionState.selectedBridgeForOrientationId === building.id && interactionState.orientingBridgeAngle !== null) {
+            effectiveRotation = interactionState.orientingBridgeAngle;
+            // console.log(`[RenderService] Using orientingBridgeAngle ${effectiveRotation} for bridge ${building.id}`);
+          } else if (typeof building.orientation === 'number') {
+            // Otherwise, for bridges, prefer building.orientation if it exists
+            effectiveRotation = building.orientation;
+          }
+          // If neither, building.rotation (already set as default) or undefined will be used.
+        }
+        
         // Pass effectiveRotation, building type, building category, and scale to drawBuilding
         this.drawBuilding(
           ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered, effectiveRotation, building.type, building.category, scale
