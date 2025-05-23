@@ -144,7 +144,8 @@ async function saveCitizensToAirtable(citizens: Citizen[]): Promise<void> {
     // Prepare records for Airtable with capitalized field names
     const records = citizens.map(citizen => ({
       fields: {
-        CitizenId: citizen.id,
+        CitizenId: citizen.id, // This is now the username
+        Username: citizen.id,  // Also populate the Username field with the username
         SocialClass: citizen.socialClass,
         FirstName: citizen.firstName,
         LastName: citizen.lastName,
@@ -328,14 +329,35 @@ async function generateCitizensWithClaude(existingCitizens: Citizen[]): Promise<
       }
       
       const jsonString = jsonMatch[0];
-      const newCitizens: Citizen[] = JSON.parse(jsonString);
-      
-      // Add IDs and creation timestamp
-      return newCitizens.map(citizen => ({
-        ...citizen,
-        id: generateUniqueId(),
-        createdAt: new Date().toISOString()
-      }));
+      const newCitizensFromClaude: Omit<Citizen, 'id' | 'createdAt'>[] = JSON.parse(jsonString);
+
+      const allCurrentIds = existingCitizens.map(c => c.id); // Existing IDs
+
+      return newCitizensFromClaude.map(rawCitizen => {
+        // Generate username from FirstName and LastName
+        const firstInitial = rawCitizen.firstName ? rawCitizen.firstName.charAt(0) : '';
+        const lastNameSanitized = rawCitizen.lastName ? rawCitizen.lastName.replace(/[^a-zA-Z0-9]/g, '') : 'Citizen';
+        let baseUsername = (firstInitial + lastNameSanitized).toLowerCase();
+
+        if (!baseUsername || baseUsername.length === 0) { // Fallback if name parts are empty
+            baseUsername = 'newcitizen';
+        }
+
+        let username = baseUsername;
+        let counter = 1;
+        // Ensure username is unique against existing citizens and those already processed in this batch
+        while (allCurrentIds.includes(username)) {
+            username = `${baseUsername}${counter}`;
+            counter++;
+        }
+        allCurrentIds.push(username); // Add to current batch's IDs to ensure uniqueness within the batch
+
+        return {
+          ...rawCitizen,
+          id: username, // Set citizen.id to the generated username
+          createdAt: new Date().toISOString()
+        };
+      });
       
     } catch (error) {
       console.error('Error generating citizens with Claude:', error);
