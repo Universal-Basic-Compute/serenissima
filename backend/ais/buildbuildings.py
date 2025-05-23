@@ -112,12 +112,12 @@ def initialize_airtable():
     api = Api(airtable_api_key)
     
     tables = {
-        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
-        "lands": Table(airtable_api_key, airtable_base_id, "LANDS"),
-        "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
-        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
-        "relevancies": Table(airtable_api_key, airtable_base_id, "RELEVANCIES"),
-        "problems": Table(airtable_api_key, airtable_base_id, "PROBLEMS")
+        "citizens": api.table(airtable_base_id, "CITIZENS"),
+        "lands": api.table(airtable_base_id, "LANDS"),
+        "buildings": api.table(airtable_base_id, "BUILDINGS"),
+        "notifications": api.table(airtable_base_id, "NOTIFICATIONS"),
+        "relevancies": api.table(airtable_base_id, "RELEVANCIES"),
+        "problems": api.table(airtable_base_id, "PROBLEMS")
     }
     
     return tables
@@ -314,9 +314,11 @@ def get_building_tier(building_type: str, building_types: Dict) -> int:
     if building_type.lower() in tier_mapping:
         return tier_mapping[building_type.lower()]
     
-    # If not found in the mapping, default to tier 5 (most restrictive)
-    # This ensures unknown building types are only available to Nobili
-    return 5  # Default to tier 5 if unknown to ensure proper restrictions
+    # If not found in the mapping, default to tier 1 (most permissive for basic buildings)
+    # This ensures unknown building types are at least buildable by some if tier info is missing.
+    # Consider logging a warning if a building type defaults.
+    log_warning(f"Building type '{building_type}' tier not found in API or mapping, defaulting to tier 1.")
+    return 1
 
 def get_building_types_from_api() -> Dict:
     """Get information about different building types from the API."""
@@ -1598,11 +1600,125 @@ def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: 
                 )
                 if building_ownership_response.ok:
                     building_ownership_data = building_ownership_response.json()
-                    if building_ownership_data.get("success") and building_ownership_data.get("detailedRelevancy"):
-                        for _, relevancy_item in building_ownership_data.get("detailedRelevancy", {}).items(): # Renamed relevancy to relevancy_item
-                            building_ownership_relevancies.append({
-                                "asset": relevancy_item.get("asset", ""), "asset_type": relevancy_item.get("assetType", ""),
-                                "category": relevancy_item.get("category", ""), "type": relevancy_item.get("type", ""),
+                    if building_ownership_data.get("success"):
+                        # detailedRelevancy is expected to be an array of relevancy items
+                        detailed_relevancy_list = building_ownership_data.get("detailedRelevancy", [])
+                        if isinstance(detailed_relevancy_list, list):
+                            for relevancy_item in detailed_relevancy_list:
+                                if isinstance(relevancy_item, dict): # Ensure item is a dictionary
+                                    building_ownership_relevancies.append({
+                                        "asset": relevancy_item.get("asset", ""), "asset_type": relevancy_item.get("assetType", ""),
+                                        "category": relevancy_item.get("category", ""), "type": relevancy_item.get("type", ""),
+                                        "target_citizen": relevancy_item.get("targetCitizen", ""), "score": relevancy_item.get("score", 0),
+                                        "time_horizon": relevancy_item.get("timeHorizon", ""), "title": relevancy_item.get("title", ""),
+                                        "description": relevancy_item.get("description", ""), "status": relevancy_item.get("status", "")
+                                    })
+                                else:
+                                    log_warning(f"Skipping non-dictionary item in detailedRelevancy list: {relevancy_item}")
+                        else:
+                            log_warning(f"detailedRelevancy field is not a list: {detailed_relevancy_list}")
+                    log_info(f"Retrieved {len(building_ownership_relevancies)} building ownership relevancies for {ai_username}")
+                else:
+                    log_warning(f"Failed to fetch building ownership relevancies: {building_ownership_response.status_code}")
+            except Exception as e_relevancy: # Renamed e to e_relevancy
+                log_warning(f"Error fetching building ownership relevancies: {str(e_relevancy)}")
+            data_package["building_ownership_relevancies"] = building_ownership_relevancies
+            
+            log_success(f"Prepared data package for {ai_username}")
+            
+            if not dry_run:
+                log_section(f"STEP 1: Get building decision for {ai_username}")
+                decision = send_building_strategy_request(ai_username, data_package, target_land_id=target_land_id_arg)
+                
+                if decision and decision.get("building_type") and decision.get("land_id"):
+                    log_section(f"STEP 2: Get placement decision for {ai_username}")
+                    building_types_api = get_building_types_from_api() # Renamed to avoid conflict
+                    
+                    # Ensure polygon_data and available_points are for the specific land chosen by AI or CLI
+                    final_land_id = decision["land_id"]
+                    final_polygon_data = [p for p in polygon_data if p.get("id") == final_land_id]
+                    
+                    if not final_polygon_data:
+                        log_error(f"Polygon data for chosen/specified land {final_land_id} not found. Skipping placement.")
+                        ai_strategy_results[ai_username] = False
+                        continue
+
+                    buildings_on_final_land = [b for b in all_buildings if b["fields"].get("LandId") == final_land_id]
+                    final_available_points = get_available_building_points(final_polygon_data, buildings_on_final_land)
+
+                    placement_success = send_building_placement_request(
+                        ai_username,
+                        decision,
+                        final_polygon_data, # Use polygon data for the specific chosen land
+                        final_available_points, # Use available points for the specific chosen land
+                        building_types_api,
+                        tables,
+                        get_citizen_relevancies(ai_username), # Contextual relevancies
+                        target_land_id_arg=final_land_id # Pass the land_id for context in placement
+                    )
+                    ai_strategy_results[ai_username] = placement_success
+                    log_success(f"Building strategy for {ai_username} completed with success: {placement_success}")
+                elif decision is None or not decision.get("building_type"): # AI decided not to build or error
+                    log_warning(f"AI {ai_username} decided not to build or an error occurred in decision making.")
+                    ai_strategy_results[ai_username] = False # Mark as false if no decision to build
+            else: # Dry run
+                log_info(f"[DRY RUN] Would send building strategy request to AI citizen {ai_username}")
+                log_data("Data package summary", {
+                    "Citizen": data_package['citizen']['username'],
+                    "Lands": len(data_package['lands']),
+                    "Buildings": len(data_package['buildings']),
+                    "Net Income": data_package['citizen']['financial']['net_income'],
+                    "Available building points": total_points
+                })
+                ai_strategy_results[ai_username] = True
+        except Exception as e:
+            print(f"Error processing AI citizen {ai_username}: {str(e)}")
+            print(f"Exception traceback: {traceback.format_exc()}")
+            ai_strategy_results[ai_username] = False
+        else:
+            # In dry run mode, just log what would happen
+            print(f"[DRY RUN] Would send building strategy request to AI citizen {ai_username}")
+            print(f"[DRY RUN] Data package summary:")
+            print(f"  - Citizen: {data_package['citizen']['username']}")
+            print(f"  - Lands: {len(data_package['lands'])}")
+            print(f"  - Buildings: {len(data_package['buildings'])}")
+            print(f"  - Net Income: {data_package['citizen']['financial']['net_income']}")
+            print(f"  - Available building points: {total_points}")
+            ai_strategy_results[ai_username] = True
+    
+    # Create admin notification with summary
+    if not dry_run and ai_strategy_results:
+        try:
+            create_admin_notification(tables, ai_strategy_results)
+            print("Created admin notification with AI building strategy results")
+        except Exception as e:
+            print(f"Error creating admin notification: {str(e)}")
+            print(f"Exception traceback: {traceback.format_exc()}")
+    else:
+        log_info(f"[DRY RUN] Would create admin notification with strategy results")
+        log_data("Strategy results", ai_strategy_results)
+    
+    # Print final summary
+    log_section("AI Building Strategy Results Summary")
+    headers = ["AI Citizen", "Status"]
+    rows = [[ai_name, "SUCCESS" if success else "FAILED"] for ai_name, success in ai_strategy_results.items()]
+    log_table(headers, rows)
+    
+    log_success("AI building strategy process completed")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="AI Building Strategy Script")
+    parser.add_argument("--dry-run", action="store_true", help="Run the script without making actual changes.")
+    parser.add_argument("--citizen", type=str, help="Run the script for a specific citizen username.")
+    parser.add_argument("--landId", type=str, help="Run the script for a specific land ID, skipping AI land selection.")
+    args = parser.parse_args()
+
+    dry_run_arg = args.dry_run
+    citizen_username_arg = args.citizen
+    target_land_id_arg = args.landId
+    
+    # Run the process
+    process_ai_building_strategies(dry_run_arg, citizen_username_arg, target_land_id_arg)
                                 "target_citizen": relevancy_item.get("targetCitizen", ""), "score": relevancy_item.get("score", 0),
                                 "time_horizon": relevancy_item.get("timeHorizon", ""), "title": relevancy_item.get("title", ""),
                                 "description": relevancy_item.get("description", ""), "status": relevancy_item.get("status", "")
