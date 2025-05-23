@@ -104,8 +104,8 @@ def enhance_image_prompt(citizen: Dict) -> str:
     # Combine original prompt with style guidelines
     enhanced_prompt = f"{base_prompt} {style_addition}"
     
-    # Add photorealistic quality directive
-    enhanced_prompt += " Photorealistic quality, highly detailed facial features, historically accurate."
+    # Add quality directive: colored illustration style
+    enhanced_prompt += " Detailed colored illustration style, highly detailed facial features, historically accurate."
     
     return enhanced_prompt
 
