@@ -12,9 +12,19 @@ const base = new Airtable({ apiKey }).base(baseId);
 export async function GET(request: Request) {
   try {
     // Get URL parameters
-    // const { searchParams } = new URL(request.url); // Owner filter removed
+    const { searchParams } = new URL(request.url);
+    const owner = searchParams.get('owner');
     
-    console.log(`Loading all resources`);
+    console.log(`Loading resources${owner ? ` for owner: ${owner}` : ' (all)'}`);
+    
+    // Build filter formula for Airtable query
+    let filterFormula = '';
+    if (owner) {
+      // Ensure owner value is properly escaped for Airtable formula
+      const escapedOwner = owner.replace(/'/g, "\\'");
+      filterFormula = `{Owner} = '${escapedOwner}'`;
+      console.log(`Filtering resources by owner: ${escapedOwner}`);
+    }
     
     // Query Airtable directly
     const records = await new Promise((resolve, reject) => {
@@ -22,7 +32,7 @@ export async function GET(request: Request) {
       
       base('RESOURCES')
         .select({
-          // filterByFormula: filterFormula || '', // Owner filter removed
+          filterByFormula: filterFormula, // Apply filter if owner is specified
           view: 'Grid view' // Ensure all necessary fields like AssetType, AssetId are in this view
         })
         .eachPage(
