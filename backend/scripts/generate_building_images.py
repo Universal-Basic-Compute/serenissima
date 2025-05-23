@@ -78,13 +78,13 @@ def _fetch_prompt_from_kinos(building_data: Dict[str, Any]) -> Optional[str]:
 You are an expert prompt engineer for the Ideogram image generation service.
 Your task is to generate a concise, effective, and descriptive Ideogram prompt based on the provided building details.
 The Ideogram prompt should:
-1. Start with a clear subject, e.g., "A detailed illustration of a [Building Name], a [Category] building..."
+1. Start with a clear subject, e.g., "A detailed colored illustration of a [Building Name], a [Category] building..."
 2. Incorporate key architectural details from the 15th-century Venetian context.
 3. Emphasize visual distinctiveness and a clear silhouette for game asset identification.
-4. Include style cues like "realistic textures (weathered stone, brick, plaster)", "natural lighting with warm Mediterranean sunlight", "historically accurate details".
+4. Specify "Detailed colored illustration style". Include "historically accurate details" and "natural lighting with warm Mediterranean sunlight". Textures should be "stylized yet recognizable (weathered stone, brick, plaster)" rather than strictly photorealistic.
 5. Specify "Square format image" and always include "--ar 1:1".
-6. If "Specific 3D Prompt Elements" are provided in the details, integrate their essence while maintaining overall stylistic consistency for UX.
-7. Tailor descriptive words and color palettes based on the building's category and name (e.g., residential, commercial, industrial, civic).
+6. If "Specific 3D Prompt Elements" are provided in the details, integrate their essence while maintaining overall stylistic consistency for UX, favoring the illustration style.
+7. Tailor descriptive words and color palettes based on the building's category and name (e.g., residential, commercial, industrial, civic), fitting an illustrative style.
     - Residential: Venetian Gothic, ornate windows, balconies. Palazzos: grand facade, marble. Modest homes: terracotta, ochre.
     - Commercial: Functional, identifiable. Workshops: signs of craft, earthy tones. Markets: open-air, vibrant awnings. Warehouses: sturdy, practical, muted colors. Taverns: welcoming, warm wood.
     - Industrial: Robust, functional. Shipyards: slipways, timber. Furnaces: chimneys, glowing light, utilitarian greys.
@@ -232,9 +232,9 @@ def create_image_prompt(building: Dict[str, Any]) -> str:
         log.warning(f"Failed to get prompt from Kinos for {name}. Falling back to basic prompt construction.")
         # Fallback: use base_prompt_for_kinos and generic style guidelines
         fallback_style_elements = [
-            "Detailed illustration",
+            "Detailed colored illustration style",
             "clear silhouette for easy game asset identification",
-            "realistic textures (weathered stone, brick, plaster)",
+            "stylized yet recognizable textures (weathered stone, brick, plaster)",
             "natural lighting with warm Mediterranean sunlight",
             "historically accurate details for 15th century Venice",
             "Square format image",
