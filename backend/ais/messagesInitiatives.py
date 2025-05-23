@@ -142,70 +142,101 @@ def _get_relationship_data(tables: Dict[str, Table], username1: str, username2: 
         return None
 
 def _get_notifications_data(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
+    """Récupère les notifications pour un citoyen via l'API."""
     try:
-        safe_username = _escape_airtable_value(username)
-        # Utiliser FIND pour plus de robustesse si Citizen est un champ de lien ou texte contenant le nom
-        formula = f"FIND('{safe_username}', ARRAYJOIN({{Citizen}})) > 0"
-        records = tables["notifications"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
-        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+        # L'API /api/notifications attend un POST avec 'citizen' dans le corps JSON
+        api_url = f"{BASE_URL}/api/notifications"
+        payload = {"citizen": username} # 'since' est optionnel et a une valeur par défaut dans l'API
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(api_url, headers=headers, json=payload, timeout=15)
+        response.raise_for_status()
+        
+        data = response.json()
+        if data.get("success") and "notifications" in data:
+            # L'API retourne déjà les champs nécessaires, pas besoin de 'fields' imbriqué
+            # Ajuster si le format de l'API est différent (par exemple, si elle retourne des enregistrements Airtable bruts)
+            print(f"Récupéré {len(data['notifications'])} notifications pour {username} via API.")
+            return data["notifications"]
+        else:
+            print(f"L'API a échoué à récupérer les notifications pour {username}: {data.get('error', 'Erreur inconnue')}")
+            return []
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur de requête API lors de la récupération des notifications pour {username}: {e}")
+        return []
     except Exception as e:
-        print(f"Erreur lors de la récupération des notifications pour {username}: {e}")
+        print(f"Erreur lors de la récupération des notifications pour {username} via API: {e}")
         return []
 
 def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, target_username: str, limit: int = 50) -> List[Dict]:
+    """Récupère les pertinences via l'API."""
     try:
-        safe_relevant_to_username = _escape_airtable_value(relevant_to_username)
-        safe_target_username = _escape_airtable_value(target_username)
+        params = {
+            "relevantToCitizen": relevant_to_username,
+            "targetCitizen": target_username,
+            "limit": str(limit) # L'API attend des chaînes pour les paramètres numériques
+        }
+        api_url = f"{BASE_URL}/api/relevancies"
+        response = requests.get(api_url, params=params, timeout=15)
+        response.raise_for_status()
         
-        conditions = []
-        if safe_relevant_to_username:
-            conditions.append(f"FIND('{safe_relevant_to_username}', ARRAYJOIN({{RelevantToCitizen}})) > 0")
+        data = response.json()
+        if data.get("success") and "relevancies" in data:
+             # L'API retourne déjà les champs nécessaires, pas besoin de 'fields' imbriqué
+            print(f"Récupéré {len(data['relevancies'])} pertinences pour {relevant_to_username} -> {target_username} via API.")
+            return data["relevancies"]
         else:
-            # Si le nom d'utilisateur est vide, cette condition ne peut pas être remplie de manière significative avec FIND.
-            # On pourrait ajouter une condition qui est toujours fausse, ou omettre, selon la logique souhaitée.
-            # Pour l'instant, on l'omet, ce qui signifie que si le nom est vide, ce critère n'est pas appliqué.
-            pass # Ou conditions.append("FALSE()") si on veut que ça échoue si le nom est vide.
-
-        if safe_target_username:
-            conditions.append(f"FIND('{safe_target_username}', ARRAYJOIN({{TargetCitizen}})) > 0")
-        else:
-            pass # Idem
-
-        if not conditions: # Si les deux noms d'utilisateur sont vides, retourner une liste vide.
-            print(f"Les deux noms d'utilisateur pour la recherche de pertinences sont vides. Retour d'une liste vide.")
+            print(f"L'API a échoué à récupérer les pertinences pour {relevant_to_username} -> {target_username}: {data.get('error', 'Erreur inconnue')}")
             return []
-
-        formula = f"AND({', '.join(conditions)})"
-        
-        records = tables["relevancies"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
-        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur de requête API lors de la récupération des pertinences pour {relevant_to_username} -> {target_username}: {e}")
+        return []
     except Exception as e:
-        print(f"Erreur lors de la récupération des pertinences pour {relevant_to_username} ciblant {target_username}: {e}")
+        print(f"Erreur lors de la récupération des pertinences pour {relevant_to_username} -> {target_username} via API: {e}")
         return []
 
 def _get_problems_data(tables: Dict[str, Table], username1: str, username2: str, limit: int = 50) -> List[Dict]:
+    """Récupère les problèmes pour un ou deux citoyens via l'API."""
+    problems_list = []
     try:
-        safe_username1 = _escape_airtable_value(username1)
-        safe_username2 = _escape_airtable_value(username2)
-        # Simplification pour le débogage :
-        # Cette formule OR est généralement correcte, mais si {Citizen} est un champ de lien multiple,
-        # la comparaison directe peut être problématique.
-        # Utiliser FIND pour plus de robustesse
-        conditions = []
-        if safe_username1:
-            conditions.append(f"FIND('{safe_username1}', ARRAYJOIN({{Citizen}})) > 0")
-        if safe_username2:
-            conditions.append(f"FIND('{safe_username2}', ARRAYJOIN({{Citizen}})) > 0")
+        # Récupérer les problèmes pour username1
+        params1 = {"citizen": username1, "status": "active", "limit": str(limit)}
+        api_url = f"{BASE_URL}/api/problems"
+        response1 = requests.get(api_url, params=params1, timeout=15)
+        response1.raise_for_status()
+        data1 = response1.json()
+        if data1.get("success") and "problems" in data1:
+            problems_list.extend(data1["problems"])
+        else:
+            print(f"L'API a échoué à récupérer les problèmes pour {username1}: {data1.get('error', 'Erreur inconnue')}")
 
-        if not conditions:
-            print(f"Les deux noms d'utilisateur pour la recherche de problèmes sont vides. Retour d'une liste vide.")
-            return []
-            
-        formula = f"OR({', '.join(conditions)})"
-        records = tables["problems"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
-        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+        # Récupérer les problèmes pour username2, en évitant les doublons si username1 == username2
+        if username1 != username2:
+            params2 = {"citizen": username2, "status": "active", "limit": str(limit)}
+            response2 = requests.get(api_url, params=params2, timeout=15)
+            response2.raise_for_status()
+            data2 = response2.json()
+            if data2.get("success") and "problems" in data2:
+                # Éviter d'ajouter des problèmes en double si un problème concerne les deux
+                existing_problem_ids = {p.get('problemId') or p.get('id') for p in problems_list}
+                for problem in data2["problems"]:
+                    problem_id = problem.get('problemId') or problem.get('id')
+                    if problem_id not in existing_problem_ids:
+                        problems_list.append(problem)
+            else:
+                print(f"L'API a échoué à récupérer les problèmes pour {username2}: {data2.get('error', 'Erreur inconnue')}")
+        
+        # L'API /api/problems ne trie pas par CreatedAt par défaut, mais on peut le demander.
+        # Ici, nous allons trier en Python pour correspondre au comportement précédent.
+        problems_list.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+        
+        print(f"Récupéré {len(problems_list)} problèmes pour {username1} ou {username2} via API.")
+        return problems_list[:limit]
+
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur de requête API lors de la récupération des problèmes pour {username1} ou {username2}: {e}")
+        return problems_list # Retourner ce qui a été collecté jusqu'à présent
     except Exception as e:
-        print(f"Erreur lors de la récupération des problèmes pour {username1} ou {username2}: {e}")
+        print(f"Erreur lors de la récupération des problèmes pour {username1} ou {username2} via API: {e}")
         return []
 
 # --- Fonctions Kinos et création de message ---

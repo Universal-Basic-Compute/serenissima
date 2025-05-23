@@ -45,28 +45,57 @@ def _escape_airtable_value(value: str) -> str:
     return str(value)
 
 def _get_citizen_building_problems(tables: Dict[str, Table], username: str, limit: int = 100) -> List[Dict]:
-    """Get latest 100 PROBLEMS where AssetType='building' AND Citizen=Username."""
+    """Get latest PROBLEMS where AssetType='building' AND Citizen=Username via API."""
     try:
-        safe_username = _escape_airtable_value(username)
-        formula = f"AND({{AssetType}}='building', {{Citizen}}='{safe_username}')"
-        # Assuming 'CreatedAt' field exists for sorting
-        records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
-        print(f"Found {len(records)} building problems for citizen {username}")
-        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+        api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+        params = {
+            "citizen": username,
+            "assetType": "building",
+            "status": "active", # Ou selon les besoins
+            "limit": str(limit)
+        }
+        api_url = f"{api_base_url}/api/problems"
+        response = requests.get(api_url, params=params, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "problems" in data:
+            # L'API /api/problems retourne déjà les champs nécessaires, pas besoin de 'fields' imbriqué
+            print(f"Récupéré {len(data['problems'])} problèmes de bâtiment pour {username} via API.")
+            return data["problems"]
+        else:
+            print(f"L'API a échoué à récupérer les problèmes de bâtiment pour {username}: {data.get('error', 'Erreur inconnue')}")
+            return []
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur de requête API lors de la récupération des problèmes de bâtiment pour {username}: {e}")
+        return []
     except Exception as e:
-        print(f"Error fetching citizen building problems for {username}: {e}")
+        print(f"Erreur lors de la récupération des problèmes de bâtiment pour {username} via API: {e}")
         return []
 
 def _get_general_building_problems(tables: Dict[str, Table], limit: int = 100) -> List[Dict]:
-    """Get latest 100 PROBLEMS where AssetType='building' for any citizen."""
+    """Get latest PROBLEMS where AssetType='building' for any citizen via API."""
     try:
-        formula = "{AssetType}='building'" # Corrected: single curly braces
-        # Assuming 'CreatedAt' field exists for sorting
-        records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
-        print(f"Found {len(records)} general building problems.")
-        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+        api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+        params = {
+            "assetType": "building",
+            "status": "active", # Ou selon les besoins
+            "limit": str(limit)
+        }
+        api_url = f"{api_base_url}/api/problems"
+        response = requests.get(api_url, params=params, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "problems" in data:
+            print(f"Récupéré {len(data['problems'])} problèmes généraux de bâtiment via API.")
+            return data["problems"]
+        else:
+            print(f"L'API a échoué à récupérer les problèmes généraux de bâtiment: {data.get('error', 'Erreur inconnue')}")
+            return []
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur de requête API lors de la récupération des problèmes généraux de bâtiment: {e}")
+        return []
     except Exception as e:
-        print(f"Error fetching general building problems: {e}")
+        print(f"Erreur lors de la récupération des problèmes généraux de bâtiment via API: {e}")
         return []
 
 def get_ai_citizens(tables) -> List[Dict]:
@@ -193,13 +222,36 @@ def get_citizen_contracts(tables, username: str) -> List[Dict]:
         # Get current time
         now = datetime.now().isoformat()
         
-        # Query contracts where the citizen is the buyer and the contract is active (between CreatedAt and EndAt)
-        formula = f"AND({{Buyer}}='{username}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
-        contracts = tables["contracts"].all(formula=formula)
-        print(f"Found {len(contracts)} active contracts where {username} is the buyer")
-        return contracts
+        # Query contracts where the citizen is the buyer and the contract is active
+        # Utiliser l'API /api/contracts
+        api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+        params = {"username": username, "scope": "userNonPublic"} # Pour obtenir les contrats non publics de l'utilisateur
+        api_url = f"{api_base_url}/api/contracts"
+        
+        response = requests.get(api_url, params=params, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        
+        if data.get("success") and "contracts" in data:
+            # Filtrer pour ne garder que les contrats actifs si l'API ne le fait pas déjà
+            # L'API /api/contracts devrait idéalement retourner des contrats actifs
+            # Pour l'instant, on suppose que l'API retourne les contrats pertinents.
+            # Si un filtrage supplémentaire par date est nécessaire, il faudrait le faire ici.
+            active_contracts = [
+                c for c in data["contracts"] 
+                # Exemple de filtrage par date si nécessaire :
+                # if c.get("createdAt") <= now and c.get("endAt") >= now
+            ]
+            print(f"Trouvé {len(active_contracts)} contrats actifs où {username} est l'acheteur via API.")
+            return active_contracts
+        else:
+            print(f"L'API a échoué à récupérer les contrats pour {username}: {data.get('error', 'Erreur inconnue')}")
+            return []
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur de requête API lors de la récupération des contrats pour {username}: {e}")
+        return []
     except Exception as e:
-        print(f"Error getting contracts for citizen {username}: {str(e)}")
+        print(f"Erreur lors de la récupération des contrats pour {username} via API: {e}")
         return []
 
 def get_kinos_api_key() -> str:
