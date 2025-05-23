@@ -277,6 +277,10 @@ export class InteractionService {
       // Callbacks for bridge orientation (setOrientBridgeModeActive removed)
       setSelectedBridgeForOrientationId: (id: string | null) => void;
       setOrientingBridgeAngle: (angle: number | null) => void;
+      // Callbacks for opening BuildingCreationPanel
+      onEmptyBuildingPointSelected?: (point: { lat: number; lng: number }, polygonId: string) => void;
+      onCanalPointSelected?: (point: { lat: number; lng: number }, polygonId: string) => void;
+      onBridgePointSelected?: (point: { lat: number; lng: number }, polygonId: string) => void;
     }
   ): () => void {
     
