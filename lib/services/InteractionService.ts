@@ -847,12 +847,16 @@ export class InteractionService {
             console.log('Dispatching buildingPointClick event with data:', { position: point });
                 
             // Dispatch an event to open the building menu at this position
-            const event = new CustomEvent('buildingPointClick', {
-              detail: { position: point }
-            });
-            window.dispatchEvent(event);
-                
-            console.log('buildingPointClick event dispatched');
+            // const event = new CustomEvent('buildingPointClick', {
+            //   detail: { position: point }
+            // });
+            // window.dispatchEvent(event);
+            // console.log('buildingPointClick event dispatched');
+
+            if (setters.onEmptyBuildingPointSelected) {
+              const polygonId = setters.findPolygonIdForPoint(point);
+              setters.onEmptyBuildingPointSelected(point, polygonId);
+            }
                 
             // Deselect any selected building
             this.state.selectedBuildingId = null;
@@ -910,12 +914,17 @@ export class InteractionService {
                 };
                 
                 // Dispatch an event to open the building menu at this position
-                window.dispatchEvent(new CustomEvent('buildingPointClick', {
-                  detail: { 
-                    position: point.edge,
-                    pointType: 'canal'
-                  }
-                }));
+                // window.dispatchEvent(new CustomEvent('buildingPointClick', {
+                //   detail: { 
+                //     position: point.edge,
+                //     pointType: 'canal'
+                //   }
+                // }));
+
+                if (setters.onCanalPointSelected) {
+                  const polygonId = setters.findPolygonIdForPoint(point.edge);
+                  setters.onCanalPointSelected(point.edge, polygonId);
+                }
                 
                 // Deselect any selected building
                 this.state.selectedBuildingId = null;
@@ -968,13 +977,18 @@ export class InteractionService {
                 };
                 
                 // Dispatch an event to open the building menu at this position
-                window.dispatchEvent(new CustomEvent('buildingPointClick', {
-                  detail: { 
-                    position: point.edge,
-                    pointType: 'bridge'
-                  }
-                }));
+                // window.dispatchEvent(new CustomEvent('buildingPointClick', {
+                //   detail: { 
+                //     position: point.edge,
+                //     pointType: 'bridge'
+                //   }
+                // }));
                 
+                if (setters.onBridgePointSelected) {
+                  const polygonId = setters.findPolygonIdForPoint(point.edge);
+                  setters.onBridgePointSelected(point.edge, polygonId);
+                }
+
                 // Deselect any selected building
                 this.state.selectedBuildingId = null;
                 setters.setSelectedBuildingId(null);
