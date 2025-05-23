@@ -14,6 +14,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   const [progress, setProgress] = useState(0);
   const [imageError, setImageError] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [imageReadyForDisplay, setImageReadyForDisplay] = useState(false); // New state for fade-in
 
 const CACHE_KEY_LOADING_IMAGES = 'loadingImagesList';
 const CACHE_DURATION_LOADING_IMAGES = 60 * 60 * 1000; // 1 heure en millisecondes
@@ -73,6 +74,7 @@ const CACHE_DURATION_LOADING_IMAGES = 60 * 60 * 1000; // 1 heure en milliseconde
         console.log('LoadingScreen: Image loaded successfully:', imageUrl);
         setLoadingImage(imageUrl);
         setImageError(false);
+        setImageReadyForDisplay(true); // Image is ready for display
       };
       img.onerror = (e) => {
         console.error('LoadingScreen: Error preloading image:', imageUrl, e);
@@ -191,7 +193,10 @@ const CACHE_DURATION_LOADING_IMAGES = 60 * 60 * 1000; // 1 heure en milliseconde
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
       {/* Background image with overlay */}
       {loadingImage && !imageError && (
-        <div className="absolute inset-0 overflow-hidden">
+        <div 
+          className="absolute inset-0 overflow-hidden transition-opacity duration-1000 ease-in-out"
+          style={{ opacity: imageReadyForDisplay ? 1 : 0 }} // Control opacity for fade-in
+        >
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ 
@@ -206,7 +211,10 @@ const CACHE_DURATION_LOADING_IMAGES = 60 * 60 * 1000; // 1 heure en milliseconde
       
       {/* Fallback background if no image loads */}
       {(!loadingImage || imageError) && (
-        <div className="absolute inset-0 bg-amber-900">
+        <div 
+          className="absolute inset-0 bg-amber-900 transition-opacity duration-1000 ease-in-out"
+          style={{ opacity: imageReadyForDisplay ? 1 : 0 }} // Control opacity for fade-in
+        >
           {/* Fallback background */}
         </div>
       )}
