@@ -1,7 +1,7 @@
 import os
 import requests
 import argparse
-from airtable import Airtable
+from pyairtable import Api, Base # Changed import
 from dotenv import load_dotenv
 import time
 
@@ -9,9 +9,22 @@ import time
 load_dotenv()
 
 # Airtable Configuration
-AIRTABLE_BASE_KEY = os.getenv("AIRTABLE_BASE_KEY")
+AIRTABLE_API_KEY_ENV = os.getenv("AIRTABLE_API_KEY") # For pyairtable
+AIRTABLE_BASE_ID_ENV = os.getenv("AIRTABLE_BASE_ID") # Consistent naming
 AIRTABLE_TABLE_NAME_CITIZENS = "CITIZENS"
-airtable_citizens = Airtable(AIRTABLE_BASE_KEY, AIRTABLE_TABLE_NAME_CITIZENS)
+
+# Initialize Airtable connection using pyairtable
+if not AIRTABLE_API_KEY_ENV or not AIRTABLE_BASE_ID_ENV:
+    print("Error: Airtable API key or Base ID not found in environment variables.")
+    # Depending on how critical this is, you might exit or handle it.
+    # For now, let's allow it to proceed and fail later if these are truly needed.
+    # However, linkrepos.py DOES need it.
+    sys.exit("Airtable API Key and Base ID are required.")
+
+api = Api(AIRTABLE_API_KEY_ENV)
+base = Base(api, AIRTABLE_BASE_ID_ENV)
+citizens_table = base.table(AIRTABLE_TABLE_NAME_CITIZENS)
+
 
 # Kinos Engine Configuration
 KINOS_ENGINE_API_KEY = os.getenv("KINOS_ENGINE_API_KEY")
@@ -66,8 +79,9 @@ def main():
     parser.add_argument("--citizen", type=str, help="Specify a single citizen username to link.")
     args = parser.parse_args()
 
-    if not AIRTABLE_BASE_KEY:
-        print("Error: AIRTABLE_BASE_KEY not found in environment variables.")
+    # Environment variable check for Airtable is now at the top level
+    if not AIRTABLE_API_KEY_ENV or not AIRTABLE_BASE_ID_ENV:
+        print("Error: Airtable credentials (AIRTABLE_API_KEY, AIRTABLE_BASE_ID) not properly set.")
         return
     if not KINOS_ENGINE_API_KEY:
         print("Error: KINOS_ENGINE_API_KEY not found in environment variables.")
@@ -85,7 +99,7 @@ def main():
     else:
         print("Fetching all citizens from Airtable to link repositories...")
         try:
-            citizens = airtable_citizens.get_all()
+            citizens = citizens_table.all() # Use pyairtable method
         except Exception as e:
             print(f"Error fetching citizens from Airtable: {e}")
             return
