@@ -321,6 +321,22 @@ def start_scheduler(forced_hour: Optional[int] = None): # Added forced_hour para
     finally:
         print("Scheduler has shut down.")
 
+# Module-level variable to hold the scheduler thread instance when run by API
+_api_scheduler_thread: Optional[threading.Thread] = None
+
+def start_scheduler_background(forced_hour: Optional[int] = None):
+    """Starts the scheduler tasks in a background daemon thread. For use by FastAPI."""
+    global _api_scheduler_thread
+    if _api_scheduler_thread and _api_scheduler_thread.is_alive():
+        print("Scheduler background thread is already running.")
+        return
+
+    print("Attempting to start scheduler in background thread...")
+    _api_scheduler_thread = threading.Thread(target=run_scheduled_tasks, args=(forced_hour,))
+    _api_scheduler_thread.daemon = True  # Ensure it exits when main app exits
+    _api_scheduler_thread.start()
+    print("Scheduler background thread has been started.")
+
 # --- Telegram Notification Function ---
 def send_telegram_notification(message: str):
     """Sends a message to a Telegram chat via a bot."""
