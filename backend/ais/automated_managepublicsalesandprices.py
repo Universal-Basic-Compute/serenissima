@@ -315,7 +315,8 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
 
     summary_message = f"Automated Public Sell Contract Management Summary ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
     for res in results:
-        summary_message += (f"- AI: {res['ai_seller']}, Building: {res['building_id']}, Resource: {res['resource_name']} ({res['resource_id']}), "
+        building_display = res.get('building_name', res['building_id']) # Use name if available, else ID
+        summary_message += (f"- AI: {res['ai_seller']}, Building: {building_display}, Resource: {res['resource_name']} ({res['resource_id']}), "
                             f"Price: {res['price']:.2f}, Amount: {res['amount']:.2f}/hr, Strategy: {res['strategy']}\n")
     
     try:
@@ -444,9 +445,11 @@ def process_automated_public_sales(strategy: str, dry_run: bool):
                     resource_def.get("name", resource_id),
                     calculated_sell_price, DEFAULT_HOURLY_AMOUNT_TO_SELL, dry_run
                 ):
+                    building_name_for_summary = business_building['fields'].get('Name', building_custom_id) # Get building name
                     managed_contracts_summary.append({
                         "ai_seller": ai_username,
                         "building_id": building_custom_id,
+                        "building_name": building_name_for_summary, # Add building name
                         "resource_id": resource_id,
                         "resource_name": resource_def.get("name", resource_id),
                         "price": calculated_sell_price,
