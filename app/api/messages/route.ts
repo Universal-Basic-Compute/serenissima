@@ -35,14 +35,26 @@ export async function POST(request: Request) {
       // Initialize Airtable
       const base = initAirtable();
       
-      // Build filter formula to get messages between the two citizens
-      // Include guild application messages if the otherCitizen is a guild ID
-      const filterFormula = `OR(
-        AND({Sender} = '${currentCitizen}', {Receiver} = '${otherCitizen}'),
-        AND({Sender} = '${otherCitizen}', {Receiver} = '${currentCitizen}'),
-        AND({Type} = 'guild_application', {Receiver} = '${currentCitizen}'),
-        AND({Type} = 'guild_application', {Sender} = '${currentCitizen}', {Receiver} = '${otherCitizen}')
-      )`;
+      // Build filter formula to get messages
+      let filterFormula = '';
+
+      if (currentCitizen === otherCitizen) {
+        // Self-chat: Fetch messages where sender and receiver are the current citizen,
+        // and any guild applications sent TO the current citizen.
+        filterFormula = `OR(
+          AND({Sender} = '${currentCitizen}', {Receiver} = '${currentCitizen}'),
+          AND({Type} = 'guild_application', {Receiver} = '${currentCitizen}')
+        )`;
+      } else {
+        // Chat with another citizen: Fetch messages between them,
+        // and guild applications exchanged *between* them.
+        filterFormula = `OR(
+          AND({Sender} = '${currentCitizen}', {Receiver} = '${otherCitizen}'),
+          AND({Sender} = '${otherCitizen}', {Receiver} = '${currentCitizen}'),
+          AND({Type} = 'guild_application', {Sender} = '${currentCitizen}', {Receiver} = '${otherCitizen}'}),
+          AND({Type} = 'guild_application', {Sender} = '${otherCitizen}', {Receiver} = '${currentCitizen}'})
+        )`;
+      }
       
       // Fetch messages from Airtable
       const records = await base(AIRTABLE_MESSAGES_TABLE)
