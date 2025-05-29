@@ -1095,7 +1095,7 @@ Your response:`;
     setIsLoadingHistory(true);
     try {
       const response = await fetch(
-        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages?limit=25&offset=${offset}`,
+        `${KINOS_API_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages?limit=25&offset=${offset}`,
         {
           method: 'GET',
           headers: {
@@ -1187,7 +1187,7 @@ Your response:`;
       }
       
       const response = await fetch(
-        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
+        `${KINOS_API_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
         {
           method: 'POST',
           headers: {
