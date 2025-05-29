@@ -31,7 +31,7 @@ def link_repo_for_citizen(username):
     url = f"{KINOS_API_BASE_URL}/{username}/link-repo"
     payload = {
         "github_url": GITHUB_REPO_URL,
-        "branch_name": username  # Using username as branch name
+        "branchName": username  # Using username as branch name
     }
     headers = {
         "Authorization": f"Bearer {KINOS_ENGINE_API_KEY}",
