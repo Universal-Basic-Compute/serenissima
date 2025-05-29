@@ -288,10 +288,10 @@ def is_nighttime(current_venice_time: Optional[datetime.datetime] = None) -> boo
     return hour >= NIGHT_START_HOUR or hour < NIGHT_END_HOUR
 
 def is_shopping_time(current_venice_time: Optional[datetime.datetime] = None) -> bool:
-    """Check if it's currently shopping time in Venice (5 PM to 8 PM)."""
+    """Check if it's currently shopping time in Venice (9 AM to 5 PM)."""
     # Constants for shopping hours
-    SHOPPING_START_HOUR = 17 # 5 PM
-    SHOPPING_END_HOUR = 20   # 8 PM
+    SHOPPING_START_HOUR = 9  # 9 AM
+    SHOPPING_END_HOUR = 17   # 5 PM
 
     now_venice = current_venice_time or datetime.datetime.now(VENICE_TIMEZONE)
     return SHOPPING_START_HOUR <= now_venice.hour < SHOPPING_END_HOUR
