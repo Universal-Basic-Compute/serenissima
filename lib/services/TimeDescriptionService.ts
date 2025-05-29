@@ -242,6 +242,31 @@ export class TimeDescriptionService {
       default: return 'th';
     }
   }
+
+  /**
+   * Format a date string into a time string (HH:MM)
+   * @param dateString ISO date string to format
+   * @returns Formatted time string (e.g., "14:30")
+   */
+  public formatTime(dateString?: string): string {
+    if (!dateString) {
+      return '--:--'; // Return placeholder if dateString is undefined
+    }
+    try {
+      const date = new Date(dateString);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      // Attempt to extract time from string if Date parsing fails (basic fallback)
+      const match = dateString.match(/T(\d{2}:\d{2})/);
+      if (match && match[1]) {
+        return match[1];
+      }
+      return '--:--'; // Fallback for invalid date string
+    }
+  }
 }
 
 // Export a singleton instance
