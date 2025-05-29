@@ -30,7 +30,7 @@ gemini_model = genai.GenerativeModel('gemini-2.5-pro-preview-03-25') # Specify t
 
 # Directory paths
 TECH_TREE_DIR = Path("components/Knowledge")
-IMAGES_DIR = Path("public/images/tech-tree")
+IMAGES_DIR = Path("publichttps://backend.serenissima.ai/public_assets/images/knowledge/tech-tree")
 PROGRESS_FILE = Path("data/tech_tree_image_generation_progress.json")
 ERROR_LOG = Path("data/tech_tree_image_generation_errors.json")
 
@@ -152,7 +152,7 @@ def extract_tech_tree_nodes():
                     'id': node['id'].strip("'\""),
                     'title': node['title'].strip("'\""),
                     'description': node['description'].strip("'\""),
-                    'image': node['image'].strip("'\"") if 'image' in node else "/images/tech-tree/" + node['id'].strip("'\"") + ".jpg"
+                    'image': node['image'].strip("'\"") if 'image' in node else "https://backend.serenissima.ai/public_assets/images/knowledge/tech-tree/" + node['id'].strip("'\"") + ".jpg"
                 })
         
         print(f"Extracted {len(clean_nodes)} tech tree nodes")
