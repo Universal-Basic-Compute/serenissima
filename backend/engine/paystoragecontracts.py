@@ -150,14 +150,14 @@ def create_notification(tables: Dict[str, Table], citizen_username: str, title: 
         payload = {
             "Citizen": citizen_username,
             "Type": "storage_payment_issue", # Generic type for now
-            "Title": title,
-            "Content": content,
+            "Title": f"⚠️ {title}" if "insufficient funds" in title.lower() else f"ℹ️ {title}",
+            "Content": content, # Content already formatted with bold/emojis
             "Details": json.dumps(details) if details else None,
             "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
             "Status": "unread"
         }
         tables["notifications"].create(payload)
-        log.info(f"{LogColors.OKCYAN}Created notification for {citizen_username}: '{title}'.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKCYAN}📬 Created notification for **{citizen_username}**: '{title}'.{LogColors.ENDC}")
         return True
     except Exception as e:
         log.error(f"{LogColors.FAIL}Error creating notification for {citizen_username}: {e}{LogColors.ENDC}")
@@ -230,14 +230,14 @@ def process_storage_payments(dry_run: bool = False):
             payments_failed_insufficient_funds += 1
             if not dry_run:
                 title_buyer = f"Storage Payment Due: {contract_custom_id}"
-                content_buyer = (f"Your daily payment of {daily_payment_amount:.2f} Ducats for storage contract {contract_custom_id} "
-                                 f"(Resource: {resource_type}, Capacity: {target_amount}) could not be processed due to insufficient funds. "
-                                 f"Please ensure you have enough Ducats. Seller: {seller_username}.")
+                content_buyer = (f"⚠️ Your daily payment of **{daily_payment_amount:.2f} ⚜️ Ducats** for storage contract **{contract_custom_id}** "
+                                 f"(Resource: **{resource_type}**, Capacity: {target_amount}) could not be processed due to **insufficient funds**. "
+                                 f"Please ensure you have enough Ducats. Storage Provider: **{seller_username}**.")
                 create_notification(tables, buyer_username, title_buyer, content_buyer, {"contractId": contract_custom_id, "amountDue": daily_payment_amount})
 
                 title_seller = f"Storage Payment Issue: {contract_custom_id}"
-                content_seller = (f"The daily payment of {daily_payment_amount:.2f} Ducats from {buyer_username} for storage contract {contract_custom_id} "
-                                  f"(Resource: {resource_type}, Capacity: {target_amount}) could not be processed due to their insufficient funds.")
+                content_seller = (f"⚠️ The daily payment of **{daily_payment_amount:.2f} ⚜️ Ducats** from **{buyer_username}** for storage contract **{contract_custom_id}** "
+                                  f"(Resource: **{resource_type}**, Capacity: {target_amount}) could not be processed due to their **insufficient funds**.")
                 create_notification(tables, seller_username, title_seller, content_seller, {"contractId": contract_custom_id, "amountDue": daily_payment_amount, "buyer": buyer_username})
             # Do not update LastExecutedAt, so it will be retried.
             continue 

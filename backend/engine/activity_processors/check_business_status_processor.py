@@ -18,7 +18,7 @@ def process(
 ) -> bool:
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
-    log.info(f"{LogColors.OKBLUE}Processing 'check_business_status' activity: {activity_guid}{LogColors.ENDC}")
+    log.info(f"{LogColors.OKBLUE}💼 Processing 'check_business_status' activity: {activity_guid}{LogColors.ENDC}")
 
     citizen_username = activity_fields.get('Citizen') # For logging
     business_building_custom_id = activity_fields.get('ToBuilding') # Citizen arrived here
@@ -33,13 +33,14 @@ def process(
         return False
     
     business_building_airtable_id = business_building_record['id']
+    business_name_log = business_building_record['fields'].get('Name', business_building_custom_id)
 
     try:
         now_iso_venice = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
         update_payload = {'CheckedAt': now_iso_venice}
         
         tables['buildings'].update(business_building_airtable_id, update_payload)
-        log.info(f"{LogColors.OKGREEN}Business {business_building_custom_id} status checked by {citizen_username}. Updated 'CheckedAt' to {now_iso_venice}.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}Business **{business_name_log}** ({business_building_custom_id}) status checked by **{citizen_username}**. Updated 'CheckedAt' to {now_iso_venice}.{LogColors.ENDC}")
         
         # Citizen's position is updated by the main processActivities loop to ToBuilding.
         return True

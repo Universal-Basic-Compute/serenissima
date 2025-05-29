@@ -57,7 +57,7 @@ def process(
     activity_id_airtable = activity_record['id']
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_id_airtable)
-    log.info(f"Processing 'leave_venice' activity: {activity_guid}")
+    log.info(f"🚢 Processing 'leave_venice' activity: {activity_guid}")
 
     forestiero_username = activity_fields.get('Citizen')
     if not forestiero_username:
@@ -83,22 +83,25 @@ def process(
         except json.JSONDecodeError:
             log.warning(f"Could not parse Details JSON for activity {activity_guid}: {details_json_str}")
 
+    galley_name_log = galley_to_delete_custom_id # Use ID if name not available
     if galley_to_delete_custom_id:
-        log.info(f"Attempting to delete galley {galley_to_delete_custom_id} specified in activity details.")
+        log.info(f"Attempting to delete galley **{galley_name_log}** specified in activity details.")
         galley_record_to_delete = get_building_record(tables, galley_to_delete_custom_id)
-        if galley_record_to_delete and galley_record_to_delete['fields'].get('Owner') == forestiero_username:
-            try:
-                tables['buildings'].delete(galley_record_to_delete['id'])
-                log.info(f"Deleted merchant_galley {galley_to_delete_custom_id} (Airtable ID: {galley_record_to_delete['id']}) owned by {forestiero_username}.")
-            except Exception as e_delete_galley:
-                log.error(f"Error deleting galley {galley_to_delete_custom_id}: {e_delete_galley}")
-        elif galley_record_to_delete:
-            log.warning(f"Galley {galley_to_delete_custom_id} found but not owned by {forestiero_username}. Owner: {galley_record_to_delete['fields'].get('Owner')}. Skipping deletion.")
+        if galley_record_to_delete:
+            galley_name_log = galley_record_to_delete['fields'].get('Name', galley_to_delete_custom_id) # Update with actual name
+            if galley_record_to_delete['fields'].get('Owner') == forestiero_username:
+                try:
+                    tables['buildings'].delete(galley_record_to_delete['id'])
+                    log.info(f"🗑️ Deleted merchant_galley **{galley_name_log}** ({galley_to_delete_custom_id}) (Airtable ID: {galley_record_to_delete['id']}) owned by **{forestiero_username}**.")
+                except Exception as e_delete_galley:
+                    log.error(f"Error deleting galley {galley_name_log}: {e_delete_galley}")
+            else:
+                log.warning(f"Galley {galley_name_log} found but not owned by {forestiero_username}. Owner: {galley_record_to_delete['fields'].get('Owner')}. Skipping deletion.")
         else:
             log.warning(f"Galley {galley_to_delete_custom_id} specified in details not found.")
     else:
         # Fallback or primary method: Query for any merchant_galley owned by the Forestiero
-        log.info(f"No galley specified in details, or parsing failed. Querying for galleys owned by {forestiero_username}.")
+        log.info(f"No galley specified in details, or parsing failed. Querying for galleys owned by **{forestiero_username}**.")
         owned_galleys_formula = f"AND({{Owner}}='{_escape_airtable_value(forestiero_username)}', {{Type}}='merchant_galley')"
         try:
             owned_galleys = tables['buildings'].all(formula=owned_galleys_formula)

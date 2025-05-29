@@ -21,7 +21,7 @@ def process(
 ) -> bool:
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
-    log.info(f"{LogColors.OKBLUE}Processing 'goto_construction_site' activity: {activity_guid}{LogColors.ENDC}")
+    log.info(f"{LogColors.OKBLUE}🚶 Processing 'goto_construction_site' activity: {activity_guid}{LogColors.ENDC}")
 
     citizen_username = activity_fields.get('Citizen')
     target_building_custom_id = activity_fields.get('BuildingToConstruct') # Stored by creator
@@ -58,8 +58,9 @@ def process(
     if not target_building_record_data:
         log.error(f"Target building {target_building_custom_id} not found for activity {activity_guid}. Aborting.")
         return False
-
-    log.info(f"Citizen {citizen_username} arrived at site {target_building_custom_id}. Creating 'construct_building' activity for {work_duration_minutes} minutes.")
+    
+    target_building_name_log = target_building_record_data['fields'].get('Name', target_building_custom_id)
+    log.info(f"Citizen **{citizen_username}** arrived at site **{target_building_name_log}** ({target_building_custom_id}). Creating 'construct_building' activity for {work_duration_minutes} minutes.")
 
     # Create the 'construct_building' activity, path_data is None because citizen is now at the site.
     if try_create_construct_building_activity(

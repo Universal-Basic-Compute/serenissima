@@ -55,7 +55,7 @@ def process(
     # details_json_str = activity_fields.get('Details') # Old way
     activity_notes = activity_fields.get('Notes', '')
 
-    log.info(f"Processing 'fetch_for_logistics_client' ({activity_guid}) by Porter {porter_username}.")
+    log.info(f"🚚 Processing 'fetch_for_logistics_client' ({activity_guid}) by Porter **{porter_username}**.")
 
     resource_id_to_fetch = None
     amount_to_fetch_total = 0.0
@@ -96,7 +96,8 @@ def process(
         return False
 
     # Stage 1: Pickup from Source Building
-    log.info(f"Stage 1: Porter {porter_username} picking up {amount_to_fetch_total} of {resource_id_to_fetch} from {source_building_custom_id}.")
+    source_building_name_log = source_building_record['fields'].get('Name', source_building_custom_id)
+    log.info(f"🚚 Stage 1: Porter **{porter_username}** picking up **{amount_to_fetch_total:.2f}** of **{resource_id_to_fetch}** from **{source_building_name_log}** ({source_building_custom_id}).")
 
     # Check source stock (owned by seller of public_sell contract)
     seller_of_goods_username = public_sell_contract_record['fields'].get('Seller')
@@ -146,7 +147,7 @@ def process(
     tables['citizens'].update(client_record['id'], {'Ducats': client_ducats - cost_of_goods})
     seller_current_ducats = float(seller_of_goods_record['fields'].get('Ducats', 0))
     tables['citizens'].update(seller_of_goods_record['id'], {'Ducats': seller_current_ducats + cost_of_goods})
-    log.info(f"Client {ultimate_buyer_username} paid {cost_of_goods:.2f} to Seller {seller_of_goods_username} for {amount_to_pickup_stage1} of {resource_id_to_fetch}.")
+    log.info(f"💰 Client **{ultimate_buyer_username}** paid **{cost_of_goods:.2f} ⚜️** to Seller **{seller_of_goods_username}** for **{amount_to_pickup_stage1:.2f}** of **{resource_id_to_fetch}**.")
 
     # Update source stock
     new_source_stock_count = actual_amount_at_source - amount_to_pickup_stage1
@@ -154,7 +155,7 @@ def process(
         tables['resources'].update(source_stock_records[0]['id'], {'Count': new_source_stock_count})
     else:
         tables['resources'].delete(source_stock_records[0]['id'])
-    log.info(f"Decremented {amount_to_pickup_stage1} of {resource_id_to_fetch} from source {source_building_custom_id}.")
+    log.info(f"📦 Decremented **{amount_to_pickup_stage1:.2f}** of **{resource_id_to_fetch}** from source **{source_building_name_log}** ({source_building_custom_id}).")
 
     # Add to Porter's inventory, owned by Client
     porter_inv_formula = f"AND({{Type}}='{_escape_airtable_value(resource_id_to_fetch)}', {{Asset}}='{_escape_airtable_value(porter_username)}', {{AssetType}}='citizen', {{Owner}}='{_escape_airtable_value(ultimate_buyer_username)}')"
@@ -174,10 +175,11 @@ def process(
             "Count": amount_to_pickup_stage1, "CreatedAt": now_iso_pickup,
             "Notes": f"Carried by Porter {porter_username} for logistics contract {logistics_contract_id_custom}"
         })
-    log.info(f"Added {amount_to_pickup_stage1} of {resource_id_to_fetch} to Porter {porter_username}'s inventory (owned by Client {ultimate_buyer_username}).")
+    log.info(f"🛍️ Added **{amount_to_pickup_stage1:.2f}** of **{resource_id_to_fetch}** to Porter **{porter_username}**'s inventory (owned by Client **{ultimate_buyer_username}**).")
 
     # Stage 2: Delivery to Client's Target Building
-    log.info(f"Stage 2: Porter {porter_username} delivering {amount_to_pickup_stage1} of {resource_id_to_fetch} to Client {ultimate_buyer_username}'s building {client_target_building_custom_id}.")
+    client_target_building_name_log = client_target_building_record['fields'].get('Name', client_target_building_custom_id)
+    log.info(f"🚚 Stage 2: Porter **{porter_username}** delivering **{amount_to_pickup_stage1:.2f}** of **{resource_id_to_fetch}** to Client **{ultimate_buyer_username}**'s building **{client_target_building_name_log}** ({client_target_building_custom_id}).")
 
     # Check client's building storage capacity
     client_building_def = building_type_defs.get(client_target_building_record['fields'].get('Type'), {})
@@ -203,7 +205,7 @@ def process(
         tables['resources'].update(inv_rec_dec['id'], {'Count': new_inv_count_dec})
     else:
         tables['resources'].delete(inv_rec_dec['id'])
-    log.info(f"Removed {amount_to_pickup_stage1} of {resource_id_to_fetch} from Porter {porter_username}'s inventory (owned by Client {ultimate_buyer_username}).")
+    log.info(f"🛍️ Removed **{amount_to_pickup_stage1:.2f}** of **{resource_id_to_fetch}** from Porter **{porter_username}**'s inventory (owned by Client **{ultimate_buyer_username}**).")
 
     # Add to Client's building (owned by Client)
     client_building_res_formula = f"AND({{Type}}='{_escape_airtable_value(resource_id_to_fetch)}', {{Asset}}='{_escape_airtable_value(client_target_building_custom_id)}', {{AssetType}}='building', {{Owner}}='{_escape_airtable_value(ultimate_buyer_username)}')"
@@ -221,7 +223,7 @@ def process(
             "Asset": client_target_building_custom_id, "AssetType": "building", "Owner": ultimate_buyer_username,
             "Count": amount_to_pickup_stage1, "CreatedAt": now_iso_delivery
         })
-    log.info(f"Deposited {amount_to_pickup_stage1} of {resource_id_to_fetch} into Client {ultimate_buyer_username}'s building {client_target_building_custom_id}.")
+    log.info(f"📦 Deposited **{amount_to_pickup_stage1:.2f}** of **{resource_id_to_fetch}** into Client **{ultimate_buyer_username}**'s building **{client_target_building_name_log}** ({client_target_building_custom_id}).")
 
     # Client pays Porter Guild Operator the service fee
     if service_fee_per_unit > 0:
@@ -254,7 +256,7 @@ def process(
         tables['citizens'].update(client_record_after_goods_payment['id'], {'Ducats': client_ducats_for_fee - total_service_fee})
         operator_current_ducats = float(porter_guild_operator_record['fields'].get('Ducats', 0))
         tables['citizens'].update(porter_guild_operator_record['id'], {'Ducats': operator_current_ducats + total_service_fee})
-        log.info(f"Client {ultimate_buyer_username} paid service fee {total_service_fee:.2f} to Porter Guild Operator {porter_guild_operator_username}.")
+        log.info(f"💰 Client **{ultimate_buyer_username}** paid service fee **{total_service_fee:.2f} ⚜️** to Porter Guild Operator **{porter_guild_operator_username}**.")
 
         # Create transaction record for service fee
         transaction_payload_service_fee = {

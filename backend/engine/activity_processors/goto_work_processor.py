@@ -44,7 +44,7 @@ def process(
     activity_id_airtable = activity_record['id']
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_id_airtable)
-    log.info(f"Processing 'goto_work' activity: {activity_guid}")
+    log.info(f"🚶 Processing 'goto_work' activity: {activity_guid}")
 
     citizen_username = activity_fields.get('Citizen')
     # 'ToBuilding' in the activity record is now the custom BuildingId of the workplace
@@ -73,8 +73,9 @@ def process(
     workplace_building_custom_id = workplace_building_custom_id_from_activity
     
     workplace_operator_username = workplace_building_record['fields'].get('RunBy')
+    workplace_name_log = workplace_building_record['fields'].get('Name', workplace_building_custom_id)
     if not workplace_operator_username:
-        log.warning(f"Workplace building {workplace_building_custom_id} has no operator (RunBy). Cannot deposit resources.")
+        log.warning(f"Workplace building **{workplace_name_log}** ({workplace_building_custom_id}) has no operator (RunBy). Cannot deposit resources.")
         # This is not a failure of the activity itself, but no resources can be deposited.
         return True 
 
@@ -125,10 +126,10 @@ def process(
     #     return False
 
     if not citizen_carried_resources:
-        log.info(f"Citizen {citizen_username} has no resources owned by {workplace_operator_username} to deposit at workplace {workplace_building_custom_id}.")
+        log.info(f"Citizen **{citizen_username}** has no resources owned by **{workplace_operator_username}** to deposit at workplace **{workplace_name_log}** ({workplace_building_custom_id}).")
         return True # Nothing to do, so it's a success.
 
-    log.info(f"Citizen {citizen_username} has {len(citizen_carried_resources)} resource types (owned by {workplace_operator_username}) to potentially deposit at {workplace_building_custom_id}.")
+    log.info(f"Citizen **{citizen_username}** has {len(citizen_carried_resources)} resource types (owned by **{workplace_operator_username}**) to potentially deposit at **{workplace_name_log}** ({workplace_building_custom_id}).")
 
     current_stored_volume_at_workplace = get_building_current_storage(tables, workplace_building_custom_id)
     
@@ -136,7 +137,7 @@ def process(
     total_volume_to_deposit = sum(float(r['fields'].get('Count', 0)) for r in citizen_carried_resources)
 
     if current_stored_volume_at_workplace + total_volume_to_deposit > storage_capacity:
-        log.warning(f"Not enough storage in workplace {workplace_building_custom_id} for citizen {citizen_username}'s resources (owned by {workplace_operator_username}). "
+        log.warning(f"Not enough storage in workplace **{workplace_name_log}** ({workplace_building_custom_id}) for citizen **{citizen_username}**'s resources (owned by **{workplace_operator_username}**). "
                     f"Capacity: {storage_capacity}, Used: {current_stored_volume_at_workplace}, To Deposit: {total_volume_to_deposit}")
         # Optionally, create a problem record here or notify the operator.
         # Deposit cannot happen, so the action related to this part of the activity fails.

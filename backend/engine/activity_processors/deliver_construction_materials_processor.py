@@ -20,7 +20,7 @@ def process(
 ) -> bool:
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
-    log.info(f"{LogColors.OKBLUE}Processing 'deliver_construction_materials' activity: {activity_guid}{LogColors.ENDC}")
+    log.info(f"{LogColors.OKBLUE}🚚 Processing 'deliver_construction_materials' activity: {activity_guid}{LogColors.ENDC}")
 
     citizen_username = activity_fields.get('Citizen')
     # from_building_custom_id = activity_fields.get('FromBuilding') # Workshop
@@ -62,8 +62,9 @@ def process(
     if not contract_buyer_username:
         log.error(f"{LogColors.FAIL}Contract {contract_custom_id_from_activity} has no Buyer. Cannot determine owner of delivered materials. Aborting.{LogColors.ENDC}")
         return False
-
-    log.info(f"Processing delivery for {citizen_username} to site {to_building_custom_id} (Owner: {contract_buyer_username}).")
+    
+    site_name_log = site_building_record['fields'].get('Name', to_building_custom_id)
+    log.info(f"Processing delivery for **{citizen_username}** to site **{site_name_log}** ({to_building_custom_id}) (Owner: **{contract_buyer_username}**).")
 
     all_transfers_successful = True
     materials_actually_delivered_summary = []
@@ -125,13 +126,13 @@ def process(
              all_transfers_successful = False; continue
 
 
-        log.info(f"Decremented {res_amount_to_deliver:.2f} of {res_type} from {citizen_username}'s inventory (owned by {workshop_operator_username}).")
+        log.info(f"🛍️ Decremented **{res_amount_to_deliver:.2f}** of **{res_type}** from **{citizen_username}**'s inventory (owned by **{workshop_operator_username}**).")
 
         # 2. Increment in site_building_record's inventory, owned by contract_buyer_username
         site_resource_record = get_resource_record(tables, to_building_custom_id, 'building', res_type, contract_buyer_username)
         if site_resource_record:
             if not update_resource_count(tables, site_resource_record['id'], res_amount_to_deliver, "increment"):
-                log.error(f"{LogColors.FAIL}Failed to increment {res_type} in site {to_building_custom_id}. Aborting this resource.{LogColors.ENDC}")
+                log.error(f"{LogColors.FAIL}Failed to increment {res_type} in site {site_name_log} ({to_building_custom_id}). Aborting this resource.{LogColors.ENDC}")
                 all_transfers_successful = False; continue
         else:
             res_def_details = resource_defs.get(res_type, {})
@@ -140,11 +141,11 @@ def process(
                 to_building_custom_id, 'building', contract_buyer_username,
                 res_amount_to_deliver, site_building_record['fields'].get('Position')
             ):
-                log.error(f"{LogColors.FAIL}Failed to create {res_type} in site {to_building_custom_id}. Aborting this resource.{LogColors.ENDC}")
+                log.error(f"{LogColors.FAIL}Failed to create {res_type} in site {site_name_log} ({to_building_custom_id}). Aborting this resource.{LogColors.ENDC}")
                 all_transfers_successful = False; continue
         
-        log.info(f"Incremented {res_amount_to_deliver} of {res_type} in site {to_building_custom_id} (owned by {contract_buyer_username}).")
-        materials_actually_delivered_summary.append(f"{res_amount_to_deliver} {res_type}")
+        log.info(f"📦 Incremented **{res_amount_to_deliver}** of **{res_type}** in site **{site_name_log}** ({to_building_custom_id}) (owned by **{contract_buyer_username}**).")
+        materials_actually_delivered_summary.append(f"**{res_amount_to_deliver}** **{res_type}**")
 
     # Import get_building_resources if not already imported (it should be via activity_helpers)
     from backend.engine.utils.activity_helpers import get_building_resources

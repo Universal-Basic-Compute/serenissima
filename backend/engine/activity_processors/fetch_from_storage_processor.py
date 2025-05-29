@@ -47,7 +47,7 @@ def process(
     activity_id_airtable = activity_record['id']
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_id_airtable)
-    log.info(f"Processing 'fetch_from_storage' activity: {activity_guid}")
+    log.info(f"📦 Processing 'fetch_from_storage' activity: {activity_guid}")
 
     resources_to_fetch_json = activity_fields.get('Resources') # Expects JSON list of {"ResourceId": X, "Amount": Y}
     from_building_custom_id = activity_fields.get('FromBuilding') # Storage facility
@@ -171,7 +171,8 @@ def process(
                 tables['resources'].update(storage_res_record['id'], {'Count': new_storage_count})
             else:
                 tables['resources'].delete(storage_res_record['id'])
-            log.info(f"Decremented {amount_requested} of {resource_type_id} from storage {from_building_custom_id} (Owner: {sq_buyer_username}).")
+            storage_facility_name_log = storage_facility_record['fields'].get('Name', from_building_custom_id)
+            log.info(f"📦 Decremented **{amount_requested:.2f}** of **{resource_type_id}** from storage **{storage_facility_name_log}** ({from_building_custom_id}) (Owner: **{sq_buyer_username}**).")
         except Exception as e_pickup:
             err_msg = f"Error picking up {resource_type_id} from storage {from_building_custom_id}: {e_pickup}"
             log.error(f"{err_msg} Activity: {activity_guid}")
@@ -203,7 +204,7 @@ def process(
                     "Owner": fetch_person_username, "Count": amount_requested, "CreatedAt": now_iso,
                     "Notes": f"Fetched from storage under contract {storage_query_contract_custom_id_from_activity}"
                 })
-            log.info(f"Added {amount_requested} of {resource_type_id} to {fetch_person_username}'s inventory.")
+            log.info(f"🛍️ Added **{amount_requested:.2f}** of **{resource_type_id}** to **{fetch_person_username}**'s inventory.")
         except Exception as e_inv_add:
             err_msg = f"Error adding {resource_type_id} to {fetch_person_username}'s inventory: {e_inv_add}"
             log.error(f"{err_msg} Activity: {activity_guid}")
@@ -257,7 +258,7 @@ def process(
                 tables['resources'].update(inv_record_dec['id'], {'Count': new_inv_count_dec})
             else:
                 tables['resources'].delete(inv_record_dec['id'])
-            log.info(f"Decremented {amount_to_deposit} of {resource_type_id} from {fetch_person_username}'s inventory.")
+            log.info(f"🛍️ Decremented **{amount_to_deposit:.2f}** of **{resource_type_id}** from **{fetch_person_username}**'s inventory.")
         except Exception as e_inv_dec:
             err_msg = f"Error decrementing {resource_type_id} from {fetch_person_username}'s inventory: {e_inv_dec}"
             log.error(f"{err_msg} Activity: {activity_guid}")
@@ -286,7 +287,8 @@ def process(
                     "Owner": destination_operator_username, "Count": amount_to_deposit, "CreatedAt": now_iso,
                     "Notes": f"Deposited after fetching from storage (Contract: {storage_query_contract_custom_id_from_activity})"
                 })
-            log.info(f"Deposited {amount_to_deposit} of {resource_type_id} into {to_building_custom_id} (Owner: {destination_operator_username}).")
+            destination_building_name_log = destination_building_record['fields'].get('Name', to_building_custom_id)
+            log.info(f"📦 Deposited **{amount_to_deposit:.2f}** of **{resource_type_id}** into **{destination_building_name_log}** ({to_building_custom_id}) (Owner: **{destination_operator_username}**).")
         except Exception as e_deposit_dest:
             err_msg = f"Error depositing {resource_type_id} into {to_building_custom_id} (Owner: {destination_operator_username}): {e_deposit_dest}"
             log.error(f"{err_msg} Activity: {activity_guid}")

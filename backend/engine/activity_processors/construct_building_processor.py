@@ -20,12 +20,12 @@ def process(
 ) -> bool:
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
-    log.info(f"{LogColors.OKBLUE}Processing 'construct_building' activity: {activity_guid}{LogColors.ENDC}")
+    log.info(f"{LogColors.OKBLUE}🛠️ Processing 'construct_building' activity: {activity_guid}{LogColors.ENDC}")
 
-    # citizen_username = activity_fields.get('Citizen') # For logging if needed
+    citizen_username_log = activity_fields.get('Citizen') # For logging
     target_building_custom_id = activity_fields.get('BuildingToConstruct')
     work_duration_minutes_activity = int(activity_fields.get('WorkDurationMinutes', 0))
-    contract_airtable_id = activity_fields.get('ContractId')
+    contract_airtable_id = activity_fields.get('ContractId') # This is Airtable Record ID
 
     if not all([target_building_custom_id, contract_airtable_id]) or work_duration_minutes_activity <= 0:
         log.error(f"Activity {activity_guid} missing crucial data or invalid work duration. Aborting.")
@@ -37,13 +37,14 @@ def process(
         return False
     
     target_building_airtable_id = target_building_record['id']
+    target_building_name_log = target_building_record['fields'].get('Name', target_building_custom_id)
 
     try:
         current_minutes_remaining = float(target_building_record['fields'].get('ConstructionMinutesRemaining', 0))
-        log.info(f"Building {target_building_custom_id} has {current_minutes_remaining:.2f} construction minutes remaining before this activity.")
+        log.info(f"Building **{target_building_name_log}** ({target_building_custom_id}) has {current_minutes_remaining:.2f} construction minutes remaining before this activity.")
 
         new_minutes_remaining = current_minutes_remaining - work_duration_minutes_activity
-        log.info(f"After {work_duration_minutes_activity} minutes of work by activity {activity_guid}, new remaining minutes: {new_minutes_remaining:.2f}.")
+        log.info(f"After {work_duration_minutes_activity} minutes of work by activity {activity_guid} (Worker: {citizen_username_log}), new remaining minutes for **{target_building_name_log}**: {new_minutes_remaining:.2f}.")
 
         if new_minutes_remaining <= 0:
             now_iso = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
@@ -53,18 +54,19 @@ def process(
                 'ConstructionDate': now_iso
             }
             tables['buildings'].update(target_building_airtable_id, building_update_payload)
-            log.info(f"{LogColors.OKGREEN}Building {target_building_custom_id} construction completed. Updated fields: {building_update_payload}{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}🎉 Building **{target_building_name_log}** ({target_building_custom_id}) construction completed. Updated fields: {building_update_payload}{LogColors.ENDC}")
 
             # Update contract status
             contract_record = tables['contracts'].get(contract_airtable_id)
             if contract_record:
+                contract_custom_id_log = contract_record['fields'].get('ContractId', contract_airtable_id)
                 tables['contracts'].update(contract_airtable_id, {'Status': 'completed'})
-                log.info(f"{LogColors.OKGREEN}Construction contract {contract_record['fields'].get('ContractId', contract_airtable_id)} marked as 'completed'.{LogColors.ENDC}")
+                log.info(f"{LogColors.OKGREEN}Construction contract **{contract_custom_id_log}** marked as 'completed'.{LogColors.ENDC}")
             else:
-                log.warning(f"{LogColors.WARNING}Could not find contract {contract_airtable_id} to mark as completed for building {target_building_custom_id}.{LogColors.ENDC}")
+                log.warning(f"{LogColors.WARNING}Could not find contract (Airtable ID: {contract_airtable_id}) to mark as completed for building {target_building_name_log}.{LogColors.ENDC}")
         else:
             tables['buildings'].update(target_building_airtable_id, {'ConstructionMinutesRemaining': new_minutes_remaining})
-            log.info(f"{LogColors.OKGREEN}Building {target_building_custom_id} progress updated. {new_minutes_remaining:.2f} minutes remaining.{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}Building **{target_building_name_log}** ({target_building_custom_id}) progress updated. {new_minutes_remaining:.2f} minutes remaining.{LogColors.ENDC}")
 
         # Citizen's position is updated by the main processActivities loop to ToBuilding,
         # which is the construction site for this activity type.
