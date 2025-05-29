@@ -569,6 +569,24 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     
     setIsPreparingContext(true); // Show loading while context is used/refreshed for Kinos
 
+    // Determine the actual sender username reliably
+    let actualSenderUsername = DEFAULT_CITIZENNAME;
+    const savedProfileForSender = localStorage.getItem('citizenProfile');
+    if (savedProfileForSender) {
+        try {
+            const profile = JSON.parse(savedProfileForSender);
+            if (profile.username) {
+                actualSenderUsername = profile.username;
+            }
+        } catch (e) {
+            console.error("Error parsing citizenProfile for sender username in Compagno", e);
+        }
+    }
+    // Fallback to component state if localStorage didn't yield a username but state is valid
+    if (actualSenderUsername === DEFAULT_CITIZENNAME && username !== DEFAULT_CITIZENNAME) {
+        actualSenderUsername = username;
+    }
+
     try {
       const response = await fetch('/api/messages/send', {
         method: 'POST',
@@ -576,7 +594,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sender: username,
+          sender: actualSenderUsername, // Use actualSenderUsername
           receiver: selectedCitizen, // This can be username itself for self-chat
           content: content,
           type: messageType
