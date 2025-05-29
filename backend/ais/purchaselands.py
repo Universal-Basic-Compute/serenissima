@@ -281,7 +281,7 @@ def process_ai_land_purchases(dry_run: bool = False):
                         # Create notification for the original seller
                         if original_seller_username and original_seller_username != "Republic" and original_seller_username != ai_username :
                             try:
-                                notification_content = f"Your land {land_id} has been purchased by {ai_username} for {price} ducats."
+                                notification_content = f"💸 Land Sold: Your land **{land_id}** has been purchased by **{ai_username}** for **{price} ⚜️ Ducats**."
                                 tables["notifications"].create({
                                     "Citizen": original_seller_username,
                                     "Type": "land_sold",
