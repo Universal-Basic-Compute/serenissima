@@ -3,27 +3,28 @@
 # Log startup
 echo "Starting application setup..."
 
-# Assuming this script is in backend/startup.sh and executed from the project root.
-# REPO_PATH will be the project root.
-REPO_PATH=$(pwd)
-BACKEND_DIR="$REPO_PATH/backend"
+# This script is in backend/startup.sh and executed from backend/
+# REPO_PATH will be the parent directory (project root).
+# BACKEND_DIR will be the current directory (backend/).
+BACKEND_DIR=$(pwd)
+REPO_PATH=$(cd "$BACKEND_DIR/.." && pwd) # Go up one level to get project root
 LOG_DIR="$BACKEND_DIR/logs"
 
 # Create logs directory if it doesn't exist
 mkdir -p "$LOG_DIR"
 
-# Install required Python packages from requirements.txt (assuming it's at REPO_PATH)
-echo "Installing Python requirements..."
-pip install -r "$REPO_PATH/requirements.txt" # Or "$BACKEND_DIR/requirements.txt" if it's there
+# Install required Python packages from requirements.txt (assuming it's in BACKEND_DIR)
+echo "Installing Python requirements from $BACKEND_DIR/requirements.txt..."
+pip install -r "$BACKEND_DIR/requirements.txt"
 
 # Install required Node.js packages (assuming package.json is at REPO_PATH)
-echo "Installing required Node.js packages..."
+echo "Installing required Node.js packages from $REPO_PATH..."
 # If npm install is slow or not strictly needed for the backend to *start*, consider moving it
 # or ensure it's fast.
-npm install dotenv @solana/web3.js @solana/spl-token
+(cd "$REPO_PATH" && npm install dotenv @solana/web3.js @solana/spl-token)
 
 # Make scripts executable (Python scripts don't strictly need +x if run with `python3 ...`)
-# but it doesn't hurt. Ensure paths are correct.
+# but it doesn't hurt. Paths are relative to BACKEND_DIR.
 chmod +x "$BACKEND_DIR/distributeIncome.py"
 echo "Made distributeIncome.py executable"
 chmod +x "$BACKEND_DIR/engine/generate_citizen.py"
@@ -53,12 +54,17 @@ add_cron_job_if_not_exists() {
     local script_path_relative_to_backend="$3" # e.g., engine/househomelesscitizens.py
     local log_file_name="$4"                   # e.g., house_homeless_cron.log
 
+    # Scripts are in BACKEND_DIR, so full_script_path is BACKEND_DIR/script_path_relative_to_backend
     local full_script_path="$BACKEND_DIR/$script_path_relative_to_backend"
     local full_log_path="$LOG_DIR/$log_file_name"
-    # The `cd $REPO_PATH` is important so python can find `backend.engine...` modules if needed,
-    # or if scripts use relative paths from project root.
-    # Alternatively, `cd $BACKEND_DIR` and adjust python paths.
-    # Using `cd $REPO_PATH` and `python3 $BACKEND_DIR/...` is explicit.
+    
+    # Cron jobs should cd to BACKEND_DIR to run python scripts directly,
+    # and Python's sys.path should be adjusted within scripts if they need to import from project root
+    # or other backend submodules.
+    # If scripts use `from backend.app import ...` or similar, then `cd $REPO_PATH` and `python3 backend/engine/script.py` is better.
+    # Given the current structure, `cd $BACKEND_DIR` and `python3 engine/script.py` is simpler if imports are relative or use sys.path.append('../')
+    # Let's stick to `cd $REPO_PATH` and `python3 $full_script_path` for consistency with previous logic,
+    # assuming Python scripts handle their own imports correctly (e.g. `sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))`)
     local cron_command="$cron_schedule cd $REPO_PATH && python3 $full_script_path >> $full_log_path 2>&1"
 
     if ! grep -qF "$job_identifier" "$TEMP_CRONTAB_NEW"; then
@@ -93,6 +99,6 @@ rm "$TEMP_CRONTAB_CURRENT"
 rm "$TEMP_CRONTAB_NEW"
 
 # Start the application
-echo "Starting application (FastAPI backend)..."
-# Ensure this is run from REPO_PATH so `backend.run` is correct, or `python $BACKEND_DIR/run.py`
-python "$BACKEND_DIR/run.py"
+echo "Starting application (FastAPI backend) from $BACKEND_DIR..."
+# run.py is in BACKEND_DIR, so just python run.py
+python run.py
