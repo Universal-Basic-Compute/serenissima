@@ -10,7 +10,7 @@ from typing import Dict, Any, List
 log = logging.getLogger(__name__)
 
 # Import necessary helpers
-from backend.engine.utils.activity_helpers import get_building_record, get_citizen_record, _escape_airtable_value, LogColors
+from backend.engine.utils.activity_helpers import get_building_record, get_citizen_record, get_contract_record, _escape_airtable_value, LogColors
 
 def process(
     tables: Dict[str, Any],
