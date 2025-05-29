@@ -13,15 +13,6 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
-  // Add rewrites for coat of arms images
-  async rewrites() {
-    return [
-      {
-        source: 'https://backend.serenissima.ai/public/assets/images/coat-of-arms/:path*',
-        destination: '/apihttps://backend.serenissima.ai/public/assets/images/coat-of-arms/:path*',
-      },
-    ];
-  },
 }
 
 module.exports = nextConfig
