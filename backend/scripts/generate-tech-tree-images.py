@@ -17,7 +17,7 @@ import sys # Added for sys.exit
 
 # --- BEGIN COPIED HELPER FUNCTION ---
 # Default API URL, can be overridden by env var or arg
-DEFAULT_FASTAPI_URL = "http://localhost:8000" 
+DEFAULT_FASTAPI_URL = "https://backend.serenissima.ai/"
 
 def upload_file_to_backend(
     local_file_path: str,

@@ -4,6 +4,9 @@ import argparse
 from dotenv import load_dotenv
 import mimetypes # Pour déterminer le type MIME si nécessaire, bien que requests le fasse souvent.
 
+# Default API URL, can be overridden by env var or arg
+DEFAULT_FASTAPI_URL = "https://backend.serenissima.ai/"
+
 def upload_file(api_url: str, api_key: str, file_path: str, destination_path: str) -> bool:
     """
     Téléverse un fichier unique vers l'endpoint /api/upload-asset.
@@ -52,8 +55,8 @@ def main():
 
     parser = argparse.ArgumentParser(description="Téléverser des assets publics vers le serveur.")
     parser.add_argument("source_directory", help="Le dossier local contenant les assets à téléverser.")
-    parser.add_argument("--api_url", default=os.getenv("FASTAPI_BACKEND_URL", "http://localhost:8000"),
-                        help="L'URL de base de l'API FastAPI (par défaut: http://localhost:8000 ou FASTAPI_BACKEND_URL de .env).")
+    parser.add_argument("--api_url", default=os.getenv("FASTAPI_BACKEND_URL", DEFAULT_FASTAPI_URL),
+                        help="L'URL de base de l'API FastAPI (par défaut: https://backend.serenissima.ai/ ou FASTAPI_BACKEND_URL de .env).")
     parser.add_argument("--api_key", default=os.getenv("UPLOAD_API_KEY"),
                         help="La clé API pour l'endpoint de téléversement (par défaut: UPLOAD_API_KEY de .env).")
     
