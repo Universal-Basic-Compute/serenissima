@@ -756,24 +756,27 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                                 print(f"Error verifying wage update: {str(verify_error)}")
                             
                             # Create notifications for employees
-                            occupant_id = building["fields"].get("Occupant", "")
+                            occupant_id = building["fields"].get("Occupant", "") # This is Airtable Record ID of citizen
+                            building_name_for_notif = building["fields"].get("Name", building_id)
+
                             if occupant_id and occupant_id in all_citizens:
                                 create_notification_for_business_employee(
-                                    tables, building_id, occupant_id, ai_username, 
+                                    tables, building_id, building_name_for_notif, occupant_id, ai_username, 
                                     current_wage, new_wage_amount, reason
                                 )
                             else:
-                                print(f"Building {building_id} has no occupant or occupant not found in citizens")
+                                print(f"Building {building_name_for_notif} ({building_id}) has no occupant or occupant not found in citizens")
                             
                             # Add to the list of adjustments for this AI
                             ai_wage_adjustments[ai_username].append({
-                                "building_id": building_id,
+                                "business_id": building_id, # Keep as business_id for consistency if other parts expect this key
+                                "building_name": building_name_for_notif, # For admin summary
                                 "old_wage": current_wage,
                                 "new_wage": new_wage_amount,
                                 "reason": reason
                             })
                         else:
-                            print(f"❌ Failed to update wage for building {building_id}")
+                            print(f"❌ Failed to update wage for building {building_name_for_notif} ({building_id})")
                     except Exception as update_error:
                         print(f"❌ Exception during wage update for building {building_id}: {str(update_error)}")
                         print(f"Exception traceback: {traceback.format_exc()}")
