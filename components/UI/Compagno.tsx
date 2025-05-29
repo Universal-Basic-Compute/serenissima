@@ -429,12 +429,23 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
       if (data.success && data.citizens && Array.isArray(data.citizens)) {
         citizensList = data.citizens;
-        // If current user is not in the list from API, add them
-        if (currentUserCitizen && !citizensList.find(c => c.username === currentUserCitizen!.username)) {
-          citizensList.unshift(currentUserCitizen); // Add to the beginning
+        
+        if (currentUserCitizen) {
+          const currentUserIndex = citizensList.findIndex(c => c.username === currentUserCitizen!.username);
+          
+          if (currentUserIndex > -1) {
+            // If current user is in the list, remove them
+            const user = citizensList.splice(currentUserIndex, 1)[0];
+            // Add them to the beginning
+            citizensList.unshift(user);
+          } else {
+            // If current user is not in the list, add them to the beginning
+            citizensList.unshift(currentUserCitizen);
+          }
         }
       } else if (currentUserCitizen) {
-        citizensList = [currentUserCitizen]; // Fallback to just current user
+        // Fallback to just current user if API call fails or returns no citizens
+        citizensList = [currentUserCitizen];
       }
       
       setCitizens(citizensList);
