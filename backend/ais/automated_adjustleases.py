@@ -251,6 +251,7 @@ def notify_building_owner_of_lease_change(
     tables: Dict[str, Table],
     building_owner_username: str,
     building_id_custom: str, # Custom BuildingId
+    building_name: str, # Building Name
     land_id: str,
     ai_land_owner_username: str,
     old_lease_price: float, new_lease_price: float,
@@ -260,14 +261,17 @@ def notify_building_owner_of_lease_change(
         log.warning(f"{LogColors.WARNING}No owner for building {building_id_custom}. Cannot send lease change notification.{LogColors.ENDC}")
         return
 
+    building_display_name = building_name if building_name and building_name != building_id_custom else building_id_custom
+
     if dry_run:
-        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would notify owner {building_owner_username} of building {building_id_custom} about LeasePrice change from {old_lease_price:.2f} to {new_lease_price:.2f} by land owner {ai_land_owner_username} for land {land_id}.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would notify owner {building_owner_username} of building {building_display_name} ({building_id_custom}) about LeasePrice change from {old_lease_price:.2f} to {new_lease_price:.2f} by land owner {ai_land_owner_username} for land {land_id}.{LogColors.ENDC}")
         return
 
-    content = (f"The Lease Price for your building {building_id_custom} on land {land_id} has been adjusted by the land owner, {ai_land_owner_username}. "
-               f"The new lease price is {new_lease_price:.2f} Ducats per day (previously {old_lease_price:.2f} Ducats).")
+    content = (f"📜 Lease Price Update: The Lease Price for your building **{building_display_name}** on land **{land_id}** has been adjusted by the land owner, **{ai_land_owner_username}**. "
+               f"The new lease price is **{new_lease_price:.2f} ⚜️ Ducats** per day (previously {old_lease_price:.2f} ⚜️ Ducats).")
     details = {
         "building_id": building_id_custom,
+        "building_name": building_display_name,
         "land_id": land_id,
         "land_owner": ai_land_owner_username,
         "old_lease_price": old_lease_price,
@@ -295,10 +299,11 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
         log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create admin summary for {len(results)} lease price adjustments.{LogColors.ENDC}")
         return
 
-    summary_message = f"Automated Lease Price Adjustments Summary ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
+    summary_message = f"📜 **Automated Lease Price Adjustments Summary** ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
     for res in results:
-        summary_message += (f"- Land Owner: {res['ai_land_owner']}, Building: {res['building_id']} (Type: {res['building_type']}) on Land: {res['land_id']}, "
-                            f"Old Lease: {res['old_lease_price']:.0f}, New Lease: {res['new_lease_price']:.0f}, Strategy: {res['strategy']}\n")
+        building_display_admin = res.get('building_name', res['building_id']) # Use name if available
+        summary_message += (f"- 👤 Land Owner: **{res['ai_land_owner']}**, 🏠 Building: **{building_display_admin}** (Type: {res['building_type']}) on Land: **{res['land_id']}**, "
+                            f"Old Lease: {res['old_lease_price']:.0f} ⚜️, New Lease: **{res['new_lease_price']:.0f} ⚜️**, Strategy: {res['strategy']}\n")
     
     try:
         tables["notifications"].create({
@@ -308,7 +313,7 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
             "Details": json.dumps({"adjustments": results, "report_time": datetime.now(VENICE_TIMEZONE).isoformat()}),
             "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat()
         })
-        log.info(f"{LogColors.OKGREEN}Admin summary notification for lease prices created.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}📜 Admin summary notification for lease prices created.{LogColors.ENDC}")
     except Exception as e:
         log.error(f"{LogColors.FAIL}Failed to create admin summary notification for lease prices: {e}{LogColors.ENDC}")
 
@@ -347,6 +352,7 @@ def process_automated_lease_adjustments(strategy: str, dry_run: bool):
             for building_record in buildings_on_this_land:
                 building_airtable_id = building_record['id']
                 building_id_custom = building_record['fields'].get('BuildingId', building_airtable_id)
+                building_name_custom = building_record['fields'].get('Name', building_id_custom) # Get building name
                 building_owner_username = building_record['fields'].get('Owner')
                 building_category = building_record['fields'].get('Category')
                 
@@ -375,6 +381,7 @@ def process_automated_lease_adjustments(strategy: str, dry_run: bool):
                                 "ai_land_owner": ai_username,
                                 "land_id": land_id_custom,
                                 "building_id": building_id_custom,
+                                "building_name": building_name_custom, # Add name for admin summary
                                 "building_type": building_type_str,
                                 "building_owner": building_owner_username,
                                 "old_lease_price": current_lease_price_val,
@@ -383,11 +390,11 @@ def process_automated_lease_adjustments(strategy: str, dry_run: bool):
                             })
                             if building_owner_username: # Notify building owner
                                 notify_building_owner_of_lease_change(
-                                    tables, building_owner_username, building_id_custom, land_id_custom,
+                                    tables, building_owner_username, building_id_custom, building_name_custom, land_id_custom,
                                     ai_username, current_lease_price_val, new_lease_price, dry_run
                                 )
                     else:
-                        log.info(f"    Building {building_id_custom}: New lease price {new_lease_price:.0f} is too close to current {current_lease_price_val:.0f}. No change.{LogColors.ENDC}")
+                        log.info(f"    Building {building_name_custom} ({building_id_custom}): New lease price {new_lease_price:.0f} is too close to current {current_lease_price_val:.0f}. No change.{LogColors.ENDC}")
                 else:
                     log.info(f"    Building {building_id_custom}: No new lease price calculated. Current lease price: {current_lease_price_val:.0f}{LogColors.ENDC}")
 

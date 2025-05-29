@@ -415,21 +415,23 @@ def update_building_lease_price(tables, building_id: str, new_lease_price: float
         print(f"Error updating lease amount for building {building_id}: {str(e)}")
         return False
 
-def create_notification_for_building_owner(tables, building_id: str, owner: str, ai_username: str, 
+def create_notification_for_building_owner(tables, building_id: str, building_name: str, owner: str, ai_username: str, 
                                           old_lease: float, new_lease: float, reason: str) -> bool:
     """Create a notification for the building owner about the lease adjustment."""
     try:
         now = datetime.now().isoformat()
+        building_display_name = building_name if building_name and building_name != building_id else building_id
         
         # Create the notification
         notification = {
             "Citizen": owner,
             "Type": "lease_adjustment",
-            "Content": f"The lease amount for your building {building_id} has been adjusted from {old_lease} to {new_lease} ducats by the land owner {ai_username}. Reason: {reason}",
+            "Content": f"📜 Lease Update: The lease for your building **{building_display_name}** has been adjusted from {old_lease} to **{new_lease} ⚜️ Ducats** by the land owner **{ai_username}**. Reason: {reason}",
             "CreatedAt": now,
             "ReadAt": None,
             "Details": json.dumps({
                 "building_id": building_id,
+                "building_name": building_display_name,
                 "old_lease_price": old_lease,
                 "new_lease_price": new_lease,
                 "land_owner": ai_username,
@@ -451,12 +453,13 @@ def create_admin_notification(tables, ai_lease_adjustments: Dict[str, List[Dict]
         now = datetime.now().isoformat()
         
         # Create a summary message
-        message = "AI Lease Adjustment Summary:\n\n"
+        message = "📜 **AI Lease Adjustment Summary**:\n\n"
         
         for ai_name, adjustments in ai_lease_adjustments.items():
-            message += f"- {ai_name}: {len(adjustments)} lease adjustments\n"
+            message += f"- 👤 AI Land Owner: **{ai_name}** made {len(adjustments)} lease adjustments:\n"
             for adj in adjustments:
-                message += f"  * Building {adj['building_id']}: {adj['old_lease']} → {adj['new_lease']} ducats\n"
+                building_display_admin = adj.get('building_name', adj['building_id'])
+                message += f"  - 🏠 Building: **{building_display_admin}**: {adj['old_lease']} ⚜️ → **{adj['new_lease']} ⚜️**\n"
         
         # Create the notification
         notification = {
@@ -472,7 +475,7 @@ def create_admin_notification(tables, ai_lease_adjustments: Dict[str, List[Dict]
         }
         
         tables["notifications"].create(notification)
-        print("Created admin notification with AI lease adjustment summary")
+        print("📜 Created admin notification with AI lease adjustment summary")
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 
@@ -618,16 +621,18 @@ def process_ai_lease_adjustments(dry_run: bool = False):
                     success = update_building_lease_price(tables, building_id, new_lease_price)
                     
                     if success:
+                        building_name_for_notif = building["fields"].get("Name", building_id)
                         # Create notification for building owner if different from AI
                         if building_owner and building_owner != ai_username:
                             create_notification_for_building_owner(
-                                tables, building_id, building_owner, ai_username, 
+                                tables, building_id, building_name_for_notif, building_owner, ai_username, 
                                 current_lease, new_lease_price, reason
                             )
                         
                         # Add to the list of adjustments for this AI
                         ai_lease_adjustments[ai_username].append({
                             "building_id": building_id,
+                            "building_name": building_name_for_notif, # For admin summary
                             "old_lease": current_lease,
                             "new_lease": new_lease_price,
                             "reason": reason
