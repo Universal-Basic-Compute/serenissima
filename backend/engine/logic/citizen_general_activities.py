@@ -680,27 +680,26 @@ def _handle_night_shelter(
         home_record = get_citizen_home(tables, citizen_username)
         if not home_record: # Homeless resident
             log.info(f"{LogColors.WARNING}[Repos] Citoyen {citizen_name} ({citizen_social_class}): Sans domicile. Recherche d'une auberge.{LogColors.ENDC}")
-        else:
+        else: # Resident with a home
             home_name_display = _get_bldg_display_name_module(tables, home_record)
             home_pos = _get_building_position_coords(home_record)
             home_custom_id_val = home_record['fields'].get('BuildingId', home_record['id'])
-            if not home_pos or not home_custom_id_val: return False # Home data invalid
+            if not home_pos or not home_custom_id_val: return False
 
             if _calculate_distance_meters(citizen_position, home_pos) < 20: # Is at home
                 if try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, home_custom_id_val, "home", stay_end_time_utc_iso, now_utc_dt):
-                    log.info(f"{LogColors.OKGREEN}[Nuit] Citoyen {citizen_name}: Activité 'rest' (maison) créée à {home_name_display}.{LogColors.ENDC}")
+                    log.info(f"{LogColors.OKGREEN}[Repos] Citoyen {citizen_name} ({citizen_social_class}): Activité 'rest' (maison) créée à {home_name_display}.{LogColors.ENDC}")
                     return True
             else: # Not at home, go home
                 path_to_home = get_path_between_points(citizen_position, home_pos, transport_api_url)
                 if path_to_home and path_to_home.get('success'):
                     if try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, home_custom_id_val, path_to_home, now_utc_dt):
-                        log.info(f"{LogColors.OKGREEN}[Nuit] Citoyen {citizen_name}: Activité 'goto_home' créée vers {home_name_display}.{LogColors.ENDC}")
+                        log.info(f"{LogColors.OKGREEN}[Repos] Citoyen {citizen_name} ({citizen_social_class}): Activité 'goto_home' créée vers {home_name_display}.{LogColors.ENDC}")
                         return True
-            return False # Failed to rest or go home
+            return False # Failed to rest or go home for resident with home
 
-    # Forestieri or Homeless Resident logic (Inn)
-    # This part is reached if is_forestieri is true, or if resident is homeless
-    log.info(f"{LogColors.OKCYAN}[Nuit] Citoyen {citizen_name} ({'Forestieri' if is_forestieri else 'Résident sans abri'}): Recherche d'une auberge.{LogColors.ENDC}")
+    # Forestieri or Homeless Resident logic (Inn) - This part is reached if is_forestieri is true, OR if resident is homeless
+    log.info(f"{LogColors.OKCYAN}[Repos] Citoyen {citizen_name} ({citizen_social_class} - {'Forestieri' if is_forestieri else 'Résident sans abri'}): Recherche d'une auberge.{LogColors.ENDC}")
     closest_inn_record = get_closest_inn(tables, citizen_position)
     if not closest_inn_record: return False
 
@@ -727,7 +726,8 @@ def _handle_shop_for_food_at_retail(
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 5: Handles shopping for food at retail_food buildings if hungry, has a home, and it's leisure time."""
+    """Prio 20 (was 5): Handles shopping for food at retail_food if hungry, has home, and it's leisure time."""
+    # This is now a lower priority than general work/production, happens during leisure.
     if not citizen_record['is_hungry']: return False
     if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
         return False
@@ -735,7 +735,7 @@ def _handle_shop_for_food_at_retail(
 
     home_record = get_citizen_home(tables, citizen_username)
     if not home_record:
-        log.info(f"{LogColors.OKBLUE}[Achat Nourriture] Citoyen {citizen_name} ({citizen_social_class}): Sans domicile, ne peut pas acheter de nourriture à emporter.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKBLUE}[Achat Nourriture Détail] Citoyen {citizen_name} ({citizen_social_class}): Sans domicile.{LogColors.ENDC}")
         return False
     
     home_custom_id = home_record['fields'].get('BuildingId')
