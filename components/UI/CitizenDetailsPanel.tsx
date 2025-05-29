@@ -539,9 +539,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
             const kinosPromptContent = 
 `You are ${aiDisplayName}, an AI citizen of Venice. You are responding to a message from ${senderDisplayName}.
-IMPORTANT: Your response MUST be VERY SHORT, human-like, and conversational.
-DO NOT use formal language, DO NOT write long paragraphs, DO NOT include any fluff or boilerplate.
-Be direct, natural, and concise. Imagine you're sending a quick, informal message.
+IMPORTANT: Your response should be human-like and conversational.
+DO NOT use overly formal language or write excessively long paragraphs unless the context truly calls for it.
+Aim for natural, pertinent, and engaging dialogue.
 
 CRITICAL: Use the structured context provided in the 'addSystem' field (detailed below) to make your response RELEVANT to ${senderDisplayName} and FOCUSED ON GAMEPLAY.
 Your message should reflect your understanding of your relationship, recent events, and potential gameplay interactions with ${senderDisplayName}.
@@ -558,7 +558,7 @@ Guide to 'addSystem' content (use this to make your message relevant and gamepla
 ${content}
 --- END OF USER'S MESSAGE ---
 
-Remember: Your reply MUST be VERY SHORT, human-like, conversational, RELEVANT to ${senderDisplayName} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Just a natural, brief, and pertinent response.
+Remember: Your reply should be human-like, conversational, RELEVANT to ${senderDisplayName} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
 Your response:`;
 
             const kinosBody: any = { content: kinosPromptContent };
