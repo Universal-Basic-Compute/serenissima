@@ -1073,7 +1073,7 @@ Your response:`;
         // For now, let's prevent auto-selection if anonymous and no specific logic.
       }
     }
-  }, [isOpen, activeTab, selectedCitizen, fetchUnreadMessagesCount]);
+  }, [isOpen, activeTab, selectedCitizen, fetchUnreadMessagesCount, username, citizens]); // Added username and citizens to dependencies
 
   // Scroll to bottom of messages when new ones are added
   useEffect(() => {
@@ -1091,139 +1091,8 @@ Your response:`;
     }
   }, [activeTab]);
 
-  const fetchMessageHistory = async (offset = 0) => {
-    setIsLoadingHistory(true);
-    try {
-      const response = await fetch(
-        `${KINOS_API_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages?limit=25&offset=${offset}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch message history: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (offset === 0) {
-        // First page of results
-        setMessages(data.messages || []);
-      } else {
-        // Append to existing messages for pagination
-        setMessages(prev => [...prev, ...(data.messages || [])]);
-      }
-      
-      setPagination(data.pagination || null);
-    } catch (error) {
-      console.error('Error fetching message history:', error);
-      // If we can't fetch history, start with a welcome message
-      if (offset === 0) {
-        setMessages([
-          {
-            id: 'welcome',
-            role: 'assistant',
-            content: "Buongiorno! I am Compagno, your guide to La Serenissima. How may I assist you today?",
-            timestamp: new Date().toISOString()
-          }
-        ]);
-      }
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  };
-
-  const loadMoreMessages = () => {
-    if (pagination && pagination.has_more) {
-      fetchMessageHistory(pagination.offset + pagination.limit);
-    }
-  };
-
-  const sendMessage = async (content: string, additionalSystemPrompt?: string, addContext?: string, images?: string[]) => {
-    if (!content.trim()) return;
-    
-    // Optimistically add citizen message to UI
-    const citizenMessage: Message = {
-      id: `temp-${Date.now()}`,
-      role: 'user',
-      content: content,
-      timestamp: new Date().toISOString()
-    };
-    
-    setMessages(prev => [...prev, citizenMessage]);
-    setInputValue('');
-    setIsTyping(true);
-    
-    try {
-      // Default system prompt
-      const defaultSystemPrompt = "You are Compagno, a Venetian guide in La Serenissima, a digital recreation of Renaissance Venice. Respond in a friendly, helpful manner with a slight Venetian flair. Your knowledge includes Venice's history, the game's mechanics, and how to navigate the digital city. Always be helpful and concise.";
-      
-      // Extract text from the current page
-      const pageText = extractPageText();
-      const pageContext = pageText ? `\n\nThe citizen is currently viewing a page with the following content:\n${pageText}` : '';
-      
-      // Use the additional system prompt if provided, otherwise use the default
-      // Add the page context to the system prompt
-      const systemPrompt = (additionalSystemPrompt || defaultSystemPrompt) + pageContext;
-      
-      // Prepare request body
-      const requestBody: any = {
-        content: content,
-        mode: 'creative',
-        addSystem: systemPrompt
-      };
-      
-      // Add optional parameters if provided
-      if (addContext) {
-        requestBody.addContext = addContext;
-      }
-      
-      if (images && images.length > 0) {
-        requestBody.images = images;
-      }
-      
-      const response = await fetch(
-        `${KINOS_API_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to send message: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Add the assistant's response to the messages
-      setMessages(prev => [...prev, {
-        id: data.id,
-        role: 'assistant',
-        content: data.content,
-        timestamp: data.timestamp
-      }]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      
-      // Add a fallback response if the API call fails
-      setMessages(prev => [...prev, {
-        id: `error-${Date.now()}`,
-        role: 'assistant',
-        content: "Forgive me, but I seem to be unable to respond at the moment. The Council of Ten may be reviewing our conversation. Please try again later.",
-        timestamp: new Date().toISOString()
-      }]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
+  // Removed fetchMessageHistory, loadMoreMessages, and sendMessage functions
+  // as they were related to the old Compagno direct chat.
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
