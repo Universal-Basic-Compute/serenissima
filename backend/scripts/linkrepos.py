@@ -1,4 +1,5 @@
 import os
+import sys # Added import
 import requests
 import argparse
 from pyairtable import Api, Base # Changed import
