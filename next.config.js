@@ -13,6 +13,9 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
+  images: {
+    domains: ['backend.serenissima.ai', 'via.placeholder.com'], // Added backend.serenissima.ai and via.placeholder.com for fallbacks
+  },
 }
 
 module.exports = nextConfig
