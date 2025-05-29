@@ -1789,7 +1789,7 @@ Your response:`;
                         onChange={(e) => setInputValue(e.target.value)}
                         placeholder={`Message ${selectedCitizen === username ? (citizens.find(u => u.username === selectedCitizen)?.firstName || 'yourself') : (citizens.find(u => u.username === selectedCitizen)?.firstName || selectedCitizen)}... (Shift + Enter for new line)`}
                         className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
-                        rows={1}
+                        rows={3}
                         disabled={isTyping || isPreparingContext}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
@@ -1797,7 +1797,7 @@ Your response:`;
                             if (!isPreparingContext && inputValue.trim()) handleSubmit(e as any);
                           }
                         }}
-                        style={{ minHeight: '40px', maxHeight: '120px' }}
+                        style={{ maxHeight: '120px' }}
                       />
                       <button 
                         type="submit"

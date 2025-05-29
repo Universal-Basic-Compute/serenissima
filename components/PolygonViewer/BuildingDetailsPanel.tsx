@@ -1696,7 +1696,7 @@ Your response:`;
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder={`Message ${activeProfileToDisplay?.firstName || activeProfileToDisplay?.username || 'them'}... (Shift+Enter for newline)`}
                   className="flex-grow p-2 border border-amber-300 rounded-l-md text-sm focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
-                  rows={1}
+                  rows={3}
                   disabled={isAiResponding || !activeProfileToDisplay?.username}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1704,7 +1704,7 @@ Your response:`;
                       if (!isAiResponding && activeProfileToDisplay?.username) handleChatSubmit(e as any);
                     }
                   }}
-                  style={{ minHeight: '40px', maxHeight: '120px' }} 
+                  style={{ maxHeight: '120px' }} 
                 />
                 <button 
                   type="submit" 

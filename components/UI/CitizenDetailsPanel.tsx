@@ -1425,20 +1425,29 @@ Your response:`;
               e.preventDefault();
               sendMessage(inputValue);
             }} 
-            className="flex flex-shrink-0"
+            className="flex flex-shrink-0 items-end" // Added items-end for alignment
           >
-            <input
-              type="text"
+            <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               // Use citizen.firstName (camelCase)
-              placeholder={`Message ${citizen.firstName}...`} 
-              className="flex-1 p-2 border border-amber-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              placeholder={`Message ${citizen.firstName}... (Shift+Enter for new line)`} 
+              className="flex-1 p-2 border border-amber-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+              rows={3}
               disabled={isTyping}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  if (!isTyping && inputValue.trim()) {
+                    sendMessage(inputValue);
+                  }
+                }
+              }}
+              style={{ maxHeight: '120px' }}
             />
             <button 
               type="submit"
-              className={`px-4 rounded-r-lg transition-colors ${
+              className={`px-4 rounded-r-lg transition-colors self-stretch ${ // Added self-stretch
                 isTyping || !inputValue.trim()
                   ? 'bg-gray-400 text-white cursor-not-allowed'
                   : 'bg-amber-700 text-white hover:bg-amber-600'
