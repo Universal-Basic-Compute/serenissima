@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pyairtable import Api, Table
+import shutil
 import os
 import sys
 import traceback
@@ -184,6 +185,8 @@ def read_root():
 # Variable d'environnement pour le chemin du disque persistant
 # Exemple de valeur sur Render: /var/data/serenissima_assets
 PERSISTENT_ASSETS_PATH_ENV = os.getenv("PERSISTENT_ASSETS_PATH")
+# Clé API pour sécuriser le téléversement d'assets
+UPLOAD_API_KEY_ENV = os.getenv("UPLOAD_API_KEY")
 
 @app.get("/public_assets/{asset_path:path}")
 async def serve_public_asset(asset_path: str):
@@ -213,6 +216,86 @@ async def serve_public_asset(asset_path: str):
 
     # FileResponse gère automatiquement le Content-Type basé sur l'extension du fichier.
     return FileResponse(path=file_path)
+
+@app.post("/api/upload-asset")
+async def upload_asset(
+    file: UploadFile = File(...),
+    destination_path: str = Form(""), # Chemin relatif optionnel dans le dossier des assets
+    x_upload_api_key: Optional[str] = Header(None) # Clé API pour l'authentification
+):
+    if not PERSISTENT_ASSETS_PATH_ENV:
+        print("ERREUR CRITIQUE: PERSISTENT_ASSETS_PATH n'est pas défini. Téléversement impossible.")
+        raise HTTPException(status_code=500, detail="Configuration du serveur incorrecte pour le téléversement.")
+
+    if not UPLOAD_API_KEY_ENV:
+        print("ERREUR CRITIQUE: UPLOAD_API_KEY n'est pas défini. Le téléversement est désactivé.")
+        raise HTTPException(status_code=503, detail="Service de téléversement non configuré.")
+
+    if not x_upload_api_key or x_upload_api_key != UPLOAD_API_KEY_ENV:
+        print(f"Tentative de téléversement non autorisée. Clé API fournie: '{x_upload_api_key}'")
+        raise HTTPException(status_code=401, detail="Non autorisé.")
+
+    try:
+        # Nettoyer destination_path pour la sécurité
+        # Empêcher les chemins absolus ou les traversées de répertoire
+        # Normalise le chemin et supprime les ".." et "." initiaux.
+        # path.normpath ne garantit pas à lui seul contre la traversée si le chemin est malveillant.
+        # La vérification .is_relative_to est la plus importante.
+        
+        # S'assurer que destination_path est relatif et ne tente pas de sortir.
+        # On ne veut pas que destination_path commence par '/' ou contienne '..' de manière à sortir.
+        # pathlib.Path gère bien cela lors de la jonction si le chemin de base est absolu.
+        
+        # On s'assure que destination_path ne commence pas par des slashes pour éviter qu'il soit traité comme absolu.
+        clean_destination_path_str = destination_path.lstrip('/')
+        # On s'assure qu'il n'y a pas de ".." pour remonter.
+        if ".." in pathlib.Path(clean_destination_path_str).parts:
+            raise HTTPException(status_code=400, detail="Chemin de destination invalide (contient '..').")
+
+        base_assets_path = pathlib.Path(PERSISTENT_ASSETS_PATH_ENV)
+        
+        # Construire le chemin de destination final
+        # Si clean_destination_path_str est vide, le fichier sera à la racine de base_assets_path
+        # Sinon, il sera dans le sous-dossier.
+        final_dir_path = base_assets_path.joinpath(clean_destination_path_str).resolve()
+        
+        # Vérification de sécurité cruciale : le répertoire final doit être DANS le répertoire des assets.
+        if not final_dir_path.is_relative_to(base_assets_path.resolve()):
+            print(f"Tentative de traversée de répertoire bloquée pour le téléversement : {destination_path}")
+            raise HTTPException(status_code=400, detail="Chemin de destination invalide.")
+
+        # Créer les répertoires parents si nécessaire
+        final_dir_path.mkdir(parents=True, exist_ok=True)
+        
+        # Chemin complet du fichier, y compris le nom du fichier.
+        file_location = final_dir_path / file.filename
+        
+        # Vérification supplémentaire que file_location est toujours dans base_assets_path
+        if not file_location.resolve().is_relative_to(base_assets_path.resolve()):
+            print(f"Tentative de traversée de répertoire bloquée pour le nom de fichier : {file.filename}")
+            raise HTTPException(status_code=400, detail="Nom de fichier invalide.")
+
+        with open(file_location, "wb+") as file_object:
+            shutil.copyfileobj(file.file, file_object)
+        
+        # Construire le chemin relatif pour la réponse, par rapport à PERSISTENT_ASSETS_PATH_ENV
+        relative_file_path = file_location.relative_to(base_assets_path)
+        
+        print(f"Fichier '{file.filename}' téléversé avec succès vers '{file_location}'")
+        return {
+            "success": True,
+            "filename": file.filename,
+            "saved_path": str(file_location),
+            "relative_path": str(relative_file_path), # Chemin relatif pour l'accès via /public_assets/
+            "content_type": file.content_type
+        }
+    except HTTPException:
+        raise # Redéclenche les HTTPException déjà levées
+    except Exception as e:
+        error_msg = f"Échec du téléversement du fichier '{file.filename}': {str(e)}"
+        print(f"ERREUR: {error_msg}")
+        traceback.print_exc(file=sys.stdout)
+        raise HTTPException(status_code=500, detail=error_msg)
 
 @app.post("/api/wallet", response_model=WalletResponse)
 async def store_wallet(wallet_data: WalletRequest):
