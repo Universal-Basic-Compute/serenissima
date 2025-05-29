@@ -261,7 +261,7 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
         create_notification(
             tables,
             building_owner,
-            f"🏠 Your tenant **{citizen_name}** could not pay the rent of **{int(rent_price):,} ⚜️ Ducats** for **{building_name}** due to **insufficient funds** 💸",
+            f"⚠️ Rent Payment Failed: Your tenant **{citizen_name}** could not pay **{int(rent_price):,} ⚜️ Ducats** for **{building_name}** due to insufficient funds. 💸",
             {
                 "building_id": building_id,
                 "building_name": building_name,
@@ -303,7 +303,7 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
     create_notification(
         tables,
         occupant_username,
-        f"🏠 Paid rent of **{int(rent_price):,} ⚜️ Ducats** to **{building_owner}** for **{building_name}**",
+        f"✅ Rent Paid: You paid **{int(rent_price):,} ⚜️ Ducats** to **{building_owner}** for **{building_name}**.",
         {
             "building_id": building_id,
             "building_name": building_name,
@@ -323,7 +323,7 @@ def create_admin_summary(tables, rent_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"🏛️ **Daily Rent Payments Summary**\n\n📊 Processed: **{rent_summary['housing']['successful']:,}** successful, **{rent_summary['housing']['failed']:,}** failed"
+        content = f"🏛️ **Daily Rent Payments Report** 📜\nHousing Rents: **{rent_summary['housing']['successful']:,}** successful, **{rent_summary['housing']['failed']:,}** failed.\nTotal Housing Rent Collected: **{int(rent_summary['housing']['total_amount']):,}** ⚜️ Ducats."
         
         # Create detailed information
         details = {
@@ -414,11 +414,11 @@ def process_daily_rent_payments(dry_run: bool = False):
                 continue
 
             total_received_by_landlord = sum(p['amount'] for p in payments)
-            summary_content = f"💰 Récapitulatif des loyers reçus :\nVous avez reçu un total de **{int(total_received_by_landlord):,} ⚜️ Ducats**.\n\n"
+            summary_content = f"📬 **Rent Received Summary** 📬\nYou received a total of **{int(total_received_by_landlord):,} ⚜️ Ducats** from your properties today.\n\nDetails:\n"
             summary_details_list = []
 
             for payment in payments:
-                summary_content += f"- **{int(payment['amount']):,} ⚜️ Ducats** de **{payment['occupant_name']}** pour **{payment['building_name']}**.\n"
+                summary_content += f"- ✅ **{int(payment['amount']):,} ⚜️** from **{payment['occupant_name']}** for **{payment['building_name']}**.\n"
                 summary_details_list.append({
                     "occupant_name": payment['occupant_name'],
                     "building_name": payment['building_name'],

@@ -400,7 +400,7 @@ def create_notification_for_building_occupant(tables, building_id: str, building
         notification = {
             "Citizen": occupant, # Occupant is already the Username
             "Type": "rent_adjustment",
-            "Content": f"The rent amount for your building {building_display_name} has been adjusted from {old_rent} to {new_rent} ducats by the building owner {ai_username}. Reason: {reason}",
+            "Content": f"🏠 Rent Update: The rent for your building **{building_display_name}** has been adjusted from {old_rent} to **{new_rent} ⚜️ Ducats** by the owner **{ai_username}**. Reason: {reason}",
             "CreatedAt": now,
             "ReadAt": None,
             "Details": json.dumps({
@@ -427,13 +427,13 @@ def create_admin_notification(tables, ai_rent_adjustments: Dict[str, List[Dict]]
         now = datetime.now().isoformat()
         
         # Create a summary message
-        message = "AI Rent Adjustment Summary:\n\n"
+        message = "📊 **AI Rent Adjustment Summary**:\n\n"
         
         for ai_name, adjustments in ai_rent_adjustments.items():
-            message += f"- {ai_name}: {len(adjustments)} rent adjustments\n"
+            message += f"- 🤖 AI: **{ai_name}** made {len(adjustments)} rent adjustments:\n"
             for adj in adjustments:
                 building_display_admin = adj.get('building_name', adj['building_id'])
-                message += f"  * Building {building_display_admin}: {adj['old_rent']} → {adj['new_rent']} ducats\n"
+                message += f"  - 🏠 Building: **{building_display_admin}**: {adj['old_rent']} ⚜️ → **{adj['new_rent']} ⚜️**\n"
         
         # Create the notification
         notification = {
@@ -449,7 +449,7 @@ def create_admin_notification(tables, ai_rent_adjustments: Dict[str, List[Dict]]
         }
         
         tables["notifications"].create(notification)
-        print("Created admin notification with AI rent adjustment summary")
+        print("📊 Created admin notification with AI rent adjustment summary")
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 

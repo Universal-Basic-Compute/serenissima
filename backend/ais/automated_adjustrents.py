@@ -277,8 +277,8 @@ def notify_occupant(
     
     building_display_name = building_name if building_name and building_name != building_id else building_id
 
-    content = (f"The rent for your dwelling/business at {building_display_name} has been adjusted by the owner, {ai_owner_username}. "
-               f"The new rent is {new_rent:.2f} Ducats (previously {old_rent:.2f} Ducats).")
+    content = (f"📢 Rent Adjustment: The rent for your dwelling/business at **{building_display_name}** has been adjusted by the owner, **{ai_owner_username}**. "
+               f"The new rent is **{new_rent:.2f} ⚜️ Ducats** (previously {old_rent:.2f} ⚜️ Ducats).")
     details = {
         "building_id": building_id,
         "building_name": building_display_name,
@@ -308,11 +308,11 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
         log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create admin summary for {len(results)} rent adjustments.{LogColors.ENDC}")
         return
 
-    summary_message = f"Automated Rent Adjustments Summary ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
+    summary_message = f"📊 **Automated Rent Adjustments Summary** ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
     for res in results:
         building_display_admin = res.get('building_name', res['building_id']) # Use name if available for admin too
-        summary_message += (f"- AI: {res['ai_owner']}, Building: {building_display_admin} (Type: {res['building_type']}), "
-                            f"Old Rent: {res['old_rent']:.0f}, New Rent: {res['new_rent']:.0f}, Strategy: {res['strategy']}\n")
+        summary_message += (f"- 🤖 AI: **{res['ai_owner']}**, 🏠 Building: **{building_display_admin}** (Type: {res['building_type']}), "
+                            f"Old Rent: {res['old_rent']:.0f} ⚜️, New Rent: **{res['new_rent']:.0f} ⚜️**, Strategy: {res['strategy']}\n")
     
     try:
         tables["notifications"].create({
@@ -322,7 +322,7 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
             "Details": json.dumps({"adjustments": results, "report_time": datetime.now(VENICE_TIMEZONE).isoformat()}),
             "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat()
         })
-        log.info(f"{LogColors.OKGREEN}Admin summary notification created.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}📊 Admin summary notification created.{LogColors.ENDC}")
     except Exception as e:
         log.error(f"{LogColors.FAIL}Failed to create admin summary notification: {e}{LogColors.ENDC}")
 

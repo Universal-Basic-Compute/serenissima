@@ -297,8 +297,8 @@ def notify_occupant_of_wage_change(
         log.info(f"{LogColors.OKCYAN}[DRY RUN] Would notify occupant {occupant_username} of business {building_display_name} ({building_id}) about wage change from {old_wage:.2f} to {new_wage:.2f} by operator {ai_operator_username}.{LogColors.ENDC}")
         return
 
-    content = (f"The wages for your job at business {building_display_name} have been adjusted by the operator, {ai_operator_username}. "
-               f"The new wage is {new_wage:.2f} Ducats per day (previously {old_wage:.2f} Ducats).")
+    content = (f"💼 Wage Update: The wages for your job at **{building_display_name}** have been adjusted by the operator, **{ai_operator_username}**. "
+               f"The new wage is **{new_wage:.2f} ⚜️ Ducats** per day (previously {old_wage:.2f} ⚜️ Ducats).")
     details = {
         "building_id": building_id,
         "building_name": building_display_name,
@@ -328,11 +328,11 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
         log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create admin summary for {len(results)} wage adjustments.{LogColors.ENDC}")
         return
 
-    summary_message = f"Automated Wage Adjustments Summary ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
+    summary_message = f"📊 **Automated Wage Adjustments Summary** ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
     for res in results:
         building_display_admin = res.get('building_name', res['building_id']) # Use name if available for admin
-        summary_message += (f"- AI Operator: {res['ai_operator']}, Business: {building_display_admin} (Type: {res['building_type']}), "
-                            f"Old Wage: {res['old_wage']:.0f}, New Wage: {res['new_wage']:.0f}, Strategy: {res['strategy']}\n")
+        summary_message += (f"- 🤖 AI Operator: **{res['ai_operator']}**, 🏢 Business: **{building_display_admin}** (Type: {res['building_type']}), "
+                            f"Old Wage: {res['old_wage']:.0f} ⚜️, New Wage: **{res['new_wage']:.0f} ⚜️**, Strategy: {res['strategy']}\n")
     
     try:
         tables["notifications"].create({
@@ -342,7 +342,7 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
             "Details": json.dumps({"adjustments": results, "report_time": datetime.now(VENICE_TIMEZONE).isoformat()}),
             "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat()
         })
-        log.info(f"{LogColors.OKGREEN}Admin summary notification for wages created.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}📊 Admin summary notification for wages created.{LogColors.ENDC}")
     except Exception as e:
         log.error(f"{LogColors.FAIL}Failed to create admin summary notification for wages: {e}{LogColors.ENDC}")
 
