@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ResourceService } from '@/lib/services/ResourceService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
 import { getNormalizedResourceIconPath } from '@/lib/utils/resourceUtils'; // Import the utility
