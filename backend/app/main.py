@@ -21,8 +21,9 @@ from citizen_utils import find_citizen_by_identifier, update_compute_balance, tr
 # Load environment variables
 load_dotenv()
 
-# Import the scheduler module
-from app.scheduler import start_scheduler
+# Import the specific scheduler function for background execution
+from app.scheduler import start_scheduler_background 
+from contextlib import asynccontextmanager
 
 # Get API key for image generation
 IDEOGRAM_API_KEY = os.getenv("IDEOGRAM_API_KEY", "")
@@ -84,8 +85,20 @@ except Exception as e:
     print(f"ERROR initializing Airtable CONTRACTS table object: {str(e)}")
     traceback.print_exc(file=sys.stdout)
 
-# Create FastAPI app
-app = FastAPI(title="Wallet Storage API")
+# Lifespan context manager for FastAPI app
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Code to run on startup
+    print("FastAPI app startup: Initializing scheduler...")
+    # Pass forced_hour=None, or get from env var if needed for API context
+    start_scheduler_background(forced_hour=None) 
+    print("FastAPI app startup: Scheduler initialization attempted.")
+    yield
+    # Code to run on shutdown (optional, as daemon thread will exit)
+    print("FastAPI app shutdown.")
+
+# Create FastAPI app with lifespan manager
+app = FastAPI(title="Wallet Storage API", lifespan=lifespan)
 
 # Add CORS middleware
 app.add_middleware(
@@ -2736,5 +2749,5 @@ async def inject_compute_complete(data: dict):
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
-# Start the scheduler
-start_scheduler()
+# The scheduler is now started via the lifespan event manager above.
+# The direct call to start_scheduler() is removed.
