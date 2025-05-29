@@ -534,7 +534,7 @@ def update_building_wage_amount(tables, building_id: str, new_wage_amount: float
         print(f"Exception traceback: {traceback.format_exc()}")
         return False
 
-def create_notification_for_business_employee(tables, building_id: str, employee_id: str, ai_username: str, 
+def create_notification_for_business_employee(tables, building_id: str, building_name: str, employee_id: str, ai_username: str, 
                                              old_wage: float, new_wage: float, reason: str) -> bool:
     """Create a notification for a business employee about the wage adjustment."""
     try:
@@ -547,31 +547,28 @@ def create_notification_for_business_employee(tables, building_id: str, employee
             return False
         
         citizen = citizens[0]
-        citizen_id = citizen["fields"].get("Citizen", "")
+        # The 'Citizen' field in the CITIZENS table is actually the Username.
+        # We should notify the Username directly.
+        occupant_username_to_notify = citizen["fields"].get("Username", "") 
         
-        if not citizen_id:
-            print(f"Citizen {employee_id} has no associated citizen, skipping notification")
+        if not occupant_username_to_notify:
+            print(f"Citizen record {employee_id} has no Username, skipping notification")
             return False
         
         now = datetime.now().isoformat()
         
-        # Get building name/type for better notification
-        building_type = "your workplace"
-        formula = f"{{BuildingId}}='{building_id}'"
-        buildings = tables["buildings"].all(formula=formula)
-        if buildings:
-            building_type = buildings[0]["fields"].get("Type", "your workplace")
+        building_display_name = building_name if building_name and building_name != building_id else building_id
         
         # Create the notification
         notification = {
-            "Citizen": citizen_id,
+            "Citizen": occupant_username_to_notify, # Notify the Username
             "Type": "wage_adjustment",
-            "Content": f"Your wage at {building_type} has been adjusted from {old_wage} to {new_wage} ducats by the business owner {ai_username}. Reason: {reason}",
+            "Content": f"Your wage at {building_display_name} has been adjusted from {old_wage} to {new_wage} ducats by the business owner {ai_username}. Reason: {reason}",
             "CreatedAt": now,
             "ReadAt": None,
             "Details": json.dumps({
                 "building_id": building_id,
-                "building_type": building_type,
+                "building_name": building_display_name,
                 "old_wage_amount": old_wage,
                 "new_wage_amount": new_wage,
                 "business_owner": ai_username,
@@ -598,7 +595,8 @@ def create_admin_notification(tables, ai_wage_adjustments: Dict[str, List[Dict]]
         for ai_name, adjustments in ai_wage_adjustments.items():
             message += f"- {ai_name}: {len(adjustments)} wage adjustments\n"
             for adj in adjustments:
-                message += f"  * Business {adj['business_id']}: {adj['old_wage']} → {adj['new_wage']} ducats\n"
+                building_display_admin = adj.get('building_name', adj['business_id'])
+                message += f"  * Business {building_display_admin}: {adj['old_wage']} → {adj['new_wage']} ducats\n"
         
         # Create the notification
         notification = {

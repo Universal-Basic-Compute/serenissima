@@ -389,21 +389,23 @@ def update_building_rent_price(tables, building_id: str, new_rent_price: float) 
         print(f"Error updating rent amount for building {building_id}: {str(e)}")
         return False
 
-def create_notification_for_building_occupant(tables, building_id: str, occupant: str, ai_username: str, 
+def create_notification_for_building_occupant(tables, building_id: str, building_name: str, occupant: str, ai_username: str, 
                                              old_rent: float, new_rent: float, reason: str) -> bool:
     """Create a notification for the building occupant about the rent adjustment."""
     try:
         now = datetime.now().isoformat()
+        building_display_name = building_name if building_name and building_name != building_id else building_id
         
         # Create the notification
         notification = {
-            "Citizen": occupant,
+            "Citizen": occupant, # Occupant is already the Username
             "Type": "rent_adjustment",
-            "Content": f"The rent amount for your building {building_id} has been adjusted from {old_rent} to {new_rent} ducats by the building owner {ai_username}. Reason: {reason}",
+            "Content": f"The rent amount for your building {building_display_name} has been adjusted from {old_rent} to {new_rent} ducats by the building owner {ai_username}. Reason: {reason}",
             "CreatedAt": now,
             "ReadAt": None,
             "Details": json.dumps({
                 "building_id": building_id,
+                "building_name": building_display_name,
                 "old_rent_price": old_rent,
                 "new_rent_price": new_rent,
                 "building_owner": ai_username,
@@ -430,7 +432,8 @@ def create_admin_notification(tables, ai_rent_adjustments: Dict[str, List[Dict]]
         for ai_name, adjustments in ai_rent_adjustments.items():
             message += f"- {ai_name}: {len(adjustments)} rent adjustments\n"
             for adj in adjustments:
-                message += f"  * Building {adj['building_id']}: {adj['old_rent']} → {adj['new_rent']} ducats\n"
+                building_display_admin = adj.get('building_name', adj['building_id'])
+                message += f"  * Building {building_display_admin}: {adj['old_rent']} → {adj['new_rent']} ducats\n"
         
         # Create the notification
         notification = {
@@ -573,21 +576,26 @@ def process_ai_rent_adjustments(dry_run: bool = False):
                     
                     if success:
                         # Create notification for occupant if there is one
-                        if occupant_id:
-                            # Get the occupant's username from citizens table
+                        building_name_for_notif = building["fields"].get("Name", building_id)
+                        if occupant_id: # occupant_id is Airtable Record ID
+                            # Get the occupant's username from citizens_info (which is indexed by Airtable Record ID)
                             if occupant_id in citizens_info:
-                                citizen = citizens_info[occupant_id]
-                                # Check if the citizen has a Citizen field
-                                occupant_username = citizen["fields"].get("Citizen", "")
-                                if occupant_username:
+                                citizen_occupant_record = citizens_info[occupant_id]
+                                occupant_username_to_notify = citizen_occupant_record["fields"].get("Username", "")
+                                if occupant_username_to_notify:
                                     create_notification_for_building_occupant(
-                                        tables, building_id, occupant_username, ai_username, 
+                                        tables, building_id, building_name_for_notif, occupant_username_to_notify, ai_username, 
                                         current_rent, new_rent_price, reason
                                     )
+                                else:
+                                    print(f"Occupant record {occupant_id} for building {building_name_for_notif} has no Username.")
+                            else:
+                                print(f"Occupant record {occupant_id} not found in citizens_info for building {building_name_for_notif}.")
                         
                         # Add to the list of adjustments for this AI
                         ai_rent_adjustments[ai_username].append({
                             "building_id": building_id,
+                            "building_name": building_name_for_notif, # For admin summary
                             "old_rent": current_rent,
                             "new_rent": new_rent_price,
                             "reason": reason

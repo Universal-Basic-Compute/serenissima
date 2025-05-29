@@ -284,20 +284,24 @@ def notify_occupant_of_wage_change(
     tables: Dict[str, Table], 
     occupant_username: str, 
     building_id: str, # Custom BuildingId
+    building_name: str, # Building Name
     ai_operator_username: str, 
     old_wage: float, new_wage: float, 
     dry_run: bool
 ):
     if not occupant_username: return
 
+    building_display_name = building_name if building_name and building_name != building_id else building_id
+
     if dry_run:
-        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would notify occupant {occupant_username} of business {building_id} about wage change from {old_wage:.2f} to {new_wage:.2f} by operator {ai_operator_username}.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would notify occupant {occupant_username} of business {building_display_name} ({building_id}) about wage change from {old_wage:.2f} to {new_wage:.2f} by operator {ai_operator_username}.{LogColors.ENDC}")
         return
 
-    content = (f"The wages for your job at business {building_id} have been adjusted by the operator, {ai_operator_username}. "
+    content = (f"The wages for your job at business {building_display_name} have been adjusted by the operator, {ai_operator_username}. "
                f"The new wage is {new_wage:.2f} Ducats per day (previously {old_wage:.2f} Ducats).")
     details = {
         "building_id": building_id,
+        "building_name": building_display_name,
         "operator": ai_operator_username,
         "old_wage": old_wage,
         "new_wage": new_wage,
@@ -326,7 +330,8 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
 
     summary_message = f"Automated Wage Adjustments Summary ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
     for res in results:
-        summary_message += (f"- AI Operator: {res['ai_operator']}, Business: {res['building_id']} (Type: {res['building_type']}), "
+        building_display_admin = res.get('building_name', res['building_id']) # Use name if available for admin
+        summary_message += (f"- AI Operator: {res['ai_operator']}, Business: {building_display_admin} (Type: {res['building_type']}), "
                             f"Old Wage: {res['old_wage']:.0f}, New Wage: {res['new_wage']:.0f}, Strategy: {res['strategy']}\n")
     
     try:
@@ -377,7 +382,8 @@ def process_automated_wage_adjustments(strategy: str, dry_run: bool):
         for j, business_building in enumerate(businesses_run):
             building_airtable_id = business_building['id']
             building_id_custom = business_building['fields'].get('BuildingId', building_airtable_id)
-            log.info(f"  Processing business {j+1}/{total_businesses_for_ai}: {building_id_custom} (Airtable ID: {building_airtable_id}) for AI {ai_username}")
+            building_name_custom = business_building['fields'].get('Name', building_id_custom) # Get building name
+            log.info(f"  Processing business {j+1}/{total_businesses_for_ai}: {building_name_custom} ({building_id_custom}) (Airtable ID: {building_airtable_id}) for AI {ai_username}")
             current_wage_price = float(business_building['fields'].get('Wages', 0.0) or 0.0)
             building_type_str = business_building['fields'].get('Type')
 
@@ -395,6 +401,7 @@ def process_automated_wage_adjustments(strategy: str, dry_run: bool):
                         wage_adjustment_results.append({
                             "ai_operator": ai_username,
                             "building_id": building_id_custom,
+                            "building_name": building_name_custom, # Add name for admin summary
                             "building_type": building_type_str,
                             "old_wage": current_wage_price,
                             "new_wage": new_wage,
@@ -402,9 +409,9 @@ def process_automated_wage_adjustments(strategy: str, dry_run: bool):
                         })
                         occupant_username = business_building['fields'].get('Occupant')
                         if occupant_username: # Notify current occupant if any
-                            notify_occupant_of_wage_change(tables, occupant_username, building_id_custom, ai_username, current_wage_price, new_wage, dry_run)
+                            notify_occupant_of_wage_change(tables, occupant_username, building_id_custom, building_name_custom, ai_username, current_wage_price, new_wage, dry_run)
                 else:
-                    log.info(f"Business {building_id_custom}: New wage {new_wage:.0f} is too close to current {current_wage_price:.0f}. No change.{LogColors.ENDC}")
+                    log.info(f"Business {building_name_custom} ({building_id_custom}): New wage {new_wage:.0f} is too close to current {current_wage_price:.0f}. No change.{LogColors.ENDC}")
             else:
                 log.info(f"Business {building_id_custom}: No new wage calculated. Current wage: {current_wage_price:.0f}{LogColors.ENDC}")
 

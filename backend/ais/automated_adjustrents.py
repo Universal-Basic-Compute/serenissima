@@ -265,19 +265,23 @@ def update_building_rent(tables: Dict[str, Table], building_airtable_id: str, ne
 def notify_occupant(
     tables: Dict[str, Table], 
     occupant_username: str, 
-    building_id: str, 
+    building_id: str, # Custom BuildingId
+    building_name: str, # Building Name
     ai_owner_username: str, 
     old_rent: float, new_rent: float, 
     dry_run: bool
 ):
     if dry_run:
-        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would notify occupant {occupant_username} of building {building_id} about rent change from {old_rent:.2f} to {new_rent:.2f} by {ai_owner_username}.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would notify occupant {occupant_username} of building {building_name} ({building_id}) about rent change from {old_rent:.2f} to {new_rent:.2f} by {ai_owner_username}.{LogColors.ENDC}")
         return
+    
+    building_display_name = building_name if building_name and building_name != building_id else building_id
 
-    content = (f"The rent for your dwelling/business at {building_id} has been adjusted by the owner, {ai_owner_username}. "
+    content = (f"The rent for your dwelling/business at {building_display_name} has been adjusted by the owner, {ai_owner_username}. "
                f"The new rent is {new_rent:.2f} Ducats (previously {old_rent:.2f} Ducats).")
     details = {
         "building_id": building_id,
+        "building_name": building_display_name,
         "owner": ai_owner_username,
         "old_rent": old_rent,
         "new_rent": new_rent,
@@ -306,7 +310,8 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
 
     summary_message = f"Automated Rent Adjustments Summary ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
     for res in results:
-        summary_message += (f"- AI: {res['ai_owner']}, Building: {res['building_id']} (Type: {res['building_type']}), "
+        building_display_admin = res.get('building_name', res['building_id']) # Use name if available for admin too
+        summary_message += (f"- AI: {res['ai_owner']}, Building: {building_display_admin} (Type: {res['building_type']}), "
                             f"Old Rent: {res['old_rent']:.0f}, New Rent: {res['new_rent']:.0f}, Strategy: {res['strategy']}\n")
     
     try:
@@ -352,6 +357,7 @@ def process_automated_rent_adjustments(strategy: str, dry_run: bool):
         for j, building in enumerate(owned_buildings):
             building_airtable_id = building['id']
             building_id_custom = building['fields'].get('BuildingId', building_airtable_id)
+            building_name_custom = building['fields'].get('Name', building_id_custom) # Get building name
             # log.info(f"  Processing building {j+1}/{total_owned_buildings}: {building_id_custom} (Airtable ID: {building_airtable_id}) owned by AI {ai_username}")
             current_rent_price = float(building['fields'].get('RentPrice', 0.0) or 0.0)
             building_type_str = building['fields'].get('Type')
@@ -379,6 +385,7 @@ def process_automated_rent_adjustments(strategy: str, dry_run: bool):
                         rent_adjustment_results.append({
                             "ai_owner": ai_username,
                             "building_id": building_id_custom,
+                            "building_name": building_name_custom, # Add name for admin summary
                             "building_type": building_type_str,
                             "old_rent": current_rent_price,
                             "new_rent": new_rent,
@@ -386,9 +393,9 @@ def process_automated_rent_adjustments(strategy: str, dry_run: bool):
                         })
                         occupant_username = building['fields'].get('Occupant')
                         if occupant_username:
-                            notify_occupant(tables, occupant_username, building_id_custom, ai_username, current_rent_price, new_rent, dry_run)
+                            notify_occupant(tables, occupant_username, building_id_custom, building_name_custom, ai_username, current_rent_price, new_rent, dry_run)
                 else:
-                    log.info(f"Building {building_id_custom}: New rent {new_rent:.0f} is too close to current {current_rent_price:.0f}. No change.{LogColors.ENDC}")
+                    log.info(f"Building {building_name_custom} ({building_id_custom}): New rent {new_rent:.0f} is too close to current {current_rent_price:.0f}. No change.{LogColors.ENDC}")
             else:
                 log.info(f"Building {building_id_custom}: No new rent calculated (e.g. non-rentable type or error). Current rent: {current_rent_price:.0f}{LogColors.ENDC}")
 
