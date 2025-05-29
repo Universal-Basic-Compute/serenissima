@@ -19,8 +19,10 @@ from backend.engine.utils.activity_helpers import (
     _has_recent_failed_activity_for_contract,
     _get_building_position_coords,
     _calculate_distance_meters,
-    is_nighttime as is_nighttime_helper,
-    is_shopping_time as is_shopping_time_helper,
+    is_nighttime as is_nighttime_helper, # General nighttime, less used now
+    is_rest_time_for_class,
+    is_work_time_for_class,
+    is_leisure_time_for_class,
     get_path_between_points,
     get_citizen_current_load,
     get_citizen_effective_carry_capacity,
@@ -216,12 +218,14 @@ def _find_closest_fishable_water_point(
 def _handle_emergency_fishing(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 4: Handles emergency fishing if citizen lives in fisherman's cottage and is starving."""
-    home_record = get_citizen_home(tables, citizen_username)
-    if not (home_record and home_record['fields'].get('Type') == 'fisherman_s_cottage'):
-        return False # Not a fisherman
+    """Prio 4: Handles emergency fishing if citizen is Facchini, starving, and it's not rest time."""
+    if citizen_social_class != "Facchini": # Only Facchini do emergency fishing for now
+        return False
+    if is_rest_time_for_class(citizen_social_class, now_venice_dt): # No fishing during rest
+        return False
 
     ate_at_str = citizen_record['fields'].get('AteAt')
     is_starving = True # Assume starving if no AteAt or very old
@@ -256,19 +260,21 @@ def _handle_emergency_fishing(
 def _handle_leave_venice(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
     """Prio 1: Handles Forestieri departure."""
-    if not citizen_record['fields'].get('HomeCity') or not citizen_record['fields'].get('HomeCity', '').strip():
-        return False # Not a Forestieri or HomeCity not set
-
-    trust_score_consiglio = get_relationship_trust_score(tables, citizen_username, "ConsiglioDeiDieci")
-    departure_condition_met = trust_score_consiglio < -50 # Example condition
-
-    if not departure_condition_met:
+    if citizen_social_class != "Forestieri":
         return False
 
-    log.info(f"{LogColors.OKCYAN}[Départ] Citoyen {citizen_name}: Conditions de départ remplies (score de confiance: {trust_score_consiglio}).{LogColors.ENDC}")
+    # Forestieri departure logic might be complex, involving duration of stay, objectives, etc.
+    # For now, let's assume a simplified condition or delegate to a specific Forestieri handler.
+    # This handler is high priority, so it should be relatively certain.
+    # The existing process_forestieri_departure_check can be used here.
+    if not process_forestieri_departure_check(tables, citizen_record, now_utc_dt):
+        return False
+
+    log.info(f"{LogColors.OKCYAN}[Départ] Forestiero {citizen_name}: Conditions de départ remplies.{LogColors.ENDC}")
 
     # Find nearest public_dock as exit point
     if not citizen_position:
@@ -321,12 +327,16 @@ def _handle_leave_venice(
 def _handle_eat_from_inventory(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 2: Handles eating from inventory if hungry."""
-    if not citizen_record['is_hungry']: return False # is_hungry flag set by main function
+    """Prio 2: Handles eating from inventory if hungry and it's leisure time or a meal break."""
+    if not citizen_record['is_hungry']: return False
+    if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
+        # Could add more nuanced checks, e.g., if it's a designated meal break within work hours
+        return False
 
-    log.info(f"{LogColors.OKCYAN}[Faim] Citoyen {citizen_name}: Est affamé. Vérification de l'inventaire.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}[Faim - Inventaire] Citoyen {citizen_name} ({citizen_social_class}): Est affamé et en période de loisirs. Vérification de l'inventaire.{LogColors.ENDC}")
     # food_resource_types = ["bread", "fish", "preserved_fish"] # Replaced by constant
     for food_type_id in FOOD_RESOURCE_TYPES_FOR_EATING:
         food_name = _get_res_display_name_module(food_type_id, resource_defs)
@@ -345,14 +355,18 @@ def _handle_eat_from_inventory(
 def _handle_eat_at_home_or_goto(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 3 & 4: Handles eating at home or going home to eat if hungry."""
+    """Prio 3: Handles eating at home or going home to eat if hungry and it's leisure time."""
     if not citizen_record['is_hungry']: return False
+    if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
+        return False
 
     home_record = get_citizen_home(tables, citizen_username)
     if not home_record: return False
 
+    log.info(f"{LogColors.OKCYAN}[Faim - Maison] Citoyen {citizen_name} ({citizen_social_class}): Affamé et en période de loisirs. Vérification domicile.{LogColors.ENDC}")
     home_name_display = _get_bldg_display_name_module(tables, home_record)
     home_position = _get_building_position_coords(home_record)
     home_building_id = home_record['fields'].get('BuildingId', home_record['id'])
@@ -395,16 +409,20 @@ def _handle_eat_at_home_or_goto(
 def _handle_eat_at_tavern_or_goto(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 5 & 6: Handles eating at tavern or going to tavern to eat if hungry."""
+    """Prio 6: Handles eating at tavern or going to tavern to eat if hungry and it's leisure time."""
     if not citizen_record['is_hungry']: return False
-    if not citizen_position: return False # Need position to find tavern
+    if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
+        return False
+    if not citizen_position: return False
     
     citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
     if citizen_ducats < TAVERN_MEAL_COST_ESTIMATE: return False
 
-    closest_tavern_record = get_closest_inn(tables, citizen_position)
+    log.info(f"{LogColors.OKCYAN}[Faim - Taverne] Citoyen {citizen_name} ({citizen_social_class}): Affamé et en période de loisirs. Recherche taverne.{LogColors.ENDC}")
+    closest_tavern_record = get_closest_inn(tables, citizen_position) # Inn also serves as tavern
     if not closest_tavern_record: return False
 
     tavern_name_display = _get_bldg_display_name_module(tables, closest_tavern_record)
@@ -444,14 +462,22 @@ def _handle_eat_at_tavern_or_goto(
 def _handle_deposit_inventory_at_work(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 10 & 11: Handles depositing full inventory at work."""
+    """Prio 10: Handles depositing full inventory at work if it's work time or just before/after."""
+    # Allow depositing even slightly outside work hours if inventory is full.
+    if not (is_work_time_for_class(citizen_social_class, now_venice_dt) or \
+            is_leisure_time_for_class(citizen_social_class, now_venice_dt)): # Allow during leisure too if near work
+        # More precise: check if current time is "close" to work time.
+        # For now, allowing during leisure is a simple proxy.
+        pass # Let it proceed if inventory is full, even if not strictly work time.
+
     current_load = get_citizen_current_load(tables, citizen_username)
     citizen_max_capacity = get_citizen_effective_carry_capacity(citizen_record)
     if current_load <= (citizen_max_capacity * 0.7): return False
 
-    log.info(f"{LogColors.OKCYAN}[Inventaire Plein] Citoyen {citizen_name}: Inventaire >70% plein. Vérification lieu de travail.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}[Inventaire Plein] Citoyen {citizen_name} ({citizen_social_class}): Inventaire >70% plein. Vérification lieu de travail.{LogColors.ENDC}")
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
     if not workplace_record: return False
 
@@ -493,11 +519,13 @@ def _handle_deposit_inventory_at_work(
 def _handle_check_business_status(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 12: Handles checking business status if manager and not checked recently."""
-    if is_night: # Managers usually check during the day
-        return False
+    """Prio 12: Handles checking business status if manager and not checked recently, during work/leisure time."""
+    if not (is_work_time_for_class(citizen_social_class, now_venice_dt) or \
+            is_leisure_time_for_class(citizen_social_class, now_venice_dt)):
+        return False # Only check during active hours
 
     # Find buildings RunBy this citizen that are businesses
     try:
@@ -560,29 +588,98 @@ def _handle_check_business_status(
 def _handle_night_shelter(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 15-18: Handles finding night shelter (home or inn)."""
-    if not is_night: return False
-    if not citizen_position: return False # Need position
+    """Prio 15: Handles finding night shelter (home or inn) if it's rest time."""
+    if not is_rest_time_for_class(citizen_social_class, now_venice_dt):
+        return False
+    if not citizen_position: return False
 
-    log.info(f"{LogColors.OKCYAN}[Nuit] Citoyen {citizen_name}: Il fait nuit. Évaluation abri.{LogColors.ENDC}")
-    home_city = citizen_record['fields'].get('HomeCity')
-    is_forestieri = home_city and home_city.strip()
+    log.info(f"{LogColors.OKCYAN}[Repos] Citoyen {citizen_name} ({citizen_social_class}): Période de repos. Évaluation abri.{LogColors.ENDC}")
+    is_forestieri = citizen_social_class == "Forestieri"
 
-    # Calculate end time for rest (next 6 AM Venice time)
-    venice_now_for_rest = now_utc_dt.astimezone(VENICE_TIMEZONE)
-    if venice_now_for_rest.hour < NIGHT_END_HOUR_FOR_STAY:
-        end_time_venice_rest = venice_now_for_rest.replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
+    # Calculate end time for rest based on class schedule
+    # Get the 'rest' periods for the citizen's social class
+    schedule = SOCIAL_CLASS_SCHEDULES.get(citizen_social_class, {})
+    rest_periods = schedule.get("rest", [])
+    if not rest_periods:
+        log.error(f"No rest periods defined for {citizen_social_class}. Cannot calculate rest end time.")
+        # Fallback to a generic 6 AM end time if schedule is missing, though this shouldn't happen.
+        venice_now_for_rest_fallback = now_utc_dt.astimezone(VENICE_TIMEZONE)
+        if venice_now_for_rest_fallback.hour < NIGHT_END_HOUR_FOR_STAY:
+             end_time_venice_rest = venice_now_for_rest_fallback.replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
+        else:
+             end_time_venice_rest = (venice_now_for_rest_fallback + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
     else:
-        end_time_venice_rest = (venice_now_for_rest + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
+        # Determine the end of the current or upcoming rest period
+        # This logic assumes rest periods are sorted and handles overnight.
+        # For simplicity, find the next rest end hour after current time.
+        current_hour_venice = now_venice_dt.hour
+        end_hour_of_current_rest_period = -1
+
+        for start_h, end_h in rest_periods:
+            if start_h <= end_h: # Same day
+                if start_h <= current_hour_venice < end_h:
+                    end_hour_of_current_rest_period = end_h
+                    break
+            else: # Overnight
+                if current_hour_venice >= start_h: # Currently in the first part of overnight rest
+                    end_hour_of_current_rest_period = end_h # End hour is on the next day
+                    break
+                elif current_hour_venice < end_h: # Currently in the second part of overnight rest
+                    end_hour_of_current_rest_period = end_h
+                    break
+        
+        if end_hour_of_current_rest_period == -1: # Should not happen if is_rest_time_for_class was true
+            log.warning(f"Could not determine current rest period end for {citizen_name}. Defaulting end time.")
+            end_time_venice_rest = (now_venice_dt + datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0) # Default 1h rest
+        else:
+            # If the end_hour is for "next day" (e.g. rest is 22-06, current is 23, end_hour is 6)
+            # or if current_hour is already past the start of a period that ends on the same day.
+            target_date = now_venice_dt
+            # If current hour is in an overnight period that started "yesterday" (e.g. current 01:00, period 22-06)
+            # OR if current hour is in a period that started today and ends "tomorrow" (e.g. current 23:00, period 22-06)
+            # and the end_hour_of_current_rest_period is less than current_hour_venice (meaning it's next day's hour)
+            # This logic needs to be robust for all cases.
+            # Simpler: if end_hour < current_hour (and it's an overnight block), it's next day.
+            # Or if it's a normal block, it's same day.
+            
+            # Find the specific (start, end) block we are in or about to be in.
+            chosen_rest_block_end_hour = -1
+            is_overnight_block_ending_next_day = False
+
+            for start_h, end_h in rest_periods:
+                if start_h <= end_h: # Same day block
+                    if start_h <= current_hour_venice < end_h:
+                        chosen_rest_block_end_hour = end_h
+                        break
+                else: # Overnight block (e.g. 22 to 06)
+                    if current_hour_venice >= start_h: # e.g. current 23:00, block 22-06
+                        chosen_rest_block_end_hour = end_h
+                        is_overnight_block_ending_next_day = True
+                        break
+                    elif current_hour_venice < end_h: # e.g. current 01:00, block 22-06
+                        chosen_rest_block_end_hour = end_h
+                        break
+            
+            if chosen_rest_block_end_hour != -1:
+                end_time_venice_rest = now_venice_dt.replace(hour=chosen_rest_block_end_hour, minute=0, second=0, microsecond=0)
+                if is_overnight_block_ending_next_day and chosen_rest_block_end_hour <= current_hour_venice : # e.g. current 23, end_hour 06
+                    end_time_venice_rest += datetime.timedelta(days=1)
+                # If current time is already past the calculated end time for today (e.g. current 07:00, end_hour 06:00 from a 22-06 block)
+                # this means we are past the rest period. This case should ideally be caught by is_rest_time_for_class.
+                # However, if is_rest_time_for_class was true, and we are here, it means we are *in* a rest period.
+            else: # Fallback, should not be reached if is_rest_time_for_class is accurate
+                log.error(f"Logic error determining rest end time for {citizen_name}. Defaulting.")
+                end_time_venice_rest = (now_venice_dt + datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+
     stay_end_time_utc_iso = end_time_venice_rest.astimezone(pytz.UTC).isoformat()
 
     if not is_forestieri: # Resident logic
         home_record = get_citizen_home(tables, citizen_username)
         if not home_record: # Homeless resident
-            log.info(f"{LogColors.WARNING}[Nuit] Citoyen {citizen_name} (résident): Sans domicile. Recherche d'une auberge.{LogColors.ENDC}")
-            # Fall through to inn logic for homeless resident
+            log.info(f"{LogColors.WARNING}[Repos] Citoyen {citizen_name} ({citizen_social_class}): Sans domicile. Recherche d'une auberge.{LogColors.ENDC}")
         else:
             home_name_display = _get_bldg_display_name_module(tables, home_record)
             home_pos = _get_building_position_coords(home_record)
@@ -627,19 +724,22 @@ def _handle_night_shelter(
 def _handle_shop_for_food_at_retail(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 5 (new): Handles shopping for food at retail_food buildings if hungry and has a home."""
+    """Prio 5: Handles shopping for food at retail_food buildings if hungry, has a home, and it's leisure time."""
     if not citizen_record['is_hungry']: return False
-    if not citizen_position: return False # Need current position to find shops
+    if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
+        return False
+    if not citizen_position: return False
 
     home_record = get_citizen_home(tables, citizen_username)
     if not home_record:
-        log.info(f"{LogColors.OKBLUE}[Achat Nourriture] Citoyen {citizen_name}: Sans domicile, ne peut pas acheter de nourriture à emporter.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKBLUE}[Achat Nourriture] Citoyen {citizen_name} ({citizen_social_class}): Sans domicile, ne peut pas acheter de nourriture à emporter.{LogColors.ENDC}")
         return False
     
     home_custom_id = home_record['fields'].get('BuildingId')
-    if not home_custom_id: return False # Home needs a valid ID
+    if not home_custom_id: return False
 
     citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
     if citizen_ducats < FOOD_SHOPPING_COST_ESTIMATE: # Estimate for 1-2 units of food
@@ -836,24 +936,30 @@ def _handle_shop_for_food_at_retail(
 def _handle_fishing(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 80: Handles regular fishing if citizen lives in fisherman's cottage and has no other work."""
-    # This handler runs if no higher priority tasks (work, urgent needs) are found.
-    # It's a fallback productive activity for fishermen.
-    
-    home_record = get_citizen_home(tables, citizen_username)
+    """Prio 32: Handles regular fishing if citizen is Facchini, it's work time, and they are a fisherman."""
+    if citizen_social_class != "Facchini":
+        return False
+    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
+        return False
+        
+    home_record = get_citizen_home(tables, citizen_username) # Fishermen live in fisherman's cottages
     if not (home_record and home_record['fields'].get('Type') == 'fisherman_s_cottage'):
-        return False # Not a fisherman
+        return False # Not a fisherman (based on home type)
 
-    # Optional: Add conditions like not being too full of fish already, or time of day.
-    # For now, assume they will fish if idle and a fisherman.
+    # Check if they have a formal "Workplace" record. If so, they should do that job.
+    # This fishing is for those Facchini in fisherman's cottages without other assigned work.
+    workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
+    if workplace_record:
+        return False # Has other work
 
     if not citizen_position:
-        log.warning(f"{LogColors.WARNING}[Pêche] {citizen_name} n'a pas de position. Impossible de pêcher.{LogColors.ENDC}")
+        log.warning(f"{LogColors.WARNING}[Pêche Régulière] {citizen_name} n'a pas de position. Impossible de pêcher.{LogColors.ENDC}")
         return False
 
-    log.info(f"{LogColors.OKCYAN}[Pêche] {citizen_name} (pêcheur) est inoccupé(e). Recherche d'un lieu de pêche.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}[Pêche Régulière] {citizen_name} (Facchini pêcheur sans autre travail) en période de travail. Recherche lieu de pêche.{LogColors.ENDC}")
     
     target_wp_id, target_wp_pos, path_data = _find_closest_fishable_water_point(citizen_position, api_base_url, transport_api_url)
 
@@ -875,26 +981,23 @@ def _handle_fishing(
 def _handle_construction_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 20-23: Handles construction related tasks."""
-    if is_night: # Construction usually not at night
+    """Prio 30: Handles construction related tasks if it's work time."""
+    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
         return False
 
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
     if not workplace_record or workplace_record['fields'].get('SubCategory') != 'construction':
-        return False # Not at a construction workplace or no workplace
+        return False
 
-    # Citizen must be at the construction workshop to initiate construction logic
     workplace_pos = _get_building_position_coords(workplace_record)
     if not citizen_position or not workplace_pos or _calculate_distance_meters(citizen_position, workplace_pos) > 20:
-        # If not at construction workshop, a general goto_work (lower priority) might handle it,
-        # or a specific goto_construction_site if that's a distinct state.
-        # For now, construction_logic expects the worker to be at their workshop.
-        log.info(f"{LogColors.OKBLUE}[Construction] Citoyen {citizen_name} n'est pas à son atelier de construction. La logique de construction ne sera pas déclenchée par ce handler.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKBLUE}[Construction] Citoyen {citizen_name} ({citizen_social_class}) n'est pas à son atelier. Pas de tâche de construction.{LogColors.ENDC}")
         return False
     
-    log.info(f"{LogColors.OKCYAN}[Construction] Citoyen {citizen_name} est à son atelier de construction. Délégation à handle_construction_worker_activity.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}[Construction] Citoyen {citizen_name} ({citizen_social_class}) est à son atelier. Délégation à handle_construction_worker_activity.{LogColors.ENDC}")
     # handle_construction_worker_activity expects the citizen record and workplace record.
     # It also needs building_type_defs, resource_defs, time, and api_urls.
     if handle_construction_worker_activity(
@@ -910,15 +1013,19 @@ def _handle_construction_tasks(
 def _handle_production_and_general_work_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 30-35: Handles production, restocking for general workplaces."""
-    if is_night: # Productive work usually not at night
+    """Prio 31: Handles production, restocking for general workplaces if it's work time."""
+    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
+        return False
+    # Nobili do not "work" in this sense, their activities are handled by leisure.
+    if citizen_social_class == "Nobili":
         return False
 
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
     if not workplace_record:
-        return False # No workplace
+        return False
 
     workplace_category = workplace_record['fields'].get('Category', '').lower()
     workplace_subcategory = workplace_record['fields'].get('SubCategory', '').lower()
@@ -1158,39 +1265,76 @@ def _handle_production_and_general_work_tasks(
 def _handle_forestieri_daytime_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 40: Handles Forestieri daytime activities."""
-    if is_night or not (citizen_record['fields'].get('HomeCity') and citizen_record['fields'].get('HomeCity', '').strip()):
-        return False # Not daytime or not a Forestieri
+    """Prio 40: Handles Forestieri specific activities (work/leisure) based on their schedule."""
+    if citizen_social_class != "Forestieri":
+        return False
 
-    log.info(f"{LogColors.OKCYAN}[Forestieri Jour] Citoyen {citizen_name}: Évaluation des tâches de jour.{LogColors.ENDC}")
-    if process_forestieri_daytime_activity(
-        tables, citizen_record, citizen_position, now_utc_dt, resource_defs, building_type_defs, transport_api_url, IDLE_ACTIVITY_DURATION_HOURS
-    ):
-        return True
+    if is_work_time_for_class(citizen_social_class, now_venice_dt):
+        # Forestieri "work" could be specific tasks or managing their affairs.
+        # For now, let's assume if they have a workplace, they go there.
+        # Otherwise, they might engage in trade-related leisure or specific Forestieri tasks.
+        # This part can be expanded with specific Forestieri work logic.
+        # If they have a workplace record (e.g. a rented stall or office):
+        workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
+        if workplace_record:
+            if not citizen_position: return False
+            workplace_pos = _get_building_position_coords(workplace_record)
+            if not workplace_pos: return False
+            if _calculate_distance_meters(citizen_position, workplace_pos) > 20: # Not at workplace
+                 # Create goto_work for Forestieri to their specific workplace
+                path_to_work = get_path_between_points(citizen_position, workplace_pos, transport_api_url)
+                if path_to_work and path_to_work.get('success'):
+                    workplace_custom_id_val = workplace_record['fields'].get('BuildingId')
+                    if try_create_goto_work_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, workplace_custom_id_val, path_to_work, None, resource_defs, False, citizen_position_str, now_utc_dt):
+                        log.info(f"{LogColors.OKGREEN}[Forestieri Travail] Forestiero {citizen_name} va à son lieu de travail {workplace_custom_id_val}.{LogColors.ENDC}")
+                        return True
+            else: # At workplace
+                # Placeholder for Forestieri-specific work/production at their workplace
+                log.info(f"{LogColors.OKBLUE}[Forestieri Travail] Forestiero {citizen_name} est à son lieu de travail. Logique de travail spécifique à implémenter.{LogColors.ENDC}")
+                # Could try production if applicable, or a specific "manage_trade" activity.
+                # For now, if at workplace during work time, let it fall through to idle if no specific task.
+                pass # Fall through to allow other non-work leisure if no specific work task here
+        # If no workplace, they engage in leisure during their "work" hours.
+        # Fall through to general leisure logic.
+
+    if is_leisure_time_for_class(citizen_social_class, now_venice_dt):
+        log.info(f"{LogColors.OKCYAN}[Forestieri Loisirs] Forestiero {citizen_name}: Période de loisirs. Évaluation des tâches.{LogColors.ENDC}")
+        if process_forestieri_daytime_activity( # This function handles general Forestieri leisure
+            tables, citizen_record, citizen_position, now_utc_dt, resource_defs, building_type_defs, transport_api_url, IDLE_ACTIVITY_DURATION_HOURS
+        ):
+            return True
     return False
+
 
 def _handle_shopping_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 50: Handles personal shopping tasks."""
-    if is_night or not is_shopping_time_helper(now_venice_dt):
+    """Prio 50: Handles personal shopping tasks if it's leisure time."""
+    if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
         return False
+    # Nobili have a lot of leisure time, shopping is a key activity for them.
+    # Other classes also shop during their leisure.
 
     current_load = get_citizen_current_load(tables, citizen_username)
     max_capacity = get_citizen_effective_carry_capacity(citizen_record)
-    if current_load >= max_capacity * 0.9: # If inventory is nearly full
+    if current_load >= max_capacity * 0.9:
         return False 
     
     home_record = get_citizen_home(tables, citizen_username)
-    if not home_record: return False # Needs a home to deliver to
+    # Forestieri might shop even without a permanent "home" record in Venice, goods go to inventory.
+    if not home_record and citizen_social_class != "Forestieri":
+         log.info(f"{LogColors.OKBLUE}[Shopping] Citoyen {citizen_name} ({citizen_social_class}): Pas de domicile, ne peut pas faire d'achats (sauf Forestieri).{LogColors.ENDC}")
+         return False
 
-    log.info(f"{LogColors.OKCYAN}[Shopping] Citoyen {citizen_name}: C'est l'heure du shopping.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}[Shopping] Citoyen {citizen_name} ({citizen_social_class}): Période de loisirs, évaluation shopping.{LogColors.ENDC}")
     
-    citizen_social_class = citizen_record['fields'].get('SocialClass', 'Facchini')
+    # citizen_social_class is now a parameter
     citizen_max_tier_access = SOCIAL_CLASS_VALUE.get(citizen_social_class, 1)
     citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
     remaining_capacity = max_capacity - current_load
@@ -1250,12 +1394,15 @@ def _handle_shopping_tasks(
 def _handle_porter_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 60: Handles Porter tasks if at Guild Hall."""
-    if is_night: return False
+    """Prio 60: Handles Porter tasks if it's work time and they are at Guild Hall."""
+    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
+        return False
+    # Assuming Porters are a specific type of Popolani or Facchini, or have their own "Porter" class.
+    # For now, let's assume their work time is covered by their general class schedule.
 
-    # Check if citizen operates a Porter Guild Hall
     porter_guild_hall_operated = None
     try:
         # Assuming RunBy is the correct field for operator
@@ -1284,24 +1431,26 @@ def _handle_porter_tasks(
 def _handle_general_goto_work(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
-    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str]
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
+    citizen_social_class: str # Added social_class
 ) -> bool:
-    """Prio 70: Handles general goto_work if citizen has a workplace and is not there."""
-    if is_night: # Usually no work at night unless specific job
-        log.info(f"{LogColors.OKBLUE}[Aller au Travail] Il fait nuit. Le citoyen {citizen_name} n'ira pas travailler.{LogColors.ENDC}")
+    """Prio 70: Handles general goto_work if it's work time, citizen has a workplace and is not there."""
+    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
+        return False
+    if citizen_social_class == "Nobili": # Nobili don't "goto_work" in this manner
         return False
 
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
-    if not workplace_record: return False # No workplace
+    if not workplace_record: return False
 
-    if not citizen_position: return False # Needs position
+    if not citizen_position: return False
     workplace_pos = _get_building_position_coords(workplace_record)
-    if not workplace_pos: return False # Workplace has no position
+    if not workplace_pos: return False
 
     if _calculate_distance_meters(citizen_position, workplace_pos) < 20:
         return False # Already at workplace
 
-    log.info(f"{LogColors.OKCYAN}[Aller au Travail] Citoyen {citizen_name} n'est pas à son lieu de travail. Création goto_work.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}[Aller au Travail] Citoyen {citizen_name} ({citizen_social_class}) n'est pas à son lieu de travail. Création goto_work.{LogColors.ENDC}")
     path_to_work = get_path_between_points(citizen_position, workplace_pos, transport_api_url)
     if path_to_work and path_to_work.get('success'):
         workplace_custom_id_val = workplace_record['fields'].get('BuildingId')
@@ -1322,13 +1471,13 @@ def _handle_general_goto_work(
 # --- Main Activity Processing Function ---
 
 def process_citizen_activity(
-    tables: Dict[str, Table], 
-    citizen_record: Dict, # Renamed from citizen to citizen_record for clarity
-    is_night: bool, 
+    tables: Dict[str, Table],
+    citizen_record: Dict,
+    # is_night: bool, # This will be determined internally based on class schedule
     resource_defs: Dict,
-    building_type_defs: Dict, 
-    now_venice_dt: datetime.datetime, 
-    now_utc_dt: datetime.datetime,    
+    building_type_defs: Dict,
+    now_venice_dt: datetime.datetime,
+    now_utc_dt: datetime.datetime,
     transport_api_url: str,
     api_base_url: str
 ) -> bool:
@@ -1342,7 +1491,8 @@ def process_citizen_activity(
     if not citizen_username: citizen_username = citizen_custom_id # Fallback
 
     citizen_name = f"{citizen_record['fields'].get('FirstName', '')} {citizen_record['fields'].get('LastName', '')}".strip() or citizen_username
-    log.info(f"{LogColors.HEADER}Processing Citizen: {citizen_name} (ID: {citizen_custom_id}, User: {citizen_username}){LogColors.ENDC}")
+    citizen_social_class = citizen_record['fields'].get('SocialClass', 'Facchini') # Default if not set
+    log.info(f"{LogColors.HEADER}Processing Citizen: {citizen_name} (ID: {citizen_custom_id}, User: {citizen_username}, Class: {citizen_social_class}){LogColors.ENDC}")
 
     citizen_position_str = citizen_record['fields'].get('Position')
     citizen_position: Optional[Dict[str, float]] = None
@@ -1377,40 +1527,62 @@ def process_citizen_activity(
     citizen_record['is_hungry'] = is_hungry # Add to record for handlers
 
     # Define activity handlers in order of priority
-    # Each handler function must accept all these parameters.
+    # Each handler function must accept all these parameters, including citizen_social_class.
+    # The 'is_night' parameter is effectively replaced by class-specific time checks within handlers.
     handler_args = (
-        tables, citizen_record, is_night, resource_defs, building_type_defs,
+        tables, citizen_record, False, resource_defs, building_type_defs, # Passing False for old is_night, it's not used
         now_venice_dt, now_utc_dt, transport_api_url, api_base_url,
-        citizen_position, citizen_custom_id, citizen_username, citizen_airtable_id, citizen_name, citizen_position_str
+        citizen_position, citizen_custom_id, citizen_username, citizen_airtable_id, citizen_name, citizen_position_str,
+        citizen_social_class # Pass social_class to handlers
     )
 
+    # Re-prioritized handlers based on new time blocks and needs
     activity_handlers = [
-        (1, _handle_leave_venice, "Départ de Venise (Forestieri)"), # Prio 1
-        (2, _handle_eat_from_inventory, "Manger depuis l'inventaire"), # Prio 2
-        (3, _handle_eat_at_home_or_goto, "Manger à la maison / Aller à la maison pour manger"), # Prio 3
-        (4, _handle_emergency_fishing, "Pêche d'urgence (faim critique)"), # Prio 4 (Nouveau)
-        (5, _handle_shop_for_food_at_retail, "Acheter de la nourriture au détail"), # Prio 5 (anciennement 5)
-        (6, _handle_eat_at_tavern_or_goto, "Manger à la taverne / Aller à la taverne pour manger"), # Prio 6 & 7 (anciennement 6 & 7)
-        (10, _handle_deposit_inventory_at_work, "Déposer inventaire plein au travail"), # Prio 10 & 11
-        (12, _handle_check_business_status, "Vérifier le statut de l'entreprise"), # Prio 12
-        (15, _handle_night_shelter, "Abri nocturne (maison/auberge)"), # Prio 15-18
-        (20, _handle_construction_tasks, "Tâches de construction"), # Prio 20-23
-        (30, _handle_production_and_general_work_tasks, "Production et tâches générales de travail"), # Prio 30-35
-        (40, _handle_forestieri_daytime_tasks, "Tâches de jour (Forestieri)"), # Prio 40
-        (50, _handle_shopping_tasks, "Shopping personnel"), # Prio 50
-        (60, _handle_porter_tasks, "Tâches de porteur (au Guild Hall)"), # Prio 60
-        (70, _handle_general_goto_work, "Aller au travail (général)"), # Prio 70
-        (80, _handle_fishing, "Pêche (activité par défaut pour pêcheur)"), # Prio 80 (Nouveau)
+        # Highest priority: Critical needs & specific roles
+        (1, _handle_leave_venice, "Départ de Venise (Forestieri)"),
+        (2, _handle_eat_from_inventory, "Manger depuis l'inventaire (si loisir/pause)"),
+        (3, _handle_eat_at_home_or_goto, "Manger à la maison / Aller à la maison (si loisir/pause)"),
+        (4, _handle_emergency_fishing, "Pêche d'urgence (Facchini affamé, pas en repos)"),
+        (5, _handle_shop_for_food_at_retail, "Acheter nourriture au détail (si faim, loisir)"), # Moved up
+        (6, _handle_eat_at_tavern_or_goto, "Manger à la taverne / Aller à la taverne (si loisir/pause)"),
+        
+        # Shelter / Rest is a primary driver based on time
+        (15, _handle_night_shelter, "Abri nocturne / Repos (selon horaire de classe)"),
+
+        # Work-related tasks, only during work hours
+        (20, _handle_deposit_inventory_at_work, "Déposer inventaire plein au travail (si travail/proche)"), # Check if near work time
+        (30, _handle_construction_tasks, "Tâches de construction (si travail)"),
+        (31, _handle_production_and_general_work_tasks, "Production et tâches générales (si travail)"),
+        (32, _handle_fishing, "Pêche régulière (Facchini pêcheur, si travail)"), # Regular fishing as work
+
+        # Forestieri specific activities (can be work or leisure for them)
+        (40, _handle_forestieri_daytime_tasks, "Tâches spécifiques Forestieri (selon leur horaire)"),
+
+        # General tasks during leisure or work time if applicable
+        (50, _handle_shopping_tasks, "Shopping personnel (si loisir)"), # General shopping
+        (60, _handle_porter_tasks, "Tâches de porteur (si travail, au Guild Hall)"),
+        (65, _handle_check_business_status, "Vérifier le statut de l'entreprise (si travail/loisir)"),
+        
+        # Movement to work if not already there and it's work time
+        (70, _handle_general_goto_work, "Aller au travail (général, si heure de travail)"),
     ]
 
     for priority, handler_func, description in activity_handlers:
-        log.info(f"{LogColors.OKBLUE}[Prio: {priority}] Citizen {citizen_name}: Evaluating '{description}'...{LogColors.ENDC}")
-        if handler_func(*handler_args):
-            log.info(f"{LogColors.OKGREEN}Citizen {citizen_name}: Activity created by '{description}'.{LogColors.ENDC}")
-            return True
+        log.info(f"{LogColors.OKBLUE}[Prio: {priority}] Citizen {citizen_name} ({citizen_social_class}): Evaluating '{description}'...{LogColors.ENDC}")
+        try:
+            if handler_func(*handler_args):
+                log.info(f"{LogColors.OKGREEN}Citizen {citizen_name} ({citizen_social_class}): Activity created by '{description}'.{LogColors.ENDC}")
+                return True
+        except Exception as e_handler:
+            log.error(f"{LogColors.FAIL}Citizen {citizen_name} ({citizen_social_class}): ERREUR dans handler '{description}': {e_handler}{LogColors.ENDC}")
+            import traceback
+            log.error(traceback.format_exc())
+            # Continue to next handler if one fails, to not block all activity creation
 
     # Fallback: If no activity was created by any handler
-    log.info(f"{LogColors.OKBLUE}Citizen {citizen_name}: No specific activity created. Creating 'idle' activity.{LogColors.ENDC}")
+    # Create idle if it's not rest time. If it is rest time, they should have gotten a rest activity.
+    if not is_rest_time_for_class(citizen_social_class, now_venice_dt):
+        log.info(f"{LogColors.OKBLUE}Citizen {citizen_name} ({citizen_social_class}): No specific activity created. Creating 'idle' activity.{LogColors.ENDC}")
     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
     try_create_idle_activity(
         tables, citizen_custom_id, citizen_username, citizen_airtable_id,

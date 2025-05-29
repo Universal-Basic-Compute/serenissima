@@ -233,9 +233,10 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
         log.info(f"{LogColors.OKBLUE}No idle citizens to process.{LogColors.ENDC}")
         return
     
-    # Check if it's nighttime in Venice
-    night_time = is_nighttime_helper(now_venice_dt)
-    log.info(f"{LogColors.OKBLUE}Current time in Venice: {'Night' if night_time else 'Day'}{LogColors.ENDC}")
+    # Check if it's nighttime in Venice (for general logging, less critical for core logic now)
+    # night_time = is_nighttime_helper(now_venice_dt) # This global night_time is less used by process_citizen_activity
+    # log.info(f"{LogColors.OKBLUE}Current time in Venice: {'Night' if night_time else 'Day'}{LogColors.ENDC}") # Log based on general night
+    log.info(f"{LogColors.OKBLUE}Determining citizen activities based on class-specific schedules.{LogColors.ENDC}")
     
     # Process each idle citizen
     success_count = 0
@@ -277,9 +278,10 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
                 log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create general activity for citizen {citizen_username_log}{LogColors.ENDC}")
                 activity_created_for_this_citizen = True # Simulate
             else:
+                # Pass now_venice_dt and now_utc_dt. The is_night flag is no longer passed.
                 activity_created_for_this_citizen = process_citizen_activity(
-                    tables, citizen_record, night_time, resource_defs,
-                    building_type_defs, 
+                    tables, citizen_record, resource_defs, # Removed night_time
+                    building_type_defs,
                     now_venice_dt, now_utc_dt, TRANSPORT_API_URL, API_BASE_URL
                 )
             

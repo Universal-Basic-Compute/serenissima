@@ -287,14 +287,76 @@ def is_nighttime(current_venice_time: Optional[datetime.datetime] = None) -> boo
     
     return hour >= NIGHT_START_HOUR or hour < NIGHT_END_HOUR
 
-def is_shopping_time(current_venice_time: Optional[datetime.datetime] = None) -> bool:
-    """Check if it's currently shopping time in Venice (9 AM to 5 PM)."""
-    # Constants for shopping hours
-    SHOPPING_START_HOUR = 9  # 9 AM
-    SHOPPING_END_HOUR = 17   # 5 PM
+# SOCIAL_CLASS_SCHEDULES defines periods for rest, work, and leisure.
+# Each period is a list of (start_hour, end_hour) tuples. end_hour is exclusive.
+# If end_hour < start_hour, it means the period crosses midnight (e.g., 22 to 6).
+SOCIAL_CLASS_SCHEDULES = {
+    "Facchini": { # Journaliers
+        "rest": [(21, 24), (0, 5)],  # 21h-5h (8 heures)
+        "work": [(5, 12), (13, 19)], # 5h-12h, 13h-19h (13 heures)
+        "leisure": [(12, 13), (19, 21)] # 12h-13h, 19h-21h (3 heures)
+    },
+    "Popolani": { # Artisans
+        "rest": [(22, 24), (0, 6)],  # 22h-6h (8 heures)
+        "work": [(6, 12), (14, 18)], # 6h-12h, 14h-18h (10 heures)
+        "leisure": [(12, 14), (18, 22)] # 12h-14h, 18h-22h (6 heures)
+    },
+    "Cittadini": { # Marchands
+        "rest": [(23, 24), (0, 6)],  # 23h-6h (7 heures)
+        "work": [(7, 12), (14, 17)], # 7h-12h, 14h-17h (8 heures)
+        "leisure": [(6, 7), (12, 14), (17, 23)] # 6h-7h, 12h-14h, 17h-23h (9 heures)
+    },
+    "Nobili": { # Nobles
+        "rest": [(0, 8)],            # 0h-8h (8 heures)
+        "work": [],                  # No specific "work" blocks, managed during leisure
+        "leisure": [(8, 24)]         # 8h-0h (reste du temps, 16 heures)
+    },
+    "Forestieri": { # Marchands Étrangers
+        "rest": [(23, 24), (0, 5)],  # 23h-5h (6 heures)
+        "work": [(6, 12), (13, 20)], # 6h-12h, 13h-20h (13 heures)
+        "leisure": [(5, 6), (12, 13), (20, 23)] # 5h-6h, 12h-13h, 20h-23h (4 heures)
+    }
+}
 
-    now_venice = current_venice_time or datetime.datetime.now(VENICE_TIMEZONE)
-    return SHOPPING_START_HOUR <= now_venice.hour < SHOPPING_END_HOUR
+def _is_time_in_ranges(current_hour: int, time_ranges: List[Tuple[int, int]]) -> bool:
+    """Helper function to check if the current hour falls within any of the time ranges."""
+    if not time_ranges:
+        return False
+    for start_hour, end_hour in time_ranges:
+        if start_hour <= end_hour: # Normal range (e.g., 9 to 17)
+            if start_hour <= current_hour < end_hour:
+                return True
+        else: # Overnight range (e.g., 22 to 6)
+            if current_hour >= start_hour or current_hour < end_hour:
+                return True
+    return False
+
+def is_rest_time_for_class(social_class: str, current_venice_time: datetime.datetime) -> bool:
+    """Checks if it's rest time for the given social class."""
+    schedule = SOCIAL_CLASS_SCHEDULES.get(social_class)
+    if not schedule:
+        log.warning(f"No schedule found for social class: {social_class}. Defaulting to general nighttime.")
+        return is_nighttime(current_venice_time) # Fallback to general night
+    return _is_time_in_ranges(current_venice_time.hour, schedule.get("rest", []))
+
+def is_work_time_for_class(social_class: str, current_venice_time: datetime.datetime) -> bool:
+    """Checks if it's work time for the given social class."""
+    schedule = SOCIAL_CLASS_SCHEDULES.get(social_class)
+    if not schedule:
+        log.warning(f"No schedule found for social class: {social_class}. Defaulting to false (no work time).")
+        return False
+    # Nobili have no specific work blocks; their "work" is part of leisure.
+    if social_class == "Nobili":
+        return False
+    return _is_time_in_ranges(current_venice_time.hour, schedule.get("work", []))
+
+def is_leisure_time_for_class(social_class: str, current_venice_time: datetime.datetime) -> bool:
+    """Checks if it's leisure/consumption time for the given social class."""
+    schedule = SOCIAL_CLASS_SCHEDULES.get(social_class)
+    if not schedule:
+        log.warning(f"No schedule found for social class: {social_class}. Defaulting to false (no leisure time).")
+        return False
+    return _is_time_in_ranges(current_venice_time.hour, schedule.get("leisure", []))
 
 def is_docks_open_time(current_venice_time: Optional[datetime.datetime] = None) -> bool:
     """Check if it's currently docks opening hours in Venice (e.g., 6 AM to 6 PM)."""

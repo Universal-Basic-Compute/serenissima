@@ -11,49 +11,23 @@ The activity system tracks what citizens are doing at any given time, creating a
 
 Core activities include:
 
-- **Rest**: Sleeping at home during nighttime hours
-- **Work**: Working at their assigned businesses during the day
-- **Travel**: Moving between locations via walking or gondola. This includes:
-    - `goto_home`: Traveling to their residence.
-    - `goto_work`: Traveling to their workplace.
-    - `goto_inn`: Traveling to an inn (for visitors).
-- **Production**: Citizen is at their workplace and actively transforming input resources into output resources according to a recipe.
-    - *Processor*: Consumes specified input resources from the building's inventory and adds specified output resources, if conditions (input availability, storage capacity) are met.
-- **Fetch Resource**: Citizen travels to a source building (`FromBuilding` in activity) to pick up resources as per a contract. The activity's `ToBuilding` field indicates the ultimate destination for these resources.
-    - *Processor (executes upon arrival at `FromBuilding`)*:
-        - Calculates the actual amount of the specified `ResourceId` to pick up, limited by contract amount, seller's stock (owned by `RunBy` of `FromBuilding`), citizen's carrying capacity (10 units total), and funds of the *effective buyer*.
-        - L'*effective buyer* est :
-            - Pour les contrats `public_sell` : l'opérateur (`RunBy`) du `ToBuilding` de l'activité.
-            - Pour les autres types de contrats (ex: `recurrent`) : le `Buyer` spécifié dans le contrat.
-        - L'*effective buyer* paie le `Seller` (opérateur du `FromBuilding`).
-        - La ressource est retirée du stock du `FromBuilding`.
-        - La ressource est ajoutée à l'inventaire du citoyen, marquée comme appartenant à l'*effective buyer*.
-        - La position du citoyen est mise à jour à `FromBuilding`.
-    - *Post-processing*: `createActivities.py` devrait ensuite idéalement créer une nouvelle activité de voyage pour que le citoyen transporte les ressources récupérées de `FromBuilding` vers le `ToBuilding` d'origine (destination finale).
-- **Fetch From Galley**: Citizen travels to a `merchant_galley` building to pick up a specific batch of resources (related to an original import contract).
-    - *Fields*: `FromBuilding` (galley's Airtable ID), `OriginalContractId` (custom ID of the original import contract), `ResourceId`, `Amount`.
-    - *Processor (executes upon arrival at galley)*:
-        - Verifies resource availability in the galley (owned by the Merchant).
-        - Checks citizen's carrying capacity.
-        - Transfers the specified `Amount` of `ResourceId` from the galley's resources to the citizen's inventory. The resources in the citizen's inventory become owned by the `Buyer` of the `OriginalContractId`.
-        - Updates the galley's `PendingDeliveriesData` to reflect the picked-up amount.
-        - Citizen's position is updated to the galley's position.
-    - *Post-processing*: `createActivities.py` should then create a `deliver_resource_batch` activity for the citizen to take these resources from the galley to the original buyer's building.
-- **Eating Activities**: Triggered when a citizen's `AteAt` timestamp is older than 12 hours.
-    - **`eat_from_inventory`**: Citizen consumes a food item they are carrying.
-        - *Processor*: Decrements the food resource from the citizen's personal inventory. Updates `AteAt`.
-    - **`eat_at_home`**: Citizen consumes a food item stored in their home building, which they own.
-        - *Processor*: Decrements the food resource from the home building's inventory (owned by the citizen). Updates `AteAt`.
-    - **`eat_at_tavern`**: Citizen consumes a meal at a tavern.
-        - *Processor*: Deducts Ducats from the citizen for the meal cost. Credits the tavern operator. Updates `AteAt`.
-    - *Note*: Travel to home (`goto_home`) or tavern (`goto_tavern`, often using `goto_inn` type) might precede `eat_at_home` or `eat_at_tavern` if the citizen is not already at the location. These travel activities are standard.
-- **Idle**: Waiting for their next scheduled activity
-- **Business Activity & `CheckedAt` Updates**: The `CheckedAt` timestamp on a `BUILDINGS` record is automatically updated when its designated `RunBy` citizen performs relevant operational activities. These include, but are not limited to:
-    - Arriving at the business premises (e.g., completion of a `goto_work` activity targeting the business).
-    - Initiating a `production` cycle within the business.
-    - Potentially, a dedicated `check_business_status` activity if explicitly implemented for certain scenarios.
-    If no such updating activity occurs for over 24 hours, the business is considered "unchecked" and suffers a 50% productivity penalty. This reflects a lack of simulated active management.
-- **`goto_construction_site`**: Un ouvrier se déplace vers un site de construction.
+- **Repos (`rest`)**: Périodes de sommeil et de repos, généralement au domicile du citoyen ou dans une auberge pour les visiteurs. Les horaires varient considérablement selon la classe sociale.
+- **Travail (`production`, `fetch_resource`, etc.)**: Activités productives réalisées pendant les heures de travail désignées pour chaque classe sociale. Cela inclut le travail dans les ateliers, la pêche pour les Facchini, la gestion des affaires pour les Cittadini, etc. Les Nobili n'ont pas de blocs de "travail" formels ; leurs activités de gestion et d'influence se déroulent pendant leurs longues périodes de loisirs.
+- **Consommation/Activités de Loisirs**: Périodes dédiées aux repas, aux achats, à la socialisation, et à d'autres activités non liées directement au repos ou au travail productif. Les achats sont une activité principale pendant ces périodes si les besoins et les moyens le permettent.
+- **Voyage (`goto_home`, `goto_work`, `goto_inn`, etc.)**: Déplacement entre les lieux. Les horaires de ces voyages sont déterminés par la nécessité d'atteindre un lieu pour la prochaine période d'activité (repos, travail, loisir).
+
+Les activités principales incluent :
+- **Production**: Un citoyen à son lieu de travail transforme des ressources. Se produit pendant les heures de travail.
+- **Fetch Resource**: Un citoyen se déplace pour récupérer des ressources. Se produit généralement pendant les heures de travail ou de loisirs si cela concerne des besoins personnels.
+    - *Processeur (à l'arrivée à `FromBuilding`)*:
+        - Calcule la quantité réelle de `ResourceId` à récupérer, limitée par le contrat, le stock du vendeur, la capacité de transport du citoyen, et les fonds de l'acheteur effectif.
+        - L'acheteur effectif paie le vendeur.
+        - La ressource est retirée du stock de `FromBuilding` et ajoutée à l'inventaire du citoyen (appartenant à l'acheteur effectif).
+- **Fetch From Galley**: Un citoyen récupère des marchandises d'une galère marchande.
+- **Activités de Repas (`eat_from_inventory`, `eat_at_home`, `eat_at_tavern`)**: Déclenchées par la faim, généralement pendant les périodes de loisirs/consommation.
+- **Idle**: Attente ou activité non spécifique, généralement lorsque aucune tâche prioritaire n'est disponible pendant une période d'activité donnée (travail ou loisir).
+- **Business Activity & `CheckedAt` Updates**: La gestion active d'une entreprise par son `RunBy` (par exemple, être présent pendant les heures de travail, lancer une production) met à jour `CheckedAt`. Une absence de gestion simulée pendant plus de 24h entraîne une pénalité de productivité.
+- **`goto_construction_site`**: Un ouvrier se déplace vers un site de construction pendant ses heures de travail.
     - *Champs*: `ToBuilding` (site de construction), `ContractId`, `BuildingToConstruct` (ID du bâtiment cible), `WorkDurationMinutes` (durée de travail prévue après arrivée).
     - *Processeur (à l'arrivée sur `ToBuilding`)*:
         - Crée une activité `construct_building` pour commencer le travail.
@@ -188,42 +162,31 @@ Each activity is stored in the ACTIVITIES table with the following fields:
 
 ### Activity Creation Process
 
-The `createActivities.py` script follows this process:
+Le script `createActivities.py` identifie les citoyens sans activité en cours et tente de leur en assigner une nouvelle. La logique de décision principale est encapsulée dans `citizen_general_activities.py` et prend en compte :
+1.  L'heure actuelle à Venise.
+2.  La classe sociale du citoyen, qui détermine ses plages horaires pour le repos, le travail et les loisirs/consommation.
+    *   **Facchini (Journaliers)**: Repos: 21h-5h; Travail: 5h-12h, 13h-19h; Loisirs: 12h-13h, 19h-21h.
+    *   **Popolani (Artisans)**: Repos: 22h-6h; Travail: 6h-12h, 14h-18h; Loisirs: 12h-14h, 18h-22h.
+    *   **Cittadini (Marchands)**: Repos: 23h-6h; Travail: 7h-12h, 14h-17h; Loisirs: 6h-7h, 12h-14h, 17h-23h.
+    *   **Nobili (Nobles)**: Repos: 0h-8h; Loisirs/Gestion: 8h-0h (le reste du temps).
+    *   **Forestieri (Marchands Étrangers)**: Repos: 23h-5h; Travail/Commerce: 6h-12h, 13h-20h; Loisirs: 5h-6h, 12h-13h, 20h-23h.
+3.  Les besoins urgents du citoyen (faim, inventaire plein).
+4.  Son statut (résident, visiteur, sans-abri, employé, etc.).
+5.  Sa localisation actuelle et la disponibilité de lieux pertinents (domicile, lieu de travail, auberges, magasins).
 
-1. Identify citizens who have no active activities
-2. Determine the current time in Venice
-3. For each idle citizen:
-   - If it's nighttime:
-     - If the citizen is a visitor (has `HomeCity`):
-       - If at an inn: create `rest` activity at the inn.
-       - Else: create `goto_inn` activity to the closest available inn.
-     - Else (citizen is a resident):
-       - If at home: create `rest` activity at home.
-       - Else: create `goto_home` activity.
-   - If hungry (AteAt > 12 hours ago):
-     - Attempt to create an "eat" activity (from inventory, at home, or at a tavern). This has high priority.
-     - If an "eat" activity is created (or a "goto" activity to facilitate eating), the process for this citizen for this cycle may conclude.
-   - If not eating, and inventory is > 70% full:
-     - If the citizen has a workplace and is not currently there, attempt to create a `goto_work` activity. The `goto_work_processor` will handle depositing resources owned by the workplace operator upon arrival. This is a high-priority action to free up inventory.
-   - If not eating, not encumbered (or encumbered but cannot go to work), and the citizen is a Forestiero (visitor with `HomeCity`):
-     - If it's daytime, check if conditions are met to `leave_venice` (e.g., in Venice > 12h, last activity ended > 12h ago). If so, create `leave_venice` activity.
-     - If it's nighttime:
-       - If at an inn: create `rest` activity at the inn.
-       - Else: create `goto_inn` activity to the closest available inn.
-     - Else (citizen is a resident):
-       - If at home: create `rest` activity at home.
-       - Else: create `goto_home` activity.
-   - If not eating, and it's daytime:
-     - If the citizen has a workplace:
-       - If at workplace:
-         - Attempt to create `production` activity if inputs for a recipe are available.
-         - Else, attempt to create `fetch_resource` activity. This involves:
-            1. Prioritizing `recurrent` contracts linked to the workplace operator.
-            2. If no suitable `recurrent` contract, evaluating `public_sell` contracts using a scoring mechanism: `Score = (PricePerResource * 2) + Distance - TrustScore`. (Voir [documentation des contrats](contracts.md#public_sell-contract-mechanics) pour plus de détails).
-         - Else, create `idle` activity.
-       - Else (not at workplace): create `goto_work` activity.
-     - Else (no workplace): create `idle` activity.
-   - If pathfinding for any travel activity fails, or no other suitable activity can be determined (and not eating): create an `idle` activity.
+**Priorités générales (illustratives, la logique exacte est dans le code) :**
+*   **Urgence absolue** : Départ de Venise pour les Forestieri si conditions remplies.
+*   **Besoins physiologiques** : Manger (depuis inventaire, domicile, taverne/magasin), généralement pendant les périodes de loisirs. Pêche d'urgence pour les Facchini affamés.
+*   **Repos** : Si c'est l'heure de repos pour sa classe, le citoyen cherchera à dormir (domicile ou auberge).
+*   **Travail** : Si c'est l'heure de travail :
+    *   Déposer un inventaire plein au travail.
+    *   Se rendre au travail s'il n'y est pas.
+    *   Une fois au travail : tâches de construction, production, réapprovisionnement, pêche (Facchini), gestion (Cittadini/Forestieri).
+*   **Loisirs/Consommation** : Si c'est l'heure des loisirs :
+    *   Shopping (nourriture ou autres biens).
+    *   Autres activités de loisirs (non encore implémentées en détail).
+*   **Gestion d'entreprise** (pour les `RunBy`) : Vérifier le statut de l'entreprise si cela n'a pas été fait récemment, pendant les heures actives.
+*   **Inactivité (`idle`)** : Si aucune autre activité n'est appropriée ou possible.
 
 ### Pathfinding for Travel Activities
 

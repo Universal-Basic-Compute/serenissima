@@ -102,7 +102,7 @@ The immigration process helps maintain population balance in the city and ensure
 
 Every day at 10:00 AM UTC, the job assignment system finds employment for citizens without jobs:
 
-1. The script identifies all citizens without jobs (Work field is empty), excluding `Forestieri`. Crucially, `Nobili` are also excluded from this process. Their societal role does not involve seeking "jobs" in the traditional sense of being an `Occupant` in a business. Instead, `Nobili` dedicate their time to managing their estates, participating in governance, engaging in large-scale commerce, and pursuing social and leisure activities. This often includes shopping and patronizing various services, making them valuable and active consumers during daytime hours.
+1. The script identifies all citizens without jobs (Work field is empty), excluding `Forestieri`. `Nobili` are also excluded as ils ne cherchent pas d'emploi en tant qu'`Occupant`. Leur temps est consacré à la gestion de leurs affaires, à la politique, au commerce et aux loisirs (y compris le shopping) pendant leurs longues périodes d'"activités/consommation".
 2. Eligible citizens (non-Nobili, non-Forestieri) are sorted by wealth in descending order (wealthier citizens get first pick of jobs).
 3. For each eligible citizen, the system finds an available business. Available businesses exclude those `RunBy` (opérées par) des `Nobili`, as these businesses operate under different staffing models or are managed directly by the Nobili family and their retainers, rather than through publicly listed job openings filled by this script.
 4. Citizens are assigned to suitable available businesses with the highest wages.
