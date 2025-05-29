@@ -40,25 +40,17 @@ export async function GET() {
     
     records.forEach(record => {
       const username = record.get('Username');
-      const coatOfArmsImageUrl = record.get('CoatOfArmsImageUrl');
+      const usernameString = username as string; // Cast username to string
       
-      if (username && coatOfArmsImageUrl) {
-        // Ensure the URL is properly formatted for production
-        let imageUrl = coatOfArmsImageUrl as string;
-          
-        // Add the production domain
-        imageUrl = `https://serenissima.ai${imageUrl}`;
-        
-        // Also add a local URL for fallback
-        const localUrl = `https://backend.serenissima.ai/public/assets/images/coat-of-arms/${username}.png`;
-        
-        // Store both URLs for better fallback options
-        coatOfArms[username as string] = imageUrl;
-        //console.log(`Coat of arms for ${username}: ${imageUrl} (local fallback: ${localUrl})`);
+      if (usernameString) {
+        // Construct the URL based on the username and the desired production path
+        // This ensures consistency and avoids issues with how paths might be stored in Airtable
+        const desiredImageUrl = `https://backend.serenissima.ai/public_assets/images/coat_of_arms/${usernameString}.png`;
+        coatOfArms[usernameString] = desiredImageUrl;
       }
     });
     
-    console.log(`Extracted coat of arms data for ${Object.keys(coatOfArms).length} citizens`);
+    console.log(`Constructed coat of arms URLs for ${Object.keys(coatOfArms).length} citizens`);
     
     // Return the coat of arms data
     return NextResponse.json({ coatOfArms });

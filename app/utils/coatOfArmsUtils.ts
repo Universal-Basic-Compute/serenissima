@@ -9,11 +9,13 @@ export async function generateCoatOfArmsImageUrl(description: string, username?:
     throw new Error('Please provide a description for the coat of arms');
   }
   
-  // Always use the production URL for coat of arms generation
-  const productionUrl = 'https://serenissima.ai';
+  // Production URL for the AI service that generates images
+  const aiServiceUrl = 'https://serenissima.ai';
+  // Base URL for where coat of arms are stored and served from
+  const coatOfArmsStorageBaseUrl = 'https://backend.serenissima.ai/public_assets/images/coat-of-arms';
   
   // First, generate the image using the AI service
-  const generateResponse = await fetch(`${productionUrl}/api/generate-coat-of-arms`, {
+  const generateResponse = await fetch(`${aiServiceUrl}/api/generate-coat-of-arms`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -34,19 +36,18 @@ export async function generateCoatOfArmsImageUrl(description: string, username?:
     throw new Error(generateData.error || 'Failed to generate image');
   }
   
-  // Ensure the image URL uses the production domain
-  let imagePath = generateData.local_image_url;
-  
-  // If the path is relative, prepend the production URL
-  if (imagePath.startsWith('/')) {
-    imagePath = `${productionUrl}${imagePath}`;
-  } else if (!imagePath.startsWith('http')) {
-    imagePath = `${productionUrl}/${imagePath}`;
+  // Construct the full URL to the initially generated image on the AI service domain
+  let generatedImageUrlOnAiService = generateData.local_image_url;
+  if (generatedImageUrlOnAiService.startsWith('/')) {
+    generatedImageUrlOnAiService = `${aiServiceUrl}${generatedImageUrlOnAiService}`;
+  } else if (!generatedImageUrlOnAiService.startsWith('http')) {
+    // Assuming it's a filename relative to a standard path on the AI service
+    generatedImageUrlOnAiService = `${aiServiceUrl}/public_assets/images/coat-of-arms/${generatedImageUrlOnAiService}`;
   }
   
-  console.log('Generated coat of arms at production URL:', imagePath);
+  console.log('Generated coat of arms at AI service URL:', generatedImageUrlOnAiService);
   
-  // Now fetch the image and store it locally using our fetch-coat-of-arms API
+  // Now fetch the image and store it locally (on backend.serenissima.ai) using our fetch-coat-of-arms API
   try {
     const localFetchResponse = await fetch(`/api/fetch-coat-of-arms`, {
       method: 'POST',
@@ -54,28 +55,38 @@ export async function generateCoatOfArmsImageUrl(description: string, username?:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        imageUrl: imagePath,
+        imageUrl: generatedImageUrlOnAiService, // Fetch from the AI service URL
       }),
     });
     
     if (!localFetchResponse.ok) {
-      console.warn('Failed to fetch coat of arms locally, using production URL');
-      return imagePath;
+      const errorText = await localFetchResponse.text();
+      console.warn(`Failed to fetch/cache coat of arms locally (status: ${localFetchResponse.status}, error: ${errorText}). Falling back.`);
+      // Fallback: Construct URL pointing to backend.serenissima.ai using the original filename from generateData.local_image_url
+      const filename = generateData.local_image_url.substring(generateData.local_image_url.lastIndexOf('/') + 1);
+      const fallbackUrl = `${coatOfArmsStorageBaseUrl}/${filename}`;
+      console.log('Using constructed backend fallback URL for generated image:', fallbackUrl);
+      return fallbackUrl;
     }
     
     const localData = await localFetchResponse.json();
     
     if (localData.success && localData.image_url) {
-      console.log('Using locally cached coat of arms:', localData.image_url);
-      return localData.image_url;
+      console.log('Using locally cached coat of arms (from backend.serenissima.ai):', localData.image_url);
+      return localData.image_url; // This URL should be backend.serenissima.ai based
     } else {
-      console.warn('Local fetch returned success=false, using production URL');
-      return imagePath;
+      console.warn('Local fetch/cache returned success=false. Falling back.');
+      const filename = generateData.local_image_url.substring(generateData.local_image_url.lastIndexOf('/') + 1);
+      const fallbackUrl = `${coatOfArmsStorageBaseUrl}/${filename}`;
+      console.log('Using constructed backend fallback URL for generated image:', fallbackUrl);
+      return fallbackUrl;
     }
   } catch (error) {
-    console.error('Error fetching coat of arms locally:', error);
-    // Fall back to the production URL if local fetch fails
-    return imagePath;
+    console.error('Error fetching/caching coat of arms locally:', error);
+    const filename = generateData.local_image_url.substring(generateData.local_image_url.lastIndexOf('/') + 1);
+    const fallbackUrl = `${coatOfArmsStorageBaseUrl}/${filename}`;
+    console.log('Using constructed backend fallback URL due to exception for generated image:', fallbackUrl);
+    return fallbackUrl;
   }
 }
 
@@ -89,20 +100,26 @@ export async function fetchCoatOfArmsImageUrl(imageUrl: string): Promise<string>
     throw new Error('Please provide a coat of arms image URL');
   }
   
-  // Ensure the URL is properly formatted for production
-  const productionUrl = 'https://serenissima.ai';
-  
-  if (!imageUrl.startsWith('http')) {
-    // If it's a relative path, ensure it has a leading slash
-    if (!imageUrl.startsWith('/')) {
-      imageUrl = `/${imageUrl}`;
+  const backendStorageBaseUrl = 'https://backend.serenissima.ai/public_assets/images/coat-of-arms';
+  let processedImageUrl = imageUrl;
+
+  if (!processedImageUrl.startsWith('http')) {
+    // Handle relative URLs: assume they are relative to the backend storage base path
+    if (processedImageUrl.startsWith('/public_assets/images/coat-of-arms/')) {
+      // Path is like /public_assets/images/coat-of-arms/filename.png
+      processedImageUrl = `https://backend.serenissima.ai${processedImageUrl}`;
+    } else if (processedImageUrl.startsWith('/')) {
+      // Path is like /filename.png or /other_folder/filename.png
+      const filename = processedImageUrl.substring(processedImageUrl.lastIndexOf('/') + 1);
+      processedImageUrl = `${backendStorageBaseUrl}/${filename}`;
+    } else {
+      // Path is just filename.png
+      processedImageUrl = `${backendStorageBaseUrl}/${processedImageUrl}`;
     }
-    
-    // Add the production domain
-    imageUrl = `${productionUrl}${imageUrl}`;
-    console.log('Using production URL for coat of arms:', imageUrl);
+    console.log('Processed relative imageUrl to:', processedImageUrl);
   }
   
+  // Now fetch the image (which might involve caching it via /api/fetch-coat-of-arms)
   try {
     const response = await fetch(`/api/fetch-coat-of-arms`, {
       method: 'POST',
@@ -110,27 +127,27 @@ export async function fetchCoatOfArmsImageUrl(imageUrl: string): Promise<string>
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        imageUrl,
+        imageUrl: processedImageUrl, // Use the processed URL
       }),
     });
     
     if (!response.ok) {
-      console.warn(`Failed to fetch coat of arms locally (status ${response.status}), using original URL`);
-      return imageUrl;
+      console.warn(`Failed to fetch/cache coat of arms locally (status ${response.status}), using processed URL as fallback: ${processedImageUrl}`);
+      return processedImageUrl; // Fallback to the processed URL
     }
     
     const data = await response.json();
     
     if (data.success && data.image_url) {
-      console.log(`Using ${data.source === 'local' ? 'locally cached' : 'fetched'} coat of arms:`, data.image_url);
-      return data.image_url;
+      console.log(`Using ${data.source === 'local' ? 'locally cached' : 'fetched from backend'} coat of arms:`, data.image_url);
+      return data.image_url; // This should be a backend.serenissima.ai URL
     } else {
-      console.warn('Local fetch returned success=false, using original URL');
-      return imageUrl;
+      console.warn('Local fetch/cache returned success=false, using processed URL as fallback:', processedImageUrl);
+      return processedImageUrl; // Fallback to the processed URL
     }
   } catch (error) {
-    console.error('Error fetching coat of arms locally:', error);
-    // Fall back to the original URL if local fetch fails
-    return imageUrl;
+    console.error('Error fetching/caching coat of arms locally:', error);
+    // Fall back to the processed URL if local fetch/cache fails
+    return processedImageUrl;
   }
 }
