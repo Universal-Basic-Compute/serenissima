@@ -167,19 +167,19 @@ export default function ResourceMarkers({
                   const numResources = locationResources.length;
                   // Calculate dynamic radius: base + increment per resource group
                   // Example: base 100px, +10px for every 5 resources beyond the first 5
-                  let dynamicRadius = 100; // Base radius for up to 5 resources
+                  let dynamicRadius = 50; // Base radius for up to 5 resources (WAS 100)
                   if (numResources > 5) {
-                    dynamicRadius += Math.floor((numResources - 5) / 5) * 20; // Increase radius by 20px for every 5 additional resources
+                    dynamicRadius += Math.floor((numResources - 5) / 5) * 10; // Increase radius by 10px for every 5 additional resources (WAS 20)
                   }
-                  dynamicRadius = Math.min(dynamicRadius, 200); // Cap the radius to prevent it from becoming too large
+                  dynamicRadius = Math.min(dynamicRadius, 100); // Cap the radius to prevent it from becoming too large (WAS 200)
 
                   return locationResources.map((resource, index) => (
                     <div 
                       key={resource.id}
                       className="absolute bg-gray-900/70 border border-gray-700 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-lg"
                       style={{ 
-                        width: '96px', 
-                        height: '120px', 
+                        width: '48px', // WAS 96px
+                        height: '60px', // WAS 120px
                         left: `${Math.cos(2 * Math.PI * index / numResources) * dynamicRadius}px`, 
                         top: `${Math.sin(2 * Math.PI * index / numResources) * dynamicRadius}px`, 
                         transition: 'all 0.3s ease-out',
@@ -189,7 +189,7 @@ export default function ResourceMarkers({
                   >
                     <div className="relative w-full h-full group">
                       {/* Image container with rounded corners - make 2x smaller */}
-                      <div className="w-full h-[96px] flex items-center justify-center p-1">
+                      <div className="w-full h-[48px] flex items-center justify-center p-0.5"> {/* WAS h-[96px], p-1 */}
                         <img 
                           src={getNormalizedResourceIconPath(resource.icon, resource.name)}
                           alt={resource.name}
@@ -201,20 +201,20 @@ export default function ResourceMarkers({
                       </div>
                         
                       {/* Resource name below the image - adjust font size */}
-                      <div className="w-full h-[24px] flex items-center justify-center bg-amber-900/80 text-white text-[12px] px-2 truncate">
+                      <div className="w-full h-[12px] flex items-center justify-center bg-amber-900/80 text-white text-[8px] px-1 truncate"> {/* WAS h-[24px], text-[12px], px-2 */}
                         {resource.name}
                       </div>
                         
                       {/* Count badge - make smaller */}
-                      <div className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-base rounded-full w-6 h-6 flex items-center justify-center">
+                      <div className="absolute -bottom-0.5 -right-0.5 bg-amber-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center"> {/* WAS text-base, w-6, h-6 */}
                         {resource.amount}
                       </div>
                         
                       {/* Detailed tooltip - adjust size */}
-                      <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-black/90 text-white text-xs rounded w-56 pointer-events-none transition-opacity z-50">
-                        <div className="font-bold text-amber-300 text-base">{resource.name}</div>
+                      <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-1 p-2 bg-black/90 text-white text-[10px] rounded w-40 pointer-events-none transition-opacity z-50"> {/* WAS mb-2, p-3, text-xs, w-56 */}
+                        <div className="font-bold text-amber-300 text-sm">{resource.name}</div> {/* WAS text-base */}
                         {typeof resource.description === 'string' && resource.description.length > 0 && (
-                          <div className="mt-1 text-xs">{resource.description.substring(0, 100)}{resource.description.length > 100 ? '...' : ''}</div>
+                          <div className="mt-0.5 text-[9px]">{resource.description.substring(0, 80)}{resource.description.length > 80 ? '...' : ''}</div> {/* WAS mt-1, text-xs */}
                         )}
                         <div className="mt-1 flex justify-between">
                           <span>Quantity: {resource.amount}</span>
@@ -230,7 +230,7 @@ export default function ResourceMarkers({
                 })()}
                 
                 {/* Center indicator */}
-                <div className="w-8 h-8 bg-gray-800/70 border border-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ borderWidth: '1px' }}>
+                <div className="w-5 h-5 bg-gray-800/70 border border-gray-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold" style={{ borderWidth: '1px' }}> {/* WAS w-8, h-8, text-sm */}
                   {locationResources.length}
                 </div>
               </div>
@@ -245,13 +245,13 @@ export default function ResourceMarkers({
                       key={resource.id}
                       className="absolute bg-gray-900/70 border border-gray-700 rounded-lg overflow-hidden"
                       style={{ 
-                        width: '54px', // Decreased from 108px to 54px (2x smaller)
-                        height: '54px', // Decreased from 108px to 54px (2x smaller)
-                        left: `${index * 9}px`, // Adjust offset for smaller icons
-                        top: `${-index * 9}px`, // Adjust offset for smaller icons
+                        width: '27px', // WAS 54px
+                        height: '27px', // WAS 54px
+                        left: `${index * 4.5}px`, // WAS 9px
+                        top: `${-index * 4.5}px`, // WAS 9px
                         zIndex: 40 - index,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                        borderWidth: '1px', // Make border slimmer
+                        boxShadow: '0 0.5px 1.5px rgba(0,0,0,0.3)', // Adjusted shadow
+                        borderWidth: '0.5px', // WAS 1px
                         borderColor: resource.owner === getCurrentCitizenIdentifier() ? '#FFD700' : '#d97706' // Gold border for citizen's resources
                       }}
                     >
@@ -267,7 +267,7 @@ export default function ResourceMarkers({
                   ))}
                   
                   {/* Count badge */}
-                  <div className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <div className="absolute -bottom-0.5 -right-0.5 bg-amber-600 text-white text-[8px] rounded-full w-3.5 h-3.5 flex items-center justify-center"> {/* WAS text-xs, w-5, h-5 */}
                     {totalResources}
                   </div>
                 </div>

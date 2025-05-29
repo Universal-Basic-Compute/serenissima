@@ -332,12 +332,12 @@ export default function ContractMarkers({
                       key={contract.contractId}
                       className="absolute bg-gray-900/70 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-lg cursor-pointer"
                       style={{ 
-                        width: '96px', // Smaller size
-                        height: '120px',
-                        left: `${Math.cos(2 * Math.PI * index / locationContracts.length) * 120}px`,
-                        top: `${Math.sin(2 * Math.PI * index / locationContracts.length) * 120}px`,
+                        width: '48px', // WAS 96px
+                        height: '60px', // WAS 120px
+                        left: `${Math.cos(2 * Math.PI * index / locationContracts.length) * 60}px`, // WAS 120px
+                        top: `${Math.sin(2 * Math.PI * index / locationContracts.length) * 60}px`, // WAS 120px
                         transition: 'all 0.3s ease-out',
-                        borderWidth: '2px',
+                        borderWidth: '1px', // WAS 2px
                         borderColor: borderColor,
                         opacity: isContractActive(contract) ? 1 : 0.5 // Apply transparency for inactive contracts
                       }}
@@ -345,7 +345,7 @@ export default function ContractMarkers({
                     >
                       <div className="relative w-full h-full group">
                         {/* Image container with rounded corners */}
-                        <div className="w-full h-[96px] flex items-center justify-center p-2">
+                        <div className="w-full h-[48px] flex items-center justify-center p-1"> {/* WAS h-[96px], p-2 */}
                           {/* Log resource type to help with debugging */}
                           <img 
                             src={`/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`}
@@ -366,19 +366,19 @@ export default function ContractMarkers({
                         </div>
                           
                         {/* Resource name below the image */}
-                        <div className="w-full h-[24px] flex items-center justify-center bg-amber-900/80 text-white text-[12px] px-2 truncate">
+                        <div className="w-full h-[12px] flex items-center justify-center bg-amber-900/80 text-white text-[8px] px-1 truncate"> {/* WAS h-[24px], text-[12px], px-2 */}
                           {resourceType}
                         </div>
                           
                         {/* Price badge */}
-                        <div className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-base rounded-full w-6 h-6 flex items-center justify-center">
+                        <div className="absolute -bottom-0.5 -right-0.5 bg-amber-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center"> {/* WAS text-base, w-6, h-6 */}
                           {contract.price}
                         </div>
                           
                         {/* Detailed tooltip */}
-                        <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-black/90 text-white text-xs rounded w-56 pointer-events-none transition-opacity z-15">
-                          <div className="font-bold text-amber-300 text-base">{resourceType}</div>
-                          <div className="mt-1 text-xs">
+                        <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-1 p-2 bg-black/90 text-white text-[10px] rounded w-40 pointer-events-none transition-opacity z-15"> {/* WAS mb-2, p-3, text-xs, w-56 */}
+                          <div className="font-bold text-amber-300 text-sm">{resourceType}</div> {/* WAS text-base */}
+                          <div className="mt-0.5 text-[9px]"> {/* WAS mt-1, text-xs */}
                             {contract.type === 'public_sell' ? 'Public Sell Contract' : 
                              contract.seller === currentUsername ? 'Your Sell Contract' : 'Your Buy Contract'}
                             {!isContractActive(contract) && (
@@ -405,7 +405,7 @@ export default function ContractMarkers({
                 
                 {/* Center indicator */}
                 <div 
-                  className="w-8 h-8 bg-gray-800/70 border border-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold cursor-pointer" 
+                  className="w-5 h-5 bg-gray-800/70 border border-gray-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold cursor-pointer"  /* WAS w-8, h-8, text-sm */
                   style={{ borderWidth: '1px' }}
                   onClick={() => handleContractClick(locationContracts[0])}
                   onMouseEnter={() => {
@@ -474,13 +474,13 @@ export default function ContractMarkers({
                         key={contract.contractId}
                         className="absolute bg-gray-900/70 rounded-lg overflow-hidden cursor-pointer"
                         style={{ 
-                          width: '54px', // Smaller size
-                          height: '54px',
-                          left: `${index * 9}px`,
-                          top: `${-index * 9}px`,
+                          width: '27px', // WAS 54px
+                          height: '27px', // WAS 54px
+                          left: `${index * 4.5}px`, // WAS 9px
+                          top: `${-index * 4.5}px`, // WAS 9px
                           zIndex: 40 - index,
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                          borderWidth: '2px',
+                          boxShadow: '0 0.5px 1.5px rgba(0,0,0,0.3)', // Adjusted shadow
+                          borderWidth: '1px', // WAS 2px
                           borderColor: borderColor,
                           opacity: isContractActive(contract) ? 1 : 0.5 // Apply transparency for inactive contracts
                         }}
@@ -507,7 +507,7 @@ export default function ContractMarkers({
                   
                   {/* Count badge */}
                   <div 
-                    className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center cursor-pointer"
+                    className="absolute -bottom-0.5 -right-0.5 bg-amber-600 text-white text-[8px] rounded-full w-3.5 h-3.5 flex items-center justify-center cursor-pointer" /* WAS text-xs, w-5, h-5 */
                     onClick={() => handleContractClick(locationContracts[0])}
                     onMouseEnter={() => {
                       // Create a summary of resources at this location
