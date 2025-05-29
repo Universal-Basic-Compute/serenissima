@@ -10,8 +10,9 @@ import json
 import requests
 import time
 from datetime import datetime, timedelta
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from dotenv import load_dotenv
+import pathlib
 
 # Add the current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -166,6 +167,39 @@ class TransactionResponse(BaseModel):
 @app.get("/")
 def read_root():
     return {"message": "Wallet Storage API is running"}
+
+# Variable d'environnement pour le chemin du disque persistant
+# Exemple de valeur sur Render: /var/data/serenissima_assets
+PERSISTENT_ASSETS_PATH_ENV = os.getenv("PERSISTENT_ASSETS_PATH")
+
+@app.get("/public_assets/{asset_path:path}")
+async def serve_public_asset(asset_path: str):
+    if not PERSISTENT_ASSETS_PATH_ENV:
+        print("ERREUR CRITIQUE: La variable d'environnement PERSISTENT_ASSETS_PATH n'est pas définie pour le backend.")
+        raise HTTPException(status_code=500, detail="Configuration du serveur incorrecte pour les assets.")
+
+    base_path = pathlib.Path(PERSISTENT_ASSETS_PATH_ENV)
+    # Nettoyer et normaliser le chemin demandé pour la sécurité
+    # Empêche les chemins comme "../../../etc/passwd"
+    # asset_path vient de l'URL, il faut donc être prudent.
+    # pathlib.Path.joinpath() ne permet pas de sortir du répertoire de base si le chemin de base est absolu
+    # et que les composants suivants ne sont pas absolus.
+    # Cependant, une double vérification est toujours une bonne pratique.
+
+    # Construire le chemin complet
+    file_path = base_path.joinpath(asset_path).resolve()
+
+    # Vérification de sécurité : s'assurer que le chemin résolu est toujours DANS le répertoire de base.
+    if not file_path.is_relative_to(base_path.resolve()):
+        print(f"Tentative de traversée de répertoire bloquée : {asset_path}")
+        raise HTTPException(status_code=403, detail="Accès interdit.")
+
+    if not file_path.exists() or not file_path.is_file():
+        print(f"Asset non trouvé : {file_path}")
+        raise HTTPException(status_code=404, detail="Asset non trouvé.")
+
+    # FileResponse gère automatiquement le Content-Type basé sur l'extension du fichier.
+    return FileResponse(path=file_path)
 
 @app.post("/api/wallet", response_model=WalletResponse)
 async def store_wallet(wallet_data: WalletRequest):
