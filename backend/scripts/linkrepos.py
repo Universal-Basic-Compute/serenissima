@@ -1,5 +1,6 @@
 import os
 import requests
+import argparse
 from airtable import Airtable
 from dotenv import load_dotenv
 import time
@@ -58,8 +59,13 @@ def link_repo_for_citizen(username):
 
 def main():
     """
-    Main function to fetch all citizens and link repositories.
+    Main function to fetch all citizens and link repositories,
+    or link for a specific citizen if provided.
     """
+    parser = argparse.ArgumentParser(description="Link GitHub repositories to Kinos Engine for Serenissima AI citizens.")
+    parser.add_argument("--citizen", type=str, help="Specify a single citizen username to link.")
+    args = parser.parse_args()
+
     if not AIRTABLE_BASE_KEY:
         print("Error: AIRTABLE_BASE_KEY not found in environment variables.")
         return
@@ -67,41 +73,48 @@ def main():
         print("Error: KINOS_ENGINE_API_KEY not found in environment variables.")
         return
 
-    print("Fetching all citizens from Airtable...")
-    try:
-        citizens = airtable_citizens.get_all()
-    except Exception as e:
-        print(f"Error fetching citizens from Airtable: {e}")
-        return
-
-    if not citizens:
-        print("No citizens found.")
-        return
-
-    print(f"Found {len(citizens)} citizens.")
-    
     successful_links = 0
     failed_links = 0
 
-    for citizen_record in citizens:
-        fields = citizen_record.get('fields', {})
-        username = fields.get('Username')
-
-        if not username:
-            print(f"Skipping record with no Username: {citizen_record.get('id')}")
-            continue
-        
-        if link_repo_for_citizen(username):
+    if args.citizen:
+        print(f"Attempting to link repo for specified citizen: {args.citizen}")
+        if link_repo_for_citizen(args.citizen):
             successful_links += 1
         else:
             failed_links += 1
-        
-        # Adding a small delay to avoid overwhelming the API
-        time.sleep(0.5) # 500ms delay
+    else:
+        print("Fetching all citizens from Airtable to link repositories...")
+        try:
+            citizens = airtable_citizens.get_all()
+        except Exception as e:
+            print(f"Error fetching citizens from Airtable: {e}")
+            return
+
+        if not citizens:
+            print("No citizens found.")
+            return
+
+        print(f"Found {len(citizens)} citizens.")
+
+        for citizen_record in citizens:
+            fields = citizen_record.get('fields', {})
+            username = fields.get('Username')
+
+            if not username:
+                print(f"Skipping record with no Username: {citizen_record.get('id')}")
+                continue
+            
+            if link_repo_for_citizen(username):
+                successful_links += 1
+            else:
+                failed_links += 1
+            
+            # Adding a small delay to avoid overwhelming the API
+            time.sleep(0.5) # 500ms delay
 
     print("\n--- Summary ---")
-    print(f"Successfully linked/verified: {successful_links} citizens")
-    print(f"Failed to link: {failed_links} citizens")
+    print(f"Successfully linked/verified: {successful_links} citizen(s)")
+    print(f"Failed to link: {failed_links} citizen(s)")
 
 if __name__ == "__main__":
     main()
