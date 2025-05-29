@@ -19,7 +19,7 @@ KINOS_API_BASE_URL = "https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/k
 GITHUB_REPO_URL = "https://github.com/Universal-Basic-Compute/serenissima"
 
 # List of citizens to exclude
-EXCLUDED_CITIZENS = ["ConsiglioDeiDieci", "Italia", "SerenissimaBank"]
+EXCLUDED_CITIZENS = ["ConsiglioDeiDieci", "Italia"]
 
 def link_repo_for_citizen(username):
     """
