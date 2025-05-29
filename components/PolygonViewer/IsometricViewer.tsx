@@ -4112,7 +4112,7 @@ number => {
           <img
             src={currentLoadingImage}
             alt="Venetian vista during loading"
-            className="max-w-7xl max-h-[90vh] object-contain rounded-lg shadow-2xl mb-6 border-4 border-amber-600/50"
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl mb-6 border-4 border-amber-600/50"
           />
         )}
         <div className="bg-black/60 p-6 rounded-lg shadow-xl border-2 border-amber-500/70 text-center">
