@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse, FileResponse
 from dotenv import load_dotenv
 import pathlib
+from typing import Optional
 
 # Add the current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
