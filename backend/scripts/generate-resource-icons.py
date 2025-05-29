@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 import argparse # Added for command-line arguments
 import tempfile # For temporary file handling
+from typing import Optional # Added for type hinting
 
 # --- BEGIN COPIED HELPER FUNCTION ---
 # (The upload_file_to_backend function defined above will be inserted here)
