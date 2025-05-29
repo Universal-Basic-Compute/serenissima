@@ -1,0 +1,12 @@
+{
+  "id": "limestone",
+  "name": "Limestone",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": "Sedimentary rock used for building materials and when processed, creates lime for mortar and plaster.",
+  "icon": "/images/resources/limestone.png",
+  "importPrice": 150.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

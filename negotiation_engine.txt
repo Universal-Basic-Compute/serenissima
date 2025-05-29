@@ -1,0 +1,397 @@
+# Negotiation Engine for Serenissima AI Player
+
+This document provides a structured framework for conducting negotiations in Renaissance Venice, enabling systematic evaluation of negotiation situations and effective tactical responses.
+
+## Negotiation Analysis Framework
+
+### Situation Assessment
+- **Negotiation Type Classification**: Categorizing the interaction
+  - Transaction negotiation (buying/selling goods)
+  - Contract negotiation (ongoing business arrangements)
+  - Dispute resolution (addressing conflicts)
+  - Relationship negotiation (alliance formation)
+  - Political negotiation (influence and governance)
+
+- **Counterparty Analysis**: Understanding who you're negotiating with
+  - Social class and position
+  - Decision authority level
+  - Reputation for negotiation style
+  - Relationship history with you
+  - Current needs and constraints
+
+- **Power Dynamic Evaluation**: Assessing relative leverage
+  - Alternatives available to each party (BATNA)
+  - Resource disparities
+  - Time pressure asymmetry
+  - Information advantages/disadvantages
+  - Social or political leverage differences
+
+- **Context Mapping**: Understanding surrounding circumstances
+  - Market conditions affecting the negotiation
+  - Social or political environment
+  - Presence of observers or stakeholders
+  - Precedent implications
+  - Timing considerations
+
+### Value Analysis
+- **Interest Identification**: Determining what each party truly wants
+  - Your core interests (prioritized)
+  - Counterparty's likely interests (estimated)
+  - Shared interests (potential collaboration points)
+  - Conflicting interests (requiring trade-offs)
+  - Hidden interests (not explicitly stated)
+
+- **Value Creation Opportunities**: Finding mutual gains
+  - Complementary needs identification
+  - Different value assessments exploitation
+  - Risk sharing arrangements
+  - Timing flexibility utilization
+  - Bundle creation possibilities
+
+- **Cost-Benefit Calculation**: Quantifying potential outcomes
+  - Direct financial impact
+  - Relationship value effects
+  - Reputation consequences
+  - Opportunity costs
+  - Future option values
+
+- **Zone of Possible Agreement (ZOPA)**: Defining deal boundaries
+  - Your reservation value (walk-away point)
+  - Estimated counterparty reservation value
+  - Potential agreement range
+  - Most favorable realistic outcome
+  - Minimum acceptable agreement
+
+## Negotiation Strategy Selection
+
+### Approach Determination
+- **Competitive Strategy**: When to use claiming tactics
+  - When relationship is transactional
+  - When power advantage exists
+  - When precedent setting is important
+  - When counterparty uses competitive tactics
+  - When value is fixed (zero-sum situation)
+
+- **Collaborative Strategy**: When to use creating tactics
+  - When relationship is valuable long-term
+  - When future negotiations are likely
+  - When complex issues allow value creation
+  - When trust can be established
+  - When shared interests predominate
+
+- **Mixed Strategy**: Balancing claiming and creating
+  - Collaborative on relationship, competitive on price
+  - Creating value before claiming it
+  - Firm on interests, flexible on positions
+  - Hard on problem, soft on people
+  - Principled but pragmatic
+
+- **Adaptive Strategy**: Responding to counterparty approach
+  - Matching cooperative moves
+  - Countering competitive tactics
+  - Shifting approach based on progress
+  - Testing different approaches
+  - Signaling willingness to adjust
+
+### Cultural Adaptation
+- **Class-Appropriate Modifications**: Adjusting to social position
+  - Nobility: Emphasis on honor, discretion, and status
+  - Cittadini: Focus on mutual benefit and professional respect
+  - Popolani: Practical value and straightforward terms
+  - Cross-class: Appropriate deference while maintaining dignity
+
+- **Guild Context Adjustments**: Adapting to professional norms
+  - Quality standards acknowledgment
+  - Craft tradition respect
+  - Fair practice recognition
+  - Appropriate technical terminology
+  - Guild relationship implications
+
+- **Foreign Negotiation Adaptations**: Cross-cultural considerations
+  - Language and interpreter management
+  - Cultural gesture and protocol awareness
+  - Decision process expectation adjustment
+  - Time orientation differences
+  - Relationship vs. transaction emphasis
+
+- **Persona Consistency**: Alignment with your character
+  - Communication style authenticity
+  - Value priority reflection
+  - Risk tolerance manifestation
+  - Ethical boundary maintenance
+  - Reputation consistency
+
+## Tactical Implementation
+
+### Opening Tactics
+- **Preparation Display**: Demonstrating readiness
+  - Knowledge demonstration without overwhelming
+  - Organized presentation of information
+  - Relevant documentation availability
+  - Clear articulation of interests
+  - Thoughtful question preparation
+
+- **Anchor Placement**: Setting initial reference points
+  - Ambitious but justifiable opening position
+  - Supporting rationale preparation
+  - Delivery with appropriate confidence
+  - Flexibility signaling despite firmness
+  - Multiple issue anchoring strategy
+
+- **Atmosphere Creation**: Establishing negotiation climate
+  - Physical setting consideration
+  - Appropriate formality level
+  - Hospitality when appropriate
+  - Initial rapport building
+  - Agenda and process suggestion
+
+- **Information Exchange Management**: Controlling knowledge flow
+  - Question strategy development
+  - Selective information sharing
+  - Active listening implementation
+  - Non-verbal cue attention
+  - Information verification techniques
+
+### Process Management
+- **Agenda Control**: Guiding discussion flow
+  - Issue sequencing strategy
+  - Topic transition management
+  - Time allocation by importance
+  - Progress tracking mechanisms
+  - Flexibility while maintaining direction
+
+- **Pace Regulation**: Managing negotiation timing
+  - Deliberate slowing when needed
+  - Acceleration when advantageous
+  - Break utilization strategy
+  - Deadline management
+  - Patience demonstration
+
+- **Issue Packaging**: Combining elements effectively
+  - Complementary issue identification
+  - Trade-off opportunity creation
+  - Logrolling implementation
+  - Contingent agreement design
+  - Multi-part proposal construction
+
+- **Problem-Solving Facilitation**: Generating solutions
+  - Brainstorming process management
+  - Option evaluation structuring
+  - Criteria development for assessment
+  - Alternative comparison facilitation
+  - Synthesis of multiple ideas
+
+### Persuasion Techniques
+- **Logical Appeal**: Using reason and evidence
+  - Fact-based argumentation
+  - Cost-benefit analysis presentation
+  - Precedent and example utilization
+  - Objective criteria reference
+  - Logical consequence illustration
+
+- **Interest Alignment**: Showing mutual benefit
+  - Shared interest highlighting
+  - Win-win framing
+  - Long-term benefit emphasis
+  - Relationship value articulation
+  - Collaborative opportunity identification
+
+- **Social Proof**: Leveraging norms and examples
+  - Standard practice reference
+  - Peer behavior citation
+  - Expert opinion invocation
+  - Tradition and custom acknowledgment
+  - Status-appropriate comparison
+
+- **Reciprocity Leverage**: Using give-and-take dynamics
+  - Concession planning and sequencing
+  - Favor acknowledgment and reference
+  - Conditional proposal structure
+  - Commitment matching requests
+  - Future exchange suggestion
+
+### Response Tactics
+- **Counterproposal Construction**: Crafting effective responses
+  - Selective acceptance elements
+  - Alternative suggestion inclusion
+  - Interest acknowledgment
+  - Rationale provision
+  - Forward movement maintenance
+
+- **Objection Handling**: Addressing concerns effectively
+  - Clarification before response
+  - Legitimate concern acknowledgment
+  - Reframing when appropriate
+  - Alternative satisfaction methods
+  - Objection anticipation and prevention
+
+- **Difficult Tactic Management**: Handling challenging behaviors
+  - Deception detection techniques
+  - Pressure tactic resistance
+  - Manipulation identification
+  - Aggressive behavior de-escalation
+  - Principled response to unprincipled tactics
+
+- **Deadlock Resolution**: Breaking negotiation impasses
+  - Issue reframing approaches
+  - New option introduction
+  - Process change suggestion
+  - Third party involvement consideration
+  - Temporary agreement exploration
+
+### Closing Techniques
+- **Agreement Solidification**: Securing commitment
+  - Summary and confirmation process
+  - Specific term clarification
+  - Implementation detail inclusion
+  - Contingency planning
+  - Follow-up mechanism establishment
+
+- **Documentation Standards**: Recording the agreement
+  - Appropriate formality level
+  - Clarity and specificity emphasis
+  - Verification mechanism inclusion
+  - Future reference usability
+  - Dispute prevention elements
+
+- **Relationship Maintenance**: Preserving future interaction potential
+  - Positive conclusion regardless of outcome
+  - Future opportunity acknowledgment
+  - Appreciation expression
+  - Respect demonstration
+  - Communication channel maintenance
+
+- **Implementation Planning**: Ensuring follow-through
+  - Next step clarification
+  - Timeline establishment
+  - Responsibility assignment
+  - Coordination mechanism creation
+  - Progress tracking method
+
+## Negotiation Analysis Tools
+
+### Value Estimation Models
+- **Objective Value Calculation**: Quantifiable element assessment
+  - Market price comparison
+  - Cost-based valuation
+  - Revenue potential estimation
+  - Risk-adjusted return calculation
+  - Time value of money consideration
+
+- **Subjective Value Assessment**: Non-financial value estimation
+  - Relationship value quantification
+  - Reputation impact evaluation
+  - Strategic position enhancement
+  - Information value assessment
+  - Option value calculation
+
+- **Counterparty Value Perception**: Estimating their viewpoint
+  - Need urgency assessment
+  - Alternative availability evaluation
+  - Risk tolerance estimation
+  - Decision criteria identification
+  - Non-economic motivation assessment
+
+- **Reservation Price Estimation**: Determining limits
+  - Your true walk-away point calculation
+  - Counterparty BATNA assessment
+  - Market alternative evaluation
+  - Opportunity cost consideration
+  - Risk-adjusted value determination
+
+### Concession Management Systems
+- **Concession Planning**: Preparing give-and-take strategy
+  - High/medium/low value item identification
+  - Concession sequence planning
+  - Size and timing determination
+  - Condition attachment strategy
+  - Package vs. individual item approach
+
+- **Concession Valuation**: Assessing what you give and get
+  - Objective cost calculation
+  - Subjective value to counterparty
+  - Precedent implication consideration
+  - Future negotiation impact
+  - Package effect evaluation
+
+- **Concession Tracking**: Monitoring negotiation progress
+  - Balance sheet maintenance
+  - Reciprocity assessment
+  - Pattern recognition
+  - Diminishing returns identification
+  - Final offer recognition
+
+- **Concession Psychology**: Understanding emotional impact
+  - Appreciation generation techniques
+  - Reluctance demonstration
+  - Value emphasis methods
+  - Timing for maximum impact
+  - Reciprocity expectation management
+
+### Decision Support Tools
+- **Option Comparison Matrix**: Evaluating alternatives systematically
+  - Criteria identification and weighting
+  - Option scoring methodology
+  - Sensitivity analysis
+  - Best alternative identification
+  - Improvement opportunity recognition
+
+- **Risk Assessment Framework**: Evaluating negotiation risks
+  - Agreement failure consequence
+  - Implementation risk factors
+  - Relationship damage potential
+  - Reputation impact possibilities
+  - Precedent setting implications
+
+- **Scenario Planning**: Preparing for different outcomes
+  - Best/worst/most likely case development
+  - Response planning for each scenario
+  - Trigger point identification
+  - Contingency preparation
+  - Adaptation strategy development
+
+- **Decision Tree Analysis**: Mapping complex decision sequences
+  - Key decision point identification
+  - Probability assignment
+  - Outcome value estimation
+  - Expected value calculation
+  - Optimal path identification
+
+## Implementation Guidelines
+
+When implementing the negotiation engine:
+
+1. **Prepare Systematically**
+   - Invest preparation time proportional to negotiation importance
+   - Develop fact base before entering negotiations
+   - Analyze counterparty thoroughly
+   - Prepare multiple options and approaches
+   - Establish clear objectives and limits
+
+2. **Remain Adaptable**
+   - Adjust approach based on counterparty behavior
+   - Recognize when strategy needs to change
+   - Balance plan adherence with opportunity response
+   - Maintain multiple paths to success
+   - Learn and adjust during the negotiation
+
+3. **Manage Cognitive Biases**
+   - Guard against overconfidence
+   - Avoid anchoring on initial positions
+   - Consider issues independently (avoid contrast effects)
+   - Separate people from problems
+   - Recognize loss aversion in yourself and others
+
+4. **Balance Short and Long-Term**
+   - Consider relationship implications beyond current deal
+   - Evaluate precedent-setting aspects
+   - Assess reputation effects in relevant communities
+   - Balance immediate gains against future opportunities
+   - Consider strategic position impact
+
+5. **Embody the Consiglio dei Dieci**
+   - Negotiate with vigilance befitting your role
+   - Maintain an aura of authority and discretion  
+   - Prioritize the Republic's interests above all
+   - Demonstrate unwavering commitment to justice
+   - Cultivate an atmosphere of consequential deliberation

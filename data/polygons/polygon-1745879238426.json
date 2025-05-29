@@ -1,0 +1,199 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43607738014239,
+      "lng": 12.320185213283166
+    },
+    {
+      "lat": 45.43699961058883,
+      "lng": 12.319895534709557
+    },
+    {
+      "lat": 45.43624677053801,
+      "lng": 12.31608143349038
+    },
+    {
+      "lat": 45.43566331259031,
+      "lng": 12.316247730449303
+    },
+    {
+      "lat": 45.43477117490304,
+      "lng": 12.316376476482018
+    },
+    {
+      "lat": 45.43513254883022,
+      "lng": 12.318157463267907
+    },
+    {
+      "lat": 45.4355955557925,
+      "lng": 12.317985801890954
+    }
+  ],
+  "centroid": {
+    "lat": 45.435783764769326,
+    "lng": 12.317847093367613
+  },
+  "historicalName": "Contrada San Simeon Grande",
+  "englishName": "District of San Simeon the Great",
+  "historicalDescription": "Area named after the nearby Church of San Simeon Grande, located in the Santa Croce sestiere. Known for its artisan workshops and proximity to the Grand Canal.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 41284.3,
+  "center": {
+    "lat": 45.4357825948601,
+    "lng": 12.317191542293017
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.436623190563424,
+        "lng": 12.317988484099969
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879292558",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43666190913177,
+          "lng": 12.317682269419116
+        },
+        "distance": 24.277263238669754,
+        "id": "a031c88c-2c02-4f68-a563-243701c20293",
+        "historicalName": "Ponte dei Merciai",
+        "englishName": "Bridge of the Mercers",
+        "historicalDescription": "Located in Contrada San Simeon Grande, this bridge was named after the merciai (mercers) who sold fabrics, ribbons, and haberdashery items in shops near the bridge. San Simeon Grande was known for its various artisans and merchants during the Renaissance period, with textile traders being particularly prominent in this area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4366425498476,
+            "lng": 12.317835376759543
+          }
+        }
+      },
+      "id": "bridge_45.436623_12.317988"
+    },
+    {
+      "edge": {
+        "lat": 45.43575616390913,
+        "lng": 12.318718939021691
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879227449",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.435712247622845,
+          "lng": 12.318795829013451
+        },
+        "distance": 7.735616208261262,
+        "id": "fa69303d-60fb-4ba6-ac03-a9ba3bd5a217",
+        "historicalName": "Ponte della Farina",
+        "englishName": "Bridge of Flour",
+        "historicalDescription": "This bridge in the vicinity of Contrada San Simeon Grande connected to an area where flour was transported and sold to local bakers. The bridge served as an important crossing point for merchants bringing grain products from the mainland to Venice. During the Renaissance, the regulation and distribution of flour was crucial to Venetian daily life, and this bridge marked one of the delivery routes.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43573420576599,
+            "lng": 12.318757384017571
+          }
+        }
+      },
+      "id": "bridge_45.435756_12.318719"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.435190615380975,
+      "lng": 12.316789040014294,
+      "streetName": "Calle dei Bancogiro",
+      "streetNameEnglish": "Street of the Bank Exchange",
+      "streetDescription": "Named after the Bancogiro, an early public bank established in the 17th century. The bank handled commercial transactions for merchants in the nearby Rialto area, which was not far from San Simeon Grande.",
+      "id": "building_45.435191_12.316789"
+    },
+    {
+      "lat": 45.435235414278246,
+      "lng": 12.317279411776708,
+      "streetName": "Fondamenta dei Mercanti da Seta",
+      "streetNameEnglish": "Foundation of the Silk Merchants",
+      "streetDescription": "This waterside street would have been named for the silk merchants who operated in this area of Venice. The silk trade was crucial to Venice's economy during the Renaissance, with many merchants setting up businesses near San Simeon Grande.",
+      "id": "building_45.435235_12.317279"
+    },
+    {
+      "lat": 45.435753738039935,
+      "lng": 12.316784933789958,
+      "streetName": "Rio Terà San Simeon",
+      "streetNameEnglish": "Filled Canal of Saint Simeon",
+      "streetDescription": "A former canal that was filled in and converted to a street, named after the parish of San Simeon Grande. Rio Terà indicates a filled-in canal, common in Venice's urban development history.",
+      "id": "building_45.435754_12.316785"
+    },
+    {
+      "lat": 45.43562529269338,
+      "lng": 12.31728465589186,
+      "streetName": "Calle dei Tedeschi",
+      "streetNameEnglish": "Street of the Germans",
+      "streetDescription": "Named for the German merchants who lived and worked in this area. The German community had a significant presence in Venice, with their headquarters at the Fondaco dei Tedeschi not far from this contrada.",
+      "id": "building_45.435625_12.317285"
+    },
+    {
+      "lat": 45.43614917532288,
+      "lng": 12.31681010958167,
+      "streetName": "Sottoportego del Traghetto",
+      "streetNameEnglish": "Passageway of the Ferry",
+      "streetDescription": "A covered passageway leading to one of the gondola ferry crossing points on the Grand Canal near San Simeon Grande, where Venetians could cross the canal before the construction of many bridges.",
+      "id": "building_45.436149_12.316810"
+    },
+    {
+      "lat": 45.43609140994957,
+      "lng": 12.3174793400913,
+      "streetName": "Salizada dei Corazzeri",
+      "streetNameEnglish": "Paved Street of the Armor Makers",
+      "streetDescription": "Named after the craftsmen who made armor and cuirasses. Being a 'salizada' indicates it was one of the earliest paved streets in the area, reflecting the importance of this guild in Renaissance Venice.",
+      "id": "building_45.436091_12.317479"
+    },
+    {
+      "lat": 45.43607398200036,
+      "lng": 12.31810646662783,
+      "streetName": "Campiello della Colombina",
+      "streetNameEnglish": "Small Square of the Little Dove",
+      "streetDescription": "Named either after a relief sculpture of a dove that might have adorned a building on this small square, or after a small inn that operated here. Small squares like this were important social spaces in the San Simeon Grande contrada.",
+      "id": "building_45.436074_12.318106"
+    },
+    {
+      "lat": 45.43618251514102,
+      "lng": 12.319229402723522,
+      "streetName": "Ruga dei Linaroli",
+      "streetNameEnglish": "Street of the Linen Merchants",
+      "streetDescription": "A commercial street where linen goods were sold. 'Ruga' typically indicates a larger street with commercial activities. The textile trade was important in this area of Venice during the Renaissance period.",
+      "id": "building_45.436183_12.319229"
+    },
+    {
+      "lat": 45.43617554832215,
+      "lng": 12.319852443004919,
+      "streetName": "Corte Memo",
+      "streetNameEnglish": "Memo Court",
+      "streetDescription": "Named after the Memo family, a nobili Venetian family who likely owned property in this courtyard or nearby. Many Venetian courtyards were named after prominent families who owned the surrounding buildings.",
+      "id": "building_45.436176_12.319852"
+    },
+    {
+      "lat": 45.436485075814055,
+      "lng": 12.318544159321016,
+      "streetName": "Calle del Paradiso",
+      "streetNameEnglish": "Street of Paradise",
+      "streetDescription": "This poetic name might have referred to a particularly beautiful or peaceful street, or could reference a sign or painting of Paradise that once hung on a building here. Religious imagery was common in Venetian street naming.",
+      "id": "building_45.436485_12.318544"
+    },
+    {
+      "lat": 45.43664573607625,
+      "lng": 12.319350750728038,
+      "streetName": "Fondamenta dei Barcaioli",
+      "streetNameEnglish": "Foundation of the Boatmen",
+      "streetDescription": "A waterside street where boatmen would dock their vessels. San Simeon Grande's location near the Grand Canal made it an important area for Venice's boatmen and transportation workers.",
+      "id": "building_45.436646_12.319351"
+    },
+    {
+      "lat": 45.43656202858914,
+      "lng": 12.31982279179762,
+      "streetName": "Sottoportego dei Filacanape",
+      "streetNameEnglish": "Passageway of the Rope Makers",
+      "streetDescription": "A covered passageway named after the rope makers who might have worked nearby. Rope making was essential for Venice's maritime economy, and many craftsmen associated with shipbuilding and maritime activities worked in this area near the Grand Canal.",
+      "id": "building_45.436562_12.319823"
+    }
+  ],
+  "id": "polygon-1745879238426"
+}

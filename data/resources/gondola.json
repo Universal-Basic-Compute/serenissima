@@ -1,0 +1,51 @@
+{
+  "id": "gondola",
+  "name": "Gondola",
+  "category": "finished_goods",
+  "subCategory": "transportation",
+  "description": "The iconic Venetian boat designed for canal transportation. With its asymmetrical design and skilled gondolier, it serves as the primary means of passenger transport through Venice's narrow waterways.",
+  "varieties": [
+    {
+      "type": "standard_gondola",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "passengerCapacity": 6,
+      "modelVariant": "models/resources/gondola_standard.glb"
+    },
+    {
+      "type": "luxury_gondola",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1.8,
+      "passengerCapacity": 4,
+      "modelVariant": "models/resources/gondola_luxury.glb"
+    },
+    {
+      "type": "ceremonial_gondola",
+      "productionDifficulty": "very_high",
+      "popularity": "low",
+      "valueMultiplier": 3,
+      "passengerCapacity": 8,
+      "modelVariant": "models/resources/gondola_ceremonial.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1100,
+    "notableProducers": [
+      "Venetian Boat Builders Guild",
+      "Squero di San Trovaso"
+    ],
+    "historicalSignificance": "The gondola evolved over centuries to become perfectly adapted to Venice's unique environment. Its asymmetrical design allows a single gondolier to propel and steer it through narrow canals. Originally colorful, a 16th-century decree mandated the now-iconic black color. Gondolas served as the primary transportation method for Venetians of all classes before becoming more associated with wealthy citizens and tourists in later centuries.",
+    "historicalContracts": [
+      "Venetian transportation system",
+      "Ducatsy families",
+      "Ceremonial functions"
+    ]
+  },
+  "importPrice": 41868.0,
+  "lifetimeHours": null,
+  "consumptionHours": 1168,
+  "tier": 3,
+  "storageCapacity": 10
+}

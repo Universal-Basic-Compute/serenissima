@@ -1,0 +1,1 @@
+aider --model gemini/gemini-2.5-pro-preview-03-25

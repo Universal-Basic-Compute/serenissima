@@ -1,0 +1,101 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43254626271505,
+      "lng": 12.325231127075567
+    },
+    {
+      "lat": 45.43271566370995,
+      "lng": 12.325756840042486
+    },
+    {
+      "lat": 45.4329377664662,
+      "lng": 12.327103308967962
+    },
+    {
+      "lat": 45.432384390178164,
+      "lng": 12.32738762312354
+    },
+    {
+      "lat": 45.43230910046795,
+      "lng": 12.32715158873023
+    },
+    {
+      "lat": 45.43233168739155,
+      "lng": 12.326540045074834
+    },
+    {
+      "lat": 45.432294042513846,
+      "lng": 12.326067976288213
+    },
+    {
+      "lat": 45.432098288744974,
+      "lng": 12.325547627739324
+    },
+    {
+      "lat": 45.432248868627454,
+      "lng": 12.32540278845252
+    }
+  ],
+  "centroid": {
+    "lat": 45.4324295634239,
+    "lng": 12.326243213943853
+  },
+  "historicalName": "Calle dei Cerchieri, sestiere di San Marco",
+  "englishName": "Street of the Barrel Makers, district of St. Mark",
+  "historicalDescription": "This street was known for its concentration of barrel makers and coopers in the 15th century, located in the central San Marco district near Piazza San Marco and the Doge's Palace.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 8779.64,
+  "center": {
+    "lat": 45.432470229470916,
+    "lng": 12.326617795179395
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.432294042513846,
+        "lng": 12.326067976288213
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879036720",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43226392659358,
+          "lng": 12.326271824173345
+        },
+        "distance": 16.255180444536155,
+        "id": "27c4f2d0-1a54-47ce-9101-23d2f3d6c07d",
+        "historicalName": "Ponte dei Cerchieri",
+        "englishName": "Bridge of the Coopers",
+        "historicalDescription": "Named after the coopers (barrel makers) who had workshops in the Calle dei Cerchieri area during the Renaissance period. The 'cerchieri' were skilled craftsmen who made barrels essential for Venice's wine trade and maritime commerce. Their presence in this area of San Marco would have been significant as the sestiere was a center of artisanal activity and trade.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43227898455371,
+            "lng": 12.326169900230779
+          }
+        }
+      },
+      "id": "bridge_45.432294_12.326068"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.432557036969044,
+      "lng": 12.32582187608287,
+      "streetName": "Calle dei Maestri Vetrai",
+      "streetNameEnglish": "Street of the Glass Masters",
+      "streetDescription": "This name references the glassmakers who, while primarily based in Murano, had connections and showrooms near San Marco. In the Renaissance period, Venetian glass was world-renowned, and merchants would often display their finest pieces near the commercial center of San Marco. The 'maestri vetrai' (glass masters) were highly respected artisans who contributed significantly to Venice's economic prosperity and artistic reputation.",
+      "id": "building_45.432557_12.325822"
+    },
+    {
+      "lat": 45.432545113127965,
+      "lng": 12.326620567891567,
+      "streetName": "Sottoportego del Leone",
+      "streetNameEnglish": "Underpass of the Lion",
+      "streetDescription": "Near the Calle dei Cerchieri in San Marco, this name would refer to a covered passageway potentially marked by a stone relief of a lion, the symbol of St. Mark and of the Venetian Republic. Such decorative elements were common in Renaissance Venice, especially in prestigious areas like San Marco. The 'sottoportego' (underpass) would connect two streets or small squares, providing shelter during acqua alta (high water) events, which were already a concern in historical Venice.",
+      "id": "building_45.432545_12.326621"
+    }
+  ],
+  "id": "polygon-1745879015190"
+}

@@ -1,0 +1,434 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43921469367373,
+      "lng": 12.320959562846276
+    },
+    {
+      "lat": 45.44054714363293,
+      "lng": 12.322247023173425
+    },
+    {
+      "lat": 45.44110420377966,
+      "lng": 12.32310533005819
+    },
+    {
+      "lat": 45.4411719539629,
+      "lng": 12.323319906779382
+    },
+    {
+      "lat": 45.44006535744906,
+      "lng": 12.324274773188684
+    },
+    {
+      "lat": 45.43940289472886,
+      "lng": 12.325208181925866
+    },
+    {
+      "lat": 45.43886840209216,
+      "lng": 12.326023573466394
+    },
+    {
+      "lat": 45.438544692822255,
+      "lng": 12.325572962351892
+    },
+    {
+      "lat": 45.438921098774266,
+      "lng": 12.323684687205407
+    },
+    {
+      "lat": 45.43874042423068,
+      "lng": 12.323395008631799
+    },
+    {
+      "lat": 45.438311319871,
+      "lng": 12.322987312861535
+    },
+    {
+      "lat": 45.43813817157376,
+      "lng": 12.322955126353357
+    },
+    {
+      "lat": 45.438017720271,
+      "lng": 12.32162475068197
+    },
+    {
+      "lat": 45.43835648890462,
+      "lng": 12.321496004649255
+    },
+    {
+      "lat": 45.43883828968028,
+      "lng": 12.321249241419885
+    }
+  ],
+  "centroid": {
+    "lat": 45.43921619036314,
+    "lng": 12.323206896372884
+  },
+  "historicalName": "Calle del Pezzetto, Sestiere di Cannaregio",
+  "englishName": "Alley of the Small Piece, Cannaregio District",
+  "historicalDescription": "This narrow street was located in the Cannaregio sestiere, known for its working-class population and being home to the Jewish Ghetto in the 15th century. The area was characterized by its dense network of small alleys and canals.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 67914.72,
+  "center": {
+    "lat": 45.43921619036314,
+    "lng": 12.323206896372884
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43965884366013,
+        "lng": 12.32138871628866
+      },
+      "water": {
+        "lat": 45.43971780379032,
+        "lng": 12.321146539995842
+      },
+      "historicalName": "Fondamenta dei Spezieri",
+      "englishName": "Foundation of the Spice Merchants",
+      "historicalDescription": "This dock was historically used by spice merchants who operated shops and warehouses in Cannaregio. The name 'Spezieri' refers to vendors of exotic spices which were crucial to Venetian trade and cuisine during the Renaissance. Its proximity to Calle del Pezzetto would have made it convenient for transporting goods to the inner areas of the sestiere.",
+      "id": "canal_45.439659_12.321389"
+    },
+    {
+      "edge": {
+        "lat": 45.440102993646526,
+        "lng": 12.321817869731042
+      },
+      "water": {
+        "lat": 45.440224041841155,
+        "lng": 12.32162826830484
+      },
+      "historicalName": "Riva del Fondaco",
+      "englishName": "Shore of the Warehouse",
+      "historicalDescription": "This landing served a significant commercial warehouse (fondaco) in Cannaregio. During the Renaissance, fondachi were centers of international trade where merchants would store goods and sometimes live. The dock would have facilitated the loading and unloading of merchandise to be distributed throughout the Cannaregio district, including the Calle del Pezzetto area.",
+      "id": "canal_45.440103_12.321818"
+    },
+    {
+      "edge": {
+        "lat": 45.44054714363293,
+        "lng": 12.322247023173425
+      },
+      "water": {
+        "lat": 45.440707630229554,
+        "lng": 12.322131281481758
+      },
+      "historicalName": "Fondamenta della Seta",
+      "englishName": "Foundation of Silk",
+      "historicalDescription": "This dock was named for the silk trade that flourished in this part of Cannaregio. Silk production and trading was a significant industry in Renaissance Venice, with many workshops located in residential areas like those near Calle del Pezzetto. This fondamenta would have been used to transport raw silk materials and finished products to and from the workshops in the vicinity.",
+      "id": "canal_45.440547_12.322247"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.440618655705975,
+        "lng": 12.323797339984033
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879404342",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.440652282008045,
+          "lng": 12.323877870995652
+        },
+        "distance": 7.311416955843887,
+        "id": "408910ad-3d24-4d99-81a8-f5235cb79faa",
+        "historicalName": "Ponte dei Lavandai",
+        "englishName": "Bridge of the Washers",
+        "historicalDescription": "Named after the washers who would gather nearby to clean clothes in the canal waters. Cannaregio had several areas where this profession was common, and Calle del Pezzetto would have been accessible to those working in this trade.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44063546885701,
+            "lng": 12.323837605489842
+          }
+        }
+      },
+      "id": "bridge_45.440619_12.323797"
+    },
+    {
+      "edge": {
+        "lat": 45.44006535744906,
+        "lng": 12.324274773188684
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879404342",
+        "targetPointIndex": 6,
+        "targetPoint": {
+          "lat": 45.44012156766975,
+          "lng": 12.324344575364243
+        },
+        "distance": 8.290055242731393,
+        "id": "408910ad-3d24-4d99-81a8-f5235cb79faa",
+        "historicalName": "Ponte dei Mori",
+        "englishName": "Bridge of the Moors",
+        "historicalDescription": "This name references the nearby Campo dei Mori in Cannaregio, known for its statues of merchants from the Mastelli family who were called 'Mori' (Moors) due to their trading background in the Peloponnese. The bridge would have connected local residents to this noteworthy area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4400934625594,
+            "lng": 12.324309674276464
+          }
+        }
+      },
+      "id": "bridge_45.440065_12.324275"
+    },
+    {
+      "edge": {
+        "lat": 45.43973412608896,
+        "lng": 12.324741477557275
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879404342",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.43973011239816,
+          "lng": 12.3249132036754
+        },
+        "distance": 13.405663509108757,
+        "id": "408910ad-3d24-4d99-81a8-f5235cb79faa",
+        "historicalName": "Ponte della Madonna dell'Orto",
+        "englishName": "Bridge of the Madonna of the Garden",
+        "historicalDescription": "Named for its proximity to the renowned Madonna dell'Orto church in Cannaregio, which contains works by Tintoretto. The bridge would have been part of the route faithful residents of Calle del Pezzetto took to reach this important religious site.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43973211924356,
+            "lng": 12.324827340616338
+          }
+        }
+      },
+      "id": "bridge_45.439734_12.324741"
+    },
+    {
+      "edge": {
+        "lat": 45.43940289472886,
+        "lng": 12.325208181925866
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879404342",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43933865712657,
+          "lng": 12.325481831986558
+        },
+        "distance": 22.513724896693667,
+        "id": "408910ad-3d24-4d99-81a8-f5235cb79faa",
+        "historicalName": "Ponte dei Trasti",
+        "englishName": "Bridge of the Rafters",
+        "historicalDescription": "Named for the wooden rafters or beams that were transported along this canal for construction. Cannaregio's position in northern Venice made it a logical entry point for timber and building materials, which would pass under this bridge on their way to construction sites.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43937077592771,
+            "lng": 12.325345006956212
+          }
+        }
+      },
+      "id": "bridge_45.439403_12.325208"
+    },
+    {
+      "edge": {
+        "lat": 45.438544692822255,
+        "lng": 12.325572962351892
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072707138",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.43846515989972,
+          "lng": 12.325608705655528
+        },
+        "distance": 9.272950370359865,
+        "id": "4c53b306-40c9-4d52-9e0f-f06121355353",
+        "historicalName": "Ponte dei Zingari",
+        "englishName": "Bridge of the Gypsies",
+        "historicalDescription": "This name references a temporary settlement of Roma people who may have camped near this area in the Renaissance period. Cannaregio, being on the edge of the city, occasionally hosted traveling groups in certain designated areas.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43850492636099,
+            "lng": 12.325590834003709
+          }
+        }
+      },
+      "id": "bridge_45.438545_12.325573"
+    },
+    {
+      "edge": {
+        "lat": 45.43807794592238,
+        "lng": 12.322289938517663
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879354937",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.437992404062534,
+          "lng": 12.322187126090611
+        },
+        "distance": 12.44280579455776,
+        "id": "cd8c6b28-0158-432c-b1e3-6df8d4ed07ca",
+        "historicalName": "Ponte dei Pezzetti",
+        "englishName": "Bridge of the Small Pieces",
+        "historicalDescription": "Taking its name directly from the adjacent Calle del Pezzetto, which likely referred to small plots of land or 'small pieces' in this area of Cannaregio. The bridge would have been a central crossing point for residents of this street and surrounding area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43803517499246,
+            "lng": 12.322238532304137
+          }
+        }
+      },
+      "id": "bridge_45.438078_12.322290"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43845523337963,
+      "lng": 12.322138686320379,
+      "streetName": "Calle del Traghetto Vecchio",
+      "streetNameEnglish": "Street of the Old Ferry",
+      "streetDescription": "Named after an ancient ferry crossing point in Cannaregio that connected this area to nearby islands before permanent bridges were built. Ferry crossings were vital transportation nodes in Venice's canal system.",
+      "id": "building_45.438455_12.322139"
+    },
+    {
+      "lat": 45.43885322992114,
+      "lng": 12.321621900203697,
+      "streetName": "Fondamenta dei Calegheri",
+      "streetNameEnglish": "Foundation of the Shoemakers",
+      "streetDescription": "This fondamenta (a street alongside a canal) was named after the shoemakers' workshops that lined this area in Renaissance Venice. The shoemakers' guild was prominent in Cannaregio, supplying footwear to merchants and nobles.",
+      "id": "building_45.438853_12.321622"
+    },
+    {
+      "lat": 45.43895257772484,
+      "lng": 12.32235960495285,
+      "streetName": "Rio Terà dei Sabbioneri",
+      "streetNameEnglish": "Filled Canal of the Sand Merchants",
+      "streetDescription": "This street was once a canal that was filled in (rio terà). It was named after the sabbioneri, merchants who transported and sold sand used for construction throughout Venice, who had their landing spots nearby.",
+      "id": "building_45.438953_12.322360"
+    },
+    {
+      "lat": 45.4388979096025,
+      "lng": 12.322939239046718,
+      "streetName": "Calle della Madonna dei Miracoli",
+      "streetNameEnglish": "Street of the Madonna of Miracles",
+      "streetDescription": "Named for its proximity to the Santa Maria dei Miracoli church in the Cannaregio district, an exquisite early Renaissance church built between 1481 and 1489 to house a miraculous image of the Virgin Mary.",
+      "id": "building_45.438898_12.322939"
+    },
+    {
+      "lat": 45.43898743920732,
+      "lng": 12.32349977752383,
+      "streetName": "Sottoportego dei Filacanevi",
+      "streetNameEnglish": "Covered Passageway of the Hemp Spinners",
+      "streetDescription": "This covered passageway (sottoportego) was named after the hemp spinners who worked nearby, creating rope and cordage essential for Venice's maritime industry. Hemp processing was particularly important in Cannaregio's industrial sectors.",
+      "id": "building_45.438987_12.323500"
+    },
+    {
+      "lat": 45.43894043896592,
+      "lng": 12.324810372959153,
+      "streetName": "Salizada dei Spezieri",
+      "streetNameEnglish": "Paved Street of the Spice Merchants",
+      "streetDescription": "A salizada (one of the first paved streets in Venice) named after the spice merchants who established their businesses here. Being close to Cannaregio's commercial waterways made it ideal for the spice trade that brought wealth to Venice.",
+      "id": "building_45.438940_12.324810"
+    },
+    {
+      "lat": 45.43893746964352,
+      "lng": 12.325354853444043,
+      "streetName": "Corte Morosini",
+      "streetNameEnglish": "Morosini Court",
+      "streetDescription": "Named after the noble Morosini family who owned property in this area of Cannaregio. The Morosini were an ancient nobili family that gave Venice several doges and military commanders throughout its history.",
+      "id": "building_45.438937_12.325355"
+    },
+    {
+      "lat": 45.43930287132632,
+      "lng": 12.32166252715959,
+      "streetName": "Calle dei Vedei",
+      "streetNameEnglish": "Street of the Glass Viewers",
+      "streetDescription": "Named after craftsmen who inspected glass products from Murano before they were sold or exported. Located in Cannaregio, this street connected to routes where glass was transported from Murano to Venice's commercial center.",
+      "id": "building_45.439303_12.321663"
+    },
+    {
+      "lat": 45.43936590321729,
+      "lng": 12.322156429510567,
+      "streetName": "Fondamenta degli Ormesini",
+      "streetNameEnglish": "Foundation of the Silk Weavers",
+      "streetDescription": "Named after a type of silk fabric called 'ormesino' that was produced by weavers in this area of Cannaregio. Venice was famous for its luxurious textiles, and this fondamenta housed many workshops for silk processing.",
+      "id": "building_45.439366_12.322156"
+    },
+    {
+      "lat": 45.43941854549232,
+      "lng": 12.32291338116667,
+      "streetName": "Ruga dei Mercanti Ebrei",
+      "streetNameEnglish": "Street of the Jewish Merchants",
+      "streetDescription": "A commercial street near the Venetian Ghetto in Cannaregio where Jewish merchants were permitted to conduct business. The Ghetto was established in 1516, making Venice's Jewish quarter the first in Europe.",
+      "id": "building_45.439419_12.322913"
+    },
+    {
+      "lat": 45.43933192479837,
+      "lng": 12.32359676196855,
+      "streetName": "Calle del Pestrin Piccolo",
+      "streetNameEnglish": "Street of the Small Bakery",
+      "streetDescription": "Named after a small bakery that served the local community in this part of Cannaregio. 'Pestrin' refers to a place where grain was ground or where bread was baked, essential for daily Venetian life.",
+      "id": "building_45.439332_12.323597"
+    },
+    {
+      "lat": 45.43928594023969,
+      "lng": 12.324108559433922,
+      "streetName": "Rio Terà dei Servi",
+      "streetNameEnglish": "Filled Canal of the Servants of Mary",
+      "streetDescription": "Named after the Order of the Servants of Mary (Servites) who had a monastery nearby. This former canal was filled in to create more usable land in the developing Cannaregio district during the Renaissance period.",
+      "id": "building_45.439286_12.324109"
+    },
+    {
+      "lat": 45.43974326309329,
+      "lng": 12.32213142074257,
+      "streetName": "Sottoportego del Forno",
+      "streetNameEnglish": "Covered Passageway of the Oven",
+      "streetDescription": "A covered walkway named after a public oven that once operated here, where residents of this area of Cannaregio could bring their prepared dough to be baked, as having private ovens in wooden houses was a fire hazard.",
+      "id": "building_45.439743_12.322131"
+    },
+    {
+      "lat": 45.43986486353948,
+      "lng": 12.322953148864666,
+      "streetName": "Calle dei Bombardieri",
+      "streetNameEnglish": "Street of the Cannoneers",
+      "streetDescription": "Named after artillery specialists who lived in this part of Cannaregio, convenient to the Arsenal. These skilled military personnel were vital to Venice's naval and defensive capabilities during the Renaissance.",
+      "id": "building_45.439865_12.322953"
+    },
+    {
+      "lat": 45.43985136059061,
+      "lng": 12.323504830743145,
+      "streetName": "Fondamenta del Borgo",
+      "streetNameEnglish": "Foundation of the Borough",
+      "streetDescription": "This canal-side street marked what was once the boundary of an early settlement or 'borgo' within Cannaregio, before the district expanded. It represents the organic growth of Venice's neighborhoods over centuries.",
+      "id": "building_45.439851_12.323505"
+    },
+    {
+      "lat": 45.43977709583389,
+      "lng": 12.324098175736866,
+      "streetName": "Campiello dei Miracoli",
+      "streetNameEnglish": "Small Square of Miracles",
+      "streetDescription": "A small square named for its proximity to the Church of Santa Maria dei Miracoli. Such campielli were important social spaces in Renaissance Venice where residents gathered around community wells.",
+      "id": "building_45.439777_12.324098"
+    },
+    {
+      "lat": 45.44027820201766,
+      "lng": 12.322935013103988,
+      "streetName": "Calle del Magazen",
+      "streetNameEnglish": "Street of the Warehouse",
+      "streetDescription": "Named after a significant storage facility that existed here during the Renaissance period. Located in the commercial district of Cannaregio, it stored goods transported via the nearby canals before distribution.",
+      "id": "building_45.440278_12.322935"
+    },
+    {
+      "lat": 45.44027909217376,
+      "lng": 12.323467342132245,
+      "streetName": "Ramo delle Monache",
+      "streetNameEnglish": "Branch of the Nuns",
+      "streetDescription": "A small side street (ramo) named for its connection to a convent that once stood in this area of Cannaregio. Religious establishments were prominent features in Venetian neighborhoods, providing services and charity.",
+      "id": "building_45.440279_12.323467"
+    },
+    {
+      "lat": 45.4406975932304,
+      "lng": 12.322908262083471,
+      "streetName": "Calle Priuli",
+      "streetNameEnglish": "Priuli Street",
+      "streetDescription": "Named after the noble Priuli family who owned property in this area of Cannaregio. The Priuli were a prestigious Venetian nobili family that produced three doges and many other notable figures in Venetian history.",
+      "id": "building_45.440698_12.322908"
+    }
+  ],
+  "id": "polygon-1745879385958"
+}

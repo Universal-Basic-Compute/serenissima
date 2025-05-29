@@ -1,0 +1,186 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.4258958853206,
+      "lng": 12.328814822985592
+    },
+    {
+      "lat": 45.424766399289744,
+      "lng": 12.328428584887448
+    },
+    {
+      "lat": 45.42506006783177,
+      "lng": 12.326282817675533
+    },
+    {
+      "lat": 45.42628743520287,
+      "lng": 12.326905090166989
+    }
+  ],
+  "centroid": {
+    "lat": 45.425502446911246,
+    "lng": 12.32760782892889
+  },
+  "historicalName": "Calle del Forno in Sestiere di Cannaregio",
+  "englishName": "Oven Street in the Cannaregio District",
+  "historicalDescription": "A small street known for its bakeries and located in the Cannaregio sestiere, not far from the Chiesa della Madonna dell'Orto.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 22235.09,
+  "center": {
+    "lat": 45.425502446911246,
+    "lng": 12.32760782892889
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.42615691857545,
+        "lng": 12.32754166777319
+      },
+      "water": {
+        "lat": 45.426336331903435,
+        "lng": 12.327523530711225
+      },
+      "historicalName": "Fondamenta dei Fornai",
+      "englishName": "Foundation of the Bakers",
+      "historicalDescription": "This dock takes its name from the nearby 'Calle del Forno' (Street of the Oven/Bakery) in Cannaregio. During the Renaissance, bakeries were vital establishments in Venice, and this fondamenta would have served as a landing point for deliveries of flour and other baking supplies. The guild of bakers (fornai) was an important trade organization in Renaissance Venice, responsible for ensuring the city's bread supply.",
+      "id": "canal_45.426157_12.327542"
+    },
+    {
+      "edge": {
+        "lat": 45.42602640194802,
+        "lng": 12.32817824537939
+      },
+      "water": {
+        "lat": 45.4261693225993,
+        "lng": 12.328333839437821
+      },
+      "historicalName": "Riva del Priuli",
+      "englishName": "Dock of the Priuli",
+      "historicalDescription": "Named after the noble Priuli family, who were prominent in Venetian politics during the Renaissance and had several doges among their lineage. The Priuli family likely owned property in this area of Cannaregio. This dock would have served as a private or semi-private landing for their palace or properties. The Priuli were particularly influential in the 16th century, with two brothers, Lorenzo and Girolamo, serving consecutively as Doges in the mid-1500s.",
+      "id": "canal_45.426026_12.328178"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.424766399289744,
+        "lng": 12.328428584887448
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052735791",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.42477571950123,
+          "lng": 12.32863271533823
+        },
+        "distance": 15.964345426584648,
+        "id": "216d844f-7950-40f1-8a85-4af9bd4ab315",
+        "historicalName": "Ponte del Forno",
+        "englishName": "Bridge of the Bakery",
+        "historicalDescription": "Named after the bakery (forno) that was historically located on Calle del Forno in Cannaregio. Bakeries were essential establishments in Renaissance Venice, and this bridge would have connected residents to this vital food source. The name directly reflects the street it connects to.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42477105939548,
+            "lng": 12.328530650112839
+          }
+        }
+      },
+      "id": "bridge_45.424766_12.328429"
+    },
+    {
+      "edge": {
+        "lat": 45.424864288803754,
+        "lng": 12.327713329150143
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052755300",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.42476890915476,
+          "lng": 12.327563125445309
+        },
+        "distance": 15.807907200592703,
+        "id": "74ee329b-f4ef-4069-9d73-cab7a9b5ebaf",
+        "historicalName": "Ponte dei Fornari",
+        "englishName": "Bridge of the Bakers",
+        "historicalDescription": "This bridge honors the bakers' guild that likely had significant presence in the Cannaregio district. Bakers were organized into one of Venice's many trade guilds (scuole), which played important social and economic roles in Renaissance Venice. The name reflects the professional activity associated with Calle del Forno.",
+        "location": {
+          "midpoint": {
+            "lat": 45.424816598979255,
+            "lng": 12.327638227297726
+          }
+        }
+      },
+      "id": "bridge_45.424864_12.327713"
+    },
+    {
+      "edge": {
+        "lat": 45.42496217831776,
+        "lng": 12.326998073412838
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052755300",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.42485424888474,
+          "lng": 12.326922971560421
+        },
+        "distance": 13.355931576106373,
+        "id": "74ee329b-f4ef-4069-9d73-cab7a9b5ebaf",
+        "historicalName": "Ponte della Farina",
+        "englishName": "Bridge of the Flour",
+        "historicalDescription": "Named for the flour supplies transported across this bridge to the bakeries in Calle del Forno. In Renaissance Venice, food supply routes were critically important, and bridges were often named after the goods commonly transported across them. The name reflects the essential ingredient needed by the bakeries in this area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.424908213601256,
+            "lng": 12.32696052248663
+          }
+        }
+      },
+      "id": "bridge_45.424962_12.326998"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.42521523747715,
+      "lng": 12.326888934441023,
+      "streetName": "Calle dei Fornai",
+      "streetNameEnglish": "Street of the Bakers",
+      "streetDescription": "This name references the bakers' guild that was historically active in Cannaregio. With 'Calle del Forno' (Street of the Oven) nearby, this complementary name acknowledges the cluster of bakeries that would have operated in this area to serve the local population. Bakeries were essential businesses in Renaissance Venice, strictly regulated by the government to ensure bread supply.",
+      "id": "building_45.425215_12.326889"
+    },
+    {
+      "lat": 45.42524319116141,
+      "lng": 12.327492047482435,
+      "streetName": "Sottoportego della Colomba",
+      "streetNameEnglish": "Underpass of the Dove",
+      "streetDescription": "This name likely refers to a small covered passageway near a building that may have had a dove as its symbol or emblem. The dove was an important Christian symbol in Renaissance Venice, and many religious confraternities used it in their iconography. Located in Cannaregio, this passageway would have connected smaller inner courtyards or provided a shortcut between larger streets.",
+      "id": "building_45.425243_12.327492"
+    },
+    {
+      "lat": 45.42516752519849,
+      "lng": 12.32816679248309,
+      "streetName": "Rio Terà dei Muschieri",
+      "streetNameEnglish": "Filled Canal of the Perfumers",
+      "streetDescription": "A 'Rio Terà' indicates a filled-in canal, common in Venice's urban development. 'Muschieri' were perfumers who worked with musk and other aromatic substances. Cannaregio had numerous small artisan workshops, and perfumers would have been present to serve the wealthy families of the area. The filled canal would have created valuable space for these craftsmen to establish their shops.",
+      "id": "building_45.425168_12.328167"
+    },
+    {
+      "lat": 45.42560952334345,
+      "lng": 12.327689474944432,
+      "streetName": "Fondamenta dei Ormesini",
+      "streetNameEnglish": "Foundation of the Silk Weavers",
+      "streetDescription": "This name references the silk weavers who specialized in 'ormesino' (a light silk fabric) production in Cannaregio. Venice was famous for its textile industry, and Cannaregio housed many silk weavers, particularly after the 16th century. A 'fondamenta' is a street running alongside a canal, which would have been useful for these craftsmen to transport their delicate goods by water.",
+      "id": "building_45.425610_12.327689"
+    },
+    {
+      "lat": 45.42561168436903,
+      "lng": 12.328299833243177,
+      "streetName": "Corte Donà",
+      "streetNameEnglish": "Donà Court",
+      "streetDescription": "Named after the noble Donà family, who were prominent nobili in Venice. The Donà family owned several palaces throughout Venice, including properties in Cannaregio. This small courtyard would have been associated with one of their properties or patronage. Nobili families often gave their names to nearby urban spaces where they exercised influence or owned property.",
+      "id": "building_45.425612_12.328300"
+    }
+  ],
+  "id": "polygon-1746052744386"
+}

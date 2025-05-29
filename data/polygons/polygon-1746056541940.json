@@ -1,0 +1,308 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43619910000985,
+      "lng": 12.332708089401168
+    },
+    {
+      "lat": 45.43554788471423,
+      "lng": 12.333609311630171
+    },
+    {
+      "lat": 45.43476491070988,
+      "lng": 12.33413502459709
+    },
+    {
+      "lat": 45.434377183984104,
+      "lng": 12.33341082816307
+    },
+    {
+      "lat": 45.43409944494489,
+      "lng": 12.332992403556746
+    },
+    {
+      "lat": 45.43363266130788,
+      "lng": 12.332862406364296
+    },
+    {
+      "lat": 45.4336364257075,
+      "lng": 12.332621007552955
+    },
+    {
+      "lat": 45.43351596479539,
+      "lng": 12.332583456626747
+    },
+    {
+      "lat": 45.433579959686966,
+      "lng": 12.332116752258155
+    },
+    {
+      "lat": 45.433783237096506,
+      "lng": 12.33200409947953
+    },
+    {
+      "lat": 45.43446082317355,
+      "lng": 12.33126380979142
+    },
+    {
+      "lat": 45.434731855326426,
+      "lng": 12.331714420905922
+    },
+    {
+      "lat": 45.43564281496668,
+      "lng": 12.330834656349037
+    },
+    {
+      "lat": 45.43576703559644,
+      "lng": 12.331220894447181
+    },
+    {
+      "lat": 45.43501417910147,
+      "lng": 12.33202019273362
+    },
+    {
+      "lat": 45.435036764942474,
+      "lng": 12.332084565749977
+    },
+    {
+      "lat": 45.435800913902554,
+      "lng": 12.331290631881568
+    }
+  ],
+  "centroid": {
+    "lat": 45.43468183293921,
+    "lng": 12.332321914793447
+  },
+  "historicalName": "Calle dei Avvocati, San Marco",
+  "englishName": "Lawyers' Street, St. Mark's District",
+  "historicalDescription": "This street was known for housing offices of lawyers and notaries in the 15th century, located in the central San Marco sestiere near Piazza San Marco and the Doge's Palace.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 41904.44,
+  "center": {
+    "lat": 45.43481313220121,
+    "lng": 12.332612228671616
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.436000006956206,
+        "lng": 12.331999360641369
+      },
+      "water": {
+        "lat": 45.436177276986086,
+        "lng": 12.33195598307252
+      },
+      "historicalName": "Fondamenta degli Avvocati",
+      "englishName": "Foundation of the Lawyers",
+      "historicalDescription": "This dock would have served the legal professionals who had offices in the nearby Calle dei Avvocati (Street of the Lawyers) in the San Marco district. During the Renaissance, Venice had a sophisticated legal system, and advocates or lawyers formed an important professional class who served both the Republic's courts and private clients. This landing would have been a convenient access point for lawyers traveling to and from the Ducal Palace, where many legal proceedings took place.",
+      "id": "canal_45.436000_12.331999"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43554788471423,
+        "lng": 12.333609311630171
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056351603",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.435638711530544,
+          "lng": 12.333659773771037
+        },
+        "distance": 10.839860579680321,
+        "id": "e5464c4c-71db-41c5-8b31-ddc794721f77",
+        "historicalName": "Ponte degli Avvocati",
+        "englishName": "Bridge of the Lawyers",
+        "historicalDescription": "Named after the lawyers who had their offices along Calle dei Avvocati in the San Marco district. During the Renaissance, Venice had a sophisticated legal system, and many advocates worked near the governmental buildings in this area to serve the nobili families and merchants requiring legal services.",
+        "location": {
+          "midpoint": {
+            "lat": 45.435593298122384,
+            "lng": 12.333634542700604
+          }
+        }
+      },
+      "id": "bridge_45.435548_12.333609"
+    },
+    {
+      "edge": {
+        "lat": 45.434377183984104,
+        "lng": 12.33341082816307
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056582235",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43438676109713,
+          "lng": 12.333545177134697
+        },
+        "distance": 10.536978113720432,
+        "id": "2c976cdc-dbde-48bb-9ac3-5a2cf8e81dd1",
+        "historicalName": "Ponte della Giustizia",
+        "englishName": "Bridge of Justice",
+        "historicalDescription": "Located near the San Marco district where many legal proceedings took place, this bridge would have been crossed by those seeking justice at the courts. The proximity to Calle dei Avvocati makes this name particularly appropriate as lawyers would traverse this bridge daily on their way to various tribunals.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43438197254062,
+            "lng": 12.333478002648883
+          }
+        }
+      },
+      "id": "bridge_45.434377_12.333411"
+    },
+    {
+      "edge": {
+        "lat": 45.43409944494489,
+        "lng": 12.332992403556746
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056582235",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.434078083599196,
+          "lng": 12.333057015093987
+        },
+        "distance": 5.573079692276663,
+        "id": "2c976cdc-dbde-48bb-9ac3-5a2cf8e81dd1",
+        "historicalName": "Ponte dei Magistrati",
+        "englishName": "Bridge of the Magistrates",
+        "historicalDescription": "Named for the Venetian magistrates who would have used this crossing while moving between government buildings in the San Marco area. The Republic of Venice had numerous magistracies and courts, many of which were located near Calle dei Avvocati, making this a fitting name for a bridge in this area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43408876427205,
+            "lng": 12.333024709325366
+          }
+        }
+      },
+      "id": "bridge_45.434099_12.332992"
+    },
+    {
+      "edge": {
+        "lat": 45.433783237096506,
+        "lng": 12.33200409947953
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056735293",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.433653149632796,
+          "lng": 12.33201584158186
+        },
+        "distance": 14.49405418325994,
+        "id": "3c6ec218-c4dd-4842-81e6-452a40832112",
+        "historicalName": "Ponte del Tribunale",
+        "englishName": "Bridge of the Tribunal",
+        "historicalDescription": "This name references the tribunals and courts that were essential to Venetian governance. As Calle dei Avvocati was home to many lawyers, this bridge would have connected their offices to the various judicial buildings where cases were heard, creating a natural thoroughfare for legal professionals.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433718193364655,
+            "lng": 12.332009970530695
+          }
+        }
+      },
+      "id": "bridge_45.433783_12.332004"
+    },
+    {
+      "edge": {
+        "lat": 45.43518733514655,
+        "lng": 12.33127453862748
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056559199",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.435190442155964,
+          "lng": 12.331192879828636
+        },
+        "distance": 6.380968416397773,
+        "id": "07b2f2a3-3679-4dfa-aeb4-8191d1b557ff",
+        "historicalName": "Ponte dei Procuratori",
+        "englishName": "Bridge of the Procurators",
+        "historicalDescription": "Named after the Procurators of Saint Mark, who were among the most prestigious officials in Venice. They administered properties, executed wills, and served as guardians for orphans. Their offices were located in the San Marco district, not far from Calle dei Avvocati, and they would have been important clients for the lawyers working in the area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.435188888651254,
+            "lng": 12.331233709228059
+          }
+        }
+      },
+      "id": "bridge_45.435187_12.331275"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43405493505779,
+      "lng": 12.332094624183112,
+      "streetName": "Calle dei Procuratori",
+      "streetNameEnglish": "Street of the Procurators",
+      "streetDescription": "Named after the Procurators of San Marco, high-ranking officials who administered the basilica's finances and properties. This street would be appropriately located near San Marco, where these officials worked and often lived.",
+      "id": "building_45.434055_12.332095"
+    },
+    {
+      "lat": 45.43439320867809,
+      "lng": 12.332231822324346,
+      "streetName": "Ruga dei Notai",
+      "streetNameEnglish": "Row of the Notaries",
+      "streetDescription": "A 'ruga' typically indicated a commercial street. This one would have housed notaries who worked closely with the avvocati (lawyers) in the San Marco district, drafting legal documents and contracts for Venetian merchants and nobility.",
+      "id": "building_45.434393_12.332232"
+    },
+    {
+      "lat": 45.43437306251359,
+      "lng": 12.332840250201912,
+      "streetName": "Salizada dei Giudici",
+      "streetNameEnglish": "Paved Street of the Judges",
+      "streetDescription": "A 'salizada' was a paved street, among the first to receive stone paving. This one references the judges who would have worked in the nearby courts of San Marco, forming part of Venice's sophisticated legal system alongside the avvocati.",
+      "id": "building_45.434373_12.332840"
+    },
+    {
+      "lat": 45.434819961731385,
+      "lng": 12.332664187768932,
+      "streetName": "Sottoportego della Giustizia",
+      "streetNameEnglish": "Passageway of Justice",
+      "streetDescription": "A 'sottoportego' is a covered passageway beneath a building. This one would lead toward the courts or legal offices, symbolizing the path to justice in Renaissance Venice's sophisticated legal system.",
+      "id": "building_45.434820_12.332664"
+    },
+    {
+      "lat": 45.43485190772981,
+      "lng": 12.33334927624859,
+      "streetName": "Rio Terà dei Tribunali",
+      "streetNameEnglish": "Filled Canal of the Courts",
+      "streetDescription": "A 'rio terà' is a filled-in canal. This street would have been created when a canal was filled near the tribunals or courts in the San Marco district, indicating the area's long association with legal proceedings.",
+      "id": "building_45.434852_12.333349"
+    },
+    {
+      "lat": 45.43535552945664,
+      "lng": 12.332121358159977,
+      "streetName": "Calle dei Dandolo",
+      "streetNameEnglish": "Street of the Dandolo",
+      "streetDescription": "Named after the prominent Dandolo family, which produced several doges and important political figures. This nobili family likely owned property near San Marco and may have employed or patronized the lawyers of Calle dei Avvocati.",
+      "id": "building_45.435356_12.332121"
+    },
+    {
+      "lat": 45.4353087784076,
+      "lng": 12.332786165841654,
+      "streetName": "Fondamenta dei Cancellieri",
+      "streetNameEnglish": "Foundation of the Chancellors",
+      "streetDescription": "A 'fondamenta' is a street running alongside a canal. This one would honor the chancellors who served as important administrative officials in the Venetian Republic, working closely with the legal professionals in the area.",
+      "id": "building_45.435309_12.332786"
+    },
+    {
+      "lat": 45.435358146107575,
+      "lng": 12.333370680659948,
+      "streetName": "Corte dei Magistrati",
+      "streetNameEnglish": "Court of the Magistrates",
+      "streetDescription": "A 'corte' is a courtyard. This enclosed space would be named for the magistrates who presided over legal cases, reflecting the concentration of legal authorities in this part of San Marco.",
+      "id": "building_45.435358_12.333371"
+    },
+    {
+      "lat": 45.435745940832355,
+      "lng": 12.332124482154722,
+      "streetName": "Campiello della Curia",
+      "streetNameEnglish": "Small Square of the Curia",
+      "streetDescription": "A 'campiello' is a small campo or square. This one would reference the curia, or court, where legal proceedings took place, serving as a gathering spot for lawyers, clients, and officials near Calle dei Avvocati.",
+      "id": "building_45.435746_12.332124"
+    }
+  ],
+  "id": "polygon-1746056541940"
+}

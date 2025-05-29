@@ -1,0 +1,281 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43793217831985,
+      "lng": 12.321414649894322
+    },
+    {
+      "lat": 45.43805262980522,
+      "lng": 12.3229596022869
+    },
+    {
+      "lat": 45.4376385767471,
+      "lng": 12.322852313926305
+    },
+    {
+      "lat": 45.437442841516535,
+      "lng": 12.323002517631139
+    },
+    {
+      "lat": 45.43702878398386,
+      "lng": 12.323860824515904
+    },
+    {
+      "lat": 45.43659966660763,
+      "lng": 12.324558198859776
+    },
+    {
+      "lat": 45.43556826588232,
+      "lng": 12.324107587745274
+    },
+    {
+      "lat": 45.43554568025405,
+      "lng": 12.323332399744364
+    },
+    {
+      "lat": 45.435613437111726,
+      "lng": 12.323225111383769
+    },
+    {
+      "lat": 45.43617807442852,
+      "lng": 12.323332399744364
+    },
+    {
+      "lat": 45.436388870911784,
+      "lng": 12.32267794074473
+    },
+    {
+      "lat": 45.43659966660763,
+      "lng": 12.322731584925029
+    },
+    {
+      "lat": 45.43702878398386,
+      "lng": 12.321143717188212
+    },
+    {
+      "lat": 45.437721387601776,
+      "lng": 12.321272463220927
+    }
+  ],
+  "centroid": {
+    "lat": 45.43680991741156,
+    "lng": 12.322890807986502
+  },
+  "historicalName": "Salizada San Pantalon in Sestiere di Santa Croce",
+  "englishName": "San Pantalon Street in the District of Santa Croce",
+  "historicalDescription": "This area was part of the Santa Croce sestiere, known for its artisan workshops and proximity to the Church of San Pantalon, which dates back to the 12th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 35263.58,
+  "center": {
+    "lat": 45.436929656979245,
+    "lng": 12.323016191731254
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.437992404062534,
+        "lng": 12.322187126090611
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879385958",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.43807794592238,
+          "lng": 12.322289938517663
+        },
+        "distance": 12.44280579455776,
+        "id": "a419ea1b-afef-4bbc-a90e-8f2f18b935bb",
+        "historicalName": "Ponte di San Pantalon",
+        "englishName": "Bridge of Saint Pantaleon",
+        "historicalDescription": "Named after the nearby Church of San Pantalon, which was an important religious landmark in the Santa Croce district since the 11th century. The church was dedicated to Saint Pantaleon, a physician and martyr particularly venerated in Venice for his healing powers during times of plague.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43803517499246,
+            "lng": 12.322238532304137
+          }
+        }
+      },
+      "id": "bridge_45.437992_12.322187"
+    },
+    {
+      "edge": {
+        "lat": 45.4376385767471,
+        "lng": 12.322852313926305
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072707138",
+        "targetPointIndex": 6,
+        "targetPoint": {
+          "lat": 45.43763705679943,
+          "lng": 12.323001598493052
+        },
+        "distance": 11.648979907115006,
+        "id": "a8084265-c051-4dd1-b172-3bb1d81816c2",
+        "historicalName": "Ponte dei Tessitori",
+        "englishName": "Bridge of the Weavers",
+        "historicalDescription": "Named for the textile weavers who maintained workshops in this area during the Renaissance period. The Santa Croce district was known for various textile crafts, and this bridge would have been frequently crossed by artisans transporting materials between workshops and the nearby canals for shipping.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43763781677326,
+            "lng": 12.322926956209677
+          }
+        }
+      },
+      "id": "bridge_45.437639_12.322852"
+    },
+    {
+      "edge": {
+        "lat": 45.43702878398386,
+        "lng": 12.323860824515904
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072707138",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.437102547435565,
+          "lng": 12.323849176541758
+        },
+        "distance": 8.25231897773581,
+        "id": "a8084265-c051-4dd1-b172-3bb1d81816c2",
+        "historicalName": "Ponte della Carampane",
+        "englishName": "Bridge of Carampane",
+        "historicalDescription": "This bridge takes its name from the nearby area once known as Carampane, historically famous as Venice's authorized zone for courtesans during the Renaissance. While located near San Pantalon, this bridge would have marked a boundary between the more respectable residential area and the district where the Republic officially permitted prostitution.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43706566570971,
+            "lng": 12.32385500052883
+          }
+        }
+      },
+      "id": "bridge_45.437029_12.323861"
+    },
+    {
+      "edge": {
+        "lat": 45.43608396624497,
+        "lng": 12.324332893302525
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879420223",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.43601116406546,
+          "lng": 12.3244089483806
+        },
+        "distance": 10.037351571870735,
+        "id": "5ab8d502-dca8-41e3-8e74-831722dad6f8",
+        "historicalName": "Ponte dei Frari",
+        "englishName": "Bridge of the Friars",
+        "historicalDescription": "Named due to its proximity to the path Franciscan friars would take between their magnificent Frari Church (located nearby in San Polo) and the Santa Croce district. The Franciscans were influential in this area of Venice, and this bridge would have been part of their regular processional routes.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43604756515522,
+            "lng": 12.324370920841563
+          }
+        }
+      },
+      "id": "bridge_45.436084_12.324333"
+    },
+    {
+      "edge": {
+        "lat": 45.43617807442852,
+        "lng": 12.323332399744364
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879328980",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43605369364408,
+          "lng": 12.323212015442117
+        },
+        "distance": 16.71865286479723,
+        "id": "7940b7a1-3657-49e0-ac17-c7f718213b79",
+        "historicalName": "Ponte dei Calafati",
+        "englishName": "Bridge of the Caulkers",
+        "historicalDescription": "Named after the skilled shipbuilders who specialized in sealing ships' hulls with pitch and oakum to make them watertight. The Santa Croce area's proximity to the Grand Canal made it a practical location for various maritime trades, and these essential naval artisans would have frequented this bridge when moving between workshops and the nearby minor shipyards.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4361158840363,
+            "lng": 12.323272207593241
+          }
+        }
+      },
+      "id": "bridge_45.436178_12.323332"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43598964202132,
+      "lng": 12.323601164634622,
+      "streetName": "Calle dei Lanaioli",
+      "streetNameEnglish": "Street of the Wool Workers",
+      "streetDescription": "Named after the wool workers who operated in this area of Santa Croce during the Renaissance. Venice's textile industry was significant, with wool processing being an important trade near San Pantalon.",
+      "id": "building_45.435990_12.323601"
+    },
+    {
+      "lat": 45.436506573452476,
+      "lng": 12.32364196295332,
+      "streetName": "Rio Terà dei Tolentini",
+      "streetNameEnglish": "Filled Canal of the Tolentini",
+      "streetDescription": "Named after the nearby Church of San Nicolò da Tolentino. 'Rio Terà' indicates this was once a canal that was filled in, a common practice in Venice's urban development. The Tolentini area was an important religious center in Santa Croce.",
+      "id": "building_45.436507_12.323642"
+    },
+    {
+      "lat": 45.436880490353396,
+      "lng": 12.322398688188928,
+      "streetName": "Sottoportego del Filatoio",
+      "streetNameEnglish": "Passageway of the Spinning Wheel",
+      "streetDescription": "This covered passageway likely housed or led to workshops where spinning wheels were used for textile production. Located near San Pantalon, it reflects the area's connection to the textile trades that flourished in Renaissance Venice.",
+      "id": "building_45.436880_12.322399"
+    },
+    {
+      "lat": 45.43686279774443,
+      "lng": 12.323155748957616,
+      "streetName": "Fondamenta dei Tintori",
+      "streetNameEnglish": "Foundation of the Dyers",
+      "streetDescription": "Named for the cloth dyers who worked along this canal-side street. Dyers required access to water for their trade, and this fondamenta in Santa Croce would have housed workshops where textiles were colored using various pigments and techniques.",
+      "id": "building_45.436863_12.323156"
+    },
+    {
+      "lat": 45.436823394816514,
+      "lng": 12.323726300243319,
+      "streetName": "Calle della Carità",
+      "streetNameEnglish": "Street of Charity",
+      "streetDescription": "Named for a charitable institution or confraternity that operated in this area near San Pantalon. Such organizations were common in Renaissance Venice, providing welfare, dowries for poor girls, and other forms of social assistance.",
+      "id": "building_45.436823_12.323726"
+    },
+    {
+      "lat": 45.43736754817018,
+      "lng": 12.32165637171261,
+      "streetName": "Corte Grimani",
+      "streetNameEnglish": "Grimani Court",
+      "streetDescription": "Named after the Grimani family, who were prominent Venetian nobles with several members serving as doges and cardinals. This small courtyard in Santa Croce would indicate the family owned property or a palazzo in this area of the city.",
+      "id": "building_45.437368_12.321656"
+    },
+    {
+      "lat": 45.43739514021348,
+      "lng": 12.32236761784128,
+      "streetName": "Salizada dei Frari",
+      "streetNameEnglish": "Paved Street of the Friars",
+      "streetDescription": "Named for its proximity to the Franciscan friars (known as 'Frari' in Venetian dialect) of the nearby Santa Maria Gloriosa dei Frari church. Salizada indicates this was one of the earliest paved streets in Venice, connecting San Pantalon to the important Frari complex.",
+      "id": "building_45.437395_12.322368"
+    },
+    {
+      "lat": 45.4377257479957,
+      "lng": 12.3217211601957,
+      "streetName": "Campiello San Rocco",
+      "streetNameEnglish": "Small Square of Saint Roch",
+      "streetDescription": "Named after Saint Roch, patron saint against plague, who was especially venerated in Venice after the devastating plague outbreaks. This small square near San Pantalon would likely have contained a shrine or small church dedicated to the saint.",
+      "id": "building_45.437726_12.321721"
+    },
+    {
+      "lat": 45.43771190923782,
+      "lng": 12.322548970129358,
+      "streetName": "Ruga dei Spezieri",
+      "streetNameEnglish": "Street of the Spice Merchants",
+      "streetDescription": "A 'ruga' was a commercial street lined with shops of the same trade. This one in Santa Croce housed spice merchants, reflecting Venice's important role in the spice trade with the East. Located near San Pantalon, it would have been bustling with merchants selling exotic spices, herbs, and medicinal ingredients.",
+      "id": "building_45.437712_12.322549"
+    }
+  ],
+  "id": "polygon-1745879354937"
+}

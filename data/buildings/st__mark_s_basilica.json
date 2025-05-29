@@ -1,0 +1,64 @@
+{
+  "name": "St. Mark's Basilica",
+  "pointType": "building",
+  "category": "Special Buildings",
+  "subCategory": "Unique Structures",
+  "size": 4,
+  "unlockCondition": "Religious structure only, not privately constructable",
+  "calculationsAnalysis": "St. Mark's Basilica represents the ultimate religious structure with extraordinary artistic and spiritual significance. The construction cost of 60,000,000 ducats reflects the unparalleled architectural complexity and precious materials, while the income of 150,000 ducats (0.25% return) represents donations, religious tourism, and ceremonial fees. The maintenance cost of 125,000 ducats (83.3% of income) creates a realistic scenario where the state's primary religious building required substantial ongoing support but generated significant income through donations and tourism. The employment capacity of 60 represents the clergy, guards, and maintenance staff. The construction time of 120 days (10368000000ms) reflects the monumental construction and artistic project. This unique building serves as the spiritual center of Venice with appropriate restrictions preventing private construction, reflecting the historical reality of this singular structure that embodied the Republic's religious identity.",
+  "shortDescription": "Primary cathedral of Venice combining religious significance with state symbolism.",
+  "fullDescription": "The spiritual center of Venice, St. Mark's Basilica (Basilica di San Marco) serves as both religious cathedral and state church. Featuring Byzantine-influenced architecture, spectacular golden mosaics, the famous quadriga horses, and St. Mark's relics, this magnificent structure blends Eastern and Western traditions. As the Doge's personal chapel and venue for state ceremonies, it represents the fusion of religious and political authority in Venetian governance.",
+  "flavorText": "Gold above, marble below, and centuries of prayer in between—this basilica stands not merely as a church, but as Venice's spiritual foundation and the treasure house of her most sacred relics and memories.",
+  "constructionCosts": {
+    "ducats": 60000000,
+    "timber": 2320,
+    "bricks": 5790,
+    "stone": 11590,
+    "glass": 2320,
+    "marble": 4640,
+    "gold": 1160
+  },
+  "maintenanceCost": 12500,
+  "soundDesign": {
+    "ambientSound": "Gregorian chants, echoing prayers, reverent whispers",
+    "activitySounds": "Religious ceremonies, choir performances, state processions",
+    "musicTheme": "Gloria di San Marco"
+  },
+  "seasonalEffects": {
+    "major religious festivals": "Spectacular ceremonies, special displays",
+    "state ceremonies": "Doge's participation, political-religious events",
+    "holy days": "Enhanced decorations, increased pilgrim visits"
+  },
+  "aiInteractionPoints": [
+    "Main Sanctuary",
+    "Reliquary of St. Mark",
+    "Golden Altarpiece",
+    "Baptistery",
+    "Treasury",
+    "Doge's Ceremonial Area",
+    "Prayer Spaces",
+    "Tourist Viewing Areas"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "gold",
+      "gold_leaf",
+      "books",
+      "wine",
+      "spiced_wine",
+      "paper",
+      "maps"
+    ],
+    "sells": [
+      "books",
+      "spiced_wine",
+      "maps"
+    ]
+  },
+  "buildTier": 5,
+  "workTier": 0,
+  "consumeTier": 0,
+  "constructionMinutes": 172800
+}

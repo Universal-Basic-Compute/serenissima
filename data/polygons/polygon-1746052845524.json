@@ -1,0 +1,254 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.42662916208796,
+      "lng": 12.30738933737463
+    },
+    {
+      "lat": 45.426870113053106,
+      "lng": 12.307593185259762
+    },
+    {
+      "lat": 45.42780378832856,
+      "lng": 12.310007173373165
+    },
+    {
+      "lat": 45.42812002967859,
+      "lng": 12.311015683962765
+    },
+    {
+      "lat": 45.4279844978884,
+      "lng": 12.311316091372433
+    },
+    {
+      "lat": 45.42577829576377,
+      "lng": 12.309996444537106
+    },
+    {
+      "lat": 45.42575570621757,
+      "lng": 12.309717494799557
+    },
+    {
+      "lat": 45.42644091843081,
+      "lng": 12.307475168063107
+    }
+  ],
+  "centroid": {
+    "lat": 45.42692281393109,
+    "lng": 12.309313822342816
+  },
+  "historicalName": "Campo de la Celestia",
+  "englishName": "Field of the Celestia",
+  "historicalDescription": "This area was known for the Church of Santa Maria della Celestia, a Catholic church built in the 14th century. The church was an important landmark in the sestiere of Castello.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 40010.16,
+  "center": {
+    "lat": 45.42678716916514,
+    "lng": 12.309551913421277
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.42733695069083,
+        "lng": 12.308800179316464
+      },
+      "water": {
+        "lat": 45.427472618258804,
+        "lng": 12.308631914368823
+      },
+      "historicalName": "Riva della Celestia",
+      "englishName": "Dock of the Celestia",
+      "historicalDescription": "Named after the adjacent Campo de la Celestia, this main dock served the Augustinian convent of Santa Maria Celestia founded in the 13th century. It was an important landing point for provisions and visitors to the convent.",
+      "id": "canal_45.427337_12.308800"
+    },
+    {
+      "edge": {
+        "lat": 45.427570369509695,
+        "lng": 12.309403676344814
+      },
+      "water": {
+        "lat": 45.42774938698439,
+        "lng": 12.309428516585653
+      },
+      "historicalName": "Fondamenta degli Arsenalotti",
+      "englishName": "Foundation of the Arsenal Workers",
+      "historicalDescription": "Located near the Arsenal, this dock was frequented by the skilled workers (arsenalotti) who were highly respected in Venetian society. Many arsenalotti likely lived in the Celestia area due to its proximity to the Arsenal shipyards.",
+      "id": "canal_45.427570_12.309404"
+    },
+    {
+      "edge": {
+        "lat": 45.42780378832856,
+        "lng": 12.310007173373165
+      },
+      "water": {
+        "lat": 45.4279612320818,
+        "lng": 12.310131085928223
+      },
+      "historicalName": "Riva dei Celestini",
+      "englishName": "Dock of the Celestine Monks",
+      "historicalDescription": "Named after the religious order that occupied the monastery in Campo de la Celestia. This dock would have been used primarily by the monks and those bringing supplies or conducting business with the religious community.",
+      "id": "canal_45.427804_12.310007"
+    },
+    {
+      "edge": {
+        "lat": 45.42710201703855,
+        "lng": 12.310788232638302
+      },
+      "water": {
+        "lat": 45.42713270946373,
+        "lng": 12.311040757431641
+      },
+      "historicalName": "Fondamenta della Polvere",
+      "englishName": "Foundation of the Gunpowder",
+      "historicalDescription": "This dock's name reflects its proximity to gunpowder storage facilities near the Arsenal. The Celestia area had connections to Venice's military maritime operations, and this dock would have been used for the careful transport of explosive materials.",
+      "id": "canal_45.427102_12.310788"
+    },
+    {
+      "edge": {
+        "lat": 45.42666077661362,
+        "lng": 12.310524303271237
+      },
+      "water": {
+        "lat": 45.42660776270528,
+        "lng": 12.310769200927844
+      },
+      "historicalName": "Riva delle Monache",
+      "englishName": "Dock of the Nuns",
+      "historicalDescription": "This landing served the convent in Campo de la Celestia where nuns resided. It would have been a protected dock, somewhat secluded to maintain the privacy of the religious women while still allowing necessary deliveries and official visitors.",
+      "id": "canal_45.426661_12.310524"
+    },
+    {
+      "edge": {
+        "lat": 45.4262195361887,
+        "lng": 12.310260373904171
+      },
+      "water": {
+        "lat": 45.42608878217753,
+        "lng": 12.310436357595906
+      },
+      "historicalName": "Fondamenta dei Navicelli",
+      "englishName": "Foundation of the Small Boats",
+      "historicalDescription": "A dock where smaller vessels could moor in the Celestia area. Its location in a quieter part of Venice made it ideal for smaller boats to dock without the congestion of the major waterways.",
+      "id": "canal_45.426220_12.310260"
+    },
+    {
+      "edge": {
+        "lat": 45.42598411028865,
+        "lng": 12.308970052554074
+      },
+      "water": {
+        "lat": 45.42580990781993,
+        "lng": 12.308906256545235
+      },
+      "historicalName": "Riva di Sant'Anna",
+      "englishName": "Dock of Saint Anne",
+      "historicalDescription": "Named after the cult of Saint Anne, which was popular in this area of Venice. The nearby church likely had a chapel dedicated to Saint Anne, mother of the Virgin Mary, making this a religiously significant dock in the Celestia neighborhood.",
+      "id": "canal_45.425984_12.308970"
+    },
+    {
+      "edge": {
+        "lat": 45.426212514359726,
+        "lng": 12.30822261030859
+      },
+      "water": {
+        "lat": 45.4260902027394,
+        "lng": 12.308034706616397
+      },
+      "historicalName": "Fondamenta dei Bacini",
+      "englishName": "Foundation of the Basins",
+      "historicalDescription": "This dock took its name from its proximity to the small repair basins near the Arsenal. These basins were used for minor repairs to vessels, and the dock would have served workers and materials going to and from these maintenance facilities.",
+      "id": "canal_45.426213_12.308223"
+    }
+  ],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.42612219020836,
+      "lng": 12.309302409670376,
+      "streetName": "Calle della Celestia",
+      "streetNameEnglish": "Street of the Celestia",
+      "streetDescription": "Named after the convent of Santa Maria Celestia founded in the 13th century, which gave the entire campo its name. The convent was an important religious institution in this eastern area of Venice until it was suppressed during Napoleonic times.",
+      "id": "building_45.426122_12.309302"
+    },
+    {
+      "lat": 45.42617176353945,
+      "lng": 12.309967168512028,
+      "streetName": "Fondamenta dei Arsenalotti",
+      "streetNameEnglish": "Foundation of the Arsenal Workers",
+      "streetDescription": "This waterfront street refers to the workers of the nearby Venetian Arsenal, the massive shipyard and armory that was the heart of Venice's naval power. Many Arsenal workers lived in this eastern district due to its proximity to their workplace.",
+      "id": "building_45.426172_12.309967"
+    },
+    {
+      "lat": 45.426651727466414,
+      "lng": 12.307962200604027,
+      "streetName": "Rio Terà delle Monache",
+      "streetNameEnglish": "Filled Canal of the Nuns",
+      "streetDescription": "This street was originally a canal that was filled in (rio terà). The name references the nuns of the Celestia convent who would have used this route to access other parts of the neighborhood.",
+      "id": "building_45.426652_12.307962"
+    },
+    {
+      "lat": 45.42663718689044,
+      "lng": 12.308681557585459,
+      "streetName": "Calle del Convento Antico",
+      "streetNameEnglish": "Street of the Ancient Convent",
+      "streetDescription": "References the original structures of the Celestia convent, which was among the oldest in this part of Venice. The convent underwent several reconstructions throughout its history.",
+      "id": "building_45.426637_12.308682"
+    },
+    {
+      "lat": 45.42664661792606,
+      "lng": 12.309259387195773,
+      "streetName": "Sottoportego della Badessa",
+      "streetNameEnglish": "Passageway of the Abbess",
+      "streetDescription": "A covered passageway named after the abbess who would have led the Celestia convent. Sottoporteghi are typical Venetian covered walkways that pass beneath buildings.",
+      "id": "building_45.426647_12.309259"
+    },
+    {
+      "lat": 45.42661575312631,
+      "lng": 12.3100051889056,
+      "streetName": "Salizada dei Bombardieri",
+      "streetNameEnglish": "Paved Street of the Bombardiers",
+      "streetDescription": "A wider, paved street (salizada) named after the bombardiers who worked at the nearby Arsenal manufacturing and testing cannons. This area of Venice had strong connections to the military-industrial complex of Renaissance Venice.",
+      "id": "building_45.426616_12.310005"
+    },
+    {
+      "lat": 45.42701728039335,
+      "lng": 12.308657863289424,
+      "streetName": "Corte della Polvere",
+      "streetNameEnglish": "Courtyard of the Gunpowder",
+      "streetDescription": "A small courtyard that likely referenced the storage or transport of gunpowder from the nearby Arsenal. The strategic eastern district of Venice contained many facilities related to naval and military functions.",
+      "id": "building_45.427017_12.308658"
+    },
+    {
+      "lat": 45.427070878702246,
+      "lng": 12.30937101973943,
+      "streetName": "Calle dei Cordai",
+      "streetNameEnglish": "Street of the Ropemakers",
+      "streetDescription": "Named after the ropemakers whose craft was essential for shipbuilding at the Arsenal. Rope production was a specialized trade in Venice, and the lengthy ropes needed for ships required long stretches of space to manufacture.",
+      "id": "building_45.427071_12.309371"
+    },
+    {
+      "lat": 45.42718099180217,
+      "lng": 12.310042094692456,
+      "streetName": "Ramo delle Ancore",
+      "streetNameEnglish": "Branch of the Anchors",
+      "streetDescription": "A small branch street where anchors might have been stored or transported to and from the Arsenal. The proximity to Venice's main shipyard influenced many of the street names in this district.",
+      "id": "building_45.427181_12.310042"
+    },
+    {
+      "lat": 45.427619324894046,
+      "lng": 12.310049291423736,
+      "streetName": "Fondamenta delle Vergini",
+      "streetNameEnglish": "Foundation of the Virgins",
+      "streetDescription": "A canal-side street referring to the unmarried women who entered the convent of the Celestia. Religious life was a common path for daughters of noble families who could not secure advantageous marriages.",
+      "id": "building_45.427619_12.310049"
+    },
+    {
+      "lat": 45.427541817704544,
+      "lng": 12.310529639156426,
+      "streetName": "Calle del Capitello Bizantino",
+      "streetNameEnglish": "Street of the Byzantine Capital",
+      "streetDescription": "Likely named after an architectural feature from the original Byzantine-influenced construction of the Celestia convent or a nearby church. Venice's architecture shows strong Byzantine influences, particularly in its older structures.",
+      "id": "building_45.427542_12.310530"
+    }
+  ]
+}

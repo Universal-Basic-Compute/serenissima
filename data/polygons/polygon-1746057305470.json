@@ -1,0 +1,233 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43506614032096,
+      "lng": 12.35729952420134
+    },
+    {
+      "lat": 45.43471229462448,
+      "lng": 12.358082729233688
+    },
+    {
+      "lat": 45.434094941501364,
+      "lng": 12.357739406479782
+    },
+    {
+      "lat": 45.43284515718749,
+      "lng": 12.358318763626999
+    },
+    {
+      "lat": 45.43264187639903,
+      "lng": 12.357363897217697
+    },
+    {
+      "lat": 45.43292044618261,
+      "lng": 12.357245880021042
+    },
+    {
+      "lat": 45.43323665886523,
+      "lng": 12.356848913086838
+    },
+    {
+      "lat": 45.433974481567944,
+      "lng": 12.356709438218063
+    },
+    {
+      "lat": 45.43431327447531,
+      "lng": 12.356956201447433
+    },
+    {
+      "lat": 45.43474993788914,
+      "lng": 12.357106405152267
+    }
+  ],
+  "centroid": {
+    "lat": 45.43385552090135,
+    "lng": 12.357367115868515
+  },
+  "historicalName": "Calle San Zulian, Sestiere di San Marco",
+  "englishName": "Saint Julian Street, District of Saint Mark",
+  "historicalDescription": "This street was located in the central San Marco sestiere, known for its proximity to Piazza San Marco, the political and religious heart of 15th century Venice. The street likely took its name from the nearby Church of San Zulian.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 20007.6,
+  "center": {
+    "lat": 45.43353227509495,
+    "lng": 12.357257016987134
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43506614032096,
+        "lng": 12.35729952420134
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057275948",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43516401108053,
+          "lng": 12.357363897217697
+        },
+        "distance": 11.985946581756322,
+        "id": "230a543d-b515-4bc1-94de-bc03ba14ea74",
+        "historicalName": "Ponte di San Zulian",
+        "englishName": "Bridge of Saint Julian",
+        "historicalDescription": "Named after the nearby Church of San Zulian (Saint Julian), which was one of the most important religious landmarks in the Sestiere di San Marco since the 9th century. The bridge would have served as an important connection point for parishioners attending services.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43511507570075,
+            "lng": 12.357331710709518
+          }
+        }
+      },
+      "id": "bridge_45.435066_12.357300"
+    },
+    {
+      "edge": {
+        "lat": 45.43323665886523,
+        "lng": 12.356848913086838
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057291098",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43322160115864,
+          "lng": 12.356741624726242
+        },
+        "distance": 8.537495302938988,
+        "id": "479ee6a8-0a92-4764-9041-09658c83b0cf",
+        "historicalName": "Ponte dei Gioiellieri di San Zulian",
+        "englishName": "Bridge of the Jewelers of Saint Julian",
+        "historicalDescription": "During the Renaissance, the area around Calle San Zulian was known for its skilled jewelers and goldsmiths who maintained workshops there. This bridge would have been frequently crossed by these artisans and their wealthy clients seeking luxury items.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43322913001194,
+            "lng": 12.35679526890654
+          }
+        }
+      },
+      "id": "bridge_45.433237_12.356849"
+    },
+    {
+      "edge": {
+        "lat": 45.433974481567944,
+        "lng": 12.356709438218063
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057291098",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43404976905647,
+          "lng": 12.356591421021408
+        },
+        "distance": 12.445258434956179,
+        "id": "479ee6a8-0a92-4764-9041-09658c83b0cf",
+        "historicalName": "Ponte della Merceria Vecchia",
+        "englishName": "Bridge of the Old Mercery",
+        "historicalDescription": "Located near the connection between San Zulian and the famous Mercerie shopping streets, this bridge would have linked the residential area to the bustling commercial district where textiles, spices, and luxury goods were sold to Venetian nobles and foreign visitors.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43401212531221,
+            "lng": 12.356650429619735
+          }
+        }
+      },
+      "id": "bridge_45.433974_12.356709"
+    },
+    {
+      "edge": {
+        "lat": 45.43431327447531,
+        "lng": 12.356956201447433
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057291098",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43426057348996,
+          "lng": 12.35677381123442
+        },
+        "distance": 15.390900056340172,
+        "id": "479ee6a8-0a92-4764-9041-09658c83b0cf",
+        "historicalName": "Ponte dei Orologi di San Marco",
+        "englishName": "Bridge of the Clockmakers of Saint Mark",
+        "historicalDescription": "The vicinity of San Zulian in the San Marco district was home to several skilled clockmakers who served the Venetian elite. This bridge would have connected their workshops to the main square, where the famous Torre dell'Orologio (Clock Tower) stands.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43428692398263,
+            "lng": 12.356865006340927
+          }
+        }
+      },
+      "id": "bridge_45.434313_12.356956"
+    },
+    {
+      "edge": {
+        "lat": 45.43474993788914,
+        "lng": 12.357106405152267
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057291098",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43470099992154,
+          "lng": 12.356988387955612
+        },
+        "distance": 10.696281780588938,
+        "id": "479ee6a8-0a92-4764-9041-09658c83b0cf",
+        "historicalName": "Ponte dei Sagredo",
+        "englishName": "Bridge of the Sagredo Family",
+        "historicalDescription": "Named after the noble Sagredo family who owned a palazzo in this area of San Marco during the Renaissance period. The Sagredo were a prominent nobili family who contributed several notable figures to Venetian political and cultural life.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43472546890534,
+            "lng": 12.35704739655394
+          }
+        }
+      },
+      "id": "bridge_45.434750_12.357106"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43301979811677,
+      "lng": 12.357346830571354,
+      "streetName": "Calle dei Merciai di San Zulian",
+      "streetNameEnglish": "Street of the Haberdashers of San Zulian",
+      "streetDescription": "This name reflects the presence of haberdashery shops in the San Zulian area during the Renaissance. Merciai (haberdashers) sold ribbons, buttons, and various clothing accessories, and were common in the commercial heart of San Marco, particularly near churches like San Zulian where wealthy patrons would shop after services.",
+      "id": "building_45.433020_12.357347"
+    },
+    {
+      "lat": 45.43358538546674,
+      "lng": 12.35726820232925,
+      "streetName": "Ruga dei Oresi di San Marco",
+      "streetNameEnglish": "Row of the Goldsmiths of San Marco",
+      "streetDescription": "The term 'Ruga' typically designated streets with shops under porticoes. This street would have housed goldsmiths (oresi) who worked in the prestigious San Marco district. Goldsmiths were highly regulated by the Venetian Republic and concentrated in specific areas, including near San Zulian, which was close to the wealthy clientele of Piazza San Marco.",
+      "id": "building_45.433585_12.357268"
+    },
+    {
+      "lat": 45.434025190638955,
+      "lng": 12.35738647703288,
+      "streetName": "Sottoportego del Capitello Votivo",
+      "streetNameEnglish": "Passage of the Votive Shrine",
+      "streetDescription": "This name refers to a covered passageway (sottoportego) that contained a small religious shrine or capitello, common in Venice. In the San Zulian area, these shrines often commemorated deliverance from plague or other calamities. They typically contained a small Madonna or saint image and served as focal points for neighborhood devotion.",
+      "id": "building_45.434025_12.357386"
+    },
+    {
+      "lat": 45.434497020146345,
+      "lng": 12.357337427476228,
+      "streetName": "Salizada dei Specchieri",
+      "streetNameEnglish": "Paved Street of the Mirror Makers",
+      "streetDescription": "A 'salizada' was one of the first paved streets in Venice. This name commemorates the mirror makers (specchieri) who were especially prominent in the San Marco area. Venetian mirrors were famous throughout Europe, and the glass industry was protected by the Republic. The proximity to San Zulian would have provided these artisans access to wealthy customers.",
+      "id": "building_45.434497_12.357337"
+    },
+    {
+      "lat": 45.434820594650034,
+      "lng": 12.357384033031352,
+      "streetName": "Rio Terà dei Baretteri",
+      "streetNameEnglish": "Filled Canal of the Cap Makers",
+      "streetDescription": "A 'rio terà' was a filled-in canal that became a street. This name references the baretteri (cap makers), who formed an important guild in Renaissance Venice. Their presence near San Zulian would be historically accurate as this central area of San Marco housed many textile and clothing trades, serving the nobility and wealthy merchants who frequented the area.",
+      "id": "building_45.434821_12.357384"
+    }
+  ],
+  "id": "polygon-1746057305470"
+}

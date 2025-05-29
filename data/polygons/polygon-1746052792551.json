@@ -1,0 +1,394 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.426727048541615,
+      "lng": 12.319781143023434
+    },
+    {
+      "lat": 45.42593642233409,
+      "lng": 12.32288177664465
+    },
+    {
+      "lat": 45.42399369376285,
+      "lng": 12.321937639071407
+    },
+    {
+      "lat": 45.4242572461321,
+      "lng": 12.320939857317867
+    },
+    {
+      "lat": 45.42516837484341,
+      "lng": 12.318772632433834
+    }
+  ],
+  "centroid": {
+    "lat": 45.425216557122816,
+    "lng": 12.320862609698239
+  },
+  "historicalName": "Calle de le Convertite, Sestiere di Dorsoduro",
+  "englishName": "Alley of the Converted Women, Dorsoduro District",
+  "historicalDescription": "This area in the Dorsoduro sestiere was known for housing a convent that took in reformed prostitutes in the 15th century, hence the name 'Calle de le Convertite' or 'Alley of the Converted Women'.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 57385.7,
+  "center": {
+    "lat": 45.425216557122816,
+    "lng": 12.320862609698239
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.4242572461321,
+        "lng": 12.320939857317867
+      },
+      "water": {
+        "lat": 45.42407766836771,
+        "lng": 12.320954317649264
+      },
+      "historicalName": "Fondamenta dei Conversi",
+      "englishName": "Foundation of the Converts",
+      "historicalDescription": "This dock takes its name from its proximity to Calle de le Convertite in Dorsoduro, where there was historically a house for converted women (often former prostitutes who had 'converted' to a religious life). The dock would have served as a landing point for supplies and visitors to this religious institution.",
+      "id": "canal_45.424257_12.320940"
+    },
+    {
+      "edge": {
+        "lat": 45.42456095570254,
+        "lng": 12.32021744902319
+      },
+      "water": {
+        "lat": 45.42441295908136,
+        "lng": 12.320071809314259
+      },
+      "historicalName": "Riva di San Trovaso",
+      "englishName": "Bank of Saint Gervasius and Protasius",
+      "historicalDescription": "Named after the nearby Chiesa di San Trovaso (a Venetian contraction of Saints Gervasius and Protasius), one of the important churches in Dorsoduro. This dock would have served the parish and the surrounding area, located not far from Calle de le Convertite, and would have been used by parishioners and clergy.",
+      "id": "canal_45.424561_12.320217"
+    },
+    {
+      "edge": {
+        "lat": 45.42486466527297,
+        "lng": 12.319495040728512
+      },
+      "water": {
+        "lat": 45.42480275251469,
+        "lng": 12.319254427122088
+      },
+      "historicalName": "Fondamenta dei Penitori",
+      "englishName": "Foundation of the Penitents",
+      "historicalDescription": "This name references the penitent women who resided in the religious house near Calle de le Convertite. During the Renaissance, Venice had several institutions for women who sought to leave their previous life and do penance. The dock would have been used for bringing supplies to these religious communities and was likely maintained by charitable donations from noble Venetian families.",
+      "id": "canal_45.424865_12.319495"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.42656892330011,
+        "lng": 12.320401269747677
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052782991",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.426683375357264,
+          "lng": 12.320452768160763
+        },
+        "distance": 13.345971538087403,
+        "id": "52f9bf83-0799-4650-8e9d-86256c8cea77",
+        "historicalName": "Ponte delle Penitenti",
+        "englishName": "Bridge of the Penitents",
+        "historicalDescription": "Named for its proximity to the convent in Calle de le Convertite, where 'convertite' referred to reformed prostitutes who had taken vows of penitence. This bridge would have been a pathway for these women to reach the church for prayer and services.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42662614932868,
+            "lng": 12.32042701895422
+          }
+        }
+      },
+      "id": "bridge_45.426569_12.320401"
+    },
+    {
+      "edge": {
+        "lat": 45.426410798058605,
+        "lng": 12.32102139647192
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052782991",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.42653428618193,
+          "lng": 12.321060020281735
+        },
+        "distance": 14.058184372349464,
+        "id": "52f9bf83-0799-4650-8e9d-86256c8cea77",
+        "historicalName": "Ponte dei Scrivani",
+        "englishName": "Bridge of the Scribes",
+        "historicalDescription": "This bridge was commonly used by scribes and notaries who worked in the Dorsoduro district, documenting legal matters for the nearby religious institutions, including those connected to the Convertite convent.",
+        "location": {
+          "midpoint": {
+            "lat": 45.426472542120266,
+            "lng": 12.321040708376827
+          }
+        }
+      },
+      "id": "bridge_45.426411_12.321021"
+    },
+    {
+      "edge": {
+        "lat": 45.4262526728171,
+        "lng": 12.321641523196163
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052782991",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.426385197006596,
+          "lng": 12.321667272402706
+        },
+        "distance": 14.872394589355972,
+        "id": "52f9bf83-0799-4650-8e9d-86256c8cea77",
+        "historicalName": "Ponte della Carità Vecchia",
+        "englishName": "Bridge of the Old Charity",
+        "historicalDescription": "Named for the charitable works performed by the nuns and patrons who supported the reformed women in the Convertite area of Dorsoduro. It served as a connection point for benefactors bringing donations to the convent.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42631893491185,
+            "lng": 12.321654397799435
+          }
+        }
+      },
+      "id": "bridge_45.426253_12.321642"
+    },
+    {
+      "edge": {
+        "lat": 45.42545074019128,
+        "lng": 12.32264574225134
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052772601",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.42530711870125,
+          "lng": 12.3227055171951
+        },
+        "distance": 16.63735045749715,
+        "id": "b8152641-6bf8-49ad-993b-415833ff0add",
+        "historicalName": "Ponte dei Gesuati",
+        "englishName": "Bridge of the Jesuates",
+        "historicalDescription": "Named for its proximity to the Church of the Gesuati (Santa Maria del Rosario) in Dorsoduro. The Jesuates were a religious order who had significant presence in this area during the Renaissance period, and likely had connections to the religious institutions along Calle de le Convertite.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42537892944627,
+            "lng": 12.32267562972322
+          }
+        }
+      },
+      "id": "bridge_45.425451_12.322646"
+    },
+    {
+      "edge": {
+        "lat": 45.42496505804847,
+        "lng": 12.322409707858029
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052772601",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.42485425021188,
+          "lng": 12.322513930836893
+        },
+        "distance": 14.763838163658125,
+        "id": "b8152641-6bf8-49ad-993b-415833ff0add",
+        "historicalName": "Ponte dei Lignaioli",
+        "englishName": "Bridge of the Woodworkers",
+        "historicalDescription": "This bridge was named for the woodworkers' workshops that were established nearby in Dorsoduro. These artisans would have crafted furniture and wooden items for the convents and churches in the area, including those associated with the Convertite.",
+        "location": {
+          "midpoint": {
+            "lat": 45.424909654130175,
+            "lng": 12.32246181934746
+          }
+        }
+      },
+      "id": "bridge_45.424965_12.322410"
+    },
+    {
+      "edge": {
+        "lat": 45.42447937590566,
+        "lng": 12.322173673464718
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052772601",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.42440138172251,
+          "lng": 12.322322344478687
+        },
+        "distance": 14.48562938643072,
+        "id": "b8152641-6bf8-49ad-993b-415833ff0add",
+        "historicalName": "Ponte della Visitazione",
+        "englishName": "Bridge of the Visitation",
+        "historicalDescription": "Named in reference to religious visitations that would occur at the convents in the area, including the one in Calle de le Convertite. It might have been used during ceremonial processions when church officials or noble patrons would formally visit the convent.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42444037881408,
+            "lng": 12.322248008971702
+          }
+        }
+      },
+      "id": "bridge_45.424479_12.322174"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.4244776638359,
+      "lng": 12.321373633527958,
+      "streetName": "Calle dei Penitenti",
+      "streetNameEnglish": "Street of the Penitents",
+      "streetDescription": "Named after the penitent women who lived in this area of Dorsoduro, often associated with the nearby Convertite convent where former prostitutes lived a life of religious devotion after converting.",
+      "id": "building_45.424478_12.321374"
+    },
+    {
+      "lat": 45.4243858686638,
+      "lng": 12.32187798099693,
+      "streetName": "Fondamenta della Carità",
+      "streetNameEnglish": "Foundation of Charity",
+      "streetDescription": "Named after the charitable works performed in this area, particularly toward reformed women. The fondamenta would have run along a canal in Dorsoduro where charitable institutions provided support to the convertite and other needy groups.",
+      "id": "building_45.424386_12.321878"
+    },
+    {
+      "lat": 45.424870050741255,
+      "lng": 12.320074591040937,
+      "streetName": "Sottoportego del Rosario",
+      "streetNameEnglish": "Underpass of the Rosary",
+      "streetDescription": "Named for the rosary prayers that were common among the reformed women of the area. This covered passageway would have connected to areas where religious devotion was practiced near the Convertite convent.",
+      "id": "building_45.424870_12.320075"
+    },
+    {
+      "lat": 45.424914494786336,
+      "lng": 12.320573672210553,
+      "streetName": "Rio Terà della Redenzione",
+      "streetNameEnglish": "Filled Canal of Redemption",
+      "streetDescription": "This former canal, now filled in, references the spiritual redemption sought by the women who entered religious life at the Convertite. Located in Dorsoduro, it would have been an important pathway for those seeking spiritual renewal.",
+      "id": "building_45.424914_12.320574"
+    },
+    {
+      "lat": 45.4249194732566,
+      "lng": 12.321205575929023,
+      "streetName": "Calle della Maddalena",
+      "streetNameEnglish": "Street of Mary Magdalene",
+      "streetDescription": "Named after Mary Magdalene, the biblical patron saint of reformed prostitutes, making it especially appropriate near the Convertite convent in Dorsoduro where former prostitutes lived in religious devotion.",
+      "id": "building_45.424919_12.321206"
+    },
+    {
+      "lat": 45.42486099792829,
+      "lng": 12.322055354233079,
+      "streetName": "Corte delle Novizie",
+      "streetNameEnglish": "Court of the Novices",
+      "streetDescription": "A small courtyard named for the novices (new entrants to religious life) who would have lived in the area near the Convertite convent as they began their new spiritual journey.",
+      "id": "building_45.424861_12.322055"
+    },
+    {
+      "lat": 45.425311972725154,
+      "lng": 12.319299504446294,
+      "streetName": "Salizada dei Gesuati",
+      "streetNameEnglish": "Paved Road of the Jesuates",
+      "streetDescription": "Named after the Jesuate order who had a significant presence in Dorsoduro. This paved street (salizada) would have connected to their monastery and would have been near the area of the Convertite.",
+      "id": "building_45.425312_12.319300"
+    },
+    {
+      "lat": 45.42538165158783,
+      "lng": 12.320151389362154,
+      "streetName": "Calle del Monastero Vecchio",
+      "streetNameEnglish": "Street of the Old Monastery",
+      "streetDescription": "Referencing an older religious building that predated the later religious establishments in the area. This street in Dorsoduro would have preserved the memory of earlier religious foundations.",
+      "id": "building_45.425382_12.320151"
+    },
+    {
+      "lat": 45.425255763332984,
+      "lng": 12.320576474128258,
+      "streetName": "Fondamenta degli Incurabili",
+      "streetNameEnglish": "Foundation of the Incurables",
+      "streetDescription": "Named after the Ospedale degli Incurabili, a Renaissance hospital in Dorsoduro that treated those with incurable diseases. This waterside street would have been connected to the charitable networks that also supported the Convertite.",
+      "id": "building_45.425256_12.320576"
+    },
+    {
+      "lat": 45.42536723462664,
+      "lng": 12.321388322304577,
+      "streetName": "Ruga dei Merletti",
+      "streetNameEnglish": "Street of the Lace Makers",
+      "streetDescription": "Named for the lace-making trade that provided honorable employment for women, including those reformed at the Convertite. This commercial street in Dorsoduro would have housed workshops where such trades were practiced.",
+      "id": "building_45.425367_12.321388"
+    },
+    {
+      "lat": 45.42540543458871,
+      "lng": 12.321942903552934,
+      "streetName": "Calle della Pietà",
+      "streetNameEnglish": "Street of Mercy",
+      "streetDescription": "Named after the concept of divine mercy, which was central to the mission of helping reformed women. This street in Dorsoduro would have been part of the network of charitable and religious institutions in the area.",
+      "id": "building_45.425405_12.321943"
+    },
+    {
+      "lat": 45.425744377846435,
+      "lng": 12.319477104450241,
+      "streetName": "Campiello della Clausura",
+      "streetNameEnglish": "Small Square of the Enclosure",
+      "streetDescription": "A small square named for the enclosed religious life lived by the women at the Convertite. This space in Dorsoduro would have been near the boundaries of the convent where the reformed women lived under religious vows.",
+      "id": "building_45.425744_12.319477"
+    },
+    {
+      "lat": 45.42585115264745,
+      "lng": 12.320069288488082,
+      "streetName": "Rio Terà delle Pentite",
+      "streetNameEnglish": "Filled Canal of the Repentant Women",
+      "streetDescription": "A former canal, now filled in, named specifically for the repentant women who lived at the Convertite convent. This street in Dorsoduro would have been a major thoroughfare near the religious institution.",
+      "id": "building_45.425851_12.320069"
+    },
+    {
+      "lat": 45.4258484390924,
+      "lng": 12.320643921809001,
+      "streetName": "Calle dei Voti",
+      "streetNameEnglish": "Street of the Vows",
+      "streetDescription": "Named for the religious vows taken by women entering consecrated life, including those at the Convertite. This narrow street in Dorsoduro would have led toward the religious institutions where such vows were taken.",
+      "id": "building_45.425848_12.320644"
+    },
+    {
+      "lat": 45.42583713992679,
+      "lng": 12.32124869880728,
+      "streetName": "Sottoportego della Disciplina",
+      "streetNameEnglish": "Underpass of Discipline",
+      "streetDescription": "Named for the disciplined religious life practiced by the reformed women. This covered passageway in Dorsoduro would have connected buildings associated with religious training and reformation.",
+      "id": "building_45.425837_12.321249"
+    },
+    {
+      "lat": 45.42579525874528,
+      "lng": 12.322037004716977,
+      "streetName": "Fondamenta Santa Maria della Grazia",
+      "streetNameEnglish": "Foundation of Saint Mary of Grace",
+      "streetDescription": "Named after the concept of divine grace that was seen as necessary for the reformation of the convertite. This waterside street in Dorsoduro would have been named for a nearby church or shrine dedicated to Mary.",
+      "id": "building_45.425795_12.322037"
+    },
+    {
+      "lat": 45.42577892993708,
+      "lng": 12.32249297661652,
+      "streetName": "Calle dei Ricami",
+      "streetNameEnglish": "Street of Embroidery",
+      "streetDescription": "Named for the embroidery work that provided respectable employment for reformed women. This street in Dorsoduro would have housed workshops where such skilled needlework was produced.",
+      "id": "building_45.425779_12.322493"
+    },
+    {
+      "lat": 45.42622731360532,
+      "lng": 12.32006150902393,
+      "streetName": "Ramo del Chiostro",
+      "streetNameEnglish": "Branch of the Cloister",
+      "streetDescription": "A small side street named for its proximity to a cloistered religious area within the Convertite complex in Dorsoduro, where reformed women would have spent time in prayer and contemplation.",
+      "id": "building_45.426227_12.320062"
+    },
+    {
+      "lat": 45.42630782927602,
+      "lng": 12.320680652343503,
+      "streetName": "Corte della Redenzione",
+      "streetNameEnglish": "Court of Redemption",
+      "streetDescription": "A small courtyard named for the spiritual redemption sought by women at the Convertite. This space in Dorsoduro would have been a quiet area for reflection within the religious community.",
+      "id": "building_45.426308_12.320681"
+    }
+  ],
+  "id": "polygon-1746052792551"
+}

@@ -1,0 +1,54 @@
+{
+  "id": "preserved_fish",
+  "name": "Preserved Fish",
+  "category": "finished_goods",
+  "subCategory": "food",
+  "description": "Fish preserved through salting, smoking, or drying for extended storage and transport. A staple protein source for Venetians and an important trade good.",
+  "varieties": [
+    {
+      "type": "salted_cod",
+      "productionDifficulty": "medium",
+      "popularity": "very_high",
+      "valueMultiplier": 1,
+      "preservationMethod": "salting",
+      "shelfLifeMultiplier": 1,
+      "modelVariant": "models/resources/preserved_fish_salted.glb"
+    },
+    {
+      "type": "smoked_herring",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 0.9,
+      "preservationMethod": "smoking",
+      "shelfLifeMultiplier": 0.8,
+      "modelVariant": "models/resources/preserved_fish_smoked.glb"
+    },
+    {
+      "type": "dried_anchovy",
+      "productionDifficulty": "low",
+      "popularity": "medium",
+      "valueMultiplier": 0.8,
+      "preservationMethod": "drying",
+      "shelfLifeMultiplier": 1.2,
+      "modelVariant": "models/resources/preserved_fish_dried.glb"
+    },
+    {
+      "type": "pickled_eel",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1.2,
+      "preservationMethod": "pickling",
+      "shelfLifeMultiplier": 1.1,
+      "modelVariant": "models/resources/preserved_fish_pickled.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "Preserved fish was essential to Venice's food security and maritime activities. The city's position as a trading hub meant it could import salt cheaply, allowing for large-scale fish preservation. This preserved protein source enabled long sea voyages and provided year-round nutrition for the population, especially during religious fasting periods when meat was forbidden but fish was permitted.",
+    "culturalContext": "Preserved fish became deeply embedded in Venetian cuisine, with distinctive recipes developing to make the most of these preserved products. The smell of fish preservation was a common feature of certain neighborhoods, particularly around the Rialto contract."
+  },
+  "importPrice": 522.0,
+  "lifetimeHours": 4350,
+  "consumptionHours": 2,
+  "tier": 2
+}

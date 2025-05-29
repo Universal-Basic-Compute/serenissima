@@ -1,0 +1,53 @@
+{
+  "id": "blackmail_evidence",
+  "name": "Blackmail Evidence",
+  "category": "finished_goods",
+  "subCategory": "criminal_supplies",
+  "description": "Compromising documents, letters, or other evidence that can be used to coerce or manipulate individuals. A dangerous but powerful tool in Venice's political landscape.",
+  "varieties": [
+    {
+      "type": "compromising_letters",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "evidenceType": "written",
+      "modelVariant": "models/resources/blackmail_evidence_letters.glb"
+    },
+    {
+      "type": "financial_irregularities",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1.3,
+      "evidenceType": "documents",
+      "modelVariant": "models/resources/blackmail_evidence_financial.glb"
+    },
+    {
+      "type": "political_secrets",
+      "productionDifficulty": "very_high",
+      "popularity": "high",
+      "valueMultiplier": 1.8,
+      "evidenceType": "mixed",
+      "modelVariant": "models/resources/blackmail_evidence_political.glb"
+    },
+    {
+      "type": "personal_scandals",
+      "productionDifficulty": "medium",
+      "popularity": "very_high",
+      "valueMultiplier": 1.5,
+      "evidenceType": "testimonial",
+      "modelVariant": "models/resources/blackmail_evidence_scandal.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1200,
+    "historicalSignificance": "In Venice's complex political landscape, blackmail was a refined art practiced by professionals and amateurs alike. The Republic's extensive bureaucracy created paper trails that could be exploited, while its close-knit noble families harbored generations of secrets. The Council of Ten itself maintained blackmail files on key figures, using them to ensure loyalty and compliance.",
+    "notableCases": [
+      "The fall of the Foscari family in 1457",
+      "The Zeno conspiracy of 1523"
+    ]
+  },
+  "importPrice": 1447.2,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 4
+}

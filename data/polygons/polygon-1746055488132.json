@@ -1,0 +1,211 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44281560717382,
+      "lng": 12.319722880558182
+    },
+    {
+      "lat": 45.445096416084894,
+      "lng": 12.32151459618013
+    },
+    {
+      "lat": 45.445292124765,
+      "lng": 12.320924510196853
+    },
+    {
+      "lat": 45.44556310489351,
+      "lng": 12.320441712574173
+    },
+    {
+      "lat": 45.44380171079073,
+      "lng": 12.318156470493484
+    }
+  ],
+  "centroid": {
+    "lat": 45.44451379274158,
+    "lng": 12.320152034000564
+  },
+  "historicalName": "Fondamenta de la Misericordia",
+  "englishName": "Quay of Mercy",
+  "historicalDescription": "Area along the Rio de la Misericordia canal in the Cannaregio sestiere, known for the Scuola Vecchia della Misericordia, a historic religious confraternity building.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 35698.4,
+  "center": {
+    "lat": 45.44414292178726,
+    "lng": 12.319899548661835
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.444184092520466,
+        "lng": 12.32079790993135
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879581983",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44426957088762,
+          "lng": 12.320893411009694
+        },
+        "distance": 12.076848762934873,
+        "id": "210afcfb-43d7-4d79-b52d-965bd64147f5",
+        "historicalName": "Ponte della Pietà",
+        "englishName": "Bridge of Mercy",
+        "historicalDescription": "Named after the nearby Fondamenta de la Misericordia, this bridge would have served as a key crossing point for those visiting or working at the charitable institution that provided assistance to the poor and sick in this area of Venice during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44422683170404,
+            "lng": 12.320845660470521
+          }
+        }
+      },
+      "id": "bridge_45.444184_12.320798"
+    },
+    {
+      "edge": {
+        "lat": 45.444640254302676,
+        "lng": 12.32115625305574
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879581983",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44467605235317,
+          "lng": 12.321200970976735
+        },
+        "distance": 5.292958119716478,
+        "id": "210afcfb-43d7-4d79-b52d-965bd64147f5",
+        "historicalName": "Ponte dei Candelai",
+        "englishName": "Bridge of the Candlemakers",
+        "historicalDescription": "This bridge is named after the candlemakers' guild that likely had workshops in the vicinity of Fondamenta de la Misericordia. Candle production was an important craft in Renaissance Venice, providing light for homes, churches, and public spaces throughout the city.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44465815332792,
+            "lng": 12.321178612016237
+          }
+        }
+      },
+      "id": "bridge_45.444640_12.321156"
+    },
+    {
+      "edge": {
+        "lat": 45.44521082607295,
+        "lng": 12.319984664158035
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055501491",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.445289109542585,
+          "lng": 12.319819440082718
+        },
+        "distance": 15.553648504502734,
+        "id": "6dff74a3-f3cc-4236-b850-e44d5f50096c",
+        "historicalName": "Ponte dei Falconieri",
+        "englishName": "Bridge of the Falconers",
+        "historicalDescription": "Named for the noble Falconieri family who may have had a palazzo near Fondamenta de la Misericordia, or alternatively for falconers who might have kept their birds in this somewhat peripheral area of Venice. Falconry was a prestigious activity among Venetian nobility during the Renaissance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44524996780777,
+            "lng": 12.319902052120376
+          }
+        }
+      },
+      "id": "bridge_45.445211_12.319985"
+    },
+    {
+      "edge": {
+        "lat": 45.444858547252394,
+        "lng": 12.319527615741897
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055501491",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44493984216476,
+          "lng": 12.319347371296097
+        },
+        "distance": 16.716497603654833,
+        "id": "6dff74a3-f3cc-4236-b850-e44d5f50096c",
+        "historicalName": "Ponte di San Marziale",
+        "englishName": "Bridge of Saint Martial",
+        "historicalDescription": "Named after the nearby church of San Marziale (Saint Martial) which has existed in this northern area of Cannaregio near Fondamenta de la Misericordia since the 11th century. Churches were important landmarks for naming bridges in Renaissance Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.444899194708576,
+            "lng": 12.319437493518997
+          }
+        }
+      },
+      "id": "bridge_45.444859_12.319528"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.4433141015548,
+      "lng": 12.319501026331679,
+      "streetName": "Calle dei Balestrieri della Misericordia",
+      "streetNameEnglish": "Street of the Crossbowmen of Mercy",
+      "streetDescription": "This street was named after the crossbowmen who were affiliated with the Scuola Grande della Misericordia, one of Venice's major confraternities. These skilled marksmen would often practice near this area and participate in city ceremonial events, representing their confraternity.",
+      "id": "building_45.443314_12.319501"
+    },
+    {
+      "lat": 45.4436624649265,
+      "lng": 12.318793871068527,
+      "streetName": "Rio Terà dei Mercanti Armeni",
+      "streetNameEnglish": "Filled Canal of the Armenian Merchants",
+      "streetDescription": "This former canal was filled in during the 16th century and named after the Armenian merchants who established trading posts in this northern area of Cannaregio. Armenians were important trade partners for Venice, bringing spices, textiles, and other eastern goods through their networks.",
+      "id": "building_45.443662_12.318794"
+    },
+    {
+      "lat": 45.443734204592445,
+      "lng": 12.31941563920965,
+      "streetName": "Sottoportego del Capitello Votivo",
+      "streetNameEnglish": "Passageway of the Votive Shrine",
+      "streetDescription": "This covered passageway was named after a small votive shrine that was erected following the plague of 1630. Local residents would light candles here in gratitude for surviving the epidemic. It connected residential buildings to the Fondamenta de la Misericordia.",
+      "id": "building_45.443734_12.319416"
+    },
+    {
+      "lat": 45.443791777908686,
+      "lng": 12.320153391859824,
+      "streetName": "Salizada dei Tintori da Seta",
+      "streetNameEnglish": "Paved Road of the Silk Dyers",
+      "streetDescription": "One of the few paved streets in the area during the Renaissance, this road housed workshops of silk dyers who benefited from the nearby water access. Venice's silk industry was crucial to its economy, and specialized dyers would create the vibrant colors that made Venetian textiles famous throughout Europe.",
+      "id": "building_45.443792_12.320153"
+    },
+    {
+      "lat": 45.4441254581315,
+      "lng": 12.319552887149953,
+      "streetName": "Calle della Scuola dei Bombardieri",
+      "streetNameEnglish": "Street of the Bombardiers' Guild",
+      "streetDescription": "Named after the guild of artillery specialists who had their meeting hall nearby. The Bombardiers were essential to Venetian naval power, and their guild maintained strict standards for training and certification. Their expertise was crucial for the Republic's maritime dominance.",
+      "id": "building_45.444125_12.319553"
+    },
+    {
+      "lat": 45.444526379527865,
+      "lng": 12.32013462145678,
+      "streetName": "Corte Moro-Zen",
+      "streetNameEnglish": "Moro-Zen Courtyard",
+      "streetDescription": "This courtyard was named after the marriage alliance between two prominent Venetian noble families, the Moro and Zen, who owned adjacent palaces in this area during the 15th century. Such unions between nobili families were common strategies to consolidate wealth and political influence.",
+      "id": "building_45.444526_12.320135"
+    },
+    {
+      "lat": 45.44460758224134,
+      "lng": 12.320667944262158,
+      "streetName": "Ruga dei Lanterneri",
+      "streetNameEnglish": "Street of the Lantern Makers",
+      "streetDescription": "This commercial street housed workshops of artisans who crafted lanterns essential for night navigation in Venice's canals and the lagoon. The lantern makers guild was small but vital, as their products were required for all Venetian boats and nighttime city illumination.",
+      "id": "building_45.444608_12.320668"
+    },
+    {
+      "lat": 45.44512496346132,
+      "lng": 12.320712911519356,
+      "streetName": "Fondamenta dei Confratelli",
+      "streetNameEnglish": "Foundation of the Brotherhood Members",
+      "streetDescription": "This quayside was named after the members of the Scuola della Misericordia who would gather here before processions or charitable activities. The confratelli (brotherhood members) would distribute alms to the poor and provide other charitable services from this location, reinforcing their mission of mercy.",
+      "id": "building_45.445125_12.320713"
+    }
+  ],
+  "id": "polygon-1746055488132"
+}

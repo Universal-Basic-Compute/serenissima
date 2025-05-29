@@ -1,0 +1,89 @@
+{
+  "name": "Armory",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Security Facilities",
+  "size": 2,
+  "unlockCondition": "20,000,000 ducats, Military Guild connection, government approval",
+  "calculationsAnalysis": "The Armory represents specialized military infrastructure with strategic rather than commercial value. The construction cost of 6,000,000 ducats reflects the secure facilities and specialized storage systems required, while generating no direct income reflects its military rather than commercial purpose. The maintenance cost of 40,000 ducats creates a substantial ongoing expense justified by the critical weapons storage and maintenance capabilities provided. The employment capacity of 25 represents the guards, armorers, and administrators needed. The construction time of 10 days (864000000ms) reflects the specialized construction requirements. This building creates a strategic military asset with appropriate government restrictions reflecting the historical importance of centralized weapons control in Venice's security system, where the state carefully managed arms to maintain both external defense and internal stability.",
+  "shortDescription": "Secure facility for weapons storage, maintenance, and distribution to security forces.",
+  "fullDescription": "Securing Venice's military equipment, armories store, maintain, and distribute weapons for defense forces. Featuring secure storage vaults, maintenance workshops, training areas, and distribution systems, these heavily protected facilities ensure weapon readiness while preventing unauthorized access. Their careful management reflected Venice's balance between maintaining defense capabilities and controlling internal security risks.",
+  "flavorText": "The finest weapon is useless if rusted when needed, lost when sought, or in untrained hands when danger arrives—here we ensure Venice's defense through order as much as steel.",
+  "constructionCosts": {
+    "ducats": 6000000,
+    "timber": 1230,
+    "bricks": 3280,
+    "stone": 4910,
+    "iron": 1640
+  },
+  "maintenanceCost": 4000,
+  "soundDesign": {
+    "ambientSound": "Metal on metal, weapon maintenance, guard movements",
+    "activitySounds": "Weapon testing, inventory checks, training sessions",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "military campaigns": "Increased distribution activity, preparation",
+    "peacetime": "Maintenance focus, inventory management",
+    "civic ceremonies": "Ceremonial weapon preparation"
+  },
+  "aiInteractionPoints": [
+    "Main weapon storage hall",
+    "Armor section",
+    "Maintenance workshop",
+    "Training area",
+    "Administrative office",
+    "Security checkpoint",
+    "Distribution counter",
+    "Testing range"
+  ],
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "processed_iron": 2,
+        "timber": 1
+      },
+      "outputs": {
+        "weapons": 2
+      },
+      "craftMinutes": 60
+    },
+    {
+      "inputs": {
+        "processed_iron": 3,
+        "tools": 1
+      },
+      "outputs": {
+        "weapons": 3
+      },
+      "craftMinutes": 90
+    },
+    {
+      "inputs": {
+        "weapons": 2,
+        "gold_leaf": 1
+      },
+      "outputs": {
+        "weapons": 3
+      },
+      "craftMinutes": 120
+    }
+  ],
+    "storageCapacity": 100,
+    "stores": [
+      "iron",
+      "processed_iron",
+      "timber",
+      "tools",
+      "weapons"
+    ],
+    "sells": [
+      "weapons"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 14400
+}

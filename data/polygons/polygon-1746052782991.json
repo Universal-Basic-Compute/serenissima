@@ -1,0 +1,258 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.42822544306822,
+      "lng": 12.320553619219723
+    },
+    {
+      "lat": 45.42721647826363,
+      "lng": 12.32336457426733
+    },
+    {
+      "lat": 45.42608701865593,
+      "lng": 12.32288177664465
+    },
+    {
+      "lat": 45.4268324645326,
+      "lng": 12.319845516039791
+    }
+  ],
+  "centroid": {
+    "lat": 45.42709035113009,
+    "lng": 12.321661371542874
+  },
+  "historicalName": "Calle de le Convertite, Sestiere Dorsoduro",
+  "englishName": "Alley of the Converted Women, Dorsoduro District",
+  "historicalDescription": "This area in the Dorsoduro sestiere was known for housing a convent that took in former prostitutes who had 'converted' and left their profession. It was near the church of San Trovaso and the Squero di San Trovaso, a historic gondola boatyard.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 36529.11,
+  "center": {
+    "lat": 45.42709035113009,
+    "lng": 12.321661371542874
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.427973201867076,
+        "lng": 12.321256357981625
+      },
+      "water": {
+        "lat": 45.42814441129552,
+        "lng": 12.321177814534325
+      },
+      "historicalName": "Fondamenta delle Zitelle",
+      "englishName": "Foundation of the Maidens",
+      "historicalDescription": "Named after the nearby Church of Santa Maria della Presentazione delle Zitelle, an institution founded in the 16th century to shelter and educate young orphaned or impoverished girls. This dock would have served the convent and is appropriately located near Calle de le Convertite in Dorsoduro, as both institutions focused on providing refuge for women.",
+      "id": "canal_45.427973_12.321256"
+    },
+    {
+      "edge": {
+        "lat": 45.42772096066592,
+        "lng": 12.321959096743527
+      },
+      "water": {
+        "lat": 45.42789169668187,
+        "lng": 12.322039705125922
+      },
+      "historicalName": "Riva dei Mendicanti",
+      "englishName": "Bank of the Beggars",
+      "historicalDescription": "This landing would have been a gathering place for the poor seeking alms from wealthy merchants and nobles arriving by gondola. Located in Dorsoduro near Calle de le Convertite, this area was known for its charitable institutions in Renaissance Venice, including convents that provided assistance to the destitute.",
+      "id": "canal_45.427721_12.321959"
+    },
+    {
+      "edge": {
+        "lat": 45.42746871946478,
+        "lng": 12.322661835505428
+      },
+      "water": {
+        "lat": 45.42755404435617,
+        "lng": 12.322887447617024
+      },
+      "historicalName": "Fondamenta San Sebastiano",
+      "englishName": "Foundation of Saint Sebastian",
+      "historicalDescription": "Named after the Church of San Sebastiano located in Dorsoduro, this dock would have served visitors to the famous church which houses important works by Paolo Veronese. Saint Sebastian was particularly venerated in Venice as a protector against plague. This dock would be historically appropriate near Calle de le Convertite as both religious establishments were active during the Renaissance period.",
+      "id": "canal_45.427469_12.322662"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.426651748459776,
+        "lng": 12.32312317545599
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052772601",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.42666572416935,
+          "lng": 12.323280276269719
+        },
+        "distance": 12.358090816217018,
+        "id": "cec82bfc-1b2a-453c-81d2-7f901fbcc292",
+        "historicalName": "Ponte delle Convertite",
+        "englishName": "Bridge of the Converted Women",
+        "historicalDescription": "Named after the nearby convent for reformed prostitutes (Le Convertite) in Dorsoduro. This religious institution, established in the 16th century, was dedicated to providing shelter and spiritual guidance to women who wished to leave their former profession.",
+        "location": {
+          "midpoint": {
+            "lat": 45.426658736314565,
+            "lng": 12.323201725862855
+          }
+        }
+      },
+      "id": "bridge_45.426652_12.323123"
+    },
+    {
+      "edge": {
+        "lat": 45.426385197006596,
+        "lng": 12.321667272402706
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052792551",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.4262526728171,
+          "lng": 12.321641523196163
+        },
+        "distance": 14.872394589355972,
+        "id": "47611a3e-b56c-4d10-b56e-2cb68b5d6e39",
+        "historicalName": "Ponte dei Pentecoste",
+        "englishName": "Bridge of Pentecost",
+        "historicalDescription": "Named for its proximity to a small chapel where Pentecost celebrations were held annually. Located in Dorsoduro near Calle de le Convertite, it would have been decorated with flowers during religious processions associated with this important feast day.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42631893491185,
+            "lng": 12.321654397799435
+          }
+        }
+      },
+      "id": "bridge_45.426385_12.321667"
+    },
+    {
+      "edge": {
+        "lat": 45.42653428618193,
+        "lng": 12.321060020281735
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052792551",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.426410798058605,
+          "lng": 12.32102139647192
+        },
+        "distance": 14.058184372349464,
+        "id": "47611a3e-b56c-4d10-b56e-2cb68b5d6e39",
+        "historicalName": "Ponte dei Cartai",
+        "englishName": "Bridge of the Papermakers",
+        "historicalDescription": "Named for the papermaking workshops that operated in this area of Dorsoduro during the Renaissance. Venice was an important center for paper production and printing, with artisans in this neighborhood supplying materials to the city's renowned publishing houses.",
+        "location": {
+          "midpoint": {
+            "lat": 45.426472542120266,
+            "lng": 12.321040708376827
+          }
+        }
+      },
+      "id": "bridge_45.426534_12.321060"
+    },
+    {
+      "edge": {
+        "lat": 45.426683375357264,
+        "lng": 12.320452768160763
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052792551",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.42656892330011,
+          "lng": 12.320401269747677
+        },
+        "distance": 13.345971538087403,
+        "id": "47611a3e-b56c-4d10-b56e-2cb68b5d6e39",
+        "historicalName": "Ponte della Maddalena",
+        "englishName": "Bridge of Mary Magdalene",
+        "historicalDescription": "Named in reference to Mary Magdalene, the patron saint of reformed women, making it thematically connected to the nearby Convertite convent in Dorsoduro. The bridge would have been an important crossing point for religious processions related to the saint's feast day on July 22nd.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42662614932868,
+            "lng": 12.32042701895422
+          }
+        }
+      },
+      "id": "bridge_45.426683_12.320453"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.42650002713133,
+      "lng": 12.322469204042216,
+      "streetName": "Calle dei Penitenti",
+      "streetNameEnglish": "Street of the Penitents",
+      "streetDescription": "Near the Convertite convent which housed reformed prostitutes, this name references the penitential practices common in the area. The 'penitenti' were those who sought spiritual redemption through acts of contrition, fitting with the religious atmosphere of Dorsoduro in the 16th century.",
+      "id": "building_45.426500_12.322469"
+    },
+    {
+      "lat": 45.4270220164238,
+      "lng": 12.320379959844434,
+      "streetName": "Fondamenta dei Ceramisti",
+      "streetNameEnglish": "Foundation of the Ceramicists",
+      "streetDescription": "Dorsoduro was known for its artisanal workshops, including ceramics production. This fondamenta (a street alongside a canal) would have housed workshops where ceramicists created decorative items for wealthy Venetian households, taking advantage of the waterway for transportation of materials and finished goods.",
+      "id": "building_45.427022_12.320380"
+    },
+    {
+      "lat": 45.426976684819046,
+      "lng": 12.321119223286754,
+      "streetName": "Rio Terà della Carità",
+      "streetNameEnglish": "Filled Canal of Charity",
+      "streetDescription": "This filled-in canal (rio terà) takes its name from charitable activities that would have occurred in this part of Dorsoduro. Near the convent of Le Convertite, charitable organizations would provide assistance to the poor and reformed women, making this name historically appropriate for the area.",
+      "id": "building_45.426977_12.321119"
+    },
+    {
+      "lat": 45.42702297933607,
+      "lng": 12.321868979331349,
+      "streetName": "Calle del Monastero",
+      "streetNameEnglish": "Street of the Monastery",
+      "streetDescription": "This street would lead directly to or past one of the many religious establishments in Dorsoduro. Given its proximity to Calle de le Convertite, it likely connected to the monastery that housed reformed women, an important religious institution in Renaissance Venice.",
+      "id": "building_45.427023_12.321869"
+    },
+    {
+      "lat": 45.42700017890029,
+      "lng": 12.322324568422314,
+      "streetName": "Sotoportego dei Pittori",
+      "streetNameEnglish": "Passageway of the Painters",
+      "streetDescription": "Dorsoduro was home to numerous artists' workshops during the Renaissance. This covered passageway (sotoportego) would have been frequented by painters who lived and worked in the area, possibly supplying artworks to nearby churches and wealthy patrons.",
+      "id": "building_45.427000_12.322325"
+    },
+    {
+      "lat": 45.427034590263816,
+      "lng": 12.32306754472646,
+      "streetName": "Ruga dei Vetrai",
+      "streetNameEnglish": "Street of the Glassmakers",
+      "streetDescription": "While Murano was the center of Venetian glassmaking, some glass finishers and decorators had workshops in Dorsoduro. This commercial street (ruga) would have housed artisans who specialized in finishing or selling glass products, contributing to Venice's famous glass industry.",
+      "id": "building_45.427035_12.323068"
+    },
+    {
+      "lat": 45.427430513919504,
+      "lng": 12.32049416662442,
+      "streetName": "Salizada San Trovaso",
+      "streetNameEnglish": "Paved Street of Saint Gervasius",
+      "streetDescription": "Named after the nearby Church of San Trovaso (dedicated to Saints Gervasius and Protasius), this wider, paved street (salizada) would have been an important thoroughfare in the parish. The church dates back to the 9th century and was an important religious landmark in Dorsoduro during the Renaissance.",
+      "id": "building_45.427431_12.320494"
+    },
+    {
+      "lat": 45.42735195309573,
+      "lng": 12.321172846036015,
+      "streetName": "Campiello della Redenzione",
+      "streetNameEnglish": "Small Square of Redemption",
+      "streetDescription": "This small square references the theme of spiritual redemption, connecting to the nearby Convertite convent. During the Renaissance, this square might have been a gathering place for religious processions or ceremonies related to the reformed women's community in the area.",
+      "id": "building_45.427352_12.321173"
+    },
+    {
+      "lat": 45.427473869998394,
+      "lng": 12.32173379903062,
+      "streetName": "Calle dei Intagliatori",
+      "streetNameEnglish": "Street of the Wood Carvers",
+      "streetDescription": "Dorsoduro housed numerous artisanal workshops, including those of wood carvers who produced decorative elements for churches, gondolas, and palaces. This street would have contained workshops where skilled craftsmen created the intricate wooden carvings that adorned Renaissance Venetian architecture and furnishings.",
+      "id": "building_45.427474_12.321734"
+    }
+  ],
+  "id": "polygon-1746052782991"
+}

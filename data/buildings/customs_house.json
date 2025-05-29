@@ -1,0 +1,102 @@
+{
+  "name": "Customs House",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "storage",
+  "size": 3,
+  "unlockCondition": "Senate appointment only",
+  "canImport": true,
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Customs House represents the intersection of government authority and commercial regulation. The construction cost of 4,000,000 ducats reflects the substantial secure infrastructure required, while the high income of 100,000 ducats (2.5% return) represents the significant tax revenue generated through import/export duties. The maintenance cost of 25,000 ducats (25% of income) creates a substantial profit margin appropriate for a revenue-generating government institution. The employment capacity of 30 represents the officials, guards, and clerks needed to process goods and collect duties. The construction time of 7 days (604800000ms) reflects the substantial construction requirements. This building creates a strategic investment in government infrastructure with appropriate high-level requirements reflecting the political nature of customs control in Renaissance Venice.",
+  "shortDescription": "Official goods inspection and taxation facility operated under government authority.",
+  "fullDescription": "The gateway through which all legal goods must pass, the customs house combines administrative offices, inspection facilities, and secure storage. Government officials carefully record imported and exported goods, calculate appropriate taxes, and inspect for contraband. These imposing buildings represent Venice's strict commercial regulations, which helped maintain quality standards while generating substantial revenue for the Republic.",
+  "flavorText": "Through these doors pass the riches of the world—and a healthy portion remains behind for the glory of the Serenissima.",
+  "constructionCosts": {
+    "ducats": 4000000,
+    "timber": 840,
+    "bricks": 2240,
+    "stone": 1680,
+    "glass": 220,
+    "marble": 170
+  },
+  "maintenanceCost": 2500,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "wine": 5,
+        "spices": 1
+      },
+      "outputs": {
+        "spiced_wine": 2
+      },
+      "craftMinutes": 60
+    },
+    {
+      "inputs": {
+        "paper": 2,
+        "tools": 1
+      },
+      "outputs": {
+        "maps": 1
+      },
+      "craftMinutes": 90
+    },
+    {
+      "inputs": {
+        "gold": 10,
+        "paper": 5
+      },
+      "outputs": {
+        "banking_services": 1
+      },
+      "craftMinutes": 120
+    }
+  ],
+    "storageCapacity": 200,
+    "stores": [
+      "wine",
+      "salt",
+      "spiced_wine",
+      "smuggler_maps",
+      "paper",
+      "maps",
+      "merchant_galley",
+      "banking_services",
+      "silk_fabric",
+      "gold",
+      "weapons",
+      "books",
+      "jewelry",
+      "fine_glassware",
+      "luxury_silk_garments",
+      "raw_silk",
+      "dyestuffs",
+      "spices"
+    ],
+    "sells": []
+  },
+  "soundDesign": {
+    "ambientSound": "Official stamps and seals, clerks calling next in line, harbor sounds",
+    "activitySounds": "Crates being opened for inspection, official declarations, tax calculations",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "shipping seasons": "Dramatically increased activity during peak seasons",
+    "trade fairs": "Special procedures and extended hours",
+    "diplomatic tensions": "Increased scrutiny of certain nation's goods"
+  },
+  "aiInteractionPoints": [
+    "Main inspection hall",
+    "Document processing office",
+    "Tax payment window",
+    "Merchant waiting area",
+    "Official's offices",
+    "Harbor inspection point",
+    "Security checkpoint"
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 10080
+}

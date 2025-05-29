@@ -1,0 +1,53 @@
+{
+  "id": "poison_components",
+  "name": "Poison Components",
+  "category": "finished_goods",
+  "subCategory": "criminal_supplies",
+  "description": "Carefully prepared botanical and mineral substances for creating various poisons. Ostensibly for pest control or medicinal purposes, but primarily used for more nefarious ends.",
+  "varieties": [
+    {
+      "type": "slow_acting_components",
+      "productionDifficulty": "high",
+      "popularity": "high",
+      "valueMultiplier": 1.2,
+      "detectionDifficulty": "very_high",
+      "modelVariant": "models/resources/poison_components_slow.glb"
+    },
+    {
+      "type": "fast_acting_components",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 1,
+      "detectionDifficulty": "medium",
+      "modelVariant": "models/resources/poison_components_fast.glb"
+    },
+    {
+      "type": "exotic_components",
+      "productionDifficulty": "very_high",
+      "popularity": "low",
+      "valueMultiplier": 2,
+      "detectionDifficulty": "high",
+      "modelVariant": "models/resources/poison_components_exotic.glb"
+    },
+    {
+      "type": "truth_serum_components",
+      "productionDifficulty": "extreme",
+      "popularity": "very_low",
+      "valueMultiplier": 2.5,
+      "detectionDifficulty": "high",
+      "modelVariant": "models/resources/poison_components_truth.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1250,
+    "historicalSignificance": "Poison was the subtle weapon of choice in Renaissance Venice's political intrigues. The Republic's position as a trade hub gave it access to exotic toxic substances from around the world. The Council of Ten even maintained its own official poisoners for state-sanctioned eliminations of enemies, though this was never publicly acknowledged.",
+    "notableCases": [
+      "The mysterious death of Doge Giovanni Bembo in 1618",
+      "The poisoning of the Cypriot ambassador in 1543"
+    ]
+  },
+  "importPrice": 10800.0,
+  "lifetimeHours": 8775,
+  "consumptionHours": null,
+  "tier": 3
+}

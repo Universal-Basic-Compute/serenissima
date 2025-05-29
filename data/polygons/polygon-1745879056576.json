@@ -1,0 +1,211 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43183222789152,
+      "lng": 12.322001747421636
+    },
+    {
+      "lat": 45.43186610855981,
+      "lng": 12.322339705757512
+    },
+    {
+      "lat": 45.43189998920777,
+      "lng": 12.322811774544133
+    },
+    {
+      "lat": 45.43221620760799,
+      "lng": 12.323873929314031
+    },
+    {
+      "lat": 45.43229526193121,
+      "lng": 12.324496201805486
+    },
+    {
+      "lat": 45.43189246017665,
+      "lng": 12.32463567667426
+    },
+    {
+      "lat": 45.43148965554726,
+      "lng": 12.324619583420171
+    },
+    {
+      "lat": 45.43100779202721,
+      "lng": 12.32439427786292
+    },
+    {
+      "lat": 45.43082709214654,
+      "lng": 12.324227980903997
+    },
+    {
+      "lat": 45.43124119518348,
+      "lng": 12.322774223617925
+    },
+    {
+      "lat": 45.43137295460354,
+      "lng": 12.321969560913457
+    }
+  ],
+  "centroid": {
+    "lat": 45.43163099498937,
+    "lng": 12.323467696566865
+  },
+  "historicalName": "Calle de Ogni Santi",
+  "englishName": "All Saints Street",
+  "historicalDescription": "Located in the sestiere of Dorsoduro, this street was named after the nearby Church of Ognissanti (All Saints), which was an important religious and social center in 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 21092.55,
+  "center": {
+    "lat": 45.43163099498937,
+    "lng": 12.323467696566865
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43221620760799,
+        "lng": 12.323873929314031
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879086976",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43229526193121,
+          "lng": 12.323868564896001
+        },
+        "distance": 8.800400512249114,
+        "id": "46b64835-6ee6-46be-9465-5a098dec36f1",
+        "historicalName": "Ponte dei Santieri",
+        "englishName": "Bridge of the Icon Makers",
+        "historicalDescription": "Named after the artisans who crafted religious icons ('santieri') who had workshops near Calle de Ogni Santi. The proximity to a street named after All Saints would have made this area popular for religious artisans who supplied the many churches of Venice with devotional images.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4322557347696,
+            "lng": 12.323871247105016
+          }
+        }
+      },
+      "id": "bridge_45.432216_12.323874"
+    },
+    {
+      "edge": {
+        "lat": 45.43189246017665,
+        "lng": 12.32463567667426
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879036720",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.431839756930664,
+          "lng": 12.324753693870916
+        },
+        "distance": 10.915628775299744,
+        "id": "8966d82e-7515-423a-94d9-76d36fd60583",
+        "historicalName": "Ponte della Carità",
+        "englishName": "Bridge of Charity",
+        "historicalDescription": "This bridge would have been named for a charitable institution or confraternity (scuola) that operated in the vicinity of Calle de Ogni Santi. During the Renaissance period, Venice had numerous charitable organizations that provided assistance to the poor, orphans, and the sick, often located near churches.",
+        "location": {
+          "midpoint": {
+            "lat": 45.431866108553656,
+            "lng": 12.324694685272588
+          }
+        }
+      },
+      "id": "bridge_45.431892_12.324636"
+    },
+    {
+      "edge": {
+        "lat": 45.43148965554726,
+        "lng": 12.324619583420171
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879036720",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43154612365923,
+          "lng": 12.324753693870916
+        },
+        "distance": 12.204119277722045,
+        "id": "8966d82e-7515-423a-94d9-76d36fd60583",
+        "historicalName": "Ponte dei Fioristi",
+        "englishName": "Bridge of the Florists",
+        "historicalDescription": "During the Renaissance, flower vendors would congregate in certain areas of Venice to sell flowers for both domestic use and religious ceremonies. This bridge near Calle de Ogni Santi would have been a gathering point for florists selling their wares, particularly for celebrations of religious festivals associated with All Saints.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43151788960324,
+            "lng": 12.324686638645543
+          }
+        }
+      },
+      "id": "bridge_45.431490_12.324620"
+    },
+    {
+      "edge": {
+        "lat": 45.43124119518348,
+        "lng": 12.322774223617925
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879142005",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43119751421401,
+          "lng": 12.322684035928768
+        },
+        "distance": 8.550971058741215,
+        "id": "6a3cca87-7fec-44b6-87f4-85b9b4711c49",
+        "historicalName": "Ponte dei Pellegrini",
+        "englishName": "Bridge of the Pilgrims",
+        "historicalDescription": "Located near Calle de Ogni Santi, this bridge would have been on a route frequented by pilgrims visiting sacred sites in Venice. The name reflects Venice's importance as a waypoint for pilgrims traveling to the Holy Land during the Renaissance period, with the reference to All Saints (Ogni Santi) emphasizing its religious significance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43121935469875,
+            "lng": 12.322729129773347
+          }
+        }
+      },
+      "id": "bridge_45.431241_12.322774"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43128720305349,
+      "lng": 12.323256832832497,
+      "streetName": "Calle dei Barcaioli",
+      "streetNameEnglish": "Street of the Boatmen",
+      "streetDescription": "Named after the boatmen who transported goods and people through Venice's canals. This street would have been near a small dock where barcaioli waited for passengers, connecting the Calle de Ogni Santi area to the waterways that served as Venice's main transportation routes.",
+      "id": "building_45.431287_12.323257"
+    },
+    {
+      "lat": 45.43128557684663,
+      "lng": 12.32393728019378,
+      "streetName": "Sottoportego del Forner",
+      "streetNameEnglish": "Passageway of the Baker",
+      "streetDescription": "A covered passageway named after a bakery that would have been operating in this area since the 15th century. Bakers were essential craftsmen in Renaissance Venice, and this name reflects the presence of a well-established forner (baker) who served the local community near Ogni Santi.",
+      "id": "building_45.431286_12.323937"
+    },
+    {
+      "lat": 45.43175682774479,
+      "lng": 12.323238222369495,
+      "streetName": "Rio Terà delle Procuratie",
+      "streetNameEnglish": "Filled Canal of the Procurators",
+      "streetDescription": "This street was once a canal that was filled in (rio terà). The name references the Procuratie, the offices of the Procurators of Saint Mark, who were among the most important officials in the Venetian Republic. This suggests the area had administrative connections or properties owned by these officials.",
+      "id": "building_45.431757_12.323238"
+    },
+    {
+      "lat": 45.431811562834355,
+      "lng": 12.323863890530427,
+      "streetName": "Fondamenta dei Cordai",
+      "streetNameEnglish": "Foundation of the Ropemakers",
+      "streetDescription": "A street running alongside a canal where ropemakers (cordai) would have had their workshops. Ropemaking was a crucial trade for maritime Venice, providing essential materials for the Republic's ships. This fondamenta would have been a working area where ropes were made and dried near the water.",
+      "id": "building_45.431812_12.323864"
+    },
+    {
+      "lat": 45.43176161476421,
+      "lng": 12.324413509483612,
+      "streetName": "Corte Lombardo",
+      "streetNameEnglish": "Lombard Court",
+      "streetDescription": "A small courtyard named after Lombard merchants or bankers who settled in this area of Venice. During the Renaissance, many northern Italian merchants established businesses in Venice, and this name indicates the presence of a Lombard family or business group that was significant enough to have a courtyard named after them near Ogni Santi.",
+      "id": "building_45.431762_12.324414"
+    }
+  ],
+  "id": "polygon-1745879056576"
+}

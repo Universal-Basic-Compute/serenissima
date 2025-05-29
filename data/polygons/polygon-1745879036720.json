@@ -1,0 +1,295 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.432339216364085,
+      "lng": 12.324565939239873
+    },
+    {
+      "lat": 45.43251614692936,
+      "lng": 12.32516675405921
+    },
+    {
+      "lat": 45.43210205324692,
+      "lng": 12.325440339378728
+    },
+    {
+      "lat": 45.43206440821604,
+      "lng": 12.325703195862188
+    },
+    {
+      "lat": 45.432132169253556,
+      "lng": 12.325671009354009
+    },
+    {
+      "lat": 45.43226392659358,
+      "lng": 12.326271824173345
+    },
+    {
+      "lat": 45.43226769108451,
+      "lng": 12.327183775238408
+    },
+    {
+      "lat": 45.43118727188805,
+      "lng": 12.326561502746953
+    },
+    {
+      "lat": 45.43068403766406,
+      "lng": 12.326352290443792
+    },
+    {
+      "lat": 45.430115580742694,
+      "lng": 12.32588022165717
+    },
+    {
+      "lat": 45.43049204292032,
+      "lng": 12.32513993196906
+    },
+    {
+      "lat": 45.43079321085449,
+      "lng": 12.324351362518682
+    },
+    {
+      "lat": 45.43118849132933,
+      "lng": 12.324598125748052
+    },
+    {
+      "lat": 45.43154612365923,
+      "lng": 12.324753693870916
+    },
+    {
+      "lat": 45.431839756930664,
+      "lng": 12.324753693870916
+    }
+  ],
+  "centroid": {
+    "lat": 45.43156880851179,
+    "lng": 12.32549291067542
+  },
+  "historicalName": "Ponte de le Maravegie, San Polo",
+  "englishName": "Bridge of Wonders, San Polo",
+  "historicalDescription": "A bridge in the San Polo sestiere, known for its artisan workshops and proximity to the Rialto contract during the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 33241.63,
+  "center": {
+    "lat": 45.43118239703004,
+    "lng": 12.325575847550898
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43226392659358,
+        "lng": 12.326271824173345
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879015190",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.432294042513846,
+          "lng": 12.326067976288213
+        },
+        "distance": 16.255180444536155,
+        "id": "ad9fa4f6-697b-4113-a1da-63dc16f6f1a4",
+        "historicalName": "Ponte dei Tintori",
+        "englishName": "Bridge of the Dyers",
+        "historicalDescription": "Named after the cloth dyers who operated workshops in the San Polo district during the Renaissance. The area near Ponte de le Maravegie was known for textile production, and dyers were essential to this trade, using water from the canal to rinse their fabrics.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43227898455371,
+            "lng": 12.326169900230779
+          }
+        }
+      },
+      "id": "bridge_45.432264_12.326272"
+    },
+    {
+      "edge": {
+        "lat": 45.43118727188805,
+        "lng": 12.326561502746953
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878999491",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43110309714254,
+          "lng": 12.326664571546408
+        },
+        "distance": 12.340653787065564,
+        "id": "24351258-c316-4fc2-bf21-1e134b83e419",
+        "historicalName": "Ponte della Seta",
+        "englishName": "Bridge of Silk",
+        "historicalDescription": "This bridge references Venice's important silk trade during the Renaissance. The San Polo district housed many silk merchants and workshops, making this name historically appropriate for a bridge in this commercial area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.431145184515294,
+            "lng": 12.32661303714668
+          }
+        }
+      },
+      "id": "bridge_45.431187_12.326562"
+    },
+    {
+      "edge": {
+        "lat": 45.43068403766406,
+        "lng": 12.326352290443792
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878999491",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43071158066436,
+          "lng": 12.326509003423544
+        },
+        "distance": 12.606528745501446,
+        "id": "24351258-c316-4fc2-bf21-1e134b83e419",
+        "historicalName": "Ponte dei Morosini",
+        "englishName": "Bridge of the Morosini",
+        "historicalDescription": "Named after the noble Morosini family who had several properties in Venice. They were an influential nobili family who provided doges and military leaders to the Republic of Venice, and likely owned property near this area in San Polo.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43069780916421,
+            "lng": 12.326430646933668
+          }
+        }
+      },
+      "id": "bridge_45.430684_12.326352"
+    },
+    {
+      "edge": {
+        "lat": 45.43049204292032,
+        "lng": 12.32513993196906
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879142005",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43032161827969,
+          "lng": 12.325133786829037
+        },
+        "distance": 18.95642155471968,
+        "id": "9b18fdff-1b58-4189-b12e-ddaff1acff08",
+        "historicalName": "Ponte dei Spezieri",
+        "englishName": "Bridge of the Spice Merchants",
+        "historicalDescription": "Venice was the center of the spice trade in Europe during the Renaissance. This bridge name reflects the spice merchants who would have operated shops or warehouses in the commercial district of San Polo, near Ponte de le Maravegie.",
+        "location": {
+          "midpoint": {
+            "lat": 45.430406830600006,
+            "lng": 12.325136859399048
+          }
+        }
+      },
+      "id": "bridge_45.430492_12.325140"
+    },
+    {
+      "edge": {
+        "lat": 45.43154612365923,
+        "lng": 12.324753693870916
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879056576",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43148965554726,
+          "lng": 12.324619583420171
+        },
+        "distance": 12.204119277722045,
+        "id": "76fd137a-5ff0-47db-a359-d29bac9500d6",
+        "historicalName": "Ponte di Santa Apollonia",
+        "englishName": "Bridge of Saint Apollonia",
+        "historicalDescription": "Named after a small church or shrine dedicated to Saint Apollonia that would have stood nearby in the Renaissance period. Local bridges were often named after nearby religious buildings, which served as important landmarks in Venetian neighborhoods.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43151788960324,
+            "lng": 12.324686638645543
+          }
+        }
+      },
+      "id": "bridge_45.431546_12.324754"
+    },
+    {
+      "edge": {
+        "lat": 45.431839756930664,
+        "lng": 12.324753693870916
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879056576",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43189246017665,
+          "lng": 12.32463567667426
+        },
+        "distance": 10.915628775299744,
+        "id": "76fd137a-5ff0-47db-a359-d29bac9500d6",
+        "historicalName": "Ponte dei Pistori",
+        "englishName": "Bridge of the Bakers",
+        "historicalDescription": "Named for the bakers' guild whose members operated in this area of San Polo. Food production was an important industry in Renaissance Venice, and bakers would have been essential to daily life in this bustling district near Ponte de le Maravegie.",
+        "location": {
+          "midpoint": {
+            "lat": 45.431866108553656,
+            "lng": 12.324694685272588
+          }
+        }
+      },
+      "id": "bridge_45.431840_12.324754"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.4305641770597,
+      "lng": 12.325751719430423,
+      "streetName": "Calle dei Tintori",
+      "streetNameEnglish": "Street of the Dyers",
+      "streetDescription": "San Polo was known for its textile industry during the Renaissance. This street would recognize the cloth dyers who operated workshops in this area, using water from nearby canals for their craft. Their colored fabrics contributed to Venice's reputation for luxury textiles.",
+      "id": "building_45.430564_12.325752"
+    },
+    {
+      "lat": 45.431092773060186,
+      "lng": 12.325109139087365,
+      "streetName": "Sottoportego delle Meraviglie",
+      "streetNameEnglish": "Passageway of Wonders",
+      "streetDescription": "Named in relation to the nearby 'Ponte de le Maravegie' (Bridge of Wonders), this covered passageway would continue the theme of the 'marvelous' that gave the bridge its name. The bridge likely earned its name from unusual sights, curious shops, or perhaps spectacular views in this area.",
+      "id": "building_45.431093_12.325109"
+    },
+    {
+      "lat": 45.43092616064907,
+      "lng": 12.32571962695894,
+      "streetName": "Rio Terà dei Frari",
+      "streetNameEnglish": "Filled Canal of the Friars",
+      "streetDescription": "This name references the proximity to the Basilica di Santa Maria Gloriosa dei Frari, one of the most important churches in Venice located in San Polo. Rio Terà indicates this was once a canal that was filled in, creating a street where water once flowed, a common practice in Venice's urban development.",
+      "id": "building_45.430926_12.325720"
+    },
+    {
+      "lat": 45.43154203455939,
+      "lng": 12.325523050723296,
+      "streetName": "Calle della Seta",
+      "streetNameEnglish": "Street of Silk",
+      "streetDescription": "San Polo hosted numerous silk merchants and artisans during the Renaissance period. This street would commemorate the important silk trade that brought great wealth to Venice through its connections with the East, highlighting the commercial importance of this district.",
+      "id": "building_45.431542_12.325523"
+    },
+    {
+      "lat": 45.43153200033438,
+      "lng": 12.326319236065505,
+      "streetName": "Fondamenta dei Mercanti",
+      "streetNameEnglish": "Foundation of the Merchants",
+      "streetDescription": "This name would be appropriate for a street running alongside a canal in the San Polo area, which was a hub of commercial activity. 'Fondamenta' refers to streets that run along canals, and merchants would have used these waterways to transport goods to and from their shops and warehouses.",
+      "id": "building_45.431532_12.326319"
+    },
+    {
+      "lat": 45.43187150994009,
+      "lng": 12.325541397579858,
+      "streetName": "Salizada dei Morosini",
+      "streetNameEnglish": "Paved Street of the Morosini",
+      "streetDescription": "Named after the powerful Morosini family who likely owned property in this area of San Polo. The Morosini were one of Venice's most illustrious nobili families, producing doges and military leaders. 'Salizada' indicates this was one of the first paved streets in the area, suggesting the importance of the family.",
+      "id": "building_45.431872_12.325541"
+    },
+    {
+      "lat": 45.43184101356824,
+      "lng": 12.326238743511613,
+      "streetName": "Campiello del Gambaro",
+      "streetNameEnglish": "Small Square of the Crab",
+      "streetDescription": "This name would refer to a small square near Ponte de le Maravegie that might have featured a shop sign depicting a crab, or perhaps was home to a seafood merchant. Animal imagery was common in Venetian street names, often derived from shop signs or family crests in the vicinity.",
+      "id": "building_45.431841_12.326239"
+    }
+  ],
+  "id": "polygon-1745879036720"
+}

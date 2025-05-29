@@ -1,0 +1,90 @@
+{
+  "name": "Apothecary",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Retail Shops",
+  "size": 1,
+  "unlockCondition": "7,500,000 ducats total wealth, Medical or Spice Guild connection",
+  "calculationsAnalysis": "The Apothecary balances specialized commercial investment with essential community services. The construction cost of 1,250,000 ducats reflects the specialized equipment and fixtures required, while the income of 14,000 ducats (1.1% return) represents the steady demand for medicines and treatments. The maintenance cost of 7,500 ducats (54% of income) creates a tighter profit margin than other shops, reflecting the costs of importing and maintaining exotic ingredients. The employment capacity of 3 represents the apothecary and assistants typical of Renaissance medical shops. The construction time of 3 days (259200000ms) reflects the specialized nature of the building. This building provides both direct income and community health benefits, encouraging strategic placement near residential areas.",
+  "shortDescription": "Medicine and herb shop offering remedies, cosmetics, and imported spices.",
+  "fullDescription": "Combining pharmacy, perfumery, and exotic goods shop, the Venetian apothecary is a vital community resource. The distinctive interior features walls lined with labeled ceramic jars, a preparation counter, and often a small garden for fresh herbs. Offering everything from fever remedies to beauty treatments, these shops benefit from Venice's position as a gateway for Eastern medical knowledge and ingredients.",
+  "flavorText": "Between these jars lies the boundary between East and West, between ancient wisdom and modern commerce, between life and death itself.",
+  "constructionCosts": {
+    "ducats": 1250000,
+    "timber": 380,
+    "bricks": 990,
+    "stone": 460,
+    "glass": 150
+  },
+  "maintenanceCost": 750,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "spices": 1,
+        "wine": 2
+      },
+      "outputs": {
+        "spiced_wine": 2
+      },
+      "craftMinutes": 30
+    },
+    {
+      "inputs": {
+        "olive_oil": 1,
+        "dyestuffs": 1
+      },
+      "outputs": {
+        "soap": 3
+      },
+      "craftMinutes": 45
+    },
+    {
+      "inputs": {
+        "spices": 2,
+        "wine": 1
+      },
+      "outputs": {
+        "poison_components": 1
+      },
+      "craftMinutes": 120
+    }
+  ],
+    "storageCapacity": 80,
+    "stores": [
+      "herbs",
+      "wine",
+      "olive_oil",
+      "poison_components",
+      "spiced_wine",
+      "soap",
+      "dyestuffs"
+    ],
+    "sells": [
+      "spiced_wine",
+      "soap",
+      "poison_components",
+      "dyestuffs"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Glass bottles clinking, quiet consultation",
+    "activitySounds": "Mortar and pestle grinding, liquid pouring, weighing sounds",
+    "musicTheme": "Spezie d'Oriente"
+  },
+  "seasonalEffects": {
+    "winter": "Cold remedies prominently displayed, winter illnesses treated",
+    "plague season": "Preventative medicines, increased activity",
+    "summer": "Cooling remedies, sunburn treatments available"
+  },
+  "aiInteractionPoints": [
+    "Consultation counter",
+    "Preparation area",
+    "Herb garden",
+    "Private treatment area"
+  ],
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 4320
+}

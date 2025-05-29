@@ -1,0 +1,69 @@
+{
+  "name": "Porter Guild Hall",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Transportation Services",
+  "size": 1,
+  "unlockCondition": "4,000,000 ducats capital, Transportation Guild connection",
+  "calculationsAnalysis": "The Porter Guild Hall represents specialized transportation infrastructure with modest service income. The construction cost of 1,500,000 ducats reflects the facilities required for organizing porter services, while the income of 18,000 ducats (1.2% return) represents fees and commissions from coordinating porter activities. The maintenance cost of 15,000 ducats (83.3% of income) creates a modest profit margin appropriate for service infrastructure. The employment capacity of 25 represents the porters, dispatchers, and administrators needed. The construction time of 4 days (345600000ms) reflects the straightforward construction requirements. This building creates a strategic investment in land-based transportation that complements Venice's water transport system.",
+  "shortDescription": "Organizational center for Venice's professional porters who transport goods through the city's pedestrian streets.",
+  "fullDescription": "Coordinating Venice's essential land-based transportation network, porter guild halls organize the professional carriers who navigate the city's bridges and narrow streets. Featuring dispatch areas, equipment storage, rest facilities, and administrative offices, these buildings support the organized movement of goods throughout Venice. In a city where wheeled transport is impossible due to countless stairs and bridges, professional porters provide the critical link between water transport and final destinations.",
+  "flavorText": "The gondola may be Venice's symbol, but it is the humble porter who completes every journey—for what arrives by water must ultimately be carried by human strength to its final destination.",
+  "constructionCosts": {
+    "ducats": 1500000,
+    "timber": 570,
+    "bricks": 1070,
+    "stone": 720,
+    "iron": 140
+  },
+  "maintenanceCost": 1500,
+  "productionInformation": {
+    "Arti": [
+      {
+      "inputs": {
+        "timber": 2,
+        "rope": 2
+      },
+      "outputs": {
+        "porter_equipment": 4
+      },
+      "craftMinutes": 60
+    }
+    ],
+    "storageCapacity": 150,
+    "stores": [
+      "bread",
+      "rope",
+      "timber",
+      "water",
+      "flour",
+      "smuggler_maps",
+      "criminal_contacts",
+      "wine"
+    ],
+    "sells": []
+  },
+  "soundDesign": {
+    "ambientSound": "Porters discussing routes, equipment being moved, assignment calls",
+    "activitySounds": "Cargo being organized, delivery dispatches, fee negotiations",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "carnival": "Increased demand, special event deliveries",
+    "winter": "Challenging conditions, slower service",
+    "contract days": "Peak activity, priority commercial deliveries"
+  },
+  "aiInteractionPoints": [
+    "Dispatch desk",
+    "Equipment storage",
+    "Porter rest area",
+    "Cargo staging zone",
+    "Administration office",
+    "Route planning station",
+    "Fee negotiation counter"
+  ],
+  "buildTier": 2,
+  "workTier": 1,
+  "consumeTier": 1,
+  "constructionMinutes": 5760
+}

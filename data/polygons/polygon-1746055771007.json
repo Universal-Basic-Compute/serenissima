@@ -1,0 +1,107 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44425328728818,
+      "lng": 12.332349652694052
+    },
+    {
+      "lat": 45.4435494726356,
+      "lng": 12.33365857069332
+    },
+    {
+      "lat": 45.443058302662706,
+      "lng": 12.334181601451224
+    },
+    {
+      "lat": 45.44292657052514,
+      "lng": 12.33389996950466
+    },
+    {
+      "lat": 45.44357017319188,
+      "lng": 12.332910234378165
+    },
+    {
+      "lat": 45.44395407304094,
+      "lng": 12.332097525046652
+    }
+  ],
+  "centroid": {
+    "lat": 45.44355197989074,
+    "lng": 12.33318292562801
+  },
+  "historicalName": "Fondamenta de la Misericordia",
+  "englishName": "Waterfront of Mercy",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for the Scuola Vecchia della Misericordia, a charitable confraternity founded in the 13th century. The nearby Rio della Sensa canal and Church of Santa Maria Valverde were also local landmarks.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 6540.62,
+  "center": {
+    "lat": 45.44369892962761,
+    "lng": 12.33290494076297
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44292657052514,
+        "lng": 12.33389996950466
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055825280",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.442919615174276,
+          "lng": 12.333802878830753
+        },
+        "distance": 7.614057709502803,
+        "id": "9c8be76f-729d-47ad-94cc-ce81a5519526",
+        "historicalName": "Ponte della Pietà Misericordiosa",
+        "englishName": "Bridge of Merciful Compassion",
+        "historicalDescription": "Located near the Fondamenta de la Misericordia, this bridge was named after the charitable works performed by the Brotherhood of Mercy (Scuola della Misericordia) in this area of Cannaregio. The brotherhood provided assistance to the poor and infirm, and the bridge served as an important crossing point for those seeking aid from the institution during the 16th century.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44292309284971,
+            "lng": 12.333851424167706
+          }
+        }
+      },
+      "id": "bridge_45.442927_12.333900"
+    },
+    {
+      "edge": {
+        "lat": 45.44395407304094,
+        "lng": 12.332097525046652
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055825280",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44389818952113,
+          "lng": 12.332080900683167
+        },
+        "distance": 6.347868270948544,
+        "id": "9c8be76f-729d-47ad-94cc-ce81a5519526",
+        "historicalName": "Ponte dei Fabbri Navali",
+        "englishName": "Bridge of the Shipwrights",
+        "historicalDescription": "This bridge near the Fondamenta de la Misericordia connected areas where shipwrights and boat builders had their workshops. During the Renaissance, this northern area of Venice had numerous small shipyards (squeri) where skilled craftsmen built and repaired the smaller vessels of Venice's maritime fleet. The bridge facilitated the movement of materials and workers between these vital maritime workshops.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44392613128103,
+            "lng": 12.33208921286491
+          }
+        }
+      },
+      "id": "bridge_45.443954_12.332098"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.443809527709476,
+      "lng": 12.332825198392337,
+      "streetName": "Calle dei Fioleri",
+      "streetNameEnglish": "Street of the Glassblowers",
+      "streetDescription": "This name refers to the skilled glass artisans who specialized in creating thin glass vessels, particularly bottles and vials. Near the Fondamenta de la Misericordia, several workshops of these specialized glassblowers operated during the Renaissance period, supplying containers for the many apothecaries and perfumers of Venice. The term 'fiola' (vial) gave rise to the profession name 'fioleri', distinguishing these craftsmen from other glass artisans who focused on different products.",
+      "id": "building_45.443810_12.332825"
+    }
+  ],
+  "id": "polygon-1746055771007"
+}

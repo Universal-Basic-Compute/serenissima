@@ -1,0 +1,93 @@
+{
+  "name": "Dye Works",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Textile Industry",
+  "size": 1,
+  "unlockCondition": "6,000,000 ducats capital, Textile Guild membership",
+  "calculationsAnalysis": "The Dye Works represents specialized textile processing with no direct income but industry-enabling capabilities. The construction cost of 1,400,000 ducats reflects the specialized vats and water systems required, while generating no direct income reflects its position as an intermediate production step rather than end product. The maintenance cost of 17,500 ducats creates an ongoing expense justified by enabling valuable colored textile production downstream. The employment capacity of 15 represents the dyers and assistants needed for this labor-intensive process. The construction time of 3 days (259200000ms) reflects the specialized construction requirements. This building creates a strategic investment in textile processing that enables the lucrative colored fabric industry, reflecting Venice's historical expertise in creating vibrant textiles using exotic dyestuffs from its extensive trade networks.",
+  "shortDescription": "Specialized facility for coloring fabrics and textiles using various natural dyes and fixing agents.",
+  "fullDescription": "Essential to Venice's textile industry, dye works transform plain fabrics into the vibrant colors that made Venetian textiles famous throughout Europe. Featuring large vats for immersion, drying yards, and specialized processes for different colorants, these facilities require significant technical knowledge. Venice's trade connections gave it access to exotic dyestuffs from around the Mediterranean and beyond.",
+  "flavorText": "The secret of our crimson is not merely in the kermes insects, but in water, time, and tradition passed from master to apprentice through generations of colored hands and careful eyes.",
+  "constructionCosts": {
+    "ducats": 1400000,
+    "timber": 380,
+    "bricks": 980,
+    "stone": 650,
+    "iron": 270
+  },
+  "maintenanceCost": 1750,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "silk_fabric": 3,
+        "dyestuffs": 2
+      },
+      "outputs": {
+        "dyed_textiles": 4
+      },
+      "craftMinutes": 120
+    },
+    {
+      "inputs": {
+        "prepared_silk": 2,
+        "dyestuffs": 1
+      },
+      "outputs": {
+        "prepared_silk": 3
+      },
+      "craftMinutes": 90
+    },
+    {
+      "inputs": {
+        "dyed_textiles": 2,
+        "silk_fabric": 2,
+        "gold_leaf": 1
+      },
+      "outputs": {
+        "luxury_silk_garments": 2
+      },
+      "craftMinutes": 300
+    }
+  ],
+    "storageCapacity": 150,
+    "stores": [
+      "dyestuffs",
+      "silk_fabric",
+      "water",
+      "raw_silk",
+      "prepared_silk",
+      "dyed_textiles",
+      "luxury_silk_garments",
+      "gold"
+    ],
+    "sells": [
+      "dyed_textiles",
+      "prepared_silk",
+      "luxury_silk_garments"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Bubbling vats, fabric splashing, steam venting",
+    "activitySounds": "Workers calling color names, poles stirring vats, wringing wet fabric",
+    "musicTheme": "Merletti di Burano"
+  },
+  "seasonalEffects": {
+    "summer": "Faster drying times, higher efficiency",
+    "winter": "Higher fuel costs, slower production",
+    "fashionSeasons": "Seasonal color shifts based on trends"
+  },
+  "aiInteractionPoints": [
+    "Main dyeing vats",
+    "Color testing area",
+    "Drying yard",
+    "Dyestuff storage",
+    "Quality control station",
+    "Master dyer's workplace"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3,
+  "constructionMinutes": 4320
+}

@@ -1,0 +1,28 @@
+{
+  "id": "murano_sand",
+  "name": "Murano Sand",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": {
+    "short": "Fine sand from Murano island.",
+    "full": "Exceptionally pure silica sand harvested from specific locations on Murano island. Its unique composition makes it essential for Venice's legendary glass production.",
+    "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation—mere grains to some, but to the glass masters, these sands are more precious than gold."
+  },
+  "varieties": [],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
+      "Murano Island Quarries"
+    ],
+    "historicalSignificance": "The unique composition of Murano sand, with its exceptional purity and specific mineral content, was a closely guarded secret of Venetian glassmaking. This special sand, when combined with soda ash, produced glass of unparalleled clarity and workability, enabling Venetian glassmakers to create their world-renowned cristallo glass. The Republic strictly controlled access to these sand deposits, considering them a strategic resource.",
+    "historicalContracts": [
+      "Murano glass foundries",
+      "Venetian glass industry"
+    ],
+    "culturalContext": ""
+  },
+  "importPrice": 1080.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

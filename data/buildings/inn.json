@@ -1,0 +1,57 @@
+{
+  "name": "Inn",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "retail_food",
+  "size": 1,
+  "unlockCondition": "100,000 ducats capital",
+  "calculationsAnalysis": "The Inn provides essential services with a modest investment. The construction cost of 50,000 ducats is relatively low, reflecting its common nature. It generates an estimated income of 500 ducats per cycle from lodging, food, and drink sales. The maintenance cost is 150 ducats (30% of income), covering supplies and upkeep, ensuring a steady profit. It employs 3 individuals, including an innkeeper, cook, and server. Construction takes 2 days (172,800,000ms), allowing for quick establishment. This building is a cornerstone of Venetian daily life, offering hospitality and fostering social interaction.",
+  "shortDescription": "Provides lodging, food, and drink for travelers and locals.",
+  "fullDescription": "A vital establishment in any Venetian neighborhood, the inn offers a warm bed, hearty meals, and a place for social gathering. Inns range from simple rooms for weary travelers to more comfortable lodgings for merchants and visitors seeking respite and refreshment.",
+  "flavorText": "A full belly and a soft bed – the simple comforts that make any journey worthwhile, and a place where stories and coins are readily exchanged.",
+  "constructionCosts": {
+    "ducats": 50000,
+    "timber": 18,
+    "bricks": 40,
+    "stone": 18
+  },
+  "maintenanceCost": 150,
+  "soundDesign": {
+    "ambientSound": "Lively chatter, clinking glasses, occasional lute music",
+    "activitySounds": "Orders being called, food sizzling, laughter, footsteps on wooden floors",
+    "musicTheme": "Venetian folk melody"
+  },
+  "seasonalEffects": {
+    "festival_periods": "Increased number of guests, special menus, higher demand for rooms",
+    "trade_season": "More merchants and travelers seeking lodging and meals",
+    "winter": "Warm fires in the hearth, serving hearty stews and mulled wine"
+  },
+  "aiInteractionPoints": [
+    "Common room / Tavern area",
+    "Reception desk",
+    "Guest room corridor",
+    "Kitchen entrance",
+    "Exterior entrance / Signpost",
+    "Mooring posts for small boats"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "fish",
+      "bread",
+      "wine",
+      "spiced_wine"
+    ],
+    "sells": [
+      "fish",
+      "bread",
+      "wine",
+      "spiced_wine"
+    ]
+  },
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 2880
+}

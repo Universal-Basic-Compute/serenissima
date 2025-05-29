@@ -1,0 +1,12 @@
+{
+  "id": "iron",
+  "name": "Iron",
+  "category": "raw_materials",
+  "subCategory": "metal",
+  "description": "Versatile metal used for tools, hardware, and structural reinforcement in buildings.",
+  "icon": "/images/resources/iron.png",
+  "importPrice": 540.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

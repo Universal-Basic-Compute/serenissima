@@ -1,0 +1,70 @@
+{
+  "name": "Quarantine Station",
+  "pointType": "building",
+  "category": "Public & Government",
+  "subCategory": "Health & Safety",
+  "size": 3,
+  "unlockCondition": "15,000,000 ducats and government approval, or Health Office appointment with government approval",
+  "calculationsAnalysis": "The Quarantine Station represents specialized public health infrastructure with modest revenue. The construction cost of 9,000,000 ducats reflects the isolated facilities and security features required, while the income of 40,000 ducats (0.44% return) represents fees charged to merchants and travelers. The maintenance cost of 35,000 ducats (87.5% of income) creates a realistic scenario where public health security required modest government subsidy but generated significant revenue through fees, while protecting the city from devastating epidemics. The employment capacity of 30 represents the health officials, guards, and support staff needed. The construction time of 20 days (1728000000ms) reflects the specialized construction requirements. This building creates a strategic investment in disease prevention that was historically crucial to Venice's survival as a trading hub exposed to foreign pathogens.",
+  "shortDescription": "Specialized facility for isolating potentially contagious travelers and goods before entry into Venice.",
+  "fullDescription": "Protecting Venice from imported diseases, quarantine stations isolate ships, travelers, and goods for observation before permitting city entry. Featuring separated accommodation blocks, inspection areas, fumigation facilities, and secure boundaries, these complex facilities implement Venice's pioneering public health measures. The term 'quarantine' itself originates from Venice's forty-day isolation period (quaranta giorni).",
+  "flavorText": "Forty days may seem a harsh price for entry to our city, but consider the alternative: the finest goods and richest merchants mean nothing if they bring the Black Death as an uninvited companion.",
+  "constructionCosts": {
+    "ducats": 9000000,
+    "timber": 2250,
+    "bricks": 5630,
+    "stone": 6760,
+    "glass": 560,
+    "iron": 1130
+  },
+  "maintenanceCost": 3500,
+  "soundDesign": {
+    "ambientSound": "Distant ship horns, water sounds, seagulls, isolation",
+    "activitySounds": "Health inspections, fumigation processes, ships docking",
+    "musicTheme": "Maschera di Medico"
+  },
+  "seasonalEffects": {
+    "plague reports abroad": "Heightened security, extended quarantine",
+    "trading seasons": "Increased processing volume, additional staff",
+    "winter": "Focus on respiratory disease monitoring"
+  },
+  "aiInteractionPoints": [
+    "Ship inspection dock",
+    "Traveler processing area",
+    "Accommodation blocks",
+    "Goods fumigation chamber",
+    "Health officer station",
+    "Administration building",
+    "Security checkpoint",
+    "Observation tower"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 150,
+    "stores": [
+      "wine",
+      "salt",
+      "water",
+      "limestone",
+      "fuel",
+      "fish",
+      "spiced_wine",
+      "preserved_fish",
+      "soap",
+      "poison_components",
+      "books",
+      "tools"
+    ],
+    "sells": [
+      "spiced_wine",
+      "preserved_fish",
+      "soap",
+      "books",
+      "tools"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 0,
+  "constructionMinutes": 28800
+}

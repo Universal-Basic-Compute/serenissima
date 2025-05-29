@@ -1,0 +1,33 @@
+{
+  "id": "spices",
+  "name": "Spices",
+  "category": "raw_materials",
+  "subCategory": "seasoning",
+  "description": "Aromatic dried seeds, fruits, roots, bark, or vegetative substances primarily used for flavoring, coloring, or preserving food. Highly valued trade goods.",
+  "varieties": [
+    {
+      "type": "pepper",
+      "valueMultiplier": 1.2,
+      "notes": "Black pepper, a cornerstone of the spice trade."
+    },
+    {
+      "type": "cinnamon",
+      "valueMultiplier": 1.5,
+      "notes": "Sweet and aromatic, used in desserts and savory dishes."
+    },
+    {
+      "type": "cloves",
+      "valueMultiplier": 1.4,
+      "notes": "Strong and pungent, used sparingly."
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "The spice trade was a major source of wealth for Venice. Control over spice routes was fiercely contested.",
+    "culturalContext": "Spices were a status symbol, and their use in cuisine indicated wealth and sophistication."
+  },
+  "importPrice": 3000.0,
+  "lifetimeHours": 657000,
+  "consumptionHours": 1,
+  "tier": 4
+}

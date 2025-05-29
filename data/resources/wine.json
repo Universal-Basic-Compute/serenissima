@@ -1,0 +1,63 @@
+{
+  "id": "wine",
+  "name": "Wine",
+  "category": "finished_goods",
+  "subCategory": "consumables",
+  "description": "Fermented grape beverage imported from mainland vineyards and distributed throughout Venice. A daily staple for citizens of all classes and an important trade commodity.",
+  "varieties": [
+    {
+      "type": "red_wine",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "regions": [
+        "veneto",
+        "friuli",
+        "tuscany"
+      ],
+      "modelVariant": "models/resources/wine_red.glb"
+    },
+    {
+      "type": "white_wine",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "regions": [
+        "veneto",
+        "friuli",
+        "lombardy"
+      ],
+      "modelVariant": "models/resources/wine_white.glb"
+    },
+    {
+      "type": "malvasia",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1.5,
+      "regions": [
+        "crete",
+        "greece"
+      ],
+      "modelVariant": "models/resources/wine_malvasia.glb"
+    },
+    {
+      "type": "ribolla",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 1.2,
+      "regions": [
+        "friuli",
+        "istria"
+      ],
+      "modelVariant": "models/resources/wine_ribolla.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "Wine was a fundamental part of Venetian daily life, consumed by all social classes. The city's position as a trading hub meant it had access to wines from across the Mediterranean, though much of its supply came from vineyards in its mainland territories. Wine consumption was considered healthier than water, which was often of questionable quality.",
+    "culturalContext": "Taverns serving wine were important social spaces in Venetian neighborhoods. The Republic strictly regulated wine prices and quality to ensure this essential commodity remained accessible to all citizens."
+  },
+  "importPrice": 300.0,
+  "lifetimeHours": 87600,
+  "consumptionHours": 2
+}

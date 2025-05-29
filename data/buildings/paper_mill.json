@@ -1,0 +1,80 @@
+{
+  "name": "Paper Mill",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Publishing Industry",
+  "size": 1,
+  "unlockCondition": "8,000,000 ducats capital, water rights, outside city location",
+  "calculationsAnalysis": "The Paper Mill represents specialized industrial production with modest direct income but significant industry-enabling capabilities. The construction cost of 2,250,000 ducats reflects the water-powered machinery and specialized facilities required, while the income of 25,000 ducats (1.11% return) represents the value of paper production. The maintenance cost of 20,000 ducats (80% of income) creates a modest profit margin appropriate for this raw material production facility. The employment capacity of 20 represents the workers needed for this labor-intensive process. The construction time of 6 days (518400000ms) reflects the specialized construction requirements. This building creates a strategic investment in paper production that enables the lucrative publishing industry, reflecting Venice's historical position as an early center of printing that depended on reliable paper supplies.",
+  "shortDescription": "Facility converting rags and fibers into paper sheets through mechanical processing.",
+  "fullDescription": "Essential to Venice's intellectual and commercial life, paper mills transform rags and plant fibers into the paper used for books, documents, and correspondence. Featuring water-powered stamping hammers, drying facilities, and sizing baths, these industrial operations require significant water resources. Venice's early adoption of paper manufacturing supported its prominence in publishing and record-keeping.",
+  "flavorText": "From discarded rags we create the very foundation of knowledge, commerce, and governance—for without paper, thoughts remain ephemeral and agreements merely spoken.",
+  "constructionCosts": {
+    "ducats": 2250000,
+    "timber": 860,
+    "bricks": 1150,
+    "stone": 1720,
+    "iron": 460
+  },
+  "maintenanceCost": 2000,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "rags": 3,
+        "water": 2
+      },
+      "outputs": {
+        "paper": 4
+      },
+      "craftMinutes": 90
+    },
+    {
+      "inputs": {
+        "rags": 2,
+        "water": 1,
+        "fuel": 1
+      },
+      "outputs": {
+        "paper": 3
+      },
+      "craftMinutes": 60
+    }
+    ],
+    "storageCapacity": 100,
+    "stores": [
+      "rags",
+      "flax",
+      "water",
+      "paper",
+      "books"
+    ],
+    "sells": [
+      "paper",
+      "books"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Water wheel turning, stamping hammers pounding, water flowing",
+    "activitySounds": "Paper sheets being lifted, pressing mechanism operating, sorting",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "summer": "Faster drying times, higher output",
+    "winter": "Potential freezing issues, slower production",
+    "rainy seasons": "Water quality issues affect paper quality"
+  },
+  "aiInteractionPoints": [
+    "Rag sorting area",
+    "Pulp vat",
+    "Sheet formation station",
+    "Pressing mechanism",
+    "Drying loft",
+    "Cutting and sorting room",
+    "Finished paper storage"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3,
+  "constructionMinutes": 8640
+}

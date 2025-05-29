@@ -1,0 +1,384 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43058897571439,
+      "lng": 12.3202951223674
+    },
+    {
+      "lat": 45.43110848850373,
+      "lng": 12.320498970252531
+    },
+    {
+      "lat": 45.431771048601085,
+      "lng": 12.32053115676071
+    },
+    {
+      "lat": 45.43203456465967,
+      "lng": 12.320402410727995
+    },
+    {
+      "lat": 45.43290792337165,
+      "lng": 12.31953337500717
+    },
+    {
+      "lat": 45.43262935352627,
+      "lng": 12.31877162764694
+    },
+    {
+      "lat": 45.43252394836136,
+      "lng": 12.317634371024626
+    },
+    {
+      "lat": 45.43243360092044,
+      "lng": 12.317076471549528
+    },
+    {
+      "lat": 45.432064680702304,
+      "lng": 12.31603577445175
+    },
+    {
+      "lat": 45.43189151323769,
+      "lng": 12.315649536353606
+    },
+    {
+      "lat": 45.43127412925726,
+      "lng": 12.315756824714201
+    },
+    {
+      "lat": 45.43113860504052,
+      "lng": 12.317924049598235
+    },
+    {
+      "lat": 45.43099555134759,
+      "lng": 12.318707254630583
+    }
+  ],
+  "centroid": {
+    "lat": 45.43179710640338,
+    "lng": 12.31837053423733
+  },
+  "historicalName": "Calle Larga Santa Maria Formosa",
+  "englishName": "Long Street of Saint Mary Formosa",
+  "historicalDescription": "This street was located in the sestiere of Castello, near the Church of Santa Maria Formosa, which was an important religious and social center in 15th century Venice. The area was known for its artisans and merchants.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 59193.74,
+  "center": {
+    "lat": 45.43179710640338,
+    "lng": 12.31837053423733
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.431228954518346,
+        "lng": 12.316479233008879
+      },
+      "water": {
+        "lat": 45.431158172609486,
+        "lng": 12.316243609551998
+      },
+      "historicalName": "Fondamenta dei Candelabri",
+      "englishName": "Dock of the Candlemakers",
+      "historicalDescription": "This dock was named after the candlemakers' guild that operated workshops near Santa Maria Formosa. Candles were essential for both religious and practical purposes in Renaissance Venice, and this fondamenta served tradesmen bringing wax and other materials.",
+      "id": "canal_45.431229_12.316479"
+    },
+    {
+      "edge": {
+        "lat": 45.43118377977944,
+        "lng": 12.317201641303557
+      },
+      "water": {
+        "lat": 45.43107607333043,
+        "lng": 12.316996371709429
+      },
+      "historicalName": "Riva dei Notai",
+      "englishName": "Landing of the Notaries",
+      "historicalDescription": "Located near the administrative buildings in the Santa Maria Formosa district, this dock was frequented by notaries and legal officials. Many important legal documents were drafted and certified in this area, making it a hub for Venetian bureaucracy.",
+      "id": "canal_45.431184_12.317202"
+    },
+    {
+      "edge": {
+        "lat": 45.43113860504052,
+        "lng": 12.317924049598235
+      },
+      "water": {
+        "lat": 45.430976189085044,
+        "lng": 12.317813926471153
+      },
+      "historicalName": "Fondamenta delle Specchiere",
+      "englishName": "Dock of the Mirror Makers",
+      "historicalDescription": "Venice was famous for its mirror-making industry during the Renaissance. This dock was where materials for mirrors arrived and finished products were exported. The prestigious mirror craftsmen had workshops near Santa Maria Formosa, contributing to Venice's reputation for luxury goods.",
+      "id": "canal_45.431139_12.317924"
+    },
+    {
+      "edge": {
+        "lat": 45.43099555134759,
+        "lng": 12.318707254630583
+      },
+      "water": {
+        "lat": 45.43082302758981,
+        "lng": 12.31877972908776
+      },
+      "historicalName": "Riva dei Querini",
+      "englishName": "Landing of the Querini Family",
+      "historicalDescription": "Named after the noble Querini family who had a palazzo near Santa Maria Formosa. This influential nobili family played significant roles in Venetian politics and commerce during the Renaissance, and maintained this private dock for their household and business affairs.",
+      "id": "canal_45.430996_12.318707"
+    },
+    {
+      "edge": {
+        "lat": 45.43079226353099,
+        "lng": 12.319501188498991
+      },
+      "water": {
+        "lat": 45.4306511017501,
+        "lng": 12.319660024445916
+      },
+      "historicalName": "Fondamenta dei Librai",
+      "englishName": "Dock of the Booksellers",
+      "historicalDescription": "This dock served the printers and booksellers who operated in the vicinity of Santa Maria Formosa. Venice was a major center for printing and publishing during the Renaissance, and this landing was where paper shipments arrived and printed books were distributed throughout the Mediterranean.",
+      "id": "canal_45.430792_12.319501"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43203456465967,
+        "lng": 12.320402410727995
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879142005",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43204076983972,
+          "lng": 12.320559726388973
+        },
+        "distance": 12.294964632109188,
+        "id": "379311e3-83aa-422d-97e7-63cacc39e844",
+        "historicalName": "Ponte dei Librai",
+        "englishName": "Bridge of the Booksellers",
+        "historicalDescription": "This bridge near Santa Maria Formosa was named after the booksellers who established shops in this area during the Renaissance. Venice was a major publishing center, and the vicinity of Santa Maria Formosa hosted several bookshops and printing presses where scholarly works and religious texts were produced and sold.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4320376672497,
+            "lng": 12.320481068558484
+          }
+        }
+      },
+      "id": "bridge_45.432035_12.320402"
+    },
+    {
+      "edge": {
+        "lat": 45.43262935352627,
+        "lng": 12.31877162764694
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879183695",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43266383524795,
+          "lng": 12.31852441369495
+        },
+        "distance": 19.667642292202537,
+        "id": "6c94c856-8369-4f0c-9978-8cc2aa9c106a",
+        "historicalName": "Ponte della Colomba",
+        "englishName": "Bridge of the Dove",
+        "historicalDescription": "Named in reference to the Holy Spirit symbolism important to the Santa Maria Formosa church nearby. The dove was a prominent symbol in Venetian religious iconography, and this bridge would have been on a processional route to the church during important feast days celebrating the Purification of the Virgin Mary, for which the church was famous.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43264659438711,
+            "lng": 12.318648020670945
+          }
+        }
+      },
+      "id": "bridge_45.432629_12.318772"
+    },
+    {
+      "edge": {
+        "lat": 45.43252394836136,
+        "lng": 12.317634371024626
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879183695",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43258854591054,
+          "lng": 12.31751590310535
+        },
+        "distance": 11.70678033360923,
+        "id": "6c94c856-8369-4f0c-9978-8cc2aa9c106a",
+        "historicalName": "Ponte dei Bombardieri",
+        "englishName": "Bridge of the Cannoneers",
+        "historicalDescription": "Named after the artillery guild whose members lived and worked near Santa Maria Formosa. The bombardieri formed an important part of Venice's military might, and historical records show that this guild had its headquarters in this district during the 16th century. They were responsible for the cannon defenses of the Venetian Republic.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43255624713595,
+            "lng": 12.317575137064988
+          }
+        }
+      },
+      "id": "bridge_45.432524_12.317634"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43096695605491,
+      "lng": 12.319610153036603,
+      "streetName": "Calle dei Librai",
+      "streetNameEnglish": "Street of the Booksellers",
+      "streetDescription": "Named after the book merchants who operated shops in this area near Santa Maria Formosa in the 16th century, selling printed works from nearby Venetian publishing houses.",
+      "id": "building_45.430967_12.319610"
+    },
+    {
+      "lat": 45.431049812215534,
+      "lng": 12.320163291167086,
+      "streetName": "Sottoportego dei Miracoli",
+      "streetNameEnglish": "Underpass of Miracles",
+      "streetDescription": "A covered passageway named after a reported miracle involving a Madonna icon that was said to have been preserved during a fire in a nearby building in the early 1500s.",
+      "id": "building_45.431050_12.320163"
+    },
+    {
+      "lat": 45.431527251324695,
+      "lng": 12.316273346041735,
+      "streetName": "Rio Terà delle Beccarie",
+      "streetNameEnglish": "Filled Canal of the Butchers",
+      "streetDescription": "A former canal that was filled in and where butcher shops were established. The meat vendors would receive special permits from the Venetian Republic to operate in this specific area.",
+      "id": "building_45.431527_12.316273"
+    },
+    {
+      "lat": 45.43149868491828,
+      "lng": 12.31696941186231,
+      "streetName": "Calle del Capitello",
+      "streetNameEnglish": "Street of the Small Shrine",
+      "streetDescription": "Named after a small religious shrine or capitello that stood at the corner of this street, containing an image of the Virgin Mary that was particularly venerated by local residents.",
+      "id": "building_45.431499_12.316969"
+    },
+    {
+      "lat": 45.4315599438551,
+      "lng": 12.317627827737516,
+      "streetName": "Fondamenta dei Notari",
+      "streetNameEnglish": "Foundation of the Notaries",
+      "streetDescription": "A canalside walkway where several notaries had their offices, providing legal services to the merchants and nobles in the Santa Maria Formosa parish during the 15th-16th centuries.",
+      "id": "building_45.431560_12.317628"
+    },
+    {
+      "lat": 45.431496555975244,
+      "lng": 12.318319695850208,
+      "streetName": "Campiello dei Barbacani",
+      "streetNameEnglish": "Small Square of the Wooden Supports",
+      "streetDescription": "Named after the wooden buttresses (barbacani) that supported the projecting upper stories of houses in this small square, a common architectural feature in Renaissance Venice.",
+      "id": "building_45.431497_12.318320"
+    },
+    {
+      "lat": 45.4315498252205,
+      "lng": 12.318909801653371,
+      "streetName": "Calle della Madonnetta",
+      "streetNameEnglish": "Street of the Little Madonna",
+      "streetDescription": "Named after a small but beloved statue of the Madonna that was displayed in a niche near the entrance to Santa Maria Formosa, attracting daily prayers from passersby.",
+      "id": "building_45.431550_12.318910"
+    },
+    {
+      "lat": 45.43148362027474,
+      "lng": 12.319582233984391,
+      "streetName": "Salizada dei Consorti",
+      "streetNameEnglish": "Paved Street of the Consortium Members",
+      "streetDescription": "A paved street named after the consorti, members of merchant guilds who pooled resources for trading ventures. This area housed several guild meeting halls near Santa Maria Formosa.",
+      "id": "building_45.431484_12.319582"
+    },
+    {
+      "lat": 45.43145261413948,
+      "lng": 12.320213847757238,
+      "streetName": "Corte delle Muneghette",
+      "streetNameEnglish": "Courtyard of the Little Nuns",
+      "streetDescription": "A small courtyard named after the young novices who resided in a nearby convent affiliated with the church of Santa Maria Formosa during the 16th century.",
+      "id": "building_45.431453_12.320214"
+    },
+    {
+      "lat": 45.43194733140078,
+      "lng": 12.316372869621404,
+      "streetName": "Ruga dei Oresi",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "A commercial street where goldsmiths and jewelers had their workshops, crafting pieces for Venetian nobility and wealthy merchants in the area surrounding Santa Maria Formosa.",
+      "id": "building_45.431947_12.316373"
+    },
+    {
+      "lat": 45.43199147505288,
+      "lng": 12.317000953668913,
+      "streetName": "Fondamenta dei Garzotti",
+      "streetNameEnglish": "Foundation of the Apprentices",
+      "streetDescription": "A canalside walkway where many workshops employed young apprentices (garzotti) learning various crafts, particularly in the textile and glass industries popular in this district.",
+      "id": "building_45.431991_12.317001"
+    },
+    {
+      "lat": 45.43197799590308,
+      "lng": 12.317575721374125,
+      "streetName": "Calle del Ridotto",
+      "streetNameEnglish": "Street of the Gaming House",
+      "streetDescription": "Named after a ridotto or gaming house that operated here during the Renaissance period, where Venetian nobles would gather for gambling and socializing not far from Santa Maria Formosa.",
+      "id": "building_45.431978_12.317576"
+    },
+    {
+      "lat": 45.432010216125114,
+      "lng": 12.318260025708895,
+      "streetName": "Sottoportego della Pergola",
+      "streetNameEnglish": "Underpass of the Arbor",
+      "streetDescription": "A covered passageway named after a grape arbor or pergola that once stood in an adjacent courtyard, producing wine grapes for a local noble family in the 15th century.",
+      "id": "building_45.432010_12.318260"
+    },
+    {
+      "lat": 45.431911672753294,
+      "lng": 12.31878010102374,
+      "streetName": "Rio Terà dei Casselleri",
+      "streetNameEnglish": "Filled Canal of the Cabinet Makers",
+      "streetDescription": "A former canal that was filled in where cabinet makers established their workshops, crafting ornate furniture for Venetian homes and palaces in the Santa Maria Formosa neighborhood.",
+      "id": "building_45.431912_12.318780"
+    },
+    {
+      "lat": 45.43201583598351,
+      "lng": 12.319610476084687,
+      "streetName": "Calle del Pestrin Vecchio",
+      "streetNameEnglish": "Street of the Old Mill",
+      "streetDescription": "Named after an old grain mill (pestrin) that operated here until the mid-16th century, providing flour to local bakers serving the Santa Maria Formosa parish.",
+      "id": "building_45.432016_12.319610"
+    },
+    {
+      "lat": 45.43184758276806,
+      "lng": 12.320001947997723,
+      "streetName": "Corte dei Ballarin",
+      "streetNameEnglish": "Courtyard of the Ballarin Family",
+      "streetDescription": "A courtyard named after the prominent Ballarin family who owned property here in the 15th-16th centuries and were known for their roles as secretaries to the Venetian Senate.",
+      "id": "building_45.431848_12.320002"
+    },
+    {
+      "lat": 45.43235832916088,
+      "lng": 12.317635324343225,
+      "streetName": "Fondamenta delle Terese",
+      "streetNameEnglish": "Foundation of the Teresian Sisters",
+      "streetDescription": "A canalside walkway named after the Teresian nuns who established a small convent in this area near Santa Maria Formosa in the late 16th century.",
+      "id": "building_45.432358_12.317635"
+    },
+    {
+      "lat": 45.432401333970276,
+      "lng": 12.318173222437855,
+      "streetName": "Calle dei Bombardieri",
+      "streetNameEnglish": "Street of the Cannoneers",
+      "streetDescription": "Named after the artillery specialists who lived in this area, many of whom served in Venice's naval forces and maintained connections to the Arsenal, not far from Santa Maria Formosa.",
+      "id": "building_45.432401_12.318173"
+    },
+    {
+      "lat": 45.432332678927025,
+      "lng": 12.318835767208595,
+      "streetName": "Sottoportego dei Strazzeri",
+      "streetNameEnglish": "Underpass of the Rag Dealers",
+      "streetDescription": "A covered passageway where cloth and rag dealers (strazzeri) once had their shops, collecting and repurposing textiles as part of Venice's robust recycling economy during the Renaissance.",
+      "id": "building_45.432333_12.318836"
+    },
+    {
+      "lat": 45.43230962536588,
+      "lng": 12.31955829279482,
+      "streetName": "Campiello del Piovan",
+      "streetNameEnglish": "Small Square of the Parish Priest",
+      "streetDescription": "A small square named after the residence of the parish priest (piovan) of Santa Maria Formosa, who would have been an important figure in the daily life of this neighborhood.",
+      "id": "building_45.432310_12.319558"
+    }
+  ],
+  "id": "polygon-1745879165953"
+}

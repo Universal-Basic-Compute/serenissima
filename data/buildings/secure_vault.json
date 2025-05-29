@@ -1,0 +1,58 @@
+{
+  "name": "Secure Vault",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "storage",
+  "size": 1,
+  "unlockCondition": "20,000,000 ducats capital, Banking Guild connection",
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Secure Vault represents specialized high-security storage with premium service fees. The construction cost of 5,000,000 ducats reflects the extraordinary security features and reinforced construction required, while the income of 50,000 ducats (1% return) represents premium fees for securing valuable items. The maintenance cost of 40,000 ducats (80% of income) creates a modest profit margin appropriate for security-focused infrastructure. The employment capacity of 8 represents the guards, administrators, and security specialists needed. The construction time of 10 days (864000000ms) reflects the specialized construction requirements. This building creates a strategic investment in financial security infrastructure with appropriate guild requirements reflecting the historical importance of secure storage in Venice's sophisticated banking and commercial system.",
+  "shortDescription": "High-security facility for storing valuable items, documents, and currency with enhanced protection.",
+  "fullDescription": "The foundation of Venice's financial security, secure vaults provide maximum protection for the most valuable possessions. Featuring multiple security layers, controlled access, specialized storage environments, and often guard quarters, these facilities represent significant investment in physical security. Used by wealthy families, businesses, and banks, secure vaults protect everything from gold to crucial documents.",
+  "flavorText": "Venice's greatest treasures lie not in her churches or palaces, but behind the iron doors and complex locks of her vaults—for true wealth requires both acquisition and protection.",
+  "constructionCosts": {
+    "ducats": 5000000,
+    "timber": 380,
+    "bricks": 3070,
+    "stone": 3830,
+    "iron": 1530
+  },
+  "maintenanceCost": 4000,
+  "soundDesign": {
+    "ambientSound": "Heavy locks operating, hushed conversations, metal doors",
+    "activitySounds": "Keys turning in locks, guard verification, coins counting",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "political instability": "Increased usage and security measures",
+    "financial crises": "Heavy activity as wealth is secured",
+    "war threats": "Special protective measures implemented"
+  },
+  "aiInteractionPoints": [
+    "Security checkpoint",
+    "Client consultation room",
+    "Main vault chamber",
+    "Guard station",
+    "Record keeping office",
+    "Private viewing booths"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 2000,
+    "stores": [
+      "gold",
+      "jewelry",
+      "banking_services",
+      "maps",
+      "paper",
+      "forgery_tools",
+      "blackmail_evidence",
+      "books"
+    ],
+    "sells": []
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 14400
+}

@@ -1,0 +1,56 @@
+{
+  "id": "marble",
+  "name": "Marble",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": {
+    "short": "Fine decorative stone for prestigious buildings.",
+    "full": "High-quality decorative stone quarried from mainland territories and imported from across the Mediterranean. Used in Venice's finest buildings and monuments.",
+    "flavor": "In these veined stones we capture eternity, turning the weight of mountains into the lightness of art that will outlast us all."
+  },
+  "varieties": [
+    {
+      "type": "white_carrara",
+      "appearance": "pure_white",
+      "valueMultiplier": 1.3,
+      "primarilyUsedFor": "sculptures"
+    },
+    {
+      "type": "veined",
+      "appearance": "white_with_gray_veins",
+      "valueMultiplier": 1.2,
+      "primarilyUsedFor": "columns_facades"
+    },
+    {
+      "type": "red_verona",
+      "appearance": "reddish",
+      "valueMultiplier": 1.4,
+      "primarilyUsedFor": "decorative_elements"
+    },
+    {
+      "type": "istrian_stone",
+      "appearance": "white_limestone",
+      "valueMultiplier": 0.9,
+      "primarilyUsedFor": "water_resistant_elements"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
+      "Carrara quarries",
+      "Greek islands",
+      "Istrian peninsula"
+    ],
+    "historicalSignificance": "Marble was essential to Venice's architectural grandeur, despite the city having no natural stone resources of its own. The Republic's ability to import and use this heavy material on unstable lagoon foundations demonstrated both its wealth and engineering prowess.",
+    "historicalContracts": [
+      "Venetian construction industry",
+      "Sculptors' workshops",
+      "Church commissions"
+    ],
+    "culturalContext": "The use of colored marbles from different regions became a status symbol in Venetian architecture, with specific varieties reserved for the most prestigious buildings."
+  },
+  "importPrice": 4320.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 4
+}

@@ -1,0 +1,59 @@
+{
+  "name": "Harbor Chain Tower",
+  "pointType": "canal",
+  "category": "Military & Defense",
+  "subCategory": "Defensive Structures",
+  "size": 2,
+  "unlockCondition": "15,000,000 ducats, Naval Guild approval, government authorization",
+  "calculationsAnalysis": "The Harbor Chain Tower represents specialized defensive infrastructure with strategic rather than commercial value. The construction cost of 5,000,000 ducats reflects the fortified structure and specialized chain mechanisms required, while generating no direct income reflects its military rather than commercial purpose. The maintenance cost of 30,000 ducats creates a substantial ongoing expense justified by the critical harbor defense capabilities provided. The employment capacity of 10 represents the guards and operators needed. The construction time of 10 days (864000000ms) reflects the specialized construction requirements. This building creates a strategic defensive asset with appropriate government restrictions reflecting the historical importance of physical water barriers in Venice's defensive strategy, where control of water access was essential to the city's security given its lagoon position.",
+  "shortDescription": "Fortified tower operating canal or harbor blocking chains to control naval access.",
+  "fullDescription": "Protecting Venice's vital waterways, harbor chain towers operate massive chain barriers that can physically block unauthorized naval access. Featuring chain winch mechanisms, guard stations, signal equipment, and defensive positions, these specialized structures implement a key defensive technology of medieval and Renaissance naval warfare. Their ability to close waterways gave Venice physical control over maritime approaches.",
+  "flavorText": "With the turn of this mechanism, we transform open water into impenetrable barrier—proving that Venetian ingenuity can alter the very nature of the sea when security demands it.",
+  "constructionCosts": {
+    "ducats": 5000000,
+    "timber": 940,
+    "bricks": 1890,
+    "stone": 3780,
+    "iron": 2360
+  },
+  "maintenanceCost": 3000,
+  "soundDesign": {
+    "ambientSound": "Chain mechanism creaking, water lapping, metal on metal",
+    "activitySounds": "Winch operation, alert signals, chain deployment splash",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "fog": "Heightened alert, additional signal procedures",
+    "naval threats": "Readiness drills, continuous manning",
+    "storms": "Additional safety measures, mechanism security"
+  },
+  "aiInteractionPoints": [
+    "Chain operation mechanism",
+    "Observation platform",
+    "Signal station",
+    "Guard post",
+    "Maintenance area",
+    "Chain anchor point",
+    "Coordination office"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 100,
+    "stores": [
+      "iron",
+      "timber",
+      "tools",
+      "ship_components",
+      "weapons",
+      "rope"
+    ],
+    "sells": [
+      "ship_components",
+      "weapons"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 0,
+  "constructionMinutes": 14400
+}

@@ -1,0 +1,526 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44223925963153,
+      "lng": 12.336918553433396
+    },
+    {
+      "lat": 45.441926861241264,
+      "lng": 12.338951667866684
+    },
+    {
+      "lat": 45.44126065648671,
+      "lng": 12.338855108342148
+    },
+    {
+      "lat": 45.440481525692476,
+      "lng": 12.33831866653917
+    },
+    {
+      "lat": 45.440349787538274,
+      "lng": 12.337980708203293
+    },
+    {
+      "lat": 45.44007125442811,
+      "lng": 12.3368112650728
+    },
+    {
+      "lat": 45.44015029774776,
+      "lng": 12.335974415860154
+    },
+    {
+      "lat": 45.43991693143729,
+      "lng": 12.33557208450792
+    },
+    {
+      "lat": 45.44047399780625,
+      "lng": 12.334499200901963
+    },
+    {
+      "lat": 45.440428830467695,
+      "lng": 12.334434827885605
+    },
+    {
+      "lat": 45.441128920151705,
+      "lng": 12.33308835896013
+    },
+    {
+      "lat": 45.44237099337397,
+      "lng": 12.334241708836533
+    },
+    {
+      "lat": 45.44141497580223,
+      "lng": 12.336371382794358
+    }
+  ],
+  "centroid": {
+    "lat": 45.440939560908085,
+    "lng": 12.336309073015704
+  },
+  "historicalName": "Calle de la Madona in Sestiere San Marco",
+  "englishName": "Our Lady's Street in the District of St. Mark",
+  "historicalDescription": "A narrow street located near Piazza San Marco, the cultural and religious heart of 15th century Venice. The area was known for its numerous churches, palaces of wealthy merchants and nobility, and bustling commercial activity.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 77063.07,
+  "center": {
+    "lat": 45.440939560908085,
+    "lng": 12.336309073015704
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.440195464621766,
+        "lng": 12.335035642704941
+      },
+      "water": {
+        "lat": 45.4400803628165,
+        "lng": 12.334838659961795
+      },
+      "historicalName": "Fondamenta dei Mascari",
+      "englishName": "Foundation of the Perfumers",
+      "historicalDescription": "This dock was named after the perfumers' guild which had several shops near the Calle de la Madona in San Marco. Venice was a major center for the perfume trade during the Renaissance, importing exotic ingredients from the East and developing unique scents that were sought after throughout Europe.",
+      "id": "canal_45.440195_12.335036"
+    },
+    {
+      "edge": {
+        "lat": 45.440428830467695,
+        "lng": 12.334434827885605
+      },
+      "water": {
+        "lat": 45.44036371478579,
+        "lng": 12.3341958706196
+      },
+      "historicalName": "Riva di San Moisè",
+      "englishName": "Bank of Saint Moses",
+      "historicalDescription": "Located near the Church of San Moisè in the San Marco district, this landing would have served visitors to the church and the surrounding area. The church of San Moisè dates back to the 8th century and was an important religious landmark in Renaissance Venice, particularly after its reconstruction in the 15th century.",
+      "id": "canal_45.440429_12.334435"
+    },
+    {
+      "edge": {
+        "lat": 45.440778875309704,
+        "lng": 12.333761593422867
+      },
+      "water": {
+        "lat": 45.44076277085897,
+        "lng": 12.333506276455978
+      },
+      "historicalName": "Fondamenta della Fenice",
+      "englishName": "Foundation of the Phoenix",
+      "historicalDescription": "This dock would have been named in reference to an area where Venetian artisans created fine glassware and other luxury items that were 'reborn' through fire, much like the mythical phoenix. The area near Calle de la Madona was known for luxury crafts and this dock would have received materials and shipped finished goods throughout the Mediterranean.",
+      "id": "canal_45.440779_12.333762"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44203099403802,
+        "lng": 12.338273963055588
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055971606",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44213951801536,
+          "lng": 12.338087996563889
+        },
+        "distance": 18.871188141086016,
+        "id": "7f088269-fae8-4b38-be9d-17f80faa39ea",
+        "historicalName": "Ponte della Madonna del Giglio",
+        "englishName": "Bridge of Our Lady of the Lily",
+        "historicalDescription": "Named for its proximity to a small shrine dedicated to the Madonna that was adorned with lilies, a common symbol of purity in Venetian religious iconography. Its location near Calle de la Madona in San Marco reflects the religious devotion prevalent in this area during the Renaissance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44208525602669,
+            "lng": 12.338180979809739
+          }
+        }
+      },
+      "id": "bridge_45.442031_12.338274"
+    },
+    {
+      "edge": {
+        "lat": 45.440481525692476,
+        "lng": 12.33831866653917
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056070563",
+        "targetPointIndex": 9,
+        "targetPoint": {
+          "lat": 45.44032700076462,
+          "lng": 12.338274205025499
+        },
+        "distance": 17.529051280061076,
+        "id": "4884f45f-0656-4eb7-8018-31380afd8b2c",
+        "historicalName": "Ponte dei Gioiellieri",
+        "englishName": "Bridge of the Jewelers",
+        "historicalDescription": "This bridge was named after the skilled jewelers who had workshops in the vicinity during the 15th and 16th centuries. San Marco was known for its luxury trades, and this bridge connected areas where jewelry craftsmen would display and sell their precious wares to wealthy nobili and foreign merchants.",
+        "location": {
+          "midpoint": {
+            "lat": 45.440404263228544,
+            "lng": 12.338296435782334
+          }
+        }
+      },
+      "id": "bridge_45.440482_12.338319"
+    },
+    {
+      "edge": {
+        "lat": 45.44015029774776,
+        "lng": 12.335974415860154
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056070563",
+        "targetPointIndex": 8,
+        "targetPoint": {
+          "lat": 45.440101163122016,
+          "lng": 12.336053335961168
+        },
+        "distance": 8.23185008325214,
+        "id": "4884f45f-0656-4eb7-8018-31380afd8b2c",
+        "historicalName": "Ponte dei Mocenigo",
+        "englishName": "Bridge of the Mocenigo Family",
+        "historicalDescription": "Named after the prominent Mocenigo family who owned property nearby in San Marco. The Mocenigo were one of Venice's most illustrious nobili families, producing seven Doges between the 15th and 18th centuries, and their palazzo would have been a landmark in this affluent area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.440125730434886,
+            "lng": 12.33601387591066
+          }
+        }
+      },
+      "id": "bridge_45.440150_12.335974"
+    },
+    {
+      "edge": {
+        "lat": 45.441542944559124,
+        "lng": 12.33347280891893
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055909289",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.441637040246626,
+          "lng": 12.33349203141687
+        },
+        "distance": 10.56989687303764,
+        "id": "0510d35b-e2cf-4c24-9799-a23f0dd8ca7a",
+        "historicalName": "Ponte degli Ambasciatori Orientali",
+        "englishName": "Bridge of the Oriental Ambassadors",
+        "historicalDescription": "This bridge earned its name as it was commonly used by diplomatic envoys from Eastern empires who would stay in accommodations near San Marco. These ambassadors would cross this bridge on their way to and from formal meetings with the Doge and the Senate during the height of Venice's diplomatic influence.",
+        "location": {
+          "midpoint": {
+            "lat": 45.441589992402875,
+            "lng": 12.3334824201679
+          }
+        }
+      },
+      "id": "bridge_45.441543_12.333473"
+    },
+    {
+      "edge": {
+        "lat": 45.44195696896655,
+        "lng": 12.333857258877732
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055909289",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.442028479572116,
+          "lng": 12.333868881783463
+        },
+        "distance": 8.00315439716258,
+        "id": "0510d35b-e2cf-4c24-9799-a23f0dd8ca7a",
+        "historicalName": "Ponte dei Cantori",
+        "englishName": "Bridge of the Singers",
+        "historicalDescription": "Named for the singers and musicians who would traverse this bridge on their way to perform at religious ceremonies in nearby churches and at state functions in the Doge's Palace. The musical traditions of Renaissance Venice were particularly strong in the San Marco area, home to the famous basilica with its renowned choir.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44199272426933,
+            "lng": 12.333863070330597
+          }
+        }
+      },
+      "id": "bridge_45.441957_12.333857"
+    },
+    {
+      "edge": {
+        "lat": 45.44237099337397,
+        "lng": 12.334241708836533
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055909289",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.4424199188976,
+          "lng": 12.334245732150055
+        },
+        "distance": 5.4493176989477154,
+        "id": "0510d35b-e2cf-4c24-9799-a23f0dd8ca7a",
+        "historicalName": "Ponte delle Spezierie",
+        "englishName": "Bridge of the Spice Shops",
+        "historicalDescription": "This bridge connected to an area where spice merchants operated their shops in the 16th century. Venice was the principal European gateway for exotic spices from the East, and the prestigious location in San Marco meant these shops catered to wealthy clientele seeking saffron, pepper, cinnamon, and other valuable spices.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442395456135785,
+            "lng": 12.334243720493294
+          }
+        }
+      },
+      "id": "bridge_45.442371_12.334242"
+    },
+    {
+      "edge": {
+        "lat": 45.44205232085006,
+        "lng": 12.334951600155808
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055962882",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.44212634475033,
+          "lng": 12.33483179481981
+        },
+        "distance": 12.454552790711238,
+        "id": "23225bc6-4550-49c9-8570-81f8788fe048",
+        "historicalName": "Ponte della Cortesia",
+        "englishName": "Bridge of Courtesy",
+        "historicalDescription": "Named for a traditional custom where Venetian noblemen would ceremoniously give way to others when crossing this narrow bridge. Located in the refined San Marco district near Calle de la Madona, it symbolized the elaborate social etiquette of Renaissance Venice's aristocratic society.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442089332800194,
+            "lng": 12.334891697487809
+          }
+        }
+      },
+      "id": "bridge_45.442052_12.334952"
+    },
+    {
+      "edge": {
+        "lat": 45.44173364832614,
+        "lng": 12.335661491475083
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055962882",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44183276423776,
+          "lng": 12.335564037880875
+        },
+        "distance": 13.389337288509088,
+        "id": "23225bc6-4550-49c9-8570-81f8788fe048",
+        "historicalName": "Ponte dei Stampatori di Seta",
+        "englishName": "Bridge of the Silk Printers",
+        "historicalDescription": "This bridge was named for the workshops of skilled artisans who printed intricate patterns on imported silk. Their craft was vital to Venice's luxury textile industry, and their location near Calle de la Madona in San Marco reflected the prestigious nature of their trade, which supplied the finest fabrics to Venetian nobility and wealthy foreign merchants.",
+        "location": {
+          "midpoint": {
+            "lat": 45.441783206281954,
+            "lng": 12.335612764677979
+          }
+        }
+      },
+      "id": "bridge_45.441734_12.335661"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44038262124128,
+      "lng": 12.335082094387829,
+      "streetName": "Calle del Duca",
+      "streetNameEnglish": "Street of the Duke",
+      "streetDescription": "Named after a noble Venetian Duke who owned a palazzo in this area of San Marco. Dukes were important patrons of the arts and commerce in Renaissance Venice.",
+      "id": "building_45.440383_12.335082"
+    },
+    {
+      "lat": 45.440294190807364,
+      "lng": 12.335640995787262,
+      "streetName": "Ruga dei Miracoli",
+      "streetNameEnglish": "Row of Miracles",
+      "streetDescription": "This street was named after reported miraculous healings attributed to a small shrine of the Madonna that stood nearby in San Marco. Ruga indicates a street with shops on both sides.",
+      "id": "building_45.440294_12.335641"
+    },
+    {
+      "lat": 45.44033660281954,
+      "lng": 12.336415462765874,
+      "streetName": "Calle dei Mercanti di Seta",
+      "streetNameEnglish": "Street of the Silk Merchants",
+      "streetDescription": "Silk trade was vital to Venice's economy. This calle in San Marco was where many silk merchants conducted business, importing raw silk from the East and exporting finished products.",
+      "id": "building_45.440337_12.336415"
+    },
+    {
+      "lat": 45.44039516867307,
+      "lng": 12.336912421007268,
+      "streetName": "Sottoportego della Regina",
+      "streetNameEnglish": "Passageway of the Queen",
+      "streetDescription": "A covered passageway named to commemorate the visit of a foreign queen, possibly Catherine Cornaro, who was Queen of Cyprus but returned to Venice in the late 15th century.",
+      "id": "building_45.440395_12.336912"
+    },
+    {
+      "lat": 45.4403920609725,
+      "lng": 12.337553103454391,
+      "streetName": "Rio Terà dei Tessitori",
+      "streetNameEnglish": "Filled Canal of the Weavers",
+      "streetDescription": "Once a canal that was filled in (terà) and where textile weavers had their workshops. Textile production was one of Venice's major industries during the Renaissance.",
+      "id": "building_45.440392_12.337553"
+    },
+    {
+      "lat": 45.44088928859051,
+      "lng": 12.334364872442244,
+      "streetName": "Calle della Fenice Antica",
+      "streetNameEnglish": "Street of the Ancient Phoenix",
+      "streetDescription": "Named in reference to an older theater or performance space that predated the famous La Fenice opera house, indicating the cultural heritage of the San Marco area.",
+      "id": "building_45.440889_12.334365"
+    },
+    {
+      "lat": 45.440864107718994,
+      "lng": 12.335066506421544,
+      "streetName": "Salizada dei Consoli",
+      "streetNameEnglish": "Paved Street of the Consuls",
+      "streetDescription": "A salizada (paved street) where foreign consuls had their residences or offices, reflecting Venice's importance as a diplomatic center during the Renaissance.",
+      "id": "building_45.440864_12.335067"
+    },
+    {
+      "lat": 45.440785169470225,
+      "lng": 12.335662920837462,
+      "streetName": "Fondamenta dei Colori",
+      "streetNameEnglish": "Foundation of the Colors",
+      "streetDescription": "A street along a canal where color merchants and dyers had their shops, supplying pigments to the many artists working in nearby San Marco during the Renaissance.",
+      "id": "building_45.440785_12.335663"
+    },
+    {
+      "lat": 45.440890875792014,
+      "lng": 12.336184231565928,
+      "streetName": "Campiello dei Orologi",
+      "streetNameEnglish": "Small Square of the Clocks",
+      "streetDescription": "A small square named after clockmakers who had workshops here, possibly supplying mechanisms for the famous clock tower in Piazza San Marco.",
+      "id": "building_45.440891_12.336184"
+    },
+    {
+      "lat": 45.44084320615079,
+      "lng": 12.336847595860592,
+      "streetName": "Corte Falier",
+      "streetNameEnglish": "Falier Court",
+      "streetDescription": "Named after the Falier family, a nobili Venetian family. Most famously, Marino Falier was a Doge who was executed for plotting a coup against the Republic in 1355.",
+      "id": "building_45.440843_12.336848"
+    },
+    {
+      "lat": 45.44088381385614,
+      "lng": 12.337689340052593,
+      "streetName": "Calle della Madonna dei Pellegrini",
+      "streetNameEnglish": "Street of the Madonna of the Pilgrims",
+      "streetDescription": "Named after a shrine dedicated to the Madonna that was frequented by pilgrims. Located near the main Calle de la Madona in San Marco, this street served pilgrims heading to the Holy Land.",
+      "id": "building_45.440884_12.337689"
+    },
+    {
+      "lat": 45.44117546483659,
+      "lng": 12.333825526410365,
+      "streetName": "Ramo dei Codici",
+      "streetNameEnglish": "Branch of the Codices",
+      "streetDescription": "A small branch street where scribes and early book binders worked, creating manuscripts and codices during the early Renaissance before the advent of printing.",
+      "id": "building_45.441175_12.333826"
+    },
+    {
+      "lat": 45.44131271471744,
+      "lng": 12.334261946713715,
+      "streetName": "Calle dei Calici d'Oro",
+      "streetNameEnglish": "Street of Golden Chalices",
+      "streetDescription": "Named after the goldsmiths who specialized in creating ornate chalices for churches and wealthy patrons. San Marco was known for its skilled goldsmiths and luxury craftsmen.",
+      "id": "building_45.441313_12.334262"
+    },
+    {
+      "lat": 45.44127484017906,
+      "lng": 12.3351314102234,
+      "streetName": "Rio Terà delle Procuratie Vecchie",
+      "streetNameEnglish": "Filled Canal of the Old Procuracies",
+      "streetDescription": "A former canal now filled in, named for its proximity to the Procuratie Vecchie, the offices of the Procurators of St. Mark, who were among the most important officials in Venice.",
+      "id": "building_45.441275_12.335131"
+    },
+    {
+      "lat": 45.44132787521204,
+      "lng": 12.335590909790788,
+      "streetName": "Calle dei Cartografi",
+      "streetNameEnglish": "Street of the Cartographers",
+      "streetDescription": "Named for the mapmakers who worked here during Venice's golden age of exploration and trade. Venetian maps were prized throughout Europe for their accuracy and detail.",
+      "id": "building_45.441328_12.335591"
+    },
+    {
+      "lat": 45.44128071460256,
+      "lng": 12.33633336048877,
+      "streetName": "Sottoportego dei Promessi",
+      "streetNameEnglish": "Passageway of the Betrothed",
+      "streetDescription": "A covered passageway traditionally used by betrothed couples on their way to be married at a nearby church, possibly related to the Madonna shrine in the area.",
+      "id": "building_45.441281_12.336333"
+    },
+    {
+      "lat": 45.44129884682611,
+      "lng": 12.336995472700883,
+      "streetName": "Calle del Velluto Carmesino",
+      "streetNameEnglish": "Street of Crimson Velvet",
+      "streetDescription": "Named after the luxurious crimson velvet that was a specialty of Venetian textile makers. The rich red dye was a closely guarded trade secret and symbol of Venetian prosperity.",
+      "id": "building_45.441299_12.336995"
+    },
+    {
+      "lat": 45.441345779689655,
+      "lng": 12.337695326433158,
+      "streetName": "Fondamenta degli Ambasciatori Ottomani",
+      "streetNameEnglish": "Foundation of the Ottoman Ambassadors",
+      "streetDescription": "A canalside street where Ottoman ambassadors were housed during diplomatic missions to Venice, reflecting the Republic's important trade relations with the Ottoman Empire.",
+      "id": "building_45.441346_12.337695"
+    },
+    {
+      "lat": 45.44123297381642,
+      "lng": 12.338264306066586,
+      "streetName": "Calle dei Mosaicisti",
+      "streetNameEnglish": "Street of the Mosaic Artists",
+      "streetDescription": "Home to the workshops of mosaic artists who created the magnificent gold mosaics in St. Mark's Basilica and other Venetian churches, continuing Byzantine traditions.",
+      "id": "building_45.441233_12.338264"
+    },
+    {
+      "lat": 45.44174639408226,
+      "lng": 12.334371851399897,
+      "streetName": "Ruga dei Notari",
+      "streetNameEnglish": "Row of the Notaries",
+      "streetDescription": "A commercial street where notaries had their offices, drafting and authenticating the many contracts and legal documents required in Venice's complex commercial system.",
+      "id": "building_45.441746_12.334372"
+    },
+    {
+      "lat": 45.441682721490544,
+      "lng": 12.334905424243402,
+      "streetName": "Salizada dei Gentiluomini",
+      "streetNameEnglish": "Paved Street of the Gentlemen",
+      "streetDescription": "One of the first streets to be paved in the area, frequented by Venetian noblemen on their way to and from government buildings in the San Marco district.",
+      "id": "building_45.441683_12.334905"
+    },
+    {
+      "lat": 45.441702036853705,
+      "lng": 12.336901725618404,
+      "streetName": "Calle del Leone Alato",
+      "streetNameEnglish": "Street of the Winged Lion",
+      "streetDescription": "Named after the symbol of St. Mark and of the Venetian Republic itself. The winged lion appeared throughout Venice, especially in the governmental heart of San Marco.",
+      "id": "building_45.441702_12.336902"
+    },
+    {
+      "lat": 45.44163711461261,
+      "lng": 12.337610399116578,
+      "streetName": "Campiello delle Maschere",
+      "streetNameEnglish": "Small Square of the Masks",
+      "streetDescription": "A small square where mask makers had their workshops, creating the famous Venetian carnival masks that were essential for festivities and allowed anonymity in public.",
+      "id": "building_45.441637_12.337610"
+    },
+    {
+      "lat": 45.44173497770869,
+      "lng": 12.338290937036335,
+      "streetName": "Corte Dandolo",
+      "streetNameEnglish": "Dandolo Court",
+      "streetDescription": "Named after the prominent Dandolo family that gave Venice several doges, including Enrico Dandolo who led the Fourth Crusade and the conquest of Constantinople in 1204.",
+      "id": "building_45.441735_12.338291"
+    },
+    {
+      "lat": 45.44172273251195,
+      "lng": 12.3387745009331,
+      "streetName": "Calle degli Astrolabi",
+      "streetNameEnglish": "Street of the Astrolabes",
+      "streetDescription": "Where makers of navigational instruments like astrolabes had their workshops, supplying Venice's merchant fleet with the tools needed for long-distance trade voyages.",
+      "id": "building_45.441723_12.338775"
+    }
+  ],
+  "id": "polygon-1746055995050"
+}

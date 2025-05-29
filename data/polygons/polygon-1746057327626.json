@@ -1,0 +1,312 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43558561189836,
+      "lng": 12.359692054642624
+    },
+    {
+      "lat": 45.43548774080736,
+      "lng": 12.35979934300322
+    },
+    {
+      "lat": 45.435231769459115,
+      "lng": 12.3607863959207
+    },
+    {
+      "lat": 45.43454666396166,
+      "lng": 12.361376481903976
+    },
+    {
+      "lat": 45.43417022882918,
+      "lng": 12.361494499100631
+    },
+    {
+      "lat": 45.43369591698712,
+      "lng": 12.361397939576095
+    },
+    {
+      "lat": 45.43343993751135,
+      "lng": 12.361451583756393
+    },
+    {
+      "lat": 45.43319901459116,
+      "lng": 12.361140447510666
+    },
+    {
+      "lat": 45.43272469458643,
+      "lng": 12.360679107560104
+    },
+    {
+      "lat": 45.43219766768347,
+      "lng": 12.35929508770842
+    },
+    {
+      "lat": 45.43258917385287,
+      "lng": 12.358908849610275
+    },
+    {
+      "lat": 45.432950561752506,
+      "lng": 12.358844476593918
+    },
+    {
+      "lat": 45.43362815782711,
+      "lng": 12.358479696167892
+    },
+    {
+      "lat": 45.43407235528342,
+      "lng": 12.358426051987594
+    },
+    {
+      "lat": 45.434629479353845,
+      "lng": 12.358715730561203
+    },
+    {
+      "lat": 45.43505861171224,
+      "lng": 12.359252172364181
+    },
+    {
+      "lat": 45.43538986954658,
+      "lng": 12.359348731888717
+    }
+  ],
+  "centroid": {
+    "lat": 45.43403514444964,
+    "lng": 12.35994639116804
+  },
+  "historicalName": "Campo de San Zanipolo",
+  "englishName": "Field of Saint John and Paul",
+  "historicalDescription": "This area was known for the Dominican church and monastery of Santi Giovanni e Paolo, one of the largest churches in Venice. The campo (square) in front of the church was a popular gathering place.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 60979.15,
+  "center": {
+    "lat": 45.43383785083468,
+    "lng": 12.359803666030869
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.435231769459115,
+        "lng": 12.3607863959207
+      },
+      "water": {
+        "lat": 45.435393120145804,
+        "lng": 12.360899660596424
+      },
+      "historicalName": "Fondamenta dei Dominicani",
+      "englishName": "Foundation of the Dominicans",
+      "historicalDescription": "Named after the Dominican friars who maintained the Basilica di San Giovanni e Paolo (San Zanipolo). The Dominican Order had significant influence in this area since the 13th century, and this dock would have served their monastery and basilica directly.",
+      "id": "canal_45.435232_12.360786"
+    },
+    {
+      "edge": {
+        "lat": 45.43454666396166,
+        "lng": 12.361376481903976
+      },
+      "water": {
+        "lat": 45.43462834523737,
+        "lng": 12.36160484393699
+      },
+      "historicalName": "Riva dei Condottieri",
+      "englishName": "Bank of the Condottieri",
+      "historicalDescription": "Named in reference to the many military commanders (condottieri) whose funeral monuments are housed in the Basilica di San Zanipolo. The basilica became the traditional burial place for Venice's doges and military heroes, making this name historically appropriate for a dock serving visitors to these grand tombs.",
+      "id": "canal_45.434547_12.361376"
+    },
+    {
+      "edge": {
+        "lat": 45.43417022882918,
+        "lng": 12.361494499100631
+      },
+      "water": {
+        "lat": 45.434192423441004,
+        "lng": 12.361748856079123
+      },
+      "historicalName": "Fondamenta della Scuola Grande di San Marco",
+      "englishName": "Foundation of the Great School of Saint Mark",
+      "historicalDescription": "Named after the prestigious Scuola Grande di San Marco, which stands on the Campo San Zanipolo. This confraternity building, with its magnificent Renaissance façade, was one of Venice's most important charitable institutions and would have had its own water access for officials and visitors.",
+      "id": "canal_45.434170_12.361494"
+    },
+    {
+      "edge": {
+        "lat": 45.43369591698712,
+        "lng": 12.361397939576095
+      },
+      "water": {
+        "lat": 45.433639084919484,
+        "lng": 12.361641123004375
+      },
+      "historicalName": "Riva dell'Ospedale",
+      "englishName": "Bank of the Hospital",
+      "historicalDescription": "Named for the historic hospital that occupied the Scuola Grande di San Marco building from the early 19th century (though the association began earlier). Even during Renaissance times, the area had connections to medical care and healing, making this a plausible name for a dock serving this function.",
+      "id": "canal_45.433696_12.361398"
+    },
+    {
+      "edge": {
+        "lat": 45.43319901459116,
+        "lng": 12.361140447510666
+      },
+      "water": {
+        "lat": 45.43307196672675,
+        "lng": 12.36132188141926
+      },
+      "historicalName": "Fondamenta del Colleoni",
+      "englishName": "Foundation of Colleoni",
+      "historicalDescription": "Named after the famous bronze equestrian statue of condottiero Bartolomeo Colleoni that stands in the campo. Created by Andrea del Verrocchio in the 1480s, this monument became an important landmark in the area, and a nearby dock might well have been named in reference to this celebrated military leader and his impressive monument.",
+      "id": "canal_45.433199_12.361140"
+    }
+  ],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.43270958210548,
+      "lng": 12.359056524575092,
+      "streetName": "Calle dei Predicatori",
+      "streetNameEnglish": "Street of the Preachers",
+      "streetDescription": "Named after the Dominican Order (Order of Preachers) who maintained the Basilica di San Giovanni e Paolo (San Zanipolo). The Dominicans were known as the 'predicatori' (preachers) in Venice.",
+      "id": "building_45.432710_12.359057"
+    },
+    {
+      "lat": 45.43263834133218,
+      "lng": 12.35964670949293,
+      "streetName": "Calle dei Dogi Sepolti",
+      "streetNameEnglish": "Street of the Buried Doges",
+      "streetDescription": "References the fact that the Basilica di San Zanipolo served as the burial place for 25 Venetian Doges. Their magnificent tombs and monuments are housed within the church.",
+      "id": "building_45.432638_12.359647"
+    },
+    {
+      "lat": 45.433123066736066,
+      "lng": 12.35897103550297,
+      "streetName": "Ruga dei Cerusici",
+      "streetNameEnglish": "Row of the Surgeons",
+      "streetDescription": "Named for its proximity to the Scuola Grande di San Marco, which later became a hospital. 'Cerusici' was the Renaissance term for surgeons, appropriate for an area that became a medical center.",
+      "id": "building_45.433123_12.358971"
+    },
+    {
+      "lat": 45.43304525983971,
+      "lng": 12.359721523077884,
+      "streetName": "Rio Terà della Barbaria",
+      "streetNameEnglish": "Filled Canal of the Barber-Surgeons",
+      "streetDescription": "Named after the guild of barber-surgeons who practiced in this area. A 'rio terà' is a filled-in canal, and this name reflects the medical traditions near the hospital of San Zanipolo.",
+      "id": "building_45.433045_12.359722"
+    },
+    {
+      "lat": 45.43314825631791,
+      "lng": 12.360471902874407,
+      "streetName": "Calle della Scuola Grande",
+      "streetNameEnglish": "Street of the Great Confraternity",
+      "streetDescription": "Named for its proximity to the Scuola Grande di San Marco, one of Venice's major confraternities whose magnificent Renaissance façade still adorns the campo.",
+      "id": "building_45.433148_12.360472"
+    },
+    {
+      "lat": 45.433532233098084,
+      "lng": 12.35910196422166,
+      "streetName": "Fondamenta dell'Ospedale",
+      "streetNameEnglish": "Foundation of the Hospital",
+      "streetDescription": "Named for the hospital that was established in the former Scuola Grande di San Marco. The 'fondamenta' typically runs alongside a canal, reflecting the hospital's position near water.",
+      "id": "building_45.433532_12.359102"
+    },
+    {
+      "lat": 45.43361850451147,
+      "lng": 12.35958686609901,
+      "streetName": "Calle del Cavallo",
+      "streetNameEnglish": "Street of the Horse",
+      "streetDescription": "Named after the famous equestrian statue of Bartolomeo Colleoni by Verrocchio, which stands prominently in the Campo San Zanipolo.",
+      "id": "building_45.433619_12.359587"
+    },
+    {
+      "lat": 45.433512846155715,
+      "lng": 12.360241262983536,
+      "streetName": "Calle dei Monumenti",
+      "streetNameEnglish": "Street of the Monuments",
+      "streetDescription": "References the many funerary monuments housed in the Basilica di San Zanipolo, which contains some of Venice's most splendid sculptural works.",
+      "id": "building_45.433513_12.360241"
+    },
+    {
+      "lat": 45.43351445039189,
+      "lng": 12.361054609835394,
+      "streetName": "Salizada dei Leoni",
+      "streetNameEnglish": "Paved Street of the Lions",
+      "streetDescription": "Named for the stone lions that were part of architectural decorations in the area. 'Salizada' indicates this was one of the earliest paved streets in Venice.",
+      "id": "building_45.433514_12.361055"
+    },
+    {
+      "lat": 45.434067403539245,
+      "lng": 12.35907478108689,
+      "streetName": "Sottoportego dell'Anatomia",
+      "streetNameEnglish": "Passageway of Anatomy",
+      "streetDescription": "Named for its connection to the anatomical studies that took place at the hospital of San Zanipolo. A 'sottoportego' is a covered passageway typical of Venetian urban architecture.",
+      "id": "building_45.434067_12.359075"
+    },
+    {
+      "lat": 45.43399265485967,
+      "lng": 12.359716713535615,
+      "streetName": "Calle della Testa d'Oro",
+      "streetNameEnglish": "Street of the Golden Head",
+      "streetDescription": "Refers to a historical pharmacy or 'spezieria' with the sign of a golden head that would have served the nearby hospital. Such pharmacies were crucial for supplying medicines to healthcare institutions.",
+      "id": "building_45.433993_12.359717"
+    },
+    {
+      "lat": 45.43402054690369,
+      "lng": 12.36029758060938,
+      "streetName": "Corte Querini",
+      "streetNameEnglish": "Querini Court",
+      "streetDescription": "Named after the noble Querini family who likely had a palazzo in this area near San Zanipolo. Many Venetian courtyards (corti) were named after prominent families.",
+      "id": "building_45.434021_12.360298"
+    },
+    {
+      "lat": 45.43399386634538,
+      "lng": 12.361011943497951,
+      "streetName": "Calle dei Mendicanti",
+      "streetNameEnglish": "Street of the Beggars",
+      "streetDescription": "Named after the Ospedale dei Mendicanti (Hospital for Beggars), which was part of the charitable institutions in the vicinity of San Zanipolo that provided care for the poor.",
+      "id": "building_45.433994_12.361012"
+    },
+    {
+      "lat": 45.434477635028706,
+      "lng": 12.35908390834226,
+      "streetName": "Ruga dei Librai",
+      "streetNameEnglish": "Row of the Booksellers",
+      "streetDescription": "Named for the booksellers who may have had shops in this commercial street near San Zanipolo, possibly supplying texts to the Dominican scholars at the monastery.",
+      "id": "building_45.434478_12.359084"
+    },
+    {
+      "lat": 45.43451186802291,
+      "lng": 12.35971320554247,
+      "streetName": "Calle dei Miracoli",
+      "streetNameEnglish": "Street of Miracles",
+      "streetDescription": "References religious miracles associated with saints venerated at San Zanipolo, particularly St. John and St. Paul, for whom the church is named.",
+      "id": "building_45.434512_12.359713"
+    },
+    {
+      "lat": 45.434414236800365,
+      "lng": 12.36031826516078,
+      "streetName": "Rio Terà dei Convalescenti",
+      "streetNameEnglish": "Filled Canal of the Convalescents",
+      "streetDescription": "Named for the convalescent patients of the hospital who might have used this area for recovery and fresh air. This filled-in canal would have provided a walking area for recovering patients.",
+      "id": "building_45.434414_12.360318"
+    },
+    {
+      "lat": 45.43435677892998,
+      "lng": 12.361054705643957,
+      "streetName": "Campiello della Carità",
+      "streetNameEnglish": "Little Square of Charity",
+      "streetDescription": "Named for the charitable works conducted in this area, particularly associated with the hospital and religious institutions at San Zanipolo that provided care for the sick and poor.",
+      "id": "building_45.434357_12.361055"
+    },
+    {
+      "lat": 45.43484270775448,
+      "lng": 12.359684716624036,
+      "streetName": "Fondamenta dei Sartori",
+      "streetNameEnglish": "Foundation of the Tailors",
+      "streetDescription": "Named after the guild of tailors who may have had workshops in this area, possibly supplying vestments for the Dominican friars or uniforms for the hospital staff of San Zanipolo.",
+      "id": "building_45.434843_12.359685"
+    },
+    {
+      "lat": 45.43482525835686,
+      "lng": 12.360382461173325,
+      "streetName": "Calle della Peste",
+      "streetNameEnglish": "Street of the Plague",
+      "streetDescription": "Commemorates the hospital's role during Venice's numerous plague outbreaks. San Zanipolo's hospital would have been crucial in treating victims during these devastating epidemics.",
+      "id": "building_45.434825_12.360382"
+    }
+  ]
+}

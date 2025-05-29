@@ -1,0 +1,37 @@
+{
+  "id": "cut_stone",
+  "name": "Cut Stone",
+  "category": "processed_materials",
+  "subCategory": "construction",
+  "description": "Precisely shaped stone blocks ready for construction.",
+  "varieties": [
+    {
+      "type": "foundation_blocks",
+      "precision": "low",
+      "valueMultiplier": 0.8,
+      "primaryUse": "foundations"
+    },
+    {
+      "type": "wall_blocks",
+      "precision": "medium",
+      "valueMultiplier": 1,
+      "primaryUse": "walls"
+    },
+    {
+      "type": "facade_blocks",
+      "precision": "high",
+      "valueMultiplier": 1.5,
+      "primaryUse": "visible_exteriors"
+    },
+    {
+      "type": "ornamental_pieces",
+      "precision": "very_high",
+      "valueMultiplier": 2,
+      "primaryUse": "decorative_elements"
+    }
+  ],
+  "importPrice": 900.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

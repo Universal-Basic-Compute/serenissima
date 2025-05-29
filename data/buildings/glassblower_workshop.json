@@ -1,0 +1,82 @@
+{
+  "name": "Glassblower Workshop",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Glass Industry",
+  "size": 1,
+  "unlockCondition": "5,000,000 ducats capital, Glass Guild membership, Murano location",
+  "calculationsAnalysis": "The Glassblower Workshop represents specialized artistic production with substantial returns. The construction cost of 1,500,000 ducats reflects the specialized equipment and facilities required, while the income of 30,000 ducats (2% return) represents the high-value artistic glass pieces produced. The maintenance cost of 20,000 ducats (66.7% of income) creates a reasonable profit margin appropriate for luxury crafts. The employment capacity of 6 represents the master glassblower, apprentices, and assistants needed. The construction time of 4 days (345600000ms) reflects the specialized construction requirements. This building creates a strategic investment in luxury production with appropriate guild and location requirements reflecting the historical importance of Murano glass to Venice's luxury exports, where artistic glassblowing represented the perfect combination of technical skill and artistic creativity that made Venetian products famous throughout Europe.",
+  "shortDescription": "Specialized facility where skilled artisans shape molten glass into fine objects and art pieces.",
+  "fullDescription": "The creative heart of Venice's famed glass industry, these workshops transform molten glass from foundries into exquisite finished pieces. Featuring glassblowing stations with specialized tools, annealing ovens for controlled cooling, and display areas for completed works, these facilities combine industrial process with artistic creativity. Master glassblowers command tremendous respect for their skill in manipulating this challenging material.",
+  "flavorText": "Between the breath of the master and the heat of the furnace, ordinary sand is transformed into objects of such delicacy that they appear to defy the very nature of matter itself.",
+  "constructionCosts": {
+    "ducats": 1500000,
+    "timber": 430,
+    "bricks": 1070,
+    "stone": 570,
+    "iron": 290
+  },
+  "maintenanceCost": 2000,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "molten_glass": 3,
+        "fuel": 1
+      },
+      "outputs": {
+        "fine_glassware": 1
+      },
+      "craftMinutes": 180
+    },
+    {
+      "inputs": {
+        "glass": 4,
+        "gold_leaf": 1,
+        "fuel": 1
+      },
+      "outputs": {
+        "fine_glassware": 2
+      },
+      "craftMinutes": 240
+    }
+  ],
+    "storageCapacity": 100,
+    "stores": [
+      "molten_glass",
+      "glass",
+      "fine_glassware",
+      "fuel",
+      "sand",
+      "gold",
+      "gold_leaf",
+      "tools"
+    ],
+    "sells": [
+      "glass",
+      "fine_glassware"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Glass being heated, gentle blowing, tools on hot glass",
+    "activitySounds": "Master giving instructions, glass cracking when flawed, cooling sounds",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "summer": "More difficult working conditions due to heat",
+    "carnival": "Special mask-themed glass pieces",
+    "diplomatic season": "Focus on prestigious gift pieces for foreign dignitaries"
+  },
+  "aiInteractionPoints": [
+    "Master's workstation",
+    "Apprentice stations",
+    "Design area",
+    "Cooling ovens",
+    "Display area for finished works",
+    "Customer commission desk"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3,
+  "constructionMinutes": 5760
+}

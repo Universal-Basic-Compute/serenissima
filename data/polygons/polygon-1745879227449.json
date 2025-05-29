@@ -1,0 +1,141 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43555414882047,
+      "lng": 12.320372967914208
+    },
+    {
+      "lat": 45.43600585960047,
+      "lng": 12.320212035373315
+    },
+    {
+      "lat": 45.43556544163403,
+      "lng": 12.31808772583352
+    },
+    {
+      "lat": 45.43513631312978,
+      "lng": 12.318243293956384
+    }
+  ],
+  "centroid": {
+    "lat": 45.43556544079619,
+    "lng": 12.319229005769357
+  },
+  "historicalName": "Fondamenta de le Erbe, Sestiere Dorsoduro",
+  "englishName": "Quay of the Herbs, Dorsoduro District",
+  "historicalDescription": "This area in the Dorsoduro sestiere was known for its herb contract along the canal quay in the 15th century, near the Church of San Nicolo dei Mendicoli.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 8716.76,
+  "center": {
+    "lat": 45.43556544079619,
+    "lng": 12.319229005769357
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.435712247622845,
+        "lng": 12.318795829013451
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879238426",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43575616390913,
+          "lng": 12.318718939021691
+        },
+        "distance": 7.735616208261262,
+        "id": "58cdaf38-a614-4e96-bd2a-d4329bb7c07e",
+        "historicalName": "Ponte degli Erbaioli",
+        "englishName": "Bridge of the Herb Sellers",
+        "historicalDescription": "This bridge name derives from its proximity to Fondamenta de le Erbe, where herb sellers and vegetable merchants would gather to sell their produce brought in from nearby islands like Sant'Erasmo. The area was known for its small contract of fresh herbs and vegetables during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43573420576599,
+            "lng": 12.318757384017571
+          }
+        }
+      },
+      "id": "bridge_45.435712_12.318796"
+    },
+    {
+      "edge": {
+        "lat": 45.43527559169335,
+        "lng": 12.318953185275658
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879220627",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.435149487279816,
+          "lng": 12.318836062148675
+        },
+        "distance": 16.73734515064266,
+        "id": "03dde575-a3c2-431a-862a-c2201c2f670b",
+        "historicalName": "Ponte dei Bottai",
+        "englishName": "Bridge of the Coopers",
+        "historicalDescription": "During the Renaissance, this area in Dorsoduro housed several workshops of bottai (coopers), craftsmen who made wooden barrels essential for Venice's wine and oil trade. These artisans were organized in a guild that had significant presence in this sestiere, and the bridge would have connected their workshops to transport routes.",
+        "location": {
+          "midpoint": {
+            "lat": 45.435212539486585,
+            "lng": 12.318894623712167
+          }
+        }
+      },
+      "id": "bridge_45.435276_12.318953"
+    },
+    {
+      "edge": {
+        "lat": 45.435414870256906,
+        "lng": 12.319663076594933
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879220627",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43530852889393,
+          "lng": 12.319601832822427
+        },
+        "distance": 12.753716828429534,
+        "id": "03dde575-a3c2-431a-862a-c2201c2f670b",
+        "historicalName": "Ponte della Giudecca Vecchia",
+        "englishName": "Bridge of the Old Giudecca",
+        "historicalDescription": "This bridge name references its orientation toward the Giudecca canal and island visible from Dorsoduro. The 'vecchia' designation indicates this was one of the older crossing points where boats would depart to the Giudecca island. In Renaissance Venice, this connection would have been important for workers traveling between the two areas.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43536169957542,
+            "lng": 12.31963245470868
+          }
+        }
+      },
+      "id": "bridge_45.435415_12.319663"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.435530538507805,
+      "lng": 12.318792302285676,
+      "streetName": "Calle dei Droghieri",
+      "streetNameEnglish": "Street of the Druggists",
+      "streetDescription": "This name reflects the historical presence of apothecaries and spice merchants near Fondamenta de le Erbe in Dorsoduro. The proximity to herb contracts ('erbe') made it a natural location for droghieri who sold medicinal herbs, spices, and compounds during the Renaissance period. Venice was a major hub for the spice trade from the East, and these merchants were essential to both medicine and cooking.",
+      "id": "building_45.435531_12.318792"
+    },
+    {
+      "lat": 45.43556878000789,
+      "lng": 12.3193104992613,
+      "streetName": "Rio Terà dei Erbaioli",
+      "streetNameEnglish": "Filled Canal of the Herb Sellers",
+      "streetDescription": "This name references the filled-in canal (rio terà) where herb sellers would gather to trade. It directly connects to the nearby Fondamenta de le Erbe, as 'erbaioli' were vendors specialized in fresh culinary and medicinal herbs. This area in Dorsoduro would have been bustling with these merchants who supplied Venetian households and apothecaries with essential herbs grown in the mainland territories of the Venetian Republic.",
+      "id": "building_45.435569_12.319310"
+    },
+    {
+      "lat": 45.43567337504869,
+      "lng": 12.320103175199636,
+      "streetName": "Sottoportego del Basilico",
+      "streetNameEnglish": "Passageway of the Basil",
+      "streetDescription": "This covered passageway (sottoportego) would likely connect to the herb contract area. Basil was a prized herb in Renaissance Venice, used both in cooking and believed to have protective properties. The name suggests a small passage where perhaps specific herb vendors specialized in aromatic plants might have set up their stalls. Such specific herb designations were common in Venice's intricate street naming system, reflecting the microeconomies of different areas.",
+      "id": "building_45.435673_12.320103"
+    }
+  ],
+  "id": "polygon-1745879227449"
+}

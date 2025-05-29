@@ -1,0 +1,12 @@
+{
+  "id": "clay",
+  "name": "Clay",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": "Malleable earth material used for bricks, tiles, and pottery.",
+  "icon": "/images/resources/clay.png",
+  "importPrice": 120.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

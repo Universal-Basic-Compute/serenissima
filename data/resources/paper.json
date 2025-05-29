@@ -1,0 +1,11 @@
+{
+  "id": "paper",
+  "name": "Paper",
+  "category": "processed_materials",
+  "subCategory": "publishing",
+  "description": "Processed sheets ready for printing, writing, and document creation.",
+  "importPrice": 144.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": 10,
+  "tier": 3
+}

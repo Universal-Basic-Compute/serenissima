@@ -1,0 +1,187 @@
+{
+  "contracts_to_create": [
+    {
+      "building_id": "building_45.438952_12.333201",
+      "resource_type": "tools",
+      "hourly_amount": 15,
+      "price_per_resource": 72,
+      "reason": "Small warehouse offering essential tools at competitive price with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.438952_12.333201",
+      "resource_type": "rope",
+      "hourly_amount": 10,
+      "price_per_resource": 113,
+      "reason": "Small warehouse selling maritime supply with 20% markup from import"
+    },
+    {
+      "building_id": "canal_45.425700_12.330415",
+      "resource_type": "rope",
+      "hourly_amount": 15,
+      "price_per_resource": 113,
+      "reason": "Cargo landing selling essential maritime supply with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.423495_12.330726",
+      "resource_type": "soap",
+      "hourly_amount": 20,
+      "price_per_resource": 36,
+      "reason": "Public bath selling hygiene product with 20% markup from import"
+    },
+    {
+      "building_id": "canal_45.429449_12.326439",
+      "resource_type": "gondola",
+      "hourly_amount": 2,
+      "price_per_resource": 3600,
+      "reason": "Gondola station offering transportation vessels with 20% markup from import"
+    },
+    {
+      "building_id": "canal_45.449120_12.327023",
+      "resource_type": "small_boats",
+      "hourly_amount": 3,
+      "price_per_resource": 1150,
+      "reason": "Public dock selling small vessels with 20% markup from import"
+    },
+    {
+      "building_id": "canal_45.449120_12.327023",
+      "resource_type": "rope",
+      "hourly_amount": 12,
+      "price_per_resource": 113,
+      "reason": "Public dock offering maritime supplies with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.442276_12.323666",
+      "resource_type": "building_materials",
+      "hourly_amount": 15,
+      "price_per_resource": 58,
+      "reason": "Small warehouse selling construction supplies with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.444858_12.317615",
+      "resource_type": "bread",
+      "hourly_amount": 30,
+      "price_per_resource": 29,
+      "reason": "Market stall selling staple food with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.439979_12.320432",
+      "resource_type": "wine",
+      "hourly_amount": 25,
+      "price_per_resource": 12,
+      "reason": "Market stall offering popular beverage with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.424830_12.339053",
+      "resource_type": "fine_glassware",
+      "hourly_amount": 5,
+      "price_per_resource": 576,
+      "reason": "Glassblower workshop selling premium Venetian specialty with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.436027_12.357020",
+      "resource_type": "preserved_fish",
+      "hourly_amount": 20,
+      "price_per_resource": 22,
+      "reason": "Market stall offering preserved food with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.440864_12.335067",
+      "resource_type": "tools",
+      "hourly_amount": 10,
+      "price_per_resource": 72,
+      "reason": "Blacksmith selling crafted tools with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.440864_12.335067",
+      "resource_type": "weapons",
+      "hourly_amount": 5,
+      "price_per_resource": 504,
+      "reason": "Blacksmith offering weapons with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.424914_12.320574",
+      "resource_type": "olive_oil",
+      "hourly_amount": 15,
+      "price_per_resource": 31,
+      "reason": "Market stall selling cooking essential with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.444368_12.327293",
+      "resource_type": "processed_iron",
+      "hourly_amount": 12,
+      "price_per_resource": 50,
+      "reason": "Blacksmith selling refined material with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.425837_12.321249",
+      "resource_type": "books",
+      "hourly_amount": 8,
+      "price_per_resource": 173,
+      "reason": "Bottega offering knowledge resources with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.438395_12.343959",
+      "resource_type": "luxury_silk_garments",
+      "hourly_amount": 3,
+      "price_per_resource": 1728,
+      "reason": "Bottega selling premium clothing with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.444013_12.323059",
+      "resource_type": "soap",
+      "hourly_amount": 15,
+      "price_per_resource": 36,
+      "reason": "Apothecary offering hygiene product with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.444013_12.323059",
+      "resource_type": "spiced_wine",
+      "hourly_amount": 10,
+      "price_per_resource": 86,
+      "reason": "Apothecary selling medicinal beverage with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.429730_12.331747",
+      "resource_type": "silk_fabric",
+      "hourly_amount": 7,
+      "price_per_resource": 360,
+      "reason": "Bottega offering luxury textile with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.441107_12.330353",
+      "resource_type": "maps",
+      "hourly_amount": 5,
+      "price_per_resource": 216,
+      "reason": "Town hall selling navigation resources with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.438070_12.321188",
+      "resource_type": "gold_leaf",
+      "hourly_amount": 3,
+      "price_per_resource": 504,
+      "reason": "Chapel offering decorative material with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.437558_12.315655",
+      "resource_type": "salt",
+      "hourly_amount": 20,
+      "price_per_resource": 12,
+      "reason": "Market stall selling essential preservative with 20% markup from import"
+    },
+    {
+      "building_id": "building_45.424871_12.332609",
+      "resource_type": "venetian_lace",
+      "hourly_amount": 2,
+      "price_per_resource": 1152,
+      "reason": "Merceria offering premium textile craft with 20% markup from import"
+    },
+    {
+      "building_id": "canal_45.428839_12.316503",
+      "resource_type": "gondola",
+      "hourly_amount": 2,
+      "price_per_resource": 3600,
+      "reason": "Boat workshop selling iconic Venetian vessel with 20% markup from import"
+    }
+  ],
+  "contracts_to_end": []
+}

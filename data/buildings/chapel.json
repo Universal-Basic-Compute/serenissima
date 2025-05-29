@@ -1,0 +1,61 @@
+{
+  "name": "Chapel",
+  "pointType": "building",
+  "category": "Public & Government",
+  "subCategory": "Religious Buildings",
+  "size": 1,
+  "unlockCondition": "5,000,000 ducats, Church approval",
+  "calculationsAnalysis": "The Chapel represents a smaller religious investment with significant influence benefits. The construction cost of 2,000,000 ducats reflects the high-quality materials and craftsmanship required even for small religious structures, while the income of 5,000 ducats (0.25% return) represents modest donations and fees for private ceremonies. The maintenance cost of 10,000 ducats (200% of income) creates an ongoing expense that is partially offset by income but primarily justified by reputation and spiritual benefits. The employment capacity of 2 represents the minimal religious staff. The construction time of 5 days (432000000ms) reflects the detailed artistic work required. This building creates a strategic option for players to enhance reputation and fulfill religious obligations without the major investment of a full church, reflecting the historical practice of private chapels maintained by wealthy families and institutions.",
+  "shortDescription": "Small private worship space often attached to palaces or institutions.",
+  "fullDescription": "Meeting the spiritual needs of private households or institutions, chapels provide dedicated worship spaces on a smaller scale than parish churches. Featuring an altar, devotional artwork, and often family memorials, these intimate religious spaces allow for private worship while demonstrating the owner's piety and status. Many Venetian noble families maintained private chapels within their palazzos or funded chapels within larger churches.",
+  "flavorText": "The lord of the house may command all who dwell beneath his roof—save in the chapel, where all kneel equally before a higher authority.",
+  "constructionCosts": {
+    "ducats": 2000000,
+    "timber": 230,
+    "bricks": 460,
+    "stone": 690,
+    "glass": 140,
+    "marble": 180
+  },
+  "maintenanceCost": 1000,
+  "soundDesign": {
+    "ambientSound": "Quiet prayers, subtle echoes, occasional small bell",
+    "activitySounds": "Private Mass, family prayers, soft organ music",
+    "musicTheme": "Gloria di San Marco"
+  },
+  "seasonalEffects": {
+    "family events": "Specially decorated for weddings, funerals, baptisms",
+    "holy days": "Enhanced decoration, family gathering",
+    "normal days": "Quiet, contemplative atmosphere"
+  },
+  "aiInteractionPoints": [
+    "Entrance doorway",
+    "Altar area",
+    "Family pews",
+    "Devotional artwork",
+    "Prayer stations",
+    "Memorial area"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "wine",
+      "bread",
+      "spiced_wine",
+      "books",
+      "gold",
+      "gold_leaf",
+      "paper"
+    ],
+    "sells": [
+      "spiced_wine",
+      "books",
+      "gold_leaf"
+    ]
+  },
+  "buildTier": 1,
+  "workTier": 0,
+  "consumeTier": 0,
+  "constructionMinutes": 7200
+}

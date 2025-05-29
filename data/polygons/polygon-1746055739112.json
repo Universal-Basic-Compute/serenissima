@@ -1,0 +1,189 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.445747483746814,
+      "lng": 12.33038409110556
+    },
+    {
+      "lat": 45.445446395618895,
+      "lng": 12.331574991908173
+    },
+    {
+      "lat": 45.44486679644842,
+      "lng": 12.332953647341828
+    },
+    {
+      "lat": 45.444388810833885,
+      "lng": 12.33365638610373
+    },
+    {
+      "lat": 45.44351939354613,
+      "lng": 12.335045770373444
+    },
+    {
+      "lat": 45.443052687830395,
+      "lng": 12.334369853701691
+    },
+    {
+      "lat": 45.44359090456469,
+      "lng": 12.333693937029938
+    },
+    {
+      "lat": 45.44428719132294,
+      "lng": 12.332508400645356
+    },
+    {
+      "lat": 45.444561939949494,
+      "lng": 12.33191295024405
+    },
+    {
+      "lat": 45.44508885137977,
+      "lng": 12.330013946261506
+    }
+  ],
+  "centroid": {
+    "lat": 45.444455045524144,
+    "lng": 12.332611397471526
+  },
+  "historicalName": "Calle de le Pignate in Sestiere di Castello",
+  "englishName": "Alley of the Pots in the Castello District",
+  "historicalDescription": "A narrow alley in the Castello sestiere, known for its pottery workshops and kilns in the 15th century, located near the Chiesa di San Martino.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 31157.21,
+  "center": {
+    "lat": 45.4444956286012,
+    "lng": 12.332617947691212
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.445156596033655,
+        "lng": 12.332264319625
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055706124",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.445272220691066,
+          "lng": 12.332204199400723
+        },
+        "distance": 13.685650658383276,
+        "id": "4d1c06aa-70df-4a06-a9e8-5340f8ca7ae1",
+        "historicalName": "Ponte dei Pignattari",
+        "englishName": "Bridge of the Pot Makers",
+        "historicalDescription": "This bridge takes its name directly from the 'Calle de le Pignate' where it's located. 'Pignate' refers to earthenware cooking pots, and this area of Castello was historically known for its pottery workshops and artisans who crafted these essential kitchen items. The bridge would have connected these craftsmen to local contracts.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44521440836236,
+            "lng": 12.332234259512862
+          }
+        }
+      },
+      "id": "bridge_45.445157_12.332264"
+    },
+    {
+      "edge": {
+        "lat": 45.44486679644842,
+        "lng": 12.332953647341828
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055706124",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44503323061386,
+          "lng": 12.332823789683163
+        },
+        "distance": 21.098013843747673,
+        "id": "4d1c06aa-70df-4a06-a9e8-5340f8ca7ae1",
+        "historicalName": "Ponte della Tana Vecchia",
+        "englishName": "Bridge of the Old Rope Factory",
+        "historicalDescription": "Located near the Arsenal in the Castello district, this bridge references the 'Tana' or rope-making facility that was crucial to Venice's maritime industry. The Arsenal required vast amounts of rope for shipbuilding, and this bridge would have been used by workers traveling between the rope works and the nearby residential areas of Calle de le Pignate.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44495001353114,
+            "lng": 12.332888718512496
+          }
+        }
+      },
+      "id": "bridge_45.444867_12.332954"
+    },
+    {
+      "edge": {
+        "lat": 45.444388810833885,
+        "lng": 12.33365638610373
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055720258",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.444516775883585,
+          "lng": 12.333634604896412
+        },
+        "distance": 14.33016800102903,
+        "id": "e28c6433-374e-423c-92e6-cbcebd4b2436",
+        "historicalName": "Ponte dei Celestini",
+        "englishName": "Bridge of the Celestines",
+        "historicalDescription": "Named after the Order of Celestine monks who had established a small monastery in this area of Castello during the 15th century. The religious order was known for their charitable works in this working-class neighborhood, and the bridge would have connected their facilities to the surrounding community near Calle de le Pignate.",
+        "location": {
+          "midpoint": {
+            "lat": 45.444452793358735,
+            "lng": 12.333645495500072
+          }
+        }
+      },
+      "id": "bridge_45.444389_12.333656"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44355649888598,
+      "lng": 12.334482278625387,
+      "streetName": "Calle dei Pentoler",
+      "streetNameEnglish": "Street of the Pot Makers",
+      "streetDescription": "This name refers to artisans who made terracotta pots (pentole) in this area of Castello. Similar to the nearby 'Calle de le Pignate' (Street of the Cooking Pots), this street would likely have hosted workshops of pot makers who supplied the Venetian households with essential cookware. The Venetian dialect term 'pentoler' specifically referred to artisans specializing in cooking vessels.",
+      "id": "building_45.443556_12.334482"
+    },
+    {
+      "lat": 45.44396649875482,
+      "lng": 12.333780894902196,
+      "streetName": "Sottoportego del Forno Casariol",
+      "streetNameEnglish": "Passageway of the Household Bread Oven",
+      "streetDescription": "This name references a communal bread oven that would have served the local residents of Castello. Many neighborhoods in Renaissance Venice had shared baking facilities where families could bring their dough to be baked. The term 'casariol' indicates it was primarily for household use rather than commercial baking, distinguishing it from the larger commercial 'forni' that supplied bread to the public.",
+      "id": "building_45.443966_12.333781"
+    },
+    {
+      "lat": 45.4443115621825,
+      "lng": 12.332606569057736,
+      "streetName": "Rio Terà dei Biscottai",
+      "streetNameEnglish": "Filled Canal of the Biscuit Makers",
+      "streetDescription": "This name designates a former canal that was filled in to create a street. The 'biscottai' were bakers who specialized in hard, twice-baked biscuits that were essential provisions for Venetian ships due to their long shelf life. This area of Castello, with its proximity to the Arsenale, would have been a logical location for such artisans who supplied the Venetian naval and merchant fleets with these durable foodstuffs.",
+      "id": "building_45.444312_12.332607"
+    },
+    {
+      "lat": 45.444918441275,
+      "lng": 12.331937079280634,
+      "streetName": "Salizada dei Greci Ortodossi",
+      "streetNameEnglish": "Paved Street of the Orthodox Greeks",
+      "streetDescription": "This name reflects the significant Greek Orthodox community that settled in the Castello district. A 'salizada' was one of the first paved streets in Venice (with 'masegni' stone slabs). The eastern section of Castello became home to many Greek merchants and refugees, especially after the fall of Constantinople in 1453, and they established their own church, San Giorgio dei Greci, in this area, making this a historically accurate street name.",
+      "id": "building_45.444918_12.331937"
+    },
+    {
+      "lat": 45.44537657087546,
+      "lng": 12.330597186393762,
+      "streetName": "Corte del Capitello Antico",
+      "streetNameEnglish": "Court of the Ancient Capital",
+      "streetDescription": "This name refers to an architectural element - likely a repurposed Byzantine column capital that became a neighborhood landmark. Venice frequently incorporated architectural elements from its eastern conquests into everyday spaces. This small courtyard would have been distinguished by such a decorative element, perhaps mounted on a wall or used as a base for a small shrine, which was common practice in Renaissance Venice.",
+      "id": "building_45.445377_12.330597"
+    },
+    {
+      "lat": 45.44525445607787,
+      "lng": 12.331186923440606,
+      "streetName": "Calle dei Arsenalotti",
+      "streetNameEnglish": "Street of the Arsenal Workers",
+      "streetDescription": "This street name honors the elite workers of the Venetian Arsenal, the massive shipyard and armory that was the heart of Venetian naval power. The Arsenalotti were highly skilled shipbuilders who enjoyed special privileges and status in the Republic. They typically lived in the eastern part of Castello near their workplace. Their importance to Venice's maritime strength would make this a prominent street name in this district, marking a route many workers would have taken to reach the Arsenal's gates.",
+      "id": "building_45.445254_12.331187"
+    }
+  ],
+  "id": "polygon-1746055739112"
+}

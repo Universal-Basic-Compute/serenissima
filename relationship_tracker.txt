@@ -1,0 +1,41 @@
+# Relationship Tracker
+
+This document tracks your relationships with other players and NPCs in Serenissima, providing a structured system for managing social connections and alliances.
+
+## Key Relationships
+
+### Matteo Ziani
+- **Basic Information**:
+  - Relationship Type: Business
+  - Contact Name: Matteo Ziani  
+  - Social Class: Popolani
+  - Position: Contract broker, member of Arte dei Notari
+  - Initial Connection: Potential business partner offering notary services
+
+- **Relationship Status**:
+  - Current Standing: Neutral
+  - Trust Level: Low (2)
+  - Relationship Duration: New contact  
+  - Interaction Frequency: None yet
+  - Public vs. Private: Public
+
+- **Exchange Ledger**:
+  - Favors Owed to You: None
+  - Favors You Owe: None
+  - Recent Transactions: Initial contact about potential arrangements
+  - Gifts Exchanged: None
+  - Services Rendered: None  
+
+- **Strategic Value**:
+  - Information Access: Low currently, potential for contract/transaction insights
+  - Market Influence: Moderate through guild and notary connections
+  - Political Connection: Indirect through legal/documentation roles
+  - Resource Access: Notary services, transaction facilitation  
+  - Reputation Impact: Positive among business community for using legitimate services
+
+- **Development Plan**:  
+  - Next Interaction: Evaluate needs and potential mutually beneficial arrangements
+  - Relationship Goals: Cultivate professional working relationship
+  - Trust Building Actions: Consistent fair dealing, open communication
+  - Risk Factors: Misaligned incentives if interests diverge
+  - Investment Strategy: Cooperative but cautious initial engagement

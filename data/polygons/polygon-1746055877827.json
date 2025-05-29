@@ -1,0 +1,162 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.443390930621156,
+      "lng": 12.331840388947239
+    },
+    {
+      "lat": 45.442875294682665,
+      "lng": 12.332838170700779
+    },
+    {
+      "lat": 45.44261935684625,
+      "lng": 12.333224408798923
+    },
+    {
+      "lat": 45.442239211740365,
+      "lng": 12.33281134861063
+    },
+    {
+      "lat": 45.441964451801795,
+      "lng": 12.332607500725498
+    },
+    {
+      "lat": 45.44165957961893,
+      "lng": 12.332194440537204
+    },
+    {
+      "lat": 45.44194563257895,
+      "lng": 12.331486337357273
+    },
+    {
+      "lat": 45.44206983933368,
+      "lng": 12.33130394714426
+    },
+    {
+      "lat": 45.442194045814965,
+      "lng": 12.331593625717868
+    },
+    {
+      "lat": 45.442310724381606,
+      "lng": 12.332076423340549
+    },
+    {
+      "lat": 45.442717215567846,
+      "lng": 12.331759922676792
+    },
+    {
+      "lat": 45.44294680651765,
+      "lng": 12.331400506668796
+    },
+    {
+      "lat": 45.443187687821236,
+      "lng": 12.33128785389017
+    },
+    {
+      "lat": 45.44329307306815,
+      "lng": 12.331674091988315
+    }
+  ],
+  "centroid": {
+    "lat": 45.44252956074252,
+    "lng": 12.332007069078879
+  },
+  "historicalName": "Fondamenta del Remèr in Sestiere Dorsoduro",
+  "englishName": "Quay of the Oar Maker in Dorsoduro District",
+  "historicalDescription": "This area, situated along the Rio de San Barnaba canal in the Dorsoduro sestiere, was known for its concentration of skilled artisans, particularly oar makers who crafted oars for Venice's many gondolas and boats.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 14900.06,
+  "center": {
+    "lat": 45.44243674009472,
+    "lng": 12.332462296493448
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.442194045814965,
+        "lng": 12.331593625717868
+      },
+      "id": "bridge_45.442194_12.331594"
+    },
+    {
+      "edge": {
+        "lat": 45.442717215567846,
+        "lng": 12.331759922676792
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055841290",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44269035092131,
+          "lng": 12.33169110586758
+        },
+        "distance": 6.143955757944495,
+        "id": "34300bdc-b816-4c97-9469-3af36e9636a0",
+        "historicalName": "Ponte dei Remeri",
+        "englishName": "Bridge of the Oar Makers",
+        "historicalDescription": "This bridge name directly references the 'Fondamenta del Remèr' where it is located. 'Remeri' were the skilled craftsmen who made oars ('remi') for Venetian boats and gondolas. The Dorsoduro area was known for its artisanal workshops, and oar makers were essential to Venetian maritime culture, making this a historically appropriate name that connects to the specific location.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44270378324458,
+            "lng": 12.331725514272186
+          }
+        }
+      },
+      "id": "bridge_45.442717_12.331760"
+    },
+    {
+      "edge": {
+        "lat": 45.44294680651765,
+        "lng": 12.331400506668796
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055841290",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44290865063872,
+          "lng": 12.331337054277615
+        },
+        "distance": 6.519712848700725,
+        "id": "34300bdc-b816-4c97-9469-3af36e9636a0",
+        "historicalName": "Ponte della Toletta Vecchia",
+        "englishName": "Bridge of the Old Toletta",
+        "historicalDescription": "Located near the Fondamenta del Remèr in Dorsoduro, this bridge would reference the historic 'Toletta' area, an important small square nearby. 'Vecchia' (old) distinguishes it from other potential bridges in the area. The Toletta was a commercial hub in Renaissance Venice where various goods were measured and taxed (a 'small toll' was collected), making this name historically consistent with Venetian bridge naming traditions that reference nearby landmarks.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442927728578184,
+            "lng": 12.331368780473206
+          }
+        }
+      },
+      "id": "bridge_45.442947_12.331401"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44209054601673,
+      "lng": 12.332470087728924,
+      "streetName": "Calle dei Squararoli",
+      "streetNameEnglish": "Street of the Boat Builders",
+      "streetDescription": "This street name refers to the squararoli, specialized boat builders who worked alongside the remèr (oar makers) in this area of Dorsoduro. These craftsmen were responsible for building small gondolas and other Venetian boats, forming an essential part of the maritime economy that defined this waterfront district near the Fondamenta del Remèr.",
+      "id": "building_45.442091_12.332470"
+    },
+    {
+      "lat": 45.442599119387324,
+      "lng": 12.33250848851288,
+      "streetName": "Rio Terà della Toletta",
+      "streetNameEnglish": "Filled Canal of the Small Table",
+      "streetDescription": "This name refers to a filled-in canal near the area historically known as 'Toletta' in Dorsoduro. The term 'toletta' likely referred to a small table or counter where goods were sold or services provided. This area was known for small workshops and commerce, connecting to the artisanal character of the Fondamenta del Remèr district where many boat-related crafts were practiced.",
+      "id": "building_45.442599_12.332508"
+    },
+    {
+      "lat": 45.4430247704161,
+      "lng": 12.33192144392349,
+      "streetName": "Sottoportego dei Maestri d'Ascia",
+      "streetNameEnglish": "Passageway of the Axe Masters",
+      "streetDescription": "This name honors the maestri d'ascia, highly skilled woodworkers who shaped oars, hulls and other wooden boat components with axes and specialized tools. These craftsmen worked closely with the remèr (oar makers) in this part of Dorsoduro. The sottoportego (covered passageway) would have connected workshops or provided shelter for these artisans as they moved between the fondamenta and inland workshops.",
+      "id": "building_45.443025_12.331921"
+    }
+  ],
+  "id": "polygon-1746055877827"
+}

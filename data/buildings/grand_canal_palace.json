@@ -1,0 +1,70 @@
+{
+  "name": "Grand Canal Palace",
+  "pointType": "canal",
+  "category": "home",
+  "subCategory": "Noble Residences",
+  "size": 3,
+  "unlockCondition": "200,000,000 ducats total wealth, Great Council membership",
+  "calculationsAnalysis": "The Grand Canal Palace represents the pinnacle of Venetian residential architecture and status. The construction cost of 15,000,000 ducats reflects the extraordinary materials, craftsmanship, and prime Grand Canal location, while the income of 180,000 ducats (1.2% return) represents the economic power wielded from this prestigious address. The maintenance cost of 75,000 ducats (41.7% of income) reflects the extensive staff and upkeep required for such a grand residence. The residentsCapacity of 25 represents the noble family with extensive household staff. The construction time of 20 days (1728000000ms) reflects the elaborate construction and artistic elements. This building creates an endgame residential option with appropriate wealth and political requirements reflecting the highest echelon of Venetian society.",
+  "shortDescription": "Spectacular palace facing the Grand Canal, the ultimate statement of wealth and power in Venice.",
+  "fullDescription": "The pinnacle of Venetian residential architecture, these magnificent palaces line the Grand Canal, their facades functioning as public displays of family power. Featuring enormous reception halls, multiple courtyards, private docks, and lavish decoration, these buildings combine Gothic, Byzantine, and Renaissance elements in a uniquely Venetian style. Only the wealthiest and most powerful families maintain such residences.",
+  "flavorText": "The facade speaks to the canal, the canal speaks to the world—and both pronounce the glory of your house for generations to come.",
+  "constructionCosts": {
+    "ducats": 15000000,
+    "timber": 2010,
+    "bricks": 5020,
+    "stone": 4020,
+    "glass": 750,
+    "marble": 1000,
+    "gold": 100
+  },
+  "maintenanceCost": 7500,
+  "residentsCapacity": 25,
+  "soundDesign": {
+    "ambientSound": "Grand Canal boat traffic, distant music from within",
+    "activitySounds": "Gondolas arriving, important visitors, chamber music, servant activity",
+    "musicTheme": "Diplomazia Veneziana"
+  },
+  "seasonalEffects": {
+    "winter": "Elegant winter decorations, heated interior visible through windows",
+    "carnival": "Most elaborate decorations in city, musicians and entertainers present, illuminated by torches and lanterns",
+    "state ceremonies": "State flags and banners, increased security, distinguished visitors"
+  },
+  "aiInteractionPoints": [
+    "Grand water entrance",
+    "Formal reception halls",
+    "Private docks",
+    "Multiple courtyards",
+    "Art galleries",
+    "Garden terraces",
+    "Ballrooms",
+    "Private chapel"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 100,
+    "stores": [
+      "banking_services",
+      "blackmail_evidence",
+      "books",
+      "gold",
+      "jewelry",
+      "luxury_silk_garments",
+      "maps",
+      "paper",
+      "spiced_wine",
+      "wine"
+    ],
+    "sells": [
+      "banking_services",
+      "maps",
+      "spiced_wine",
+      "luxury_silk_garments",
+      "jewelry"
+    ]
+  },
+  "buildTier": 4,
+  "workTier": 4,
+  "consumeTier": 4,
+  "constructionMinutes": 28800
+}

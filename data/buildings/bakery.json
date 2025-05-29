@@ -1,0 +1,67 @@
+{
+  "name": "Bakery",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "retail_food",
+  "size": 1,
+  "unlockCondition": "1,000,000 ducats capital, Bakers Guild connection",
+  "calculationsAnalysis": "The Bakery represents basic food production with modest but reliable returns. The construction cost of 400,000 ducats reflects the specialized oven and preparation areas required, while the income of 7,000 ducats (1.75% return) represents daily bread and pastry sales. The maintenance cost of 5,000 ducats (71% of income) creates a modest profit margin appropriate for this essential service that was often price-controlled. The employment capacity of 4 represents the baker, apprentices, and sales staff needed. The construction time of 2 days (172800000ms) reflects the straightforward construction requirements. This building creates an accessible investment in food production with appropriate guild requirements reflecting the historical importance of regulated bakeries in Venice's urban food system, where consistent bread supply at controlled prices was considered essential to social stability.",
+  "shortDescription": "Facility producing bread and pastries, an essential food service for the urban population.",
+  "fullDescription": "A staple of every Venetian neighborhood, bakeries provide essential daily bread as well as sweet and savory pastries. Featuring stone ovens, preparation areas, and often a small retail space, these establishments operate from pre-dawn to serve the community. Their regulated prices and consistent operation made them crucial to urban food security in Renaissance Venice.",
+  "flavorText": "The scent of fresh bread has ended more neighborhood disputes than any magistrate's decree—for even bitter enemies must still eat side by side.",
+  "constructionCosts": {
+    "ducats": 400000,
+    "timber": 60,
+    "bricks": 370,
+    "stone": 180,
+    "iron": 18
+  },
+  "maintenanceCost": 500,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "flour": 2,
+        "water": 1
+      },
+      "outputs": {
+        "bread": 6
+      },
+      "craftMinutes": 60
+    }
+  ],
+    "storageCapacity": 100,
+    "stores": [
+      "flour",
+      "water",
+      "fuel",
+      "bread",
+      "grain"
+    ],
+    "sells": [
+      "bread",
+      "spiced_wine"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Oven crackling, dough being kneaded, wood splitting",
+    "activitySounds": "Bread being thumped for doneness, customer interactions, early morning activity",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "festivals": "Special celebration breads and pastries",
+    "lent": "Specific religious observation breads",
+    "harvest": "Grain quality variations affect product"
+  },
+  "aiInteractionPoints": [
+    "Retail counter",
+    "Oven area",
+    "Preparation tables",
+    "Early morning line",
+    "Delivery distribution"
+  ],
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 1,
+  "constructionMinutes": 2880
+}

@@ -1,0 +1,164 @@
+{
+  "wage_adjustments": [
+    {
+      "business_id": "building_45.438952_12.333201",
+      "new_wage_amount": 50,
+      "reason": "Small warehouse - reduced from 55 to align with standard warehouse wage rates while remaining competitive"
+    },
+    {
+      "business_id": "canal_45.425700_12.330415",
+      "new_wage_amount": 75,
+      "reason": "Cargo landing - reduced from 80 to optimize costs while remaining attractive for dock workers"
+    },
+    {
+      "business_id": "building_45.423495_12.330726",
+      "new_wage_amount": 40,
+      "reason": "Public bath - reduced from 45 to standardize service wages while ensuring adequate compensation"
+    },
+    {
+      "business_id": "canal_45.429449_12.326439",
+      "new_wage_amount": 65,
+      "reason": "Gondola station - reduced from 70 to align with standardized transportation wages"
+    },
+    {
+      "business_id": "canal_45.449120_12.327023",
+      "new_wage_amount": 0,
+      "reason": "Public dock - maintained at 0 as civic infrastructure with no dedicated employee"
+    },
+    {
+      "business_id": "building_45.442276_12.323666",
+      "new_wage_amount": 50,
+      "reason": "Small warehouse - reduced from 55 to standardize warehouse wages while remaining competitive"
+    },
+    {
+      "business_id": "building_45.444858_12.317615",
+      "new_wage_amount": 50,
+      "reason": "Market stall - reduced from 55 to standardize market wages while remaining competitive"
+    },
+    {
+      "business_id": "building_45.439979_12.320432",
+      "new_wage_amount": 50,
+      "reason": "Market stall - reduced from 55 to standardize market wages while remaining competitive"
+    },
+    {
+      "business_id": "building_45.424830_12.339053",
+      "new_wage_amount": 120,
+      "reason": "Glassblower workshop - reduced from 125 to optimize costs while maintaining premium for skilled artisans"
+    },
+    {
+      "business_id": "building_45.436027_12.357020",
+      "new_wage_amount": 50,
+      "reason": "Market stall - reduced from 55 to standardize market wages while remaining competitive"
+    },
+    {
+      "business_id": "building_45.440864_12.335067",
+      "new_wage_amount": 290,
+      "reason": "Blacksmith - reduced from 300 to optimize costs while maintaining premium for specialized skills"
+    },
+    {
+      "business_id": "building_45.424914_12.320574",
+      "new_wage_amount": 50,
+      "reason": "Market stall - reduced from 55 to standardize market wages while remaining competitive"
+    },
+    {
+      "business_id": "canal_45.430226_12.323033",
+      "new_wage_amount": 0,
+      "reason": "Public dock - maintained at 0 as civic infrastructure with no dedicated employee"
+    },
+    {
+      "business_id": "canal_45.447787_12.320340",
+      "new_wage_amount": 0,
+      "reason": "Public dock - maintained at 0 as civic infrastructure with no dedicated employee"
+    },
+    {
+      "business_id": "building_45.444368_12.327293",
+      "new_wage_amount": 290,
+      "reason": "Blacksmith - reduced from 300 to optimize costs while maintaining premium for specialized skills"
+    },
+    {
+      "business_id": "canal_45.436636_12.334073",
+      "new_wage_amount": 0,
+      "reason": "Public dock - maintained at 0 as civic infrastructure with no dedicated employee"
+    },
+    {
+      "business_id": "canal_45.427469_12.322662",
+      "new_wage_amount": 0,
+      "reason": "Public dock - maintained at 0 as civic infrastructure with no dedicated employee"
+    },
+    {
+      "business_id": "building_45.425837_12.321249",
+      "new_wage_amount": 60,
+      "reason": "Bottega - reduced from 65 to standardize retail wages while valuing commercial skills"
+    },
+    {
+      "business_id": "canal_45.436930_12.333117",
+      "new_wage_amount": 70,
+      "reason": "Gondola station - reduced from 75 to align with standardized transportation wages"
+    },
+    {
+      "business_id": "building_45.438395_12.343959",
+      "new_wage_amount": 60,
+      "reason": "Bottega - reduced from 65 to standardize retail wages while valuing commercial skills"
+    },
+    {
+      "business_id": "building_45.444013_12.323059",
+      "new_wage_amount": 110,
+      "reason": "Apothecary - reduced from 115 to optimize costs while maintaining premium for specialized knowledge"
+    },
+    {
+      "business_id": "building_45.429730_12.331747",
+      "new_wage_amount": 60,
+      "reason": "Bottega - reduced from 65 to standardize retail wages while valuing commercial skills"
+    },
+    {
+      "business_id": "building_45.441107_12.330353",
+      "new_wage_amount": 0,
+      "reason": "Town hall - maintained at 0 as civic building with no wage allocation"
+    },
+    {
+      "business_id": "building_45.438070_12.321188",
+      "new_wage_amount": 0,
+      "reason": "Chapel - maintained at 0 as religious building with no wage allocation"
+    },
+    {
+      "business_id": "building_45.437768_12.340851",
+      "new_wage_amount": 0,
+      "reason": "Guard post - maintained at 0 as security infrastructure with separate funding"
+    },
+    {
+      "business_id": "building_45.437558_12.315655",
+      "new_wage_amount": 50,
+      "reason": "Market stall - reduced from 55 to standardize market wages while remaining competitive"
+    },
+    {
+      "business_id": "building_45.445605_12.322269",
+      "new_wage_amount": 0,
+      "reason": "Parish church - maintained at 0 as religious building with no wage allocation"
+    },
+    {
+      "business_id": "building_45.446139_12.318907",
+      "new_wage_amount": 0,
+      "reason": "Guard post - maintained at 0 as security infrastructure with separate funding"
+    },
+    {
+      "business_id": "building_45.434820_12.332664",
+      "new_wage_amount": 0,
+      "reason": "Chapel - maintained at 0 as religious building with no wage allocation"
+    },
+    {
+      "business_id": "building_45.424871_12.332609",
+      "new_wage_amount": 100,
+      "reason": "Merceria - reduced from 105 to optimize costs while maintaining premium for textile expertise"
+    },
+    {
+      "business_id": "canal_45.441223_12.343860",
+      "new_wage_amount": 0,
+      "reason": "Public dock - maintained at 0 as civic infrastructure with no dedicated employee"
+    },
+    {
+      "business_id": "canal_45.428839_12.316503",
+      "new_wage_amount": 110,
+      "reason": "Boat workshop - reduced from 115 to optimize costs while maintaining premium for specialized skills"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "name": "City Gate",
+  "pointType": "building",
+  "category": "Military & Defense",
+  "subCategory": "Defensive Structures",
+  "size": 2,
+  "unlockCondition": "25,000,000 ducats, government authorization, Engineering Guild approval",
+  "calculationsAnalysis": "The City Gate balances defensive infrastructure with modest revenue generation. The construction cost of 7,500,000 ducats reflects the massive fortified structure and defensive systems required, while the income of 30,000 ducats (0.4% return) represents tolls and entry fees collected. The maintenance cost of 35,000 ducats exceeds income, creating a realistic scenario where defensive infrastructure required public funding but provided essential security. The employment capacity of 20 represents the guards, administrators, and maintenance staff needed. The construction time of 20 days (1728000000ms) reflects the substantial defensive project. This building creates a strategic control point with appropriate government restrictions reflecting the historical importance of controlled access points in Venice's unique urban structure, where gates regulated movement between districts and to the mainland connections.",
+  "shortDescription": "Fortified entrance point controlling access between districts or to the city itself.",
+  "fullDescription": "Regulating movement while providing defensive capabilities, city gates control access to key areas through fortified entry points. Featuring defensive architecture, checkpoint functions, guard facilities, and often customs inspection areas, these impressive structures combine practical control with symbolic authority. Though Venice's island nature limited traditional walls, gates controlled key access points and bridge approaches.",
+  "flavorText": "The gate speaks two messages simultaneously: to citizens it says 'you are protected,' while to potential enemies it declares 'you shall not pass'—both essential to the security of any great city.",
+  "constructionCosts": {
+    "ducats": 7500000,
+    "timber": 550,
+    "bricks": 2180,
+    "stone": 4370,
+    "iron": 820,
+    "marble": 550
+  },
+  "maintenanceCost": 2500,
+  "soundDesign": {
+    "ambientSound": "Passage of people and carts, guard challenges, gate mechanisms",
+    "activitySounds": "Document checking, customs inspections, traffic regulation",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "heightened alert": "Increased inspections, restricted access",
+    "festivals": "Decorated with banners, ceremonial guards",
+    "trade fairs": "Maximum traffic, expedited processing"
+  },
+  "aiInteractionPoints": [
+    "Main archway",
+    "Guard checkpoint",
+    "Customs inspection area",
+    "Administration office",
+    "Defensive positions",
+    "Waiting area",
+    "Document verification station"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 100,
+    "stores": [
+      "porter_equipment",
+      "weapons",
+      "tools",
+      "wine",
+      "criminal_contacts",
+      "blackmail_evidence",
+      "smuggler_maps",
+      "salt"
+    ],
+    "sells": [
+      "criminal_contacts",
+      "blackmail_evidence",
+      "smuggler_maps"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 0,
+  "constructionMinutes": 28800
+}

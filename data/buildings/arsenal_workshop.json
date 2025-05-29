@@ -1,0 +1,128 @@
+{
+  "name": "Arsenal Workshop",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Naval Facilities",
+  "size": 4,
+  "unlockCondition": "Government license only, Senate appointment",
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Arsenal Workshop represents Venice's revolutionary naval production system with strategic rather than commercial value. The construction cost of 12,500,000 ducats reflects the massive industrial facilities and specialized equipment required, while generating no direct income reflects its military rather than commercial purpose. The maintenance cost of 100,000 ducats creates a substantial ongoing expense justified by the critical naval production capabilities provided. The employment capacity of 80 represents the shipwrights, craftsmen, and laborers needed for industrial-scale production. The construction time of 40 days (3456000000ms) reflects the massive industrial project. This building creates a strategic military asset with appropriate government restrictions reflecting the historical Arsenal's status as a state-controlled facility that was the largest industrial complex in pre-industrial Europe and key to Venice's naval dominance.",
+  "shortDescription": "Specialized production facility within the Arsenal complex for building naval vessels and equipment.",
+  "fullDescription": "The industrial heart of Venice's naval power, Arsenal workshops represent the world's first standardized ship production facilities. Featuring specialized construction areas, material processing stations, equipment fabrication, and assembly zones, these massive structures enabled Venice to build ships at unprecedented speed and quality. Their advanced organization and scale astounded foreign visitors and projected Venetian power throughout the Mediterranean.",
+  "flavorText": "What other nations do in months, the Arsenal does in days; what they build individually, we create in series—for Venice's navy is not merely ships, but the perfected system that produces them.",
+  "constructionCosts": {
+    "ducats": 12500000,
+    "timber": 3530,
+    "bricks": 5640,
+    "stone": 7050,
+    "iron": 2120,
+    "marble": 350
+  },
+  "maintenanceCost": 6000,
+  "soundDesign": {
+    "ambientSound": "Intense industrial activity, hammering, sawing, orders being shouted",
+    "activitySounds": "Ship hull construction, material processing, coordinated team work",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "wartime": "Maximum production, extended hours",
+    "peacetime": "Maintenance focus, training, improvements",
+    "fleet commissioning": "Ceremonial launches, quality inspections"
+  },
+  "aiInteractionPoints": [
+    "Main construction hall",
+    "Material processing zone",
+    "Component assembly areas",
+    "Ship launch channel",
+    "Administration office",
+    "Security checkpoint",
+    "Naval design area",
+    "Quality inspection station"
+  ],
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "timber": 15,
+        "rope": 5,
+        "sailcloth": 2
+      },
+      "outputs": {
+        "small_boats": 1
+      },
+      "craftMinutes": 240
+    },
+    {
+      "inputs": {
+        "timber": 30,
+        "rope": 10,
+        "sailcloth": 5,
+        "iron_fittings": 5
+      },
+      "outputs": {
+        "gondola": 1
+      },
+      "craftMinutes": 480
+    },
+    {
+      "inputs": {
+        "ship_components": 50,
+        "sailcloth": 20,
+        "rope": 30,
+        "iron_fittings": 15
+      },
+      "outputs": {
+        "merchant_galley": 1
+      },
+      "craftMinutes": 1440
+    },
+    {
+      "inputs": {
+        "ship_components": 100,
+        "sailcloth": 40,
+        "rope": 60,
+        "weapons": 20
+      },
+      "outputs": {
+        "war_galley": 1
+      },
+      "craftMinutes": 2880
+    },
+    {
+      "inputs": {
+        "timber": 8,
+        "iron_fittings": 2
+      },
+      "outputs": {
+        "ship_components": 3
+      },
+      "craftMinutes": 180
+    }
+  ],
+    "storageCapacity": 150,
+    "stores": [
+      "timber",
+      "iron_fittings",
+      "sailcloth",
+      "rope",
+      "pitch",
+      "weapons",
+      "small_boats",
+      "gondola",
+      "merchant_galley",
+      "war_galley",
+      "ship_components"
+    ],
+    "sells": [
+      "small_boats",
+      "gondola",
+      "merchant_galley",
+      "war_galley",
+      "ship_components"
+    ]
+  },
+  "buildTier": 4,
+  "workTier": 2,
+  "consumeTier": 3,
+  "constructionMinutes": 57600
+}

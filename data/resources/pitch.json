@@ -1,0 +1,27 @@
+{
+  "id": "pitch",
+  "name": "Pitch",
+  "category": "processed_materials",
+  "subCategory": "naval_supplies",
+  "description": "Sticky, waterproof tar essential for shipbuilding and maintenance.",
+  "varieties": [
+    {
+      "type": "liquid_pitch",
+      "viscosity": "medium",
+      "waterproofing": "good",
+      "valueMultiplier": 1,
+      "primaryUse": "hull_sealing"
+    },
+    {
+      "type": "thick_pitch",
+      "viscosity": "high",
+      "waterproofing": "excellent",
+      "valueMultiplier": 1.2,
+      "primaryUse": "critical_seams"
+    }
+  ],
+  "importPrice": 1020.0,
+  "lifetimeHours": 26250,
+  "consumptionHours": null,
+  "tier": 0
+}

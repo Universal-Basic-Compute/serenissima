@@ -1,0 +1,62 @@
+{
+  "name": "Oil Press",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Food Processing",
+  "size": 1,
+  "unlockCondition": "3,000,000 ducats total wealth, access to olive supply",
+  "shortDescription": "Facility for extracting oil from olives through pressing.",
+  "fullDescription": "This specialized workshop houses large wooden or stone presses used to extract valuable oil from olives. The process involves crushing olives into a paste, then pressing them to separate the oil from the solids and water. The resulting olive oil is a staple of Venetian cuisine and an important trade commodity.",
+  "flavorText": "From humble fruit to liquid gold—the press transforms nature's bounty into Venice's culinary treasure.",
+  "constructionCosts": {
+    "ducats": 800000,
+    "timber": 610,
+    "stone": 810,
+    "iron": 300
+  },
+  "maintenanceCost": 800,
+  "productionInformation": {
+  "Arti": [
+    {
+      "inputs": {
+        "olives": 4
+      },
+      "outputs": {
+        "olive_oil": 3
+      },
+      "craftMinutes": 90
+    }
+  ],
+    "storageCapacity": 120,
+    "stores": [
+      "olives",
+      "olive_oil",
+      "water",
+      "soap"
+    ],
+    "sells": [
+      "olive_oil",
+      "soap"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Grinding stones, wooden mechanisms creaking",
+    "activitySounds": "Pressing, liquid pouring, workers calling"
+  },
+  "seasonalEffects": {
+    "autumn": "Peak production after olive harvest",
+    "winter": "Continued processing of stored olives",
+    "summer": "Minimal activity, maintenance period"
+  },
+  "aiInteractionPoints": [
+    "Olive receiving area",
+    "Crushing mill",
+    "Press mechanism",
+    "Oil collection vats",
+    "Storage area"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 4320
+}

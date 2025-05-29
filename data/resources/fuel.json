@@ -1,0 +1,69 @@
+{
+  "id": "fuel",
+  "name": "Fuel",
+  "category": "utility_resources",
+  "subCategory": "energy",
+  "description": "Burnable material for heating and power, typically wood or charcoal. Essential for most production processes in Venice.",
+  "historicalNotes": "Venice's unique situation as a city built on water made fuel a particularly precious commodity. With no forests of its own, the Republic depended entirely on imported wood and charcoal from its mainland territories and neighboring regions. This dependency influenced Venetian foreign policy and territorial expansion, particularly into the forests of the Dalmatian coast. Special magistrates oversaw the fuel supply, recognizing its critical importance to both industry and daily life.\n\nWithout fuel, the furnaces of Murano would fall cold, the bakeries would produce no bread, and in winter, the palaces would stand empty. From the humblest fisherman to the Doge himself, all depend on this most basic resource.",
+  "variants": [
+    {
+      "id": "firewood",
+      "name": "Firewood",
+      "valueModifier": 0.8,
+      "properties": [
+        "bulky",
+        "smoky"
+      ],
+      "primaryUse": "heating",
+      "sources": [
+        "mainland_forests",
+        "imported"
+      ]
+    },
+    {
+      "id": "charcoal",
+      "name": "Charcoal",
+      "valueModifier": 1.2,
+      "properties": [
+        "hot_burning",
+        "clean"
+      ],
+      "primaryUse": "production",
+      "sources": [
+        "mainland_production",
+        "imported"
+      ]
+    },
+    {
+      "id": "coal",
+      "name": "Coal",
+      "valueModifier": 1.3,
+      "properties": [
+        "hot_burning",
+        "long_lasting",
+        "smoky"
+      ],
+      "primaryUse": "industrial",
+      "sources": [
+        "imported"
+      ]
+    },
+    {
+      "id": "peat",
+      "name": "Peat",
+      "valueModifier": 0.6,
+      "properties": [
+        "slow_burning",
+        "smoky"
+      ],
+      "primaryUse": "basic_heating",
+      "sources": [
+        "mainland_bogs"
+      ]
+    }
+  ],
+  "importPrice": 540.0,
+  "lifetimeHours": 8775,
+  "consumptionHours": 2,
+  "tier": 1
+}

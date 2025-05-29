@@ -1,0 +1,288 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.444086701776,
+      "lng": 12.330022771860317
+    },
+    {
+      "lat": 45.443631291952755,
+      "lng": 12.331519444490628
+    },
+    {
+      "lat": 45.44346945121285,
+      "lng": 12.331771572138027
+    },
+    {
+      "lat": 45.44330008249951,
+      "lng": 12.331540902162747
+    },
+    {
+      "lat": 45.443221043592594,
+      "lng": 12.33118685057278
+    },
+    {
+      "lat": 45.44290865063872,
+      "lng": 12.331337054277615
+    },
+    {
+      "lat": 45.44269035092131,
+      "lng": 12.33169110586758
+    },
+    {
+      "lat": 45.44235931164824,
+      "lng": 12.331954212775361
+    },
+    {
+      "lat": 45.4421108991399,
+      "lng": 12.33125147401346
+    },
+    {
+      "lat": 45.44213724597295,
+      "lng": 12.330902786841524
+    },
+    {
+      "lat": 45.44221252257098,
+      "lng": 12.330827684989107
+    },
+    {
+      "lat": 45.44253621079801,
+      "lng": 12.329159350981843
+    },
+    {
+      "lat": 45.44328143942364,
+      "lng": 12.3294758516456
+    },
+    {
+      "lat": 45.44368039615734,
+      "lng": 12.329845996489656
+    },
+    {
+      "lat": 45.44381212653476,
+      "lng": 12.329851360907686
+    }
+  ],
+  "centroid": {
+    "lat": 45.44302918165598,
+    "lng": 12.330822561334264
+  },
+  "historicalName": "Calle de la Maddalena in Cannaregio",
+  "englishName": "Alley of Mary Magdalene in Cannaregio",
+  "historicalDescription": "A narrow street in the Cannaregio sestiere of Venice, near the Church of Santa Maria Maddalena. The area was known for its artisan workshops and residential homes in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 28815.86,
+  "center": {
+    "lat": 45.44288743934877,
+    "lng": 12.330461748726243
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.44221252257098,
+        "lng": 12.330827684989107
+      },
+      "water": {
+        "lat": 45.442032659992385,
+        "lng": 12.330828813432772
+      },
+      "historicalName": "Fondamenta della Maddalena",
+      "englishName": "Foundation of the Magdalene",
+      "historicalDescription": "This dock takes its name from the Church of Santa Maria Maddalena that historically stood in this area of Cannaregio. The church was a significant landmark from the 13th century until it was demolished in the early 19th century. The fondamenta would have served merchants and residents visiting the church and the surrounding parish.",
+      "id": "canal_45.442213_12.330828"
+    },
+    {
+      "edge": {
+        "lat": 45.4423743666845,
+        "lng": 12.329993517985475
+      },
+      "water": {
+        "lat": 45.442239895414176,
+        "lng": 12.32982326758327
+      },
+      "historicalName": "Riva dei Linaioli",
+      "englishName": "Shore of the Linen Workers",
+      "historicalDescription": "Cannaregio was home to many textile artisans during the Renaissance period, including those who worked with linen. This dock would have served as a loading and unloading point for raw materials and finished goods related to the linen trade. The area around Calle de la Maddalena had numerous workshops dedicated to textile production, making this name historically appropriate for a local water landing.",
+      "id": "canal_45.442374_12.329994"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44385899686438,
+        "lng": 12.330771108175473
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055751637",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44387694718557,
+          "lng": 12.330933943953614
+        },
+        "distance": 12.859515723697177,
+        "id": "61f90587-a3d9-4314-8c54-a887f1af28f2",
+        "historicalName": "Ponte della Maddalena",
+        "englishName": "Bridge of the Magdalene",
+        "historicalDescription": "Named after the nearby Calle de la Maddalena in Cannaregio, this bridge served as a connection to the small church dedicated to Mary Magdalene that existed in this area during the Renaissance period. Local residents would cross this bridge during religious processions dedicated to the saint.",
+        "location": {
+          "midpoint": {
+            "lat": 45.443867972024975,
+            "lng": 12.330852526064543
+          }
+        }
+      },
+      "id": "bridge_45.443859_12.330771"
+    },
+    {
+      "edge": {
+        "lat": 45.44290865063872,
+        "lng": 12.331337054277615
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055877827",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44294680651765,
+          "lng": 12.331400506668796
+        },
+        "distance": 6.519712848700725,
+        "id": "3c69afcf-8527-4625-9be6-dde95f673c23",
+        "historicalName": "Ponte dei Lanifici",
+        "englishName": "Bridge of the Wool Workshops",
+        "historicalDescription": "The Cannaregio district housed several wool processing workshops during the 15th and 16th centuries. This bridge was commonly used by wool workers traveling between their homes and workshops, becoming associated with this important Venetian trade that brought significant wealth to the Republic.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442927728578184,
+            "lng": 12.331368780473206
+          }
+        }
+      },
+      "id": "bridge_45.442909_12.331337"
+    },
+    {
+      "edge": {
+        "lat": 45.44269035092131,
+        "lng": 12.33169110586758
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055877827",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.442717215567846,
+          "lng": 12.331759922676792
+        },
+        "distance": 6.143955757944495,
+        "id": "3c69afcf-8527-4625-9be6-dde95f673c23",
+        "historicalName": "Ponte dei Riello",
+        "englishName": "Bridge of the Small Canal",
+        "historicalDescription": "Crossing one of the smaller canals that branched off from the main Cannaregio Canal, this bridge took its name from 'riello' (small rio or canal). It served as an important connection point for residents of this densely populated neighborhood during Renaissance Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44270378324458,
+            "lng": 12.331725514272186
+          }
+        }
+      },
+      "id": "bridge_45.442690_12.331691"
+    },
+    {
+      "edge": {
+        "lat": 45.44328143942364,
+        "lng": 12.3294758516456
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055561861",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.4432758183432,
+          "lng": 12.329384746499054
+        },
+        "distance": 7.135091269557788,
+        "id": "b442dc2f-256b-4b50-a9a9-c488036a780d",
+        "historicalName": "Ponte dei Lombardi",
+        "englishName": "Bridge of the Lombards",
+        "historicalDescription": "Named after merchants and craftsmen from Lombardy who settled in this area of Cannaregio during the 15th century. These immigrants established workshops and businesses, contributing to the economic life of the district. The bridge marked the entrance to their small community within Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44327862888342,
+            "lng": 12.329430299072328
+          }
+        }
+      },
+      "id": "bridge_45.443281_12.329476"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.442583686447435,
+      "lng": 12.32989944103499,
+      "streetName": "Calle dei Marzeri della Maddalena",
+      "streetNameEnglish": "Street of the Mercers of Maddalena",
+      "streetDescription": "This street name refers to the haberdashers and textile merchants who had shops in this area of Cannaregio near the Maddalena church. The 'marzeri' were an important guild in Renaissance Venice, selling textile trimmings, buttons, and other mercantile goods.",
+      "id": "building_45.442584_12.329899"
+    },
+    {
+      "lat": 45.442642984742974,
+      "lng": 12.330320427333316,
+      "streetName": "Fondamenta dei Sanser",
+      "streetNameEnglish": "Foundation of the Brokers",
+      "streetDescription": "The 'sanser' were official brokers who facilitated trade between Venetians and foreign merchants. This waterside street would have been where these intermediaries conducted business in Cannaregio, helping to regulate the commercial exchanges that were vital to Venice's economy.",
+      "id": "building_45.442643_12.330320"
+    },
+    {
+      "lat": 45.44262164031446,
+      "lng": 12.331200163265565,
+      "streetName": "Rio Terà della Misericordia Piccola",
+      "streetNameEnglish": "Filled Canal of the Little Mercy",
+      "streetDescription": "This street was once a small canal that was filled in (rio terà). The name references a smaller confraternity of mercy that likely existed in this area of Cannaregio, separate from the more famous Scuola Grande della Misericordia nearby.",
+      "id": "building_45.442622_12.331200"
+    },
+    {
+      "lat": 45.443056898182434,
+      "lng": 12.329734814981679,
+      "streetName": "Sottoportego dei Tessitori Fiamminghi",
+      "streetNameEnglish": "Passageway of the Flemish Weavers",
+      "streetDescription": "This covered passageway commemorates the Flemish textile workers who settled in this area of Cannaregio. Skilled foreign craftsmen were often recruited to Venice, and the Flemish were particularly known for their expertise in producing fine textiles.",
+      "id": "building_45.443057_12.329735"
+    },
+    {
+      "lat": 45.44304273351187,
+      "lng": 12.330323349393606,
+      "streetName": "Salizada dei Corazzeri",
+      "streetNameEnglish": "Paved Street of the Cuirassiers",
+      "streetDescription": "This paved street (salizada indicates it was one of the first to be paved) was named after the makers of 'corazze' (armor breastplates). The armorer's guild had workshops in this area of Cannaregio, supplying equipment for Venice's military forces and merchant ships.",
+      "id": "building_45.443043_12.330323"
+    },
+    {
+      "lat": 45.44292811937699,
+      "lng": 12.331018572003153,
+      "streetName": "Corte Venier della Maddalena",
+      "streetNameEnglish": "Venier Court of the Maddalena",
+      "streetDescription": "This courtyard was named after the Venier family, one of Venice's nobili houses who owned property near the Church of the Maddalena in Cannaregio. The Venier family produced several doges and maintained significant influence in Venetian politics throughout the Renaissance period.",
+      "id": "building_45.442928_12.331019"
+    },
+    {
+      "lat": 45.44346352033527,
+      "lng": 12.330470254051209,
+      "streetName": "Calle del Tintoretto Vecchio",
+      "streetNameEnglish": "Street of the Old Dyer",
+      "streetDescription": "Named after the cloth dyeing profession (tintoretto means 'little dyer'), this street commemorates the textile industry that flourished in this part of Cannaregio. The 'vecchio' designation distinguishes it from newer streets with similar names, indicating this was among the oldest areas for the dyeing trade.",
+      "id": "building_45.443464_12.330470"
+    },
+    {
+      "lat": 45.44350832313842,
+      "lng": 12.331021755319965,
+      "streetName": "Ruga degli Speziali",
+      "streetNameEnglish": "Row of the Apothecaries",
+      "streetDescription": "A 'ruga' typically indicates a commercial street, and this one hosted Venice's apothecaries and spice merchants who sold medicinal herbs, spices, and compounds. Located near the Maddalena area, these shops would have served the local community's health needs and contributed to Venice's spice trade.",
+      "id": "building_45.443508_12.331022"
+    },
+    {
+      "lat": 45.44381912869383,
+      "lng": 12.330485128491915,
+      "streetName": "Campiello della Madonna dei Miracoli",
+      "streetNameEnglish": "Small Square of the Madonna of Miracles",
+      "streetDescription": "This small campo would reference a shrine or image of the Madonna dei Miracoli that was venerated in this area of Cannaregio. Local shrines were common throughout Venice, often marking sites where miraculous events were believed to have occurred, and served as important centers for neighborhood religious devotion.",
+      "id": "building_45.443819_12.330485"
+    }
+  ],
+  "id": "polygon-1746055841290"
+}

@@ -1,0 +1,458 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.443212140156646,
+      "lng": 12.358220179277234
+    },
+    {
+      "lat": 45.44306911706866,
+      "lng": 12.358488400178723
+    },
+    {
+      "lat": 45.44245985870958,
+      "lng": 12.358756621080213
+    },
+    {
+      "lat": 45.44224155725562,
+      "lng": 12.358928282457166
+    },
+    {
+      "lat": 45.44194797810642,
+      "lng": 12.359003384309583
+    },
+    {
+      "lat": 45.4417522578249,
+      "lng": 12.358799536424451
+    },
+    {
+      "lat": 45.441579120086836,
+      "lng": 12.358509857850843
+    },
+    {
+      "lat": 45.44100700899991,
+      "lng": 12.357522804933362
+    },
+    {
+      "lat": 45.440442420003095,
+      "lng": 12.356358466084867
+    },
+    {
+      "lat": 45.44001332858702,
+      "lng": 12.35478132718411
+    },
+    {
+      "lat": 45.44008108008017,
+      "lng": 12.354137597020536
+    },
+    {
+      "lat": 45.44035208523931,
+      "lng": 12.35379427426663
+    },
+    {
+      "lat": 45.44092420296727,
+      "lng": 12.353397307332425
+    },
+    {
+      "lat": 45.44108981491104,
+      "lng": 12.353450951512723
+    },
+    {
+      "lat": 45.44118767628568,
+      "lng": 12.353654799397855
+    },
+    {
+      "lat": 45.4411952040767,
+      "lng": 12.353987393315702
+    },
+    {
+      "lat": 45.44108228710595,
+      "lng": 12.354641852315336
+    },
+    {
+      "lat": 45.44115003731553,
+      "lng": 12.355210480626493
+    },
+    {
+      "lat": 45.44129306526854,
+      "lng": 12.355843481954008
+    },
+    {
+      "lat": 45.44153395363299,
+      "lng": 12.356337008412748
+    },
+    {
+      "lat": 45.44187270115541,
+      "lng": 12.356959280904203
+    },
+    {
+      "lat": 45.44236952717592,
+      "lng": 12.357474265035062
+    },
+    {
+      "lat": 45.44282118339797,
+      "lng": 12.35778540128079
+    }
+  ],
+  "centroid": {
+    "lat": 45.441507721974396,
+    "lng": 12.356349693615437
+  },
+  "historicalName": "Campo San Polo",
+  "englishName": "St. Paul's Square",
+  "historicalDescription": "A major square in the San Polo sestiere, known for its large size and the Church of San Polo which has stood there since the 9th century. In the 15th century, it was a bustling area with contracts, festivities, and one of the main wells providing water to the district.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 54238.26,
+  "center": {
+    "lat": 45.44094218311763,
+    "lng": 12.356304597890317
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.443212140156646,
+        "lng": 12.358220179277234
+      },
+      "water": {
+        "lat": 45.44335465273743,
+        "lng": 12.358376577361788
+      },
+      "historicalName": "Riva di San Polo",
+      "englishName": "St. Paul's Landing",
+      "historicalDescription": "The main dock serving Campo San Polo, named after the parish church that dominates the campo. This would have been one of the busiest landings in this commercial district.",
+      "id": "canal_45.443212_12.358220"
+    },
+    {
+      "edge": {
+        "lat": 45.44306911706866,
+        "lng": 12.358488400178723
+      },
+      "water": {
+        "lat": 45.44319880101921,
+        "lng": 12.358666033576702
+      },
+      "historicalName": "Fondamenta dei Frari",
+      "englishName": "Foundation of the Friars",
+      "historicalDescription": "Named for its proximity to the Franciscan Friary (Santa Maria Gloriosa dei Frari) near Campo San Polo. This dock would have served the religious community and visitors to the important basilica.",
+      "id": "canal_45.443069_12.358488"
+    },
+    {
+      "edge": {
+        "lat": 45.44245985870958,
+        "lng": 12.358756621080213
+      },
+      "water": {
+        "lat": 45.44254819426794,
+        "lng": 12.358979926487585
+      },
+      "historicalName": "Riva dei Mercanti di Lana",
+      "englishName": "Wool Merchants' Landing",
+      "historicalDescription": "The San Polo district was known for textile production and trade. This dock would have served wool merchants bringing their goods to the workshops and contracts of the area.",
+      "id": "canal_45.442460_12.358757"
+    },
+    {
+      "edge": {
+        "lat": 45.44194797810642,
+        "lng": 12.359003384309583
+      },
+      "water": {
+        "lat": 45.441989366244734,
+        "lng": 12.359252855718399
+      },
+      "historicalName": "Fondamenta del Magistrato",
+      "englishName": "Magistrate's Foundation",
+      "historicalDescription": "San Polo contained administrative buildings, and this dock would have served officials of the Venetian Republic who worked in the area's governmental offices.",
+      "id": "canal_45.441948_12.359003"
+    },
+    {
+      "edge": {
+        "lat": 45.441579120086836,
+        "lng": 12.358509857850843
+      },
+      "water": {
+        "lat": 45.44158758361435,
+        "lng": 12.358765923576161
+      },
+      "historicalName": "Riva della Scuola Grande",
+      "englishName": "Landing of the Great School",
+      "historicalDescription": "Named for its proximity to the Scuola Grande di San Rocco, one of Venice's most important confraternities. This landing would have served members and visitors to this prestigious institution.",
+      "id": "canal_45.441579_12.358510"
+    },
+    {
+      "edge": {
+        "lat": 45.44100700899991,
+        "lng": 12.357522804933362
+      },
+      "water": {
+        "lat": 45.440913530732864,
+        "lng": 12.357741813464473
+      },
+      "historicalName": "Fondamenta dei Toscani",
+      "englishName": "Foundation of the Tuscans",
+      "historicalDescription": "San Polo attracted merchants from various Italian regions. This dock was likely used by Tuscan traders who had established businesses or residences in the area.",
+      "id": "canal_45.441007_12.357523"
+    },
+    {
+      "edge": {
+        "lat": 45.4407247145015,
+        "lng": 12.356940635509115
+      },
+      "water": {
+        "lat": 45.440565760666836,
+        "lng": 12.3570605992174
+      },
+      "historicalName": "Riva dei Bernardo",
+      "englishName": "Bernardo Family Landing",
+      "historicalDescription": "Named after the prominent Bernardo noble family who owned properties in the San Polo district. Nobili families often had their own private docks near their palaces.",
+      "id": "canal_45.440725_12.356941"
+    },
+    {
+      "edge": {
+        "lat": 45.440442420003095,
+        "lng": 12.356358466084867
+      },
+      "water": {
+        "lat": 45.44026255868408,
+        "lng": 12.356359947193477
+      },
+      "historicalName": "Fondamenta dei Ricamatori",
+      "englishName": "Embroiderers' Foundation",
+      "historicalDescription": "The textile arts flourished in San Polo. This dock would have served the guild of embroiderers who had workshops in the area, receiving materials and shipping finished goods.",
+      "id": "canal_45.440442_12.356358"
+    },
+    {
+      "edge": {
+        "lat": 45.44022787429506,
+        "lng": 12.355569896634488
+      },
+      "water": {
+        "lat": 45.44006248907735,
+        "lng": 12.355469129257598
+      },
+      "historicalName": "Riva di Sant'Aponal",
+      "englishName": "St. Apollinaris' Landing",
+      "historicalDescription": "Named after the Church of Sant'Aponal (St. Apollinaris) in the San Polo district. Parish churches often had associated docks for parishioners arriving by boat.",
+      "id": "canal_45.440228_12.355570"
+    },
+    {
+      "edge": {
+        "lat": 45.44001332858702,
+        "lng": 12.35478132718411
+      },
+      "water": {
+        "lat": 45.43986849567827,
+        "lng": 12.354629324991006
+      },
+      "historicalName": "Fondamenta del Teatro",
+      "englishName": "Theater Foundation",
+      "historicalDescription": "Campo San Polo hosted theatrical performances during carnival season. This dock would have served performers and spectators coming to enjoy the dramatic arts.",
+      "id": "canal_45.440013_12.354781"
+    },
+    {
+      "edge": {
+        "lat": 45.44008108008017,
+        "lng": 12.354137597020536
+      },
+      "water": {
+        "lat": 45.43995936175529,
+        "lng": 12.353948865220994
+      },
+      "historicalName": "Riva dei Sarti",
+      "englishName": "Tailors' Landing",
+      "historicalDescription": "The tailors' guild had a significant presence in San Polo. This dock would have been used for receiving fabrics and shipping finished garments throughout the city and beyond.",
+      "id": "canal_45.440081_12.354138"
+    },
+    {
+      "edge": {
+        "lat": 45.44035208523931,
+        "lng": 12.35379427426663
+      },
+      "water": {
+        "lat": 45.44025464350597,
+        "lng": 12.35357880474823
+      },
+      "historicalName": "Fondamenta dei Cognati",
+      "englishName": "Foundation of the Brothers-in-law",
+      "historicalDescription": "Likely named after a family business operated by brothers-in-law in the San Polo area, possibly textile merchants or artisans who shared ownership of properties along this waterfront.",
+      "id": "canal_45.440352_12.353794"
+    },
+    {
+      "edge": {
+        "lat": 45.44092420296727,
+        "lng": 12.353397307332425
+      },
+      "water": {
+        "lat": 45.44087543536345,
+        "lng": 12.353150561634695
+      },
+      "historicalName": "Riva del Tribunale",
+      "englishName": "Court Landing",
+      "historicalDescription": "San Polo contained legal offices and courts. This dock would have served lawyers, judges, and clients coming to conduct legal business in the district.",
+      "id": "canal_45.440924_12.353397"
+    },
+    {
+      "edge": {
+        "lat": 45.44118767628568,
+        "lng": 12.353654799397855
+      },
+      "water": {
+        "lat": 45.44115765924416,
+        "lng": 12.353402045636534
+      },
+      "historicalName": "Fondamenta delle Maschere",
+      "englishName": "Foundation of the Masks",
+      "historicalDescription": "Campo San Polo was a center for carnival celebrations. This dock may have been associated with mask-makers or costume artists who supplied the festival revelry.",
+      "id": "canal_45.441188_12.353655"
+    },
+    {
+      "edge": {
+        "lat": 45.44153395363299,
+        "lng": 12.356337008412748
+      },
+      "water": {
+        "lat": 45.441704280565276,
+        "lng": 12.35625464108353
+      },
+      "historicalName": "Riva dei Pittori",
+      "englishName": "Painters' Landing",
+      "historicalDescription": "The San Polo district attracted many artists who established studios in the area. This dock would have served painters receiving supplies and shipping completed works.",
+      "id": "canal_45.441534_12.356337"
+    },
+    {
+      "edge": {
+        "lat": 45.44282118339797,
+        "lng": 12.35778540128079
+      },
+      "water": {
+        "lat": 45.44296390666614,
+        "lng": 12.357941408062914
+      },
+      "historicalName": "Fondamenta del Traghetto San Polo",
+      "englishName": "San Polo Ferry Foundation",
+      "historicalDescription": "This dock would have served as a gondola ferry (traghetto) crossing point on the Grand Canal, connecting San Polo to San Marco district, essential for the commercial life of the area.",
+      "id": "canal_45.442821_12.357785"
+    }
+  ],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.44045261342427,
+      "lng": 12.35474937104809,
+      "streetName": "Calle dei Mercanti di San Polo",
+      "streetNameEnglish": "Street of the Merchants of San Polo",
+      "streetDescription": "Named after the merchants who conducted business in Campo San Polo, one of Venice's largest squares. The area was a commercial hub where traders would set up contract stalls, particularly during festivals and celebrations.",
+      "id": "building_45.440453_12.354749"
+    },
+    {
+      "lat": 45.440379075960756,
+      "lng": 12.355356668146714,
+      "streetName": "Rio Terà dei Fruttaroli",
+      "streetNameEnglish": "Filled Canal of the Fruit Sellers",
+      "streetDescription": "This street was originally a canal that was filled in (rio terà) where fruit vendors would sell their goods. The fruit contract was an important part of daily life in the San Polo district, supplying the local residents with fresh produce.",
+      "id": "building_45.440379_12.355357"
+    },
+    {
+      "lat": 45.44052022757142,
+      "lng": 12.355949500280815,
+      "streetName": "Salizada dei Pisani",
+      "streetNameEnglish": "Paved Road of the Pisani Family",
+      "streetDescription": "Named after the noble Pisani family who owned a palazzo near Campo San Polo. The Pisani were one of Venice's most influential nobili families who served as senators, ambassadors, and military commanders during the Renaissance period.",
+      "id": "building_45.440520_12.355950"
+    },
+    {
+      "lat": 45.440860911654504,
+      "lng": 12.354039699363504,
+      "streetName": "Ruga dei Setaioli",
+      "streetNameEnglish": "Street of the Silk Weavers",
+      "streetDescription": "This street housed workshops of silk weavers, a prestigious craft in Renaissance Venice. The San Polo district was known for textile production, and silk was particularly valuable, often used for the fine garments worn by Venetian nobility.",
+      "id": "building_45.440861_12.354040"
+    },
+    {
+      "lat": 45.44086186561191,
+      "lng": 12.354745605000184,
+      "streetName": "Sottoportego della Scuola Grande",
+      "streetNameEnglish": "Passageway of the Great School",
+      "streetDescription": "Named for its proximity to the Scuola Grande di San Rocco, one of Venice's most important confraternities. This covered passageway would have connected buildings associated with the scuola, which was renowned for its charitable works and artistic patronage.",
+      "id": "building_45.440862_12.354746"
+    },
+    {
+      "lat": 45.4408815730136,
+      "lng": 12.35523973131557,
+      "streetName": "Calle del Campanile di San Polo",
+      "streetNameEnglish": "Street of the Bell Tower of San Polo",
+      "streetDescription": "Named for its view or path to the bell tower of the Church of San Polo, which dates back to the 9th century. The campanile would have been an important landmark for orientation in the dense urban fabric of Venice.",
+      "id": "building_45.440882_12.355240"
+    },
+    {
+      "lat": 45.44099609962101,
+      "lng": 12.356003475780756,
+      "streetName": "Fondamenta dei Orafi",
+      "streetNameEnglish": "Foundation of the Goldsmiths",
+      "streetDescription": "A canalside street where goldsmiths had their workshops. Goldsmithing was a highly regulated and respected trade in Renaissance Venice, with strict guild rules to maintain quality and reputation.",
+      "id": "building_45.440996_12.356003"
+    },
+    {
+      "lat": 45.440853537023045,
+      "lng": 12.35659273012015,
+      "streetName": "Rio Terà delle Processioni",
+      "streetNameEnglish": "Filled Canal of the Processions",
+      "streetDescription": "This former canal was filled in and became a route for religious processions that would pass through Campo San Polo. Religious processions were elaborate public displays of Venetian piety and civic pride, often following feast days of important saints.",
+      "id": "building_45.440854_12.356593"
+    },
+    {
+      "lat": 45.44141841191074,
+      "lng": 12.356674232519598,
+      "streetName": "Calle dei Tintori di Lana",
+      "streetNameEnglish": "Street of the Wool Dyers",
+      "streetDescription": "Named for the wool dyers who operated in this area. Wool dyeing required access to water and good ventilation, making the San Polo district, with its proximity to the Grand Canal, an ideal location for this trade.",
+      "id": "building_45.441418_12.356674"
+    },
+    {
+      "lat": 45.441364260827484,
+      "lng": 12.357238089446586,
+      "streetName": "Corte Bernardo",
+      "streetNameEnglish": "Bernardo Court",
+      "streetDescription": "Named after the Bernardo family, a nobili family who likely owned property in the area. Many small courtyards in Venice were named after the prominent families whose homes surrounded them.",
+      "id": "building_45.441364_12.357238"
+    },
+    {
+      "lat": 45.44185978746321,
+      "lng": 12.35723081461892,
+      "streetName": "Campiello dei Spezieri",
+      "streetNameEnglish": "Small Square of the Spice Merchants",
+      "streetDescription": "A small square where spice merchants would have conducted business. Venice was the principal European trading port for spices from the East, and merchants dealing in these valuable commodities would have been prominent in the commercial district of San Polo.",
+      "id": "building_45.441860_12.357231"
+    },
+    {
+      "lat": 45.44186215733378,
+      "lng": 12.35791118329747,
+      "streetName": "Ramo del Teatro",
+      "streetNameEnglish": "Branch of the Theater",
+      "streetDescription": "Named for a small theater or performance space that existed in the area. During the Renaissance, Teatro San Polo was known for comedy performances and later for puppet shows, attracting both common people and nobility.",
+      "id": "building_45.441862_12.357911"
+    },
+    {
+      "lat": 45.4421803079468,
+      "lng": 12.357797398524838,
+      "streetName": "Calle dei Notari",
+      "streetNameEnglish": "Street of the Notaries",
+      "streetDescription": "Home to notaries who served the commercial interests in the area. Given San Polo's importance as a business district, notaries would have been essential for drafting commercial contracts, wills, and other legal documents for merchants and citizens.",
+      "id": "building_45.442180_12.357797"
+    },
+    {
+      "lat": 45.44219055534132,
+      "lng": 12.358513336750576,
+      "streetName": "Fondamenta della Fiera",
+      "streetNameEnglish": "Foundation of the Fair",
+      "streetDescription": "This canalside street was named for the annual fair held in Campo San Polo. The fair, coinciding with Carnival or other religious festivals, would draw merchants, performers, and visitors from throughout the Venetian territories.",
+      "id": "building_45.442191_12.358513"
+    },
+    {
+      "lat": 45.4426295642399,
+      "lng": 12.357933754026673,
+      "streetName": "Sottoportego dei Marzeri",
+      "streetNameEnglish": "Passageway of the Mercers",
+      "streetDescription": "A covered passageway where mercers (cloth merchants) had their shops. The textile trade was central to Venice's economy, and mercers selling fine fabrics would have been concentrated near Campo San Polo, catering to the wealthy residents of the district.",
+      "id": "building_45.442630_12.357934"
+    }
+  ]
+}

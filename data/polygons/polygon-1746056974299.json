@@ -1,0 +1,506 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.437860682127976,
+      "lng": 12.345811110708338
+    },
+    {
+      "lat": 45.437853153892085,
+      "lng": 12.34624026415072
+    },
+    {
+      "lat": 45.43772893785453,
+      "lng": 12.34749017355166
+    },
+    {
+      "lat": 45.43760848567821,
+      "lng": 12.34824655649386
+    },
+    {
+      "lat": 45.43719442936101,
+      "lng": 12.349297982427698
+    },
+    {
+      "lat": 45.43651687610647,
+      "lng": 12.348348480436426
+    },
+    {
+      "lat": 45.436012470067745,
+      "lng": 12.347356063100916
+    },
+    {
+      "lat": 45.43529349545791,
+      "lng": 12.347903233739954
+    },
+    {
+      "lat": 45.43492835824821,
+      "lng": 12.348461133215052
+    },
+    {
+      "lat": 45.43475519957034,
+      "lng": 12.348604571341868
+    },
+    {
+      "lat": 45.43419807674106,
+      "lng": 12.348722588538523
+    },
+    {
+      "lat": 45.43388186944534,
+      "lng": 12.34854019832551
+    },
+    {
+      "lat": 45.433358617766686,
+      "lng": 12.347826730727549
+    },
+    {
+      "lat": 45.43354683835368,
+      "lng": 12.347129356383677
+    },
+    {
+      "lat": 45.43366353480236,
+      "lng": 12.346356880187388
+    },
+    {
+      "lat": 45.43372752952661,
+      "lng": 12.345391284942027
+    },
+    {
+      "lat": 45.434367472777815,
+      "lng": 12.345584403991099
+    },
+    {
+      "lat": 45.43515798089292,
+      "lng": 12.345959913253184
+    },
+    {
+      "lat": 45.435553230797915,
+      "lng": 12.346142303466197
+    },
+    {
+      "lat": 45.43588448572885,
+      "lng": 12.346083294867869
+    },
+    {
+      "lat": 45.436268437874745,
+      "lng": 12.34582043838441
+    },
+    {
+      "lat": 45.43683575157286,
+      "lng": 12.345959913253184
+    },
+    {
+      "lat": 45.43718958395455,
+      "lng": 12.345933091163035
+    },
+    {
+      "lat": 45.43749448029104,
+      "lng": 12.345841896056529
+    },
+    {
+      "lat": 45.437697743600125,
+      "lng": 12.345782887458201
+    }
+  ],
+  "centroid": {
+    "lat": 45.43578310889964,
+    "lng": 12.346993390006594
+  },
+  "historicalName": "Calle de la Fontana in Contrà San Provolo",
+  "englishName": "Fountain Street in the San Provolo District",
+  "historicalDescription": "A narrow street located near the Church of San Provolo in the Castello sestiere, known for its fresh water fountain.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 91030.38,
+  "center": {
+    "lat": 45.43499765554072,
+    "lng": 12.346991756445796
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43354683835368,
+        "lng": 12.347129356383677
+      },
+      "water": {
+        "lat": 45.43336713751351,
+        "lng": 12.347140282285393
+      },
+      "historicalName": "Riva di San Provolo",
+      "englishName": "Saint Provolus' Shore",
+      "historicalDescription": "This dock was named after the contrada (district) of San Provolo where it was located. San Provolo was a Byzantine saint venerated in Venice, and the area contained a church dedicated to him. The dock would have served local residents and visitors to the nearby Fontana (fountain) which was an important water source in the area during the Renaissance period.",
+      "id": "canal_45.433547_12.347129"
+    },
+    {
+      "edge": {
+        "lat": 45.43366353480236,
+        "lng": 12.346356880187388
+      },
+      "water": {
+        "lat": 45.4334875357511,
+        "lng": 12.346304027529657
+      },
+      "historicalName": "Fondamenta della Fontana",
+      "englishName": "Foundation of the Fountain",
+      "historicalDescription": "This landing takes its name directly from the fountain (fontana) located in the Calle de la Fontana. Public fountains were crucial infrastructure in Renaissance Venice, providing fresh water to residents. This fondamenta would have been a practical landing point for boats delivering goods to the neighborhood, and the name references the most notable landmark in the immediate vicinity that would have been recognized by gondoliers and merchants alike.",
+      "id": "canal_45.433664_12.346357"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.436012470067745,
+        "lng": 12.347356063100916
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057007426",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43601895204564,
+          "lng": 12.347523586063337
+        },
+        "distance": 13.091015916704823,
+        "id": "ac0399a8-99b7-4209-bac3-07f75bbcdfb9",
+        "historicalName": "Ponte della Fontana",
+        "englishName": "Bridge of the Fountain",
+        "historicalDescription": "Named after the nearby fountain in Calle de la Fontana, which was a crucial source of fresh water for residents of Contrà San Provolo during the Renaissance period. Public fountains were vital infrastructure in Venice, as they provided accessible fresh water in a city surrounded by saltwater.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4360157110567,
+            "lng": 12.347439824582127
+          }
+        }
+      },
+      "id": "bridge_45.436012_12.347356"
+    },
+    {
+      "edge": {
+        "lat": 45.43419807674106,
+        "lng": 12.348722588538523
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057051612",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43414772964816,
+          "lng": 12.348834119377727
+        },
+        "distance": 10.34778389639208,
+        "id": "9b99f307-c918-4199-a36f-5fa9eb8c7226",
+        "historicalName": "Ponte di San Provolo",
+        "englishName": "Bridge of Saint Provolus",
+        "historicalDescription": "Named after the contrà (district) of San Provolo where it's located. Saint Provolus was an early Christian bishop of Verona whose veneration spread to Venice. The area around this bridge would have been administered by the parish of San Provolo, which dates back to the medieval period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43417290319461,
+            "lng": 12.348778353958124
+          }
+        }
+      },
+      "id": "bridge_45.434198_12.348723"
+    },
+    {
+      "edge": {
+        "lat": 45.435553230797915,
+        "lng": 12.346142303466197
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056451160",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43547660235802,
+          "lng": 12.345963688541145
+        },
+        "distance": 16.335087490921545,
+        "id": "6d5ae0a5-f42e-40cb-ad1e-ab91860a9554",
+        "historicalName": "Ponte dei Vetrari",
+        "englishName": "Bridge of the Glassmakers",
+        "historicalDescription": "This bridge likely served as a passage for glassmakers who had workshops in the San Provolo area. While Murano became the center of Venetian glassmaking after 1291, smaller workshops existed throughout Venice, and this bridge may have connected to an area where glass artisans lived or worked during the Renaissance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43551491657797,
+            "lng": 12.346052996003671
+          }
+        }
+      },
+      "id": "bridge_45.435553_12.346142"
+    },
+    {
+      "edge": {
+        "lat": 45.43588448572885,
+        "lng": 12.346083294867869
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056451160",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43571751555505,
+          "lng": 12.345990510631294
+        },
+        "distance": 19.927799311039422,
+        "id": "6d5ae0a5-f42e-40cb-ad1e-ab91860a9554",
+        "historicalName": "Ponte della Pietà",
+        "englishName": "Bridge of Mercy",
+        "historicalDescription": "Named for its proximity to the Ospedale della Pietà, the famous orphanage and music school where Antonio Vivaldi worked. While Vivaldi came later, the institution existed since the 14th century near San Provolo, taking in abandoned children and providing them with musical education. This bridge would have connected local residents to this important charitable institution.",
+        "location": {
+          "midpoint": {
+            "lat": 45.435801000641945,
+            "lng": 12.346036902749582
+          }
+        }
+      },
+      "id": "bridge_45.435884_12.346083"
+    },
+    {
+      "edge": {
+        "lat": 45.43683575157286,
+        "lng": 12.345959913253184
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056451160",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43685807501105,
+          "lng": 12.345877857852669
+        },
+        "distance": 6.8667223772538,
+        "id": "6d5ae0a5-f42e-40cb-ad1e-ab91860a9554",
+        "historicalName": "Ponte dei Provveditori",
+        "englishName": "Bridge of the Superintendents",
+        "historicalDescription": "Named after the Provveditori, Venetian officials who oversaw various aspects of civic administration. This bridge near Calle de la Fontana may have been along a route used by these magistrates when conducting their duties in this part of the city, or could have been near an administrative building where they worked during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43684691329196,
+            "lng": 12.345918885552926
+          }
+        }
+      },
+      "id": "bridge_45.436836_12.345960"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43382351027501,
+      "lng": 12.346754977986468,
+      "streetName": "Calle del Melograno",
+      "streetNameEnglish": "Street of the Pomegranate",
+      "streetDescription": "Named after the pomegranate trees that once grew in a small garden near the San Provolo district. Pomegranates were symbols of prosperity in Renaissance Venice, often featured in the gardens of wealthy families.",
+      "id": "building_45.433824_12.346755"
+    },
+    {
+      "lat": 45.43371941417544,
+      "lng": 12.347255213739839,
+      "streetName": "Fondamenta dei Copisti",
+      "streetNameEnglish": "Foundation of the Copyists",
+      "streetDescription": "This street along a canal was named for the scribes who worked copying manuscripts in the area. Located near the Greek community of San Provolo, these copyists specialized in reproducing both Latin and Greek texts for Venice's intellectual community.",
+      "id": "building_45.433719_12.347255"
+    },
+    {
+      "lat": 45.43380262568542,
+      "lng": 12.347959047543524,
+      "streetName": "Salizada di San Zaccaria",
+      "streetNameEnglish": "Paved Street of Saint Zacharias",
+      "streetDescription": "One of the early paved streets leading toward the important Benedictine convent and church of San Zaccaria, which was closely connected to the San Provolo district. The 'salizada' designation indicates it was one of the first streets to receive stone paving.",
+      "id": "building_45.433803_12.347959"
+    },
+    {
+      "lat": 45.43424909664539,
+      "lng": 12.346116961914998,
+      "streetName": "Rio Terà del Pozzo Bianco",
+      "streetNameEnglish": "Filled Canal of the White Well",
+      "streetDescription": "A former canal that was filled in during the 15th century. Named after a distinctive white stone well that served as an important water source for residents of the San Provolo district.",
+      "id": "building_45.434249_12.346117"
+    },
+    {
+      "lat": 45.43422428030878,
+      "lng": 12.34670425709486,
+      "streetName": "Calle dei Pergolesi",
+      "streetNameEnglish": "Street of the Parchment Makers",
+      "streetDescription": "Named for the craftsmen who prepared animal skins for parchment, used for important documents and manuscripts. These artisans served the nearby government offices and the scribes working in the San Provolo area.",
+      "id": "building_45.434224_12.346704"
+    },
+    {
+      "lat": 45.43427451900287,
+      "lng": 12.347338151823484,
+      "streetName": "Sottoportego della Colomba",
+      "streetNameEnglish": "Passageway of the Dove",
+      "streetDescription": "A covered passageway named for a relief sculpture of a dove that adorned the entrance. The dove symbolized the Holy Spirit and was associated with the nearby Church of San Provolo.",
+      "id": "building_45.434275_12.347338"
+    },
+    {
+      "lat": 45.43426093869851,
+      "lng": 12.347874779914527,
+      "streetName": "Ruga degli Armeni",
+      "streetNameEnglish": "Street of the Armenians",
+      "streetDescription": "A commercial street where Armenian merchants established shops in the 15th century. The Armenian community had close ties to the Greek community in the San Provolo district, contributing to Venice's role as a crossroads of Eastern and Western cultures.",
+      "id": "building_45.434261_12.347875"
+    },
+    {
+      "lat": 45.434666313716306,
+      "lng": 12.346116517590046,
+      "streetName": "Calle dei Calegari",
+      "streetNameEnglish": "Street of the Shoemakers",
+      "streetDescription": "Home to workshops of shoemakers who supplied footwear to Venice's elite families as well as to the clergy of nearby San Zaccaria and San Provolo. The guild of shoemakers had a strong presence in this district.",
+      "id": "building_45.434666_12.346117"
+    },
+    {
+      "lat": 45.43469782845915,
+      "lng": 12.346645720489143,
+      "streetName": "Corte Michiel",
+      "streetNameEnglish": "Michiel Court",
+      "streetDescription": "Named after the noble Michiel family who owned a palazzo in this location near San Provolo. The Michiel family produced several doges and military leaders who served the Venetian Republic from the 12th century onward.",
+      "id": "building_45.434698_12.346646"
+    },
+    {
+      "lat": 45.43467994746052,
+      "lng": 12.34727712262671,
+      "streetName": "Campiello delle Acque",
+      "streetNameEnglish": "Little Square of the Waters",
+      "streetDescription": "A small square named for its proximity to cisterns that collected rainwater for public use. Water management was crucial in Venice, and this campiello contained one of the important public wells of the San Provolo district.",
+      "id": "building_45.434680_12.347277"
+    },
+    {
+      "lat": 45.43466230403469,
+      "lng": 12.34805446081412,
+      "streetName": "Calle della Pietà",
+      "streetNameEnglish": "Street of the Pietà",
+      "streetDescription": "Named after the Ospedale della Pietà, the famous foundling home and music school where Antonio Vivaldi taught. Although the main institution was nearby, this street in the San Provolo area had connections to the charitable works of the Pietà.",
+      "id": "building_45.434662_12.348054"
+    },
+    {
+      "lat": 45.43511860634672,
+      "lng": 12.346556201239418,
+      "streetName": "Ramo del Battistero",
+      "streetNameEnglish": "Branch of the Baptistery",
+      "streetDescription": "A small branch street leading toward the baptistery of the nearby San Marco Basilica. Many residents of the San Provolo district would use this route to attend baptismal ceremonies.",
+      "id": "building_45.435119_12.346556"
+    },
+    {
+      "lat": 45.435101931021336,
+      "lng": 12.347421955998664,
+      "streetName": "Fondamenta dei Greci",
+      "streetNameEnglish": "Foundation of the Greeks",
+      "streetDescription": "A canalside street named for the Greek community that settled in this area near San Provolo. The Greeks established their own church, San Giorgio dei Greci, and became influential in Venetian trade with the Byzantine world.",
+      "id": "building_45.435102_12.347422"
+    },
+    {
+      "lat": 45.43509737968346,
+      "lng": 12.347978518525943,
+      "streetName": "Calle del Paradiso",
+      "streetNameEnglish": "Street of Paradise",
+      "streetDescription": "Named after a luxurious palazzo called 'Paradiso' owned by a wealthy merchant family in the 15th century. The name reflected the ornate decorations of the building that seemed heavenly to onlookers in the San Provolo district.",
+      "id": "building_45.435097_12.347979"
+    },
+    {
+      "lat": 45.43562060539232,
+      "lng": 12.346585350811866,
+      "streetName": "Sottoportego dei Preti",
+      "streetNameEnglish": "Passageway of the Priests",
+      "streetDescription": "A covered passage frequently used by priests traveling between the churches of San Provolo and San Zaccaria. This shortcut allowed clergy to move quickly between religious sites while protected from the elements.",
+      "id": "building_45.435621_12.346585"
+    },
+    {
+      "lat": 45.43557988594206,
+      "lng": 12.34731204924302,
+      "streetName": "Rio Terà delle Procuratie",
+      "streetNameEnglish": "Filled Canal of the Procurators",
+      "streetDescription": "A former canal filled in during the 16th century, named for its connection to the path used by the Procurators of St. Mark, high officials of the Republic who had responsibilities in the San Provolo district.",
+      "id": "building_45.435580_12.347312"
+    },
+    {
+      "lat": 45.43607038371857,
+      "lng": 12.34678931492295,
+      "streetName": "Calle del Capitello Bizantino",
+      "streetNameEnglish": "Street of the Byzantine Capital",
+      "streetDescription": "Named after an ornate Byzantine column capital that was incorporated into a building facade. This architectural element reflected the strong Byzantine influence in Venetian art, particularly prominent in the San Provolo area with its Greek connections.",
+      "id": "building_45.436070_12.346789"
+    },
+    {
+      "lat": 45.43602565064715,
+      "lng": 12.347334906182475,
+      "streetName": "Salizada dei Consorti",
+      "streetNameEnglish": "Paved Street of the Consortium",
+      "streetDescription": "One of the early paved streets, funded by a consortium of wealthy families living in the San Provolo district who pooled their resources to improve their neighborhood infrastructure in the 15th century.",
+      "id": "building_45.436026_12.347335"
+    },
+    {
+      "lat": 45.43641871919653,
+      "lng": 12.346562075652017,
+      "streetName": "Calle della Scuola di San Teodoro",
+      "streetNameEnglish": "Street of the School of Saint Theodore",
+      "streetDescription": "Named after a confraternity dedicated to Saint Theodore, Venice's first patron saint before Saint Mark. This scuola or lay brotherhood had a meeting hall in this street near San Provolo and performed charitable works in the community.",
+      "id": "building_45.436419_12.346562"
+    },
+    {
+      "lat": 45.4364421239986,
+      "lng": 12.347235391270535,
+      "streetName": "Ruga dei Oresi",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "A commercial street where goldsmiths established their workshops and showrooms. These artisans created precious items for the wealthy families of the San Provolo district and for the nearby churches.",
+      "id": "building_45.436442_12.347235"
+    },
+    {
+      "lat": 45.43652966479283,
+      "lng": 12.34801925946878,
+      "streetName": "Campiello dei Tagliapietra",
+      "streetNameEnglish": "Little Square of the Stonemasons",
+      "streetDescription": "A small square where stonemasons would gather to receive commissions for work on the numerous palaces and churches in the San Provolo area. These skilled craftsmen were essential for maintaining Venice's stone infrastructure.",
+      "id": "building_45.436530_12.348019"
+    },
+    {
+      "lat": 45.4370246314283,
+      "lng": 12.346752706350667,
+      "streetName": "Calle delle Vele",
+      "streetNameEnglish": "Street of the Sails",
+      "streetDescription": "Named for the sail makers who had workshops in this street. Their proximity to the San Provolo district allowed them to serve the many shipping merchants who lived in the area, providing crucial equipment for Venice's maritime enterprises.",
+      "id": "building_45.437025_12.346753"
+    },
+    {
+      "lat": 45.43701420476864,
+      "lng": 12.347324219955269,
+      "streetName": "Fondamenta degli Oratori",
+      "streetNameEnglish": "Foundation of the Orators",
+      "streetDescription": "A canalside street named for the public speakers who would gather here to debate or announce news. Its location near San Provolo made it convenient for the dissemination of information to residents and visitors.",
+      "id": "building_45.437014_12.347324"
+    },
+    {
+      "lat": 45.43694735470593,
+      "lng": 12.347885945117914,
+      "streetName": "Sottoportego del Leone Antico",
+      "streetNameEnglish": "Passageway of the Ancient Lion",
+      "streetDescription": "A covered passage named for an old stone relief of the Lion of Saint Mark that adorned the entrance. This symbol of Venetian power was particularly significant in the San Provolo district, which was close to the seat of government.",
+      "id": "building_45.436947_12.347886"
+    },
+    {
+      "lat": 45.43686876575963,
+      "lng": 12.348522002401275,
+      "streetName": "Calle del Dose Falier",
+      "streetNameEnglish": "Street of Doge Falier",
+      "streetDescription": "Named after Doge Marino Falier, who owned property in this area near San Provolo before becoming doge. His attempted coup and subsequent execution in 1355 made him infamous in Venetian history, and the street name served as a historical reminder.",
+      "id": "building_45.436869_12.348522"
+    },
+    {
+      "lat": 45.43746710005502,
+      "lng": 12.346638867704424,
+      "streetName": "Rio Terà della Fontana Vecchia",
+      "streetNameEnglish": "Filled Canal of the Old Fountain",
+      "streetDescription": "A former canal filled in during the 16th century, named for its proximity to the original fountain that gave 'Calle de la Fontana in Contrà San Provolo' its name. This area was known for having one of the earliest decorative public water sources in the district.",
+      "id": "building_45.437467_12.346639"
+    },
+    {
+      "lat": 45.437476402475305,
+      "lng": 12.347246803178285,
+      "streetName": "Calle della Cancelleria",
+      "streetNameEnglish": "Street of the Chancellery",
+      "streetDescription": "Named for a small administrative office that served the San Provolo district. Scribes and notaries working here recorded property transactions, wills, and other legal documents for residents of the area.",
+      "id": "building_45.437476_12.347247"
+    },
+    {
+      "lat": 45.437448465495116,
+      "lng": 12.347850736439822,
+      "streetName": "Corte dei Iconi",
+      "streetNameEnglish": "Court of the Icons",
+      "streetDescription": "A small courtyard named for the workshops of icon painters, many of Greek origin, who created religious images in the Byzantine style. Their presence in the San Provolo district reflected the area's connection to Eastern Orthodox traditions.",
+      "id": "building_45.437448_12.347851"
+    }
+  ],
+  "id": "polygon-1746056974299"
+}

@@ -1,0 +1,332 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44354529199993,
+      "lng": 12.339826119761378
+    },
+    {
+      "lat": 45.442408631529595,
+      "lng": 12.341735852579982
+    },
+    {
+      "lat": 45.44114397574842,
+      "lng": 12.340609324793727
+    },
+    {
+      "lat": 45.44109880894623,
+      "lng": 12.340620053629786
+    },
+    {
+      "lat": 45.44145637847362,
+      "lng": 12.340979469637782
+    },
+    {
+      "lat": 45.44142250356292,
+      "lng": 12.341097486834437
+    },
+    {
+      "lat": 45.4403723712437,
+      "lng": 12.340405476908595
+    },
+    {
+      "lat": 45.44013306213039,
+      "lng": 12.340194711307703
+    },
+    {
+      "lat": 45.43962492441673,
+      "lng": 12.339840659717737
+    },
+    {
+      "lat": 45.43966632840166,
+      "lng": 12.339701184848963
+    },
+    {
+      "lat": 45.439820652077906,
+      "lng": 12.339588532070337
+    },
+    {
+      "lat": 45.439937335552926,
+      "lng": 12.339572438816248
+    },
+    {
+      "lat": 45.44010295039342,
+      "lng": 12.339604625324426
+    },
+    {
+      "lat": 45.44085950291407,
+      "lng": 12.33902526817721
+    },
+    {
+      "lat": 45.441006295511606,
+      "lng": 12.338821420292078
+    },
+    {
+      "lat": 45.44194726463002,
+      "lng": 12.339078912357508
+    }
+  ],
+  "centroid": {
+    "lat": 45.44090914234582,
+    "lng": 12.340043846066118
+  },
+  "historicalName": "Calle Stella in Sestiere San Marco, presso la Chiesa di San Salvador",
+  "englishName": "Star Street in the District of St. Mark, near the Church of San Salvador",
+  "historicalDescription": "This area was part of the vibrant merchant district of San Marco in the 15th century, known for its bustling trade and proximity to important landmarks like the Rialto Bridge and the Church of San Salvador.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 49778.78,
+  "center": {
+    "lat": 45.4413603085514,
+    "lng": 12.339872017490793
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.443166405176484,
+        "lng": 12.34046269736758
+      },
+      "water": {
+        "lat": 45.44334476424711,
+        "lng": 12.340495793171861
+      },
+      "historicalName": "Riva di San Salvador",
+      "englishName": "Dock of Saint Savior",
+      "historicalDescription": "This landing was historically used by merchants and worshippers visiting the Church of San Salvador, an important religious site in the San Marco district since the 12th century. The dock served as a key access point for goods and materials during the church's various renovations, particularly after the 1506 reconstruction designed by Giorgio Spavento and Tullio Lombardo.",
+      "id": "canal_45.443166_12.340463"
+    },
+    {
+      "edge": {
+        "lat": 45.44278751835304,
+        "lng": 12.34109927497378
+      },
+      "water": {
+        "lat": 45.44295484869324,
+        "lng": 12.341193295168615
+      },
+      "historicalName": "Fondamenta della Stella",
+      "englishName": "Foundation of the Star",
+      "historicalDescription": "Named after Calle Stella (Star Street), this dock served the commercial establishments in this busy area near the Rialto. The star symbol had significance for navigation and commerce in Renaissance Venice, and this fondamenta would have been used by small traders and shopkeepers operating in the narrow streets between San Marco and the Rialto contracts. Merchant families with businesses along Calle Stella would have utilized this water access point for receiving goods.",
+      "id": "canal_45.442788_12.341099"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.4403723712437,
+        "lng": 12.340405476908595
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056149790",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44024939713091,
+          "lng": 12.340340009751172
+        },
+        "distance": 14.596921487150729,
+        "id": "698e0a9b-9455-4307-a301-24d81d2288a6",
+        "historicalName": "Ponte della Stella",
+        "englishName": "Bridge of the Star",
+        "historicalDescription": "Named after the nearby Calle Stella (Star Street) in San Marco, this bridge would have connected merchants and worshippers traveling between Campo San Salvador and the bustling commercial area. The star may have referenced a shop sign or family emblem that was prominent in this area during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.440310884187305,
+            "lng": 12.340372743329883
+          }
+        }
+      },
+      "id": "bridge_45.440372_12.340405"
+    },
+    {
+      "edge": {
+        "lat": 45.43966632840166,
+        "lng": 12.339701184848963
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056083350",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43962690113015,
+          "lng": 12.339626038369005
+        },
+        "distance": 7.320881096878111,
+        "id": "ac9bf332-6786-4e98-a229-9eaebfceaa81",
+        "historicalName": "Ponte dei Orafi",
+        "englishName": "Bridge of the Goldsmiths",
+        "historicalDescription": "This bridge likely connected to an area where goldsmiths had their workshops near San Salvador. The San Marco district was known for its luxury crafts and the area around the church would have housed numerous artisans making religious objects and fine jewelry for the wealthy Venetian nobili.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439646614765905,
+            "lng": 12.339663611608984
+          }
+        }
+      },
+      "id": "bridge_45.439666_12.339701"
+    },
+    {
+      "edge": {
+        "lat": 45.44085950291407,
+        "lng": 12.33902526817721
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056070563",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44077867333803,
+          "lng": 12.339024215076764
+        },
+        "distance": 8.988214314064082,
+        "id": "77d50c9c-635c-4c06-b0b1-c73e65b0559f",
+        "historicalName": "Ponte del Salvatore",
+        "englishName": "Bridge of the Savior",
+        "historicalDescription": "Named after the nearby Chiesa di San Salvador (Church of the Holy Savior), this bridge would have served as an important connection for parishioners and clergy. The church was an important religious center in Renaissance Venice, rebuilt in the 16th century in Renaissance style after a fire.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44081908812605,
+            "lng": 12.339024741626986
+          }
+        }
+      },
+      "id": "bridge_45.440860_12.339025"
+    },
+    {
+      "edge": {
+        "lat": 45.441006295511606,
+        "lng": 12.338821420292078
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056070563",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44092923005899,
+          "lng": 12.338798909519513
+        },
+        "distance": 8.747409945327279,
+        "id": "77d50c9c-635c-4c06-b0b1-c73e65b0559f",
+        "historicalName": "Ponte dei Centurioni",
+        "englishName": "Bridge of the Centurions",
+        "historicalDescription": "This bridge might reference the Centurioni family who likely owned property or conducted business in this area of San Marco during the Renaissance period. Many Venetian bridges were named after prominent local families who funded their construction or maintained residences nearby.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4409677627853,
+            "lng": 12.338810164905794
+          }
+        }
+      },
+      "id": "bridge_45.441006_12.338821"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.440452068903696,
+      "lng": 12.33951175717915,
+      "streetName": "Calle dei Mercanti Orientali",
+      "streetNameEnglish": "Street of the Eastern Merchants",
+      "streetDescription": "Named for the many Eastern merchants who established trading posts near San Marco during the Renaissance. The area around San Salvador was known for commerce with Byzantine and Ottoman traders who brought luxury goods to Venice.",
+      "id": "building_45.440452_12.339512"
+    },
+    {
+      "lat": 45.44056892936081,
+      "lng": 12.340193386374533,
+      "streetName": "Ruga degli Orefici",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "This street would have housed numerous goldsmiths' workshops, as the area near San Salvador was known for luxury artisans who served the wealthy Venetian nobles and merchants who frequented this central area of the city.",
+      "id": "building_45.440569_12.340193"
+    },
+    {
+      "lat": 45.440921744448644,
+      "lng": 12.339564958284875,
+      "streetName": "Salizada San Salvador",
+      "streetNameEnglish": "Paved Street of San Salvador",
+      "streetDescription": "Named directly after the nearby Church of San Salvador. 'Salizada' indicates it was one of the first streets to be paved with stone ('salizo' in Venetian dialect) in this area, showing its importance as a major thoroughfare.",
+      "id": "building_45.440922_12.339565"
+    },
+    {
+      "lat": 45.441032880727576,
+      "lng": 12.340023561997228,
+      "streetName": "Rio Terà del Fontego",
+      "streetNameEnglish": "Filled Canal of the Warehouse",
+      "streetDescription": "Named for a former canal that was filled in ('terà' means filled) where there once stood a warehouse or 'fontego'. The San Marco area had several important commercial warehouses that served as trading centers for foreign merchants.",
+      "id": "building_45.441033_12.340024"
+    },
+    {
+      "lat": 45.441410591342795,
+      "lng": 12.339479093519678,
+      "streetName": "Calle della Stella",
+      "streetNameEnglish": "Street of the Star",
+      "streetDescription": "This maintains the historical 'Stella' (star) reference that already exists in the area. The name likely derived from either a shop sign depicting a star, a family emblem, or possibly a reference to the nativity star given its proximity to the church.",
+      "id": "building_45.441411_12.339479"
+    },
+    {
+      "lat": 45.44140393543666,
+      "lng": 12.340133631376752,
+      "streetName": "Sottoportego dei Cambiavalute",
+      "streetNameEnglish": "Passageway of the Money Changers",
+      "streetDescription": "The area near San Salvador and the Rialto was the financial center of Venice, where money changers set up their tables to exchange foreign currencies. This covered passageway would have provided shelter for such financial transactions.",
+      "id": "building_45.441404_12.340134"
+    },
+    {
+      "lat": 45.441460073241096,
+      "lng": 12.340643782454913,
+      "streetName": "Calle dei Merciai",
+      "streetNameEnglish": "Street of the Mercers",
+      "streetDescription": "Merciai were merchants who sold fine textiles and notions. This area between San Salvador and Rialto was known for specialized textile shops catering to the wealthy Venetian aristocracy and foreign diplomats.",
+      "id": "building_45.441460_12.340644"
+    },
+    {
+      "lat": 45.44194797837162,
+      "lng": 12.339552378186893,
+      "streetName": "Corte Memmo",
+      "streetNameEnglish": "Memmo Court",
+      "streetDescription": "Named after the Memmo family, who were prominent Venetian nobles. Several nobili families had palaces in the San Marco district, and family names were commonly used for courtyards and streets near their residences.",
+      "id": "building_45.441948_12.339552"
+    },
+    {
+      "lat": 45.44182494766228,
+      "lng": 12.340146244314942,
+      "streetName": "Fondamenta delle Procuratie",
+      "streetNameEnglish": "Foundation of the Procuracies",
+      "streetDescription": "Named for its proximity to the offices of the Procurators of Saint Mark, who were important government officials. This quayside street would have connected the San Salvador area to the administrative center of the Republic at San Marco.",
+      "id": "building_45.441825_12.340146"
+    },
+    {
+      "lat": 45.44195829975246,
+      "lng": 12.340838265014783,
+      "streetName": "Ruga dei Drappieri",
+      "streetNameEnglish": "Street of the Drapers",
+      "streetDescription": "A street where cloth merchants and drapers would have had their shops. The San Marco district was a commercial hub where luxury fabrics from the East were sold to Venetian nobles.",
+      "id": "building_45.441958_12.340838"
+    },
+    {
+      "lat": 45.44236520164644,
+      "lng": 12.339498722908674,
+      "streetName": "Calle del Paradiso",
+      "streetNameEnglish": "Street of Paradise",
+      "streetDescription": "A poetic name that might have derived from a particularly beautiful view, or more likely, from the name of a shop or inn. Such allegorical names were common in Venice, especially near churches like San Salvador.",
+      "id": "building_45.442365_12.339499"
+    },
+    {
+      "lat": 45.442367959952975,
+      "lng": 12.340121674058228,
+      "streetName": "Campiello dei Cinque Lampade",
+      "streetNameEnglish": "Small Square of the Five Lamps",
+      "streetDescription": "Named for a distinguishing feature - five lamps that would have illuminated this small square near San Salvador. Public lighting was an important feature in Renaissance Venice, especially in commercial areas that might be active after sunset.",
+      "id": "building_45.442368_12.340122"
+    },
+    {
+      "lat": 45.442348795943055,
+      "lng": 12.34072375461503,
+      "streetName": "Calle dei Santissimi",
+      "streetNameEnglish": "Street of the Most Holy",
+      "streetDescription": "A reference to religious imagery or relics housed in the Church of San Salvador. Streets with religious names were common near important churches, reflecting the deep connection between Venetian civic and religious life.",
+      "id": "building_45.442349_12.340724"
+    },
+    {
+      "lat": 45.4428521065766,
+      "lng": 12.340154736323505,
+      "streetName": "Ramo dei Pellegrini",
+      "streetNameEnglish": "Branch Street of the Pilgrims",
+      "streetDescription": "A small side street that might have led to a hospice or inn where pilgrims stayed. San Salvador was on the route many pilgrims would take when visiting Venice's numerous churches and relics before continuing to the Holy Land.",
+      "id": "building_45.442852_12.340155"
+    }
+  ],
+  "id": "polygon-1746056033630"
+}

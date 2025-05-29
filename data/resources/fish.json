@@ -1,0 +1,32 @@
+{
+  "id": "fish",
+  "name": "Fish",
+  "category": "raw_materials",
+  "subCategory": "food",
+  "description": {
+    "short": "Fresh fish caught from the lagoon and Adriatic.",
+    "full": "Various species of fish harvested from Venice's lagoon waters and nearby Adriatic Sea. A staple food for Venetians of all classes.",
+    "flavor": "The fishermen's nets haul in more than sustenanceâ€”they draw forth the very identity of Venice, a city as much of the water as beside it."
+  },
+  "varieties": [
+    {
+      "type": "lagoon_fish",
+      "valueMultiplier": 0.8,
+      "availability": "very_common"
+    },
+    {
+      "type": "adriatic_fish",
+      "valueMultiplier": 1.2,
+      "availability": "common"
+    },
+    {
+      "type": "deep_sea_fish",
+      "valueMultiplier": 1.6,
+      "availability": "uncommon"
+    }
+  ],
+  "importPrice": 120.0,
+  "lifetimeHours": 75,
+  "consumptionHours": 1,
+  "tier": 1
+}

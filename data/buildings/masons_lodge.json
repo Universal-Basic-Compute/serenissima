@@ -1,0 +1,64 @@
+{
+  "name": "Masons' Lodge",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "construction",
+  "size": 1,
+  "unlockCondition": "10 Popolani, 1,000,000 ducats total wealth, Masonry Guild Membership",
+  "commercialStorage": true,
+  "canImport": true,
+  "employmentCapacity": 10,
+  "calculationsAnalysis": "The Masons' Lodge serves as a local hub for masons and builders, providing essential materials and a place for coordinating smaller construction projects. Its construction cost of 500,000 ducats and maintenance of 2,500 ducats reflect its smaller scale compared to the Master Builder's Workshop. It supports a modest employment capacity of 10. It primarily functions as a material depot and coordination point for Tier 2 construction activities.",
+  "shortDescription": "A local lodge for masons, storing common building materials and coordinating neighborhood projects.",
+  "fullDescription": "The Masons' Lodge is a vital support structure for Venice's ongoing construction and repair needs. It typically holds stocks of timber, stone, bricks, and mortar, readily available for local builders. Masons gather here to plan their work, share techniques, and access tools. These lodges are essential for maintaining the city's fabric and undertaking smaller-scale building projects efficiently.",
+  "flavorText": "Stone by stone, brick by brick, the masons' hands raise Venice from the waters.",
+  "constructionCosts": {
+    "ducats": 500000,
+    "timber": 500,
+    "bricks": 750,
+    "stone": 300,
+    "iron": 100
+  },
+  "maintenanceCost": 2500,
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 1000,
+    "stores": [
+      "timber",
+      "stone",
+      "bricks",
+      "iron",
+      "tools",
+      "mortar",
+      "sand"
+    ],
+    "sells": []
+  },
+  "soundDesign": {
+    "ambientSound": "Stone cutting, chisel sounds, workers conversing",
+    "activitySounds": "Mixing mortar, sharpening tools, discussing plans",
+    "musicTheme": "Lavoro Artigiano"
+  },
+  "seasonalEffects": {
+    "winter": "More indoor activity, planning for spring projects",
+    "construction_season": "Busy with material dispatch and worker coordination"
+  },
+  "aiInteractionPoints": [
+    "Material storage yard",
+    "Tool shed",
+    "Meeting area",
+    "Foreman's desk"
+  ],
+  "assets": {
+    "models": "/assets/buildings/models/masons_lodge",
+    "variants": [
+      "model"
+    ],
+    "textures": "/assets/buildings/textures/masons_lodge/",
+    "thumbnail": "/assets/buildings/thumbnails/masons_lodge.png"
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 0,
+  "constructionMinutes": 2880
+}

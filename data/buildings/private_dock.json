@@ -1,0 +1,98 @@
+{
+  "name": "Private Dock",
+  "pointType": "canal",
+  "category": "business",
+  "subCategory": "Transportation Facilities",
+  "size": 1,
+  "unlockCondition": "Waterfront property, 5,000,000 ducats capital",
+  "canImport": true,
+  "calculationsAnalysis": "The Private Dock represents premium personal infrastructure with modest direct and significant indirect benefits. The construction cost of 2,000,000 ducats reflects the high-quality materials and security features required, while the income of 5,000 ducats (0.25% return) represents minimal fees from occasional third-party usage. The maintenance cost of 22,500 ducats (450% of income) creates a significant ongoing expense justified by convenience and status benefits. The employment capacity of 3 represents the boatmen and guards needed. The construction time of 4 days (345600000ms) reflects the quality construction requirements. This building creates a strategic personal infrastructure option that enhances property value and transportation efficiency, reflecting the historical importance of private water access for wealthy Venetians in a city where boats were the primary transportation method.",
+  "shortDescription": "Exclusive water access facility for personal or business use with enhanced security and privacy.",
+  "fullDescription": "A mark of status and practicality, private docks provide dedicated water access for wealthy residences or businesses. Featuring secure moorings, covered boat storage, and often a small gatehouse, these facilities offer convenience and privacy for owners while demonstrating their status. Often architecturally integrated with the associated building, private docks represent significant investment in waterfront infrastructure.",
+  "flavorText": "The private dock speaks volumes before its owner utters a word—it declares to Venice that one has not merely wealth, but the wisdom to navigate the city on one's own terms.",
+  "constructionCosts": {
+    "ducats": 2000000,
+    "timber": 1280,
+    "stone": 1710,
+    "iron": 340,
+    "marble": 90
+  },
+  "maintenanceCost": 2250,
+  "soundDesign": {
+    "ambientSound": "Gentle water sounds, private gondola arriving/departing",
+    "activitySounds": "Gate opening/closing, quiet conversations, boat securing",
+    "musicTheme": "Sospiri Veneziani"
+  },
+  "seasonalEffects": {
+    "acqua alta": "Enhanced protection systems deployed",
+    "fog": "Private lanterns lit, family boatmen guiding arrivals",
+    "carnival": "Decorated with family colors, increased usage"
+  },
+  "aiInteractionPoints": [
+    "Covered boat shelter",
+    "Private water entrance",
+    "Family waiting area",
+    "Boatman's station",
+    "Security gate"
+  ],
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "timber": 2,
+          "rope": 19
+        },
+        "outputs": {
+          "small_boats": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "timber": 1,
+          "rope": 2,
+          "tools": 24
+        },
+        "outputs": {
+          "gondola": 1
+        },
+        "craftMinutes": 240
+      },
+      {
+        "inputs": {
+          "smuggler_maps": 1,
+          "porter_equipment": 1
+        },
+        "outputs": {
+          "criminal_contacts": 1
+        },
+        "craftMinutes": 60
+      }
+    ],
+    "storageCapacity": 200,
+    "stores": [
+      "timber",
+      "rope",
+      "tools",
+      "small_boats",
+      "gondola",
+      "smuggler_maps",
+      "porter_equipment",
+      "criminal_contacts",
+      "wine",
+      "salt",
+      "spiced_wine",
+      "luxury_silk_garments",
+      "jewelry"
+    ],
+    "sells": [
+      "small_boats",
+      "gondola",
+      "criminal_contacts"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 5760
+}

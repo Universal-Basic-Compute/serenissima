@@ -1,0 +1,34 @@
+{
+  "id": "processed_iron",
+  "name": "Processed Iron",
+  "category": "processed_materials",
+  "subCategory": "metallurgy",
+  "description": "Refined iron ingots and bars ready for blacksmithing.",
+  "varieties": [
+    {
+      "type": "soft_iron",
+      "carbonContent": "low",
+      "malleability": "high",
+      "valueMultiplier": 0.9,
+      "primaryUse": "decorative_elements"
+    },
+    {
+      "type": "medium_iron",
+      "carbonContent": "medium",
+      "malleability": "medium",
+      "valueMultiplier": 1,
+      "primaryUse": "general_purpose"
+    },
+    {
+      "type": "hard_iron",
+      "carbonContent": "high",
+      "malleability": "low",
+      "valueMultiplier": 1.2,
+      "primaryUse": "tools_weapons"
+    }
+  ],
+  "importPrice": 1959.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

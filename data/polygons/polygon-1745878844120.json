@@ -1,0 +1,196 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.431060003212025,
+      "lng": 12.334223588747344
+    },
+    {
+      "lat": 45.431092002059316,
+      "lng": 12.335511049074492
+    },
+    {
+      "lat": 45.430969653427574,
+      "lng": 12.337117692274413
+    },
+    {
+      "lat": 45.43032590702703,
+      "lng": 12.335736354631743
+    },
+    {
+      "lat": 45.43007367690319,
+      "lng": 12.335588833135924
+    },
+    {
+      "lat": 45.42949234820865,
+      "lng": 12.334877050982547
+    },
+    {
+      "lat": 45.429619139282565,
+      "lng": 12.3347406976769
+    },
+    {
+      "lat": 45.43030806922017,
+      "lng": 12.334432243640187
+    }
+  ],
+  "centroid": {
+    "lat": 45.43036759991757,
+    "lng": 12.335278438770441
+  },
+  "historicalName": "Fondamenta delle Zattere",
+  "englishName": "Wharf of the Rafts",
+  "historicalDescription": "This area along the Giudecca Canal in the sestiere of Dorsoduro was known for its zattere (rafts or barges) that would transport goods along the canal. The nearby Chiesa dello Spirito Santo church was a prominent landmark.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 19095.58,
+  "center": {
+    "lat": 45.43036759991757,
+    "lng": 12.335278438770441
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43107600263567,
+        "lng": 12.334867318910918
+      },
+      "water": {
+        "lat": 45.43124258153294,
+        "lng": 12.334770645237741
+      },
+      "historicalName": "Riva dei Saloni",
+      "englishName": "Dock of the Great Halls",
+      "historicalDescription": "This dock along the Zattere was historically used by merchants who traded luxury goods displayed in the grand exhibition halls nearby. During the Renaissance, Venetian merchants would showcase fine textiles, spices, and exotic goods from the East in these 'saloni' to attract wealthy buyers.",
+      "id": "canal_45.431076_12.334867"
+    },
+    {
+      "edge": {
+        "lat": 45.431092002059316,
+        "lng": 12.335511049074492
+      },
+      "water": {
+        "lat": 45.4312674665356,
+        "lng": 12.33556739187475
+      },
+      "historicalName": "Fondamenta della Dogana",
+      "englishName": "Foundation of the Customs House",
+      "historicalDescription": "Named for its proximity to Venice's historic customs house (Dogana da Mar), where goods entering the city by sea were inspected and taxed. This dock served as an official entry point for merchants arriving along the Zattere, who would register their cargoes before being permitted to trade in the city.",
+      "id": "canal_45.431092_12.335511"
+    },
+    {
+      "edge": {
+        "lat": 45.43007367690319,
+        "lng": 12.335588833135924
+      },
+      "water": {
+        "lat": 45.42992917079922,
+        "lng": 12.335741437315441
+      },
+      "historicalName": "Riva dei Gesuati",
+      "englishName": "Dock of the Jesuates",
+      "historicalDescription": "Named after the Church of Santa Maria del Rosario (commonly called I Gesuati) which faces the Zattere waterfront. The Jesuate order established their presence here in the 15th century, and this dock served as the landing for those visiting the church and monastery, which became particularly important after its reconstruction by Giorgio Massari in the 18th century.",
+      "id": "canal_45.430074_12.335589"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43030806922017,
+        "lng": 12.334432243640187
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878859083",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.430241993372505,
+          "lng": 12.33433568411565
+        },
+        "distance": 10.524159255174165,
+        "id": "2c8a9793-af4d-40ee-b012-7d6285df0ceb",
+        "location": {
+          "midpoint": {
+            "lat": 45.43027503129633,
+            "lng": 12.334383963877919
+          }
+        },
+        "historicalName": "Ponte delle Zattere",
+        "englishName": "Bridge of the Rafts",
+        "historicalDescription": "Named after the fondamenta itself, which was historically a landing place for timber rafts (zattere) that arrived from the Cadore region in the Dolomites. Timber merchants would float logs down the Piave River and then assemble them into rafts to transport them to Venice, where they would dock along this fondamenta. The bridge would have connected parts of this busy commercial area where timber was traded and stored for shipbuilding and construction."
+      },
+      "id": "bridge_45.430308_12.334432"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43003055172295,
+      "lng": 12.334953915713706,
+      "buildingType": "palazzo",
+      "historicalName": "Palazzo Malipiero-Trevisan",
+      "englishName": "Malipiero-Trevisan Palace",
+      "historicalDescription": "Built in the early 16th century for the prominent Malipiero family before being acquired by the Trevisan merchants. The palazzo stands as a fine example of Venetian Gothic architecture transitioning to Renaissance style. Its façade facing the Giudecca Canal made it an important landmark for ships entering the city. The family was known for their trade connections with the Ottoman Empire and investment in Venetian glass production.",
+      "streetName": "Calle dei Zattieri",
+      "streetNameEnglish": "Street of the Raftsmen",
+      "streetDescription": "Named after the 'zattieri' (raftsmen) who transported timber from the mountains to Venice on large rafts called 'zattere'. These raftsmen would dock their rafts along the Fondamenta delle Zattere, which derives its name from these same rafts.",
+      "id": "building_45.430031_12.334954"
+    },
+    {
+      "lat": 45.4303915139355,
+      "lng": 12.334878695899736,
+      "buildingType": "chiesa",
+      "historicalName": "Chiesa di San Trovaso",
+      "englishName": "Church of Saint Gervasius and Protasius",
+      "historicalDescription": "Located near the Zattere, this parish church dates to the 9th century but was rebuilt in the Renaissance period. It takes its name from the contraction of the two saints it honors: Gervasio and Protasio. The church is notable for having two entrances of equal importance—one facing the canal and one facing the campo—to accommodate the rival factions of the Castellani and Nicolotti boat builders who frequented the church but refused to use the same door.",
+      "streetName": "Rio Terà dei Saloni",
+      "streetNameEnglish": "Filled-in Canal of the Timber Warehouses",
+      "streetDescription": "A 'rio terà' is a filled-in canal. This street was named after the 'saloni', large warehouses where timber was stored after being delivered by rafts to the Zattere. The timber trade was crucial to Venice's shipbuilding industry.",
+      "id": "building_45.430392_12.334879"
+    },
+    {
+      "lat": 45.43046224860791,
+      "lng": 12.335395042644379,
+      "buildingType": "squero",
+      "historicalName": "Squero di San Trovaso",
+      "englishName": "San Trovaso Gondola Yard",
+      "historicalDescription": "One of the oldest and few remaining traditional gondola boatyards in Venice, established in the 17th century. Located just off the Fondamenta delle Zattere, this workshop maintained the distinctive alpine appearance with its wooden structure resembling mountain houses from the Cadore region, where many boat builders originated. The squero continues the ancient tradition of gondola construction and repair, a craft passed down through generations of master boat builders.",
+      "streetName": "Calle del Squero Vecchio",
+      "streetNameEnglish": "Street of the Old Boatyard",
+      "streetDescription": "Named after an ancient 'squero' (traditional Venetian boatyard where gondolas and other vessels were built and repaired) that once existed in this area. The Zattere area had several squeri historically, given its waterfront location.",
+      "id": "building_45.430462_12.335395"
+    },
+    {
+      "lat": 45.43085945851152,
+      "lng": 12.334950234975903,
+      "buildingType": "fondaco",
+      "historicalName": "Fondaco delle Zattere",
+      "englishName": "Zattere Trading House",
+      "historicalDescription": "A commercial warehouse established in the mid-16th century directly on the Fondamenta delle Zattere waterfront. This building served as a crucial storage and trading point for timber transported down the Piave River on zattere (rafts), which gave the fondamenta its name. The building featured large ground-floor spaces for storage and sorting of lumber, with administrative offices on the upper floors. The timber trade was essential for Venice's shipbuilding industry and construction needs.",
+      "streetName": "Salizada San Basegio",
+      "streetNameEnglish": "Paved Street of Saint Basil",
+      "streetDescription": "A 'salizada' was one of the first paved streets in Venice. This one is named after the Church of San Basegio (Saint Basil) that was historically located near the Zattere. 'Salizada' indicates it was an important route that received stone paving earlier than other streets.",
+      "id": "building_45.430859_12.334950"
+    },
+    {
+      "lat": 45.430780215239515,
+      "lng": 12.335489223984304,
+      "buildingType": "ospizio",
+      "historicalName": "Ospizio degli Incurabili",
+      "englishName": "Hospital for Incurables",
+      "historicalDescription": "Founded in 1522 by San Gaetano Thiene and the noblewoman Maria Malipiero to care for those suffering from syphilis and other diseases considered incurable at the time. Located along the Zattere, this institution was one of the first specialized hospitals in Europe. The building was later expanded to include a church designed by Jacopo Sansovino. During the Renaissance, it was renowned for its advanced medical treatments and also served as a shelter for abandoned children and fallen women seeking redemption.",
+      "streetName": "Calle della Dogana",
+      "streetNameEnglish": "Street of the Customs House",
+      "streetDescription": "Named for its proximity to the Dogana da Mar (Maritime Customs House), which was located at the eastern end of the Zattere where the Grand Canal meets the Giudecca Canal. The Dogana controlled all goods entering Venice by sea and collected duties.",
+      "id": "building_45.430780_12.335489"
+    },
+    {
+      "lat": 45.43086545321393,
+      "lng": 12.336112002900672,
+      "buildingType": "bottega",
+      "historicalName": "Bottega dei Tagliapietra",
+      "englishName": "Stone Cutters' Workshop",
+      "historicalDescription": "A 16th-century workshop owned by the Tagliapietra guild, which specialized in marble and stone sculpture for Venetian palaces and churches. Located near the Zattere waterfront for easy transport of stone materials arriving by boat, this bottega employed several master craftsmen who worked on prestigious commissions throughout the city. The guild maintained strict quality standards and training procedures for apprentices. Their work can still be seen in many architectural details along the Grand Canal and in churches across Venice.",
+      "streetName": "Ruga degli Armeni",
+      "streetNameEnglish": "Street of the Armenians",
+      "streetDescription": "A 'ruga' typically designated a commercial street. This one acknowledges the Armenian merchant community that had established a presence near the Zattere in Renaissance Venice. Armenian merchants were important in Venice's trade with the East, particularly in textiles and spices.",
+      "id": "building_45.430865_12.336112"
+    }
+  ],
+  "id": "polygon-1745878844120"
+}

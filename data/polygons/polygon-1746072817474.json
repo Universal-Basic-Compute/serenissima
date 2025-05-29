@@ -1,0 +1,125 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43971487292721,
+      "lng": 12.328614400081998
+    },
+    {
+      "lat": 45.438876914124066,
+      "lng": 12.329982326679593
+    },
+    {
+      "lat": 45.438745172223314,
+      "lng": 12.32978384321249
+    },
+    {
+      "lat": 45.43863977848125,
+      "lng": 12.329362736397153
+    },
+    {
+      "lat": 45.43817491444846,
+      "lng": 12.328662679844266
+    },
+    {
+      "lat": 45.43795471435938,
+      "lng": 12.328386412315732
+    },
+    {
+      "lat": 45.43812974526946,
+      "lng": 12.328145013504392
+    },
+    {
+      "lat": 45.43828971928229,
+      "lng": 12.328029678516751
+    },
+    {
+      "lat": 45.43834806263294,
+      "lng": 12.328142331295377
+    },
+    {
+      "lat": 45.43854191268735,
+      "lng": 12.328043089561826
+    },
+    {
+      "lat": 45.438982307423174,
+      "lng": 12.327619300537473
+    },
+    {
+      "lat": 45.43924955383493,
+      "lng": 12.328145013504392
+    },
+    {
+      "lat": 45.43945657483313,
+      "lng": 12.328458831959134
+    },
+    {
+      "lat": 45.43950927096595,
+      "lng": 12.328405187778836
+    },
+    {
+      "lat": 45.439554439040606,
+      "lng": 12.328399823360806
+    },
+    {
+      "lat": 45.43958831507287,
+      "lng": 12.328453467541104
+    }
+  ],
+  "centroid": {
+    "lat": 45.4388597667254,
+    "lng": 12.328539633505706
+  },
+  "areaInSquareMeters": 16700.97,
+  "historicalName": "Calle del Traghetto di San Marcuola",
+  "englishName": "Street of the San Marcuola Ferry",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for its traghetto (ferry) crossing, connecting the north and south banks of the Grand Canal near the Chiesa di San Marcuola.",
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.4388597667254,
+    "lng": 12.328539633505706
+  },
+  "canalPoints": [],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.43841113990643,
+      "lng": 12.32877505118066,
+      "streetName": "Calle dei Marzeri di San Marcuola",
+      "streetNameEnglish": "Street of the Mercers of San Marcuola",
+      "streetDescription": "This street name references the mercers (fabric and textile merchants) who historically had shops near the San Marcuola church area. Mercers were important tradespeople in Renaissance Venice, and streets were often named after the guilds or trades practiced there.",
+      "id": "building_45.438411_12.328775"
+    },
+    {
+      "lat": 45.438941342041446,
+      "lng": 12.328377050854249,
+      "streetName": "Fondamenta dei Traghettatori",
+      "streetNameEnglish": "Foundation of the Ferrymen",
+      "streetDescription": "This fondamenta (street along a canal) would be named after the ferrymen who operated the traghetto (ferry crossing) at San Marcuola. The traghetto was essential for crossing the Grand Canal before many bridges were built, and this area was known for its ferry service.",
+      "id": "building_45.438941_12.328377"
+    },
+    {
+      "lat": 45.438854411894674,
+      "lng": 12.328808131498615,
+      "streetName": "Rio Terà dei Sabbioneri",
+      "streetNameEnglish": "Filled Canal of the Sand Merchants",
+      "streetDescription": "A rio terà is a filled-in canal that became a street. Sand merchants (sabbioneri) were important in Venice for construction, and they often operated near canal areas where they could easily transport their heavy materials. This would be appropriate near San Marcuola which was historically a commercial district.",
+      "id": "building_45.438854_12.328808"
+    },
+    {
+      "lat": 45.43891958095206,
+      "lng": 12.329519203102656,
+      "streetName": "Corte Memmo",
+      "streetNameEnglish": "Memmo Court",
+      "streetDescription": "Named after the Memmo family, who were prominent Venetian nobili with several doges in their lineage. Nobili families often owned property throughout Venice, and courts (corti) were frequently named after the noble families who owned surrounding buildings.",
+      "id": "building_45.438920_12.329519"
+    },
+    {
+      "lat": 45.43926488740872,
+      "lng": 12.32882495271372,
+      "streetName": "Sottoportego della Misericordia",
+      "streetNameEnglish": "Passage of Mercy",
+      "streetDescription": "A sottoportego is a covered passageway under a building. This name would reference the nearby Scuola Grande della Misericordia, one of Venice's important confraternities dedicated to charitable works. Such passageways often connected neighborhoods to important religious or charitable institutions.",
+      "id": "building_45.439265_12.328825"
+    }
+  ]
+}

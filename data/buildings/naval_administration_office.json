@@ -1,0 +1,64 @@
+{
+  "name": "Naval Administration Office",
+  "pointType": "building",
+  "category": "Military & Defense",
+  "subCategory": "Naval Facilities",
+  "size": 3,
+  "unlockCondition": "Government appointment only, Admiralty connection",
+  "calculationsAnalysis": "The Naval Administration Office represents specialized military command infrastructure with strategic rather than commercial value. The construction cost of 8,000,000 ducats reflects the secure facilities and specialized command systems required, while generating 65,000 ducats income reflects administrative fees, licensing revenue, and naval contract management. The maintenance cost of 60,000 ducats creates a substantial ongoing expense justified by the critical naval command capabilities provided. The employment capacity of 40 represents the officers, clerks, and support staff needed. The construction time of 14 days (1209600000ms) reflects the specialized construction requirements. This building creates a strategic military asset with appropriate government restrictions reflecting the historical importance of naval command in Venice's defensive strategy, where sophisticated fleet coordination was essential to maintaining control of trade routes and defending the lagoon approaches.",
+  "shortDescription": "Command and control center for Venice's naval forces, coordinating fleet operations and maintenance.",
+  "fullDescription": "Directing Venice's naval power, administration offices coordinate fleet operations, personnel, and logistics for the Republic's maritime forces. Featuring command centers, navigation archives, personnel management, and strategic planning facilities, these complex organizations managed Europe's most sophisticated naval operation. Their efficient administration enabled Venice to project power throughout the Mediterranean while defending the lagoon approaches.",
+  "flavorText": "Ships and sailors make a navy, but without the quill and ledger to direct them, they are merely wood and flesh without purpose—here we transform vessels and men into coordinated power.",
+  "constructionCosts": {
+    "ducats": 8000000,
+    "timber": 1520,
+    "bricks": 2270,
+    "stone": 3790,
+    "glass": 450,
+    "marble": 610
+  },
+  "maintenanceCost": 6000,
+  "soundDesign": {
+    "ambientSound": "Maps being moved, quiet strategic discussions, naval terminology",
+    "activitySounds": "Orders being dispatched, reports delivered, navigational calculations",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "naval campaign seasons": "Increased activity, strategic planning",
+    "winter": "Fleet maintenance planning, training programs",
+    "diplomatic tensions": "Intelligence focus, readiness activities"
+  },
+  "aiInteractionPoints": [
+    "Strategy map room",
+    "Admiral's office",
+    "Communications center",
+    "Personnel management desk",
+    "Naval archive",
+    "Diplomatic reception area",
+    "Intelligence briefing room",
+    "Officer's mess"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 100,
+    "stores": [
+      "paper",
+      "maps",
+      "banking_services",
+      "criminal_contacts",
+      "tools",
+      "smuggler_maps",
+      "blackmail_evidence",
+      "forgery_tools",
+      "weapons"
+    ],
+    "sells": [
+      "smuggler_maps",
+      "maps"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 0,
+  "constructionMinutes": 20160
+}

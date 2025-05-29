@@ -1,0 +1,262 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43854782010626,
+      "lng": 12.336446089441266
+    },
+    {
+      "lat": 45.438306918992545,
+      "lng": 12.337663812334027
+    },
+    {
+      "lat": 45.438254221736834,
+      "lng": 12.337738914186444
+    },
+    {
+      "lat": 45.43788910368471,
+      "lng": 12.337776465112652
+    },
+    {
+      "lat": 45.437377181612604,
+      "lng": 12.337669176752057
+    },
+    {
+      "lat": 45.43667328118021,
+      "lng": 12.337470693284954
+    },
+    {
+      "lat": 45.43648130681112,
+      "lng": 12.337921304399456
+    },
+    {
+      "lat": 45.436108648818454,
+      "lng": 12.337610168153729
+    },
+    {
+      "lat": 45.43573222410523,
+      "lng": 12.337127370531048
+    },
+    {
+      "lat": 45.43598066469767,
+      "lng": 12.336617750818219
+    },
+    {
+      "lat": 45.43656788356823,
+      "lng": 12.335802359277691
+    },
+    {
+      "lat": 45.437181445475325,
+      "lng": 12.335223002130475
+    },
+    {
+      "lat": 45.43803590401026,
+      "lng": 12.336301250154461
+    }
+  ],
+  "centroid": {
+    "lat": 45.43716435421534,
+    "lng": 12.337028335121268
+  },
+  "historicalName": "Calle de la Fava, San Marco",
+  "englishName": "Bean Street, St Mark's district",
+  "historicalDescription": "Named for the bean sellers who populated this street. Located in the central San Marco sestiere, near the Mercerie main shopping area and Rialto bridge.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 38540.81,
+  "center": {
+    "lat": 45.43697780966343,
+    "lng": 12.3365709328624
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43760867474279,
+        "lng": 12.335762126142468
+      },
+      "water": {
+        "lat": 45.437689123885676,
+        "lng": 12.335532865010558
+      },
+      "historicalName": "Fondamenta del Paradiso",
+      "englishName": "Foundation of Paradise",
+      "historicalDescription": "This dock was named after the nearby Church of Santa Maria del Paradiso, which existed in the San Marco district during the Renaissance period. Merchants bringing religious goods and artisans crafting church ornaments often used this landing near Calle de la Fava.",
+      "id": "canal_45.437609_12.335762"
+    },
+    {
+      "edge": {
+        "lat": 45.43803590401026,
+        "lng": 12.336301250154461
+      },
+      "water": {
+        "lat": 45.438191128777405,
+        "lng": 12.336171754863058
+      },
+      "historicalName": "Riva dei Cambiavalute",
+      "englishName": "Bank of the Money Changers",
+      "historicalDescription": "Located close to Calle de la Fava in the commercial heart of San Marco, this dock served the many money changers and bankers who operated in this area. Renaissance Venice was a financial center, and foreign merchants would arrive at this dock to exchange currencies before conducting business in the nearby contracts.",
+      "id": "canal_45.438036_12.336301"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43667328118021,
+        "lng": 12.337470693284954
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056319492",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43671904550969,
+          "lng": 12.337634755775428
+        },
+        "distance": 13.775377723657108,
+        "id": "ae8cd501-dd91-439c-b62e-3559505f3072",
+        "historicalName": "Ponte dei Merciari di Fava",
+        "englishName": "Bridge of the Fava Merchants",
+        "historicalDescription": "Named after the merchants who sold beans (fava) and other legumes in the nearby area. The Calle de la Fava was a commercial hub where vendors would set up stalls to sell their produce, making this bridge an important crossing point for traders and customers alike.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43669616334495,
+            "lng": 12.337552724530191
+          }
+        }
+      },
+      "id": "bridge_45.436673_12.337471"
+    },
+    {
+      "edge": {
+        "lat": 45.43598066469767,
+        "lng": 12.336617750818219
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056351603",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43585703853184,
+          "lng": 12.336653067275977
+        },
+        "distance": 14.02007350515459,
+        "id": "e765d7c3-b486-4cae-8777-1b1fb59133e7",
+        "historicalName": "Ponte della Scuola San Teodoro",
+        "englishName": "Bridge of St. Theodore's School",
+        "historicalDescription": "Named after one of Venice's minor confraternities (scuole piccole) dedicated to Saint Theodore, who was Venice's first patron saint before Saint Mark. This bridge would have connected the confraternity building to the nearby church, allowing members to process across during religious festivities in the San Marco district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43591885161476,
+            "lng": 12.336635409047098
+          }
+        }
+      },
+      "id": "bridge_45.435981_12.336618"
+    },
+    {
+      "edge": {
+        "lat": 45.43656788356823,
+        "lng": 12.335802359277691
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056351603",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43646684395748,
+          "lng": 12.33580548922727
+        },
+        "distance": 11.237746029652527,
+        "id": "e765d7c3-b486-4cae-8777-1b1fb59133e7",
+        "historicalName": "Ponte dei Garzotti",
+        "englishName": "Bridge of the Apprentices",
+        "historicalDescription": "This bridge was named for the young apprentices (garzotti) who would cross it daily to reach their masters' workshops in the artisan district near San Marco. The area around Calle de la Fava was home to various craft workshops, and this bridge served as a crucial passage for young workers learning trades such as goldsmithing and textile work.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43651736376286,
+            "lng": 12.335803924252481
+          }
+        }
+      },
+      "id": "bridge_45.436568_12.335802"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43610126182275,
+      "lng": 12.337161057376077,
+      "streetName": "Calle dei Orafi di San Marco",
+      "streetNameEnglish": "Street of the Goldsmiths of San Marco",
+      "streetDescription": "Named after the goldsmiths who had workshops in this area near San Marco. The goldsmith trade was highly regulated in Renaissance Venice, and many of these artisans were concentrated in the San Marco district near the Fava area.",
+      "id": "building_45.436101_12.337161"
+    },
+    {
+      "lat": 45.43662887451498,
+      "lng": 12.336583202607619,
+      "streetName": "Sotoportego del Capitello Bizantino",
+      "streetNameEnglish": "Passageway of the Byzantine Capital",
+      "streetDescription": "This name references the Byzantine architectural influences that were common in this area of Venice. The 'capitello' (capital) refers to decorative column elements that would have adorned nearby buildings, reflecting Venice's strong Byzantine heritage in the San Marco district.",
+      "id": "building_45.436629_12.336583"
+    },
+    {
+      "lat": 45.436543630973794,
+      "lng": 12.337204706672152,
+      "streetName": "Rio Terà dei Libreri",
+      "streetNameEnglish": "Filled Canal of the Booksellers",
+      "streetDescription": "A reference to the booksellers and printers who operated near the Fava area. During the Renaissance, Venice was one of Europe's major publishing centers, with many bookshops concentrated in the San Marco district, near the commercial center of the city.",
+      "id": "building_45.436544_12.337205"
+    },
+    {
+      "lat": 45.43715882654168,
+      "lng": 12.335860296221503,
+      "streetName": "Ruga dei Mercanti da Costantinopoli",
+      "streetNameEnglish": "Street of the Merchants from Constantinople",
+      "streetDescription": "Named for the merchants who traded with Constantinople (modern Istanbul). This reflects Venice's strong commercial ties with the eastern Mediterranean and the presence of foreign merchants in this commercial area near San Marco during the Renaissance period.",
+      "id": "building_45.437159_12.335860"
+    },
+    {
+      "lat": 45.43714119025383,
+      "lng": 12.336606091047022,
+      "streetName": "Calle della Confraternita della Fava",
+      "streetNameEnglish": "Street of the Fava Brotherhood",
+      "streetDescription": "Named after the religious confraternity (scuola piccola) associated with the Church of Santa Maria della Fava nearby. Religious confraternities were important social and charitable organizations in Renaissance Venice that often took their names from nearby churches.",
+      "id": "building_45.437141_12.336606"
+    },
+    {
+      "lat": 45.437017885350635,
+      "lng": 12.337064123621191,
+      "streetName": "Salizada dei Garzotti",
+      "streetNameEnglish": "Paved Street of the Apprentices",
+      "streetDescription": "This name references the young apprentices ('garzotti') who would have worked in the various workshops and businesses in this commercial area near San Marco. The salizada indicates it was one of the early paved streets in the district.",
+      "id": "building_45.437018_12.337064"
+    },
+    {
+      "lat": 45.43753542178775,
+      "lng": 12.336376539617163,
+      "streetName": "Fondamenta dei Pistori di San Marco",
+      "streetNameEnglish": "Foundation of the Bakers of San Marco",
+      "streetDescription": "Named for the bakers (pistori) who had shops along this waterfront area. Bakers were essential tradespeople in Renaissance Venice, and their guild would have had members operating in this central district to serve the densely populated San Marco area.",
+      "id": "building_45.437535_12.336377"
+    },
+    {
+      "lat": 45.437539076480405,
+      "lng": 12.33722638995675,
+      "streetName": "Corte Grimani alla Fava",
+      "streetNameEnglish": "Grimani Court at Fava",
+      "streetDescription": "Named after the Grimani family, one of Venice's nobili families, who likely owned a palazzo in this area near the Church of Santa Maria della Fava. Prominent Venetian families often gave their names to nearby streets and courts.",
+      "id": "building_45.437539_12.337226"
+    },
+    {
+      "lat": 45.438004631459975,
+      "lng": 12.336609175570436,
+      "streetName": "Calle dei Merletti di San Marco",
+      "streetNameEnglish": "Street of the Lace-makers of San Marco",
+      "streetDescription": "References the lace-making trade that was prominent in Venice during the Renaissance. While Burano became most famous for lace, there were also lace-makers in the city center, particularly in commercial areas like San Marco who catered to wealthy residents and visitors.",
+      "id": "building_45.438005_12.336609"
+    },
+    {
+      "lat": 45.43790763738547,
+      "lng": 12.337257821925418,
+      "streetName": "Sotoportego della Scala d'Oro",
+      "streetNameEnglish": "Passageway of the Golden Staircase",
+      "streetDescription": "This name alludes to the famous Golden Staircase in the nearby Doge's Palace, reflecting the proximity of this area to the seat of Venetian power. The covered passageway (sotoportego) would have connected buildings or provided shelter in this prestigious San Marco district.",
+      "id": "building_45.437908_12.337258"
+    }
+  ],
+  "id": "polygon-1746056283856"
+}

@@ -1,0 +1,25 @@
+# This file makes the 'activity_creators' directory a Python package.
+
+# Optionally, you can import key functions here for easier access, e.g.:
+from .stay_activity_creator import try_create as try_create_stay_activity
+from .goto_work_activity_creator import try_create as try_create_goto_work_activity
+from .goto_home_activity_creator import try_create as try_create_goto_home_activity
+from .travel_to_inn_activity_creator import try_create as try_create_travel_to_inn_activity
+from .idle_activity_creator import try_create as try_create_idle_activity
+from .production_activity_creator import try_create as try_create_production_activity
+from .resource_fetching_activity_creator import try_create as try_create_resource_fetching_activity
+from .eat_activity_creator import (
+    try_create_eat_from_inventory_activity,
+    try_create_eat_at_home_activity,
+    try_create_eat_at_tavern_activity
+)
+from .fetch_from_galley_activity_creator import try_create as try_create_fetch_from_galley_activity
+from .leave_venice_activity_creator import try_create as try_create_leave_venice_activity
+from .deliver_construction_materials_creator import try_create_deliver_construction_materials_activity
+from .construct_building_creator import try_create_construct_building_activity
+from .secure_warehouse_activity_creator import try_create as try_create_secure_warehouse_activity
+from .deliver_to_storage_activity_creator import try_create as try_create_deliver_to_storage_activity
+from .fetch_from_storage_activity_creator import try_create as try_create_fetch_from_storage_activity
+from .fetch_for_logistics_client_activity_creator import try_create as try_create_fetch_for_logistics_client_activity # Already present
+from .check_business_status_activity_creator import try_create as try_create_check_business_status_activity
+from .fishing_activity_creator import try_create_fishing_activity # New fishing activity creator

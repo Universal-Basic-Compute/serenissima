@@ -1,0 +1,11 @@
+{
+  "id": "dyed_textiles",
+  "name": "Dyed Textiles",
+  "category": "processed_materials",
+  "subCategory": "textile",
+  "description": "Vibrant colored fabrics ready for tailoring into garments.",
+  "importPrice": 16443.0,
+  "lifetimeHours": 43800,
+  "consumptionHours": 117,
+  "tier": 3
+}

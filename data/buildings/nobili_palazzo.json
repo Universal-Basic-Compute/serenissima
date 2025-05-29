@@ -1,0 +1,68 @@
+{
+  "name": "Nobili Palazzo",
+  "pointType": "building",
+  "category": "home",
+  "subCategory": "Noble Residences",
+  "size": 1,
+  "unlockCondition": "50,000,000 ducats total wealth, Nobility status or connection",
+  "calculationsAnalysis": "The Nobili Palazzo represents elite housing with significant influence value. The construction cost of 6,000,000 ducats reflects the high-quality materials and craftsmanship required, while the income of 80,000 ducats (1.33% return) represents both residential value and business activities conducted from this prestigious address. The maintenance cost of 30,000 ducats (37.5% of income) reflects the higher standards required for noble residences. The residentsCapacity of 15 represents the noble family with numerous servants and possibly extended family. The construction time of 10 days (864000000ms) reflects the sophisticated construction and decorative elements. This building creates a progression into noble housing with appropriate wealth and status requirements reflecting the social hierarchy of Renaissance Venice.",
+  "shortDescription": "Grand family residence for Venice's nobili class, featuring impressive architecture and private courtyard.",
+  "fullDescription": "A statement of wealth and status for Venice's noble families, the palazzo combines imposing architecture with practical business needs. Organized around a central courtyard, these buildings typically feature grand reception rooms, a family chapel, extensive servant quarters, and business offices. The facade displays the family's status through architectural refinement rather than ostentatious display.",
+  "flavorText": "Stone and legacy intertwined—a nobili palazzo houses not merely a family, but a dynasty's ambitions across generations.",
+  "constructionCosts": {
+    "ducats": 6000000,
+    "timber": 1130,
+    "bricks": 2820,
+    "stone": 1980,
+    "glass": 450,
+    "marble": 340
+  },
+  "maintenanceCost": 3000,
+  "residentsCapacity": 15,
+  "soundDesign": {
+    "ambientSound": "Fountain in courtyard, distant string instruments",
+    "activitySounds": "Servants moving about, carriage arrivals, dignified conversations",
+    "musicTheme": "Sospiri Veneziani"
+  },
+  "seasonalEffects": {
+    "winter": "Braziers visible in courtyard, elegant winter decorations",
+    "carnival": "Elaborate decorations, masked guests arriving, music from within",
+    "state ceremonies": "Family banners displayed, increased activity"
+  },
+  "aiInteractionPoints": [
+    "Main entrance",
+    "Courtyard",
+    "Water entrance",
+    "Receiving rooms",
+    "Garden",
+    "Roof loggia"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 150,
+    "stores": [
+      "paper",
+      "banking_services",
+      "blackmail_evidence",
+      "gold",
+      "gold_leaf",
+      "jewelry",
+      "prepared_silk",
+      "luxury_silk_garments",
+      "books",
+      "maps",
+      "wine",
+      "spiced_wine"
+    ],
+    "sells": [
+      "banking_services",
+      "blackmail_evidence",
+      "jewelry",
+      "luxury_silk_garments"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 4,
+  "consumeTier": 4,
+  "constructionMinutes": 14400
+}

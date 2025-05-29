@@ -1,0 +1,113 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43692236254862,
+      "lng": 12.350066320209455
+    },
+    {
+      "lat": 45.4366739261021,
+      "lng": 12.350785152225447
+    },
+    {
+      "lat": 45.436613698920034,
+      "lng": 12.350769058971357
+    },
+    {
+      "lat": 45.43664757671787,
+      "lng": 12.350586668758345
+    },
+    {
+      "lat": 45.43635020424275,
+      "lng": 12.350377456455183
+    },
+    {
+      "lat": 45.435126819980795,
+      "lng": 12.349835650234175
+    },
+    {
+      "lat": 45.43501389086565,
+      "lng": 12.350077049045515
+    },
+    {
+      "lat": 45.43483696813096,
+      "lng": 12.350087777881575
+    },
+    {
+      "lat": 45.43487461131244,
+      "lng": 12.34897197893138
+    },
+    {
+      "lat": 45.43514187717907,
+      "lng": 12.34893442800517
+    },
+    {
+      "lat": 45.43529244894085,
+      "lng": 12.349159733562422
+    },
+    {
+      "lat": 45.43669274708331,
+      "lng": 12.349900023250532
+    }
+  ],
+  "centroid": {
+    "lat": 45.43584892766871,
+    "lng": 12.349962608127546
+  },
+  "historicalName": "Calle de l'Anzolo in Sestiere San Marco",
+  "englishName": "Angel Street in the District of St. Mark",
+  "historicalDescription": "A narrow street located in the San Marco sestiere, near Piazza San Marco and the Basilica. This area was a center of political power and commerce in 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 13153.86,
+  "center": {
+    "lat": 45.4357260803709,
+    "lng": 12.34975735686033
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43575921498834,
+        "lng": 12.349406496791792
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057007426",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.435751688525016,
+          "lng": 12.349331394939375
+        },
+        "distance": 5.91939062333372,
+        "id": "b8d23b55-17bb-48bc-8ed1-78ed91fef194",
+        "historicalName": "Ponte dell'Anzolo",
+        "englishName": "Bridge of the Angel",
+        "historicalDescription": "Named after its proximity to Calle de l'Anzolo (Angel Street) in San Marco, where a stone relief of an angel was historically displayed. The area was significant for Renaissance Venetian nobility and merchants, and the bridge would have served as an important connection between palaces and commercial establishments in this affluent district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43575545175668,
+            "lng": 12.349368945865583
+          }
+        }
+      },
+      "id": "bridge_45.435759_12.349406"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.435365988288524,
+      "lng": 12.349671898330278,
+      "streetName": "Calle del Campanil di San Moisè",
+      "streetNameEnglish": "Street of the Bell Tower of Saint Moses",
+      "streetDescription": "This street would be named after the bell tower of the nearby San Moisè church, which was an important landmark in the San Marco district during the Renaissance. The church of San Moisè was one of the most prominent in the area, and streets were commonly named after nearby religious structures. Located near Calle de l'Anzolo, this name reflects the Venetian tradition of orienting streets by significant religious architecture.",
+      "id": "building_45.435366_12.349672"
+    },
+    {
+      "lat": 45.436591963865055,
+      "lng": 12.350287236376307,
+      "streetName": "Ruga dei Orafi di San Marco",
+      "streetNameEnglish": "Row of the Goldsmiths of Saint Mark",
+      "streetDescription": "This street name reflects the presence of goldsmiths' workshops in this wealthy area near St. Mark's Square. The San Marco district was known for its luxury crafts and high-end commerce, with goldsmiths being particularly prominent in the Renaissance period. 'Ruga' typically indicated a commercial street lined with shops of the same trade. The proximity to Calle de l'Anzolo would make this a logical location for such prestigious artisans who would serve the wealthy families and officials who lived in and frequented the area.",
+      "id": "building_45.436592_12.350287"
+    }
+  ],
+  "id": "polygon-1746057029127"
+}

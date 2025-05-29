@@ -1,0 +1,84 @@
+{
+  "name": "Boat Workshop",
+  "pointType": "canal",
+  "category": "business",
+  "subCategory": "Transportation Industry",
+  "size": 1,
+  "unlockCondition": "6,000,000 ducats capital, Boat Builders Guild connection, water access",
+  "calculationsAnalysis": "The Boat Workshop represents specialized maritime production with modest returns. The construction cost of 2,000,000 ducats reflects the specialized equipment and waterfront facilities required, while the income of 25,000 ducats (1.25% return) represents sales of various watercraft. The maintenance cost of 20,000 ducats (80% of income) creates a modest profit margin appropriate for specialized production. The employment capacity of 8 represents the boat builders, apprentices, and assistants needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in transportation infrastructure that supports Venice's unique water-based mobility needs.",
+  "shortDescription": "Specialized workshop for building and repairing small watercraft for Venice's canals and lagoon.",
+  "fullDescription": "Essential to Venice's water-based transportation system, boat workshops construct and maintain the diverse fleet of small vessels that navigate the city's canals. Featuring covered construction areas, specialized tools, wood steaming equipment, and direct water access, these facilities combine traditional craftsmanship with practical functionality. From simple sandoli to elegant gondolas, these workshops produce the watercraft that define Venetian mobility.",
+  "flavorText": "In a city where streets are made of water, the boat builder is as essential as the baker—for while one feeds the body, the other enables every aspect of Venetian life to flow.",
+  "constructionCosts": {
+    "ducats": 2000000,
+    "timber": 1380,
+    "bricks": 920,
+    "stone": 740,
+    "iron": 370
+  },
+  "maintenanceCost": 2000,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "timber": 12,
+        "rope": 4,
+        "pitch": 2
+      },
+      "outputs": {
+        "small_boats": 1
+      },
+      "craftMinutes": 180
+    },
+    {
+      "inputs": {
+        "timber": 25,
+        "rope": 8,
+        "pitch": 3,
+        "iron_fittings": 2
+      },
+      "outputs": {
+        "gondola": 1
+      },
+      "craftMinutes": 360
+    }],
+    "storageCapacity": 50,
+    "stores": [
+      "timber",
+      "tools",
+      "pitch",
+      "iron_fittings",
+      "small_boats",
+      "gondola",
+      "rope",
+      "ship_components"
+    ],
+    "sells": [
+      "small_boats",
+      "gondola"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Wood being worked, hammering, water lapping against hulls",
+    "activitySounds": "Sawing, planing, steam box hissing, boat launching",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "winter": "Focus on repairs, indoor construction",
+    "summer": "Peak production season, outdoor finishing work",
+    "carnival": "Decorative boat commissions, gondola refurbishment"
+  },
+  "aiInteractionPoints": [
+    "Main construction area",
+    "Wood selection racks",
+    "Steam bending station",
+    "Caulking and sealing area",
+    "Launching slipway",
+    "Design consultation desk",
+    "Repair dock"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 7200
+}

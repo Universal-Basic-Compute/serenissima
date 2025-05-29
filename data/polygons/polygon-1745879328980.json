@@ -1,0 +1,167 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.437073792987576,
+      "lng": 12.320181119255288
+    },
+    {
+      "lat": 45.43703991544564,
+      "lng": 12.320953595451577
+    },
+    {
+      "lat": 45.43652422146278,
+      "lng": 12.322514641098245
+    },
+    {
+      "lat": 45.436264490591974,
+      "lng": 12.322557556442483
+    },
+    {
+      "lat": 45.43617038490896,
+      "lng": 12.322815048507913
+    },
+    {
+      "lat": 45.436128978358724,
+      "lng": 12.32315300684379
+    },
+    {
+      "lat": 45.43605369364408,
+      "lng": 12.323212015442117
+    },
+    {
+      "lat": 45.4355793976322,
+      "lng": 12.323169100097878
+    },
+    {
+      "lat": 45.435827838897495,
+      "lng": 12.321559774688943
+    },
+    {
+      "lat": 45.43591441665719,
+      "lng": 12.32138274889396
+    },
+    {
+      "lat": 45.43613650682465,
+      "lng": 12.321071612648232
+    },
+    {
+      "lat": 45.436418823572374,
+      "lng": 12.320470797828897
+    },
+    {
+      "lat": 45.4369495752344,
+      "lng": 12.320175754837258
+    }
+  ],
+  "centroid": {
+    "lat": 45.436314002786006,
+    "lng": 12.321785905541278
+  },
+  "historicalName": "Calle de la Sbiaca, Sestiere di San Marco",
+  "englishName": "Alley of the Bleachers, District of St. Mark",
+  "historicalDescription": "This narrow alley was located in the Sestiere di San Marco, near Piazza San Marco, the heart of Venice. The area was known for its artisan workshops, particularly bleachers who whitened linens and fabrics.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 19977.49,
+  "center": {
+    "lat": 45.436314002786006,
+    "lng": 12.321785905541278
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43703991544564,
+        "lng": 12.320953595451577
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879309201",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.437086017680585,
+          "lng": 12.321024585019043
+        },
+        "distance": 7.54712537505626,
+        "id": "da2aa84a-2d1a-49fc-a49f-35d46c9f00d9",
+        "historicalName": "Ponte dei Vetrai",
+        "englishName": "Bridge of the Glassmakers",
+        "historicalDescription": "Named after the glassmakers who operated workshops near the Calle de la Sbiaca in San Marco. In Renaissance Venice, glassmaking was a prestigious craft concentrated primarily on Murano, but some glassmakers maintained showrooms and small workshops in this area of San Marco to be closer to wealthy patrons and foreign merchants.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43706296656311,
+            "lng": 12.32098909023531
+          }
+        }
+      },
+      "id": "bridge_45.437040_12.320954"
+    },
+    {
+      "edge": {
+        "lat": 45.43605369364408,
+        "lng": 12.323212015442117
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879354937",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43617807442852,
+          "lng": 12.323332399744364
+        },
+        "distance": 16.71865286479723,
+        "id": "c09843be-7e01-4d99-971c-d3c0bd34f95f",
+        "historicalName": "Ponte della Fenice",
+        "englishName": "Bridge of the Phoenix",
+        "historicalDescription": "Named for its proximity to an area where an earlier theater existed before the famous Teatro La Fenice was built. The name 'Fenice' (Phoenix) was a common symbol in Venetian culture, representing renewal and artistic rebirth. This bridge would have connected the artistic communities in the San Marco district, where musicians, actors, and playwrights gathered during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4361158840363,
+            "lng": 12.323272207593241
+          }
+        }
+      },
+      "id": "bridge_45.436054_12.323212"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.436118218695896,
+      "lng": 12.321569212928221,
+      "streetName": "Calle dei Specchieri",
+      "streetNameEnglish": "Street of the Mirror Makers",
+      "streetDescription": "This name references the mirror-making artisans who had workshops near San Marco. Venice was famous for its production of high-quality mirrors during the Renaissance, especially after the development of cristallo glass on Murano. Mirror makers would have been prominent near this wealthy area where noble families would purchase luxury items.",
+      "id": "building_45.436118_12.321569"
+    },
+    {
+      "lat": 45.43608751354005,
+      "lng": 12.322063552632242,
+      "streetName": "Sottoportego dei Marzeri",
+      "streetNameEnglish": "Underpass of the Mercers",
+      "streetDescription": "The marzeri were general merchants who sold fabrics, clothing, and small luxury goods. This name would be fitting for a covered passageway (sottoportego) near San Marco, as these merchants often clustered near the commercial heart of Venice to sell their wares to wealthy patrons and visitors to the city.",
+      "id": "building_45.436088_12.322064"
+    },
+    {
+      "lat": 45.43656445812937,
+      "lng": 12.320811476434514,
+      "streetName": "Rio Terà dei Gioiellieri",
+      "streetNameEnglish": "Filled Canal of the Jewelers",
+      "streetDescription": "This name suggests a former canal that was filled in (rio terà) where jewelers had their shops. The San Marco area was home to many luxury artisans, including jewelers who served the nobili families. The Rialto and San Marco areas were centers for the jewelry trade in Renaissance Venice, making this a plausible street name.",
+      "id": "building_45.436564_12.320811"
+    },
+    {
+      "lat": 45.43641682463639,
+      "lng": 12.321444501587635,
+      "streetName": "Calle dei Maschereri",
+      "streetNameEnglish": "Street of the Mask Makers",
+      "streetDescription": "Venice was famous for its carnival traditions and mask makers (maschereri) who created elaborate masks for festivals and celebrations. This guild would have had workshops in central areas like San Marco to cater to wealthy patrons. The proximity to theaters and entertainment venues in this area would make this a logical location for mask makers.",
+      "id": "building_45.436417_12.321445"
+    },
+    {
+      "lat": 45.43647278541954,
+      "lng": 12.322109547576058,
+      "streetName": "Fondamenta dei Cortigiani",
+      "streetNameEnglish": "Foundation of the Courtiers",
+      "streetDescription": "This name references a walkway along a canal (fondamenta) frequented by courtiers or courtesans. The San Marco area, being close to the political center of Venice, would have been frequented by various officials, dignitaries, and those who served in diplomatic or administrative capacities. This name suggests a path used by those connected to the political life of the Republic.",
+      "id": "building_45.436473_12.322110"
+    }
+  ],
+  "id": "polygon-1745879328980"
+}

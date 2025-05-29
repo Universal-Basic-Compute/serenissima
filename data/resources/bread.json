@@ -1,0 +1,50 @@
+{
+  "id": "bread",
+  "name": "Bread",
+  "category": "finished_goods",
+  "subCategory": "food",
+  "description": "The staple food of Venice, baked fresh daily in neighborhood bakeries. Available in various forms from simple loaves for commoners to fine white bread for wealthy households.",
+  "varieties": [
+    {
+      "type": "common_loaf",
+      "productionDifficulty": "low",
+      "popularity": "very_high",
+      "valueMultiplier": 1,
+      "flourType": "standard",
+      "modelVariant": "models/resources/bread_common.glb"
+    },
+    {
+      "type": "white_bread",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1.3,
+      "flourType": "fine_wheat",
+      "modelVariant": "models/resources/bread_white.glb"
+    },
+    {
+      "type": "focaccia",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 1.2,
+      "flourType": "standard",
+      "modelVariant": "models/resources/bread_focaccia.glb"
+    },
+    {
+      "type": "ceremonial_bread",
+      "productionDifficulty": "high",
+      "popularity": "low",
+      "valueMultiplier": 2,
+      "flourType": "fine_wheat",
+      "modelVariant": "models/resources/bread_ceremonial.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "Bread was so essential to Venetian life that the Republic maintained strict control over grain supplies and bread production. The Magistrate of Grain ensured stable prices and adequate supplies, while neighborhood bakeries were required to produce sufficient quantities at regulated prices. During times of shortage, the government would subsidize bread prices to prevent unrest.",
+    "culturalContext": "Each Venetian neighborhood had its own bakery, creating a strong community connection. The smell of fresh bread was part of the daily rhythm of city life, and the quality of a neighborhood's bread was a point of local pride."
+  },
+  "importPrice": 318.6,
+  "lifetimeHours": 75,
+  "consumptionHours": 1,
+  "tier": 1
+}

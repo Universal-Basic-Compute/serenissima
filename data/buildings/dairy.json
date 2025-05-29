@@ -1,0 +1,62 @@
+{
+  "name": "Dairy",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Food Industry",
+  "size": 1,
+  "unlockCondition": "Access to milk supply, Cheesemakers' Guild membership",
+  "calculationsAnalysis": "The Dairy processes imported milk into cheese, a valuable and longer-lasting food product. Construction includes specialized equipment for cheese making. Income is steady from cheese sales, with maintenance covering milk spoilage and production costs. Employs skilled cheesemakers.",
+  "shortDescription": "A facility that processes milk into various types of cheese.",
+  "fullDescription": "Dairies are essential for transforming perishable milk into durable and nutritious cheese. Using traditional techniques, these establishments produce a range of cheeses, from soft and fresh to hard and aged, catering to diverse tastes and culinary needs.",
+  "flavorText": "Patience, a gentle hand, and the magic of time turn simple milk into a treasure worthy of any table.",
+  "constructionCosts": {
+    "ducats": 350000,
+    "timber": 90,
+    "bricks": 330,
+    "stone": 110
+  },
+  "maintenanceCost": 400,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "salt": 1,
+        "fuel": 1
+      },
+      "outputs": {
+        "cheese": 3
+      },
+      "craftMinutes": 240
+    }
+  ],
+    "storageCapacity": 150,
+    "stores": [
+      "milk",
+      "salt",
+      "cheese"
+    ],
+    "sells": [
+      "cheese"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Milk churning, presses, quiet aging room sounds",
+    "activitySounds": "Cutting curd, brining cheese, packaging",
+    "musicTheme": "Vita Quotidiana"
+  },
+  "seasonalEffects": {
+    "summer": "Milk quality may vary, affecting cheese production",
+    "winter": "Ideal conditions for aging certain cheeses"
+  },
+  "aiInteractionPoints": [
+    "Milk reception",
+    "Cheese vats",
+    "Aging cellar",
+    "Sales counter"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "canImport": true,
+  "constructionMinutes": 4320
+}

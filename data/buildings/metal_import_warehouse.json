@@ -1,0 +1,58 @@
+{
+  "name": "Metal Import Warehouse",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "storage",
+  "size": 2,
+  "unlockCondition": "18,000,000 ducats total wealth, Blacksmith Guild connection",
+  "canImport": true,
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Metal Import Warehouse represents critical infrastructure for industrial materials. The construction cost of 3,800,000 ducats reflects the specialized heavy-duty storage and handling facilities required, while the income of 40,000 ducats (1.05% return) represents the handling fees for essential industrial metals. The maintenance cost of 28,000 ducats (70% of income) balances profitability with the reality of maintaining specialized heavy-duty facilities. The employment capacity of 20 represents the specialized staff needed to handle, assess, and distribute industrial metals. The construction time of 10 days (864000000ms) represents a significant industrial construction project.",
+  "shortDescription": "Specialized facility for importing, storing, and distributing metals for Venice's industries.",
+  "fullDescription": "Supporting Venice's shipbuilding, weapons manufacturing, and construction industries, these specialized warehouses handle imported metals from across Europe. Featuring reinforced floors to support heavy materials, specialized handling equipment, and secure storage for precious metals, these facilities employ metallurgical experts who can assess quality and purity. The substantial security measures reflect both the value of precious metals and the strategic importance of industrial metals to Venice's military and commercial power.",
+  "flavorText": "Iron becomes ships, bronze becomes cannons, gold becomes influence—and all pass through these humble walls before transforming Venice's fortunes.",
+  "constructionCosts": {
+    "ducats": 3800000,
+    "timber": 1520,
+    "bricks": 2430,
+    "stone": 1820,
+    "iron": 610
+  },
+  "maintenanceCost": 2800,
+  "soundDesign": {
+    "ambientSound": "Metal being moved, quality testing, weight measurements",
+    "activitySounds": "Metal ingots being stacked, hammering tests, merchant negotiations",
+    "musicTheme": "Fucina Veneziana"
+  },
+  "seasonalEffects": {
+    "military preparations": "Increased throughput of strategic metals",
+    "shipbuilding season": "Focus on naval construction materials",
+    "mining cycles": "Strategic stockpiling based on European mining output"
+  },
+  "aiInteractionPoints": [
+    "Heavy materials handling area",
+    "Quality assessment station",
+    "Secure vault for precious metals",
+    "Merchant negotiation room",
+    "Loading dock for industrial quantities",
+    "Metallurgical testing area"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 500,
+    "stores": [
+      "iron",
+      "tools",
+      "iron_fittings",
+      "gold",
+      "jewelry",
+      "timber",
+      "weapons"
+    ],
+    "sells": []
+  },
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 14400
+}

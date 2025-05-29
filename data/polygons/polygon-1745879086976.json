@@ -1,0 +1,261 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43275076325543,
+      "lng": 12.321781806282415
+    },
+    {
+      "lat": 45.43290134139704,
+      "lng": 12.322506002716436
+    },
+    {
+      "lat": 45.4330895635091,
+      "lng": 12.32415824346961
+    },
+    {
+      "lat": 45.43330413595111,
+      "lng": 12.325703195862188
+    },
+    {
+      "lat": 45.433413304073405,
+      "lng": 12.326963834099187
+    },
+    {
+      "lat": 45.433014274739605,
+      "lng": 12.327055029205694
+    },
+    {
+      "lat": 45.43283734573596,
+      "lng": 12.326073340706243
+    },
+    {
+      "lat": 45.4327394698786,
+      "lng": 12.325595907501592
+    },
+    {
+      "lat": 45.43257383342564,
+      "lng": 12.325102381042852
+    },
+    {
+      "lat": 45.43232161334767,
+      "lng": 12.324281625084295
+    },
+    {
+      "lat": 45.43229526193121,
+      "lng": 12.323868564896001
+    },
+    {
+      "lat": 45.432001631029635,
+      "lng": 12.322978071503057
+    },
+    {
+      "lat": 45.431941398860985,
+      "lng": 12.322591833404912
+    },
+    {
+      "lat": 45.43191128275259,
+      "lng": 12.321969560913457
+    },
+    {
+      "lat": 45.432378080627224,
+      "lng": 12.321948103241338
+    }
+  ],
+  "centroid": {
+    "lat": 45.43263155336768,
+    "lng": 12.324171833328618
+  },
+  "historicalName": "Calle Longa de San Barnaba in Sestier de Dorsoduro",
+  "englishName": "Long Street of Saint Barnabas in the Dorsoduro District",
+  "historicalDescription": "This area in the sestiere of Dorsoduro was known for the Church of San Barnaba, which dates back to the 9th century. The nearby Rio de San Barnaba canal was an important waterway for local transportation and commerce in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 31574.5,
+  "center": {
+    "lat": 45.43263155336768,
+    "lng": 12.324171833328618
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.4330895635091,
+        "lng": 12.32415824346961
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879117945",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43322281232007,
+          "lng": 12.32436846319012
+        },
+        "distance": 22.1044018802067,
+        "id": "8701daf0-f784-4f18-b22c-5da74ab669cb",
+        "historicalName": "Ponte dei Barnabiti",
+        "englishName": "Bridge of the Barnabites",
+        "historicalDescription": "Named after the religious order of Barnabites who had a presence near San Barnaba church in Dorsoduro during the 16th century. The Barnabites were known for their educational work in Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433156187914584,
+            "lng": 12.324263353329865
+          }
+        }
+      },
+      "id": "bridge_45.433090_12.324158"
+    },
+    {
+      "edge": {
+        "lat": 45.43319684973011,
+        "lng": 12.324930719665899
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879117945",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43329245404909,
+          "lng": 12.325033651025814
+        },
+        "distance": 13.323689467377879,
+        "id": "8701daf0-f784-4f18-b22c-5da74ab669cb",
+        "historicalName": "Ponte dei Gondolieri",
+        "englishName": "Bridge of the Gondoliers",
+        "historicalDescription": "This bridge was a common meeting point for gondoliers serving the Dorsoduro area. In Renaissance Venice, gondoliers formed a powerful guild and were essential for transportation throughout the canal network, particularly in areas like San Barnaba.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433244651889595,
+            "lng": 12.324982185345856
+          }
+        }
+      },
+      "id": "bridge_45.433197_12.324931"
+    },
+    {
+      "edge": {
+        "lat": 45.43330413595111,
+        "lng": 12.325703195862188
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879117945",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43336209577811,
+          "lng": 12.325698838861507
+        },
+        "distance": 6.453799622691829,
+        "id": "8701daf0-f784-4f18-b22c-5da74ab669cb",
+        "historicalName": "Ponte dei Pittori",
+        "englishName": "Bridge of the Painters",
+        "historicalDescription": "The Dorsoduro sestiere was home to many artists' workshops during the Renaissance. This bridge was named for the painters who had studios along Calle Longa de San Barnaba, reflecting the area's artistic heritage.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43333311586461,
+            "lng": 12.325701017361848
+          }
+        }
+      },
+      "id": "bridge_45.433304_12.325703"
+    },
+    {
+      "edge": {
+        "lat": 45.43229526193121,
+        "lng": 12.323868564896001
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879056576",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43221620760799,
+          "lng": 12.323873929314031
+        },
+        "distance": 8.800400512249114,
+        "id": "018a4c65-a587-467c-b16d-3efc1f443481",
+        "historicalName": "Ponte della Toletta",
+        "englishName": "Bridge of the Toilette",
+        "historicalDescription": "Named after the nearby street (La Toletta) in Dorsoduro. The name originates from the small cloth shops that once lined this area in Renaissance Venice, where fine fabrics for personal grooming and appearance were sold.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4322557347696,
+            "lng": 12.323871247105016
+          }
+        }
+      },
+      "id": "bridge_45.432295_12.323869"
+    },
+    {
+      "edge": {
+        "lat": 45.432378080627224,
+        "lng": 12.321948103241338
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879142005",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43222899482186,
+          "lng": 12.321847186716122
+        },
+        "distance": 18.352826968821088,
+        "id": "ddd91c09-2132-48b1-a22d-3d02dfe6d70d",
+        "historicalName": "Ponte dei Cavalli",
+        "englishName": "Bridge of the Horses",
+        "historicalDescription": "This bridge was named for being one of the few places in San Barnaba where horses would be brought into Venice by boat before being led through the calli. During the Renaissance, horses were rare in Venice and typically reserved for noble families.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43230353772454,
+            "lng": 12.32189764497873
+          }
+        }
+      },
+      "id": "bridge_45.432378_12.321948"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43229292326091,
+      "lng": 12.322304692697571,
+      "streetName": "Calle dei Gondolieri",
+      "streetNameEnglish": "Street of the Gondoliers",
+      "streetDescription": "This name reflects the presence of gondoliers who traditionally lived near San Barnaba. In the Renaissance period, many boatmen settled in Dorsoduro due to its proximity to important waterways, making this a historically accurate name for the area.",
+      "id": "building_45.432293_12.322305"
+    },
+    {
+      "lat": 45.432296590718174,
+      "lng": 12.323114988792474,
+      "streetName": "Fondamenta dei Pittori",
+      "streetNameEnglish": "Foundation of the Painters",
+      "streetDescription": "Dorsoduro was known for housing many artists' workshops during the Renaissance. This name honors the painters who lived and worked near San Barnaba, including several who contributed to the nearby Scuola Grande di San Rocco and churches in the area.",
+      "id": "building_45.432297_12.323115"
+    },
+    {
+      "lat": 45.432785348924995,
+      "lng": 12.323723316885534,
+      "streetName": "Sottoportego del Tagliapietra",
+      "streetNameEnglish": "Passageway of the Stonecutter",
+      "streetDescription": "The Tagliapietra were a notable family of stonecutters who worked in Venice during the Renaissance. This name would be appropriate for a covered passageway near San Barnaba, reflecting the craft guilds that were vital to Venetian construction and artistry.",
+      "id": "building_45.432785_12.323723"
+    },
+    {
+      "lat": 45.432791994316176,
+      "lng": 12.324415068949339,
+      "streetName": "Rio Terà dei Carmini",
+      "streetNameEnglish": "Filled Canal of the Carmelites",
+      "streetDescription": "This name refers to the nearby Chiesa di Santa Maria dei Carmini (Church of the Carmelites). 'Rio Terà' indicates a canal that was filled in to create a street, a common practice in Venice. The Carmelite order had significant presence in this part of Dorsoduro during the Renaissance.",
+      "id": "building_45.432792_12.324415"
+    },
+    {
+      "lat": 45.43278560210383,
+      "lng": 12.325031222295157,
+      "streetName": "Calle della Toletta",
+      "streetNameEnglish": "Street of the Small Table",
+      "streetDescription": "This name historically indicates a street where money changers or small merchants would set up their tables ('toletta' is Venetian for small table). Located near San Barnaba, this would be appropriate for an area where local commerce took place during the Renaissance period.",
+      "id": "building_45.432786_12.325031"
+    },
+    {
+      "lat": 45.43287726726038,
+      "lng": 12.325527636751696,
+      "streetName": "Salizada dei Caotorta",
+      "streetNameEnglish": "Paved Street of the Caotorta Family",
+      "streetDescription": "The Caotorta were a nobili Venetian family with properties in Dorsoduro. A 'salizada' was a prestigious paved street (when most were unpaved), often named after prominent families who lived there. This would accurately reflect the Renaissance Venetian practice of commemorating noble families in street names.",
+      "id": "building_45.432877_12.325528"
+    }
+  ],
+  "id": "polygon-1745879086976"
+}

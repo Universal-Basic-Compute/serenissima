@@ -1,0 +1,68 @@
+{
+  "id": "merchant_galley",
+  "name": "Merchant Galley",
+  "category": "finished_goods",
+  "subCategory": "naval_vessels",
+  "description": "A versatile Venetian trading vessel combining oars and sails, capable of long-distance Mediterranean voyages with significant cargo capacity. The backbone of Venice's commercial maritime power.",
+  "varieties": [
+    {
+      "type": "light_galley",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 0.7,
+      "speedMultiplier": 1.2,
+      "capacityMultiplier": 0.7,
+      "crewRequirement": 70,
+      "modelVariant": "models/resources/merchant_galley_light.glb"
+    },
+    {
+      "type": "standard_galley",
+      "productionDifficulty": "high",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "speedMultiplier": 1,
+      "capacityMultiplier": 1,
+      "crewRequirement": 120,
+      "modelVariant": "models/resources/merchant_galley_standard.glb"
+    },
+    {
+      "type": "heavy_galley",
+      "productionDifficulty": "very_high",
+      "popularity": "medium",
+      "valueMultiplier": 1.4,
+      "speedMultiplier": 0.8,
+      "capacityMultiplier": 1.4,
+      "crewRequirement": 180,
+      "modelVariant": "models/resources/merchant_galley_heavy.glb"
+    },
+    {
+      "type": "galleass",
+      "productionDifficulty": "extremely_high",
+      "popularity": "low",
+      "valueMultiplier": 1.8,
+      "speedMultiplier": 0.7,
+      "capacityMultiplier": 1.6,
+      "crewRequirement": 200,
+      "modelVariant": "models/resources/merchant_galley_galleass.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1250,
+    "notableProducers": [
+      "Venetian Arsenal",
+      "Republic Shipyards"
+    ],
+    "historicalSignificance": "The merchant galley was a crucial innovation that gave Venice commercial dominance in the Mediterranean. Its combination of sail and oar power made it versatile in varied weather conditions, while its design allowed for substantial cargo capacity without sacrificing too much speed. The standardized construction methods pioneered at the Venetian Arsenal allowed for efficient production that astounded foreign visitors.",
+    "historicalContracts": [
+      "Venice's maritime trade routes",
+      "Eastern Mediterranean",
+      "Black Sea",
+      "North African coast"
+    ]
+  },
+  "importPrice": 202950.0,
+  "lifetimeHours": null,
+  "consumptionHours": 1168,
+  "tier": 3,
+  "storageCapacity": 1000
+}

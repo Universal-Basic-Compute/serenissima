@@ -1,0 +1,11 @@
+{
+  "id": "silk_fabric",
+  "name": "Silk Fabric",
+  "category": "processed_materials",
+  "subCategory": "textile",
+  "description": "Finely woven silk fabric ready for dyeing or garment making.",
+  "importPrice": 8262.0,
+  "lifetimeHours": 43800,
+  "consumptionHours": 117,
+  "tier": 3
+}

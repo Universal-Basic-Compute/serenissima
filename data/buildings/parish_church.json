@@ -1,0 +1,61 @@
+{
+  "name": "Parish Church",
+  "pointType": "building",
+  "category": "Public & Government",
+  "subCategory": "Religious Buildings",
+  "size": 3,
+  "unlockCondition": "10,000,000 ducats, Church approval, local community support",
+  "calculationsAnalysis": "The Parish Church's economic values reflect its dual spiritual and community roles. The high construction cost (7,500,000 ducats) represents the significant architectural investment and decorative elements required for religious buildings in Venice. The income of 45,000 ducats (0.6% return) represents donations, fees for services, and endowments, while the maintenance cost of 40,000 ducats creates a small but sustainable profit margin. This encourages players to build churches for their substantial reputation and community benefits while providing modest financial returns, mirroring the historical importance of parish churches as neighborhood centers.",
+  "shortDescription": "Neighborhood worship center serving the spiritual needs of local residents.",
+  "fullDescription": "The spiritual heart of each Venetian neighborhood, parish churches provide religious services, community gathering spaces, and social support. Featuring a main worship area, bell tower, side chapels, and often charitable facilities, these buildings serve as both religious centers and neighborhood focal points. Venice's distinctive layout resulted in an unusually high number of parish churches, each forming the center of a local community.",
+  "flavorText": "The parish church marks both the geographical center of the neighborhood and the spiritual center of its people's lives—from baptism to burial, all significant moments pass through these doors.",
+  "constructionCosts": {
+    "ducats": 7500000,
+    "timber": 830,
+    "bricks": 2090,
+    "stone": 3340,
+    "glass": 420,
+    "marble": 630
+  },
+  "maintenanceCost": 4000,
+  "soundDesign": {
+    "ambientSound": "Church bells at regular intervals, quiet prayers, echoing spaces",
+    "activitySounds": "Choir practice, Mass ceremonies, community gatherings",
+    "musicTheme": "Gloria di San Marco"
+  },
+  "seasonalEffects": {
+    "religious festivals": "Decorated exterior, increased activity, processions",
+    "holy days": "Special services, community gatherings",
+    "ordinary time": "Regular rhythm of daily Masses and prayers"
+  },
+  "aiInteractionPoints": [
+    "Main entrance",
+    "Bell tower",
+    "Altar area",
+    "Side chapels",
+    "Community gathering space",
+    "Confessionals",
+    "Parish office"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 150,
+    "stores": [
+      "paper",
+      "gold",
+      "books",
+      "gold_leaf",
+      "wine",
+      "spiced_wine",
+      "bread"
+    ],
+    "sells": [
+      "books",
+      "gold_leaf"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 0,
+  "consumeTier": 0,
+  "constructionMinutes": 43200
+}

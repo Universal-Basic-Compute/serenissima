@@ -1,0 +1,462 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.440072521573214,
+      "lng": 12.333980185837996
+    },
+    {
+      "lat": 45.43945899110243,
+      "lng": 12.335165722222579
+    },
+    {
+      "lat": 45.43950792322529,
+      "lng": 12.335262281747115
+    },
+    {
+      "lat": 45.439432643018684,
+      "lng": 12.335353476853621
+    },
+    {
+      "lat": 45.43938371083057,
+      "lng": 12.335246188493025
+    },
+    {
+      "lat": 45.43893955518205,
+      "lng": 12.335755808205855
+    },
+    {
+      "lat": 45.43861208225291,
+      "lng": 12.335965020509017
+    },
+    {
+      "lat": 45.438453991193086,
+      "lng": 12.336002571435225
+    },
+    {
+      "lat": 45.43807005391809,
+      "lng": 12.335691435189498
+    },
+    {
+      "lat": 45.43807381802168,
+      "lng": 12.335573417992842
+    },
+    {
+      "lat": 45.43760706725894,
+      "lng": 12.33487604364897
+    },
+    {
+      "lat": 45.43718171844348,
+      "lng": 12.33388899073149
+    },
+    {
+      "lat": 45.436677318347584,
+      "lng": 12.332344038338912
+    },
+    {
+      "lat": 45.437113963468846,
+      "lng": 12.332022173257124
+    },
+    {
+      "lat": 45.43790443311056,
+      "lng": 12.331238968224776
+    },
+    {
+      "lat": 45.438228146053575,
+      "lng": 12.33188806280638
+    },
+    {
+      "lat": 45.438329776478234,
+      "lng": 12.331812960953963
+    },
+    {
+      "lat": 45.438563149353165,
+      "lng": 12.332177741379988
+    },
+    {
+      "lat": 45.43858949784293,
+      "lng": 12.332327945084822
+    },
+    {
+      "lat": 45.43930090241547,
+      "lng": 12.333261353822005
+    }
+  ],
+  "centroid": {
+    "lat": 45.43847506315454,
+    "lng": 12.333991719336757
+  },
+  "areaInSquareMeters": 72641,
+  "historicalName": "Contrada San Polo",
+  "englishName": "District of Saint Paul",
+  "historicalDescription": "This area in the San Polo sestiere was known for its artisan workshops, particularly blacksmiths and leather tanners, as well as the Church of San Polo which dates back to the 9th century.",
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.43847506315454,
+    "lng": 12.333991719336757
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43976575633782,
+        "lng": 12.334572954030287
+      },
+      "water": {
+        "lat": 45.439937262457875,
+        "lng": 12.33465018796041
+      },
+      "historicalName": "Fondamenta dei Rialto",
+      "englishName": "Foundation of Rialto",
+      "historicalDescription": "Named for its proximity to the Rialto contracts, this dock served merchants bringing goods to Venice's commercial center in San Polo. It was a bustling landing point for traders from across the Mediterranean.",
+      "id": "canal_45.439766_12.334573"
+    },
+    {
+      "edge": {
+        "lat": 45.43945899110243,
+        "lng": 12.335165722222579
+      },
+      "water": {
+        "lat": 45.43959690294185,
+        "lng": 12.335330275834272
+      },
+      "historicalName": "Riva dei Melangoli",
+      "englishName": "Dock of the Bitter Oranges",
+      "historicalDescription": "This dock in San Polo was where citrus fruits, particularly bitter oranges used in medicines and cooking, would arrive. The area was known for specialty food merchants who sold exotic fruits to wealthy Venetian households.",
+      "id": "canal_45.439459_12.335166"
+    },
+    {
+      "edge": {
+        "lat": 45.43893955518205,
+        "lng": 12.335755808205855
+      },
+      "water": {
+        "lat": 45.43900274705672,
+        "lng": 12.335995803891697
+      },
+      "historicalName": "Fondamenta della Scuola di San Giovanni",
+      "englishName": "Foundation of the School of St. John",
+      "historicalDescription": "Named after one of the confraternities (scuole) that was active in the San Polo district, this dock served as a landing point for members and benefactors of the religious brotherhood dedicated to St. John.",
+      "id": "canal_45.438940_12.335756"
+    },
+    {
+      "edge": {
+        "lat": 45.43861208225291,
+        "lng": 12.335965020509017
+      },
+      "water": {
+        "lat": 45.43862979481166,
+        "lng": 12.336220110590357
+      },
+      "historicalName": "Riva dei Casaroli",
+      "englishName": "Dock of the Cheesemakers",
+      "historicalDescription": "This landing in San Polo served the guild of cheesemakers who had workshops in the area. Fresh cheeses would arrive here from the mainland and nearby islands before being distributed throughout the city.",
+      "id": "canal_45.438612_12.335965"
+    },
+    {
+      "edge": {
+        "lat": 45.43807381802168,
+        "lng": 12.335573417992842
+      },
+      "water": {
+        "lat": 45.43801266488917,
+        "lng": 12.335814482169287
+      },
+      "historicalName": "Fondamenta dei Cavagnin",
+      "englishName": "Foundation of the Basket Weavers",
+      "historicalDescription": "Named for the basket weaving artisans who had workshops nearby in San Polo, this dock was where materials for their craft would arrive, including reeds and grasses from the lagoon islands.",
+      "id": "canal_45.438074_12.335573"
+    },
+    {
+      "edge": {
+        "lat": 45.43760706725894,
+        "lng": 12.33487604364897
+      },
+      "water": {
+        "lat": 45.437460746772906,
+        "lng": 12.335025116661678
+      },
+      "historicalName": "Riva della Marangona",
+      "englishName": "Dock of the Carpenter's Bell",
+      "historicalDescription": "Named after the bell (marangona) that signaled the beginning and end of the workday for carpenters and shipbuilders. This dock in San Polo was associated with the woodworking trades that were essential to Venetian shipbuilding.",
+      "id": "canal_45.437607_12.334876"
+    },
+    {
+      "edge": {
+        "lat": 45.43718171844348,
+        "lng": 12.33388899073149
+      },
+      "water": {
+        "lat": 45.4370021328246,
+        "lng": 12.333874726490878
+      },
+      "historicalName": "Fondamenta dei Tagliapietra",
+      "englishName": "Foundation of the Stonemasons",
+      "historicalDescription": "This dock served the prestigious guild of stonemasons (tagliapietra) who had workshops in San Polo. Marble and stone from quarries on the mainland would arrive here to be worked into architectural elements for Venetian palaces and churches.",
+      "id": "canal_45.437182_12.333889"
+    },
+    {
+      "edge": {
+        "lat": 45.43692951839553,
+        "lng": 12.3331165145352
+      },
+      "water": {
+        "lat": 45.43676236608609,
+        "lng": 12.333021860205097
+      },
+      "historicalName": "Riva del Gambaro",
+      "englishName": "Dock of the Crayfish",
+      "historicalDescription": "Named for a popular tavern or osteria in San Polo that served freshwater crayfish, this dock was where local fishermen would deliver their catch to nearby establishments, making it a lively spot for both commerce and socializing.",
+      "id": "canal_45.436930_12.333117"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.437113963468846,
+        "lng": 12.332022173257124
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072871983",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.437075634974825,
+          "lng": 12.332004203671264
+        },
+        "distance": 4.486633567807287,
+        "id": "1f377b7b-ff78-4d67-b6f6-c260e7ca9b7a",
+        "historicalName": "Ponte dei Velai",
+        "englishName": "Bridge of the Sailmakers",
+        "historicalDescription": "This bridge in San Polo would have been named after the sailmakers (velai) who had workshops in the area during the Renaissance. Sailmaking was a crucial trade in maritime Venice, and San Polo contained many artisan workshops supporting the Republic's naval power.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43709479922184,
+            "lng": 12.332013188464195
+          }
+        }
+      },
+      "id": "bridge_45.437114_12.332022"
+    },
+    {
+      "edge": {
+        "lat": 45.4375091982897,
+        "lng": 12.33163057074095
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072871983",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.437482162413914,
+          "lng": 12.331596507901
+        },
+        "distance": 4.01260860505041,
+        "id": "1f377b7b-ff78-4d67-b6f6-c260e7ca9b7a",
+        "historicalName": "Ponte dei Varoteri di San Polo",
+        "englishName": "Bridge of the Furriers of San Polo",
+        "historicalDescription": "Named after the furriers (varoteri) who had their shops nearby in the San Polo district. Fur trading was a lucrative business in Renaissance Venice, with pelts imported from Eastern Europe and Russia. The guild of furriers was particularly active in this area of the city.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43749568035181,
+            "lng": 12.331613539320976
+          }
+        }
+      },
+      "id": "bridge_45.437509_12.331631"
+    },
+    {
+      "edge": {
+        "lat": 45.43930090241547,
+        "lng": 12.333261353822005
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072933644",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.439323011498814,
+          "lng": 12.333207709641707
+        },
+        "distance": 4.854008033292496,
+        "id": "46fa0a1f-4243-4e11-b71a-76609f8abf8a",
+        "historicalName": "Ponte della Scuola di San Giovanni Evangelista",
+        "englishName": "Bridge of the School of Saint John the Evangelist",
+        "historicalDescription": "This bridge would have been named after the nearby Scuola Grande di San Giovanni Evangelista, one of the six great confraternities of Venice. Founded in 1261, this important religious and charitable institution was located in the San Polo district and would have been a significant landmark in Renaissance Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43931195695714,
+            "lng": 12.333234531731856
+          }
+        }
+      },
+      "id": "bridge_45.439301_12.333261"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.437148224861446,
+      "lng": 12.332601606999939,
+      "streetName": "Calle dei Mercanti di San Polo",
+      "streetNameEnglish": "Street of the Merchants of San Polo",
+      "streetDescription": "Named after the merchants who conducted business in the San Polo district. This area was a commercial hub near the Rialto contracts, with many merchant families maintaining residences and shops in this contrada.",
+      "id": "building_45.437148_12.332602"
+    },
+    {
+      "lat": 45.437120060797156,
+      "lng": 12.33317736213598,
+      "streetName": "Rio Terà dei Marangoni",
+      "streetNameEnglish": "Filled Canal of the Carpenters",
+      "streetDescription": "This street was once a canal that was filled in (rio terà). It was named after the carpenters (marangoni) who had workshops in the area, crafting furniture and wooden components for Venetian homes and ships.",
+      "id": "building_45.437120_12.333177"
+    },
+    {
+      "lat": 45.437601216669556,
+      "lng": 12.331976027617516,
+      "streetName": "Salizada dei Frari",
+      "streetNameEnglish": "Paved Street of the Friars",
+      "streetDescription": "A paved street (salizada) near the Franciscan Basilica of Santa Maria Gloriosa dei Frari, one of the most important churches in San Polo. This name acknowledges the significance of the Franciscan friars in this contrada.",
+      "id": "building_45.437601_12.331976"
+    },
+    {
+      "lat": 45.43753913893009,
+      "lng": 12.33246246058785,
+      "streetName": "Fondamenta dei Sarti",
+      "streetNameEnglish": "Foundation of the Tailors",
+      "streetDescription": "A street running alongside a canal where tailors had their workshops. The tailors' guild was influential in Renaissance Venice, and many master tailors operated businesses in the San Polo district.",
+      "id": "building_45.437539_12.332462"
+    },
+    {
+      "lat": 45.43750245924431,
+      "lng": 12.333068282205074,
+      "streetName": "Sottoportego del Traghetto di San Thomà",
+      "streetNameEnglish": "Passageway of the San Tomà Ferry",
+      "streetDescription": "A covered passageway (sottoportego) leading to the gondola ferry (traghetto) crossing point at San Tomà. This ferry service connected San Polo to the Dorsoduro district across the Grand Canal.",
+      "id": "building_45.437502_12.333068"
+    },
+    {
+      "lat": 45.43753534786537,
+      "lng": 12.33389361440679,
+      "streetName": "Ruga dei Oresi di San Polo",
+      "streetNameEnglish": "Street of the Goldsmiths of San Polo",
+      "streetDescription": "A street where goldsmiths and jewelers had their workshops in the San Polo district. The term 'ruga' typically indicated a commercial street lined with shops of the same trade.",
+      "id": "building_45.437535_12.333894"
+    },
+    {
+      "lat": 45.43808019746839,
+      "lng": 12.332510635685718,
+      "streetName": "Calle del Campaniel dei Frari",
+      "streetNameEnglish": "Street of the Frari Bell Tower",
+      "streetDescription": "Named for its proximity to the bell tower of the Frari church, this street would have been a landmark for orientation in the San Polo district, as the bell tower was visible from many points in the neighborhood.",
+      "id": "building_45.438080_12.332511"
+    },
+    {
+      "lat": 45.43801428436477,
+      "lng": 12.333276997525788,
+      "streetName": "Campiello dei Nomboli",
+      "streetNameEnglish": "Small Square of the Nomboli Family",
+      "streetDescription": "A small square named after the Nomboli, a merchant family with property in the San Polo district. Many Venetian squares were named after prominent local families who owned palaces or properties nearby.",
+      "id": "building_45.438014_12.333277"
+    },
+    {
+      "lat": 45.43800461357267,
+      "lng": 12.333787377715943,
+      "streetName": "Corte Pisani di San Polo",
+      "streetNameEnglish": "Pisani Court of San Polo",
+      "streetDescription": "A courtyard named after the Pisani family, one of Venice's nobili families with a residence in the San Polo district. Noble families often had courtyards associated with their palazzos.",
+      "id": "building_45.438005_12.333787"
+    },
+    {
+      "lat": 45.43798858894973,
+      "lng": 12.334520969539103,
+      "streetName": "Rio Terà dei Meloni",
+      "streetNameEnglish": "Filled Canal of the Melons",
+      "streetDescription": "A former canal, now filled in, where melon sellers would gather to sell their produce. Fresh fruits were important in the Venetian diet, and specific areas were often designated for selling particular goods.",
+      "id": "building_45.437989_12.334521"
+    },
+    {
+      "lat": 45.43846097380233,
+      "lng": 12.332610368944955,
+      "streetName": "Calle della Scuola di San Giovanni Evangelista",
+      "streetNameEnglish": "Street of the School of Saint John the Evangelist",
+      "streetDescription": "Named for its proximity to the Scuola Grande di San Giovanni Evangelista, one of Venice's major confraternities located in the San Polo district. These scuole were important religious and social institutions.",
+      "id": "building_45.438461_12.332610"
+    },
+    {
+      "lat": 45.43844921305672,
+      "lng": 12.333089926233379,
+      "streetName": "Fondamenta dei Tintori di San Polo",
+      "streetNameEnglish": "Foundation of the Dyers of San Polo",
+      "streetDescription": "A canalside street where dyers had their workshops. Fabric dyeing was a crucial industry in Venice, and the proximity to water was essential for this trade. The San Polo district had several operations related to textile production.",
+      "id": "building_45.438449_12.333090"
+    },
+    {
+      "lat": 45.43847273672002,
+      "lng": 12.333733727319562,
+      "streetName": "Sottoportego dei Laneri",
+      "streetNameEnglish": "Passageway of the Wool Workers",
+      "streetDescription": "A covered passageway associated with the wool trade, which was one of Venice's major industries. The wool workers' guild had a significant presence in the San Polo district, contributing to the city's textile economy.",
+      "id": "building_45.438473_12.333734"
+    },
+    {
+      "lat": 45.43847046039522,
+      "lng": 12.334547066560136,
+      "streetName": "Calle dei Stagneri Piccola",
+      "streetNameEnglish": "Small Street of the Tinsmiths",
+      "streetDescription": "A narrow street where tinsmiths had their workshops. These artisans produced tin objects for domestic and commercial use, including containers and utensils. The qualifier 'piccola' (small) distinguished it from larger streets of the same trade.",
+      "id": "building_45.438470_12.334547"
+    },
+    {
+      "lat": 45.43849636009825,
+      "lng": 12.335152076213376,
+      "streetName": "Ramo del Fontico di San Polo",
+      "streetNameEnglish": "Branch of the Grain Warehouse of San Polo",
+      "streetDescription": "A side street (ramo) leading to a local grain warehouse. Food storage facilities were crucial to Venice's infrastructure, and neighborhood grain warehouses ensured provisions were available throughout the city.",
+      "id": "building_45.438496_12.335152"
+    },
+    {
+      "lat": 45.438952082448466,
+      "lng": 12.333201033683252,
+      "streetName": "Salizada dei Mercanti da Rialto",
+      "streetNameEnglish": "Paved Street of the Rialto Merchants",
+      "streetDescription": "A paved street used by merchants traveling between their businesses in San Polo and the nearby Rialto contract, which was the commercial heart of Renaissance Venice and located partially within the San Polo district.",
+      "id": "building_45.438952_12.333201"
+    },
+    {
+      "lat": 45.438843357351,
+      "lng": 12.333843769093784,
+      "streetName": "Calle del Traghetto di San Silvestro",
+      "streetNameEnglish": "Street of the San Silvestro Ferry",
+      "streetDescription": "A street leading to one of the ferry crossing points on the Grand Canal. The traghetto at San Silvestro connected the San Polo district with San Marco, facilitating movement between these important areas of the city.",
+      "id": "building_45.438843_12.333844"
+    },
+    {
+      "lat": 45.43888928119571,
+      "lng": 12.33436169780532,
+      "streetName": "Corte Mocenigo",
+      "streetNameEnglish": "Mocenigo Court",
+      "streetDescription": "A courtyard named for the Mocenigo family, who were among Venice's most distinguished noble families. They owned several palaces throughout the city, including in San Polo, and produced several doges (elected leaders) of the Venetian Republic.",
+      "id": "building_45.438889_12.334362"
+    },
+    {
+      "lat": 45.43897196414193,
+      "lng": 12.335023188442372,
+      "streetName": "Rio Terà dei Frari",
+      "streetNameEnglish": "Filled Canal of the Friars",
+      "streetDescription": "A former canal near the Frari church that was filled in to create a street. This transformation of waterways into pedestrian streets was common in Venice's development, especially in areas where religious institutions needed more surrounding space.",
+      "id": "building_45.438972_12.335023"
+    },
+    {
+      "lat": 45.4393405564567,
+      "lng": 12.33389732477691,
+      "streetName": "Calle dei Botteri di San Polo",
+      "streetNameEnglish": "Street of the Barrel Makers of San Polo",
+      "streetDescription": "A street where barrel makers (botteri) had their workshops in the San Polo district. Barrels were essential containers for storing wine, oil, and other liquids, making these craftsmen important to Venetian commerce and daily life.",
+      "id": "building_45.439341_12.333897"
+    },
+    {
+      "lat": 45.43941932190337,
+      "lng": 12.334489226732478,
+      "streetName": "Campiello San Stin",
+      "streetNameEnglish": "Small Square of San Stin",
+      "streetDescription": "A small square named after the Church of San Stin (a Venetian contraction of Santo Stefano), a local parish church in the San Polo district. Parish churches were the centers of neighborhood life in Renaissance Venice.",
+      "id": "building_45.439419_12.334489"
+    }
+  ],
+  "id": "polygon-1746072967949"
+}

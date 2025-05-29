@@ -1,0 +1,30 @@
+{
+  "id": "molten_glass",
+  "name": "Molten Glass",
+  "category": "processed_materials",
+  "subCategory": "glass",
+  "description": "Heated glass ready for shaping by skilled glassblowers.",
+  "varieties": [
+    {
+      "type": "cristallo",
+      "clarity": "high",
+      "requiredInputs": [
+        "high_quality_sand",
+        "refined_soda_ash"
+      ],
+      "valueMultiplier": 1.5
+    },
+    {
+      "type": "colored",
+      "clarity": "medium",
+      "requiredInputs": [
+        "minerals_colorants"
+      ],
+      "valueMultiplier": 1.2
+    }
+  ],
+  "importPrice": 1270.8,
+  "lifetimeHours": 75,
+  "consumptionHours": null,
+  "tier": 0
+}

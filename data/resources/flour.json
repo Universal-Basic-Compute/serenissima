@@ -1,0 +1,11 @@
+{
+  "id": "flour",
+  "name": "Flour",
+  "category": "processed_materials",
+  "subCategory": "food",
+  "description": "Milled grain ready for baking into bread and pastries.",
+  "importPrice": 228.0,
+  "lifetimeHours": 2175,
+  "consumptionHours": 10,
+  "tier": 0
+}

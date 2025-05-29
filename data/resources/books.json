@@ -1,0 +1,68 @@
+{
+  "id": "books",
+  "name": "Books",
+  "category": "finished_goods",
+  "subCategory": "cultural_goods",
+  "description": "Printed volumes containing knowledge, stories, or religious texts. Venice's publishing industry is among Europe's most advanced, producing works in multiple languages for contracts across the continent.",
+  "varieties": [
+    {
+      "type": "religious_text",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1.2,
+      "censorshipLevel": "high",
+      "modelVariant": "models/resources/books_religious.glb"
+    },
+    {
+      "type": "classical_literature",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 1.1,
+      "censorshipLevel": "low",
+      "modelVariant": "models/resources/books_classical.glb"
+    },
+    {
+      "type": "scientific_treatise",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1.5,
+      "censorshipLevel": "variable",
+      "modelVariant": "models/resources/books_scientific.glb"
+    },
+    {
+      "type": "merchant_manual",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1.3,
+      "censorshipLevel": "low",
+      "modelVariant": "models/resources/books_merchant.glb"
+    },
+    {
+      "type": "illustrated_volume",
+      "productionDifficulty": "very_high",
+      "popularity": "medium",
+      "valueMultiplier": 2,
+      "censorshipLevel": "variable",
+      "modelVariant": "models/resources/books_illustrated.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1469,
+    "notableProducers": [
+      "Aldus Manutius",
+      "Giolito Press",
+      "Venetian Hebrew Printers"
+    ],
+    "historicalSignificance": "Venice became one of Europe's earliest and most important printing centers, with hundreds of printing houses by the early 16th century. The city's political stability, commercial networks, and relative intellectual freedom made it ideal for the publishing industry. Venetian printers pioneered innovations in typography, book design, and distribution, helping spread Renaissance learning throughout Europe.",
+    "historicalContracts": [
+      "Italian states",
+      "Holy Roman Empire",
+      "Ottoman territories",
+      "Northern Europe"
+    ]
+  },
+  "importPrice": 3088.8,
+  "lifetimeHours": null,
+  "consumptionHours": 1168,
+  "tier": 3
+}

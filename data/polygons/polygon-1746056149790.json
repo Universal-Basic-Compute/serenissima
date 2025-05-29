@@ -1,0 +1,149 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.4419529449742,
+      "lng": 12.342584482254834
+    },
+    {
+      "lat": 45.440549013430825,
+      "lng": 12.341592064919324
+    },
+    {
+      "lat": 45.43907729433548,
+      "lng": 12.340787402214856
+    },
+    {
+      "lat": 45.43856538304313,
+      "lng": 12.340626469673962
+    },
+    {
+      "lat": 45.43874982220574,
+      "lng": 12.339859357895703
+    },
+    {
+      "lat": 45.439483808818,
+      "lng": 12.339880815567822
+    },
+    {
+      "lat": 45.4398376245948,
+      "lng": 12.340063205780835
+    },
+    {
+      "lat": 45.44189648727534,
+      "lng": 12.34144722563252
+    },
+    {
+      "lat": 45.442350032034064,
+      "lng": 12.341838828148694
+    }
+  ],
+  "centroid": {
+    "lat": 45.44027360119018,
+    "lng": 12.340964428009839
+  },
+  "historicalName": "Calle de la Testa, Sestiere di Castello",
+  "englishName": "Head Street, Castello District",
+  "historicalDescription": "This narrow street was located in the Castello sestiere, known for being the largest district and home to the Arsenale, the historic shipyard and naval base of Venice. The area was populated by artisans, sailors, and shipbuilders.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 31953.71,
+  "center": {
+    "lat": 45.44027360119018,
+    "lng": 12.340964428009839
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44024939713091,
+        "lng": 12.340340009751172
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056033630",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.4403723712437,
+          "lng": 12.340405476908595
+        },
+        "distance": 14.596921487150729,
+        "id": "eceb642e-6469-4e64-a36a-1e7e1db8981d",
+        "historicalName": "Ponte della Testa",
+        "englishName": "Bridge of the Head",
+        "historicalDescription": "This bridge takes its name from the adjacent Calle de la Testa in Castello. The name likely references either a shop sign depicting a head that existed in this area during the Renaissance period, or possibly relates to the helmet-makers (testiere) who may have had workshops in this vicinity, as Castello was known for various artisanal crafts including armor-making due to its proximity to the Arsenale.",
+        "location": {
+          "midpoint": {
+            "lat": 45.440310884187305,
+            "lng": 12.340372743329883
+          }
+        }
+      },
+      "id": "bridge_45.440249_12.340340"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43908586893523,
+      "lng": 12.340392756249006,
+      "streetName": "Calle dei Armaiuoli",
+      "streetNameEnglish": "Street of the Armorers",
+      "streetDescription": "Named after the armorers who had workshops in this area of Castello. The Sestiere di Castello was home to many craftsmen who supplied the Venetian Arsenal with weapons and armor during the Renaissance period.",
+      "id": "building_45.439086_12.340393"
+    },
+    {
+      "lat": 45.43937937858061,
+      "lng": 12.340450452704347,
+      "streetName": "Rio Terà dei Cavalletti",
+      "streetNameEnglish": "Filled Canal of the Trestles",
+      "streetDescription": "This street was originally a canal that was filled in (Rio Terà). The name 'Cavalletti' refers to the wooden trestles used by shipwrights in the nearby Arsenal for shipbuilding, a critical industry for the Venetian Republic's naval power.",
+      "id": "building_45.439379_12.340450"
+    },
+    {
+      "lat": 45.4398645316664,
+      "lng": 12.34052405210396,
+      "streetName": "Sottoportego della Lanterna",
+      "streetNameEnglish": "Passageway of the Lantern",
+      "streetDescription": "A covered passageway named after a lantern or light that would have guided residents through this narrow passage at night. Located near Calle de la Testa, it would have been an important connection between streets in this densely built area of Castello.",
+      "id": "building_45.439865_12.340524"
+    },
+    {
+      "lat": 45.439911504960904,
+      "lng": 12.341042141595093,
+      "streetName": "Calle Zorzi",
+      "streetNameEnglish": "Zorzi Street",
+      "streetDescription": "Named after the Zorzi family, a noble Venetian family that had property in this area of Castello during the Renaissance. Many streets in Venice bear the names of prominent families who owned palaces or properties nearby.",
+      "id": "building_45.439912_12.341042"
+    },
+    {
+      "lat": 45.44044007602291,
+      "lng": 12.341183045454798,
+      "streetName": "Fondamenta dei Bombardieri",
+      "streetNameEnglish": "Foundation of the Bombardiers",
+      "streetDescription": "This waterside street (fondamenta) is named after the bombardiers, specialized artillery soldiers who worked at the Arsenal. Castello's proximity to the Arsenal meant many military personnel and craftsmen resided in this area.",
+      "id": "building_45.440440_12.341183"
+    },
+    {
+      "lat": 45.440881858041436,
+      "lng": 12.341241276009455,
+      "streetName": "Salizada dei Greci",
+      "streetNameEnglish": "Paved Road of the Greeks",
+      "streetDescription": "A wide, paved street (salizada) named for the Greek community that settled in this part of Castello. The Greek Orthodox community had significant presence in Venice, particularly after the fall of Constantinople, and the Church of San Giorgio dei Greci is located in this sestiere.",
+      "id": "building_45.440882_12.341241"
+    },
+    {
+      "lat": 45.4413111011049,
+      "lng": 12.341753140293756,
+      "streetName": "Ruga dei Calafati",
+      "streetNameEnglish": "Street of the Caulkers",
+      "streetDescription": "A commercial street (ruga) named after the calafati, skilled workers who sealed ships' hulls with pitch and oakum to make them watertight. These craftsmen were essential to the Venetian maritime economy and would have worked at the nearby Arsenal.",
+      "id": "building_45.441311_12.341753"
+    },
+    {
+      "lat": 45.441722658032944,
+      "lng": 12.34177002822075,
+      "streetName": "Corte del Capitello",
+      "streetNameEnglish": "Court of the Capital",
+      "streetDescription": "A small courtyard (corte) named after a decorative column capital that was likely displayed there. Renaissance Venice often repurposed architectural elements from older structures or from Byzantine acquisitions, displaying them in public spaces as decorative features.",
+      "id": "building_45.441723_12.341770"
+    }
+  ],
+  "id": "polygon-1746056149790"
+}

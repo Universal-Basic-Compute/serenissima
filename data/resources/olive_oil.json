@@ -1,0 +1,31 @@
+{
+  "id": "olive_oil",
+  "name": "Olive Oil",
+  "category": "processed_materials",
+  "subCategory": "food",
+  "description": "Pressed oil from olives, used in cooking and various industries.",
+  "varieties": [
+    {
+      "type": "common_oil",
+      "acidity": "medium",
+      "valueMultiplier": 1,
+      "primaryUse": "cooking"
+    },
+    {
+      "type": "first_press",
+      "acidity": "low",
+      "valueMultiplier": 1.5,
+      "primaryUse": "fine_cuisine"
+    },
+    {
+      "type": "lamp_oil",
+      "acidity": "high",
+      "valueMultiplier": 0.7,
+      "primaryUse": "lighting"
+    }
+  ],
+  "importPrice": 768.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": 19,
+  "tier": 2
+}

@@ -1,0 +1,58 @@
+{
+  "name": "Watchtower",
+  "pointType": "building",
+  "category": "Military & Defense",
+  "subCategory": "Security Facilities",
+  "size": 1,
+  "unlockCondition": "7,000,000 ducats, Security Guild connection or government approval",
+  "calculationsAnalysis": "The Watchtower represents specialized security infrastructure with surveillance rather than direct revenue functions. The construction cost of 2,500,000 ducats reflects the tall structure and observation facilities required, while generating no direct income reflects its security rather than commercial purpose. The maintenance cost of 17,500 ducats creates an ongoing expense justified by the critical surveillance capabilities provided. The employment capacity of 8 represents the guards and observers needed for continuous operation. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic security asset that extends visual control over approaches to Venice, reflecting the historical importance of early warning systems in the city's defensive strategy, where advance notice of approaching threats was essential given Venice's unique lagoon position.",
+  "shortDescription": "Elevated observation position for surveillance of surrounding areas and early warning.",
+  "fullDescription": "Providing critical observation capabilities, watchtowers enable surveillance of wide areas for security and navigation purposes. Featuring elevated viewing platforms, signal equipment, observer quarters, and often communication systems, these specialized structures extend visual control over key approaches to Venice. Their strategic placement helped secure the lagoon approaches against threats while assisting maritime navigation.",
+  "flavorText": "From these heights, we can see threats before they see us, ships before they signal, and weather before it arrives—proving that in both security and commerce, foreknowledge is the greatest advantage.",
+  "constructionCosts": {
+    "ducats": 2500000,
+    "timber": 580,
+    "bricks": 1460,
+    "stone": 2560,
+    "iron": 370
+  },
+  "maintenanceCost": 1750,
+  "soundDesign": {
+    "ambientSound": "Wind at height, flag flapping, distant city sounds",
+    "activitySounds": "Alerting bell, observation reports, signal operations",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "fog": "Limited effectiveness, increased staffing",
+    "stormy weather": "Weather warning priority, signal system active",
+    "war threats": "Military observers added, continuous operation"
+  },
+  "aiInteractionPoints": [
+    "Main observation platform",
+    "Signal equipment station",
+    "Watch captain's post",
+    "Communication desk",
+    "Entry checkpoint",
+    "Equipment storage"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "tools",
+      "paper",
+      "maps",
+      "smuggler_maps",
+      "blackmail_evidence",
+      "criminal_contacts"
+    ],
+    "sells": [
+      "maps",
+      "smuggler_maps"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 0,
+  "constructionMinutes": 7200
+}

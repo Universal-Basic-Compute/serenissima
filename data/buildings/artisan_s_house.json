@@ -1,0 +1,63 @@
+{
+  "name": "Artisan's House",
+  "pointType": "building",
+  "category": "home",
+  "subCategory": "Basic Residences",
+  "size": 1,
+  "unlockCondition": "5 citizens, 2,000,000 ducats total wealth",
+  "calculationsAnalysis": "The Artisan's House represents a step up in residential investment with workshop capabilities. The construction cost of 750,000 ducats reflects the larger structure with specialized workshop space, while the income of 12,000 ducats (1.6% return) represents both rent and workshop production. The maintenance cost of 10,000 ducats (83% of income) creates a more realistic maintenance burden for a working building. The residentsCapacity of 5 represents the artisan family with perhaps an apprentice. The construction time of 3 days (259200000ms) creates a meaningful progression from the Fisherman's Cottage. This building serves as a bridge between pure residential and productive buildings, reflecting the historical reality of combined living and working spaces in Renaissance Venice.",
+  "shortDescription": "Modest residence with attached workshop space for craftspeople.",
+  "fullDescription": "A practical combined living and working space for Venice's skilled artisans. The ground floor typically houses a workshop open to the street, while upper floors provide living quarters for the artisan's family. These buildings form the backbone of Venice's craft economy.",
+  "flavorText": "The hands shape the clay, the wood, the glass—and in turn, they shape Venice itself.",
+  "constructionCosts": {
+    "ducats": 750000,
+    "timber": 420,
+    "bricks": 560,
+    "stone": 210
+  },
+  "maintenanceCost": 1000,
+  "residentsCapacity": 5,
+  "soundDesign": {
+    "ambientSound": "Tool working sounds, street chatter",
+    "activitySounds": "Hammering, sawing, customer interactions",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "winter": "Workshop more enclosed, brazier visible",
+    "carnival": "Workshop busy with mask or costume production"
+  },
+  "aiInteractionPoints": [
+    "Workshop entrance",
+    "Upper floor windows",
+    "Side courtyard"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 80,
+    "stores": [
+      "iron",
+      "timber",
+      "raw_silk",
+      "dyestuffs",
+      "sand",
+      "soda_ash",
+      "fuel",
+      "rags",
+      "water",
+      "tools",
+      "dyed_textiles",
+      "glass",
+      "paper"
+    ],
+    "sells": [
+      "tools",
+      "dyed_textiles",
+      "glass",
+      "paper"
+    ]
+  },
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 4320
+}

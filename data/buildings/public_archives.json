@@ -1,0 +1,66 @@
+{
+  "name": "Public Archives",
+  "pointType": "building",
+  "category": "Public & Government",
+  "subCategory": "Civic Buildings",
+  "size": 2,
+  "unlockCondition": "12,000,000 ducats, government authorization",
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Public Archives balances information infrastructure with modest service fees. The construction cost of 3,000,000 ducats reflects the specialized storage and preservation facilities required, while the income of 22,500 ducats (0.75% return) represents fees for document retrieval and certification. The maintenance cost of 25,000 ducats represents a reasonable 111% of income, creating a realistic scenario where information infrastructure required modest public subsidy but provided essential record-keeping services. The employment capacity of 15 represents the archivists and clerks needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in information management with appropriate requirements reflecting the governmental nature of official record-keeping in Renaissance Venice.",
+  "shortDescription": "Document storage and records facility preserving governmental and commercial information.",
+  "fullDescription": "Preserving the documentation that powers Venetian governance and commerce, archives securely store and organize vital records. Featuring specialized storage systems, reading rooms, copying facilities, and often restoration workshops, these buildings protect everything from property deeds to diplomatic treaties. Venice's sophisticated bureaucracy generated enormous volumes of documents requiring careful preservation and retrieval systems.",
+  "flavorText": "The true power of Venice lies not in her ships or gold, but in these carefully preserved papers—for they contain the accumulated knowledge of centuries of statecraft and commerce.",
+  "constructionCosts": {
+    "ducats": 3000000,
+    "timber": 680,
+    "bricks": 1710,
+    "stone": 2560,
+    "glass": 260,
+    "iron": 430
+  },
+  "maintenanceCost": 2500,
+  "soundDesign": {
+    "ambientSound": "Paper handling, quiet research, quill scratching",
+    "activitySounds": "Document retrieval, scrolls unrolling, catalog searches",
+    "musicTheme": "Diplomazia Veneziana"
+  },
+  "seasonalEffects": {
+    "major government events": "Increased documentation processing",
+    "humidity changes": "Additional preservation activities",
+    "research seasons": "Scholar presence increases"
+  },
+  "aiInteractionPoints": [
+    "Document catalog",
+    "Reading room",
+    "Retrieval desk",
+    "Restoration workshop",
+    "New submissions office",
+    "Archivist's consultation table",
+    "Security checkpoint"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 300,
+    "stores": [
+      "paper",
+      "books",
+      "maps",
+      "tools",
+      "rags",
+      "water",
+      "forgery_tools",
+      "smuggler_maps",
+      "banking_services"
+    ],
+    "sells": [
+      "books",
+      "maps",
+      "paper",
+      "forgery_tools"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 10080
+}

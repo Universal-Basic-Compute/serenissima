@@ -1,0 +1,119 @@
+# Market Memory System
+
+This document tracks market information in Serenissima, providing historical data and analysis to inform trading and investment decisions.
+
+## Price History
+
+### [Commodity/Good 1]
+- **Current Price**: [X] ducats per [unit]
+- **Price Trend**: [Rising/Falling/Stable/Volatile]
+- **Historical Prices**:
+  - [Date]: [Price] ducats
+  - [Date]: [Price] ducats
+  - [Date]: [Price] ducats
+  - [Continue with additional historical data points]
+
+- **Seasonal Patterns**:
+  - Spring: [Typical price behavior]
+  - Summer: [Typical price behavior]
+  - Fall: [Typical price behavior]
+  - Winter: [Typical price behavior]
+
+- **Supply Factors**:
+  - Primary Sources: [Where the good comes from]
+  - Production Constraints: [Factors limiting supply]
+  - Transportation Factors: [Shipping routes and costs]
+  - Inventory Levels: [Current market stockpiles]
+
+- **Demand Factors**:
+  - Primary Buyers: [Who purchases this good]
+  - Usage Patterns: [How the good is consumed]
+  - Substitutes: [Alternative goods]
+  - Demand Drivers: [What increases or decreases demand]
+
+### [Commodity/Good 2]
+- [Same structure repeated for each significant commodity]
+
+## Market Opportunities
+
+### Current Opportunities
+1. **[Opportunity Name]**
+   - Type: [Arbitrage/Shortage/Surplus/Seasonal]
+   - Description: [Details of the opportunity]
+   - Potential Profit: [Estimated return]
+   - Time Window: [How long the opportunity will last]
+   - Capital Required: [Investment needed]
+   - Risk Level: [Low/Moderate/High]
+   - Action Taken: [Your response to this opportunity]
+
+2. [Additional current opportunities listed in same format]
+
+### Monitored Potential Opportunities
+1. **[Potential Opportunity]**
+   - Trigger Conditions: [What would activate this opportunity]
+   - Early Indicators: [Signs to watch for]
+   - Preparation Steps: [What to do before it happens]
+   - Potential Value: [Estimated worth if it materializes]
+
+2. [Additional potential opportunities listed in same format]
+
+## Trade Routes
+
+### [Route Name 1]
+- **Path**: [Origin] to [Destination]
+- **Goods**: [Primary goods traded on this route]
+- **Economics**:
+  - Transport Cost: [Cost per unit]
+  - Time Required: [Duration of journey]
+  - Risk Factors: [Piracy, weather, political]
+  - Profit Margins: [Typical returns]
+
+- **Key Players**:
+  - [Player/NPC]: [Role and influence on this route]
+  - [Additional players listed in same format]
+
+- **Strategic Value**:
+  - Competitive Position: [Your advantage or disadvantage]
+  - Integration Potential: [How it fits with your operations]
+  - Development Opportunities: [How to improve the route]
+
+### [Route Name 2]
+- [Same structure repeated for each significant trade route]
+
+## Market Trends Analysis
+
+### Short-Term Trends (1-4 weeks)
+- **[Trend 1]**:
+  - Description: [What is happening]
+  - Causes: [Factors driving the trend]
+  - Expected Duration: [How long it will continue]
+  - Impact on Your Position: [How it affects you]
+  - Response Strategy: [How you're responding]
+
+- [Additional short-term trends listed in same format]
+
+### Medium-Term Trends (1-6 months)
+- [Same structure as short-term trends]
+
+### Long-Term Trends (6+ months)
+- [Same structure as short-term trends]
+
+## Market Intelligence Network
+
+### Information Sources
+- **[Source Name]**:
+  - Type: [Merchant/Guild/Official/Agent]
+  - Reliability: [High/Moderate/Low]
+  - Specialization: [What they know best]
+  - Access Method: [How you get information from them]
+  - Maintenance Cost: [What it takes to keep this source]
+
+- [Additional sources listed in same format]
+
+### Intelligence Gaps
+- **[Missing Information]**:
+  - Importance: [Critical/High/Moderate/Low]
+  - Acquisition Strategy: [How you plan to get this information]
+  - Potential Sources: [Who might have this information]
+
+- [Additional intelligence gaps listed in same format]

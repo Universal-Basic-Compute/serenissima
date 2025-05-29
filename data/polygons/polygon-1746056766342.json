@@ -1,0 +1,123 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43318636230436,
+      "lng": 12.33275613126997
+    },
+    {
+      "lat": 45.43320518444879,
+      "lng": 12.33303508100752
+    },
+    {
+      "lat": 45.43314495356461,
+      "lng": 12.333383768179456
+    },
+    {
+      "lat": 45.43159775069421,
+      "lng": 12.333566158392468
+    },
+    {
+      "lat": 45.431575163476865,
+      "lng": 12.332482545950452
+    },
+    {
+      "lat": 45.43242970690118,
+      "lng": 12.332573741056958
+    }
+  ],
+  "centroid": {
+    "lat": 45.43252318689833,
+    "lng": 12.332966237642806
+  },
+  "historicalName": "Campiello de la Feltrina in Contrà San Moisè",
+  "englishName": "Little Square of the Feltrina in the San Moisè District",
+  "historicalDescription": "This small square was likely named after a felt workshop or merchant in the San Marco sestiere, near the Church of San Moisè. The area was known for its artisan workshops and proximity to Piazza San Marco.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 12205.86,
+  "center": {
+    "lat": 45.43200179413452,
+    "lng": 12.332972451887564
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.432629219274475,
+        "lng": 12.333444564917126
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056790924",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.432591575447205,
+          "lng": 12.333516090490857
+        },
+        "distance": 6.976438738671834,
+        "id": "0588f064-4452-437a-89d6-6150bc40dff2",
+        "historicalName": "Ponte della Feltrina",
+        "englishName": "Bridge of Feltrina",
+        "historicalDescription": "Named after the Campiello de la Feltrina where it was located. The term 'Feltrina' likely refers to felt-making or felt-trading activities in this area during the Renaissance period, as textile crafts were prominent in Venice. The bridge would have served as an important crossing point for artisans and merchants in the San Moisè district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43261039736084,
+            "lng": 12.333480327703992
+          }
+        }
+      },
+      "id": "bridge_45.432629_12.333445"
+    },
+    {
+      "edge": {
+        "lat": 45.43211348498434,
+        "lng": 12.333505361654797
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056790924",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.432124779338395,
+          "lng": 12.333573310949841
+        },
+        "distance": 5.44888649812529,
+        "id": "0588f064-4452-437a-89d6-6150bc40dff2",
+        "historicalName": "Ponte dei Profumieri di San Moisè",
+        "englishName": "Bridge of the Perfumers of San Moisè",
+        "historicalDescription": "This bridge name reflects the presence of perfumers and apothecaries who historically operated in the San Moisè area during the Renaissance. Venice was a major center for luxury goods and exotic scents, with many spices and aromatics arriving through its port. Perfumers would have been an important guild in this fashionable district near Piazza San Marco.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43211913216137,
+            "lng": 12.33353933630232
+          }
+        }
+      },
+      "id": "bridge_45.432113_12.333505"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43198377277879,
+      "lng": 12.3330403319003,
+      "streetName": "Calle del Mercante Feltrin",
+      "streetNameEnglish": "Street of the Feltrin Merchant",
+      "streetDescription": "This name references the historical presence of merchants from Feltre (Feltrini) who settled in this area of San Moisè. During the Renaissance, many mainland merchants established businesses in Venice, and those from Feltre were known for cloth and wool trade. The name connects directly to 'Campiello de la Feltrina,' suggesting this street led to the small square named after a woman from Feltre or a Feltrin family business.",
+      "id": "building_45.431984_12.333040"
+    },
+    {
+      "lat": 45.43241442649399,
+      "lng": 12.33309753886029,
+      "streetName": "Ruga dei Setaioli di San Moisè",
+      "streetNameEnglish": "Row of the Silk Merchants of San Moisè",
+      "streetDescription": "This name reflects the silk trade that flourished in the San Moisè district during the Renaissance. 'Ruga' typically designated commercial streets with shops of the same trade. San Moisè was a wealthy area close to Piazza San Marco where luxury textile merchants, particularly silk traders, established their businesses catering to the nobili class. The proximity to the church of San Moisè would have made this a prestigious location for high-end textile commerce.",
+      "id": "building_45.432414_12.333098"
+    },
+    {
+      "lat": 45.43294215096145,
+      "lng": 12.333054473994908,
+      "streetName": "Sottoportego della Zecca Vecchia",
+      "streetNameEnglish": "Passageway of the Old Mint",
+      "streetDescription": "This name suggests a covered passageway ('sottoportego') that may have connected to or been along a route toward Venice's original mint. While the main Zecca was relocated near San Marco, historical references indicate that an older monetary exchange point existed in this area before the centralization of Venice's minting operations. San Moisè's proximity to the commercial and administrative heart of Venice makes this a plausible historical reference, as financial activities were concentrated in this general district.",
+      "id": "building_45.432942_12.333054"
+    }
+  ],
+  "id": "polygon-1746056766342"
+}

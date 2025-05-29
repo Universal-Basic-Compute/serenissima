@@ -1,0 +1,66 @@
+{
+  "name": "Prison",
+  "pointType": "building",
+  "category": "Military & Defense",
+  "subCategory": "Security Facilities",
+  "size": 2,
+  "unlockCondition": "Government authorization, Security Guild appointment",
+  "calculationsAnalysis": "The Prison represents specialized security infrastructure with judicial rather than commercial value. The construction cost of 10,000,000 ducats reflects the secure facilities and specialized detention systems required, while generating 55,000 ducats income reflects fees, fines, and prisoner labor contributions to state coffers. The maintenance cost of 50,000 ducats creates a substantial ongoing expense justified by the essential detention capabilities provided. The employment capacity of 35 represents the guards, administrators, and support staff needed. The construction time of 20 days (1728000000ms) reflects the specialized construction requirements. This building creates a strategic judicial asset with appropriate government restrictions reflecting the historical importance of incarceration facilities in Venice's sophisticated legal system, where the famous prison adjacent to the Doge's Palace symbolized the close relationship between governance and punishment.",
+  "shortDescription": "Detention facility for holding criminals and enemies of the state in secure conditions.",
+  "fullDescription": "Enforcing Venice's strict laws, prisons incarcerate criminals and political prisoners in secure facilities. Featuring multiple security levels, guard stations, prisoner housing, and administrative offices, these imposing institutions formed a key component of Venice's justice system. The Republic's famous prison adjacent to the Doge's Palace, connected by the Bridge of Sighs, symbolized the close relationship between government authority and punishment.",
+  "flavorText": "The shadow of the prison reminds all Venetians that while our laws may be complex and our courts sophisticated, the consequence of transgression remains simple and absolute—the loss of the very freedom that Venice herself treasures above all.",
+  "constructionCosts": {
+    "ducats": 10000000,
+    "timber": 1650,
+    "bricks": 5490,
+    "stone": 8790,
+    "iron": 2750
+  },
+  "maintenanceCost": 5000,
+  "soundDesign": {
+    "ambientSound": "Cell doors, guard movements, distant prisoner sounds",
+    "activitySounds": "Lock mechanisms, prisoner processing, security checks",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "amnesty periods": "Selected releases, processing activity",
+    "high crime periods": "Increased population, enhanced security",
+    "festival security": "Special monitoring, temporary detention"
+  },
+  "aiInteractionPoints": [
+    "Main entrance security",
+    "Guard stations",
+    "Administrative offices",
+    "Prisoner processing",
+    "Visitation area",
+    "Cell blocks",
+    "Exercise yard",
+    "Isolation cells"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 75,
+    "stores": [
+      "criminal_contacts",
+      "blackmail_evidence",
+      "smuggler_maps",
+      "rags",
+      "tools",
+      "forgery_tools",
+      "paper",
+      "iron",
+      "weapons",
+      "poison_components"
+    ],
+    "sells": [
+      "smuggler_maps",
+      "forgery_tools",
+      "weapons",
+      "blackmail_evidence"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 0,
+  "constructionMinutes": 28800
+}

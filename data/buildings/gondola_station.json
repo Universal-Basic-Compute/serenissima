@@ -1,0 +1,56 @@
+{
+  "name": "Gondola Station",
+  "pointType": "canal",
+  "category": "business",
+  "subCategory": "Transportation Facilities",
+  "size": 1,
+  "unlockCondition": "5,000,000 ducats capital, Water Transportation Guild connection",
+  "calculationsAnalysis": "The Gondola Station balances transportation infrastructure with service revenue. The construction cost of 1,750,000 ducats reflects the specialized docking and waiting facilities required, while the income of 17,500 ducats (1% return) represents the fees collected from gondoliers for using the station. The maintenance cost of 20,000 ducats exceeds income, creating a realistic scenario where transportation infrastructure requires subsidy but provides essential mobility services. The employment capacity of 10 represents the dispatchers, maintenance staff, and station managers. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in public transportation that enhances city mobility and accessibility, reflecting Venice's historical dependence on organized water transportation services.",
+  "shortDescription": "Professional water taxi service hub offering passenger transportation throughout Venice's canals.",
+  "fullDescription": "The backbone of Venice's passenger transportation system, gondola stations organize professional water taxi services throughout the canal network. Featuring multiple moorings, covered waiting areas, and dispatcher facilities, these stations ensure that transportation remains available regardless of weather or time. Operated under guild regulations, gondola stations maintain consistent service quality and pricing.",
+  "flavorText": "Unlike the streets of other cities that merely connect places, our watery streets connect lives and livelihoods—and the gondolier knows every current, both of water and of gossip.",
+  "constructionCosts": {
+    "ducats": 1750000,
+    "timber": 1510,
+    "stone": 2270,
+    "iron": 380
+  },
+  "maintenanceCost": 2000,
+  "soundDesign": {
+    "ambientSound": "Gondoliers calling, water splashing against boats, passenger conversations",
+    "activitySounds": "Fare transactions, departure announcements, gondola poles pushing off",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "rain": "Increased demand, awnings deployed",
+    "acqua alta": "Modified boarding procedures, raised platforms used",
+    "carnival": "Decorated gondolas, increased prices, higher volume"
+  },
+  "aiInteractionPoints": [
+    "Passenger waiting area",
+    "Dispatcher's desk",
+    "Gondola boarding points",
+    "Information board",
+    "Gondolier rest area"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "timber",
+      "pitch",
+      "rope",
+      "porter_equipment",
+      "gondola",
+      "small_boats"
+    ],
+    "sells": [
+      "gondola",
+      "small_boats"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3,
+  "constructionMinutes": 7200
+}

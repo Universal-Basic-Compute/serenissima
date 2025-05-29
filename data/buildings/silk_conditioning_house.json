@@ -1,0 +1,75 @@
+{
+  "name": "Silk Conditioning House",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Textile Industry",
+  "size": 1,
+  "unlockCondition": "7,500,000 ducats capital, Textile Guild connection",
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Silk Conditioning House represents specialized textile infrastructure with modest returns but industry-enabling capabilities. The construction cost of 1,750,000 ducats reflects the specialized equipment and facilities required, while the income of 22,000 ducats (1.26% return) represents processing fees for raw silk. The maintenance cost of 30,000 ducats exceeds income, creating a realistic scenario where initial processing often operated at a loss but enabled profitable downstream production. The employment capacity of 12 represents the skilled workers needed for this delicate process. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in textile processing that enables the lucrative silk industry, reflecting Venice's historical position as a center for luxury textile production that depended on carefully prepared raw materials.",
+  "shortDescription": "Specialized facility for preparing raw silk for weaving through washing, stretching, and treating.",
+  "fullDescription": "The crucial first step in Venice's lucrative silk industry, these specialized facilities prepare raw silk through complex processes of washing, stretching, and treating. Featuring carefully controlled environments for humidity and temperature, silk conditioning houses require both technical expertise and significant water resources. The quality of Venetian textiles depends heavily on this initial preparation.",
+  "flavorText": "Before the shimmer of silk can adorn a nobleman, it must first be bathed, stretched, and coaxed into perfection—like any Venetian preparing for a grand appearance.",
+  "constructionCosts": {
+    "ducats": 1750000,
+    "timber": 640,
+    "bricks": 1200,
+    "stone": 800,
+    "iron": 240
+  },
+  "maintenanceCost": 3000,
+  "productionInformation": {
+  "Arti": [
+    {
+      "inputs": {
+        "raw_silk": 2,
+        "water": 1
+      },
+      "outputs": {
+        "prepared_silk": 3
+      },
+      "craftMinutes": 90
+    },
+    {
+      "inputs": {
+        "raw_silk": 3
+      },
+      "outputs": {
+        "prepared_silk": 4
+      },
+      "craftMinutes": 120
+    }
+  ],
+    "storageCapacity": 100,
+    "stores": [
+      "raw_silk",
+      "prepared_silk",
+      "water",
+      "soap"
+    ],
+    "sells": [
+      "prepared_silk"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Water flowing, steam venting, silk being stretched",
+    "activitySounds": "Workers calling measurements, pulleys creaking, water splashing",
+    "musicTheme": "Merletti di Burano"
+  },
+  "seasonalEffects": {
+    "winter": "Higher fuel consumption for heating water",
+    "summer": "Extended drying capacity, higher efficiency",
+    "shipping seasons": "Activity peaks with silk shipment arrivals"
+  },
+  "aiInteractionPoints": [
+    "Silk receiving area",
+    "Washing vats",
+    "Stretching frames",
+    "Quality control table",
+    "Drying rooms"
+  ],
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 4,
+  "constructionMinutes": 7200
+}

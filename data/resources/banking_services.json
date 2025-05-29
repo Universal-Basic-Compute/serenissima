@@ -1,0 +1,58 @@
+{
+  "id": "banking_services",
+  "name": "Banking Services",
+  "category": "utility_resources",
+  "subCategory": "financial",
+  "description": "Financial services provided by Venetian banks, including loans, deposits, currency exchange, and trade financing. Essential infrastructure for Venice's commercial empire.",
+  "historicalNotes": "Venetian banking evolved from the needs of its maritime trade, developing sophisticated financial instruments to manage risk and capital. The city pioneered concepts like double-entry bookkeeping and bills of exchange that facilitated long-distance trade. The Banco della Piazza di Rialto, founded in 1587, became one of Europe's first public banks, providing secure deposits and regulated exchange services. Unlike some banking centers, Venice maintained tight state oversight of financial activities, viewing them as extensions of the Republic's commercial policy rather than independent enterprises. This integration of banking with state interests helped finance Venice's commercial and military power while providing stability during periods of European financial turbulence.\n\nWhile Florence may claim the birth of modern banking, Venice perfected its practical application. The city's banks financed trade voyages, managed public debt, and created financial instruments that oiled the wheels of commerce across the Mediterranean and beyond.",
+  "variants": [
+    {
+      "id": "trade_financing",
+      "name": "Trade Financing",
+      "valueModifier": 1.3,
+      "properties": [
+        "risk_sharing",
+        "voyage_specific"
+      ],
+      "primaryUse": "merchant_ventures",
+      "riskLevel": "high"
+    },
+    {
+      "id": "deposit_services",
+      "name": "Deposit Services",
+      "valueModifier": 0.8,
+      "properties": [
+        "secure",
+        "interest_bearing"
+      ],
+      "primaryUse": "wealth_storage",
+      "riskLevel": "low"
+    },
+    {
+      "id": "currency_exchange",
+      "name": "Currency Exchange",
+      "valueModifier": 1,
+      "properties": [
+        "fluctuating_rates",
+        "international"
+      ],
+      "primaryUse": "foreign_trade",
+      "riskLevel": "medium"
+    },
+    {
+      "id": "public_debt",
+      "name": "Public Debt Management",
+      "valueModifier": 1.2,
+      "properties": [
+        "state_guaranteed",
+        "long_term"
+      ],
+      "primaryUse": "government_financing",
+      "riskLevel": "low"
+    }
+  ],
+  "importPrice": 1800.0,
+  "lifetimeHours": null,
+  "consumptionHours": 10,
+  "tier": 3
+}

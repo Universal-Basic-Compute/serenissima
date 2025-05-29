@@ -1,0 +1,214 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43474437316049,
+      "lng": 12.334156720790093
+    },
+    {
+      "lat": 45.43419101458697,
+      "lng": 12.334762900027458
+    },
+    {
+      "lat": 45.433882336018335,
+      "lng": 12.334886281642143
+    },
+    {
+      "lat": 45.433679058965744,
+      "lng": 12.334934561404411
+    },
+    {
+      "lat": 45.43350966086258,
+      "lng": 12.334414212855522
+    },
+    {
+      "lat": 45.433155805406706,
+      "lng": 12.333604185733025
+    },
+    {
+      "lat": 45.43323862283991,
+      "lng": 12.333496897372429
+    },
+    {
+      "lat": 45.433283795934095,
+      "lng": 12.333298413905327
+    },
+    {
+      "lat": 45.433249916116864,
+      "lng": 12.333132116946404
+    },
+    {
+      "lat": 45.43357742016486,
+      "lng": 12.332885353717034
+    },
+    {
+      "lat": 45.434078083599196,
+      "lng": 12.333057015093987
+    },
+    {
+      "lat": 45.43438676109713,
+      "lng": 12.333545177134697
+    }
+  ],
+  "centroid": {
+    "lat": 45.433748070729415,
+    "lng": 12.333847819718544
+  },
+  "historicalName": "Calle del Caffettier in Sestiere San Marco",
+  "englishName": "Coffeehouse Maker Street in the District of St. Mark",
+  "historicalDescription": "This street was located in the bustling commercial district of San Marco, known for its artisan workshops, merchants, and proximity to Piazza San Marco, the heart of Venice. The street name suggests it was home to one or more coffeehouses or coffee roasters in the 15th century, when coffee was first introduced to Venice from the Ottoman Empire.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 16989.8,
+  "center": {
+    "lat": 45.433825282883205,
+    "lng": 12.333936987373551
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43419101458697,
+        "lng": 12.334762900027458
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056876739",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43422393603966,
+          "lng": 12.334820746903308
+        },
+        "distance": 5.811564734880421,
+        "id": "62fd8c1c-c752-4423-b796-f086773dd7e2",
+        "historicalName": "Ponte dei Caffettieri",
+        "englishName": "Bridge of the Coffee Makers",
+        "historicalDescription": "Named after the coffee makers guild that operated in the area during the late Renaissance period. Venice was one of the first European cities to embrace coffee culture after trade with the Ottoman Empire flourished in the 16th century, making this a fitting name for a bridge near Calle del Caffettier in San Marco.",
+        "location": {
+          "midpoint": {
+            "lat": 45.434207475313315,
+            "lng": 12.334791823465384
+          }
+        }
+      },
+      "id": "bridge_45.434191_12.334763"
+    },
+    {
+      "edge": {
+        "lat": 45.433882336018335,
+        "lng": 12.334886281642143
+      },
+      "id": "bridge_45.433882_12.334886"
+    },
+    {
+      "edge": {
+        "lat": 45.43350966086258,
+        "lng": 12.334414212855522
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056790924",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.433487515861415,
+          "lng": 12.334494202711621
+        },
+        "distance": 6.70974685690661,
+        "id": "e44c77a1-2fb2-4c93-8a22-241c4376c5d7",
+        "historicalName": "Ponte della Spezieria",
+        "englishName": "Bridge of the Spice Shop",
+        "historicalDescription": "This bridge likely connected to an area where spice merchants operated shops. San Marco was a prime location for luxury goods like exotic spices, which complemented the coffee trade in the vicinity of Calle del Caffettier. Spice traders were highly respected in Renaissance Venice due to the city's role as a major port in the spice trade with the East.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433498588362,
+            "lng": 12.334454207783573
+          }
+        }
+      },
+      "id": "bridge_45.433510_12.334414"
+    },
+    {
+      "edge": {
+        "lat": 45.434078083599196,
+        "lng": 12.333057015093987
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056541940",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43409944494489,
+          "lng": 12.332992403556746
+        },
+        "distance": 5.573079692276663,
+        "id": "bddd7361-7b2f-433f-a2f9-ccdaf9bded70",
+        "historicalName": "Ponte dei Pasticcieri",
+        "englishName": "Bridge of the Pastry Makers",
+        "historicalDescription": "Named for the pastry makers who would have had shops near the coffee establishments in this area of San Marco. The combination of coffee and pastry shops was common in Renaissance Venice, as the wealthy patrons of San Marco enjoyed these luxuries together. This bridge would connect areas where these complementary businesses operated.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43408876427205,
+            "lng": 12.333024709325366
+          }
+        }
+      },
+      "id": "bridge_45.434078_12.333057"
+    },
+    {
+      "edge": {
+        "lat": 45.43438676109713,
+        "lng": 12.333545177134697
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056541940",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.434377183984104,
+          "lng": 12.33341082816307
+        },
+        "distance": 10.536978113720432,
+        "id": "bddd7361-7b2f-433f-a2f9-ccdaf9bded70",
+        "historicalName": "Ponte dei Contarini",
+        "englishName": "Bridge of the Contarini",
+        "historicalDescription": "Named after the prominent Contarini family, one of Venice's most distinguished noble houses that produced eight Doges between the 11th and 18th centuries. They likely owned property or a palazzo near this bridge in the affluent San Marco district, possibly near Calle del Caffettier. Many Venetian bridges were named after the noble families whose residences were nearby.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43438197254062,
+            "lng": 12.333478002648883
+          }
+        }
+      },
+      "id": "bridge_45.434387_12.333545"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43362979841447,
+      "lng": 12.33345720801754,
+      "streetName": "Ruga dei Mercanti di Caffè",
+      "streetNameEnglish": "Street of the Coffee Merchants",
+      "streetDescription": "Near Calle del Caffettier in San Marco, this street would have been home to merchants who imported and sold coffee beans. Coffee became immensely popular in Venice in the late Renaissance period, with the first coffee house opening in Piazza San Marco in the early 17th century. Venetian merchants were among the first Europeans to trade extensively in coffee from the Ottoman Empire.",
+      "id": "building_45.433630_12.333457"
+    },
+    {
+      "lat": 45.43359840356082,
+      "lng": 12.334118008103061,
+      "streetName": "Calle dei Speziali",
+      "streetNameEnglish": "Street of the Spice Merchants",
+      "streetDescription": "This street name references the spice merchants who would have operated in the San Marco district, near the Rialto contracts. Spice trade was crucial to Venetian wealth during the Renaissance, and shops selling exotic spices from the East would have been common in this commercial area. The proximity to Calle del Caffettier is logical as both coffee and spices were luxury imports handled by specialized merchants.",
+      "id": "building_45.433598_12.334118"
+    },
+    {
+      "lat": 45.43401898647304,
+      "lng": 12.33347102980398,
+      "streetName": "Sottoportego della Bottega d'Oro",
+      "streetNameEnglish": "Passageway of the Golden Shop",
+      "streetDescription": "This covered passageway would have been named after a prestigious shop or workshop with gilded signage or decorations. The San Marco area was known for its luxury crafts and goods, particularly those catering to wealthy patrons and visitors. A sottoportego (covered passageway) with this name would indicate a notable landmark that served as a reference point for locals and visitors alike.",
+      "id": "building_45.434019_12.333471"
+    },
+    {
+      "lat": 45.43408574321019,
+      "lng": 12.33419547844121,
+      "streetName": "Rio Terà dei Benintendi",
+      "streetNameEnglish": "Filled Canal of the Benintendi Family",
+      "streetDescription": "Rio Terà indicates a filled-in canal, common in Venice's urban development. The Benintendi would represent a prominent Venetian merchant family who might have owned properties along this former waterway. The naming of streets after influential families was a common practice in Renaissance Venice, particularly if the family had contributed to local development or held significant property in the area.",
+      "id": "building_45.434086_12.334195"
+    }
+  ],
+  "id": "polygon-1746056582235"
+}

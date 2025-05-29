@@ -1,0 +1,85 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44678471385596,
+      "lng": 12.326723554517995
+    },
+    {
+      "lat": 45.44600942292341,
+      "lng": 12.326476791288625
+    },
+    {
+      "lat": 45.44509486700868,
+      "lng": 12.329969027426015
+    },
+    {
+      "lat": 45.44575349930548,
+      "lng": 12.33033380785204
+    },
+    {
+      "lat": 45.446517503135986,
+      "lng": 12.327479937460195
+    },
+    {
+      "lat": 45.446720733939664,
+      "lng": 12.326991775419485
+    }
+  ],
+  "centroid": {
+    "lat": 45.4461467900282,
+    "lng": 12.327995815660726
+  },
+  "historicalName": "Contrada San Giobbe, Sestiere Cannaregio",
+  "englishName": "Saint Job District, Cannaregio Sestiere",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for the nearby Chiesa di San Giobbe (Church of Saint Job), which was built in the mid-15th century. The church and surrounding area were named after the biblical figure Job.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 23966.74,
+  "center": {
+    "lat": 45.445921885136784,
+    "lng": 12.328189531696982
+  },
+  "canalPoints": [],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.445577484775036,
+      "lng": 12.328963243761715,
+      "streetName": "Fondamenta dei Mendicanti",
+      "streetNameEnglish": "Foundation of the Beggars",
+      "streetDescription": "This name refers to the hospital for the poor that was located near San Giobbe in Cannaregio during the Renaissance period. The church of San Giobbe was known for its charitable works, and beggars would often gather in this area seeking alms or assistance from the nearby religious institution.",
+      "id": "building_45.445577_12.328963"
+    },
+    {
+      "lat": 45.44556312109814,
+      "lng": 12.32976114647432,
+      "streetName": "Calle della Sacra Infermeria",
+      "streetNameEnglish": "Street of the Sacred Infirmary",
+      "streetDescription": "This name reflects the presence of a hospital or infirmary that existed in the San Giobbe area during the 15th-16th centuries. The Contrada San Giobbe was known for medical facilities that cared for the sick, particularly during plague outbreaks, making this a historically appropriate reference to the healthcare function of this district.",
+      "id": "building_45.445563_12.329761"
+    },
+    {
+      "lat": 45.44607462803205,
+      "lng": 12.327242997524763,
+      "streetName": "Rio Terà dei Lanaioli",
+      "streetNameEnglish": "Filled Canal of the Wool Workers",
+      "streetDescription": "This name references the wool trade that was prominent in this northern part of Cannaregio during the Renaissance. Many wool workers and textile artisans had workshops in this area, taking advantage of the space available in this less densely populated part of Venice to conduct their trade, which required large areas for drying and processing wool.",
+      "id": "building_45.446075_12.327243"
+    },
+    {
+      "lat": 45.44601543998492,
+      "lng": 12.327860290951083,
+      "streetName": "Sottoportego della Misericordia Vecchia",
+      "streetNameEnglish": "Passageway of the Old Mercy",
+      "streetDescription": "This name refers to the Scuola della Misericordia, one of Venice's important confraternities, which had a presence in this part of Cannaregio. The term 'vecchia' (old) would distinguish it from newer charitable establishments in the area, indicating a historic location where acts of mercy and charity were performed for the local community.",
+      "id": "building_45.446015_12.327860"
+    },
+    {
+      "lat": 45.44592306154109,
+      "lng": 12.328425024799877,
+      "streetName": "Salizada dei Frati Minori",
+      "streetNameEnglish": "Paved Street of the Minor Friars",
+      "streetDescription": "This name honors the Franciscan friars (known as Frati Minori) who had a significant presence at the Church of San Giobbe. The church and adjoining monastery were run by the Franciscan Order, followers of Saint Francis of Assisi. The salizada would have been one of the few paved streets in this area, likely leading to or near the religious complex.",
+      "id": "building_45.445923_12.328425"
+    }
+  ]
+}

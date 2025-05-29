@@ -1,0 +1,60 @@
+{
+  "name": "Courthouse",
+  "pointType": "building",
+  "category": "Public & Government",
+  "subCategory": "Civic Buildings",
+  "size": 3,
+  "unlockCondition": "25,000,000 ducats and government approval, or judicial appointment with government approval",
+  "calculationsAnalysis": "The Courthouse represents significant judicial infrastructure with modest revenue generation. The construction cost of 9,000,000 ducats reflects the imposing architecture and specialized facilities required, while the income of 40,000 ducats (0.44% return) represents court fees and fines collected. The maintenance cost of 50,000 ducats exceeds income, creating a realistic scenario where judicial buildings required public funding but provided essential legal services. The employment capacity of 30 represents the judges, clerks, and guards needed. The construction time of 20 days (1728000000ms) reflects the substantial public project. This building creates a strategic investment in legal infrastructure with appropriate high-level requirements reflecting the political nature of establishing judicial authority in Renaissance Venice.",
+  "shortDescription": "Judicial facility for legal proceedings, records, and administration of justice.",
+  "fullDescription": "The physical embodiment of Venetian justice, courthouses provide spaces for legal proceedings from simple disputes to complex trials. Featuring multiple courtrooms, judicial offices, legal archives, and holding cells, these imposing buildings represent the rule of law in the Republic. Venice's sophisticated legal system required substantial facilities to manage its complex commercial and criminal jurisprudence.",
+  "flavorText": "Between the stones of this building lie not just mortar, but the accumulated wisdom of centuries of law—for Venice conquers by trade, but endures by justice.",
+  "constructionCosts": {
+    "ducats": 9000000,
+    "timber": 1100,
+    "bricks": 2200,
+    "stone": 3300,
+    "glass": 440,
+    "marble": 820
+  },
+  "maintenanceCost": 3500,
+  "soundDesign": {
+    "ambientSound": "Echoing halls, distant proceedings, hushed conversations",
+    "activitySounds": "Gavel strikes, oath-taking, verdict announcements, case arguments",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "legal terms": "Different case types on calendar",
+    "judicial appointments": "Ceremonies and processions",
+    "major trials": "Increased public presence, security"
+  },
+  "aiInteractionPoints": [
+    "Main courtroom",
+    "Legal archives",
+    "Advocates' preparation area",
+    "Witness waiting room",
+    "Judicial chambers",
+    "Public gallery",
+    "Holding cells"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "paper",
+      "blackmail_evidence",
+      "criminal_contacts",
+      "smuggler_maps",
+      "forgery_tools"
+    ],
+    "sells": [
+      "blackmail_evidence",
+      "smuggler_maps",
+      "forgery_tools"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 0,
+  "constructionMinutes": 28800
+}

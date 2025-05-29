@@ -1,0 +1,92 @@
+[
+  {
+    "node": "arsenalgate",
+    "stage": "prompt_generation",
+    "error": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}}",
+    "timestamp": "2025-05-26 10:58:31"
+  },
+  {
+    "node": "contracted_construction",
+    "stage": "prompt_generation",
+    "error": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}}",
+    "timestamp": "2025-05-26 10:58:32"
+  },
+  {
+    "node": "smugglers_den",
+    "stage": "prompt_generation",
+    "error": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}}",
+    "timestamp": "2025-05-26 10:58:32"
+  },
+  {
+    "node": "law_enforcement",
+    "stage": "prompt_generation",
+    "error": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}}",
+    "timestamp": "2025-05-26 10:59:02"
+  },
+  {
+    "node": "influence_system",
+    "stage": "prompt_generation",
+    "error": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}}",
+    "timestamp": "2025-05-26 10:59:02"
+  },
+  {
+    "node": "unique_buildings",
+    "stage": "prompt_generation",
+    "error": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}}",
+    "timestamp": "2025-05-26 10:59:02"
+  },
+  {
+    "node": "guilds",
+    "stage": "prompt_generation",
+    "error": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}}",
+    "timestamp": "2025-05-26 10:59:33"
+  },
+  {
+    "node": "public_health",
+    "stage": "prompt_generation",
+    "error": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}}",
+    "timestamp": "2025-05-26 10:59:33"
+  },
+  {
+    "node": "merchant_galley",
+    "stage": "prompt_generation",
+    "error": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}}",
+    "timestamp": "2025-05-26 10:59:33"
+  },
+  {
+    "node": "arsenalgate",
+    "stage": "prompt_generation",
+    "error": "400 * GenerateContentRequest.model: unexpected model name format\n",
+    "timestamp": "2025-05-26 11:02:15"
+  },
+  {
+    "node": "contracted_construction",
+    "stage": "prompt_generation",
+    "error": "400 * GenerateContentRequest.model: unexpected model name format\n",
+    "timestamp": "2025-05-26 11:02:15"
+  },
+  {
+    "node": "smugglers_den",
+    "stage": "prompt_generation",
+    "error": "400 * GenerateContentRequest.model: unexpected model name format\n",
+    "timestamp": "2025-05-26 11:02:15"
+  },
+  {
+    "node": "arsenalgate",
+    "stage": "prompt_generation",
+    "error": "404 models/gemini-2.5-pro-preview-0325 is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "timestamp": "2025-05-26 11:04:47"
+  },
+  {
+    "node": "contracted_construction",
+    "stage": "prompt_generation",
+    "error": "404 models/gemini-2.5-pro-preview-0325 is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "timestamp": "2025-05-26 11:04:47"
+  },
+  {
+    "node": "smugglers_den",
+    "stage": "prompt_generation",
+    "error": "404 models/gemini-2.5-pro-preview-0325 is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "timestamp": "2025-05-26 11:04:47"
+  }
+]

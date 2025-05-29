@@ -1,0 +1,54 @@
+{
+  "id": "fine_glassware",
+  "name": "Fine Glassware",
+  "category": "finished_goods",
+  "subCategory": "luxury_goods",
+  "description": "Exquisite Venetian glassware, renowned throughout Europe for its clarity and craftsmanship. Each piece showcases the mastery of Murano glassblowers.",
+  "varieties": [
+    {
+      "type": "goblet",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "modelVariant": "models/resources/fine_glassware_goblet.glb"
+    },
+    {
+      "type": "chandelier",
+      "productionDifficulty": "very_high",
+      "popularity": "high",
+      "valueMultiplier": 3,
+      "modelVariant": "models/resources/fine_glassware_chandelier.glb"
+    },
+    {
+      "type": "mirror",
+      "productionDifficulty": "high",
+      "popularity": "very_high",
+      "valueMultiplier": 2,
+      "modelVariant": "models/resources/fine_glassware_mirror.glb"
+    },
+    {
+      "type": "decorative_vessel",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1.8,
+      "modelVariant": "models/resources/fine_glassware_vessel.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1290,
+    "notableProducers": [
+      "Angelo Barovier",
+      "Murano Guild"
+    ],
+    "historicalSignificance": "Venetian glassware became one of the Republic's most prestigious exports. The secrets of its production were closely guarded, with glassmakers confined to Murano island and forbidden from leaving the Republic.",
+    "historicalContracts": [
+      "European nobility",
+      "Ottoman court",
+      "Papal states"
+    ]
+  },
+  "importPrice": 5839.2,
+  "lifetimeHours": null,
+  "consumptionHours": 584,
+  "tier": 4
+}

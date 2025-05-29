@@ -1,0 +1,72 @@
+{
+  "name": "Goldsmith Workshop",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Luxury Industry",
+  "size": 1,
+  "unlockCondition": "15,000,000 ducats capital, Goldsmith Guild membership",
+  "calculationsAnalysis": "The Goldsmith Workshop represents high-end luxury production with substantial returns. The construction cost of 2,500,000 ducats reflects the secure facilities and specialized equipment required, while the income of 45,000 ducats (1.8% return) represents the high-value precious metal items produced. The maintenance cost of 35,000 ducats (77.8% of income) creates a modest profit margin appropriate for high-value, low-volume luxury production. The employment capacity of 6 represents the master goldsmith, apprentices, and security staff needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in luxury production with appropriate guild and wealth requirements reflecting the historical importance of fine jewelry and precious metalwork to Venice's luxury contract, where goldsmithing represented the pinnacle of metalworking craftsmanship.",
+  "shortDescription": "High-end workshop crafting precious metal jewelry, religious objects, and luxury items.",
+  "fullDescription": "Representing the pinnacle of metalworking craftsmanship, goldsmith workshops create the finest jewelry and precious objects for Venice's elite. Featuring specialized tools for intricate work, secure facilities for valuable materials, and often a discreet showroom, these establishments combine artistic excellence with extreme security. Their creations symbolize wealth and status throughout Venetian society.",
+  "flavorText": "Gold speaks of wealth, but in my hands it whispers of eternity—for while the merchant merely possesses gold, I transform it into legacy.",
+  "constructionCosts": {
+    "ducats": 2500000,
+    "timber": 330,
+    "bricks": 840,
+    "stone": 1260,
+    "iron": 250,
+    "marble": 170
+  },
+  "maintenanceCost": 3500,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "gold": 5,
+        "tools": 1
+      },
+      "outputs": {
+        "jewelry": 1
+      },
+      "craftMinutes": 360
+    }
+  ],
+    "storageCapacity": 80,
+    "stores": [
+      "gold",
+      "gold_leaf",
+      "tools",
+      "processed_iron",
+      "jewelry",
+      "luxury_silk_garments",
+      "weapons"
+    ],
+    "sells": [
+      "jewelry",
+      "luxury_silk_garments",
+      "weapons"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Gentle metalworking, quiet precision tools, soft conversation",
+    "activitySounds": "Gold being hammered delicately, gems being set, client consultations",
+    "musicTheme": "Sospiri Veneziani"
+  },
+  "seasonalEffects": {
+    "carnival": "Mask ornamentation, special jewelry designs",
+    "wedding season": "Focus on bridal commissions",
+    "state ceremonies": "Ceremonial objects and official gifts"
+  },
+  "aiInteractionPoints": [
+    "Master's workbench",
+    "Client reception area",
+    "Display cases",
+    "Gem-setting station",
+    "Apprentice workstations",
+    "Design consultation table"
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 4,
+  "constructionMinutes": 7200
+}

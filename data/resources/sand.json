@@ -1,0 +1,12 @@
+{
+  "id": "sand",
+  "name": "Sand",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": "Fine granular material essential for glass production and construction mortar.",
+  "icon": "/images/resources/sand.png",
+  "importPrice": 30.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

@@ -1,0 +1,72 @@
+{
+  "name": "Contract Stall",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "retail_food",
+  "size": 1,
+  "unlockCondition": "None - available from start",
+  "calculationsAnalysis": "The Contract Stall represents the entry point to commercial ventures in Renaissance Venice. Historically, these simple structures required minimal investment (150,000 ducats) but provided steady daily income (8,000 ducats) with low maintenance (1,000 ducats). This creates a reasonable ROI of about 1.3% per cycle, balancing accessibility for new players while requiring multiple cycles to recoup the initial investment. The employment capacity of 1 reflects the family-operated nature of these businesses, while construction time of 1 day (86400000ms) allows new players to quickly establish basic income streams.",
+  "shortDescription": "Simple open-air selling space for basic goods and produce.",
+  "fullDescription": "The humble beginning of many Venetian merchants, these wooden stalls provide a simple but effective way to sell goods directly to the public. Typically clustered in contract areas or along busy streets, contract stalls can be assembled daily and feature awnings for protection from sun and rain.",
+  "flavorText": "A good location, a keen eye, and a loud voice—the three essentials of the successful contract vendor.",
+  "constructionCosts": {
+    "ducats": 150000,
+    "timber": 270
+  },
+  "maintenanceCost": 100,
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "bread",
+      "fish",
+      "flour",
+      "grain",
+      "olive_oil",
+      "olives",
+      "preserved_fish",
+      "salt",
+      "water",
+      "wine"
+    ],
+    "sells": [
+      "bread",
+      "fish",
+      "flour",
+      "olive_oil",
+      "olives",
+      "preserved_fish",
+      "salt",
+      "wine"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Contract chatter, occasional vendor calls",
+    "activitySounds": "Haggling, coins clinking, goods being arranged",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "winter": "Additional wind protection, brazier for warmth",
+    "carnival": "Festive decorations, specialized carnival goods",
+    "rain": "Additional awning coverage, goods better protected"
+  },
+  "aiInteractionPoints": [
+    "Front counter",
+    "Sides for browsing",
+    "Merchant position behind counter"
+  ],
+  "assets": {
+    "models": "/assets/buildings/models/market-stall",
+    "variants": [
+      "model",
+      "winter",
+      "festival"
+    ],
+    "textures": "/assets/buildings/textures/market-stall/",
+    "thumbnail": "/assets/buildings/thumbnails/market-stall.png"
+  },
+  "buildTier": 1,
+  "workTier": 1,
+  "consumeTier": 1,
+  "constructionMinutes": 1440
+}

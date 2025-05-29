@@ -1,0 +1,157 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44607110635687,
+      "lng": 12.332139469538692
+    },
+    {
+      "lat": 45.44546416565718,
+      "lng": 12.333598948088467
+    },
+    {
+      "lat": 45.44522517588691,
+      "lng": 12.333998597231686
+    },
+    {
+      "lat": 45.44471708403455,
+      "lng": 12.333360231486141
+    },
+    {
+      "lat": 45.44503323061386,
+      "lng": 12.332823789683163
+    },
+    {
+      "lat": 45.44551121076827,
+      "lng": 12.331584609118282
+    }
+  ],
+  "centroid": {
+    "lat": 45.445336995552935,
+    "lng": 12.332917607524406
+  },
+  "historicalName": "Calle de le Do Corti in Sestiere di San Marco",
+  "englishName": "Alley of the Two Courts in the District of St. Mark",
+  "historicalDescription": "This narrow alley was located in the heart of the San Marco sestiere, known for its bustling commerce, artisan workshops, and proximity to Piazza San Marco and the Doge's Palace in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 12536.17,
+  "center": {
+    "lat": 45.445336995552935,
+    "lng": 12.332917607524406
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44576763600702,
+        "lng": 12.33286920881358
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055693144",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44579930937069,
+          "lng": 12.333089786227273
+        },
+        "distance": 17.56452773063974,
+        "id": "40259c61-e152-4f27-9070-8610cb8d2331",
+        "historicalName": "Ponte delle Due Corti",
+        "englishName": "Bridge of the Two Courts",
+        "historicalDescription": "Named after its location near 'Calle de le Do Corti' (Street of the Two Courts) in San Marco. The name refers to two small courtyards that were historically notable in this area, possibly belonging to prominent families or serving as gathering places for local residents.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44578347268886,
+            "lng": 12.332979497520427
+          }
+        }
+      },
+      "id": "bridge_45.445768_12.332869"
+    },
+    {
+      "edge": {
+        "lat": 45.44503323061386,
+        "lng": 12.332823789683163
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055739112",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44486679644842,
+          "lng": 12.332953647341828
+        },
+        "distance": 21.098013843747673,
+        "id": "a605687a-9a6f-45c4-b777-e9b854b4ea53",
+        "historicalName": "Ponte dei Notai",
+        "englishName": "Bridge of the Notaries",
+        "historicalDescription": "San Marco was home to many government offices and legal professionals. This bridge would have been crossed frequently by notaries working nearby, documenting important contracts and legal matters for the Venetian Republic. The area near Calle de le Do Corti would have housed several notarial offices.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44495001353114,
+            "lng": 12.332888718512496
+          }
+        }
+      },
+      "id": "bridge_45.445033_12.332824"
+    },
+    {
+      "edge": {
+        "lat": 45.445272220691066,
+        "lng": 12.332204199400723
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055739112",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.445156596033655,
+          "lng": 12.332264319625
+        },
+        "distance": 13.685650658383276,
+        "id": "a605687a-9a6f-45c4-b777-e9b854b4ea53",
+        "historicalName": "Ponte dei Cortigiani",
+        "englishName": "Bridge of the Courtiers",
+        "historicalDescription": "Located in San Marco near the Doge's Palace, this bridge would have been traversed by courtiers and officials serving in the Venetian government. The name reflects the bridge's proximity to centers of power and the presence of noble families who served the Republic in official capacities.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44521440836236,
+            "lng": 12.332234259512862
+          }
+        }
+      },
+      "id": "bridge_45.445272_12.332204"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.445228973116315,
+      "lng": 12.332885792550872,
+      "streetName": "Calle dei Gioiellieri",
+      "streetNameEnglish": "Street of the Jewelers",
+      "streetDescription": "This narrow street near Calle de le Do Corti would have been home to several workshops of jewelers and goldsmiths during the Renaissance. San Marco was known for its luxury craftsmen who served the wealthy nobili families and foreign dignitaries. The proximity to Piazza San Marco made it an ideal location for artisans dealing in precious materials.",
+      "id": "building_45.445229_12.332886"
+    },
+    {
+      "lat": 45.44515998979189,
+      "lng": 12.333383354942482,
+      "streetName": "Sottoportego della Cancelleria",
+      "streetNameEnglish": "Covered Passageway of the Chancellery",
+      "streetDescription": "This covered passageway would have been named after its proximity to one of Venice's administrative offices. The Cancelleria (Chancellery) was an important government institution in Renaissance Venice, responsible for documenting official affairs. Located in the San Marco district near the seat of government, this small covered walkway would have been used by officials and scribes traveling between government buildings.",
+      "id": "building_45.445160_12.333383"
+    },
+    {
+      "lat": 45.44559998883575,
+      "lng": 12.332165364762869,
+      "streetName": "Ruga dei Libreri",
+      "streetNameEnglish": "Street of the Booksellers",
+      "streetDescription": "This wider commercial street would have hosted several booksellers and printers. Venice was one of Europe's most important publishing centers during the Renaissance, with the innovations of Aldus Manutius and others making the city famous for its printed works. San Marco, with its concentration of wealth and learning, would naturally attract book merchants catering to the educated elite.",
+      "id": "building_45.445600_12.332165"
+    },
+    {
+      "lat": 45.445593587048116,
+      "lng": 12.332771479727427,
+      "streetName": "Calle Corner",
+      "streetNameEnglish": "Corner Family Street",
+      "streetDescription": "Named after the prominent Corner (or Cornaro) family, one of Venice's most prestigious nobili houses who likely owned property in this area. The Corner family produced several doges, cardinals, and Caterina Corner, who became Queen of Cyprus. Their influence in the San Marco district would have been significant, with family palaces and properties scattered throughout this prestigious area of the city.",
+      "id": "building_45.445594_12.332771"
+    }
+  ],
+  "id": "polygon-1746055706124"
+}

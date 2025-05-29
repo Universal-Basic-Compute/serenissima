@@ -1,0 +1,81 @@
+{
+  "name": "Printing House",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Publishing Industry",
+  "size": 1,
+  "unlockCondition": "15,000,000 ducats capital, Senate permission, Printer's Guild membership",
+  "calculationsAnalysis": "The Printing House represents revolutionary information technology with substantial returns. The construction cost of 4,500,000 ducats reflects the specialized presses and equipment required, while the income of 50,000 ducats (1.11% return) represents the high-value books and documents produced. The maintenance cost of 35,000 ducats (70% of income) creates a modest profit margin appropriate for this specialized industry. The employment capacity of 15 represents the printers, typesetters, and binders needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in information technology with appropriate guild and government requirements reflecting the historical importance of printing to Venice's intellectual and commercial life, where the city became an early center of publishing due to its strategic position and trade networks.",
+  "shortDescription": "Specialized workshop producing printed books, maps, and documents using mechanical presses.",
+  "fullDescription": "At the forefront of Renaissance information technology, printing houses use mechanical presses to produce multiple copies of texts and images. Featuring type-setting areas, printing presses, drying racks, and bindery facilities, these workshops revolutionized the spread of knowledge. Venice became an early center of printing, with its strategic position and trade networks facilitating distribution throughout Europe.",
+  "flavorText": "What once required a monastery of scribes working for months can now be accomplished in days—we are not merely making books, but building a new age of knowledge itself.",
+  "constructionCosts": {
+    "ducats": 4500000,
+    "timber": 1430,
+    "bricks": 2150,
+    "stone": 2980,
+    "iron": 1430
+  },
+  "maintenanceCost": 3500,
+  "productionInformation": {
+  "Arti": [
+    {
+      "inputs": {
+        "paper": 10,
+        "dyestuffs": 1
+      },
+      "outputs": {
+        "books": 2
+      },
+      "craftMinutes": 180
+    },
+    {
+      "inputs": {
+        "paper": 3,
+        "dyestuffs": 1
+      },
+      "outputs": {
+        "maps": 2
+      },
+      "craftMinutes": 120
+    }
+  ],
+    "storageCapacity": 150,
+    "stores": [
+      "paper",
+      "rags",
+      "books",
+      "maps",
+      "gold_leaf",
+      "water"
+    ],
+    "sells": [
+      "books",
+      "maps",
+      "paper"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Press mechanisms squeaking, paper shuffling, type being sorted",
+    "activitySounds": "Press lever operation, binding tools, proof-reading discussions",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "state events": "Increased production of official publications",
+    "intellectual seasons": "New manuscript submissions",
+    "religious calendar": "Prayer book and religious text production"
+  },
+  "aiInteractionPoints": [
+    "Type-setting tables",
+    "Press operation area",
+    "Proof-reading desks",
+    "Binding station",
+    "Censorship desk",
+    "Completed works storage",
+    "Author consultation area"
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 10080
+}

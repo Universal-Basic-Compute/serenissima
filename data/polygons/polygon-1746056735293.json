@@ -1,0 +1,266 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.434025823841004,
+      "lng": 12.331640332319775
+    },
+    {
+      "lat": 45.431545047173024,
+      "lng": 12.3305459910417
+    },
+    {
+      "lat": 45.43148481451709,
+      "lng": 12.331972926237622
+    },
+    {
+      "lat": 45.43207208017025,
+      "lng": 12.33204266367201
+    },
+    {
+      "lat": 45.43307342930616,
+      "lng": 12.332434266188184
+    },
+    {
+      "lat": 45.43315248242864,
+      "lng": 12.331913917639294
+    },
+    {
+      "lat": 45.433551510785264,
+      "lng": 12.33204266367201
+    },
+    {
+      "lat": 45.433653149632796,
+      "lng": 12.33201584158186
+    }
+  ],
+  "centroid": {
+    "lat": 45.432819792231776,
+    "lng": 12.331826075294058
+  },
+  "historicalName": "Calle Zaguri in Sestiere San Marco",
+  "englishName": "Zaguri Alley in the District of St. Mark",
+  "historicalDescription": "A narrow alleyway located in the San Marco sestiere, known for its proximity to Piazza San Marco and the Doge's Palace in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 21532.49,
+  "center": {
+    "lat": 45.43217451346115,
+    "lng": 12.331458522532506
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.431514930845054,
+        "lng": 12.33125945863966
+      },
+      "water": {
+        "lat": 45.43134287747588,
+        "lng": 12.331184747022462
+      },
+      "historicalName": "Fondamenta dei Zaguri",
+      "englishName": "Foundation of the Zaguri",
+      "historicalDescription": "Named after the prestigious Zaguri family who owned a palace near Calle Zaguri in San Marco. The Zaguri were a noble Venetian family that rose to prominence during the Renaissance, and their palace (Palazzo Zaguri) still stands today. This dock would have served as a private water entrance for family members and their guests, as well as for the delivery of goods to their residence.",
+      "id": "canal_45.431515_12.331259"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43352966850741,
+        "lng": 12.33142146406416
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056711688",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43355018773553,
+          "lng": 12.331381640045253
+        },
+        "distance": 3.855137882631247,
+        "id": "ce628ca4-5fbf-473b-8543-ad899f86f264",
+        "historicalName": "Ponte degli Zaguri",
+        "englishName": "Bridge of the Zaguri",
+        "historicalDescription": "Named after the prominent Zaguri family who owned a palace in the area. The Zaguri were a noble Venetian family that gained prominence in the 15th century and had significant influence in the Sestiere San Marco region.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43353992812147,
+            "lng": 12.331401552054707
+          }
+        }
+      },
+      "id": "bridge_45.433530_12.331421"
+    },
+    {
+      "edge": {
+        "lat": 45.43303351317381,
+        "lng": 12.331202595808545
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056711688",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.433054785483215,
+          "lng": 12.331161698906032
+        },
+        "distance": 3.9722411991581623,
+        "id": "ce628ca4-5fbf-473b-8543-ad899f86f264",
+        "historicalName": "Ponte dei Musicisti",
+        "englishName": "Bridge of the Musicians",
+        "historicalDescription": "This bridge was named for its proximity to where musicians would gather to practice or perform near the churches in San Marco. The area was known for cultural activities and this bridge would have connected artists and musicians to important venues.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43304414932851,
+            "lng": 12.33118214735729
+          }
+        }
+      },
+      "id": "bridge_45.433034_12.331203"
+    },
+    {
+      "edge": {
+        "lat": 45.43253735784022,
+        "lng": 12.33098372755293
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056711688",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.432559383230895,
+          "lng": 12.33094175776681
+        },
+        "distance": 4.089422027066788,
+        "id": "ce628ca4-5fbf-473b-8543-ad899f86f264",
+        "historicalName": "Ponte della Fenice Piccola",
+        "englishName": "Bridge of the Little Phoenix",
+        "historicalDescription": "Named for its position on a route that led toward the Teatro La Fenice area. The 'piccola' (little) designation distinguishes it from other bridges associated with the famous theater, as this would have been a smaller, lesser-known connection point.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43254837053556,
+            "lng": 12.330962742659871
+          }
+        }
+      },
+      "id": "bridge_45.432537_12.330984"
+    },
+    {
+      "edge": {
+        "lat": 45.43204120250662,
+        "lng": 12.330764859297314
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056711688",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43206398097858,
+          "lng": 12.33072181662759
+        },
+        "distance": 4.2066739785317395,
+        "id": "ce628ca4-5fbf-473b-8543-ad899f86f264",
+        "historicalName": "Ponte dei Gioiellieri di San Marco",
+        "englishName": "Bridge of the Jewelers of San Marco",
+        "historicalDescription": "This bridge connected an area where jewelers had their workshops in the San Marco district. The skilled artisans would have used this route daily to transport their valuable goods to and from the prestigious shops near Piazza San Marco.",
+        "location": {
+          "midpoint": {
+            "lat": 45.432052591742604,
+            "lng": 12.330743337962453
+          }
+        }
+      },
+      "id": "bridge_45.432041_12.330765"
+    },
+    {
+      "edge": {
+        "lat": 45.43315248242864,
+        "lng": 12.331913917639294
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056756754",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43318259787475,
+          "lng": 12.331983655073682
+        },
+        "distance": 6.389431918892692,
+        "id": "e725159b-27ea-4b1f-8ecd-0de777088320",
+        "historicalName": "Ponte della Rosa d'Oro",
+        "englishName": "Bridge of the Golden Rose",
+        "historicalDescription": "Named after a historic shop or inn that likely displayed a golden rose as its emblem. Such establishments were common in Renaissance Venice, and bridges were often named after notable nearby businesses or landmarks.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43316754015169,
+            "lng": 12.331948786356488
+          }
+        }
+      },
+      "id": "bridge_45.433152_12.331914"
+    },
+    {
+      "edge": {
+        "lat": 45.433653149632796,
+        "lng": 12.33201584158186
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056541940",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.433783237096506,
+          "lng": 12.33200409947953
+        },
+        "distance": 14.49405418325994,
+        "id": "55999794-170d-4276-a7a5-011aae377f6f",
+        "historicalName": "Ponte dei Miniaturisti",
+        "englishName": "Bridge of the Miniaturists",
+        "historicalDescription": "This bridge was named for the skilled artists who created miniature paintings and illuminated manuscripts in the workshops of San Marco. These highly specialized craftsmen would have traveled this route between their studios and the wealthy patrons who commissioned their delicate works.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433718193364655,
+            "lng": 12.332009970530695
+          }
+        }
+      },
+      "id": "bridge_45.433653_12.332016"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43185386189916,
+      "lng": 12.331076316668668,
+      "streetName": "Calle dei Mercanti Zaguri",
+      "streetNameEnglish": "Street of the Zaguri Merchants",
+      "streetDescription": "Named after the wealthy Zaguri family who were prominent merchants in San Marco during the 15th and 16th centuries. The family owned several palaces in this area and were known for their trading connections with the Levant.",
+      "id": "building_45.431854_12.331076"
+    },
+    {
+      "lat": 45.43231395601033,
+      "lng": 12.33130132365762,
+      "streetName": "Rio Terà del Consiglio",
+      "streetNameEnglish": "Filled Canal of the Council",
+      "streetDescription": "This refers to a former canal that was filled in (rio terà) near where councilmen would walk on their way to the Palazzo Ducale for governmental meetings. The proximity to San Marco made this area frequented by Venice's political elite.",
+      "id": "building_45.432314_12.331301"
+    },
+    {
+      "lat": 45.432410885292576,
+      "lng": 12.331768324519356,
+      "streetName": "Salizada dei Orafi",
+      "streetNameEnglish": "Paved Street of the Goldsmiths",
+      "streetDescription": "This elevated and paved street (salizada) was historically home to several goldsmiths who had workshops in this area of San Marco. The street would have connected to the main commercial areas where luxury goods were sold to wealthy Venetians and foreign visitors.",
+      "id": "building_45.432411_12.331768"
+    },
+    {
+      "lat": 45.43285145747438,
+      "lng": 12.331867392410931,
+      "streetName": "Sottoportego della Fenice",
+      "streetNameEnglish": "Passageway of the Phoenix",
+      "streetDescription": "Named for its proximity to the area where Teatro La Fenice would later be built. In Renaissance Venice, this covered passageway would have connected buildings owned by the confraternity that managed performances and musical events in the district.",
+      "id": "building_45.432851_12.331867"
+    },
+    {
+      "lat": 45.433301280082595,
+      "lng": 12.331765737637777,
+      "streetName": "Corte Morosini",
+      "streetNameEnglish": "Morosini Court",
+      "streetDescription": "A small courtyard named after the Morosini family, who were neighbors to the Zaguri family in San Marco. The Morosini produced several doges and military leaders for the Republic of Venice, including Francesco Morosini who led Venetian forces in the 17th century.",
+      "id": "building_45.433301_12.331766"
+    }
+  ],
+  "id": "polygon-1746056735293"
+}

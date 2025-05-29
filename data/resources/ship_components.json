@@ -1,0 +1,11 @@
+{
+  "id": "ship_components",
+  "name": "Ship Components",
+  "category": "processed_materials",
+  "subCategory": "shipbuilding",
+  "description": "Prefabricated wooden parts ready for ship assembly.",
+  "importPrice": 1800.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

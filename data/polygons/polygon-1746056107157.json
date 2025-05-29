@@ -1,0 +1,233 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43950268899734,
+      "lng": 12.336123073395555
+    },
+    {
+      "lat": 45.4395629130959,
+      "lng": 12.336450302895372
+    },
+    {
+      "lat": 45.43954032906646,
+      "lng": 12.33700820237047
+    },
+    {
+      "lat": 45.43945752088126,
+      "lng": 12.337131583985155
+    },
+    {
+      "lat": 45.43889668042801,
+      "lng": 12.338520968254869
+    },
+    {
+      "lat": 45.438734826106334,
+      "lng": 12.338365400132005
+    },
+    {
+      "lat": 45.438614376077226,
+      "lng": 12.338118636902635
+    },
+    {
+      "lat": 45.43833207031402,
+      "lng": 12.33773239880449
+    },
+    {
+      "lat": 45.43848263356351,
+      "lng": 12.337104761895006
+    },
+    {
+      "lat": 45.43859931980551,
+      "lng": 12.336364472206895
+    },
+    {
+      "lat": 45.43881387129818,
+      "lng": 12.336423480805223
+    }
+  ],
+  "centroid": {
+    "lat": 45.438957929966705,
+    "lng": 12.337213025604335
+  },
+  "historicalName": "Campo San Zuane Grisostomo",
+  "englishName": "St. John Chrysostom Square",
+  "historicalDescription": "This campo was located in the Cannaregio sestiere, named after the nearby Church of San Giovanni Grisostomo. In the 15th century, it was a bustling area known for its artisans, particularly goldsmiths and jewelers.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 15174.18,
+  "center": {
+    "lat": 45.438957929966705,
+    "lng": 12.337213025604335
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43881387129818,
+        "lng": 12.336423480805223
+      },
+      "water": {
+        "lat": 45.4387686058228,
+        "lng": 12.336175393543083
+      },
+      "historicalName": "Fondamenta dei Mercanti Orientali",
+      "englishName": "Foundation of the Eastern Merchants",
+      "historicalDescription": "This dock name reflects the historical importance of Campo San Zuane Grisostomo (St. John Chrysostom) as a commercial area with strong ties to the Eastern Mediterranean trade. During the Renaissance, this area housed the Fondaco dei Tedeschi nearby and was frequented by merchants from Constantinople, the Levant, and other eastern territories. The Byzantine connection is particularly appropriate given that San Giovanni Crisostomo (John Chrysostom) was himself a prominent Byzantine saint and patriarch of Constantinople.",
+      "id": "canal_45.438814_12.336423"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.4395629130959,
+        "lng": 12.336450302895372
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056070563",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.439593025121056,
+          "lng": 12.336418116387193
+        },
+        "distance": 4.185380536064431,
+        "id": "5d6e8e0a-e8bf-484a-98e1-566dd69a8eca",
+        "historicalName": "Ponte dei Mercanti Bizantini",
+        "englishName": "Bridge of Byzantine Merchants",
+        "historicalDescription": "Near Campo San Zuane Grisostomo (St. John Chrysostom), this bridge would reference the significant Byzantine merchant community that historically operated in this area. St. John Chrysostom himself was a patriarch of Constantinople, making this Byzantine connection historically appropriate.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43957796910848,
+            "lng": 12.336434209641283
+          }
+        }
+      },
+      "id": "bridge_45.439563_12.336450"
+    },
+    {
+      "edge": {
+        "lat": 45.43954032906646,
+        "lng": 12.33700820237047
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056070563",
+        "targetPointIndex": 6,
+        "targetPoint": {
+          "lat": 45.43959678912307,
+          "lng": 12.337024295624559
+        },
+        "distance": 6.402402177538152,
+        "id": "5d6e8e0a-e8bf-484a-98e1-566dd69a8eca",
+        "historicalName": "Ponte della Seta Orientale",
+        "englishName": "Bridge of Oriental Silk",
+        "historicalDescription": "This area of Venice was known for its connection to Eastern trade routes. The name reflects the silk merchants who would have operated shops near Campo San Zuane Grisostomo, importing valuable fabrics from Constantinople and beyond.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439568559094766,
+            "lng": 12.337016248997514
+          }
+        }
+      },
+      "id": "bridge_45.439540_12.337008"
+    },
+    {
+      "edge": {
+        "lat": 45.43945752088126,
+        "lng": 12.337131583985155
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056070563",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.43950268899734,
+          "lng": 12.337158406075304
+        },
+        "distance": 5.441004133280181,
+        "id": "5d6e8e0a-e8bf-484a-98e1-566dd69a8eca",
+        "historicalName": "Ponte dei Fondaco",
+        "englishName": "Bridge of the Fondaco",
+        "historicalDescription": "References the nearby Fondaco dei Tedeschi (German trading post), which was one of Venice's most important commercial buildings. Merchants traveling between the fondaco and the Campo San Zuane Grisostomo area would have crossed such a bridge.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4394801049393,
+            "lng": 12.33714499503023
+          }
+        }
+      },
+      "id": "bridge_45.439458_12.337132"
+    },
+    {
+      "edge": {
+        "lat": 45.43917710065463,
+        "lng": 12.337826276120012
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056070563",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43916580873836,
+          "lng": 12.338032806214159
+        },
+        "distance": 16.16267600344078,
+        "id": "5d6e8e0a-e8bf-484a-98e1-566dd69a8eca",
+        "historicalName": "Ponte dei Grisostomi",
+        "englishName": "Bridge of the Chrysostoms",
+        "historicalDescription": "Named directly after the campo and church of San Zuane Grisostomo (St. John Chrysostom). Venetian bridges were commonly named after nearby religious landmarks, and this would honor the 5th-century saint for whom the campo was named.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43917145469649,
+            "lng": 12.337929541167085
+          }
+        }
+      },
+      "id": "bridge_45.439177_12.337826"
+    },
+    {
+      "edge": {
+        "lat": 45.43848263356351,
+        "lng": 12.337104761895006
+      },
+      "id": "bridge_45.438483_12.337105"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43875559275439,
+      "lng": 12.336874668830708,
+      "streetName": "Calle dei Mercanti Tedeschi",
+      "streetNameEnglish": "Street of the German Merchants",
+      "streetDescription": "This street reflects the historical presence of German merchants near Campo San Zuane Grisostomo (St. John Chrysostom Square). The area was close to the Fondaco dei Tedeschi, the trading post and residence for German merchants in Venice during the Renaissance period, which was a crucial hub for commerce between Venice and Northern Europe.",
+      "id": "building_45.438756_12.336875"
+    },
+    {
+      "lat": 45.43878114084863,
+      "lng": 12.337300023193869,
+      "streetName": "Ruga dei Librai",
+      "streetNameEnglish": "Row of Booksellers",
+      "streetDescription": "The area around Campo San Zuane Grisostomo was known for its book trade in the 16th century. This name commemorates the booksellers and printers who had shops in this district, including the renowned Aldine Press founded by Aldus Manutius, which was located nearby and revolutionized book printing in Renaissance Venice.",
+      "id": "building_45.438781_12.337300"
+    },
+    {
+      "lat": 45.43874640541977,
+      "lng": 12.337916168635887,
+      "streetName": "Salizada dei Garzoni",
+      "streetNameEnglish": "Paved Road of the Apprentices",
+      "streetDescription": "This salizada (one of the first paved streets in Venice) would reference the young apprentices who worked in the various workshops and businesses around Campo San Zuane Grisostomo. The area was home to many artisans and craftsmen who trained young garzoni (apprentices) in various trades during the Renaissance.",
+      "id": "building_45.438746_12.337916"
+    },
+    {
+      "lat": 45.43914824709456,
+      "lng": 12.336713491915798,
+      "streetName": "Rio Terà dei Bombardieri",
+      "streetNameEnglish": "Filled Canal of the Bombardiers",
+      "streetDescription": "This street name indicates a former canal that was filled in (rio terà) and references the bombardieri, members of the artillery guild who had connections to this area. The bombardieri were an important military guild in Renaissance Venice, responsible for cannon operation and defense of the Republic.",
+      "id": "building_45.439148_12.336713"
+    },
+    {
+      "lat": 45.43920383480786,
+      "lng": 12.337463724034262,
+      "streetName": "Calle della Chiesa Greca",
+      "streetNameEnglish": "Street of the Greek Church",
+      "streetDescription": "This name would reference the nearby Greek Orthodox community that had a presence in this part of Venice. Though the main Greek church (San Giorgio dei Greci) was located elsewhere, smaller Greek prayer houses or chapels might have existed near Campo San Zuane Grisostomo, reflecting Venice's important role as a bridge between Eastern and Western Christianity during the Renaissance.",
+      "id": "building_45.439204_12.337464"
+    }
+  ],
+  "id": "polygon-1746056107157"
+}

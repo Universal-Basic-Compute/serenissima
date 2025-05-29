@@ -1,0 +1,137 @@
+{
+  "name": "Fondaco dei Tedeschi",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Trade Facilities",
+  "size": 4,
+  "unlockCondition": "25,000,000 ducats total wealth, German merchant connections, Senate approval",
+  "canImport": true,
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Fondaco dei Tedeschi represents a major commercial investment with significant returns. The construction cost of 7,500,000 ducats reflects the massive scale and institutional nature of this trading complex, while the income of 75,000 ducats (1% return) represents the substantial commercial activity it facilitates. The maintenance cost of 35,000 ducats (47% of income) balances profitability with the reality of maintaining a large commercial complex. The employment capacity of 40 reflects the administrative staff, guards, and workers needed to operate this international trading center. The construction time of 15 days (1296000000ms) represents a major project appropriate for advanced players. This building creates a strategic investment in international trade with appropriate requirements reflecting the political and diplomatic nature of establishing foreign trading posts in Renaissance Venice.",
+  "shortDescription": "German merchant trading hall combining warehouse, accommodation, and commercial offices.",
+  "fullDescription": "A cornerstone of Venice's international trade, this massive complex serves as headquarters for German merchants. Combining warehouse facilities, living quarters, offices, and trading halls, the fondaco creates a self-contained community for foreign traders under Venetian oversight. State regulations require all German goods to pass through this building, making it a vital link to Northern European contracts while allowing careful tax collection.",
+  "flavorText": "Between these walls the languages of north and south mingle, as do the coins of a dozen cities—all under the watchful eye of the Serenissima.",
+  "constructionCosts": {
+    "ducats": 7500000,
+    "timber": 1660,
+    "bricks": 4440,
+    "stone": 2770,
+    "glass": 550,
+    "marble": 280
+  },
+  "maintenanceCost": 3500,
+  "soundDesign": {
+    "ambientSound": "Multiple languages being spoken, trading negotiations, cargo movement",
+    "activitySounds": "Goods being inspected, coins counting, ships docking, cargo loading",
+    "musicTheme": "Diplomazia Veneziana"
+  },
+  "seasonalEffects": {
+    "winter": "Increased northern goods, fur trading",
+    "trading seasons": "Dramatic fluctuations in activity based on shipping seasons",
+    "festive seasons": "Cultural exchanges, German and Venetian celebrations"
+  },
+  "aiInteractionPoints": [
+    "Trading floor",
+    "Customs office",
+    "Warehouse receiving",
+    "Merchant accommodations",
+    "Canal docks",
+    "Courtyard contract",
+    "Administrative offices"
+  ],
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "silk_fabric": 4,
+        "dyed_textiles": 2,
+        "gold_leaf": 1
+      },
+      "outputs": {
+        "luxury_silk_garments": 3
+      },
+      "craftMinutes": 240
+    },
+    {
+      "inputs": {
+        "wine": 10,
+        "spices": 2
+      },
+      "outputs": {
+        "spiced_wine": 5
+      },
+      "craftMinutes": 180
+    },
+    {
+      "inputs": {
+        "gold": 5,
+        "paper": 3
+      },
+      "outputs": {
+        "banking_services": 1
+      },
+      "craftMinutes": 90
+    },
+    {
+      "inputs": {
+        "glass": 5,
+        "gold_leaf": 1
+      },
+      "outputs": {
+        "fine_glassware": 2
+      },
+      "craftMinutes": 240
+    },
+    {
+      "inputs": {
+        "ship_components": 30,
+        "sailcloth": 12,
+        "rope": 20,
+        "iron_fittings": 8
+      },
+      "outputs": {
+        "merchant_galley": 1
+      },
+      "craftMinutes": 720
+    }
+  ],
+    "storageCapacity": 500,
+    "stores": [
+      "raw_silk",
+      "spiced_wine",
+      "luxury_silk_garments",
+      "wine",
+      "gold",
+      "banking_services",
+      "glass",
+      "fine_glassware",
+      "timber",
+      "rope",
+      "merchant_galley",
+      "weapons",
+      "jewelry",
+      "maps",
+      "silk_fabric",
+      "dyed_textiles",
+      "grain",
+      "books",
+      "tools"
+    ],
+    "sells": [
+      "luxury_silk_garments",
+      "spiced_wine",
+      "banking_services",
+      "fine_glassware",
+      "merchant_galley",
+      "weapons",
+      "jewelry",
+      "maps",
+      "silk_fabric",
+      "dyed_textiles"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 21600
+}

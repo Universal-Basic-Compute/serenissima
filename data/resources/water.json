@@ -1,0 +1,11 @@
+{
+  "id": "water",
+  "name": "Water",
+  "category": "raw_materials",
+  "subCategory": "natural",
+  "description": "Fresh water collected from wells and cisterns, essential for daily life and many crafts.",
+  "importPrice": 30.0,
+  "lifetimeHours": 150,
+  "consumptionHours": 1,
+  "tier": 1
+}

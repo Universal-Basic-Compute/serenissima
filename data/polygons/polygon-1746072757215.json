@@ -1,0 +1,130 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44210472885054,
+      "lng": 12.329123452329434
+    },
+    {
+      "lat": 45.44202757018885,
+      "lng": 12.329515054845608
+    },
+    {
+      "lat": 45.44197111256467,
+      "lng": 12.329759135865963
+    },
+    {
+      "lat": 45.44099815063163,
+      "lng": 12.32907249035815
+    },
+    {
+      "lat": 45.44061987656894,
+      "lng": 12.328734532022274
+    },
+    {
+      "lat": 45.44076102390389,
+      "lng": 12.328450217866695
+    },
+    {
+      "lat": 45.440996268677395,
+      "lng": 12.32845290007571
+    },
+    {
+      "lat": 45.441385831865304,
+      "lng": 12.328696981096066
+    }
+  ],
+  "centroid": {
+    "lat": 45.4413580704064,
+    "lng": 12.328975595557488
+  },
+  "areaInSquareMeters": 7333.71,
+  "historicalName": "Calle del Megio in Sestiere Dorsoduro",
+  "englishName": "Alley of the Megio in the Dorsoduro District",
+  "historicalDescription": "A narrow alley located in the Dorsoduro sestiere, known for its artisan workshops and proximity to the Chiesa di San Sebastiano church.",
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.4413580704064,
+    "lng": 12.328975595557488
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.44202757018885,
+        "lng": 12.329515054845608
+      },
+      "water": {
+        "lat": 45.44218414431989,
+        "lng": 12.329641216752577
+      },
+      "historicalName": "Fondamenta del Megio",
+      "englishName": "Millet Foundation Dock",
+      "historicalDescription": "This dock name derives from its location near Calle del Megio (Millet Street) in Sestiere Dorsoduro. 'Megio' refers to millet, a grain that was commonly traded in this area during the Renaissance period. The dock would have served local merchants and residents in this part of Dorsoduro, possibly as a landing point for grain shipments and other goods coming into this neighborhood.",
+      "id": "canal_45.442028_12.329515"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44148463159815,
+        "lng": 12.329415813112057
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072788813",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44148838766212,
+          "lng": 12.329486307135115
+        },
+        "distance": 5.5156740495413645,
+        "id": "dbe2e5c3-bbdd-4e75-a6ce-e980268f5e29",
+        "historicalName": "Ponte del Megio",
+        "englishName": "Bridge of Millet",
+        "historicalDescription": "Named after Calle del Megio where it is located, 'megio' being the Venetian dialect word for millet. During the Renaissance, this area likely stored or traded millet, an important grain for the Venetian food supply, particularly for the lower classes. The bridge would have connected warehouses or shops specializing in grain trade in Dorsoduro.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44148650963014,
+            "lng": 12.329451060123585
+          }
+        }
+      },
+      "id": "bridge_45.441485_12.329416"
+    },
+    {
+      "edge": {
+        "lat": 45.44099815063163,
+        "lng": 12.32907249035815
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072788813",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44100661157261,
+          "lng": 12.329129573336134
+        },
+        "distance": 4.551855651066608,
+        "id": "dbe2e5c3-bbdd-4e75-a6ce-e980268f5e29",
+        "historicalName": "Ponte dei Granai di Dorsoduro",
+        "englishName": "Bridge of the Dorsoduro Granaries",
+        "historicalDescription": "This bridge connected the granaries and storage facilities in Dorsoduro, where various grains including millet were kept. Dorsoduro contained several storage facilities for the Republic's grain supplies, essential for feeding the population. The bridge would have facilitated the movement of goods between these granaries and the canals for distribution throughout the city during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44100238110212,
+            "lng": 12.329101031847141
+          }
+        }
+      },
+      "id": "bridge_45.440998_12.329072"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44145299129484,
+      "lng": 12.329083105975489,
+      "streetName": "Calle dei Granai",
+      "streetNameEnglish": "Street of the Granaries",
+      "streetDescription": "This street name refers to the granaries or grain storage facilities that were historically present in this area of Dorsoduro. 'Megio' in 'Calle del Megio' refers to millet, a type of grain, so 'Calle dei Granai' would be a complementary name for a nearby street, referencing the broader grain storage and distribution activities in this neighborhood during the Renaissance period. Grain was an essential commodity in Venice, with dedicated public storehouses to ensure food security for the population.",
+      "id": "building_45.441453_12.329083"
+    }
+  ],
+  "id": "polygon-1746072757215"
+}

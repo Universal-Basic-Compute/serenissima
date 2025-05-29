@@ -1,0 +1,65 @@
+{
+  "id": "dyestuffs",
+  "name": "Dyestuffs",
+  "category": "raw_materials",
+  "subCategory": "colorants",
+  "description": {
+    "short": "Rare colorants for textile dyeing.",
+    "full": "Precious natural substances imported from around the world that provide vibrant, lasting colors for Venetian textiles. These rare materials are a cornerstone of Venice's luxury textile industry.",
+    "flavor": "Each shade represents a journey across seas and continentsâ€”the crimson of kermes beetles, the purple of murex shells, the blue of distant indigo plants. In these tiny grains of color lies the secret to Venice's most splendid fabrics."
+  },
+  "varieties": [
+    {
+      "type": "kermes",
+      "color": "crimson",
+      "source": "insect",
+      "origin": "mediterranean",
+      "rarity": "high",
+      "valueMultiplier": 1.8
+    },
+    {
+      "type": "indigo",
+      "color": "blue",
+      "source": "plant",
+      "origin": "india",
+      "rarity": "high",
+      "valueMultiplier": 1.7
+    },
+    {
+      "type": "murex",
+      "color": "purple",
+      "source": "mollusk",
+      "origin": "mediterranean",
+      "rarity": "very_high",
+      "valueMultiplier": 3
+    },
+    {
+      "type": "saffron",
+      "color": "yellow",
+      "source": "flower",
+      "origin": "persia",
+      "rarity": "high",
+      "valueMultiplier": 2
+    },
+    {
+      "type": "madder",
+      "color": "red",
+      "source": "root",
+      "origin": "europe",
+      "rarity": "medium",
+      "valueMultiplier": 1.2
+    },
+    {
+      "type": "woad",
+      "color": "blue",
+      "source": "plant",
+      "origin": "europe",
+      "rarity": "low",
+      "valueMultiplier": 0.9
+    }
+  ],
+  "importPrice": 2880.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": null,
+  "tier": 0
+}

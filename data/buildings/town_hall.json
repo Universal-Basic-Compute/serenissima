@@ -1,0 +1,62 @@
+{
+  "name": "Town Hall",
+  "pointType": "building",
+  "category": "Public & Government",
+  "subCategory": "Civic Buildings",
+  "size": 2,
+  "unlockCondition": "15,000,000 ducats, local government appointment or connection",
+  "calculationsAnalysis": "The Town Hall balances civic investment with modest administrative revenue. The construction cost of 5,000,000 ducats reflects the substantial public building required, while the income of 30,000 ducats (0.6% return) represents administrative fees and taxes collected. The maintenance cost of 35,000 ducats exceeds income, creating a realistic scenario where civic buildings required public subsidy but provided essential governance services. The employment capacity of 20 represents the officials and clerks needed for local administration. The construction time of 14 days (1209600000ms) reflects the substantial public project. This building creates a strategic investment in local governance with appropriate requirements reflecting the political nature of establishing administrative centers in Renaissance Venice.",
+  "shortDescription": "Local government offices providing administrative services for a district.",
+  "fullDescription": "Handling local governance needs, town halls serve as administrative centers for Venice's districts. Featuring offices for district officials, public meeting spaces, record archives, and often small courtrooms, these buildings manage the day-to-day governance tasks below the level of the central government. Their accessible location and public service focus made them important neighborhood institutions.",
+  "flavorText": "Between the lofty politics of the Senate and the daily concerns of the citizen lies the town hall—where grand policies become practical solutions to everyday problems.",
+  "constructionCosts": {
+    "ducats": 5000000,
+    "timber": 750,
+    "bricks": 1490,
+    "stone": 1990,
+    "glass": 300,
+    "marble": 400
+  },
+  "maintenanceCost": 2500,
+  "soundDesign": {
+    "ambientSound": "Quill scratching, official stamps, muted conversations",
+    "activitySounds": "Public announcements, dispute resolutions, citizen petitions",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "tax seasons": "Increased activity, financial focus",
+    "elections": "Community gatherings, political speeches",
+    "civic holidays": "Decorated with district flags, ceremonies"
+  },
+  "aiInteractionPoints": [
+    "Public counter",
+    "Meeting hall",
+    "Document archive",
+    "Officials' offices",
+    "Courtroom",
+    "Waiting area",
+    "Announcement board"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "paper",
+      "books",
+      "maps",
+      "banking_services",
+      "rags",
+      "water",
+      "blackmail_evidence"
+    ],
+    "sells": [
+      "books",
+      "maps",
+      "banking_services"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 0,
+  "constructionMinutes": 20160
+}

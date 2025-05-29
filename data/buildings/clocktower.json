@@ -1,0 +1,60 @@
+{
+  "name": "Clocktower",
+  "pointType": "building",
+  "category": "Special Buildings",
+  "subCategory": "Unique Structures",
+  "size": 1,
+  "unlockCondition": "Government project only, not privately constructable",
+  "calculationsAnalysis": "The Clocktower represents specialized public infrastructure with technological significance. The construction cost of 20,000,000 ducats reflects the complex mechanical systems and architectural integration, while generating no direct income reflects its public service rather than commercial purpose. The maintenance cost of 75,000 ducats creates a substantial ongoing expense justified by its practical and symbolic importance. The employment capacity of 5 represents the specialized technicians needed to maintain the complex mechanism. The construction time of 40 days (3456000000ms) reflects the precision engineering project. This unique building serves as both practical timekeeper and symbol of Venetian technological prowess with appropriate restrictions preventing private construction, reflecting the historical reality of this singular structure that represented the Republic's orderly governance.",
+  "shortDescription": "Public timepiece marking hours with automatons and astronomical indicators.",
+  "fullDescription": "Regulating Venetian life through public timekeeping, the Clock Tower (Torre dell'Orologio) combines practical function with astronomical artistry. Featuring an ornate blue and gold clockface, zodiac indicators, automated figures striking the hours, and a bell at the top, this sophisticated mechanism represented cutting-edge Renaissance technology. Its prominent position overlooking St. Mark's Square symbolized Venice's orderly governance and scientific advancement.",
+  "flavorText": "How better to demonstrate the Republic's mastery over commerce than to measure and display time itself—for in Venice, even the hours are counted, regulated, and transformed into the rhythm of prosperity.",
+  "constructionCosts": {
+    "ducats": 20000000,
+    "timber": 1420,
+    "bricks": 4250,
+    "stone": 7080,
+    "iron": 2830,
+    "gold": 710
+  },
+  "maintenanceCost": 7500,
+  "soundDesign": {
+    "ambientSound": "Clockwork mechanisms, gentle ticking, pedestrians below",
+    "activitySounds": "Bell striking hours, automated figures moving, crowd reactions",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "festivals": "Special automated displays, decorative elements",
+    "astronomical events": "Highlighted indicators, educational focus",
+    "civic ceremonies": "Timing coordination, official reference point"
+  },
+  "aiInteractionPoints": [
+    "Main Clockface",
+    "Automated Figures Platform",
+    "Zodiac Display",
+    "Archway Passage",
+    "Bell Tower",
+    "Maintenance Access",
+    "Timekeeper's Station",
+    "Viewing Area"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "iron",
+      "tools",
+      "gold",
+      "paper",
+      "maps"
+    ],
+    "sells": [
+      "tools",
+      "maps"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 0,
+  "consumeTier": 0,
+  "constructionMinutes": 57600
+}

@@ -1,0 +1,11 @@
+{
+  "id": "iron_fittings",
+  "name": "Iron Fittings",
+  "category": "processed_materials",
+  "subCategory": "metallurgy",
+  "description": "Forged iron hardware for construction and shipbuilding.",
+  "importPrice": 1342.8,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

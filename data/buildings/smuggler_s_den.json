@@ -1,0 +1,61 @@
+{
+  "name": "Smuggler's Den",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "storage",
+  "size": 1,
+  "unlockCondition": "8,000,000 ducats capital, Criminal Contacts (street level quality), water access",
+  "canImport": true,
+  "calculationsAnalysis": "The Smuggler's Den represents specialized contraband handling with high risk and high reward. The construction cost of 2,500,000 ducats reflects the specialized storage and security measures required, while the income of 35,000 ducats (1.4% return) represents the markup on smuggled goods. The maintenance cost of 25,000 ducats (71.4% of income) creates a reasonable profit margin appropriate for this high-risk venture. The employment capacity of 8 represents the minimal crew needed for operations. The construction time of 5 days (432000000ms) reflects the need for discreet construction. This building creates a strategic investment in contraband movement with appropriate location requirements reflecting Venice's historical position as a smuggling hub due to its complex waterways and position between East and West.",
+  "shortDescription": "Concealed facility for storing and moving contraband through Venice's complex waterways.",
+  "fullDescription": "Taking advantage of Venice's labyrinthine canals and lagoon, smuggler's dens serve as hubs for moving illegal goods into and through the city. Featuring hidden docks, concealed storage, lookout positions, and often disguised entrances, these facilities enable the shadow economy that operates beneath Venice's legitimate trade. Their strategic locations provide quick access to both city canals and lagoon escape routes.",
+  "flavorText": "The customs officer sees only what passes through the gate, but the smuggler knows that in Venice, every canal is a highway and every water door a potential customs house—if you know whom to pay.",
+  "constructionCosts": {
+    "ducats": 2500000,
+    "timber": 990,
+    "bricks": 1490,
+    "stone": 1240,
+    "iron": 500
+  },
+  "maintenanceCost": 2500,
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 100,
+    "stores": [
+      "wine",
+      "spiced_wine",
+      "smuggler_maps",
+      "forgery_tools",
+      "disguise_materials",
+      "weapons",
+      "poison_components",
+      "blackmail_evidence",
+      "criminal_contacts",
+      "spices",
+      "dyestuffs"
+    ],
+    "sells": []
+  },
+  "soundDesign": {
+    "ambientSound": "Water lapping, quiet boat movements, hushed conversations",
+    "activitySounds": "Cargo being moved, warning signals, boat moorings",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "fog": "Increased operations, natural concealment",
+    "guard patrols": "Altered routes, reduced volume",
+    "customs inspections": "Temporary shutdowns, alternative methods"
+  },
+  "aiInteractionPoints": [
+    "Hidden dock",
+    "Contraband storage",
+    "Lookout post",
+    "Front business",
+    "Escape route planning",
+    "Smuggler boat moorings"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 7200
+}

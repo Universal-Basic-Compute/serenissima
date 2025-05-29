@@ -1,0 +1,75 @@
+{
+  "name": "Soap Workshop",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Household Goods",
+  "size": 1,
+  "unlockCondition": "4,000,000 ducats total wealth, access to olive oil supply",
+  "shortDescription": "Workshop producing Venetian soap from olive oil and other ingredients.",
+  "fullDescription": "This specialized facility produces the famous Venetian soap, combining olive oil with alkaline materials like lye derived from wood ash. The workshop features large cauldrons for mixing and heating ingredients, cooling tables for setting the soap, and cutting stations for preparing the final product. Venetian soap was renowned throughout Europe for its quality and pleasant scents.",
+  "flavorText": "Where oil and ash transform into luxury—the alchemy of cleanliness that made Venice famous from palaces to peasant homes.",
+  "constructionCosts": {
+    "ducats": 900000,
+    "timber": 720,
+    "stone": 620,
+    "iron": 410
+  },
+  "maintenanceCost": 900,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "olive_oil": 2,
+        "salt": 1
+      },
+      "outputs": {
+        "soap": 4
+      },
+      "craftMinutes": 120
+    },
+    {
+      "inputs": {
+        "olive_oil": 3,
+        "dyestuffs": 1,
+        "spices": 1
+      },
+      "outputs": {
+        "soap": 6
+      },
+      "craftMinutes": 180
+    }
+    ],
+    "storageCapacity": 100,
+    "stores": [
+      "olive_oil",
+      "soda_ash",
+      "dyestuffs",
+      "fuel",
+      "soap"
+    ],
+    "sells": [
+      "soap"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Bubbling cauldrons, stirring, workers chatting",
+    "activitySounds": "Pouring liquids, cutting soap, packaging"
+  },
+  "seasonalEffects": {
+    "winter": "Production of heavier, more moisturizing varieties",
+    "summer": "Production of lighter, more fragrant varieties",
+    "spring": "Incorporation of fresh herbs and flowers"
+  },
+  "aiInteractionPoints": [
+    "Ingredient storage",
+    "Mixing cauldrons",
+    "Cooling tables",
+    "Cutting station",
+    "Packaging area",
+    "Scent blending table"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 5760
+}

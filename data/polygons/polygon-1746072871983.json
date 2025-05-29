@@ -1,0 +1,183 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43788868985301,
+      "lng": 12.331188812130737
+    },
+    {
+      "lat": 45.437075634974825,
+      "lng": 12.332004203671264
+    },
+    {
+      "lat": 45.436672867339595,
+      "lng": 12.332299246662902
+    },
+    {
+      "lat": 45.436386787646974,
+      "lng": 12.331188812130737
+    },
+    {
+      "lat": 45.43681214245454,
+      "lng": 12.330904497975158
+    },
+    {
+      "lat": 45.43716973914819,
+      "lng": 12.330791845196533
+    },
+    {
+      "lat": 45.43772683263994,
+      "lng": 12.330770387524414
+    }
+  ],
+  "centroid": {
+    "lat": 45.437104670579586,
+    "lng": 12.33130682932739
+  },
+  "areaInSquareMeters": 11464.5,
+  "historicalName": "Calle del Forno in Sestiere di Santa Croce",
+  "englishName": "Oven Street in the District of the Holy Cross",
+  "historicalDescription": "This calle was located in the sestiere of Santa Croce, known for its many artisan workshops and bread ovens in the 15th century. It was likely near the Church of San Simeon Grando.",
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.437104670579586,
+    "lng": 12.33130682932739
+  },
+  "coatOfArmsCenter": {
+    "lat": 45.43278158026788,
+    "lng": 12.33738617252928
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.437482162413914,
+        "lng": 12.331596507901
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072967949",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.4375091982897,
+          "lng": 12.33163057074095
+        },
+        "distance": 4.01260860505041,
+        "id": "ec214cd3-38a9-4a39-9f2d-9c9db3ac331e",
+        "historicalName": "Ponte del Forno",
+        "englishName": "Bridge of the Bakery",
+        "historicalDescription": "Named after the prominent bakery (forno) located on Calle del Forno in Santa Croce. Bakeries were essential establishments in Renaissance Venice, and this bridge would have provided access to an important local bakery that served the neighborhood.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43749568035181,
+            "lng": 12.331613539320976
+          }
+        }
+      },
+      "id": "bridge_45.437482_12.331597"
+    },
+    {
+      "edge": {
+        "lat": 45.437075634974825,
+        "lng": 12.332004203671264
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072967949",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.437113963468846,
+          "lng": 12.332022173257124
+        },
+        "distance": 4.486633567807287,
+        "id": "ec214cd3-38a9-4a39-9f2d-9c9db3ac331e",
+        "historicalName": "Ponte dei Fornaciai",
+        "englishName": "Bridge of the Kiln Workers",
+        "historicalDescription": "Named for the kiln workers who operated in this area of Santa Croce during the Renaissance period. These craftsmen were involved in firing clay for bricks, tiles, and pottery, activities that required proximity to water for transportation of materials and finished goods.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43709479922184,
+            "lng": 12.332013188464195
+          }
+        }
+      },
+      "id": "bridge_45.437076_12.332004"
+    },
+    {
+      "edge": {
+        "lat": 45.43681214245454,
+        "lng": 12.330904497975158
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072856331",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43679708570194,
+          "lng": 12.3308401249588
+        },
+        "distance": 5.294394362611413,
+        "id": "830b41d9-0d37-44ef-81ca-5861263305c9",
+        "historicalName": "Ponte della Croce Piccola",
+        "englishName": "Bridge of the Little Cross",
+        "historicalDescription": "Named in reference to a small religious shrine or cross that would have been located near this bridge in the Sestiere di Santa Croce (Holy Cross district). Such small devotional markers were common throughout Venice and often became navigation points for locals.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43680461407824,
+            "lng": 12.33087231146698
+          }
+        }
+      },
+      "id": "bridge_45.436812_12.330904"
+    },
+    {
+      "edge": {
+        "lat": 45.43716973914819,
+        "lng": 12.330791845196533
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072856331",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43714715416089,
+          "lng": 12.330738201016235
+        },
+        "distance": 4.881159813323041,
+        "id": "830b41d9-0d37-44ef-81ca-5861263305c9",
+        "historicalName": "Ponte dei Varoteri",
+        "englishName": "Bridge of the Furriers",
+        "historicalDescription": "Named after the furriers' guild whose members worked or lived in this area of Santa Croce. The fur trade was a significant industry in Renaissance Venice, with furriers processing pelts imported from Eastern Europe and Russia to create luxurious garments for Venetian nobility.",
+        "location": {
+          "midpoint": {
+            "lat": 45.437158446654536,
+            "lng": 12.330765023106384
+          }
+        }
+      },
+      "id": "bridge_45.437170_12.330792"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.436760281873305,
+      "lng": 12.331530222032637,
+      "streetName": "Calle del Panificio di Santa Croce",
+      "streetNameEnglish": "Street of the Bakery of Santa Croce",
+      "streetDescription": "This name references the historical bakeries that would have been present near Calle del Forno. 'Panificio' specifically refers to a bread-making establishment, and including 'di Santa Croce' situates it clearly in the sestiere. Bakeries were essential businesses in Renaissance Venice, and often clustered in neighborhoods to serve local residents.",
+      "id": "building_45.436760_12.331530"
+    },
+    {
+      "lat": 45.43680060302762,
+      "lng": 12.331936959176213,
+      "streetName": "Rio Terà dei Pistori",
+      "streetNameEnglish": "Filled Canal of the Bakers",
+      "streetDescription": "This name combines 'Rio Terà' (indicating a filled-in canal) with 'Pistori', the Venetian term for bakers or bread-makers. The guild of bakers (Arte dei Pistori) was an important trade organization in Renaissance Venice. This street name suggests it was built on a former canal in an area where bakers had their shops or where the guild had influence, connecting thematically to the nearby Calle del Forno.",
+      "id": "building_45.436801_12.331937"
+    },
+    {
+      "lat": 45.43724160435523,
+      "lng": 12.331364002310394,
+      "streetName": "Sottoportego dei Fornai",
+      "streetNameEnglish": "Passageway of the Oven-keepers",
+      "streetDescription": "A 'sottoportego' is a covered passageway that runs beneath a building. This name connects to the bread-making tradition in the area, with 'fornai' referring to those who operated ovens. Such a passage would likely have been near bakeries in the Santa Croce district, perhaps providing access between workshops or connecting the bakers' quarter to nearby canals for the transportation of flour and finished bread.",
+      "id": "building_45.437242_12.331364"
+    }
+  ],
+  "id": "polygon-1746072871983"
+}

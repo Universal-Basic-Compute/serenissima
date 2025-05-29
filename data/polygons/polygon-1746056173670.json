@@ -1,0 +1,85 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43862793717223,
+      "lng": 12.34011167544188
+    },
+    {
+      "lat": 45.438405856810384,
+      "lng": 12.340927066982408
+    },
+    {
+      "lat": 45.43766056378373,
+      "lng": 12.340240421474595
+    },
+    {
+      "lat": 45.43757398870307,
+      "lng": 12.340047302425523
+    },
+    {
+      "lat": 45.437781015848905,
+      "lng": 12.339709344089647
+    }
+  ],
+  "centroid": {
+    "lat": 45.43800987246367,
+    "lng": 12.34020716208281
+  },
+  "historicalName": "Calle del Dose, Sestiere di San Marco",
+  "englishName": "Alley of the Doge, District of St. Mark",
+  "historicalDescription": "This alley was located in the sestiere of San Marco, near the political and religious heart of 15th century Venice. The Doge's Palace and St. Mark's Basilica were prominent landmarks in this district.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 5759.32,
+  "center": {
+    "lat": 45.43810621533953,
+    "lng": 12.340252195199714
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43766056378373,
+        "lng": 12.340240421474595
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056244077",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.4376745051079,
+          "lng": 12.340318205805012
+        },
+        "distance": 6.263883611107534,
+        "id": "cc3e549c-44bf-465e-8008-282aec6fdb92",
+        "historicalName": "Ponte del Doge",
+        "englishName": "Bridge of the Doge",
+        "historicalDescription": "This bridge takes its name from the nearby Calle del Dose (Street of the Doge) in the San Marco district. During the Renaissance, this area was frequented by the Venetian Doges when traveling between official functions, and the bridge would have been part of routes connecting the Doge's Palace to other important governmental buildings and residences of noble families associated with the doges. The name honors the highest elected official of the Venetian Republic.",
+        "location": {
+          "midpoint": {
+            "lat": 45.437667534445815,
+            "lng": 12.340279313639805
+          }
+        }
+      },
+      "id": "bridge_45.437661_12.340240"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43794257374539,
+      "lng": 12.340249752107278,
+      "streetName": "Calle del Doge Barbarigo",
+      "streetNameEnglish": "Street of Doge Barbarigo",
+      "streetDescription": "Named after Agostino Barbarigo, who served as Doge of Venice from 1486 to 1501 during the Renaissance. His palace was located near San Marco, and this calle would commemorate one of the notable Doges who helped maintain Venice's diplomatic relations during a pivotal period. The name follows the convention of streets named after prominent Venetian leaders in the San Marco district.",
+      "id": "building_45.437943_12.340250"
+    },
+    {
+      "lat": 45.43838561719342,
+      "lng": 12.34031419811156,
+      "streetName": "Sottoportego dei Camerlenghi",
+      "streetNameEnglish": "Passageway of the Treasurers",
+      "streetDescription": "This covered passageway would reference the Camerlenghi, who were financial officials responsible for managing the Republic's treasury. Located in San Marco near the Doge's administrative center, this path would have been used by officials traveling between financial offices and the Palazzo Ducale. The name reflects Venice's sophisticated government structure and the importance of financial administration to the maritime republic.",
+      "id": "building_45.438386_12.340314"
+    }
+  ],
+  "id": "polygon-1746056173670"
+}

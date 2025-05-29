@@ -1,0 +1,61 @@
+{
+  "name": "Merceria",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "retail_goods",
+  "size": 1,
+  "unlockCondition": "5,000,000 ducats total wealth, Textile Guild connection",
+  "calculationsAnalysis": "The Merceria's economic profile reflects the importance of textile retail in Venice's economy. With a construction cost of 1,000,000 ducats and income of 15,000 ducats (1.5% return), it represents a specialized investment with modest but reliable returns. The maintenance cost of 6,000 ducats (40% of income) balances profitability with realistic overhead for a specialized shop. The employment capacity of 4 reflects the staff needed to handle, display, and sell valuable textiles. The construction time of 3 days (259200000ms) represents the more refined construction and specialized fixtures required. This building creates a strategic choice for players to specialize in the lucrative textile trade, with appropriate guild requirements reflecting historical trade organization.",
+  "shortDescription": "Specialized textile and fabric shop offering a variety of imported and local cloths.",
+  "fullDescription": "Named after Venice's famous shopping street, these specialized shops are the center of the textile trade. Offering everything from simple local woolens to exotic silks from the East, a merceria features dramatic fabric displays, specialized measuring counters, and often a separate area for noble clients. These shops connect Venice's vital textile industry directly to consumers.",
+  "flavorText": "Under these silks lie the true fabric of Venice—commerce that spans from humble wool to threads of gold.",
+  "constructionCosts": {
+    "ducats": 1000000,
+    "timber": 400,
+    "bricks": 800,
+    "stone": 270,
+    "glass": 70
+  },
+  "maintenanceCost": 600,
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 150,
+    "stores": [
+      "raw_silk",
+      "prepared_silk",
+      "silk_fabric",
+      "dyed_textiles",
+      "venetian_lace",
+      "luxury_silk_garments",
+      "tools"
+    ],
+    "sells": [
+      "silk_fabric",
+      "prepared_silk",
+      "luxury_silk_garments",
+      "dyed_textiles",
+      "venetian_lace"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Soft conversation, fabric being unfolded",
+    "activitySounds": "Scissors cutting samples, measuring discussions, price negotiations",
+    "musicTheme": "Sospiri Veneziani"
+  },
+  "seasonalEffects": {
+    "winter": "Heavier fabrics prominently displayed, seasonal colors",
+    "carnival": "Mask-making fabrics, costume materials featured",
+    "seasonal collections": "Complete rotation of stock 4 times per year"
+  },
+  "aiInteractionPoints": [
+    "Main counter",
+    "Noble client area",
+    "Fabric displays",
+    "Window shopping",
+    "Color matching area"
+  ],
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 4320
+}

@@ -1,0 +1,127 @@
+{
+  "name": "Shipyard",
+  "pointType": "canal",
+  "category": "business",
+  "subCategory": "Shipbuilding Industry",
+  "size": 2,
+  "unlockCondition": "20,000,000 ducats capital, Shipwright Guild membership, deep water access",
+  "calculationsAnalysis": "The Shipyard represents major maritime industrial infrastructure with substantial returns. The construction cost of 6,000,000 ducats reflects the extensive facilities and specialized equipment required, while the income of 70,000 ducats (1.17% return) represents the high-value vessels produced. The maintenance cost of 75,000 ducats exceeds income, creating a realistic scenario where shipbuilding required substantial ongoing investment but provided strategic maritime capabilities. The employment capacity of 40 represents the shipwrights, carpenters, and laborers needed. The construction time of 14 days (1209600000ms) reflects the major industrial project. This building creates a strategic investment in maritime production with appropriate guild and location requirements reflecting the historical importance of shipbuilding to Venice's commercial and naval power, where private shipyards complemented the state-run Arsenal.",
+  "shortDescription": "Facility for construction and repair of maritime vessels, from small boats to trading ships.",
+  "fullDescription": "The backbone of Venice's maritime power, private shipyards construct and maintain the merchant fleet that drives the city's commerce. Featuring slipways for vessel construction, specialized workshops for component fabrication, and direct water access, these industrial facilities require substantial space and resources. While not as large as the state-run Arsenal, private shipyards are vital to maintaining Venice's commercial fleet.",
+  "flavorText": "From oak and pitch and canvas, we conjure vessels that will challenge the Mediterranean and return laden with the world's riches—or consign their investors to bankruptcy.",
+  "constructionCosts": {
+    "ducats": 6000000,
+    "timber": 3480,
+    "bricks": 2320,
+    "stone": 4650,
+    "iron": 1160
+  },
+  "maintenanceCost": 7500,
+  "productionInformation": {
+  "Arti": [
+    {
+      "inputs": {
+        "timber": 15,
+        "rope": 5,
+        "pitch": 3,
+        "sailcloth": 2
+      },
+      "outputs": {
+        "small_boats": 1
+      },
+      "craftMinutes": 360
+    },
+    {
+      "inputs": {
+        "timber": 10,
+        "iron_fittings": 3
+      },
+      "outputs": {
+        "ship_components": 4
+      },
+      "craftMinutes": 240
+    },
+    {
+      "inputs": {
+        "timber": 30,
+        "rope": 10,
+        "pitch": 5,
+        "sailcloth": 5,
+        "iron_fittings": 5
+      },
+      "outputs": {
+        "gondola": 1
+      },
+      "craftMinutes": 600
+    },
+    {
+      "inputs": {
+        "ship_components": 60,
+        "sailcloth": 25,
+        "rope": 40,
+        "iron_fittings": 20
+      },
+      "outputs": {
+        "merchant_galley": 1
+      },
+      "craftMinutes": 2160
+    },
+    {
+      "inputs": {
+        "ship_components": 120,
+        "sailcloth": 50,
+        "rope": 80,
+        "weapons": 30,
+        "iron_fittings": 40
+      },
+      "outputs": {
+        "war_galley": 1
+      },
+      "craftMinutes": 4320
+    }
+  ],
+    "storageCapacity": 200,
+    "stores": [
+      "timber",
+      "rope",
+      "sailcloth",
+      "pitch",
+      "ship_components",
+      "small_boats",
+      "gondola",
+      "merchant_galley",
+      "war_galley",
+      "tools",
+      "weapons"
+    ],
+    "sells": [
+      "small_boats",
+      "gondola",
+      "merchant_galley",
+      "war_galley",
+      "ship_components"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Hammering, sawing, creaking timber, water lapping",
+    "activitySounds": "Workers shouting measurements, pulleys creaking, ship hulls being caulked",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "winter": "Reduced exterior work, focus on interior fittings",
+    "summer": "Peak production season, multiple launches",
+    "stormySeasons": "Additional repair work for damaged vessels"
+  },
+  "aiInteractionPoints": [
+    "Main construction slipway",
+    "Design office",
+    "Component workshops",
+    "Timber selection yard",
+    "Launching platform",
+    "Ship inspection area"
+  ],
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 3,
+  "constructionMinutes": 20160
+}

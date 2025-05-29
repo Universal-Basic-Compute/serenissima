@@ -1,0 +1,15 @@
+{
+  "id": "pine_resin",
+  "name": "Pine Resin",
+  "category": "raw_materials",
+  "subCategory": "forestry",
+  "description": {
+    "short": "Sticky substance harvested from pine trees.",
+    "full": "Viscous, aromatic resin collected from pine trees in mainland forests. Essential raw material for producing pitch used in shipbuilding and waterproofing.",
+    "flavor": "The lifeblood of the forest becomes the lifeblood of our shipsâ€”without this golden sap, Venice's wooden vessels would succumb to the hungry sea."
+  },
+  "importPrice": 420.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": null,
+  "tier": 0
+}

@@ -1,0 +1,402 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43236421348823,
+      "lng": 12.327496056341024
+    },
+    {
+      "lat": 45.43176942182734,
+      "lng": 12.328193430684896
+    },
+    {
+      "lat": 45.43163766333286,
+      "lng": 12.328037862562033
+    },
+    {
+      "lat": 45.43160001799221,
+      "lng": 12.328129057668539
+    },
+    {
+      "lat": 45.431720482993875,
+      "lng": 12.328236346029135
+    },
+    {
+      "lat": 45.43141555546016,
+      "lng": 12.328896169446798
+    },
+    {
+      "lat": 45.43133273535167,
+      "lng": 12.328826432012411
+    },
+    {
+      "lat": 45.4313063834735,
+      "lng": 12.328896169446798
+    },
+    {
+      "lat": 45.431419320007656,
+      "lng": 12.328982000135275
+    },
+    {
+      "lat": 45.43108803886668,
+      "lng": 12.33011389233956
+    },
+    {
+      "lat": 45.430655111717435,
+      "lng": 12.32986712911019
+    },
+    {
+      "lat": 45.43047064609711,
+      "lng": 12.329636459134909
+    },
+    {
+      "lat": 45.42978171814393,
+      "lng": 12.329180483602377
+    },
+    {
+      "lat": 45.42891207577002,
+      "lng": 12.328692321561666
+    },
+    {
+      "lat": 45.4296273670123,
+      "lng": 12.325688247464987
+    },
+    {
+      "lat": 45.43015065328492,
+      "lng": 12.32610130765328
+    },
+    {
+      "lat": 45.43071158066436,
+      "lng": 12.326509003423544
+    },
+    {
+      "lat": 45.43110309714254,
+      "lng": 12.326664571546408
+    },
+    {
+      "lat": 45.4319087090442,
+      "lng": 12.32708299615273
+    },
+    {
+      "lat": 45.432191046942656,
+      "lng": 12.327260021947714
+    }
+  ],
+  "centroid": {
+    "lat": 45.43105829193068,
+    "lng": 12.328124497913217
+  },
+  "historicalName": "Salizada dei Greci",
+  "englishName": "Way of the Greeks",
+  "historicalDescription": "This area was historically known for its Greek immigrant population and the nearby Greek Orthodox church of San Giorgio dei Greci, founded in the late 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 69248.5,
+  "center": {
+    "lat": 45.43030179402832,
+    "lng": 12.327961858759707
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.42909089858059,
+        "lng": 12.327941303037496
+      },
+      "water": {
+        "lat": 45.42891141705956,
+        "lng": 12.32792459052043
+      },
+      "historicalName": "Fondamenta dei Greci",
+      "englishName": "Quay of the Greeks",
+      "historicalDescription": "Named for its proximity to the Greek Orthodox community that settled in this area of Venice in the Renaissance period. The Salizada dei Greci led to the Greek Orthodox church of San Giorgio dei Greci, making this a logical name for a nearby water landing used by members of this important Byzantine-Venetian community.",
+      "id": "canal_45.429091_12.327941"
+    },
+    {
+      "edge": {
+        "lat": 45.429269721391165,
+        "lng": 12.327190284513327
+      },
+      "water": {
+        "lat": 45.42910084497714,
+        "lng": 12.32710207630156
+      },
+      "historicalName": "Riva degli Armeni",
+      "englishName": "Bank of the Armenians",
+      "historicalDescription": "This dock would serve the Armenian merchant community who had a presence near the Greek quarter in Renaissance Venice. Armenian traders were important in Venice's commerce with the East, and would likely have had a designated landing area near their community buildings, not far from Salizada dei Greci.",
+      "id": "canal_45.429270_12.327190"
+    },
+    {
+      "edge": {
+        "lat": 45.42944854420173,
+        "lng": 12.326439265989157
+      },
+      "water": {
+        "lat": 45.42930359418003,
+        "lng": 12.32628751897962
+      },
+      "historicalName": "Fondamenta dei Vetrai",
+      "englishName": "Foundation of the Glassmakers",
+      "historicalDescription": "While most glass production was centered in Murano, some glass merchants and artisans had workshops in the city proper. This dock would have served as a loading point for glass goods or materials being transported to and from the eastern parts of Venice, connecting to the Greek quarter and the broader commercial network of the Serenissima.",
+      "id": "canal_45.429449_12.326439"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.42978171814393,
+        "lng": 12.329180483602377
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878962632",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.42967996938384,
+          "lng": 12.32927032120231
+        },
+        "distance": 13.309840849694638,
+        "id": "7f92a144-989e-4687-bdc2-0237b49314e4",
+        "historicalName": "Ponte dei Greci",
+        "englishName": "Bridge of the Greeks",
+        "historicalDescription": "Named for its proximity to the Salizada dei Greci and the Greek Orthodox community that settled in this area of Venice during the Renaissance. The Greek community established their church, San Giorgio dei Greci, nearby in the 16th century.",
+        "location": {
+          "midpoint": {
+            "lat": 45.429730843763885,
+            "lng": 12.329225402402344
+          }
+        }
+      },
+      "id": "bridge_45.429782_12.329180"
+    },
+    {
+      "edge": {
+        "lat": 45.42934689695697,
+        "lng": 12.328936402582022
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878962632",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.42926246259036,
+          "lng": 12.328987558900923
+        },
+        "distance": 10.202120344800983,
+        "id": "7f92a144-989e-4687-bdc2-0237b49314e4",
+        "historicalName": "Ponte dei Sartori",
+        "englishName": "Bridge of the Tailors",
+        "historicalDescription": "Named after the guild of tailors who had workshops in this area during the Renaissance period. The Venetian textile industry was prominent, and specialized craftsmen like tailors would often cluster in specific neighborhoods.",
+        "location": {
+          "midpoint": {
+            "lat": 45.429304679773665,
+            "lng": 12.328961980741472
+          }
+        }
+      },
+      "id": "bridge_45.429347_12.328936"
+    },
+    {
+      "edge": {
+        "lat": 45.43071158066436,
+        "lng": 12.326509003423544
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879036720",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43068403766406,
+          "lng": 12.326352290443792
+        },
+        "distance": 12.606528745501446,
+        "id": "68ea579a-1936-4fe0-af51-5a18e025f1f8",
+        "historicalName": "Ponte dei Flangini",
+        "englishName": "Bridge of the Flangini",
+        "historicalDescription": "Named after the Flangini family, a prominent Greek-Venetian family who resided near Salizada dei Greci. The family became influential in Venetian society after immigrating from Greece, and Tommaso Flangini founded a college for Greek students in Venice in the 17th century.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43069780916421,
+            "lng": 12.326430646933668
+          }
+        }
+      },
+      "id": "bridge_45.430712_12.326509"
+    },
+    {
+      "edge": {
+        "lat": 45.43110309714254,
+        "lng": 12.326664571546408
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879036720",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43118727188805,
+          "lng": 12.326561502746953
+        },
+        "distance": 12.340653787065564,
+        "id": "68ea579a-1936-4fe0-af51-5a18e025f1f8",
+        "historicalName": "Ponte di San Giorgio",
+        "englishName": "Bridge of Saint George",
+        "historicalDescription": "Named in honor of Saint George, the patron saint of the nearby Greek Orthodox church (San Giorgio dei Greci). This bridge would have served as an important connection for worshippers accessing the church from different parts of the neighborhood.",
+        "location": {
+          "midpoint": {
+            "lat": 45.431145184515294,
+            "lng": 12.32661303714668
+          }
+        }
+      },
+      "id": "bridge_45.431103_12.326665"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.42927269153364,
+      "lng": 12.328151592247343,
+      "streetName": "Calle dei Greci",
+      "streetNameEnglish": "Street of the Greeks",
+      "streetDescription": "A main street near Salizada dei Greci, named after the Greek community that settled in this area of Venice in the 15th century. Many Greek scholars came to Venice following the fall of Constantinople in 1453.",
+      "id": "building_45.429273_12.328152"
+    },
+    {
+      "lat": 45.429809321833,
+      "lng": 12.326295880004611,
+      "streetName": "Fondamenta San Giorgio dei Greci",
+      "streetNameEnglish": "Foundation of St. George of the Greeks",
+      "streetDescription": "Named after the nearby Greek Orthodox church of San Giorgio dei Greci, built between 1539 and 1573 to serve the Greek community. This fondamenta runs alongside a canal near the church.",
+      "id": "building_45.429809_12.326296"
+    },
+    {
+      "lat": 45.42988419875812,
+      "lng": 12.326956475853217,
+      "streetName": "Corte Flangini",
+      "streetNameEnglish": "Flangini Court",
+      "streetDescription": "Named after the prominent Greek-Venetian Flangini family who became wealthy merchants in the 16th century. Tommaso Flangini was a notable patron who funded a Greek college in Venice in 1626.",
+      "id": "building_45.429884_12.326956"
+    },
+    {
+      "lat": 45.42988639810436,
+      "lng": 12.327624718753325,
+      "streetName": "Rio Terà dei Greci",
+      "streetNameEnglish": "Filled Canal of the Greeks",
+      "streetDescription": "A street created by filling in a former canal in the Greek neighborhood. 'Rio Terà' indicates a filled canal, common in Venice as the city evolved over centuries.",
+      "id": "building_45.429886_12.327625"
+    },
+    {
+      "lat": 45.42983073705614,
+      "lng": 12.328319043609003,
+      "streetName": "Calle della Confraternita",
+      "streetNameEnglish": "Street of the Brotherhood",
+      "streetDescription": "Named after the Greek Orthodox Brotherhood (Confraternita Greca) founded in 1498, which served as a religious and cultural organization for the Greek community in Venice.",
+      "id": "building_45.429831_12.328319"
+    },
+    {
+      "lat": 45.43032271127459,
+      "lng": 12.327021683105226,
+      "streetName": "Sottoportego dell'Iconografo",
+      "streetNameEnglish": "Passageway of the Icon Painter",
+      "streetDescription": "Named for the Greek icon painters who worked in this area, continuing the Byzantine tradition of religious art. Venice became a center for Greek artisans after the fall of Constantinople.",
+      "id": "building_45.430323_12.327022"
+    },
+    {
+      "lat": 45.43024924718729,
+      "lng": 12.327577490586942,
+      "streetName": "Calle dei Copisti",
+      "streetNameEnglish": "Street of the Copyists",
+      "streetDescription": "Named for the Greek scholars who worked as copyists and translators of ancient Greek texts during the Renaissance, contributing significantly to the revival of classical learning in Western Europe.",
+      "id": "building_45.430249_12.327577"
+    },
+    {
+      "lat": 45.430290160059975,
+      "lng": 12.328165073102616,
+      "streetName": "Ruga Giustiniani",
+      "streetNameEnglish": "Giustiniani Commercial Street",
+      "streetDescription": "Named after the Giustiniani family who had connections with the Greek community and were involved in trade with the Eastern Mediterranean. 'Ruga' indicates a commercial street lined with shops.",
+      "id": "building_45.430290_12.328165"
+    },
+    {
+      "lat": 45.43019448727839,
+      "lng": 12.328929174472847,
+      "streetName": "Campiello dei Marmorari",
+      "streetNameEnglish": "Small Square of the Marble Workers",
+      "streetDescription": "Named for the marble craftsmen, many of Greek origin, who worked with materials imported from the Eastern Mediterranean and created architectural elements for Venetian palaces and churches.",
+      "id": "building_45.430194_12.328929"
+    },
+    {
+      "lat": 45.430681394740354,
+      "lng": 12.32694562958525,
+      "streetName": "Calle del Grammatico",
+      "streetNameEnglish": "Street of the Grammarian",
+      "streetDescription": "Named for the Greek grammar teachers who taught in Venice, particularly after the establishment of the Greek college. These scholars helped preserve Greek language and literature during the Renaissance.",
+      "id": "building_45.430681_12.326946"
+    },
+    {
+      "lat": 45.43073578119389,
+      "lng": 12.32752058835446,
+      "streetName": "Fondamenta Mavrogordato",
+      "streetNameEnglish": "Foundation of Mavrogordato",
+      "streetDescription": "Named after the Mavrogordato family, prominent Greek merchants who settled in Venice during the 16th century and engaged in trade between Venice and the Ottoman Empire.",
+      "id": "building_45.430736_12.327521"
+    },
+    {
+      "lat": 45.430757644633864,
+      "lng": 12.32837467888178,
+      "streetName": "Calle della Stamperia Greca",
+      "streetNameEnglish": "Street of the Greek Printing Press",
+      "streetDescription": "Named for the Greek printing presses established in this area during the late 15th and early 16th centuries, which published some of the first printed books in Greek and contributed to the spread of Hellenic studies.",
+      "id": "building_45.430758_12.328375"
+    },
+    {
+      "lat": 45.43079434358556,
+      "lng": 12.328979811574133,
+      "streetName": "Corte Basilio",
+      "streetNameEnglish": "Basil's Court",
+      "streetDescription": "Named after Saint Basil, an important saint in the Greek Orthodox tradition. This small courtyard might have contained a shrine dedicated to him or been connected to a Greek family with this name.",
+      "id": "building_45.430794_12.328980"
+    },
+    {
+      "lat": 45.430666587521685,
+      "lng": 12.329493508207348,
+      "streetName": "Salizada dei Mercanti Levantini",
+      "streetNameEnglish": "Paved Street of the Levantine Merchants",
+      "streetDescription": "Named for the merchants from the Levant (Eastern Mediterranean) who conducted business in this area. 'Salizada' indicates it was one of the earliest paved streets in the city.",
+      "id": "building_45.430667_12.329494"
+    },
+    {
+      "lat": 45.43107244200383,
+      "lng": 12.326936983392265,
+      "streetName": "Sottoportego del Filologo",
+      "streetNameEnglish": "Passageway of the Philologist",
+      "streetDescription": "Named in honor of the Greek philologists who worked in Venice during the Renaissance, studying and preserving ancient Greek texts that had been brought from Constantinople.",
+      "id": "building_45.431072_12.326937"
+    },
+    {
+      "lat": 45.431158025218025,
+      "lng": 12.32753014264955,
+      "streetName": "Calle dei Codici",
+      "streetNameEnglish": "Street of the Codices",
+      "streetDescription": "Named for the manuscript dealers who sold Greek codices and manuscripts, many of which had been brought to Venice after the fall of Constantinople and formed the basis for important library collections.",
+      "id": "building_45.431158_12.327530"
+    },
+    {
+      "lat": 45.4310828323555,
+      "lng": 12.328376189944509,
+      "streetName": "Rio Terà della Scuola",
+      "streetNameEnglish": "Filled Canal of the School",
+      "streetDescription": "Named after the Greek school established in the area, where Greek language, literature, and Orthodox theology were taught to the children of the Greek community and to interested Venetians.",
+      "id": "building_45.431083_12.328376"
+    },
+    {
+      "lat": 45.43111089239747,
+      "lng": 12.328996907830883,
+      "streetName": "Calle del Metropolita",
+      "streetNameEnglish": "Street of the Metropolitan",
+      "streetDescription": "Named in reference to visits by Greek Orthodox metropolitan bishops who occasionally traveled to Venice to minister to the Greek community and maintain ecclesiastical connections with the Venetian Greeks.",
+      "id": "building_45.431111_12.328997"
+    },
+    {
+      "lat": 45.43161172618027,
+      "lng": 12.327482596552942,
+      "streetName": "Fondamenta dei Navarchos",
+      "streetNameEnglish": "Foundation of the Ship Captains",
+      "streetDescription": "Named for the Greek ship captains who sailed between Venice and various Greek ports. These mariners often settled in this area when in Venice and contributed to the maritime knowledge of the Republic.",
+      "id": "building_45.431612_12.327483"
+    }
+  ],
+  "id": "polygon-1745878999491"
+}

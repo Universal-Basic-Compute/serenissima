@@ -1,0 +1,138 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.42859438838161,
+      "lng": 12.31885846312231
+    },
+    {
+      "lat": 45.428270620174935,
+      "lng": 12.320403415514889
+    },
+    {
+      "lat": 45.42527379374517,
+      "lng": 12.318718988253536
+    },
+    {
+      "lat": 45.4258686538582,
+      "lng": 12.317313510729733
+    }
+  ],
+  "centroid": {
+    "lat": 45.42700186403998,
+    "lng": 12.318823594405117
+  },
+  "historicalName": "Contrada de la Zudeca",
+  "englishName": "District of Giudecca",
+  "historicalDescription": "In the 15th century, Giudecca was a separate island from the main part of Venice, known for its gardens, vineyards, and convents. It was a quieter, more rural area compared to the dense central sestieri of Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 43063.26,
+  "center": {
+    "lat": 45.42700186403998,
+    "lng": 12.318823594405117
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.42843250427828,
+        "lng": 12.3196309393186
+      },
+      "water": {
+        "lat": 45.42859973105243,
+        "lng": 12.319725309434787
+      },
+      "historicalName": "Fondamenta dei Corameri",
+      "englishName": "Foundation of the Leather Workers",
+      "historicalDescription": "This dock served leather craftsmen workshops in Giudecca. During the Renaissance, Venetian leather production was renowned throughout Europe, and Giudecca housed numerous workshops processing leather imported through Venice's maritime trade routes. The craftsmen here specialized in decorative leather goods, saddles, and luxury items for both local nobles and export.",
+      "id": "canal_45.428433_12.319631"
+    },
+    {
+      "edge": {
+        "lat": 45.42557122380168,
+        "lng": 12.318016249491635
+      },
+      "water": {
+        "lat": 45.42540399760219,
+        "lng": 12.317921879699743
+      },
+      "historicalName": "Riva del Redentore",
+      "englishName": "Bank of the Redeemer",
+      "historicalDescription": "Named after the Church of the Redentore (Redeemer), one of Giudecca's most prominent landmarks. The church was commissioned by the Venetian Senate following the plague of 1575-1576 as a votive offering for the city's deliverance. This dock would have served pilgrims and worshippers arriving by boat to the church, particularly during the annual Festa del Redentore celebration when a temporary bridge of boats connected Giudecca to the main islands.",
+      "id": "canal_45.425571_12.318016"
+    }
+  ],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.42617845315174,
+      "lng": 12.317851755881907,
+      "streetName": "Calle dei Conciapelli",
+      "streetNameEnglish": "Street of the Tanners",
+      "streetDescription": "This street was named after the tanners who operated workshops in the Giudecca area since the 15th century. Leather tanning was an important trade in Venice, and due to the unpleasant smells it produced, tanneries were often located in more peripheral areas like the Giudecca.",
+      "id": "building_45.426178_12.317852"
+    },
+    {
+      "lat": 45.426132799326396,
+      "lng": 12.318536897765485,
+      "streetName": "Fondamenta delle Convertite",
+      "streetNameEnglish": "Foundation of the Converted Women",
+      "streetDescription": "Named after the convent of Santa Maria delle Convertite, established in the 16th century on the Giudecca. This institution housed former prostitutes who had 'converted' to a religious life. The fondamenta (walkway along a canal) would have led to or been near this significant religious establishment.",
+      "id": "building_45.426133_12.318537"
+    },
+    {
+      "lat": 45.42656855897898,
+      "lng": 12.318510062385469,
+      "streetName": "Rio Terà dei Molini",
+      "streetNameEnglish": "Filled Canal of the Mills",
+      "streetDescription": "This filled-in canal (rio terà) was named after the flour mills that operated in this part of the Giudecca. The island's open spaces allowed for the construction of windmills, which were important for flour production in Renaissance Venice.",
+      "id": "building_45.426569_12.318510"
+    },
+    {
+      "lat": 45.42698890467024,
+      "lng": 12.31868437138213,
+      "streetName": "Calle del Cordame",
+      "streetNameEnglish": "Street of the Ropes",
+      "streetDescription": "This street name refers to the rope-making industry that flourished in the Giudecca. Rope makers (corderi) needed long, straight spaces to twist their hemp into ropes, and the more spacious Giudecca was ideal for this maritime industry that was essential to Venice's shipbuilding and naval power.",
+      "id": "building_45.426989_12.318684"
+    },
+    {
+      "lat": 45.42715419105841,
+      "lng": 12.319228603049517,
+      "streetName": "Salizada dei Ebrei",
+      "streetNameEnglish": "Paved Street of the Jews",
+      "streetDescription": "This salizada (paved street) reflects the historical connection between the Giudecca and Jewish residents. Though the name 'Giudecca' predates the Jewish ghetto in Venice, some Jewish families did live in this area before the establishment of the Venetian Ghetto in 1516.",
+      "id": "building_45.427154_12.319229"
+    },
+    {
+      "lat": 45.42751291585992,
+      "lng": 12.31853582668181,
+      "streetName": "Sottoportego dei Cantieri",
+      "streetNameEnglish": "Passageway of the Shipyards",
+      "streetDescription": "This covered passageway (sottoportego) was named for the small shipyards or boat repair facilities that existed along the Giudecca's shores. The island's location made it suitable for maritime activities, including small-scale shipbuilding and repairs.",
+      "id": "building_45.427513_12.318536"
+    },
+    {
+      "lat": 45.427454663254146,
+      "lng": 12.31926445024411,
+      "streetName": "Fondamenta del Redentore",
+      "streetNameEnglish": "Foundation of the Redeemer",
+      "streetDescription": "Named after the famous Chiesa del Redentore (Church of the Redeemer), built on the Giudecca as a votive church to thank God for the end of the 1575-1576 plague. Designed by Palladio and completed in 1592, the church is one of the most significant landmarks of the Giudecca.",
+      "id": "building_45.427455_12.319264"
+    },
+    {
+      "lat": 45.427913352569625,
+      "lng": 12.319332145337539,
+      "streetName": "Calle delle Tintorie",
+      "streetNameEnglish": "Street of the Dye-works",
+      "streetDescription": "This street was named for the dyeing workshops established in the Giudecca in the Renaissance period. Like tanning, dyeing cloth produced strong odors and pollution, so these workshops were relegated to less densely populated areas like the Giudecca, away from the city center.",
+      "id": "building_45.427913_12.319332"
+    },
+    {
+      "lat": 45.42797671239383,
+      "lng": 12.319996970434351,
+      "streetName": "Rio Terà Palada",
+      "streetNameEnglish": "Filled Canal of the Palisade",
+      "streetDescription": "This filled-in canal got its name from the wooden palisades ('palada' in Venetian dialect) that were constructed along parts of the Giudecca's shoreline. These wooden barriers helped protect the island from erosion and provided mooring points for boats serving the various industries established there.",
+      "id": "building_45.427977_12.319997"
+    }
+  ]
+}

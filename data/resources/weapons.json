@@ -1,0 +1,67 @@
+{
+  "id": "weapons",
+  "name": "Weapons",
+  "category": "finished_goods",
+  "subCategory": "military_equipment",
+  "description": "Crafted armaments for military use, personal defense, and ceremonial purposes. Venice produces both standard military equipment and finely crafted pieces for wealthy clients.",
+  "varieties": [
+    {
+      "type": "swords",
+      "productionDifficulty": "high",
+      "popularity": "high",
+      "valueMultiplier": 1.2,
+      "primaryUse": "naval_officers_nobles",
+      "modelVariant": "models/resources/weapons_sword.glb"
+    },
+    {
+      "type": "pikes",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 0.8,
+      "primaryUse": "infantry",
+      "modelVariant": "models/resources/weapons_pike.glb"
+    },
+    {
+      "type": "crossbows",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1.3,
+      "primaryUse": "ship_defense",
+      "modelVariant": "models/resources/weapons_crossbow.glb"
+    },
+    {
+      "type": "naval_cutlass",
+      "productionDifficulty": "medium",
+      "popularity": "very_high",
+      "valueMultiplier": 1,
+      "primaryUse": "ship_crews",
+      "modelVariant": "models/resources/weapons_cutlass.glb"
+    },
+    {
+      "type": "ceremonial_weapons",
+      "productionDifficulty": "very_high",
+      "popularity": "low",
+      "valueMultiplier": 2.5,
+      "primaryUse": "display_ceremony",
+      "modelVariant": "models/resources/weapons_ceremonial.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
+      "Arsenal Smiths",
+      "Venetian Weapons Guild"
+    ],
+    "historicalSignificance": "While Venice was primarily a naval and commercial power rather than a land military force, its weapons production was significant, particularly for naval use. The Arsenal produced standardized weapons for the Republic's ships and soldiers, while private smiths created more specialized and decorative pieces. Venetian weapons were known for their quality and practicality, with designs often adapted for naval combat.",
+    "historicalContracts": [
+      "Venetian navy",
+      "Merchant vessels",
+      "Mercenary companies",
+      "Foreign militaries"
+    ]
+  },
+  "importPrice": 2534.4,
+  "lifetimeHours": null,
+  "consumptionHours": 1168,
+  "tier": 3
+}

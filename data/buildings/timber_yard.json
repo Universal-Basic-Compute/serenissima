@@ -1,0 +1,54 @@
+{
+  "name": "Timber Yard",
+  "pointType": "canal",
+  "category": "business",
+  "subCategory": "storage",
+  "size": 2,
+  "unlockCondition": "12,000,000 ducats total wealth, water access",
+  "canImport": true,
+  "calculationsAnalysis": "The Timber Yard represents essential infrastructure for Venice's shipbuilding industry. The construction cost of 3,000,000 ducats reflects the extensive waterfront facilities required, while the income of 35,000 ducats (1.17% return) represents the handling fees for essential construction materials. The maintenance cost of 20,000 ducats (57% of income) balances profitability with the reality of maintaining extensive outdoor facilities. The employment capacity of 25 represents the specialized staff needed to handle, season, and process timber. The construction time of 8 days (691200000ms) represents a significant industrial construction project.",
+  "shortDescription": "Waterfront facility for receiving, processing, and distributing imported timber for shipbuilding and construction.",
+  "fullDescription": "Critical to Venice's shipbuilding industry and construction sector, these extensive waterfront facilities handle the massive timber imports required by a city built on water. Featuring water soaking basins for seasoning wood, specialized cutting areas, and extensive storage for different timber varieties, these yards employ wood experts who can assess quality and appropriateness for different applications. The direct canal access allows for efficient unloading from timber transport ships and loading onto smaller boats for distribution throughout the city.",
+  "flavorText": "Venice stands on oak and pine, sails on fir and spruce, and profits from them all—for a city without forests has made timber its foundation.",
+  "constructionCosts": {
+    "ducats": 3000000,
+    "timber": 2480,
+    "stone": 3100,
+    "iron": 990
+  },
+  "maintenanceCost": 2000,
+  "soundDesign": {
+    "ambientSound": "Timber being moved, sawing, water soaking",
+    "activitySounds": "Wood quality assessment, cutting operations, loading onto boats",
+    "musicTheme": "Legno e Acqua"
+  },
+  "seasonalEffects": {
+    "shipbuilding season": "Increased throughput and processing",
+    "winter": "Reduced cutting operations, focus on seasoning",
+    "spring floods": "Strategic stockpiling of alpine timber arrivals"
+  },
+  "aiInteractionPoints": [
+    "Timber receiving dock",
+    "Seasoning basin",
+    "Cutting area",
+    "Quality assessment station",
+    "Distribution loading area",
+    "Timber storage yard"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 600,
+    "stores": [
+      "timber",
+      "tools",
+      "ship_components",
+      "rope",
+      "small_boats"
+    ],
+    "sells": []
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 11520
+}

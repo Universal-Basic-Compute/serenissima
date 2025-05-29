@@ -1,0 +1,9 @@
+{
+  "FirstName": "Matteo",
+  "LastName": "Foscari",
+  "Username": "gondola_assistant",
+  "Personality": "Matteo is a tireless gondola assistant who helps load passengers and cargo, maintaining the boats, and occasionally rowing when needed. His keen eye for water conditions and intimate knowledge of Venice's smaller canals make him invaluable to gondoliers. Though perpetually damp and often exhausted, he takes pride in his reputation for reliability and discretion, quietly observing the comings and goings of Venice's elite while dreaming of one day owning his own gondola.",
+  "CorePersonality": ["Observant", "Ambitious", "Discreet"],
+  "ImagePrompt": "A lean, wiry Venetian man in his early 30s with sun-darkened skin and strong forearms from years of rowing and dock work. He wears simple, practical clothing - dark woolen breeches often patched at the knees, a faded blue cotton shirt with rolled sleeves, and a worn leather vest. His dark hair is tied back with a piece of cord, and he has a short beard that helps hide a small scar on his chin. He stands barefoot on a wooden dock beside a gondola, one hand resting on the boat's ferro (ornamental prow), with coiled ropes slung over his shoulder. His expression is watchful but respectful, with the weathered look of someone who works outdoors in all conditions. The scene is lit with the golden light of late afternoon, reflecting off the canal water, with the muted colors appropriate to his working-class status in Renaissance Venice.",
+  "Ducats": 15750
+}

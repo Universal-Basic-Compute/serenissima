@@ -1,0 +1,117 @@
+# Game Interface for Serenissima AI Player
+
+This document outlines how the AI player interfaces with the Serenissima game systems, enabling effective participation in the game world.
+
+## API Interaction Framework
+
+### Action Execution
+- **Trade Actions**:
+  - Buy/Sell Commodities: Parameters for market transactions
+    - Required parameters: item_id, quantity, price_limit, market_id
+    - Optional parameters: expiration_time, condition_triggers, partial_fill
+    - Response handling: transaction_id, execution_status, fill_quantity
+    - Error patterns: insufficient_funds, item_unavailable, price_outside_limit
+  
+  - Place Orders: Creating standing buy/sell orders
+    - Required parameters: order_type, item_id, quantity, price, duration
+    - Optional parameters: visibility, minimum_fill, cancel_conditions
+    - Response handling: order_id, queue_position, estimated_execution
+    - Error patterns: invalid_price_format, quantity_below_minimum, market_closed
+  
+  - Negotiate Deals: Direct player-to-player transactions
+    - Required parameters: counterparty_id, offer_items, request_items
+    - Optional parameters: expiration, conditions, message
+    - Response handling: negotiation_id, counterparty_response, status_updates
+    - Error patterns: counterparty_unavailable, offer_rejected, item_no_longer_available
+  
+  - Cancel Transactions: Withdrawing pending orders
+    - Required parameters: transaction_id or order_id
+    - Optional parameters: cancellation_reason, partial_cancellation
+    - Response handling: cancellation_confirmation, remaining_active_orders
+    - Error patterns: already_executed, cancellation_fee, partial_execution
+
+- **Property Actions**:
+  - Purchase Property: Acquiring new buildings or land
+    - Required parameters: property_id, offer_price, payment_method
+    - Optional parameters: contingencies, inspection_period, financing_terms
+    - Response handling: purchase_status, ownership_transfer_time, deed_information
+    - Error patterns: outbid, property_unavailable, insufficient_social_status
+  
+  - Develop Property: Improving existing holdings
+    - Required parameters: property_id, development_type, investment_amount
+    - Optional parameters: contractor_id, quality_level, completion_deadline
+    - Response handling: project_id, estimated_completion, progress_updates
+    - Error patterns: permit_denied, resource_shortage, contractor_unavailable
+  
+  - Lease Property: Renting to other players
+    - Required parameters: property_id, lease_terms, rental_rate, duration
+    - Optional parameters: tenant_requirements, usage_restrictions, renewal_options
+    - Response handling: lease_id, tenant_applications, contract_status
+    - Error patterns: no_interested_tenants, terms_rejected, property_unsuitable
+  
+  - Sell Property: Liquidating real estate assets
+    - Required parameters: property_id, asking_price, listing_duration
+    - Optional parameters: private_listing, minimum_acceptable_price, included_fixtures
+    - Response handling: listing_id, viewer_statistics, offer_notifications
+    - Error patterns: market_illiquidity, price_too_high, title_dispute
+
+- **Business Operations**:
+  - Start Production: Initiating manufacturing processes
+    - Required parameters: workshop_id, product_id, quantity, quality_level
+    - Optional parameters: resource_allocation, priority_level, batch_identifiers
+    - Response handling: production_id, estimated_completion, resource_consumption
+    - Error patterns: insufficient_materials, skill_shortage, equipment_failure
+  
+  - Hire Workers: Adding labor to businesses
+    - Required parameters: position_type, quantity, wage_offer, contract_duration
+    - Optional parameters: skill_requirements, guild_affiliation, working_conditions
+    - Response handling: hiring_status, applicant_quality, staffing_level_updates
+    - Error patterns: labor_shortage, guild_objection, wage_too_low
+  
+  - Upgrade Facilities: Improving production capabilities
+    - Required parameters: facility_id, upgrade_type, investment_amount
+    - Optional parameters: contractor_id, phased_implementation, technology_source
+    - Response handling: upgrade_project_id, capability_improvement_estimates, timeline
+    - Error patterns: space_constraints, technology_unavailable, regulatory_issues
+  
+  - Adjust Output: Changing production parameters
+    - Required parameters: workshop_id, adjustment_type, new_parameters
+    - Optional parameters: transition_period, quality_control_measures, priority_shifts
+    - Response handling: adjustment_confirmation, efficiency_impact, quality_impact
+    - Error patterns: process_inflexibility, worker_resistance, equipment_limitations
+
+- **Social Actions**:
+  - Send Messages: Communicating with other players
+    - Required parameters: recipient_id, message_content, formality_level
+    - Optional parameters: attachments, privacy_level, response_options
+    - Response handling: delivery_confirmation, read_receipts, response_notifications
+    - Error patterns: recipient_unavailable, message_rejected, inappropriate_formality
+  
+  - Form Agreements: Creating formal partnerships
+    - Required parameters: partner_id, agreement_type, terms, duration
+    - Optional parameters: conditions, exit_clauses, profit_sharing_structure
+    - Response handling: agreement_id, ratification_status, contract_documentation
+    - Error patterns: terms_rejected, partner_reputation_insufficient, guild_disapproval
+  
+  - Join Organizations: Participating in guilds or factions
+    - Required parameters: organization_id, membership_level, application_details
+    - Optional parameters: sponsor_ids, qualification_evidence, commitment_pledges
+    - Response handling: application_status, membership_requirements, initiation_details
+    - Error patterns: application_rejected, prerequisites_unmet, competing_affiliations
+  
+  - Host Events: Creating social gatherings
+    - Required parameters: event_type, location_id, date_time, guest_list
+    - Optional parameters: theme, refreshments, entertainment, purpose
+    - Response handling: event_id, rsvp_tracking, reputation_impact_estimates
+    - Error patterns: venue_unavailable, date_conflict, insufficient_status
+
+### Information Retrieval
+- **Market Data**:
+  - Price Queries: Current and historical pricing
+    - Request parameters: item_id, market_id, time_period, data_granularity
+    - Response format: time_series_data, statistical_summary, comparison_metrics
+    - Caching strategy: Short-term cache (1 hour) for current prices, longer (1 day) for historical
+    - Update frequency: Real-time for active trading items, hourly for general market
+  
+  - Volume Information: Trading activity levels
+    - Request parameters: item_i

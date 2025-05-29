@@ -1,0 +1,58 @@
+{
+  "name": "Textile Import House",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "storage",
+  "size": 2,
+  "unlockCondition": "20,000,000 ducats total wealth, Cloth Guild membership",
+  "canImport": true,
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Textile Import House represents specialized infrastructure for high-value fabric trade. The construction cost of 4,000,000 ducats reflects the specialized storage and display facilities required, while the income of 50,000 ducats (1.25% return) represents the premium handling fees for valuable textiles. The maintenance cost of 30,000 ducats (60% of income) balances profitability with the reality of maintaining specialized climate-controlled storage. The employment capacity of 25 represents the specialized staff needed to handle, assess, and market valuable fabrics. The construction time of 9 days (777600000ms) represents a significant specialized construction project.",
+  "shortDescription": "Specialized facility for importing, storing, and trading fine textiles from around the world.",
+  "fullDescription": "Supporting Venice's renowned textile industry, these specialized facilities handle imported fabrics from across Europe, North Africa, and Asia. Featuring climate-controlled storage to prevent damage from humidity, specialized display areas with optimal lighting, and secure vaults for the most valuable silks and brocades, these buildings employ fabric experts who can assess quality and authenticity. The substantial security measures reflect the extraordinary value of fine textiles, which often represented significant wealth in Renaissance society.",
+  "flavorText": "Between these walls lie the dreams of a thousand weavers, the heritage of ancient traditions, and the future of Venetian fashion—all measured by the yard and valued by the ounce.",
+  "constructionCosts": {
+    "ducats": 4000000,
+    "timber": 1110,
+    "bricks": 1950,
+    "stone": 1390,
+    "glass": 450,
+    "marble": 170
+  },
+  "maintenanceCost": 3000,
+  "soundDesign": {
+    "ambientSound": "Fabric being unfolded, quality discussions, careful measuring",
+    "activitySounds": "Textile bales being moved, cutting samples, merchant negotiations",
+    "musicTheme": "Tessuti Preziosi"
+  },
+  "seasonalEffects": {
+    "humidity changes": "Climate control systems adjusted",
+    "fashion seasons": "Display areas reconfigured for seasonal fabrics",
+    "trade fairs": "Special exhibitions of newest imports"
+  },
+  "aiInteractionPoints": [
+    "Fabric display area",
+    "Climate-controlled storage",
+    "Quality assessment station",
+    "Merchant negotiation room",
+    "Secure vault for precious textiles",
+    "Sample cutting area"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 400,
+    "stores": [
+      "raw_silk",
+      "dyestuffs",
+      "silk_fabric",
+      "dyed_textiles",
+      "gold",
+      "luxury_silk_garments"
+    ],
+    "sells": []
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 12960
+}

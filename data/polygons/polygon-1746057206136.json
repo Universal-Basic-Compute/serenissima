@@ -1,0 +1,1060 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43553054318185,
+      "lng": 12.350646322843856
+    },
+    {
+      "lat": 45.43535738635173,
+      "lng": 12.351429527876205
+    },
+    {
+      "lat": 45.43573381356535,
+      "lng": 12.351740664121932
+    },
+    {
+      "lat": 45.43558324298124,
+      "lng": 12.352330750105208
+    },
+    {
+      "lat": 45.43765355329653,
+      "lng": 12.35353237974388
+    },
+    {
+      "lat": 45.43648666045963,
+      "lng": 12.359347408888167
+    },
+    {
+      "lat": 45.43717174240478,
+      "lng": 12.360506123182601
+    },
+    {
+      "lat": 45.43833109290262,
+      "lng": 12.35930449354393
+    },
+    {
+      "lat": 45.43845154353642,
+      "lng": 12.359347408888167
+    },
+    {
+      "lat": 45.43845907169251,
+      "lng": 12.359508341429061
+    },
+    {
+      "lat": 45.43734489366758,
+      "lng": 12.36079580175621
+    },
+    {
+      "lat": 45.43801490876555,
+      "lng": 12.36202961790306
+    },
+    {
+      "lat": 45.4381654728613,
+      "lng": 12.363209789869613
+    },
+    {
+      "lat": 45.4386021064671,
+      "lng": 12.363220518705672
+    },
+    {
+      "lat": 45.438556937630075,
+      "lng": 12.363724774000472
+    },
+    {
+      "lat": 45.44037119080859,
+      "lng": 12.364625996229476
+    },
+    {
+      "lat": 45.44045399765289,
+      "lng": 12.364540165541
+    },
+    {
+      "lat": 45.4404690534297,
+      "lng": 12.364400690672225
+    },
+    {
+      "lat": 45.44042388608721,
+      "lng": 12.364304131147689
+    },
+    {
+      "lat": 45.44030343966379,
+      "lng": 12.36426121580345
+    },
+    {
+      "lat": 45.4401754650572,
+      "lng": 12.364357775327987
+    },
+    {
+      "lat": 45.43871502840147,
+      "lng": 12.363671129820174
+    },
+    {
+      "lat": 45.43876019711193,
+      "lng": 12.363306349394149
+    },
+    {
+      "lat": 45.439738843626586,
+      "lng": 12.363231247541732
+    },
+    {
+      "lat": 45.44081533518755,
+      "lng": 12.362351482984847
+    },
+    {
+      "lat": 45.440574443754905,
+      "lng": 12.360366648313827
+    },
+    {
+      "lat": 45.43999479453019,
+      "lng": 12.35901481497032
+    },
+    {
+      "lat": 45.438699972156606,
+      "lng": 12.356869047758407
+    },
+    {
+      "lat": 45.43854188134303,
+      "lng": 12.356826132414168
+    },
+    {
+      "lat": 45.43811277547346,
+      "lng": 12.354315584776229
+    },
+    {
+      "lat": 45.43860963460309,
+      "lng": 12.351483172056502
+    },
+    {
+      "lat": 45.43854188134303,
+      "lng": 12.351450985548324
+    },
+    {
+      "lat": 45.43834614924592,
+      "lng": 12.352105444547957
+    },
+    {
+      "lat": 45.43723949731003,
+      "lng": 12.35152608740074
+    },
+    {
+      "lat": 45.43715668574812,
+      "lng": 12.35177285063011
+    },
+    {
+      "lat": 45.43647913204042,
+      "lng": 12.351408070204085
+    },
+    {
+      "lat": 45.4365995866275,
+      "lng": 12.35102183210594
+    },
+    {
+      "lat": 45.43650171729506,
+      "lng": 12.351032560942
+    },
+    {
+      "lat": 45.43645654677669,
+      "lng": 12.351118391630477
+    },
+    {
+      "lat": 45.43613282367028,
+      "lng": 12.350968187925643
+    },
+    {
+      "lat": 45.43603495352832,
+      "lng": 12.351257866499251
+    },
+    {
+      "lat": 45.43592955472409,
+      "lng": 12.351204222318954
+    },
+    {
+      "lat": 45.435997311120836,
+      "lng": 12.350925272581405
+    }
+  ],
+  "centroid": {
+    "lat": 45.438037645304256,
+    "lng": 12.35731142511499
+  },
+  "historicalName": "Calle de la Madonna",
+  "englishName": "Alley of the Madonna",
+  "historicalDescription": "This narrow alley in the Castello sestiere was known for its proximity to the Chiesa della Madonna della Fava church. The area was a quiet residential district populated by working-class Venetians.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 227020.48,
+  "center": {
+    "lat": 45.43779840481383,
+    "lng": 12.357360650942573
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43739424377722,
+        "lng": 12.35482460844261
+      },
+      "water": {
+        "lat": 45.43733201930859,
+        "lng": 12.354584104123761
+      },
+      "historicalName": "Fondamenta della Madonna",
+      "englishName": "Madonna's Foundation",
+      "historicalDescription": "Named after the nearby church dedicated to the Virgin Mary in Calle de la Madonna. This dock served as a primary entry point for pilgrims visiting the sacred site during the Renaissance period.",
+      "id": "canal_45.437394_12.354825"
+    },
+    {
+      "edge": {
+        "lat": 45.43726458901756,
+        "lng": 12.355470722791976
+      },
+      "water": {
+        "lat": 45.43717221654508,
+        "lng": 12.355250777326681
+      },
+      "historicalName": "Riva dei Battiloro",
+      "englishName": "Gold Beaters' Shore",
+      "historicalDescription": "This landing was frequented by gold beaters (battiloro) who hammered gold into thin sheets for use in artwork and gilding throughout Venice. Their workshops were located near Calle de la Madonna.",
+      "id": "canal_45.437265_12.355471"
+    },
+    {
+      "edge": {
+        "lat": 45.437134934257905,
+        "lng": 12.356116837141341
+      },
+      "water": {
+        "lat": 45.437003130398466,
+        "lng": 12.35594241664876
+      },
+      "historicalName": "Fondamenta dei Cedristi",
+      "englishName": "Foundation of the Citron Merchants",
+      "historicalDescription": "Named for merchants who specialized in importing citrons (cedri) used in religious ceremonies by the Jewish community and for medicinal purposes. The dock was a key arrival point for these exotic fruits.",
+      "id": "canal_45.437135_12.356117"
+    },
+    {
+      "edge": {
+        "lat": 45.43700527949825,
+        "lng": 12.356762951490706
+      },
+      "water": {
+        "lat": 45.436836745200885,
+        "lng": 12.356673412863646
+      },
+      "historicalName": "Riva dei Santissimi",
+      "englishName": "Shore of the Most Holy",
+      "historicalDescription": "A dock used primarily for religious processions related to the Madonna worship. Religious relics would arrive here before being taken to the nearby church during feast days.",
+      "id": "canal_45.437005_12.356763"
+    },
+    {
+      "edge": {
+        "lat": 45.4368756247386,
+        "lng": 12.357409065840072
+      },
+      "water": {
+        "lat": 45.43669607223906,
+        "lng": 12.3574241530397
+      },
+      "historicalName": "Fondamenta dei Candelieri",
+      "englishName": "Candlemakers' Foundation",
+      "historicalDescription": "Named for the guild of candlemakers who supplied the numerous churches in Venice, including the Madonna's shrine in Calle de la Madonna. Beeswax and other materials arrived at this dock.",
+      "id": "canal_45.436876_12.357409"
+    },
+    {
+      "edge": {
+        "lat": 45.436745969978936,
+        "lng": 12.358055180189437
+      },
+      "water": {
+        "lat": 45.43657920328853,
+        "lng": 12.358151205537146
+      },
+      "historicalName": "Riva della Consorteria",
+      "englishName": "Shore of the Brotherhood",
+      "historicalDescription": "Used by a religious brotherhood dedicated to the Madonna that maintained the shrines and organized processions in her honor. Their meeting hall was located near this landing.",
+      "id": "canal_45.436746_12.358055"
+    },
+    {
+      "edge": {
+        "lat": 45.43661631521928,
+        "lng": 12.358701294538802
+      },
+      "water": {
+        "lat": 45.436468006581066,
+        "lng": 12.358846320415427
+      },
+      "historicalName": "Fondamenta degli Icondotti",
+      "englishName": "Foundation of the Icon Carriers",
+      "historicalDescription": "Named for craftsmen who transported and installed sacred icons, many depicting the Madonna, to churches and private chapels throughout Venice.",
+      "id": "canal_45.436616_12.358701"
+    },
+    {
+      "edge": {
+        "lat": 45.43648666045963,
+        "lng": 12.359347408888167
+      },
+      "water": {
+        "lat": 45.436354365983455,
+        "lng": 12.35952107235606
+      },
+      "historicalName": "Riva dei Votivi",
+      "englishName": "Shore of the Votive Offerings",
+      "historicalDescription": "Where pilgrims would disembark to bring votive offerings to the Madonna shrine, particularly during times of plague or hardship when Venetians sought divine protection.",
+      "id": "canal_45.436487_12.359347"
+    },
+    {
+      "edge": {
+        "lat": 45.436829201432204,
+        "lng": 12.359926766035384
+      },
+      "water": {
+        "lat": 45.436730281819514,
+        "lng": 12.360140850046138
+      },
+      "historicalName": "Fondamenta dei Tiepolo",
+      "englishName": "Tiepolo's Foundation",
+      "historicalDescription": "Named after the prominent Tiepolo family who had a palazzo near Calle de la Madonna and financially supported the local religious institutions during the Renaissance.",
+      "id": "canal_45.436829_12.359927"
+    },
+    {
+      "edge": {
+        "lat": 45.43767990121657,
+        "lng": 12.361412709829635
+      },
+      "water": {
+        "lat": 45.43765771276611,
+        "lng": 12.361667084830792
+      },
+      "historicalName": "Riva delle Processioni",
+      "englishName": "Shore of the Processions",
+      "historicalDescription": "The starting point for religious processions that would wind through the city during feast days related to the Madonna. Decorated boats would dock here before the ceremonies began.",
+      "id": "canal_45.437680_12.361413"
+    },
+    {
+      "edge": {
+        "lat": 45.43801490876555,
+        "lng": 12.36202961790306
+      },
+      "water": {
+        "lat": 45.438013673546045,
+        "lng": 12.36228594556383
+      },
+      "historicalName": "Fondamenta dei Paramenti",
+      "englishName": "Foundation of the Vestments",
+      "historicalDescription": "Named for the workshops of ecclesiastical vestment makers whose elaborate creations adorned priests during services at the Madonna shrine and other churches.",
+      "id": "canal_45.438015_12.362030"
+    },
+    {
+      "edge": {
+        "lat": 45.440735038043336,
+        "lng": 12.36168987142784
+      },
+      "water": {
+        "lat": 45.440853709134,
+        "lng": 12.361882500032422
+      },
+      "historicalName": "Riva delle Grazie",
+      "englishName": "Shore of the Graces",
+      "historicalDescription": "Named for the many 'grazie' (miracles or divine favors) attributed to the Madonna in this area. Pilgrims would arrive seeking healing or blessings.",
+      "id": "canal_45.440735_12.361690"
+    },
+    {
+      "edge": {
+        "lat": 45.44065474089912,
+        "lng": 12.361028259870833
+      },
+      "water": {
+        "lat": 45.44078214613979,
+        "lng": 12.361209202526314
+      },
+      "historicalName": "Fondamenta degli Ex-Voto",
+      "englishName": "Foundation of the Votive Offerings",
+      "historicalDescription": "Where craftsmen specialized in creating ex-voto offerings (silver miniatures representing healed body parts) would have their workshops. These were offered to the Madonna by those who believed they were healed by her intercession.",
+      "id": "canal_45.440655_12.361028"
+    },
+    {
+      "edge": {
+        "lat": 45.440574443754905,
+        "lng": 12.360366648313827
+      },
+      "water": {
+        "lat": 45.44071182392909,
+        "lng": 12.360532103750437
+      },
+      "historicalName": "Riva dei Coristi",
+      "englishName": "Shore of the Choir Singers",
+      "historicalDescription": "Where choir members would arrive for special services at the Madonna shrine, particularly during important religious festivals when elaborate musical performances were staged.",
+      "id": "canal_45.440574_12.360367"
+    },
+    {
+      "edge": {
+        "lat": 45.440284619142545,
+        "lng": 12.359690731642074
+      },
+      "water": {
+        "lat": 45.44042899493918,
+        "lng": 12.359843610269067
+      },
+      "historicalName": "Fondamenta delle Reliquie",
+      "englishName": "Foundation of the Relics",
+      "historicalDescription": "A secure landing point where religious relics would arrive before being installed in the Madonna shrine or nearby churches. Guarded closely during transport to prevent theft of these precious items.",
+      "id": "canal_45.440285_12.359691"
+    },
+    {
+      "edge": {
+        "lat": 45.43999479453019,
+        "lng": 12.35901481497032
+      },
+      "water": {
+        "lat": 45.4401482981473,
+        "lng": 12.35914841566907
+      },
+      "historicalName": "Riva dei Pellegrini Mariani",
+      "englishName": "Shore of the Marian Pilgrims",
+      "historicalDescription": "The primary landing point for pilgrims specifically coming to worship at the Madonna shrine. During certain feast days, thousands would arrive by boat to this particular dock.",
+      "id": "canal_45.439995_12.359015"
+    },
+    {
+      "edge": {
+        "lat": 45.4396710889368,
+        "lng": 12.358478373167342
+      },
+      "water": {
+        "lat": 45.43983188207142,
+        "lng": 12.358593245349972
+      },
+      "historicalName": "Fondamenta dell'Annunciazione",
+      "englishName": "Foundation of the Annunciation",
+      "historicalDescription": "Named for the Biblical Annunciation to Mary, this dock was especially active during the feast day of the Annunciation (March 25), which was also the traditional Venetian New Year.",
+      "id": "canal_45.439671_12.358478"
+    },
+    {
+      "edge": {
+        "lat": 45.4393473833434,
+        "lng": 12.357941931364364
+      },
+      "water": {
+        "lat": 45.43951778872792,
+        "lng": 12.358023964302747
+      },
+      "historicalName": "Riva della Devozione",
+      "englishName": "Shore of Devotion",
+      "historicalDescription": "A landing point frequented by the most devout worshippers of the Madonna, and a gathering place for prayer groups before they proceeded to the shrine in Calle de la Madonna.",
+      "id": "canal_45.439347_12.357942"
+    },
+    {
+      "edge": {
+        "lat": 45.43902367775,
+        "lng": 12.357405489561385
+      },
+      "water": {
+        "lat": 45.439203140467185,
+        "lng": 12.357422609749685
+      },
+      "historicalName": "Fondamenta dei Ceri",
+      "englishName": "Foundation of the Votive Candles",
+      "historicalDescription": "Where large ceremonial candles were unloaded for use in Madonna processions and ceremonies. These enormous candles were often decorated with gold leaf and carried in religious processions.",
+      "id": "canal_45.439024_12.357405"
+    },
+    {
+      "edge": {
+        "lat": 45.43854188134303,
+        "lng": 12.356826132414168
+      },
+      "water": {
+        "lat": 45.4386909397888,
+        "lng": 12.35668267385475
+      },
+      "historicalName": "Riva del Rosario",
+      "englishName": "Shore of the Rosary",
+      "historicalDescription": "Named for the rosary beads used in Marian devotion. Craftsmen making rosaries had workshops nearby, and the dock was a gathering point for rosary prayer groups before proceeding to the Madonna shrine.",
+      "id": "canal_45.438542_12.356826"
+    },
+    {
+      "edge": {
+        "lat": 45.43843460487564,
+        "lng": 12.356198495504684
+      },
+      "water": {
+        "lat": 45.43851610863828,
+        "lng": 12.35596998873135
+      },
+      "historicalName": "Fondamenta degli Incoronati",
+      "englishName": "Foundation of the Crowned Ones",
+      "historicalDescription": "Named for the tradition of ceremonially crowning statues of the Madonna. The dock would be elaborately decorated during these special ceremonies that typically occurred once annually.",
+      "id": "canal_45.438435_12.356198"
+    },
+    {
+      "edge": {
+        "lat": 45.43832732840825,
+        "lng": 12.355570858595199
+      },
+      "water": {
+        "lat": 45.43836883856087,
+        "lng": 12.355321444042245
+      },
+      "historicalName": "Riva dei Ceristi",
+      "englishName": "Shore of the Wax Workers",
+      "historicalDescription": "Used by artisans who crafted elaborate wax figurines and decorations for the Madonna shrine and related religious ceremonies. Wax was an important material in Renaissance Venetian religious practice.",
+      "id": "canal_45.438327_12.355571"
+    },
+    {
+      "edge": {
+        "lat": 45.43822005194085,
+        "lng": 12.354943221685714
+      },
+      "water": {
+        "lat": 45.43823967773658,
+        "lng": 12.35468841803596
+      },
+      "historicalName": "Fondamenta della Purificazione",
+      "englishName": "Foundation of the Purification",
+      "historicalDescription": "Named for the feast of the Purification of the Virgin (Candlemas), this dock was central to the February 2nd celebrations when candles were blessed and distributed to the faithful who arrived by boat.",
+      "id": "canal_45.438220_12.354943"
+    }
+  ],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.43777669005638,
+      "lng": 12.351859684619345,
+      "streetName": "Calle della Madonna Antica",
+      "streetNameEnglish": "Street of the Ancient Madonna",
+      "streetDescription": "Named after an ancient shrine to the Madonna that predated the larger church nearby, this street was known for housing the oldest Marian icon in the district, brought from Byzantium in the 13th century.",
+      "id": "building_45.437777_12.351860"
+    },
+    {
+      "lat": 45.4362439328198,
+      "lng": 12.351286325635577,
+      "streetName": "Rio Terà della Vergine",
+      "streetNameEnglish": "Filled Canal of the Virgin",
+      "streetDescription": "Originally a small canal that was filled in during the 15th century, this street maintained its connection to the Madonna through its name, referring to the Virgin Mary. The area became known for small workshops of religious artisans.",
+      "id": "building_45.436244_12.351286"
+    },
+    {
+      "lat": 45.436225644712195,
+      "lng": 12.351841795287537,
+      "streetName": "Calle dei Devoti",
+      "streetNameEnglish": "Street of the Devout",
+      "streetDescription": "This narrow street led directly to the side entrance of the Madonna shrine and was traditionally home to candlemakers who supplied votives for the faithful visiting the nearby Marian shrine.",
+      "id": "building_45.436226_12.351842"
+    },
+    {
+      "lat": 45.43675329072543,
+      "lng": 12.351809017843408,
+      "streetName": "Sottoportego del Miracolo",
+      "streetNameEnglish": "Passageway of the Miracle",
+      "streetDescription": "Named after a reported miracle in 1487 where a Madonna image under this covered passageway was said to have wept tears. The event attracted pilgrims and led to several documented healings.",
+      "id": "building_45.436753_12.351809"
+    },
+    {
+      "lat": 45.436770118681245,
+      "lng": 12.352548368866367,
+      "streetName": "Calle dei Ceri",
+      "streetNameEnglish": "Street of the Candles",
+      "streetDescription": "Home to several workshops of candlemakers who specialized in elaborate votive candles for the Madonna shrine. These artisans were particularly busy during the Feast of the Annunciation.",
+      "id": "building_45.436770_12.352548"
+    },
+    {
+      "lat": 45.436794576520754,
+      "lng": 12.358359700369839,
+      "streetName": "Fondamenta degli Ex Voto",
+      "streetNameEnglish": "Foundation of the Votive Offerings",
+      "streetDescription": "This canalside street contained several shops of silversmiths who specialized in creating votive offerings for those seeking the Madonna's intercession, particularly silver hearts, limbs, and small ship models from sailors.",
+      "id": "building_45.436795_12.358360"
+    },
+    {
+      "lat": 45.43671755682685,
+      "lng": 12.359055234886497,
+      "streetName": "Calle della Processione",
+      "streetNameEnglish": "Street of the Procession",
+      "streetDescription": "The traditional route of the annual Marian procession that occurred on the Feast of the Assumption (August 15), when the Madonna icon would be carried through the neighborhood with great ceremony.",
+      "id": "building_45.436718_12.359055"
+    },
+    {
+      "lat": 45.437219898007314,
+      "lng": 12.351951944508054,
+      "streetName": "Salizada della Confraternita",
+      "streetNameEnglish": "Paved Street of the Brotherhood",
+      "streetDescription": "Named after the Brotherhood of the Madonna, a lay confraternity founded in 1342 dedicated to Marian devotion. They maintained their meeting hall on this street and organized charitable works in the area.",
+      "id": "building_45.437220_12.351952"
+    },
+    {
+      "lat": 45.437087676108206,
+      "lng": 12.35244877337041,
+      "streetName": "Ruga dei Pittori Sacri",
+      "streetNameEnglish": "Street of the Sacred Painters",
+      "streetDescription": "Home to several workshops of artists who specialized in religious iconography, particularly Marian subjects. These botteghe were known for producing small devotional paintings for private homes.",
+      "id": "building_45.437088_12.352449"
+    },
+    {
+      "lat": 45.437075094652236,
+      "lng": 12.357050116247908,
+      "streetName": "Calle del Rosario",
+      "streetNameEnglish": "Street of the Rosary",
+      "streetDescription": "Named for the rosary devotion popular among Venetians who prayed to the Madonna. Rosary makers and sellers of prayer beads traditionally had their shops along this street.",
+      "id": "building_45.437075_12.357050"
+    },
+    {
+      "lat": 45.437178400755414,
+      "lng": 12.35772096373455,
+      "streetName": "Corte delle Pellegrine",
+      "streetNameEnglish": "Court of the Female Pilgrims",
+      "streetDescription": "A small courtyard where a hospice for female pilgrims visiting the Madonna shrine was established in the early 16th century, operated by a group of tertiary nuns.",
+      "id": "building_45.437178_12.357721"
+    },
+    {
+      "lat": 45.43713443525611,
+      "lng": 12.358338414792323,
+      "streetName": "Ramo dei Fioretti",
+      "streetNameEnglish": "Branch of the Little Flowers",
+      "streetDescription": "A small side street where flower sellers traditionally gathered to sell blooms for offering at the Madonna shrine, particularly lilies which were associated with the Virgin Mary.",
+      "id": "building_45.437134_12.358338"
+    },
+    {
+      "lat": 45.43720782116143,
+      "lng": 12.359064494652655,
+      "streetName": "Campiello della Stella",
+      "streetNameEnglish": "Little Square of the Star",
+      "streetDescription": "Named after the star symbol often associated with the Madonna (Stella Maris - Star of the Sea). The small square featured a well with a star motif that served the local community.",
+      "id": "building_45.437208_12.359064"
+    },
+    {
+      "lat": 45.43710215570422,
+      "lng": 12.35959316846937,
+      "streetName": "Calle degli Angeli",
+      "streetNameEnglish": "Street of the Angels",
+      "streetDescription": "Named for the angelic figures that surrounded the Madonna in the central altarpiece of the nearby church. Several woodcarvers who specialized in angel figurines had workshops here.",
+      "id": "building_45.437102_12.359593"
+    },
+    {
+      "lat": 45.437622278118866,
+      "lng": 12.35267923580817,
+      "streetName": "Fondamenta dei Marinai Devoti",
+      "streetNameEnglish": "Foundation of the Devout Sailors",
+      "streetDescription": "A canalside street where sailors would traditionally come to pray to the Madonna before departing on voyages, as the Virgin was considered the protector of seafarers. Several maritime ex-votos were displayed along the street.",
+      "id": "building_45.437622_12.352679"
+    },
+    {
+      "lat": 45.43764905311208,
+      "lng": 12.353201519472242,
+      "streetName": "Rio Terà dell'Annunciazione",
+      "streetNameEnglish": "Filled Canal of the Annunciation",
+      "streetDescription": "This former canal was filled in during the 16th century and named after the Feast of the Annunciation, which was particularly important in the Madonna district and celebrated with special festivities.",
+      "id": "building_45.437649_12.353202"
+    },
+    {
+      "lat": 45.43756733560458,
+      "lng": 12.354582564262545,
+      "streetName": "Calle dei Dogaressa Morosini",
+      "streetNameEnglish": "Street of Dogaressa Morosini",
+      "streetDescription": "Named after Morosina Morosini, dogaressa of Venice (1595-1605), who was a notable benefactor of the Madonna shrine and financed renovations to the church in the late 16th century.",
+      "id": "building_45.437567_12.354583"
+    },
+    {
+      "lat": 45.43759786872032,
+      "lng": 12.355747349751592,
+      "streetName": "Sotoportego della Colomba",
+      "streetNameEnglish": "Passageway of the Dove",
+      "streetDescription": "Named for the dove symbol of the Holy Spirit often depicted in Annunciation scenes with the Madonna. A carved stone dove was visible on the keystone of this covered passageway.",
+      "id": "building_45.437598_12.355747"
+    },
+    {
+      "lat": 45.43760211356015,
+      "lng": 12.356368296385655,
+      "streetName": "Calle degli Orafi Sacri",
+      "streetNameEnglish": "Street of the Sacred Goldsmiths",
+      "streetDescription": "Home to goldsmiths who specialized in religious items, particularly gilded frames for Madonna paintings and jeweled crowns that would be placed on Marian statues during feast days.",
+      "id": "building_45.437602_12.356368"
+    },
+    {
+      "lat": 45.437617487709325,
+      "lng": 12.35709632385522,
+      "streetName": "Fondamenta delle Litanie",
+      "streetNameEnglish": "Foundation of the Litanies",
+      "streetDescription": "Named for the Litany of Loreto, prayers honoring the Madonna that would be sung during processions along this canalside street during Marian feast days.",
+      "id": "building_45.437617_12.357096"
+    },
+    {
+      "lat": 45.43756127542517,
+      "lng": 12.357707951395717,
+      "streetName": "Calle del Manto Blu",
+      "streetNameEnglish": "Street of the Blue Mantle",
+      "streetDescription": "Named after the traditional blue mantle worn by the Madonna in Venetian religious art. Several fabric dyers specializing in the particular lapis lazuli-derived blue used in religious garments had workshops here.",
+      "id": "building_45.437561_12.357708"
+    },
+    {
+      "lat": 45.437622468575846,
+      "lng": 12.358209548005789,
+      "streetName": "Ruga dei Medagliari",
+      "streetNameEnglish": "Street of the Medallion Makers",
+      "streetDescription": "Home to artisans who created small religious medallions, particularly those bearing the image of the Madonna, which Venetians would wear for protection or carry while traveling.",
+      "id": "building_45.437622_12.358210"
+    },
+    {
+      "lat": 45.437616344390435,
+      "lng": 12.359073549029306,
+      "streetName": "Calle della Scuola Mariana",
+      "streetNameEnglish": "Street of the Marian School",
+      "streetDescription": "Named for a small religious school established in 1489 that taught children the prayers and devotions associated with the Madonna cult, as well as basic literacy using religious texts.",
+      "id": "building_45.437616_12.359074"
+    },
+    {
+      "lat": 45.437651019660144,
+      "lng": 12.359538264231993,
+      "streetName": "Corte dei Miracolati",
+      "streetNameEnglish": "Court of the Healed",
+      "streetDescription": "A small courtyard where those claiming healing through the Madonna's intercession would leave testimonials and votive offerings. The walls were traditionally covered with small plaques commemorating miracles.",
+      "id": "building_45.437651_12.359538"
+    },
+    {
+      "lat": 45.438140992657715,
+      "lng": 12.352565309486005,
+      "streetName": "Calle dei Brocadeori",
+      "streetNameEnglish": "Street of the Brocade Makers",
+      "streetDescription": "Home to textile artisans who specialized in creating elaborate brocade fabrics used for religious vestments and altar cloths in the Madonna shrine and other Venetian churches.",
+      "id": "building_45.438141_12.352565"
+    },
+    {
+      "lat": 45.4380239001945,
+      "lng": 12.353264048445787,
+      "streetName": "Salizada dei Pellegrini",
+      "streetNameEnglish": "Paved Street of the Pilgrims",
+      "streetDescription": "One of the first streets in the area to be paved with stone (rather than packed earth), as it was the main approach for pilgrims visiting the Madonna shrine from the Grand Canal.",
+      "id": "building_45.438024_12.353264"
+    },
+    {
+      "lat": 45.43799612629631,
+      "lng": 12.354495185072022,
+      "streetName": "Calle della Corona",
+      "streetNameEnglish": "Street of the Crown",
+      "streetDescription": "Named for the ornate crown that adorned the Madonna statue in the nearby church. Jewelers who specialized in ecclesiastical metalwork traditionally had workshops along this street.",
+      "id": "building_45.437996_12.354495"
+    },
+    {
+      "lat": 45.43805395955373,
+      "lng": 12.355178318528537,
+      "streetName": "Rio Terà della Purificazione",
+      "streetNameEnglish": "Filled Canal of the Purification",
+      "streetDescription": "This former canal was filled in the early 16th century and named after the Feast of the Purification of the Virgin (Candlemas), which was celebrated with special ceremonies in the nearby Madonna shrine.",
+      "id": "building_45.438054_12.355178"
+    },
+    {
+      "lat": 45.4381072172537,
+      "lng": 12.355881617599827,
+      "streetName": "Calle dei Lampade Votive",
+      "streetNameEnglish": "Street of the Votive Lamps",
+      "streetDescription": "Home to craftsmen who produced ornate oil lamps that hung before Marian images throughout Venice. Many of these artisans were descended from Byzantine craftsmen who settled in Venice after 1204.",
+      "id": "building_45.438107_12.355882"
+    },
+    {
+      "lat": 45.438053938858545,
+      "lng": 12.356462509220451,
+      "streetName": "Fondamenta dei Barberigo",
+      "streetNameEnglish": "Foundation of the Barberigo",
+      "streetDescription": "Named after the Barberigo family, notable patrons of the Madonna shrine who financed an elaborate side chapel in the late 15th century decorated with Marian imagery.",
+      "id": "building_45.438054_12.356463"
+    },
+    {
+      "lat": 45.43812934282446,
+      "lng": 12.357013146990743,
+      "streetName": "Calle delle Sette Spade",
+      "streetNameEnglish": "Street of the Seven Swords",
+      "streetDescription": "Named for the iconography of the Madonna of Seven Sorrows, depicted with seven swords piercing her heart. A small shrine with this image was located at the entrance to this street.",
+      "id": "building_45.438129_12.357013"
+    },
+    {
+      "lat": 45.43813867097163,
+      "lng": 12.357723117058669,
+      "streetName": "Campiello delle Vergini",
+      "streetNameEnglish": "Little Square of the Virgins",
+      "streetDescription": "A small square near a convent of nuns dedicated to the Virgin Mary, established in 1472. The nuns were known for their embroidery work on religious vestments.",
+      "id": "building_45.438139_12.357723"
+    },
+    {
+      "lat": 45.4380337983435,
+      "lng": 12.358274666744387,
+      "streetName": "Calle del Capitello Mariano",
+      "streetNameEnglish": "Street of the Marian Capital",
+      "streetDescription": "Named for an ornate column capital featuring the Madonna that was visible at the corner of the street. This 14th-century carving was considered especially fine and was often used as a landmark.",
+      "id": "building_45.438034_12.358275"
+    },
+    {
+      "lat": 45.43798748450245,
+      "lng": 12.358858524003912,
+      "streetName": "Sottoportego dell'Assunta",
+      "streetNameEnglish": "Passageway of the Assumption",
+      "streetDescription": "Named for the Feast of the Assumption of Mary, this covered passageway featured a small shrine dedicated to this aspect of Marian devotion and was decorated with appropriate imagery.",
+      "id": "building_45.437987_12.358859"
+    },
+    {
+      "lat": 45.43797048986185,
+      "lng": 12.360799753610145,
+      "streetName": "Calle dei Corali",
+      "streetNameEnglish": "Street of the Choral Books",
+      "streetDescription": "Home to scribes and illuminators who produced the elaborate choral books used in Marian services, featuring ornate musical notation and illuminated capitals depicting scenes from the life of the Virgin.",
+      "id": "building_45.437970_12.360800"
+    },
+    {
+      "lat": 45.43812722108603,
+      "lng": 12.361561287182376,
+      "streetName": "Ruga dei Ricamatori",
+      "streetNameEnglish": "Street of the Embroiderers",
+      "streetDescription": "Where skilled embroiderers had their workshops, specializing in elaborate religious vestments and altar cloths featuring Marian imagery for use in the nearby Madonna shrine and other churches.",
+      "id": "building_45.438127_12.361561"
+    },
+    {
+      "lat": 45.43854043193245,
+      "lng": 12.357757500627093,
+      "streetName": "Calle dei Mercanti Pii",
+      "streetNameEnglish": "Street of the Pious Merchants",
+      "streetDescription": "Named for a guild of merchants who placed themselves under the Madonna's protection. They maintained a small chapel on this street and contributed regularly to the upkeep of the Madonna shrine.",
+      "id": "building_45.438540_12.357758"
+    },
+    {
+      "lat": 45.438478531149364,
+      "lng": 12.358339037790564,
+      "streetName": "Fondamenta della Natività",
+      "streetNameEnglish": "Foundation of the Nativity",
+      "streetDescription": "This canalside street was named for the Nativity of the Virgin Mary, a feast celebrated on September 8th. During this feast, the canal would be decorated with floating lanterns.",
+      "id": "building_45.438479_12.358339"
+    },
+    {
+      "lat": 45.43858731821456,
+      "lng": 12.359038837695469,
+      "streetName": "Calle della Reliquia",
+      "streetNameEnglish": "Street of the Relic",
+      "streetDescription": "Named for a purported relic of the Virgin Mary's veil that was brought to Venice after the Fourth Crusade and housed in a reliquary in the Madonna shrine. The street led directly to the side chapel containing this relic.",
+      "id": "building_45.438587_12.359039"
+    },
+    {
+      "lat": 45.43856594337441,
+      "lng": 12.360214821428794,
+      "streetName": "Rio Terà degli Iconografi",
+      "streetNameEnglish": "Filled Canal of the Iconographers",
+      "streetDescription": "A former canal filled in during the 16th century, this street became home to painters who specialized in Byzantine-style icons of the Madonna, many of them descendants of Greek artists who fled to Venice after the fall of Constantinople.",
+      "id": "building_45.438566_12.360215"
+    },
+    {
+      "lat": 45.438443849416494,
+      "lng": 12.360776534554386,
+      "streetName": "Calle dei Panettieri Votivi",
+      "streetNameEnglish": "Street of the Votive Bakers",
+      "streetDescription": "Home to bakers who specialized in ritual breads and sweets for Marian feast days. These bakers would produce specially shaped loaves for different celebrations throughout the liturgical calendar.",
+      "id": "building_45.438444_12.360777"
+    },
+    {
+      "lat": 45.43849302921632,
+      "lng": 12.361597297164153,
+      "streetName": "Salizada dei Priuli",
+      "streetNameEnglish": "Paved Street of the Priuli",
+      "streetDescription": "Named after the Priuli family, prominent Venetian nobles who were major benefactors of the Madonna shrine in the 16th century and maintained their family palazzo nearby.",
+      "id": "building_45.438493_12.361597"
+    },
+    {
+      "lat": 45.4384411519787,
+      "lng": 12.362043391413224,
+      "streetName": "Calle dei Cesellatori",
+      "streetNameEnglish": "Street of the Metalchasers",
+      "streetDescription": "Where skilled metalworkers specialized in chasing and embossing techniques created ornate silver and gold items for liturgical use in the Madonna shrine, including candlesticks, censers, and reliquaries.",
+      "id": "building_45.438441_12.362043"
+    },
+    {
+      "lat": 45.438463308963534,
+      "lng": 12.362891610104759,
+      "streetName": "Corte delle Immacolatine",
+      "streetNameEnglish": "Court of the Little Immaculates",
+      "streetDescription": "Named for a small convent of nuns devoted to the Immaculate Conception of Mary. These nuns operated a small orphanage for girls and taught them embroidery and lacemaking skills.",
+      "id": "building_45.438463_12.362892"
+    },
+    {
+      "lat": 45.43895640862305,
+      "lng": 12.357780254728775,
+      "streetName": "Calle del Giglio Mariano",
+      "streetNameEnglish": "Street of the Marian Lily",
+      "streetDescription": "Named for the lily, a symbol associated with the Virgin Mary representing purity. Florists who specialized in providing fresh lilies for the Madonna shrine traditionally gathered on this street.",
+      "id": "building_45.438956_12.357780"
+    },
+    {
+      "lat": 45.43887584361235,
+      "lng": 12.358382821201117,
+      "streetName": "Fondamenta dei Miniatori",
+      "streetNameEnglish": "Foundation of the Illuminators",
+      "streetDescription": "A canalside street where manuscript illuminators had their workshops, specializing in religious texts featuring elaborate depictions of the Madonna and scenes from her life.",
+      "id": "building_45.438876_12.358383"
+    },
+    {
+      "lat": 45.43892085839175,
+      "lng": 12.359086252856835,
+      "streetName": "Calle dei Calici Sacri",
+      "streetNameEnglish": "Street of the Sacred Chalices",
+      "streetDescription": "Home to metalsmiths who specialized in creating liturgical vessels used in Marian ceremonies, particularly ornate chalices and patens featuring Marian imagery.",
+      "id": "building_45.438921_12.359086"
+    },
+    {
+      "lat": 45.439001024656214,
+      "lng": 12.35969636941379,
+      "streetName": "Rio Terà delle Madonnelle",
+      "streetNameEnglish": "Filled Canal of the Little Madonnas",
+      "streetDescription": "Named for the numerous small street shrines featuring images of the Madonna that lined this former canal after it was filled in during the late 15th century.",
+      "id": "building_45.439001_12.359696"
+    },
+    {
+      "lat": 45.43900868151663,
+      "lng": 12.360352672237235,
+      "streetName": "Calle dei Veronese",
+      "streetNameEnglish": "Street of Veronese",
+      "streetDescription": "Named after the painter Paolo Veronese who created a significant altarpiece for the Madonna shrine in the 1560s. His workshop assistants maintained connections with this area after his death.",
+      "id": "building_45.439009_12.360353"
+    },
+    {
+      "lat": 45.439010075107305,
+      "lng": 12.3609810210916,
+      "streetName": "Sottoportego delle Grazie",
+      "streetNameEnglish": "Passageway of the Graces",
+      "streetDescription": "Named for the concept of divine graces granted through the Madonna's intercession. Devotees would pass through this covered walkway on their way to pray for special favors at the shrine.",
+      "id": "building_45.439010_12.360981"
+    },
+    {
+      "lat": 45.43900355268924,
+      "lng": 12.361455482500084,
+      "streetName": "Calle della Salve Regina",
+      "streetNameEnglish": "Street of the Hail Holy Queen",
+      "streetDescription": "Named after the Marian prayer 'Salve Regina' that would traditionally be sung during processions down this street during major feasts of the Virgin.",
+      "id": "building_45.439004_12.361455"
+    },
+    {
+      "lat": 45.438894474198875,
+      "lng": 12.362094735434905,
+      "streetName": "Ruga dei Cereri",
+      "streetNameEnglish": "Street of the Wax Chandlers",
+      "streetDescription": "Home to artisans who specialized in elaborate wax candles and ex-votos for the Madonna shrine, particularly anatomical wax models offered by those seeking healing.",
+      "id": "building_45.438894_12.362095"
+    },
+    {
+      "lat": 45.4389184893979,
+      "lng": 12.362775521334484,
+      "streetName": "Calle della Scuola dei Devoti",
+      "streetNameEnglish": "Street of the School of the Devout",
+      "streetDescription": "Named for a confraternity of laypeople dedicated to Marian devotion who maintained their meeting hall here and organized processions and charitable works in the Madonna's name.",
+      "id": "building_45.438918_12.362776"
+    },
+    {
+      "lat": 45.43935120506439,
+      "lng": 12.359028537442425,
+      "streetName": "Campiello del Baldacchino",
+      "streetNameEnglish": "Little Square of the Canopy",
+      "streetDescription": "Named for the ornate processional canopy (baldacchino) used to cover the Madonna statue during religious processions. The canopy would be stored in a special building on this small square.",
+      "id": "building_45.439351_12.359029"
+    },
+    {
+      "lat": 45.439389690194254,
+      "lng": 12.359696620287806,
+      "streetName": "Calle dei Tintori Blu",
+      "streetNameEnglish": "Street of the Blue Dyers",
+      "streetDescription": "Home to fabric dyers who specialized in the deep blue color traditionally used for the Madonna's garments in religious art, derived from expensive lapis lazuli pigment.",
+      "id": "building_45.439390_12.359697"
+    },
+    {
+      "lat": 45.439421637946374,
+      "lng": 12.360203613655376,
+      "streetName": "Fondamenta dei Donà",
+      "streetNameEnglish": "Foundation of the Donà",
+      "streetDescription": "Named after the Donà family, Venetian nobles who were significant patrons of the Madonna shrine in the 15th century and maintained their family palazzo along this canalside street.",
+      "id": "building_45.439422_12.360204"
+    },
+    {
+      "lat": 45.43931564235242,
+      "lng": 12.36090170476239,
+      "streetName": "Calle del Monte di Pietà",
+      "streetNameEnglish": "Street of the Mount of Piety",
+      "streetDescription": "Where a charitable pawnshop operated under Madonna's patronage, providing low-interest loans to the poor as an alternative to usurious moneylenders. Established in 1509 as a work of mercy.",
+      "id": "building_45.439316_12.360902"
+    },
+    {
+      "lat": 45.439390716794726,
+      "lng": 12.361577369825786,
+      "streetName": "Rio Terà della Visitazione",
+      "streetNameEnglish": "Filled Canal of the Visitation",
+      "streetDescription": "Named for the Visitation of Mary to Elizabeth, this former canal was filled in during the 16th century. A small shrine depicting this biblical scene was erected at one end of the street.",
+      "id": "building_45.439391_12.361577"
+    },
+    {
+      "lat": 45.43941789819177,
+      "lng": 12.362080388902186,
+      "streetName": "Calle dei Tessitori Sacri",
+      "streetNameEnglish": "Street of the Sacred Weavers",
+      "streetDescription": "Home to specialized weavers who created elaborate silk and gold thread textiles for religious vestments used in Marian ceremonies throughout Venice's churches.",
+      "id": "building_45.439418_12.362080"
+    },
+    {
+      "lat": 45.439364240810384,
+      "lng": 12.362843996477752,
+      "streetName": "Salizada del Capitolo",
+      "streetNameEnglish": "Paved Street of the Chapter",
+      "streetDescription": "Named for the ecclesiastical chapter (governing clergy) of the Madonna shrine who maintained their administrative quarters along this street, one of the first in the area to be paved with stone.",
+      "id": "building_45.439364_12.362844"
+    },
+    {
+      "lat": 45.43979585599747,
+      "lng": 12.35952415229651,
+      "streetName": "Calle della Campana",
+      "streetNameEnglish": "Street of the Bell",
+      "streetDescription": "Named for the distinctive bell of the Madonna shrine that would ring to mark Marian feast days. Bell founders traditionally had workshops along this street as well.",
+      "id": "building_45.439796_12.359524"
+    },
+    {
+      "lat": 45.43993473656735,
+      "lng": 12.360210086628117,
+      "streetName": "Corte dei Zelanti",
+      "streetNameEnglish": "Court of the Zealous",
+      "streetDescription": "A small courtyard where particularly devout followers of the Madonna would gather for special prayers and devotions, particularly during novenas preceding major Marian feast days.",
+      "id": "building_45.439935_12.360210"
+    },
+    {
+      "lat": 45.43987792854666,
+      "lng": 12.360975634394858,
+      "streetName": "Calle della Schola Cantorum",
+      "streetNameEnglish": "Street of the Choir School",
+      "streetDescription": "Named for the choir school established in the 15th century to train boys to sing for services at the Madonna shrine. The school was known for its excellent musical education and Marian hymns.",
+      "id": "building_45.439878_12.360976"
+    },
+    {
+      "lat": 45.439898825116,
+      "lng": 12.361417291171293,
+      "streetName": "Fondamenta dell'Ave Maria",
+      "streetNameEnglish": "Foundation of the Hail Mary",
+      "streetDescription": "A canalside street where the evening Angelus bells would prompt passing gondoliers to pause and recite the Ave Maria. A small shrine with the prayer's text was mounted on the wall.",
+      "id": "building_45.439899_12.361417"
+    },
+    {
+      "lat": 45.43989251839233,
+      "lng": 12.362184262020756,
+      "streetName": "Calle dei Loredan",
+      "streetNameEnglish": "Street of the Loredan",
+      "streetDescription": "Named after the Loredan family who were prominent benefactors of the Madonna shrine and commissioned several artworks for it during the early 16th century.",
+      "id": "building_45.439893_12.362184"
+    },
+    {
+      "lat": 45.44028459242113,
+      "lng": 12.360985388808853,
+      "streetName": "Rio Terà del Miracolo",
+      "streetNameEnglish": "Filled Canal of the Miracle",
+      "streetDescription": "Named after a reported miracle in 1524 when the canal waters were said to have parted to allow a procession carrying the Madonna statue to pass during a flood. The canal was later filled in during the 17th century.",
+      "id": "building_45.440285_12.360985"
+    },
+    {
+      "lat": 45.44036791501625,
+      "lng": 12.361503535345499,
+      "streetName": "Calle dell'Incoronazione",
+      "streetNameEnglish": "Street of the Coronation",
+      "streetDescription": "Named for the annual ceremony of crowning the Madonna statue with an elaborate jeweled crown, which would take place during the Feast of the Assumption. The procession traditionally began on this street.",
+      "id": "building_45.440368_12.361504"
+    },
+    {
+      "lat": 45.44026735087304,
+      "lng": 12.362105608601762,
+      "streetName": "Sottoportego dei Guardiani",
+      "streetNameEnglish": "Passageway of the Guardians",
+      "streetDescription": "Named for the lay guardians who maintained continuous prayer before the Madonna shrine. These volunteers would pass through this covered walkway during their rotation changes.",
+      "id": "building_45.440267_12.362106"
+    }
+  ]
+}

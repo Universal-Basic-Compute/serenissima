@@ -1,0 +1,43 @@
+{
+  "type": "merchant_galley",
+  "name": "Merchant Galley",
+  "pointType": "water",
+  "category": "transport",
+  "subCategory": "Maritime Vessels",
+  "size": 1,
+  "unlockCondition": "Dynamically created by import system",
+  "canImport": false,
+  "calculationsAnalysis": "This building type is dynamically created by the import system to represent a merchant galley arriving with goods. It is not intended for player construction. Its primary function is to serve as a temporary holding point for imported resources.",
+  "shortDescription": "A large trading ship used for importing goods. Appears temporarily at a designated water point.",
+  "fullDescription": "The Merchant Galley is a dynamically generated building representing a large trading vessel that has arrived in Venice with imported goods. It serves as a temporary container for these resources before they are processed further. It is not a player-constructible building but a part of the import logistics.",
+  "flavorText": "From distant shores, the galley arrives, its hold laden with the bounty of the world, a promise of Venetian prosperity.",
+  "constructionCosts": {
+    "ducats": 0,
+    "timber": 0,
+    "stone": 0,
+    "iron": 0
+  },
+  "maintenanceCost": 0,
+  "soundDesign": {
+    "ambientSound": "Creaking wood, distant seagulls, gentle lapping of water",
+    "activitySounds": "Sounds of cargo being present, occasional shouts of sailors if animated",
+    "musicTheme": "Mare Aperto"
+  },
+  "seasonalEffects": {
+    "storm weather": "May be delayed or appear at a sheltered dock point"
+  },
+  "aiInteractionPoints": [
+    "Cargo hold access",
+    "Deck area"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 1000,
+    "stores": [],
+    "sells": []
+  },
+  "buildTier": 0,
+  "workTier": 0,
+  "consumeTier": 0,
+  "constructionMinutes": 0
+}

@@ -1,0 +1,298 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43363809203729,
+      "lng": 12.334960907080212
+    },
+    {
+      "lat": 45.43341222762281,
+      "lng": 12.33504137335066
+    },
+    {
+      "lat": 45.43344987175467,
+      "lng": 12.33528813658003
+    },
+    {
+      "lat": 45.43338964113165,
+      "lng": 12.335411518194714
+    },
+    {
+      "lat": 45.43331811718333,
+      "lng": 12.335470526793042
+    },
+    {
+      "lat": 45.43307342930616,
+      "lng": 12.33551880655531
+    },
+    {
+      "lat": 45.43284003372709,
+      "lng": 12.33554026422743
+    },
+    {
+      "lat": 45.43201561258453,
+      "lng": 12.335942595579663
+    },
+    {
+      "lat": 45.43182738689073,
+      "lng": 12.334987729170361
+    },
+    {
+      "lat": 45.431657983229584,
+      "lng": 12.333630531408826
+    },
+    {
+      "lat": 45.433058371556015,
+      "lng": 12.333458870031873
+    },
+    {
+      "lat": 45.43321647773241,
+      "lng": 12.333866565802136
+    },
+    {
+      "lat": 45.433487515861415,
+      "lng": 12.334494202711621
+    }
+  ],
+  "centroid": {
+    "lat": 45.432952673893666,
+    "lng": 12.33489323288353
+  },
+  "historicalName": "Calle Larga de San Moisè",
+  "englishName": "Long Street of Saint Moses",
+  "historicalDescription": "This street was located in the San Marco sestiere, known for its proximity to the Church of San Moisè and the bustling commercial activity in the area during the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 29376.11,
+  "center": {
+    "lat": 45.43254769811212,
+    "lng": 12.334566909912711
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43182738689073,
+        "lng": 12.334987729170361
+      },
+      "water": {
+        "lat": 45.431647834066595,
+        "lng": 12.335002807168353
+      },
+      "historicalName": "Fondamenta dei Mercanti di Tessuti",
+      "englishName": "Foundation of the Cloth Merchants",
+      "historicalDescription": "This dock served cloth merchants who operated shops along Calle Larga de San Moisè during the 15th-16th centuries. The area was known for luxury textile trading, especially silk and fine fabrics imported from the East. Ducatsy merchants would use this landing to transport their valuable textiles directly to their workshops and storefronts nearby.",
+      "id": "canal_45.431827_12.334988"
+    },
+    {
+      "edge": {
+        "lat": 45.43174268506016,
+        "lng": 12.334309130289594
+      },
+      "water": {
+        "lat": 45.43157233009478,
+        "lng": 12.334226894177649
+      },
+      "historicalName": "Riva del Ridotto",
+      "englishName": "Bank of the Ridotto",
+      "historicalDescription": "Named after the famous Ridotto gambling house established in the 17th century near San Moisè, this dock served as a landing point for Venetian nobles and wealthy visitors attending the gambling establishment. The Ridotto was Europe's first public gambling house, located just steps from Calle Larga de San Moisè, and this dock would have been used by gondolas bringing patrons to try their luck at various games of chance.",
+      "id": "canal_45.431743_12.334309"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43307342930616,
+        "lng": 12.33551880655531
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056876739",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43307955890658,
+          "lng": 12.335614680771716
+        },
+        "distance": 7.512062609344751,
+        "id": "d4af6ab2-d52e-4cee-84d2-25e78ed6fb1a",
+        "historicalName": "Ponte dei Gioiellieri di San Moisè",
+        "englishName": "Bridge of the Jewelers of San Moisè",
+        "historicalDescription": "Named after the jewelry craftsmen who had workshops near the Church of San Moisè during the Renaissance period. The Calle Larga San Moisè was known for luxury artisans, particularly jewelers who served the wealthy nobili families and foreign dignitaries.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43307649410637,
+            "lng": 12.335566743663513
+          }
+        }
+      },
+      "id": "bridge_45.433073_12.335519"
+    },
+    {
+      "edge": {
+        "lat": 45.43284003372709,
+        "lng": 12.33554026422743
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056876739",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43281981218131,
+          "lng": 12.335630774025805
+        },
+        "distance": 7.411823768784818,
+        "id": "d4af6ab2-d52e-4cee-84d2-25e78ed6fb1a",
+        "historicalName": "Ponte dei Mercanti di Seta",
+        "englishName": "Bridge of the Silk Merchants",
+        "historicalDescription": "This bridge was frequented by silk merchants who operated in the San Moisè area, which was known for its luxury textile trade in Renaissance Venice. The proximity to Piazza San Marco made it an ideal location for merchants dealing in high-end fabrics catering to nobility.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4328299229542,
+            "lng": 12.335585519126617
+          }
+        }
+      },
+      "id": "bridge_45.432840_12.335540"
+    },
+    {
+      "edge": {
+        "lat": 45.432124779338395,
+        "lng": 12.333573310949841
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056766342",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43211348498434,
+          "lng": 12.333505361654797
+        },
+        "distance": 5.44888649812529,
+        "id": "3879cbd4-152c-4ad2-bc04-3746a730694c",
+        "historicalName": "Ponte della Scuola di San Moisè",
+        "englishName": "Bridge of the School of San Moisè",
+        "historicalDescription": "Named after the confraternity or 'scuola' associated with the Church of San Moisè. These religious confraternities were important social and charitable institutions in Renaissance Venice, providing education, spiritual guidance, and assistance to members and the community.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43211913216137,
+            "lng": 12.33353933630232
+          }
+        }
+      },
+      "id": "bridge_45.432125_12.333573"
+    },
+    {
+      "edge": {
+        "lat": 45.432591575447205,
+        "lng": 12.333516090490857
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056766342",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.432629219274475,
+          "lng": 12.333444564917126
+        },
+        "distance": 6.976438738671834,
+        "id": "3879cbd4-152c-4ad2-bc04-3746a730694c",
+        "historicalName": "Ponte degli Ambasciatori",
+        "englishName": "Bridge of the Ambassadors",
+        "historicalDescription": "Located along a route frequently used by foreign ambassadors traveling between their lodgings and the Doge's Palace, this bridge earned its name from the diplomatic processions that would pass through the San Moisè district, which was known for housing distinguished foreign visitors.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43261039736084,
+            "lng": 12.333480327703992
+          }
+        }
+      },
+      "id": "bridge_45.432592_12.333516"
+    },
+    {
+      "edge": {
+        "lat": 45.433487515861415,
+        "lng": 12.334494202711621
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056582235",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43350966086258,
+          "lng": 12.334414212855522
+        },
+        "distance": 6.70974685690661,
+        "id": "b773c717-544c-485b-90e4-2396c9b162d8",
+        "historicalName": "Ponte dei Vallaresso",
+        "englishName": "Bridge of the Vallaresso Family",
+        "historicalDescription": "Named after the noble Vallaresso family who owned property in the San Moisè area during the Renaissance period. This nobili family contributed to Venetian civic life and governance, and like many noble families, had architectural elements and urban features named after them in districts where they held influence.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433498588362,
+            "lng": 12.334454207783573
+          }
+        }
+      },
+      "id": "bridge_45.433488_12.334494"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43217206856034,
+      "lng": 12.334153508471362,
+      "streetName": "Calle dei Mercanti di Seta",
+      "streetNameEnglish": "Street of the Silk Merchants",
+      "streetDescription": "Named after the silk merchants who had workshops in this area near San Moisè. Venice was a major center for luxury silk trade during the Renaissance, with connections to both Eastern suppliers and wealthy European buyers. These merchants would have operated near the fashionable San Moisè district where wealthy patrons could purchase fine textiles.",
+      "id": "building_45.432172_12.334154"
+    },
+    {
+      "lat": 45.43216034710242,
+      "lng": 12.334800814417298,
+      "streetName": "Sottoportego dei Gioiellieri",
+      "streetNameEnglish": "Covered Passageway of the Jewelers",
+      "streetDescription": "This covered passageway would have housed workshops of jewelers who catered to the wealthy clientele of the San Moisè area. Jewelers were an important guild in Renaissance Venice, creating elaborate pieces for nobility and wealthy merchants. Their proximity to San Moisè church placed them near potential aristocratic customers.",
+      "id": "building_45.432160_12.334801"
+    },
+    {
+      "lat": 45.432558218844726,
+      "lng": 12.334166074853817,
+      "streetName": "Rio Terà della Fenice",
+      "streetNameEnglish": "Filled Canal of the Phoenix",
+      "streetDescription": "Named for its proximity to the area where the famous Teatro La Fenice would later be built. While the current theater dates to the late 18th century, the name references earlier performance spaces in this area. Rio Terà indicates this was once a canal that was filled in to create a street, common practice in Venice's urban development.",
+      "id": "building_45.432558_12.334166"
+    },
+    {
+      "lat": 45.43255891019304,
+      "lng": 12.334705644650251,
+      "streetName": "Salizada dei Specchieri",
+      "streetNameEnglish": "Paved Street of the Mirror Makers",
+      "streetDescription": "Venice was famous for its glass production, including fine mirrors which were highly prized luxury items throughout Europe. This paved street (salizada indicating it was one of the first to be paved with stone) would have connected to workshops of mirror makers who operated near San Moisè, catering to wealthy residents and visitors.",
+      "id": "building_45.432559_12.334706"
+    },
+    {
+      "lat": 45.43256419503638,
+      "lng": 12.335334362993562,
+      "streetName": "Calle del Ridotto",
+      "streetNameEnglish": "Street of the Gambling House",
+      "streetDescription": "Named after the Ridotto, Venice's famous public gambling house which operated near San Moisè from the early Renaissance period. The Ridotto was Europe's first public gambling house and attracted nobles, merchants, and visitors. Its location in the fashionable San Moisè area made it accessible to wealthy patrons.",
+      "id": "building_45.432564_12.335334"
+    },
+    {
+      "lat": 45.43295184340373,
+      "lng": 12.334153727400205,
+      "streetName": "Ruga dei Oresi di San Moisè",
+      "streetNameEnglish": "Row of the Goldsmiths of San Moisè",
+      "streetDescription": "This street would have housed goldsmiths associated with the San Moisè parish. 'Ruga' typically indicated a commercial street lined with shops of the same trade. Goldsmiths were prestigious artisans in Renaissance Venice, and those working in the San Moisè area would have served wealthy clientele, creating religious objects, jewelry, and fine decorative pieces.",
+      "id": "building_45.432952_12.334154"
+    },
+    {
+      "lat": 45.4329707010366,
+      "lng": 12.334703697044919,
+      "streetName": "Fondamenta Barbarigo",
+      "streetNameEnglish": "Barbarigo Foundation",
+      "streetDescription": "Named after the prominent Barbarigo family who had a palazzo in this area. The Barbarigo were one of Venice's nobili families who produced several Doges (elected leaders of Venice). A 'fondamenta' is a street running alongside a canal, suggesting this would have been a waterside path near the family's property in the San Moisè district.",
+      "id": "building_45.432971_12.334704"
+    },
+    {
+      "lat": 45.433386975264945,
+      "lng": 12.33462525832331,
+      "streetName": "Corte della Zecca",
+      "streetNameEnglish": "Court of the Mint",
+      "streetDescription": "This small courtyard would have been named for its proximity to a branch office of the Venetian mint or money-changing facilities. While the main Zecca was located near San Marco, smaller operations related to Venice's complex financial system existed throughout the city. The San Moisè area, being commercially important, would likely have had facilities for financial transactions.",
+      "id": "building_45.433387_12.334625"
+    }
+  ],
+  "id": "polygon-1746056790924"
+}

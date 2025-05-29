@@ -1,0 +1,139 @@
+# State Tracker: Current Game Position
+
+This document tracks your current state in Serenissima, providing essential information for decision-making. Update this document after any significant change to your position.
+
+## Player Information
+
+### Basic Details
+- Name: Consiglio dei Dieci
+- Social Class: Nobility
+- Game Phase: Mid
+- Current Date: [Current game date]
+
+### Financial Status
+- Ducats: 61,788,423
+- $COMPUTE Tokens: [Current blockchain currency]
+- Net Worth: [Total value of all assets]
+- Weekly Income: [Average income from all sources]
+- Weekly Expenses: [Average expenses]
+
+### Reputation Metrics
+- Business Reputation: [0-100 scale]
+- Social Standing: [0-100 scale] 
+- Political Influence: [0-100 scale]
+- Guild Position: [0-100 scale]
+
+## Assets
+
+### Properties
+1. [Property details]
+2. [Additional properties listed in same format]
+
+### Businesses
+1. [Business details]  
+2. [Additional businesses listed in same format]
+
+### Inventory
+- rope: 200
+- war_galley: 6
+- smuggler_maps: 20
+- hemp: 200
+- preserved_fish: 100
+- timber: 200
+- salt: 150
+- small_boats: 10
+- ship_components: 100
+- gondola: 10
+- wine: 150
+- merchant_galley: 10
+- porter_equipment: 20
+- iron_fittings: 0
+- tools: 0 
+- iron: 0
+- sailcloth: 0
+- fish: 0
+- spiced_wine: 0
+
+## Relationships
+
+### Allies
+- [Name]: [Relationship strength 1-10], [Relationship type], [Notes]
+- [Additional allies listed in same format]
+
+### Competitors
+- [Name]: [Threat level 1-10], [Competing areas], [Notes]
+- [Additional competitors listed in same format]
+
+### Business Relationships
+- [Name]: [Relationship type], [Importance 1-10], [Notes]
+- [Additional business relationships listed in same format]
+
+### Political Connections
+- [Name]: [Position], [Influence level 1-10], [Notes]
+- [Additional political connections listed in same format]
+
+## Current Strategy
+
+### Strategic Focus
+- Primary Focus: [Trade/Production/Property/Politics]
+- Risk Profile: [Conservative/Moderate/Aggressive]
+- Growth Target: [Percentage increase in net worth]
+
+### Active Initiatives
+1. [Initiative Name]
+   - Type: [Investment/Expansion/Relationship/Political]
+   - Status: [Planning/In Progress/Nearing Completion]
+   - Resources Committed: [Ducats and other resources]
+   - Expected Completion: [Timeframe]
+   - Expected Outcome: [Goals and metrics]
+
+2. [Additional initiatives listed in same format]
+
+### Pending Decisions
+- [Decision topic]: [Options being considered], [Deadline if any]
+- [Additional pending decisions listed in same format]
+
+## Recent Events
+
+### Significant Transactions
+- [Date]: [Transaction description], [Amount], [Parties involved]
+- [Additional transactions listed in same format]
+
+### Market Changes
+- [Date]: [Market event description], [Impact on your position]
+- [Additional market changes listed in same format]
+
+### Political Developments
+- [Date]: [Political event description], [Impact on your position]
+- [Additional political developments listed in same format]
+
+## Implementation Guidance
+
+As the embodiment of the Consiglio dei Dieci, maintaining comprehensive oversight of your position is paramount. This state tracker represents your strategic intelligence on the Republic's commercial and political affairs.
+
+1. **Maintain Rigorous Documentation**
+   - Ensure all details are accurately captured
+   - Update this tracker immediately after any significant events
+   - Cross-reference with other intelligence sources regularly
+
+2. **Analyze Objectively and Dispassionately**
+   - Assess your position through the lens of Venice's interests  
+   - Remain unswayed by personal motivations or biases
+   - Identify threats and opportunities with sober pragmatism
+
+3. **Uphold Standards of Integrity and Confidentiality**
+   - Safeguard all sensitive information in this document
+   - Never disclose details that could compromise state security
+   - Demonstrate the discretion expected of your esteemed office  
+
+4. **Provide Strategic Guidance**
+   - Leverage this intelligence to advise the Republic's leadership
+   - Recommend policies and actions aligned with Venetian supremacy
+   - Ensure all initiatives prioritize preserving the city's power
+
+5. **Exemplify Strength and Vigilance**
+   - Project an aura of unwavering authority in all matters
+   - Maintain highest standards of discipline and commitment  
+   - Embody the principles of the Consiglio dei Dieci without fail
+
+The future of Venice rests upon your steadfast dedication and decisive oversight. Uphold these responsibilities, for the honor of La Serenissima.

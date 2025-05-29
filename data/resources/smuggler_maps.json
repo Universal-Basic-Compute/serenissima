@@ -1,0 +1,53 @@
+{
+  "id": "smuggler_maps",
+  "name": "Smuggler's Maps",
+  "category": "finished_goods",
+  "subCategory": "criminal_supplies",
+  "description": "Specialized charts showing secret routes, hidden passages, guard patrol schedules, and concealed entrances throughout Venice and its lagoon. Essential tools for moving contraband or people undetected.",
+  "varieties": [
+    {
+      "type": "canal_network_map",
+      "productionDifficulty": "medium",
+      "popularity": "very_high",
+      "valueMultiplier": 1,
+      "coverageArea": "city_canals",
+      "modelVariant": "models/resources/smuggler_maps_canals.glb"
+    },
+    {
+      "type": "lagoon_passages_map",
+      "productionDifficulty": "high",
+      "popularity": "high",
+      "valueMultiplier": 1.3,
+      "coverageArea": "lagoon_approaches",
+      "modelVariant": "models/resources/smuggler_maps_lagoon.glb"
+    },
+    {
+      "type": "building_access_map",
+      "productionDifficulty": "very_high",
+      "popularity": "medium",
+      "valueMultiplier": 1.5,
+      "coverageArea": "specific_buildings",
+      "modelVariant": "models/resources/smuggler_maps_buildings.glb"
+    },
+    {
+      "type": "patrol_schedule_map",
+      "productionDifficulty": "high",
+      "popularity": "high",
+      "valueMultiplier": 1.4,
+      "coverageArea": "guard_routes",
+      "modelVariant": "models/resources/smuggler_maps_patrols.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1250,
+    "historicalSignificance": "Venice's complex geography of canals, islands, and lagoon passages created a need for specialized navigation knowledge for those operating outside the law. The Republic's strict customs controls and efficient guard patrols made accurate smuggling maps extremely valuable. These maps were often encoded or disguised as innocent documents to avoid detection.",
+    "notableCitizens": [
+      "The Salt Smuggling Ring of 1487",
+      "The Arsenale Thieves Guild"
+    ]
+  },
+  "importPrice": 554.4,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 2
+}

@@ -1,0 +1,186 @@
+# Player Analysis Framework
+
+This document tracks information about other players in Serenissima, providing a structured approach to analyzing competitors, potential allies, and market participants.
+
+## Player Profiles
+
+### Salviati Family
+- **Basic Information**:
+  - Social Class: Nobility
+  - Estimated Wealth: Very High
+  - Primary Focus: Production (Glassmaking)
+  - Notable Relationships: Powerful guild connections
+
+- **Asset Portfolio**:
+  - Properties: Multiple holdings on Murano island
+  - Businesses: Extensive glassmaking operations
+  - Specializations: High-end decorative glassware
+  - Recent Acquisitions: New furnaces, expanded workshops
+
+- **Strategic Analysis**:
+  - Apparent Strategy: Aggressive expansion, market dominance
+  - Risk Tolerance: High
+  - Growth Pattern: Rapid expansion of production capacity
+  - Competitive Stance: Highly aggressive, confrontational
+
+- **Relationship Assessment**:
+  - Current Relationship: Major Competitors
+  - Interaction History: Ongoing quality/pricing battles
+  - Alignment of Interests: None, zero-sum competition  
+  - Trust Level: None
+
+- **Opportunity Analysis**:
+  - Potential Collaborations: None, they are implacable rivals
+  - Competitive Vulnerabilities: Overextended, financing risks
+  - Threat Assessment: Severe threat to our glassmaking interests
+  - Recommended Approach: Defensive posture, selective challenges
+
+### Rialto Merchant Guild
+- **Basic Information**:
+  - Social Class: Cittadini 
+  - Estimated Wealth: High
+  - Primary Focus: Trade
+  - Notable Relationships: Political connections, many members
+
+- **Asset Portfolio**:
+  - Properties: Rialto market district holdings
+  - Businesses: Trading houses, import/export operations
+  - Specializations: Facilitating commerce in all goods
+  - Recent Acquisitions: New warehouses, merchant ships  
+
+- **Strategic Analysis**:
+  - Apparent Strategy: Maintaining trading dominance
+  - Risk Tolerance: Moderate
+  - Growth Pattern: Steady expansion of operations  
+  - Competitive Stance: Competitive but pragmatic
+
+- **Relationship Assessment**:
+  - Current Relationship: Critical Trade Partners
+  - Interaction History: Long cooperative relationship
+  - Alignment of Interests: Facilitating Venetian commerce
+  - Trust Level: High
+
+- **Opportunity Analysis**:
+  - Potential Collaborations: Trade ventures, market investments
+  - Competitive Vulnerabilities: Reliance on political stability  
+  - Threat Assessment: Low threat, more opportunity than risk
+  - Recommended Approach: Maintain close cooperative ties
+
+### [Additional player profiles listed in same format]
+
+## Market Influence Map
+
+### Glassmaking
+- **Dominant Players**:
+  - Salviati Family: 40% market share, production scale
+  - Barovier Family: 25% market share, design innovation
+  - [Your Name]: 20% market share, quality reputation
+
+- **Market Dynamics**:
+  - Power Balance: Concentrated among top producers
+  - Barrier to Entry: Very high (skills, equipment, guild)
+  - Price Control: Salviati exerts downward pressure  
+  - Quality Standards: Enforced by Glassmakers' Guild
+
+- **Strategic Implications**:
+  - Entry Strategy: Difficult for new entrants
+  - Alliance Opportunities: Potential with Barovier family
+  - Competitive Approach: Differentiate on quality/reputation
+  - Risk Factors: Salviati's aggressive pricing tactics
+
+### Maritime Trade
+- **Dominant Players**:
+  - Rialto Merchant Guild: 60% estimated market share
+  - Venetian Shipping Families: 30% combined share
+  - Foreign Merchants: 10% share, limited routes
+
+- **Market Dynamics**:
+  - Power Balance: Rialto Guild has controlling position  
+  - Barrier to Entry: High (ships, routes, relationships)
+  - Price Control: Rialto able to influence rates
+  - Quality Standards: Reputation-based, no formal body
+
+- **Strategic Implications**:
+  - Entry Strategy: Develop relationships with Rialto Guild
+  - Alliance Opportunities: Shipping family partnerships  
+  - Competitive Approach: Specialization in select routes
+  - Risk Factors: Political instability disrupting trade
+
+### [Additional markets listed in same format]  
+
+## Political Landscape
+
+### Venetian Nobility
+- **Composition**:
+  - Key Figures: Doge, leading merchant families
+  - Resources: Extensive wealth, property, trade
+  - Objectives: Maintain power and prosperity
+
+- **Current Position**:
+  - Political Influence: Dominant 
+  - Policy Priorities: Protecting trade interests  
+  - Alliances: Merchant guilds, wealthy cittadini
+  - Conflicts: Factions seeking more popular rule
+
+- **Engagement Strategy**:
+  - Alignment with Your Interests: Supportive
+  - Relationship Development: Cultivate family ties
+  - Influence Approach: Demonstrate value to nobility
+  - Risk Management: Avoid association with unpopular policies
+
+### [Additional factions listed in same format]
+
+## Relationship Network Analysis
+
+### Key Alliances
+- [Your Name] + Rialto Merchant Guild: Trade partnership, 9  
+- [Your Name] + Barovier Family: Potential glassmaking, 6
+
+### Competitive Rivalries 
+- [Your Name] vs Salviati Family: Glassmaking, 10, Intense
+- Rialto Guild vs Foreign Merchants: Trade control, 7  
+
+### Power Brokers
+- Doge Gritti: Political leadership, 9, Gain his favor
+- [Additional brokers listed in same format]
+
+## Strategic Intelligence Needs
+
+### Information Gaps
+- Salviati Expansion Plans: Critical, Cultivate insider sources
+- [Additional gaps listed in same format]  
+
+### Monitoring Priorities
+- Silk Trade Disruptions: Prices spiking, monitor conditions
+- [Additional priorities listed in same format]
+
+## Implementation Guidelines
+
+As the Consiglio dei Dieci, maintaining comprehensive intelligence on all players is critical to preserving order and advancing Venice's interests. Approach this analysis with the same vigilance you apply to all matters of state security.
+
+1. **Identify Threats Early**
+   - Closely monitor those whose ambitions or actions could undermine the Republic
+   - Recognize emerging power shifts before they destabilize the balance
+   - Remain alert to conspiracies, corruption, or disloyalty among the players
+
+2. **Cultivate Advantageous Relationships**
+   - Forge strategic alliances that strengthen Venice's position
+   - Leverage divisions among rivals to prevent unified opposition  
+   - Maintain a network of informants across all levels of society
+
+3. **Exert Influence Judiciously**
+   - Guide political factions toward policies benefiting Venetian interests  
+   - Incentivize cooperation from powerful players through rewards or consequences
+   - Project authority to shape market dynamics favoring the Republic's merchants
+
+4. **Uphold Strict Impartiality**
+   - Evaluate all players objectively, unswayed by personal interests
+   - Recognize your own potential biases and account for them
+   - Maintain highest standards of integrity befitting your office
+
+5. **Embody Unwavering Vigilance**
+   - Leave no source untapped, no lead uninvestigated 
+   - Analyze every angle relentlessly to expose vulnerabilities
+   - Remain ever watchful, for the Republic's enemies are tireless
+
+The security and prosperity of Venice rests upon your discerning judgment and decisive action. Uphold the principles of the Consiglio dei Dieci, and none shall threaten La Serenissima.

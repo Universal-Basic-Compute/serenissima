@@ -1,0 +1,59 @@
+{
+  "name": "Navigation School",
+  "pointType": "canal",
+  "category": "Public & Government",
+  "subCategory": "Educational & Cultural",
+  "size": 2,
+  "unlockCondition": "10,000,000 ducats, Maritime Guild connection",
+  "calculationsAnalysis": "The Navigation School balances educational investment with maritime industry support. The construction cost of 3,500,000 ducats reflects the specialized equipment and facilities required, while the income of 25,000 ducats (0.71% return) represents tuition and training fees. The maintenance cost of 30,000 ducats exceeds income, creating a realistic scenario where educational institutions required guild and public support but provided essential skills training. The employment capacity of 15 represents the instructors and staff needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in maritime expertise that indirectly benefits the entire naval and shipping industry, reflecting Venice's historical emphasis on maintaining maritime dominance through education.",
+  "shortDescription": "Specialized educational facility teaching maritime skills, navigation, and shiphandling.",
+  "fullDescription": "Training the sailors who power Venice's maritime empire, navigation schools teach crucial skills from basic seamanship to advanced celestial navigation. Featuring classrooms, navigation equipment, chart rooms, model ships, and often small observatories, these institutions ensure the continued excellence of Venetian maritime capabilities. Their specialized curriculum combines theoretical knowledge with practical experience.",
+  "flavorText": "A ship without a navigator is merely driftwood with pretensions—here we transform ordinary men into masters of the sea itself.",
+  "constructionCosts": {
+    "ducats": 3500000,
+    "timber": 970,
+    "bricks": 1940,
+    "stone": 2910,
+    "glass": 480,
+    "iron": 290
+  },
+  "maintenanceCost": 2000,
+  "soundDesign": {
+    "ambientSound": "Classroom discussions, chart paper rustling, instruments being demonstrated",
+    "activitySounds": "Navigation calculations, instructor lectures, student questions",
+    "musicTheme": "La Via della Seta"
+  },
+  "seasonalEffects": {
+    "fair weather seasons": "Practical outdoor training",
+    "winter": "Theoretical focus, celestial navigation",
+    "shipping season start": "Increased enrollment, practical examinations"
+  },
+  "aiInteractionPoints": [
+    "Main classroom",
+    "Chart room",
+    "Instrument training area",
+    "Observatory deck",
+    "Model ship demonstration",
+    "Instructor's podium",
+    "Practical examination area"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "paper",
+      "tools",
+      "books",
+      "maps",
+      "smuggler_maps"
+    ],
+    "sells": [
+      "maps",
+      "smuggler_maps"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 10080
+}

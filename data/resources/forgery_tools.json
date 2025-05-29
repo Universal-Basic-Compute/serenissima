@@ -1,0 +1,45 @@
+{
+  "id": "forgery_tools",
+  "name": "Forgery Tools",
+  "category": "finished_goods",
+  "subCategory": "criminal_supplies",
+  "description": "Specialized equipment for creating convincing document forgeries, including custom quills, special inks, paper treatments, and seal replication tools.",
+  "varieties": [
+    {
+      "type": "document_forgery_kit",
+      "productionDifficulty": "high",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "primaryUse": "official_documents",
+      "modelVariant": "models/resources/forgery_tools_documents.glb"
+    },
+    {
+      "type": "seal_replication_kit",
+      "productionDifficulty": "very_high",
+      "popularity": "medium",
+      "valueMultiplier": 1.5,
+      "primaryUse": "official_seals",
+      "modelVariant": "models/resources/forgery_tools_seals.glb"
+    },
+    {
+      "type": "currency_forgery_kit",
+      "productionDifficulty": "extreme",
+      "popularity": "low",
+      "valueMultiplier": 2.5,
+      "primaryUse": "counterfeit_money",
+      "modelVariant": "models/resources/forgery_tools_currency.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1300,
+    "historicalSignificance": "Document forgery was both a serious crime and a necessary tool in Renaissance Venice's complex political landscape. The Republic's extensive bureaucracy created high demand for forged papers, from trade permits to noble lineages. The Council of Ten regularly prosecuted forgers, with penalties ranging from hand amputation to execution for counterfeiting currency.",
+    "notableCases": [
+      "The Spafarii Affair of 1498",
+      "The False Ducal Seal Scandal of 1521"
+    ]
+  },
+  "importPrice": 2489.4,
+  "lifetimeHours": null,
+  "consumptionHours": 117,
+  "tier": 3
+}

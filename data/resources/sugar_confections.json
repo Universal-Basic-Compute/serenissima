@@ -1,0 +1,28 @@
+{
+  "id": "sugar_confections",
+  "name": "Sugar Confections",
+  "category": "finished_goods",
+  "subCategory": "luxury_food",
+  "description": "Expensive sweets made with refined sugar, such as candied fruits, marzipan, and other elaborate desserts. Enjoyed primarily by the nobility and wealthy merchants.",
+  "varieties": [
+    {
+      "type": "candied_fruit",
+      "valueMultiplier": 1.2,
+      "notes": "Fruits preserved in sugar, a luxurious treat."
+    },
+    {
+      "type": "marzipan",
+      "valueMultiplier": 1.5,
+      "notes": "Almond paste confection, often sculpted into elaborate shapes."
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "medieval",
+    "historicalSignificance": "The availability of sugar through Venetian trade routes led to the development of a sophisticated confectionery art. These items were often given as diplomatic gifts.",
+    "culturalContext": "Sugar confections were a display of wealth and artistry, prominent at banquets and special occasions."
+  },
+  "importPrice": 3600.0,
+  "lifetimeHours": 25200,
+  "consumptionHours": 1,
+  "tier": 4
+}

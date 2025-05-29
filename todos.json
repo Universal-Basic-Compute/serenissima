@@ -1,0 +1,181 @@
+[
+  {
+    "id": "TODO-002",
+    "description": "Fix income and maintenance discrepancies in building descriptions",
+    "files": [
+      "data/buildings/military_defense/defensive_structures/defensive_bastion.json",
+      "data/buildings/military_defense/security_facilities/prison.json",
+      "data/buildings/military_defense/naval_facilities/naval_administration_office.json",
+      "data/buildings/military_defense/defensive_structures/harbor_chain_tower.json",
+      "data/buildings/infrastructure/water_management/public_well.json"
+    ],
+    "details": "Update the calculationsAnalysis sections to match the actual income and maintenance values in the JSON. For buildings like the Defensive Bastion, either set the incomeGeneration to 0 or update the analysis to explain its income source."
+  },
+  {
+    "id": "TODO-003",
+    "description": "Standardize income approach for public infrastructure buildings",
+    "files": [
+      "data/buildings/infrastructure/transportation_facilities/bridge.json",
+      "data/buildings/infrastructure/water_management/public_well.json",
+      "data/buildings/infrastructure/water_management/cistern.json",
+      "data/buildings/infrastructure/water_management/flood_control_station.json",
+      "data/buildings/military_defense/defensive_structures/defensive_bastion.json",
+      "data/buildings/military_defense/defensive_structures/city_gate.json"
+    ],
+    "details": "Decide on a consistent approach for public infrastructure buildings - either they all generate some income (through fees, etc.) or none do. Currently, some bridges, wells, and defensive structures have income while others don't, without clear justification."
+  },
+  {
+    "id": "TODO-004",
+    "description": "Verify construction time descriptions match actual values",
+    "files": [
+      "data/buildings/special_buildings/unique_structures/doge_s_palace.json",
+      "data/buildings/residential/basic_residences/artisan_s_house.json",
+      "data/buildings/residential/basic_residences/merchant_s_house.json",
+      "data/buildings/residential/basic_residences/fisherman_s_cottage.json",
+      "data/buildings/public_government/civic_buildings/public_archives.json"
+    ],
+    "details": "Ensure all construction time descriptions in the analysis sections match the actual millisecond values. For example, if a building says '5 days' in the analysis, verify that the constructionTime value is exactly 432000000ms."
+  },
+  {
+    "id": "TODO-005",
+    "description": "Review and balance building tier progression",
+    "files": [
+      "data/buildings/index.json",
+      "data/buildings/commercial/trade_facilities/weighing_station.json",
+      "data/buildings/commercial/trade_facilities/broker_s_office.json",
+      "data/buildings/production/glass_industry/glass_foundry.json",
+      "data/buildings/production/publishing_industry/paper_mill.json",
+      "data/buildings/production/publishing_industry/printing_house.json"
+    ],
+    "details": "Review buildings where the tier progression seems inconsistent (e.g., where Tier 3 buildings cost less than Tier 2). Ensure that higher tier buildings consistently have higher costs, requirements, and capabilities."
+  },
+  {
+    "id": "TODO-006",
+    "description": "Standardize environmental effects descriptions",
+    "files": [
+      "data/buildings/residential/basic_residences/canal_house.json",
+      "data/buildings/commercial/retail_shops/merceria.json",
+      "data/buildings/commercial/retail_shops/luxury_showroom.json",
+      "data/buildings/infrastructure/transportation_facilities/cargo_landing.json",
+      "data/buildings/infrastructure/transportation_facilities/gondola_station.json",
+      "data/buildings/production/glass_industry/glassblower_workshop.json"
+    ],
+    "details": "Some buildings have very specific environmental effects (e.g., 'Increases property value of adjacent buildings by 8%') while others are vague (e.g., 'Creates commercial hub'). Consider standardizing the level of detail in environmental effects."
+  },
+  {
+    "id": "TODO-007",
+    "description": "Fix employment capacity inconsistencies",
+    "files": [
+      "data/buildings/infrastructure/transportation_facilities/bridge.json",
+      "data/buildings/infrastructure/water_management/public_well.json",
+      "data/buildings/military_defense/defensive_structures/harbor_chain_tower.json"
+    ],
+    "details": "Ensure employment capacity values are consistent with the descriptions in the calculationsAnalysis sections. For example, the Public Well has an employment capacity of 0 in its analysis but shows a value of 8,000 for incomeGeneration."
+  },
+  {
+    "id": "TODO-008",
+    "description": "Standardize building unlock conditions format",
+    "files": [
+      "data/buildings/commercial/trade_facilities/weighing_station.json",
+      "data/buildings/public_government/civic_buildings/courthouse.json",
+      "data/buildings/military_defense/security_facilities/guard_post.json",
+      "data/buildings/public_government/health_safety/quarantine_station.json",
+      "data/buildings/special_buildings/guild_headquarters/goldsmith_guild_hall.json"
+    ],
+    "details": "Some unlock conditions are very specific (e.g., '15,000,000 ducats, government authorization, Health Office approval') while others are vague (e.g., 'Government license only'). Standardize the format and level of detail for unlock conditions."
+  },
+  {
+    "id": "TODO-009",
+    "description": "Standardize property naming conventions in resource files",
+    "files": [
+      "data/resources/raw_materials/marble.json",
+      "data/resources/raw_materials/hemp.json",
+      "data/resources/raw_materials/raw_silk.json",
+      "data/resources/finished_goods/bread.json",
+      "data/resources/finished_goods/wine.json"
+    ],
+    "details": "Convert all camelCase properties (like valueModifier, perishTime) to snake_case (value_multiplier, perish_time) for consistency across all resource files."
+  },
+  {
+    "id": "TODO-010",
+    "description": "Standardize resource file structure",
+    "files": [
+      "data/resources/raw_materials/raw_silk.json",
+      "data/resources/raw_materials/salt.json",
+      "data/resources/raw_materials/marble.json",
+      "data/resources/raw_materials/sand.json",
+      "data/resources/raw_materials/soda_ash.json"
+    ],
+    "details": "Ensure all resource files use consistent property names (source_properties instead of sourceInfo, production_chain_position instead of productionChain) and have the same overall structure."
+  },
+  {
+    "id": "TODO-011",
+    "description": "Complete silk production chain connections",
+    "files": [
+      "data/resources/raw_materials/raw_silk.json",
+      "data/resources/raw_materials/dyestuffs.json",
+      "data/resources/finished_goods/luxury_silk_garments.json"
+    ],
+    "details": "Create or update the intermediate resources in the silk production chain (prepared_silk, silk_fabric, dyed_silk_fabric) to ensure proper connections between raw_silk and luxury_silk_garments."
+  },
+  {
+    "id": "TODO-012",
+    "description": "Standardize quality variation naming across resources",
+    "files": [
+      "data/resources/raw_materials/fish.json",
+      "data/resources/raw_materials/marble.json",
+      "data/resources/finished_goods/weapons.json",
+      "data/resources/finished_goods/fine_glassware.json",
+      "data/resources/finished_goods/venetian_lace.json"
+    ],
+    "details": "Decide on a standard set of quality levels (e.g., poor/common/fine/superior/masterwork) and apply it consistently across all resources, adjusting multipliers accordingly."
+  },
+  {
+    "id": "TODO-013",
+    "description": "Balance detail levels across resource files",
+    "files": [
+      "data/resources/raw_materials/soda_ash.json",
+      "data/resources/raw_materials/pine_resin.json",
+      "data/resources/raw_materials/iron_ore.json",
+      "data/resources/finished_goods/luxury_silk_garments.json",
+      "data/resources/finished_goods/merchant_galley.json"
+    ],
+    "details": "Add more detailed properties to simpler resource files to match the level of detail in the more comprehensive files. Focus on adding relevant historical_notes, varieties, and usage_properties."
+  },
+  {
+    "id": "TODO-014",
+    "description": "Enhance criminal supplies interconnections",
+    "files": [
+      "data/resources/finished_goods/forgery_tools.json",
+      "data/resources/finished_goods/disguise_materials.json",
+      "data/resources/finished_goods/smuggler_maps.json",
+      "data/resources/finished_goods/poison_components.json",
+      "data/resources/finished_goods/blackmail_evidence.json"
+    ],
+    "details": "Create stronger interconnections between criminal supply resources by updating their complementary_resources, production_chain_position, and usage_properties to reference each other more consistently."
+  },
+  {
+    "id": "TODO-015",
+    "description": "Standardize transport and storage properties",
+    "files": [
+      "data/resources/raw_materials/timber.json",
+      "data/resources/raw_materials/gold.json",
+      "data/resources/finished_goods/preserved_fish.json",
+      "data/resources/finished_goods/books.json",
+      "data/resources/finished_goods/jewelry.json"
+    ],
+    "details": "Ensure all resources have consistent transport_methods, storage_facilities, and related properties with appropriate values for their type and value."
+  },
+  {
+    "id": "TODO-016",
+    "description": "Add missing production chain connections",
+    "files": [
+      "data/resources/raw_materials/timber.json",
+      "data/resources/finished_goods/small_boats.json",
+      "data/resources/finished_goods/gondola.json",
+      "data/resources/raw_materials/dyestuffs.json",
+      "data/resources/finished_goods/maps.json"
+    ],
+    "details": "Ensure all resources properly reference their predecessors and successors in the production chain, particularly for timber products and dyestuffs."
+  }
+]

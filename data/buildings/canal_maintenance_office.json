@@ -1,0 +1,64 @@
+{
+  "name": "Canal Maintenance Office",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Water Management",
+  "size": 1,
+  "unlockCondition": "Government license only",
+  "calculationsAnalysis": "The Canal Maintenance Office represents essential water management infrastructure with no direct revenue. The construction cost of 2,500,000 ducats reflects the specialized equipment and facilities required, while generating no direct income reflects its public service rather than commercial purpose. The maintenance cost of 40,000 ducats creates a substantial ongoing expense justified by the essential canal maintenance provided. The employment capacity of 20 represents the engineers, dredgers, and maintenance crews needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in waterway management that prevents sedimentation and maintains Venice's vital canal network, reflecting the historical reality that without constant maintenance, Venice's canals would quickly become unusable, threatening the city's very existence.",
+  "shortDescription": "Administrative and operational center for maintaining Venice's vital canal network.",
+  "fullDescription": "Critical to Venice's survival, canal maintenance offices coordinate the complex work of keeping the city's waterways navigable. Featuring administrative offices, equipment storage, specialized tools, and dredging boats, these facilities support the essential work of removing sediment, repairing canal walls, and maintaining water quality. Without this constant maintenance, Venice's canal network would quickly silt up and become unusable.",
+  "flavorText": "The canals are not merely our streets, but our very foundation—and like any foundation, they require constant attention lest our entire civilization sink into the mud from which it rose.",
+  "constructionCosts": {
+    "ducats": 2500000,
+    "timber": 830,
+    "bricks": 1670,
+    "stone": 1250,
+    "iron": 420
+  },
+  "maintenanceCost": 4000,
+  "soundDesign": {
+    "ambientSound": "Administrative discussions, boat engines, equipment preparation",
+    "activitySounds": "Dredging operations, maintenance planning, water testing",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "low tide": "Intensive maintenance operations, exposed canal walls",
+    "high water": "Emergency response operations, preventative measures",
+    "summer": "Algae control, tourist season preparations"
+  },
+  "aiInteractionPoints": [
+    "Administration office",
+    "Map planning room",
+    "Equipment yard",
+    "Maintenance boat dock",
+    "Dredging operation staging area",
+    "Water quality testing station"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 150,
+    "stores": [
+      "tools",
+      "timber",
+      "bricks",
+      "mortar",
+      "rope",
+      "pitch",
+      "rags",
+      "small_boats",
+      "building_materials",
+      "porter_equipment",
+      "water"
+    ],
+    "sells": [
+      "small_boats",
+      "building_materials",
+      "porter_equipment"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 0,
+  "constructionMinutes": 10080
+}

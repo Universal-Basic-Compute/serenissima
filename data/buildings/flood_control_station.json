@@ -1,0 +1,62 @@
+{
+  "name": "Flood Control Station",
+  "pointType": "canal",
+  "category": "Infrastructure",
+  "subCategory": "Water Management",
+  "size": 2,
+  "unlockCondition": "15,000,000 ducats capital, Engineering Guild approval, Senate permission",
+  "calculationsAnalysis": "The Flood Control Station represents advanced water management infrastructure with modest revenue. The construction cost of 6,000,000 ducats reflects the specialized equipment and engineering systems required, while generating 15,000 ducats income reflects fees from protected properties and increased property values in secured areas. The maintenance cost of 60,000 ducats creates a substantial ongoing expense partially offset by this income. The employment capacity of 15 represents the engineers, operators, and maintenance staff needed. The construction time of 14 days (1209600000ms) reflects the complex engineering project. This building creates a strategic investment in flood protection that enables development in vulnerable low-lying areas, reflecting Venice's historical struggle against the sea and the sophisticated systems developed to protect the city from acqua alta (high water) events.",
+  "shortDescription": "Specialized facility managing barriers and pumps to control acqua alta flooding events.",
+  "fullDescription": "Venice's first line of defense against the sea, flood control stations manage the complex systems that protect the city during acqua alta (high water) events. Featuring monitoring equipment, barrier storage, pump systems, and emergency response capabilities, these facilities represent sophisticated engineering solutions to Venice's existential challenge. Their operators maintain constant vigilance against the lagoon's rising waters.",
+  "flavorText": "The sea gives Venice life, commerce, and beauty—but would also reclaim it in an instant if we relaxed our vigilance even for a season.",
+  "constructionCosts": {
+    "ducats": 6000000,
+    "timber": 2050,
+    "bricks": 3080,
+    "stone": 4110,
+    "iron": 1540
+  },
+  "maintenanceCost": 6000,
+  "soundDesign": {
+    "ambientSound": "Water flow, mechanical systems creaking, measurement tools",
+    "activitySounds": "Barrier deployment, pumps operating, warning bells during events",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "acqua alta season": "Heightened alert, frequent deployments",
+    "storm warnings": "Preventative measures activated",
+    "astronomical high tides": "Full system deployment"
+  },
+  "aiInteractionPoints": [
+    "Monitoring station",
+    "Barrier deployment area",
+    "Pump control room",
+    "Emergency response dock",
+    "Warning bell tower",
+    "Canal gate mechanism"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 150,
+    "stores": [
+      "timber",
+      "rope",
+      "small_boats",
+      "tools",
+      "porter_equipment",
+      "sand",
+      "limestone",
+      "mortar",
+      "water"
+    ],
+    "sells": [
+      "small_boats",
+      "porter_equipment",
+      "mortar"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 0,
+  "constructionMinutes": 20160
+}

@@ -1,0 +1,76 @@
+{
+  "name": "Small Warehouse",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "storage",
+  "size": 1,
+  "unlockCondition": "5,000,000 ducats capital",
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Small Warehouse balances basic storage infrastructure with modest rental income. The construction cost of 1,250,000 ducats reflects the secure structure and organizational systems required, while the income of 15,000 ducats (1.2% return) represents storage rental fees. The maintenance cost of 12,500 ducats (83.3% of income) creates a thin profit margin appropriate for basic commercial infrastructure. The employment capacity of 5 represents the clerks, guards, and laborers needed. The construction time of 3 days (259200000ms) reflects the straightforward construction requirements. This building creates an accessible investment in commercial storage that supports trading activities, reflecting the historical importance of secure storage in Venice's commercial system where goods often needed to be warehoused between maritime shipments.",
+  "shortDescription": "Basic goods storage facility for commercial merchandise and materials.",
+  "fullDescription": "The workhorse of Venice's commercial infrastructure, small warehouses provide secure storage for merchandise and materials throughout the city. Featuring loading areas, organized storage systems, inventory management, and basic security, these practical facilities enable the smooth functioning of Venice's complex trade networks. Their flexible design accommodates a wide variety of goods from textiles to spices.",
+  "flavorText": "The difference between a successful merchant and a ruined one often lies not in what they buy or sell, but in how they store their goods between these transactions.",
+  "constructionCosts": {
+    "ducats": 1250000,
+    "timber": 550,
+    "bricks": 820,
+    "stone": 550,
+    "iron": 160
+  },
+  "maintenanceCost": 1250,
+  "soundDesign": {
+    "ambientSound": "Crates being moved, inventory counting, shelving creaking",
+    "activitySounds": "Goods being loaded/unloaded, inventory discussions, security locks",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "trading seasons": "Capacity maximum during peak seasons",
+    "inventory periods": "Organized auditing and reorganization",
+    "acqua alta": "Goods elevated from ground level"
+  },
+  "aiInteractionPoints": [
+    "Main storage area",
+    "Loading dock",
+    "Clerk's desk",
+    "Inventory management area",
+    "Security checkpoint",
+    "Goods organization system"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 500,
+    "stores": [
+      "books",
+      "bread",
+      "bricks",
+      "dyed_textiles",
+      "fish",
+      "flour",
+      "fuel",
+      "grain",
+      "iron",
+      "olive_oil",
+      "paper",
+      "preserved_fish",
+      "processed_iron",
+      "rope",
+      "salt",
+      "silk_fabric",
+      "spiced_wine",
+      "timber",
+      "tools",
+      "weapons",
+      "wine"
+    ],
+    "sells": [
+      "preserved_fish",
+      "flour",
+      "rope",
+      "tools"
+    ]
+  },
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 4320
+}

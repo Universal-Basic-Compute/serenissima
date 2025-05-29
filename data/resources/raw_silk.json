@@ -1,0 +1,29 @@
+{
+  "id": "raw_silk",
+  "name": "Raw Silk",
+  "category": "raw_materials",
+  "subCategory": "textile_fiber",
+  "description": {
+    "short": "Unprocessed silk fibers from silkworm cocoons.",
+    "full": "Luxurious fibers harvested from silkworm cocoons, primarily imported from China and Persia. The foundation of Venice's prestigious textile industry.",
+    "flavor": "The journey of this delicate thread spans continents, passing through the hands of countless merchants before reaching Venice, where it transforms from simple cocoon to royal garment."
+  },
+  "varieties": [],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
+      "Chinese silk farms",
+      "Persian silk traders"
+    ],
+    "historicalSignificance": "Raw silk was one of Venice's most valuable imports, forming the basis of its luxury textile industry. The Republic maintained exclusive trade routes to ensure a steady supply.",
+    "historicalContracts": [
+      "Venetian silk weavers",
+      "European royal courts"
+    ],
+    "culturalContext": "Silk processing knowledge was closely guarded, with strict guild regulations controlling production methods and quality standards."
+  },
+  "importPrice": 5400.0,
+  "lifetimeHours": 26250,
+  "consumptionHours": null,
+  "tier": 0
+}

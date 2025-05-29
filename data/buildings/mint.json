@@ -1,0 +1,89 @@
+{
+  "name": "Mint",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Metallurgy Industry",
+  "size": 2,
+  "unlockCondition": "Government facility only, not privately constructable",
+  "calculationsAnalysis": "The Mint represents specialized monetary infrastructure with strategic rather than commercial value. The construction cost of 10,000,000 ducats reflects the secure facilities and specialized equipment required, while generating no direct income reflects its governmental rather than private commercial purpose. The maintenance cost of 100,000 ducats creates a substantial ongoing expense justified by the critical currency production capabilities provided. The employment capacity of 50 represents the metalworkers, engravers, and security staff needed. The construction time of 30 days (2592000000ms) reflects the specialized construction requirements. This building creates a strategic economic asset with appropriate government restrictions reflecting the historical importance of currency production to Venice's commercial system, where the consistent quality of Venetian ducats was a key factor in the city's trading power.",
+  "shortDescription": "Official facility for producing Venetian coinage from precious metals under strict government oversight.",
+  "fullDescription": "The literal economic engine of Venice, the mint (Zecca) transforms gold and silver into the ducats and other coins that power commerce. Operating under the strictest security and quality control, this heavily guarded facility features specialized workshops for metal purification, coin striking, and verification. The consistent quality of Venetian currency was a key factor in the city's commercial dominance.",
+  "flavorText": "All wealth flows from these walls—but never forget that each coin bears not just gold, but the very authority of the Republic itself.",
+  "constructionCosts": {
+    "ducats": 10000000,
+    "timber": 1080,
+    "bricks": 2880,
+    "stone": 4320,
+    "iron": 1440,
+    "marble": 720
+  },
+  "maintenanceCost": 10000,
+  "productionInformation": {
+  "Arti": [
+    {
+      "inputs": {
+        "gold": 8,
+        "tools": 1
+      },
+      "outputs": {
+        "banking_services": 2
+      },
+      "craftMinutes": 120
+    },
+    {
+      "inputs": {
+        "gold": 4,
+        "tools": 1
+      },
+      "outputs": {
+        "jewelry": 1
+      },
+      "craftMinutes": 240
+    },
+    {
+      "inputs": {
+        "gold": 5,
+        "silver": 2
+      },
+      "outputs": {
+        "jewelry": 1
+      },
+      "craftMinutes": 300
+    }
+  ],
+    "storageCapacity": 100,
+    "stores": [
+      "gold",
+      "gold_leaf",
+      "tools",
+      "banking_services",
+      "jewelry"
+    ],
+    "sells": [
+      "banking_services",
+      "jewelry"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Metal striking, coin counting, secure locks operating",
+    "activitySounds": "Hammering coin dies, molten metal pouring, verification testing",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "tradeSeason": "Increased production before major fairs",
+    "wartime": "Special production runs for military financing",
+    "stateEvents": "Commemorative coin production"
+  },
+  "aiInteractionPoints": [
+    "Secure entrance",
+    "Bullion receiving",
+    "Coin striking hall",
+    "Quality verification",
+    "Secure vault",
+    "Official's oversight office"
+  ],
+  "buildTier": 4,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 43200
+}

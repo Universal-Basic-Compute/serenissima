@@ -1,0 +1,60 @@
+{
+  "id": "criminal_contacts",
+  "name": "Criminal Contacts",
+  "category": "utility_resources",
+  "subCategory": "underworld_network",
+  "description": "A network of underworld connections providing access to illegal services, information, and contraband. These relationships are carefully cultivated and highly valuable in Venice's shadow economy.",
+  "historicalNotes": "Venice's unique geography and position as a trading crossroads made it an ideal environment for sophisticated criminal networks. The labyrinthine canals, crowded campos, and masked celebrations provided perfect cover for clandestine meetings and exchanges. The Republic's Council of Ten maintained an extensive network of informants, creating a culture where information was a valuable currency. Criminal organizations often specialized by district or trade, with some focusing on smuggling contraband through the lagoon's countless approaches, while others specialized in document forgery to navigate Venice's complex bureaucracy. Despite the Republic's fearsome reputation for justice, corruption was endemic, creating a parallel system of influence that operated alongside official channels.\n\nIn a city built on water, information flows like the tide, and those who control these currents of secrets wield power beyond measure. From the gondolier who overhears noble conversations to the servant who knows which guards can be bribed, Venice's criminal networks operate in plain sight yet remain invisible to those who don't know where to look.",
+  "variants": [
+    {
+      "id": "smuggling_network",
+      "name": "Smuggling Network",
+      "valueModifier": 1.2,
+      "properties": [
+        "goods_movement",
+        "customs_evasion"
+      ],
+      "primaryUse": "contraband_trade",
+      "riskLevel": "medium"
+    },
+    {
+      "id": "information_network",
+      "name": "Information Network",
+      "valueModifier": 1.3,
+      "properties": [
+        "intelligence_gathering",
+        "rumor_collection"
+      ],
+      "primaryUse": "espionage",
+      "riskLevel": "low"
+    },
+    {
+      "id": "enforcement_network",
+      "name": "Enforcement Network",
+      "valueModifier": 1.5,
+      "properties": [
+        "intimidation",
+        "protection",
+        "debt_collection"
+      ],
+      "primaryUse": "criminal_enforcement",
+      "riskLevel": "high"
+    },
+    {
+      "id": "corruption_network",
+      "name": "Corruption Network",
+      "valueModifier": 1.8,
+      "properties": [
+        "official_bribery",
+        "document_forgery",
+        "legal_interference"
+      ],
+      "primaryUse": "system_manipulation",
+      "riskLevel": "very_high"
+    }
+  ],
+  "importPrice": 7200.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 2
+}

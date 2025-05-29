@@ -1,0 +1,109 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.433543981974466,
+      "lng": 12.332090943434277
+    },
+    {
+      "lat": 45.4334649294004,
+      "lng": 12.332627385237256
+    },
+    {
+      "lat": 45.43358162601844,
+      "lng": 12.332681029417554
+    },
+    {
+      "lat": 45.43359291922674,
+      "lng": 12.332820504286328
+    },
+    {
+      "lat": 45.43325412199482,
+      "lng": 12.332917063810864
+    },
+    {
+      "lat": 45.433239064292884,
+      "lng": 12.332718580343762
+    },
+    {
+      "lat": 45.43284379817958,
+      "lng": 12.332616656401196
+    },
+    {
+      "lat": 45.43240712001681,
+      "lng": 12.332477181532422
+    },
+    {
+      "lat": 45.431556340788845,
+      "lng": 12.332434266188184
+    },
+    {
+      "lat": 45.43153375355493,
+      "lng": 12.33202657041792
+    },
+    {
+      "lat": 45.43208337368061,
+      "lng": 12.332101672270337
+    },
+    {
+      "lat": 45.43310730922938,
+      "lng": 12.332498639204541
+    },
+    {
+      "lat": 45.43318259787475,
+      "lng": 12.331983655073682
+    }
+  ],
+  "centroid": {
+    "lat": 45.43287622586406,
+    "lng": 12.332461088278334
+  },
+  "historicalName": "Fondamenta dei Narisi, Sestiere Dorsoduro",
+  "englishName": "Walkway of the Narisi Family, Dorsoduro District",
+  "historicalDescription": "A walkway along a canal in the Dorsoduro district, likely named after a prominent local family. The area was known for its artisan workshops and proximity to the Zattere promenade.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 6695.31,
+  "center": {
+    "lat": 45.43313127078681,
+    "lng": 12.332461463393921
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43318259787475,
+        "lng": 12.331983655073682
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056735293",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43315248242864,
+          "lng": 12.331913917639294
+        },
+        "distance": 6.389431918892692,
+        "id": "449da4b1-0c98-4b48-a5d9-43f97b3b235b",
+        "historicalName": "Ponte dei Narisi",
+        "englishName": "Bridge of the Narisi",
+        "historicalDescription": "Named after the prominent Narisi family who owned properties along this fondamenta in Dorsoduro during the Renaissance period. The Narisi were a nobili family involved in maritime trade between Venice and the Eastern Mediterranean. This bridge would have connected their properties to other parts of the sestiere and served as a local landmark in the neighborhood.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43316754015169,
+            "lng": 12.331948786356488
+          }
+        }
+      },
+      "id": "bridge_45.433183_12.331984"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43332489997469,
+      "lng": 12.332607979632417,
+      "streetName": "Calle dei Profumieri",
+      "streetNameEnglish": "Street of the Perfumers",
+      "streetDescription": "This small street near Fondamenta dei Narisi in Dorsoduro would have been named after the artisans who created perfumes and scented waters in the Renaissance period. The name 'Narisi' itself relates to the nose (naso), making this area a fitting location for perfumers who worked with fragrances. These craftsmen would have created luxury products for Venetian nobility using exotic ingredients imported through Venice's extensive trade networks with the East.",
+      "id": "building_45.433325_12.332608"
+    }
+  ],
+  "id": "polygon-1746056756754"
+}

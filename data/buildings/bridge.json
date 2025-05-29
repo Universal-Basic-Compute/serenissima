@@ -1,0 +1,59 @@
+{
+  "name": "Bridge",
+  "pointType": "bridge",
+  "category": "bridge",
+  "subCategory": "bridge",
+  "size": 1,
+  "unlockCondition": "15,000,000 ducats capital, Engineering Guild approval, Senate permission",
+  "calculationsAnalysis": "The Bridge represents essential pedestrian infrastructure with modest revenue. The construction cost of 4,000,000 ducats reflects the engineering challenges and durable materials required, while generating 10,000 ducats income reflects small crossing fees and increased property values in connected areas. The maintenance cost of 25,000 ducats creates an ongoing expense partially offset by this income. The employment capacity of 2 reflects the maintenance workers needed for this infrastructure. The construction time of 14 days (1209600000ms) reflects the complex engineering project. This building creates a strategic investment in urban connectivity that dramatically increases property values and accessibility of connected areas, reflecting the historical importance of bridges in Venice's unique urban fabric where canals would otherwise fragment the city.",
+  "shortDescription": "Canal crossing structure connecting separate land areas and enabling pedestrian movement.",
+  "fullDescription": "Essential to Venice's pedestrian mobility, bridges overcome the canal barriers that would otherwise fragment the city. Featuring arched construction for boat clearance, steps for elevation, and often small shops or seating areas, bridges serve as both transportation links and social spaces. Their construction requires significant engineering expertise and government approval, making them prestigious civic improvements.",
+  "flavorText": "A paradox of Venice: we are a city defined by water, yet our greatest infrastructure achievements are the means by which we pretend, momentarily, that the water is not there.",
+  "constructionCosts": {
+    "ducats": 4000000,
+    "timber": 500,
+    "stone": 4020,
+    "iron": 800,
+    "marble": 300
+  },
+  "maintenanceCost": 2500,
+  "soundDesign": {
+    "ambientSound": "Footsteps on stone, conversation echoes, water sounds below",
+    "activitySounds": "People greeting each other, boats passing underneath, shoes on steps",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "acqua alta": "Lower areas may flood during extreme events",
+    "carnival": "Decorated with banners and masks, performance spaces",
+    "ice": "Steps may become slippery, sand applied"
+  },
+  "aiInteractionPoints": [
+    "Main crossing area",
+    "Sitting/viewing spots at apex",
+    "Steps on either side",
+    "Underneath passage for boats",
+    "Bridge approaches"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "stone",
+      "timber",
+      "iron_fittings",
+      "cut_stone",
+      "mortar",
+      "porter_equipment",
+      "building_materials",
+      "tools"
+    ],
+    "sells": [
+      "porter_equipment",
+      "building_materials"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 0,
+  "consumeTier": 0,
+  "constructionMinutes": 20160
+}

@@ -1,0 +1,92 @@
+{
+  "name": "Weapons Smith",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Metal Industry",
+  "size": 1,
+  "unlockCondition": "5,000,000 ducats capital, Metal Workers Guild connection, Security clearance",
+  "calculationsAnalysis": "The Weapons Smith represents specialized military production with substantial returns. The construction cost of 1,800,000 ducats reflects the specialized forge and equipment required, while the income of 25,000 ducats (1.39% return) represents sales of weapons and military equipment. The maintenance cost of 30,000 ducats (120% of income) creates a negative profit margin reflecting the resource-intensive nature of weapons production but strategic importance to the Republic. The employment capacity of 8 represents the master smith, apprentices, and specialized assistants needed. The construction time of 4 days (345600000ms) reflects the specialized construction requirements. This building creates a strategic investment in military production with appropriate guild and security requirements reflecting the historical importance of weapons production to Venice's military capabilities, where quality armaments were essential for naval and defensive forces.",
+  "shortDescription": "Specialized workshop producing weapons and military equipment for Venice's forces and export contracts.",
+  "fullDescription": "Crafting the implements of war and defense, weapons smiths create everything from naval cutlasses to ceremonial arms. Featuring specialized forges, hardening facilities, and finishing areas, these workshops require both metallurgical expertise and artistic skill. Venice's weapons production supported both its naval power and provided valuable export goods, though under strict regulation by the Republic.",
+  "flavorText": "In peace, prepare for war—and in Venice, that preparation takes the form of steel shaped by fire, skill, and centuries of martial knowledge.",
+  "constructionCosts": {
+    "ducats": 1800000,
+    "timber": 390,
+    "bricks": 1220,
+    "stone": 730,
+    "iron": 490
+  },
+  "maintenanceCost": 3000,
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "processed_iron": 1,
+          "timber": 1,
+          "tools": 1
+        },
+        "outputs": {
+          "weapons": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "iron": 1,
+          "fuel": 2
+        },
+        "outputs": {
+          "processed_iron": 1
+        },
+        "craftMinutes": 45
+      },
+      {
+        "inputs": {
+          "processed_iron": 1,
+          "ship_components": 1
+        },
+        "outputs": {
+          "weapons": 1
+        },
+        "craftMinutes": 90
+      }
+    ],
+    "storageCapacity": 150,
+    "stores": [
+      "iron",
+      "processed_iron",
+      "timber",
+      "tools",
+      "fuel",
+      "ship_components",
+      "weapons"
+    ],
+    "sells": [
+      "weapons",
+      "processed_iron"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Multiple hammers on anvils, grinding wheels, metal being quenched",
+    "activitySounds": "Weapon testing, quality inspections, military orders being discussed",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "wartime": "Increased production, military priority orders",
+    "peacetime": "Focus on export and ceremonial weapons",
+    "naval expansion": "Emphasis on maritime weapons"
+  },
+  "aiInteractionPoints": [
+    "Main forge",
+    "Blade testing area",
+    "Decorative workshop",
+    "Military contract desk",
+    "Quality inspection station",
+    "Secure weapons storage",
+    "Design consultation area"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3,
+  "constructionMinutes": 5760
+}

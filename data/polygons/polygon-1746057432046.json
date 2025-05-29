@@ -1,0 +1,461 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.4288265193675,
+      "lng": 12.363033973108623
+    },
+    {
+      "lat": 45.42873616600774,
+      "lng": 12.3655874360908
+    },
+    {
+      "lat": 45.42919546075207,
+      "lng": 12.366198979746196
+    },
+    {
+      "lat": 45.42823169042438,
+      "lng": 12.36711093081126
+    },
+    {
+      "lat": 45.427862742740274,
+      "lng": 12.365952216516826
+    },
+    {
+      "lat": 45.42537040031994,
+      "lng": 12.366778336893413
+    },
+    {
+      "lat": 45.42514450281889,
+      "lng": 12.365909301172588
+    },
+    {
+      "lat": 45.42463999513604,
+      "lng": 12.364257060419414
+    },
+    {
+      "lat": 45.42473788503901,
+      "lng": 12.36384936464915
+    }
+  ],
+  "centroid": {
+    "lat": 45.42697170695621,
+    "lng": 12.365408622156476
+  },
+  "historicalName": "Campo de Santa Elena",
+  "englishName": "St. Helen's Square",
+  "historicalDescription": "Area located in the Castello sestiere, near the church of Sant'Elena and the eastern end of the main Venetian islands. In the 15th century, it was a relatively quiet and less populated part of the city.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 103261.57,
+  "center": {
+    "lat": 45.426589756532806,
+    "lng": 12.36481375606678
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.42879640158091,
+        "lng": 12.363885127436015
+      },
+      "water": {
+        "lat": 45.42895158686587,
+        "lng": 12.363755558378747
+      },
+      "historicalName": "Riva di Santa Elena",
+      "englishName": "Saint Helen's Shore",
+      "historicalDescription": "Named after Saint Helen, mother of Emperor Constantine, whose relics were housed in the nearby church. This was the main landing point for visitors to the Campo and church of Santa Elena.",
+      "id": "canal_45.428796_12.363885"
+    },
+    {
+      "edge": {
+        "lat": 45.428766283794324,
+        "lng": 12.364736281763408
+      },
+      "water": {
+        "lat": 45.42894023563629,
+        "lng": 12.36467111049444
+      },
+      "historicalName": "Fondamenta degli Agostiniani",
+      "englishName": "Foundation of the Augustinians",
+      "historicalDescription": "Named for the Augustinian monks who maintained a monastery near Campo Santa Elena from the 12th century. They were responsible for much of the early development of this area of Venice.",
+      "id": "canal_45.428766_12.364736"
+    },
+    {
+      "edge": {
+        "lat": 45.428713575588226,
+        "lng": 12.366654955278728
+      },
+      "water": {
+        "lat": 45.42887431243686,
+        "lng": 12.366769964903872
+      },
+      "historicalName": "Riva dei Ciprioti",
+      "englishName": "Shore of the Cypriots",
+      "historicalDescription": "This dock was frequented by Cypriot merchants who traded with Venice, particularly after Venice gained control of Cyprus in the late 15th century. It would have seen goods like sugar, cotton, and salt arriving from the eastern Mediterranean.",
+      "id": "canal_45.428714_12.366655"
+    },
+    {
+      "edge": {
+        "lat": 45.427364274256206,
+        "lng": 12.366117440592143
+      },
+      "water": {
+        "lat": 45.42747569747564,
+        "lng": 12.366318626050283
+      },
+      "historicalName": "Fondamenta della Croce Antica",
+      "englishName": "Foundation of the Ancient Cross",
+      "historicalDescription": "Named for an old stone cross that stood in the Campo de Santa Elena, marking the site of religious processions and ceremonies. Such crosses were important landmarks in Renaissance Venice.",
+      "id": "canal_45.427364_12.366117"
+    },
+    {
+      "edge": {
+        "lat": 45.42686580577214,
+        "lng": 12.36628266466746
+      },
+      "water": {
+        "lat": 45.42683520650433,
+        "lng": 12.366535211993579
+      },
+      "historicalName": "Riva dei Legnamari",
+      "englishName": "Shore of the Timber Merchants",
+      "historicalDescription": "This dock served timber merchants who supplied wood for shipbuilding at the nearby Arsenal. The eastern location of Santa Elena made it convenient for receiving timber that arrived from the forests of the Veneto mainland.",
+      "id": "canal_45.426866_12.366283"
+    },
+    {
+      "edge": {
+        "lat": 45.42636733728808,
+        "lng": 12.366447888742778
+      },
+      "water": {
+        "lat": 45.426252577654395,
+        "lng": 12.366645227985678
+      },
+      "historicalName": "Fondamenta dei Giardinieri",
+      "englishName": "Foundation of the Gardeners",
+      "historicalDescription": "Campo Santa Elena was known for having more green space than many areas of Venice. This dock served gardeners who maintained the monastery gardens and supplied produce to this part of the city.",
+      "id": "canal_45.426367_12.366448"
+    },
+    {
+      "edge": {
+        "lat": 45.42586886880401,
+        "lng": 12.366613112818095
+      },
+      "water": {
+        "lat": 45.42572611683408,
+        "lng": 12.366769022744103
+      },
+      "historicalName": "Riva del Naviglio Piccolo",
+      "englishName": "Shore of the Small Ship",
+      "historicalDescription": "A smaller dock used primarily by local fishermen and small craft. Its name references the smaller vessels that would dock here, as opposed to the larger merchant ships that required deeper harbors.",
+      "id": "canal_45.425869_12.366613"
+    },
+    {
+      "edge": {
+        "lat": 45.42514450281889,
+        "lng": 12.365909301172588
+      },
+      "water": {
+        "lat": 45.42496787499841,
+        "lng": 12.365957699620013
+      },
+      "historicalName": "Fondamenta dei Reliquiari",
+      "englishName": "Foundation of the Reliquaries",
+      "historicalDescription": "Named for its connection to the relics of Saint Helen housed in the church. Pilgrims and those bringing offerings or reliquaries would often arrive at this dock when visiting the sacred site.",
+      "id": "canal_45.425145_12.365909"
+    },
+    {
+      "edge": {
+        "lat": 45.424892248977464,
+        "lng": 12.365083180796
+      },
+      "water": {
+        "lat": 45.42471345992465,
+        "lng": 12.365055199777302
+      },
+      "historicalName": "Riva dei Patrizi Orientali",
+      "englishName": "Shore of the Eastern Nobili",
+      "historicalDescription": "A dock used by noble Venetian families with interests in the eastern territories of the Republic. Santa Elena's position on the eastern edge of Venice made it symbolically connected to Venice's eastern maritime empire.",
+      "id": "canal_45.424892_12.365083"
+    }
+  ],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.425082076796265,
+      "lng": 12.36438300750376,
+      "streetName": "Calle della Confraternita di Sant'Elena",
+      "streetNameEnglish": "Street of the Saint Helena Brotherhood",
+      "streetDescription": "Named after the religious brotherhood dedicated to Saint Helena that was active in this area. Confraternities played important social and religious roles in Renaissance Venice, providing welfare services and organizing religious ceremonies.",
+      "id": "building_45.425082_12.364383"
+    },
+    {
+      "lat": 45.42512606272602,
+      "lng": 12.364896819794888,
+      "streetName": "Rio Terà dei Cipriotti",
+      "streetNameEnglish": "Filled Canal of the Cypriots",
+      "streetDescription": "This former canal was filled in and named after Cypriot merchants who settled in this area. Venice had strong commercial ties with Cyprus and many Cypriot merchants established themselves near Sant'Elena, particularly after Venice gained control of Cyprus in the late 15th century.",
+      "id": "building_45.425126_12.364897"
+    },
+    {
+      "lat": 45.42556269175928,
+      "lng": 12.364372177450303,
+      "streetName": "Fondamenta dei Olivetani",
+      "streetNameEnglish": "Foundation of the Olivetan Monks",
+      "streetDescription": "Named after the Olivetan order of Benedictine monks who maintained a monastery near Campo Sant'Elena. The Olivetans were known for their dedication to manual work and prayer, and their presence in this area dates back to the 15th century.",
+      "id": "building_45.425563_12.364372"
+    },
+    {
+      "lat": 45.425580276347404,
+      "lng": 12.364944550541042,
+      "streetName": "Calle dei Reliquiari",
+      "streetNameEnglish": "Street of the Reliquaries",
+      "streetDescription": "Named for the craftsmen who made reliquaries to house sacred relics. This name references the presence of the relic of the True Cross and other holy items that were kept in the Church of Sant'Elena, making it an important pilgrimage site.",
+      "id": "building_45.425580_12.364945"
+    },
+    {
+      "lat": 45.42545192463379,
+      "lng": 12.365520889220596,
+      "streetName": "Salizada dei Navarchos",
+      "streetNameEnglish": "Paved Street of the Ship Captains",
+      "streetDescription": "This paved street was named after the Greek and Byzantine ship captains who often docked in this eastern part of Venice. The term 'navarchos' reflects the Greek influence in Venetian maritime vocabulary and the presence of Greek sailors in this area near the Arsenale.",
+      "id": "building_45.425452_12.365521"
+    },
+    {
+      "lat": 45.4255071848987,
+      "lng": 12.366148060093662,
+      "streetName": "Calle della Croce Vera",
+      "streetNameEnglish": "Street of the True Cross",
+      "streetDescription": "Named after the relic of the True Cross that was housed in the Church of Sant'Elena. According to tradition, Saint Helena discovered the True Cross in Jerusalem, and a fragment was brought to Venice during the Crusades, becoming one of the city's most venerated relics.",
+      "id": "building_45.425507_12.366148"
+    },
+    {
+      "lat": 45.425963254391775,
+      "lng": 12.364380325197045,
+      "streetName": "Ruga dei Carpentieri Navali",
+      "streetNameEnglish": "Row of the Naval Carpenters",
+      "streetDescription": "This commercial street was home to many naval carpenters who worked in the nearby Arsenale. The street reflects the importance of shipbuilding to Venice's maritime power and the proximity of Sant'Elena to Venice's famed shipyards.",
+      "id": "building_45.425963_12.364380"
+    },
+    {
+      "lat": 45.425950460817795,
+      "lng": 12.364980534950671,
+      "streetName": "Sottoportego dei Pellegrini",
+      "streetNameEnglish": "Passageway of the Pilgrims",
+      "streetDescription": "A covered passageway that pilgrims would use when visiting the Church of Sant'Elena to venerate the relics kept there. The church became a significant pilgrimage destination after the translation of Saint Helena's remains to Venice in the 13th century.",
+      "id": "building_45.425950_12.364981"
+    },
+    {
+      "lat": 45.42598829322197,
+      "lng": 12.365661886393038,
+      "streetName": "Campiello dei Cipressi",
+      "streetNameEnglish": "Small Square of the Cypress Trees",
+      "streetDescription": "Named after the cypress trees that were planted in this small square adjacent to Campo Sant'Elena. Cypress trees were commonly associated with monasteries and sacred spaces in Renaissance Venice, symbolizing eternity and the connection between earth and heaven.",
+      "id": "building_45.425988_12.365662"
+    },
+    {
+      "lat": 45.426054429454226,
+      "lng": 12.366206735013469,
+      "streetName": "Calle dei Mosaicisti Bizantini",
+      "streetNameEnglish": "Street of the Byzantine Mosaic Artists",
+      "streetDescription": "Named for the Byzantine mosaic artisans who were brought to Venice to decorate the Church of Sant'Elena and other churches. These skilled craftsmen continued the Byzantine artistic tradition that heavily influenced early Venetian sacred art.",
+      "id": "building_45.426054_12.366207"
+    },
+    {
+      "lat": 45.42650411424811,
+      "lng": 12.363776668582947,
+      "streetName": "Rio Terà delle Clarisse",
+      "streetNameEnglish": "Filled Canal of the Poor Clares",
+      "streetDescription": "A former canal that was filled in and named after the Poor Clare nuns who established a convent near Sant'Elena in the 15th century. The order was known for its strict observance of poverty and contemplative lifestyle.",
+      "id": "building_45.426504_12.363777"
+    },
+    {
+      "lat": 45.42644665069614,
+      "lng": 12.364312885137336,
+      "streetName": "Fondamenta dei Marangoni",
+      "streetNameEnglish": "Foundation of the Carpenters",
+      "streetDescription": "A waterfront street named after the carpenters' guild whose members worked in the nearby Arsenale and lived in this area. Marangoni were skilled woodworkers essential to Venice's shipbuilding industry and the construction of gondolas.",
+      "id": "building_45.426447_12.364313"
+    },
+    {
+      "lat": 45.426469499318245,
+      "lng": 12.364997772944992,
+      "streetName": "Calle dei Calafati",
+      "streetNameEnglish": "Street of the Caulkers",
+      "streetDescription": "Named after the caulkers who worked in the nearby Arsenale. These specialized workers were responsible for making ships watertight by filling seams with oakum and pitch, a crucial skill in maintaining Venice's powerful naval and merchant fleets.",
+      "id": "building_45.426469_12.364998"
+    },
+    {
+      "lat": 45.426507933786006,
+      "lng": 12.365660574144187,
+      "streetName": "Salizada dell'Imperatrice",
+      "streetNameEnglish": "Paved Street of the Empress",
+      "streetDescription": "Named in honor of Empress Helena (Saint Helena), mother of Emperor Constantine. This wider, paved street reflected the importance of the saint to whom the nearby church and campo were dedicated, and her imperial status in Byzantine tradition.",
+      "id": "building_45.426508_12.365661"
+    },
+    {
+      "lat": 45.42686606573997,
+      "lng": 12.363729053905923,
+      "streetName": "Calle dei Arsenalotti",
+      "streetNameEnglish": "Street of the Arsenal Workers",
+      "streetDescription": "Named after the workers of the Arsenale who lived in this area. The Arsenalotti were a privileged class of workers who enjoyed special status in the Republic, including serving as the Doge's personal bodyguards during official ceremonies.",
+      "id": "building_45.426866_12.363729"
+    },
+    {
+      "lat": 45.42689426557559,
+      "lng": 12.364266869345077,
+      "streetName": "Rio Terà della Basilica",
+      "streetNameEnglish": "Filled Canal of the Basilica",
+      "streetDescription": "A former canal that was filled in and named for its proximity to the Basilica of Sant'Elena. The church was elevated to the status of minor basilica due to its importance as a pilgrimage site housing the relics of Saint Helena.",
+      "id": "building_45.426894_12.364267"
+    },
+    {
+      "lat": 45.42690624017464,
+      "lng": 12.365032989756758,
+      "streetName": "Calle dei Remeri",
+      "streetNameEnglish": "Street of the Oar Makers",
+      "streetDescription": "Named after the craftsmen who made oars for Venetian boats and galleys. These specialized artisans were essential to Venice's maritime power, and many established workshops near the Arsenale and Sant'Elena area.",
+      "id": "building_45.426906_12.365033"
+    },
+    {
+      "lat": 45.4274067252769,
+      "lng": 12.363721699771894,
+      "streetName": "Sottoportego del Monastero",
+      "streetNameEnglish": "Passageway of the Monastery",
+      "streetDescription": "A covered passageway leading to the Benedictine monastery that was established at Sant'Elena in the 12th century. The monastery became an important center of learning and spirituality in Renaissance Venice.",
+      "id": "building_45.427407_12.363722"
+    },
+    {
+      "lat": 45.42740446632813,
+      "lng": 12.364293266309012,
+      "streetName": "Calle dei Bombardieri",
+      "streetNameEnglish": "Street of the Bombardiers",
+      "streetDescription": "Named after the artillery specialists who worked and trained near the Arsenale. These military experts were responsible for the cannon and other artillery that armed Venetian ships and fortifications, living in this eastern section of Venice close to Sant'Elena.",
+      "id": "building_45.427404_12.364293"
+    },
+    {
+      "lat": 45.427353896860986,
+      "lng": 12.364907241806677,
+      "streetName": "Fondamenta dei Costantinopolitani",
+      "streetNameEnglish": "Foundation of the Constantinopolitans",
+      "streetDescription": "Named after refugees and merchants from Constantinople who settled in this area after the fall of the Byzantine capital in 1453. Many Greek and Byzantine nobles found refuge in Venice, particularly in eastern districts like Sant'Elena.",
+      "id": "building_45.427354_12.364907"
+    },
+    {
+      "lat": 45.427357104187564,
+      "lng": 12.365549857264513,
+      "streetName": "Calle della Sacra Imperatrice",
+      "streetNameEnglish": "Street of the Holy Empress",
+      "streetDescription": "Another reference to Saint Helena, emphasizing her dual role as both Roman Empress and Christian saint. The street acknowledges her importance to the religious identity of this area of Venice.",
+      "id": "building_45.427357_12.365550"
+    },
+    {
+      "lat": 45.427733259608274,
+      "lng": 12.363617248413467,
+      "streetName": "Rio Terà dei Vetrari",
+      "streetNameEnglish": "Filled Canal of the Glassmakers",
+      "streetDescription": "A former canal that was filled in and named after glassmakers who had workshops in this area. While most glass production was concentrated in Murano, some specialized glass artisans maintained smaller workshops in this eastern part of Venice.",
+      "id": "building_45.427733_12.363617"
+    },
+    {
+      "lat": 45.427815888731516,
+      "lng": 12.364375313077149,
+      "streetName": "Calle dei Velieri",
+      "streetNameEnglish": "Street of the Sailing Ships",
+      "streetDescription": "Named for the sailing ships that could be seen from this area. The street offered views of the lagoon where merchant and naval vessels would anchor, reflecting Venice's maritime identity and the area's proximity to shipping lanes.",
+      "id": "building_45.427816_12.364375"
+    },
+    {
+      "lat": 45.42769534419946,
+      "lng": 12.364833888286213,
+      "streetName": "Salizada dei Greci Ortodossi",
+      "streetNameEnglish": "Paved Street of the Orthodox Greeks",
+      "streetDescription": "This wider, paved street was named after the Greek Orthodox community that settled in this area. After the fall of Constantinople, many Greek Orthodox refugees established themselves in eastern Venice, bringing their religious traditions with them.",
+      "id": "building_45.427695_12.364834"
+    },
+    {
+      "lat": 45.42779436757112,
+      "lng": 12.365467515674371,
+      "streetName": "Calle del Galleggiante",
+      "streetNameEnglish": "Street of the Floating Dock",
+      "streetDescription": "Named after a floating dock that was once located nearby in the lagoon. These specialized structures were used for the maintenance and repair of smaller vessels, supporting Venice's maritime infrastructure.",
+      "id": "building_45.427794_12.365468"
+    },
+    {
+      "lat": 45.428183936946695,
+      "lng": 12.36370954368133,
+      "streetName": "Fondamenta delle Galeazze",
+      "streetNameEnglish": "Foundation of the Galleasses",
+      "streetDescription": "Named after the galleasses – large, powerful warships that were constructed and moored nearby. These hybrid vessels combined the maneuverability of galleys with the artillery power of sailing ships and were key to Venice's naval supremacy.",
+      "id": "building_45.428184_12.363710"
+    },
+    {
+      "lat": 45.42821711882389,
+      "lng": 12.364310033551929,
+      "streetName": "Calle dei Cordami",
+      "streetNameEnglish": "Street of the Ropes",
+      "streetDescription": "Named after the rope makers who provided essential materials for Venice's shipbuilding industry. High-quality ropes were crucial for rigging ships, and many rope makers established workshops near Sant'Elena due to its proximity to the Arsenale.",
+      "id": "building_45.428217_12.364310"
+    },
+    {
+      "lat": 45.42819759275336,
+      "lng": 12.364893438024698,
+      "streetName": "Rio Terà dei Benedettini",
+      "streetNameEnglish": "Filled Canal of the Benedictines",
+      "streetDescription": "A former canal filled to create a street, named after the Benedictine monks who administered the monastery at Sant'Elena. The Benedictine order played a significant role in the religious and cultural life of Renaissance Venice.",
+      "id": "building_45.428198_12.364893"
+    },
+    {
+      "lat": 45.42823608332967,
+      "lng": 12.365628788107703,
+      "streetName": "Calle della Palma",
+      "streetNameEnglish": "Street of the Palm",
+      "streetDescription": "Named after palm branches, a symbol associated with Saint Helena and pilgrimage to the Holy Land. The palm was used in religious iconography of the saint and referenced the Eastern connections of Venice and Sant'Elena in particular.",
+      "id": "building_45.428236_12.365629"
+    },
+    {
+      "lat": 45.42817857929438,
+      "lng": 12.366271046144634,
+      "streetName": "Sottoportego dei Naviganti",
+      "streetNameEnglish": "Passageway of the Sailors",
+      "streetDescription": "A covered passageway used by sailors and maritime workers living in the Sant'Elena area. Many sailors established homes in this eastern part of Venice due to its proximity to the lagoon and shipping routes.",
+      "id": "building_45.428179_12.366271"
+    },
+    {
+      "lat": 45.4286323939024,
+      "lng": 12.363685585890188,
+      "streetName": "Calle dei Patroni di Galea",
+      "streetNameEnglish": "Street of the Galley Captains",
+      "streetDescription": "Named after the commanders of Venetian war galleys who often lived in this prestigious area. These experienced naval officers were responsible for Venice's military ships and enjoyed high social status in the maritime republic.",
+      "id": "building_45.428632_12.363686"
+    },
+    {
+      "lat": 45.42863890065151,
+      "lng": 12.364364502844335,
+      "streetName": "Fondamenta delle Porpore",
+      "streetNameEnglish": "Foundation of the Purple Dyes",
+      "streetDescription": "Named after workshops that produced purple dye, a color associated with imperial status and Saint Helena as a Roman empress. The production of this valuable dye reflected the luxury trades present in Renaissance Venice.",
+      "id": "building_45.428639_12.364365"
+    },
+    {
+      "lat": 45.42860478199204,
+      "lng": 12.3649666804277,
+      "streetName": "Calle dei Pellegrinaggi",
+      "streetNameEnglish": "Street of the Pilgrimages",
+      "streetDescription": "Named after the pilgrimages that were made to the Church of Sant'Elena to venerate the relics kept there. The street acknowledged the importance of religious tourism to Renaissance Venice's economy and cultural identity.",
+      "id": "building_45.428605_12.364967"
+    },
+    {
+      "lat": 45.42861231607108,
+      "lng": 12.365487374399006,
+      "streetName": "Rio Terà degli Olivetani",
+      "streetNameEnglish": "Filled Canal of the Olivetan Monks",
+      "streetDescription": "A former canal that was filled in, named after the Olivetan branch of the Benedictine order that maintained a presence at Sant'Elena. The Olivetans were known for their focus on manual labor and contemplative prayer.",
+      "id": "building_45.428612_12.365487"
+    },
+    {
+      "lat": 45.42872029733278,
+      "lng": 12.366137195091442,
+      "id": "building_45.428720_12.366137"
+    }
+  ]
+}

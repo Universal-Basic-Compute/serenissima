@@ -1,0 +1,185 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44709672016714,
+      "lng": 12.32166435190375
+    },
+    {
+      "lat": 45.44590744114481,
+      "lng": 12.326358217679813
+    },
+    {
+      "lat": 45.445617644672446,
+      "lng": 12.32618119188483
+    },
+    {
+      "lat": 45.44553484540687,
+      "lng": 12.325961250745609
+    },
+    {
+      "lat": 45.44543322796033,
+      "lng": 12.325033206426456
+    },
+    {
+      "lat": 45.446370359694015,
+      "lng": 12.321519512616947
+    },
+    {
+      "lat": 45.44651337441265,
+      "lng": 12.321321029149845
+    }
+  ],
+  "centroid": {
+    "lat": 45.44606765906546,
+    "lng": 12.324005537201035
+  },
+  "historicalName": "Calle del Batelo in Contrada San Moisè, Sestiere San Marco",
+  "englishName": "Batelo Alley in the San Moisè Quarter, District of St. Mark",
+  "historicalDescription": "A narrow alley in the vibrant San Moisè quarter, known for its artisan workshops and proximity to St. Mark's Square and the bustling Rialto contract area.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 30400.25,
+  "center": {
+    "lat": 45.44606765906546,
+    "lng": 12.324005537201035
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44658702915757,
+        "lng": 12.32367600866492
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055610394",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.446704773854165,
+          "lng": 12.323682139428383
+        },
+        "distance": 13.101345506250833,
+        "id": "38fca673-53c1-48e2-ae0d-f5f80d54a56e",
+        "historicalName": "Ponte del Batelo",
+        "englishName": "Bridge of the Small Boat",
+        "historicalDescription": "Named after the 'Calle del Batelo' (Street of the Small Boat) where it is located. In Renaissance Venice, 'batelo' referred to a small boat commonly used for transportation through the canals. This bridge would have served residents and visitors to the San Moisè area, an affluent district in the San Marco sestiere.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44664590150587,
+            "lng": 12.323679074046652
+          }
+        }
+      },
+      "id": "bridge_45.446587_12.323676"
+    },
+    {
+      "edge": {
+        "lat": 45.44641713215438,
+        "lng": 12.324346560918643
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055610394",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44653272661183,
+          "lng": 12.32435652340927
+        },
+        "distance": 12.876992235538408,
+        "id": "38fca673-53c1-48e2-ae0d-f5f80d54a56e",
+        "historicalName": "Ponte di San Moisè",
+        "englishName": "Bridge of Saint Moses",
+        "historicalDescription": "Named for the nearby Church of San Moisè (Saint Moses), which has been a prominent landmark in this contrada since the 8th century. The church was rebuilt in the 17th century with an elaborate Baroque façade funded by the wealthy Fini family. This bridge would have been an important crossing point for parishioners attending services at the church.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4464749293831,
+            "lng": 12.324351542163956
+          }
+        }
+      },
+      "id": "bridge_45.446417_12.324347"
+    },
+    {
+      "edge": {
+        "lat": 45.44543322796033,
+        "lng": 12.325033206426456
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055561861",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44536842812019,
+          "lng": 12.324814262337677
+        },
+        "distance": 18.53811413467082,
+        "id": "df20dd55-9181-48cc-9710-2ed94de1dad6",
+        "historicalName": "Ponte dei Profumieri",
+        "englishName": "Bridge of the Perfumers",
+        "historicalDescription": "This bridge name reflects the historical presence of perfume makers and sellers in the San Moisè area during the Renaissance period. The affluent San Marco district, particularly near San Moisè, was known for luxury trades catering to nobility and wealthy merchants. Perfumers would have established their workshops and shops in this area to serve the Venetian elite.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44540082804026,
+            "lng": 12.324923734382066
+          }
+        }
+      },
+      "id": "bridge_45.445433_12.325033"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44585975731633,
+      "lng": 12.324464872104532,
+      "streetName": "Calle del Ridotto di San Moisè",
+      "streetNameEnglish": "Street of the San Moisè Gaming House",
+      "streetDescription": "Named after the famous Ridotto, Venice's first public gambling house established in 1638 near San Moisè. This elegant gaming establishment attracted nobles and wealthy merchants in the area, making it a significant landmark in the San Marco district.",
+      "id": "building_45.445860_12.324465"
+    },
+    {
+      "lat": 45.4459051188909,
+      "lng": 12.325124522235088,
+      "streetName": "Ruga dei Oresi di San Marco",
+      "streetNameEnglish": "Row of the Goldsmiths of San Marco",
+      "streetDescription": "This street would commemorate the goldsmiths who had workshops in this prosperous area near San Moisè. The San Marco district was known for luxury artisans, and goldsmiths were among the most prestigious guild members who served the wealthy nobili and merchants of Venice.",
+      "id": "building_45.445905_12.325125"
+    },
+    {
+      "lat": 45.44591757944336,
+      "lng": 12.325704276176609,
+      "streetName": "Salizada degli Specchieri",
+      "streetNameEnglish": "Paved Street of the Mirror Makers",
+      "streetDescription": "This paved street (salizada) would reference the mirror makers who were particularly important in Venice's Renaissance economy. The area near San Moisè and the Grand Canal would have been an excellent location for luxury craftsmen who made the famous Venetian mirrors that were exported throughout Europe.",
+      "id": "building_45.445918_12.325704"
+    },
+    {
+      "lat": 45.44640112220141,
+      "lng": 12.32261278356826,
+      "streetName": "Rio Terà dei Baretteri",
+      "streetNameEnglish": "Filled Canal of the Hat Makers",
+      "streetDescription": "This former canal (now filled in) would be named after the hat makers who had shops in this commercial area. The hat-making guild was significant in Renaissance Venice, and their presence near the fashionable San Moisè district would be historically appropriate as they catered to the wealthy residents.",
+      "id": "building_45.446401_12.322613"
+    },
+    {
+      "lat": 45.446394827246415,
+      "lng": 12.323135022255997,
+      "streetName": "Calle Venier",
+      "streetNameEnglish": "Venier Street",
+      "streetDescription": "Named after the noble Venier family who likely had a palace (palazzo) in this area of San Marco. The Venier were one of Venice's case vecchie (old houses) families who provided several Doges to the Republic, making this a historically appropriate reference to a prominent family who might have owned property near San Moisè.",
+      "id": "building_45.446395_12.323135"
+    },
+    {
+      "lat": 45.446283814489895,
+      "lng": 12.323816719582274,
+      "streetName": "Sottoportego della Fenice",
+      "streetNameEnglish": "Passageway of the Phoenix",
+      "streetDescription": "This covered passageway would reference the Phoenix (La Fenice), which could refer to an early incarnation or predecessor of Venice's famous theater. The area between San Moisè and La Fenice would have contained numerous passageways connecting these important landmarks in the San Marco district.",
+      "id": "building_45.446284_12.323817"
+    },
+    {
+      "lat": 45.446815881896775,
+      "lng": 12.32188877722767,
+      "streetName": "Fondamenta San Moisè",
+      "streetNameEnglish": "San Moisè Foundation",
+      "streetDescription": "This waterside street would run along a small canal near the Church of San Moisè. Fondamente typically bordered canals, and this one would directly reference the important local church of San Moisè (dedicated to Moses), which was a significant landmark in this contrada (district) since the early medieval period.",
+      "id": "building_45.446816_12.321889"
+    }
+  ],
+  "id": "polygon-1746055595653"
+}

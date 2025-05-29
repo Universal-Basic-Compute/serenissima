@@ -1,0 +1,50 @@
+{
+  "name": "Butcher Shop",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "retail_food",
+  "size": 1,
+  "unlockCondition": "Butchers' Guild membership, livestock supply chain",
+  "calculationsAnalysis": "The Butcher Shop processes imported livestock into various cuts of meat. Construction requires specialized tools and hygiene facilities. Income is derived from meat sales, with significant maintenance for waste disposal and tool upkeep. Employs skilled butchers and assistants.",
+  "shortDescription": "Processes livestock into meat cuts and sells them to the public.",
+  "fullDescription": "Butcher shops are vital for supplying the city with fresh meat. Livestock arrives from the mainland and is processed here by skilled butchers into various cuts. These shops adhere to guild regulations for quality and hygiene.",
+  "flavorText": "A sharp knife and a strong arm carve sustenance and satisfaction from the bounty of the herds.",
+  "constructionCosts": {
+    "ducats": 450000,
+    "timber": 110,
+    "bricks": 370,
+    "stone": 180,
+    "iron": 40
+  },
+  "maintenanceCost": 600,
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 200,
+    "stores": [
+      "meat"
+    ],
+    "sells": [
+      "meat"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Cleaver chopping, knives sharpening, low hum of activity",
+    "activitySounds": "Meat cutting, customer orders, deliveries",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "summer": "Increased need for ice/cooling to preserve meat",
+    "festivals": "Higher demand for specific cuts of meat"
+  },
+  "aiInteractionPoints": [
+    "Cutting blocks",
+    "Meat display",
+    "Sales counter",
+    "Delivery entrance"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3,
+  "canImport": true,
+  "constructionMinutes": 5760
+}

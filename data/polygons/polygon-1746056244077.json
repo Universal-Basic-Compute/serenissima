@@ -1,0 +1,295 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43650196639206,
+      "lng": 12.340747359247395
+    },
+    {
+      "lat": 45.43657725050863,
+      "lng": 12.341104093046376
+    },
+    {
+      "lat": 45.437072241074034,
+      "lng": 12.341707590074726
+    },
+    {
+      "lat": 45.437267977590125,
+      "lng": 12.34210992142696
+    },
+    {
+      "lat": 45.437379020119515,
+      "lng": 12.342466655225941
+    },
+    {
+      "lat": 45.437761080034356,
+      "lng": 12.34250420615215
+    },
+    {
+      "lat": 45.43809232200476,
+      "lng": 12.342539074869343
+    },
+    {
+      "lat": 45.43828993702698,
+      "lng": 12.342093828172871
+    },
+    {
+      "lat": 45.43841415182954,
+      "lng": 12.341442051382252
+    },
+    {
+      "lat": 45.43841979795044,
+      "lng": 12.34113359734554
+    },
+    {
+      "lat": 45.43831816768792,
+      "lng": 12.340948524923512
+    },
+    {
+      "lat": 45.4376745051079,
+      "lng": 12.340318205805012
+    },
+    {
+      "lat": 45.43750700106879,
+      "lng": 12.340135815592
+    },
+    {
+      "lat": 45.43708541566855,
+      "lng": 12.340589108915516
+    },
+    {
+      "lat": 45.43668327375849,
+      "lng": 12.340682986231037
+    }
+  ],
+  "centroid": {
+    "lat": 45.437536273854796,
+    "lng": 12.341368201227372
+  },
+  "historicalName": "Calle Longa Santa Maria Formosa in Sestiere Castello",
+  "englishName": "Long Street of Saint Mary Formosa in Castello District",
+  "historicalDescription": "This area was part of the Castello sestiere, known for its proximity to the Church of Santa Maria Formosa, a prominent church in 15th century Venice. The street likely served as a main thoroughfare leading to the church.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 24058.35,
+  "center": {
+    "lat": 45.437536273854796,
+    "lng": 12.341368201227372
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43657725050863,
+        "lng": 12.341104093046376
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056403060",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.436564467849514,
+          "lng": 12.341226907420845
+        },
+        "distance": 9.687469512711631,
+        "id": "eddb5e0b-6297-4441-a614-31d9743434d9",
+        "historicalName": "Ponte dei Formosini",
+        "englishName": "Bridge of the Formosa Residents",
+        "historicalDescription": "Named after the residents of the Santa Maria Formosa parish. This bridge would be appropriately located in Calle Longa Santa Maria Formosa, connecting local residents to the prominent church of Santa Maria Formosa, one of the oldest in Venice, founded in the 7th century.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43657085917907,
+            "lng": 12.341165500233611
+          }
+        }
+      },
+      "id": "bridge_45.436577_12.341104"
+    },
+    {
+      "edge": {
+        "lat": 45.437072241074034,
+        "lng": 12.341707590074726
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056403060",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.43707263312455,
+          "lng": 12.341752620387764
+        },
+        "distance": 3.5137431721378047,
+        "id": "eddb5e0b-6297-4441-a614-31d9743434d9",
+        "historicalName": "Ponte delle Coronelle",
+        "englishName": "Bridge of the Small Crowns",
+        "historicalDescription": "Named after the small crown decorations that adorned the nearby buildings in Castello. These decorative elements were common on nobili homes in the Renaissance period, and were especially present in this area where many noble families had their residences.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43707243709929,
+            "lng": 12.341730105231246
+          }
+        }
+      },
+      "id": "bridge_45.437072_12.341708"
+    },
+    {
+      "edge": {
+        "lat": 45.437761080034356,
+        "lng": 12.34250420615215
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056377511",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.437825462157235,
+          "lng": 12.34258410518238
+        },
+        "distance": 9.492822671828954,
+        "id": "31427501-b0fb-4991-b39e-0da934dd5ca9",
+        "historicalName": "Ponte dei Casselleri",
+        "englishName": "Bridge of the Chest Makers",
+        "historicalDescription": "Named for the artisans who crafted wooden chests and cabinets in workshops near Santa Maria Formosa. During the Renaissance, the area had several workshops of casselleri (chest makers) who produced ornate cassoni (marriage chests) and furniture for Venetian homes.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4377932710958,
+            "lng": 12.342544155667266
+          }
+        }
+      },
+      "id": "bridge_45.437761_12.342504"
+    },
+    {
+      "edge": {
+        "lat": 45.43809232200476,
+        "lng": 12.342539074869343
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056377511",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43806260122233,
+          "lng": 12.342637749362678
+        },
+        "distance": 8.37823349145632,
+        "id": "31427501-b0fb-4991-b39e-0da934dd5ca9",
+        "historicalName": "Ponte della Malvasia Castello",
+        "englishName": "Bridge of the Castello Wine Shop",
+        "historicalDescription": "Named after a historical malvasia (wine shop) that operated in the Castello district near Santa Maria Formosa. These establishments were important social centers in Renaissance Venice, selling sweet wines from the eastern Mediterranean, particularly from Crete.",
+        "location": {
+          "midpoint": {
+            "lat": 45.438077461613545,
+            "lng": 12.342588412116012
+          }
+        }
+      },
+      "id": "bridge_45.438092_12.342539"
+    },
+    {
+      "edge": {
+        "lat": 45.4376745051079,
+        "lng": 12.340318205805012
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056173670",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43766056378373,
+          "lng": 12.340240421474595
+        },
+        "distance": 6.263883611107534,
+        "id": "43062484-18d2-43eb-bb3f-91f739c3c9fa",
+        "historicalName": "Ponte dei Donà",
+        "englishName": "Bridge of the Donà Family",
+        "historicalDescription": "Named after the noble Donà family who had properties in the Santa Maria Formosa area during the Renaissance. The Donà were a nobili family that provided several important figures to the Republic, including doges and military commanders, and owned palaces in this sestiere.",
+        "location": {
+          "midpoint": {
+            "lat": 45.437667534445815,
+            "lng": 12.340279313639805
+          }
+        }
+      },
+      "id": "bridge_45.437675_12.340318"
+    },
+    {
+      "edge": {
+        "lat": 45.43708541566855,
+        "lng": 12.340589108915516
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056319492",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.437035236908045,
+          "lng": 12.340493990585303
+        },
+        "distance": 9.285038356194212,
+        "id": "2ca6d666-d643-4cbc-9755-0adef550f8e2",
+        "historicalName": "Ponte dei Bombaser",
+        "englishName": "Bridge of the Cotton Merchants",
+        "historicalDescription": "Named for the bombaser (cotton merchants) who traded in this area of Castello. During the Renaissance, Venice was a major center for textile trade, and this bridge would have connected warehouses and shops dealing in cotton fabrics imported from the Eastern Mediterranean.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4370603262883,
+            "lng": 12.340541549750409
+          }
+        }
+      },
+      "id": "bridge_45.437085_12.340589"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.4368756232604,
+      "lng": 12.340891299890126,
+      "streetName": "Calle dei Oratori Bizantini",
+      "streetNameEnglish": "Street of the Byzantine Orators",
+      "streetDescription": "Named for the Byzantine scholars who frequented this area near Santa Maria Formosa after the fall of Constantinople in 1453. These Greek intellectuals often gave public orations and lectures in the campo nearby, contributing to Venice's reputation as a center of humanist learning during the Renaissance.",
+      "id": "building_45.436876_12.340891"
+    },
+    {
+      "lat": 45.437344749041316,
+      "lng": 12.340664338916007,
+      "streetName": "Fondamenta dei Miracoli",
+      "streetNameEnglish": "Foundation of Miracles",
+      "streetDescription": "This waterside path was named after reported miraculous events associated with a small Madonna shrine that stood near Santa Maria Formosa in the 15th century. Venetians believed the shrine protected the neighborhood from plague outbreaks, and it became a significant place of devotion for local residents.",
+      "id": "building_45.437345_12.340664"
+    },
+    {
+      "lat": 45.437485889473486,
+      "lng": 12.341374989876101,
+      "streetName": "Rio Terà dei Verrocchi",
+      "streetNameEnglish": "Filled Canal of the Verrocchi",
+      "streetDescription": "Named after the Verrocchi family, who were prominent glass merchants in this area of Castello during the 15th-16th centuries. This was once a canal that was filled in (rio terà) around 1490 to create more buildable land, a common practice in Venice as the city expanded.",
+      "id": "building_45.437486_12.341375"
+    },
+    {
+      "lat": 45.43740766415558,
+      "lng": 12.342113917283848,
+      "streetName": "Salizada dei Questori",
+      "streetNameEnglish": "Paved Street of the Quaestors",
+      "streetDescription": "One of the first paved streets (salizada) in this part of Castello, named after the Venetian quaestors or financial officers who had their residences nearby. These magistrates were responsible for managing the Republic's treasury and often came from noble families residing in the parish of Santa Maria Formosa.",
+      "id": "building_45.437408_12.342114"
+    },
+    {
+      "lat": 45.43776762393742,
+      "lng": 12.340851045694007,
+      "streetName": "Calle della Donzella d'Oro",
+      "streetNameEnglish": "Street of the Golden Maiden",
+      "streetDescription": "Named after a historic inn that operated here since the early 1400s, marked by a sign depicting a golden maiden. The inn was particularly popular with merchants from the Levant who came to trade in Venice and frequented the nearby Rialto contracts. The building reportedly featured distinctive Byzantine-influenced architectural elements.",
+      "id": "building_45.437768_12.340851"
+    },
+    {
+      "lat": 45.43776580907551,
+      "lng": 12.341483421107904,
+      "streetName": "Sottoportego dei Stampatori",
+      "streetNameEnglish": "Underpass of the Printers",
+      "streetDescription": "This covered passageway near Santa Maria Formosa was home to several printing workshops that flourished in the late 15th century, following the introduction of printing to Venice in 1469. These early printers produced religious texts, classical works, and commercial documents, contributing to Venice's position as Europe's printing capital.",
+      "id": "building_45.437766_12.341483"
+    },
+    {
+      "lat": 45.437764170494304,
+      "lng": 12.342127434246315,
+      "streetName": "Ruga dei Orafi Castellani",
+      "streetNameEnglish": "Street of the Goldsmiths of Castello",
+      "streetDescription": "This commercial street was home to goldsmiths who specialized in creating Byzantine-inspired jewelry and religious objects. The 'Castellani' designation distinguished these artisans from those working in other sestieri. Their workshops were strategically located near Santa Maria Formosa to serve the wealthy noble families residing in this prestigious area of Castello.",
+      "id": "building_45.437764_12.342127"
+    }
+  ],
+  "id": "polygon-1746056244077"
+}

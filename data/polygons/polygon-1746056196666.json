@@ -1,0 +1,494 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44187009337603,
+      "lng": 12.342733467927832
+    },
+    {
+      "lat": 45.43992791322683,
+      "lng": 12.346113051286597
+    },
+    {
+      "lat": 45.43790285575469,
+      "lng": 12.345694626680274
+    },
+    {
+      "lat": 45.43789532752443,
+      "lng": 12.344836319795508
+    },
+    {
+      "lat": 45.438362075902745,
+      "lng": 12.342830027452369
+    },
+    {
+      "lat": 45.43856533608654,
+      "lng": 12.340716446748633
+    }
+  ],
+  "centroid": {
+    "lat": 45.439087266978554,
+    "lng": 12.343820656648534
+  },
+  "historicalName": "Calle de le Tole",
+  "englishName": "Street of the Planks",
+  "historicalDescription": "Located in the Castello sestiere, this area was known for its workshops producing wooden planks and boards for construction, especially for building and repairing ships at the nearby Arsenale.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 110491.89,
+  "center": {
+    "lat": 45.439260120829495,
+    "lng": 12.343725402621484
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.4415463966845,
+        "lng": 12.34329673182096
+      },
+      "water": {
+        "lat": 45.44172428436329,
+        "lng": 12.343258832327
+      },
+      "historicalName": "Fondamenta dei Tornitori",
+      "englishName": "Foundation of the Woodturners",
+      "historicalDescription": "This dock was named after the woodturners who had workshops nearby in Calle de le Tole. These artisans specialized in creating wooden balusters, furniture legs, and decorative elements using lathes - crafts essential to Venice's furniture industry during the Renaissance.",
+      "id": "canal_45.441546_12.343297"
+    },
+    {
+      "edge": {
+        "lat": 45.44122269999296,
+        "lng": 12.343859995714087
+      },
+      "water": {
+        "lat": 45.441402549290245,
+        "lng": 12.343863308907828
+      },
+      "historicalName": "Riva delle Assi",
+      "englishName": "Shore of the Planks",
+      "historicalDescription": "This landing was where timber planks were delivered and unloaded for the various woodworking shops in Calle de le Tole. The name reflects the area's historical connection to woodworking, as 'tole' itself refers to wooden planks or boards in Venetian dialect.",
+      "id": "canal_45.441223_12.343860"
+    },
+    {
+      "edge": {
+        "lat": 45.44089900330143,
+        "lng": 12.344423259607215
+      },
+      "water": {
+        "lat": 45.441074160847236,
+        "lng": 12.344481518888108
+      },
+      "historicalName": "Fondamenta dei Marangoni",
+      "englishName": "Foundation of the Carpenters",
+      "historicalDescription": "The Marangoni were the guild of carpenters and joiners in Renaissance Venice. This dock served their workshops that were concentrated in the Calle de le Tole area, where they crafted everything from ornate furniture to architectural elements for Venice's palaces and churches.",
+      "id": "canal_45.440899_12.344423"
+    },
+    {
+      "edge": {
+        "lat": 45.4405753066099,
+        "lng": 12.344986523500342
+      },
+      "water": {
+        "lat": 45.440732923677686,
+        "lng": 12.345110015180763
+      },
+      "historicalName": "Riva di San Zanipolo",
+      "englishName": "Shore of Saints John and Paul",
+      "historicalDescription": "Named for its proximity to the Basilica di San Giovanni e Paolo (locally known as San Zanipolo in Venetian dialect), one of Venice's largest churches. This dock would have served visitors and materials headed to both the basilica and the Scuola Grande di San Marco nearby from the Calle de le Tole district.",
+      "id": "canal_45.440575_12.344987"
+    },
+    {
+      "edge": {
+        "lat": 45.44025160991836,
+        "lng": 12.34554978739347
+      },
+      "water": {
+        "lat": 45.440376150069625,
+        "lng": 12.345734738233269
+      },
+      "historicalName": "Fondamenta dei Falegnami",
+      "englishName": "Foundation of the Woodworkers",
+      "historicalDescription": "This dock was named for the falegnami (woodworkers) who were prevalent in the area of Calle de le Tole. The Falegnami guild was distinct from other woodworking specialties and focused on general carpentry. This landing would have received raw materials for their workshops that produced wooden items essential to Venetian daily life.",
+      "id": "canal_45.440252_12.345550"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.4394216488588,
+        "lng": 12.346008445135016
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056493504",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43937665830215,
+          "lng": 12.346106554690476
+        },
+        "distance": 9.144441208766315,
+        "id": "1e49c7af-5651-455a-a77c-9856bbcb8e17",
+        "historicalName": "Ponte dei Legnatoli",
+        "englishName": "Bridge of the Woodworkers",
+        "historicalDescription": "Named after the woodworkers' workshops that were historically located near Calle de le Tole. 'Tole' refers to wooden planks or boards, and this area was known for woodworking artisans who crafted furniture and wooden goods for Venetian households.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439399153580474,
+            "lng": 12.346057499912746
+          }
+        }
+      },
+      "id": "bridge_45.439422_12.346008"
+    },
+    {
+      "edge": {
+        "lat": 45.43891538449076,
+        "lng": 12.345903838983435
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056493504",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.438895444229914,
+          "lng": 12.345999818823312
+        },
+        "distance": 7.80990096675569,
+        "id": "1e49c7af-5651-455a-a77c-9856bbcb8e17",
+        "historicalName": "Ponte della Stamperia",
+        "englishName": "Bridge of the Printing House",
+        "historicalDescription": "This bridge name references the early printing workshops that operated in this district during the Renaissance period. Venice was one of Europe's most important centers for printing in the 15th-16th centuries, and the area around Calle de le Tole housed several printing establishments that produced books and documents.",
+        "location": {
+          "midpoint": {
+            "lat": 45.438905414360335,
+            "lng": 12.345951828903374
+          }
+        }
+      },
+      "id": "bridge_45.438915_12.345904"
+    },
+    {
+      "edge": {
+        "lat": 45.43840912012273,
+        "lng": 12.345799232831855
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056493504",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.438414230157676,
+          "lng": 12.345893082956147
+        },
+        "distance": 7.3444588011522525,
+        "id": "1e49c7af-5651-455a-a77c-9856bbcb8e17",
+        "historicalName": "Ponte dei Armeni",
+        "englishName": "Bridge of the Armenians",
+        "historicalDescription": "Named to commemorate the Armenian merchant community that established itself in this part of Venice. Armenian traders were important to Venice's commerce with the East, and they had a significant presence near Calle de le Tole, bringing valuable goods such as silk, spices, and precious stones to the Republic.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4384116751402,
+            "lng": 12.345846157894002
+          }
+        }
+      },
+      "id": "bridge_45.438409_12.345799"
+    },
+    {
+      "edge": {
+        "lat": 45.43820649310997,
+        "lng": 12.343498791566748
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056214187",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.438137661282454,
+          "lng": 12.343523954197035
+        },
+        "distance": 7.901538046452877,
+        "id": "387b8d51-9ceb-4626-8804-a81d471b46da",
+        "historicalName": "Ponte delle Scuole",
+        "englishName": "Bridge of the Schools",
+        "historicalDescription": "This bridge takes its name from the small educational institutions that existed in the vicinity of Calle de le Tole. Renaissance Venice had numerous small schools where young nobles and merchants' children received instruction in subjects ranging from mathematics to classical languages, preparing them for roles in commerce and governance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.438172077196214,
+            "lng": 12.343511372881892
+          }
+        }
+      },
+      "id": "bridge_45.438206_12.343499"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43842112315793,
+      "lng": 12.343234366746286,
+      "streetName": "Calle dei Marangoni",
+      "streetNameEnglish": "Street of the Carpenters",
+      "streetDescription": "Named after the woodworkers' guild (marangoni) that had workshops in this area near Calle de le Tole. Carpenters were essential for the Venetian shipbuilding industry and furniture crafting.",
+      "id": "building_45.438421_12.343234"
+    },
+    {
+      "lat": 45.438394992222804,
+      "lng": 12.343959061322606,
+      "streetName": "Ruga dei Tagiapiera",
+      "streetNameEnglish": "Row of the Stonemasons",
+      "streetDescription": "The stonemasons (tagiapiera) were responsible for creating the ornate stone decorations of Venetian palaces. This street housed several workshops where they would carve marble and stone for building projects.",
+      "id": "building_45.438395_12.343959"
+    },
+    {
+      "lat": 45.438329842900856,
+      "lng": 12.344477187736224,
+      "streetName": "Calle del Forner",
+      "streetNameEnglish": "Baker's Street",
+      "streetDescription": "Named after a prominent bakery that served the neighborhood around Calle de le Tole. Bakers were essential to Venetian daily life and were strictly regulated by the Republic.",
+      "id": "building_45.438330_12.344477"
+    },
+    {
+      "lat": 45.43832356098534,
+      "lng": 12.345278572579577,
+      "streetName": "Fondamenta della Madonnetta",
+      "streetNameEnglish": "Foundation of the Little Madonna",
+      "streetDescription": "Named after a small shrine with an image of the Madonna that was placed along this canal-side walkway. Such devotional markers were common throughout Venice.",
+      "id": "building_45.438324_12.345279"
+    },
+    {
+      "lat": 45.43879084224779,
+      "lng": 12.341426534743839,
+      "streetName": "Sottoportego dei Baretteri",
+      "streetNameEnglish": "Underpass of the Cap Makers",
+      "streetDescription": "This covered passageway was home to artisans who made the distinctive Venetian caps (barète). Cap makers formed their own guild and were important to Venetian fashion.",
+      "id": "building_45.438791_12.341427"
+    },
+    {
+      "lat": 45.43883765097962,
+      "lng": 12.341912357720984,
+      "streetName": "Rio Terà delle Acque",
+      "streetNameEnglish": "Filled Canal of the Waters",
+      "streetDescription": "A former canal that was filled in during urban renovations, possibly named for the good water quality or for water sellers who gathered here. Rio Terà indicates a filled-in canal that became a street.",
+      "id": "building_45.438838_12.341912"
+    },
+    {
+      "lat": 45.4387777366168,
+      "lng": 12.342582224339004,
+      "streetName": "Calle delle Vele",
+      "streetNameEnglish": "Street of the Sails",
+      "streetDescription": "Named after the sailmakers who operated workshops in this area. Sailmaking was a crucial industry for the maritime Republic of Venice.",
+      "id": "building_45.438778_12.342582"
+    },
+    {
+      "lat": 45.43873278392137,
+      "lng": 12.343312557170929,
+      "streetName": "Salizada dei Greci",
+      "streetNameEnglish": "Paved Way of the Greeks",
+      "streetDescription": "Named for the Greek community that settled nearby. 'Salizada' indicates one of the first paved streets in Venice, showing the importance of the Greek merchants to Venetian commerce.",
+      "id": "building_45.438733_12.343313"
+    },
+    {
+      "lat": 45.438733279811466,
+      "lng": 12.34393442211925,
+      "streetName": "Campiello del Pozzo",
+      "streetNameEnglish": "Little Square of the Well",
+      "streetDescription": "Named after a public water well (pozzo) located in this small square. Wells were essential infrastructure in Venice for collecting rainwater, as the city had no natural freshwater sources.",
+      "id": "building_45.438733_12.343934"
+    },
+    {
+      "lat": 45.43882017531941,
+      "lng": 12.344666034287426,
+      "streetName": "Calle del Paradiso",
+      "streetNameEnglish": "Street of Paradise",
+      "streetDescription": "Often named for its proximity to a church or convent, suggesting a path to spiritual paradise, or ironically named for a once-disreputable area that was later reformed.",
+      "id": "building_45.438820_12.344666"
+    },
+    {
+      "lat": 45.43874873485675,
+      "lng": 12.345229613806477,
+      "streetName": "Corte Morosini",
+      "streetNameEnglish": "Morosini Court",
+      "streetDescription": "Named after the Morosini family, a prominent noble Venetian family that produced several doges and military leaders. Their family palace was likely nearby.",
+      "id": "building_45.438749_12.345230"
+    },
+    {
+      "lat": 45.43926927094284,
+      "lng": 12.342004362043998,
+      "streetName": "Ramo del Pestrin",
+      "streetNameEnglish": "Branch of the Grain Mill",
+      "streetDescription": "A small side street named after a grain mill (pestrin) that operated in the vicinity. Grain processing was essential for the city's food supply.",
+      "id": "building_45.439269_12.342004"
+    },
+    {
+      "lat": 45.43927877845626,
+      "lng": 12.342644019723448,
+      "streetName": "Calle della Mandola",
+      "streetNameEnglish": "Street of the Almond",
+      "streetDescription": "Possibly named after almond sellers or confectioners who used almonds in their sweets, or for the almond-like shape of the street itself.",
+      "id": "building_45.439279_12.342644"
+    },
+    {
+      "lat": 45.439262717694284,
+      "lng": 12.343191769162765,
+      "streetName": "Fondamenta dei Vetrai",
+      "streetNameEnglish": "Foundation of the Glassmakers",
+      "streetDescription": "Named for glassmakers who may have had workshops here before the industry was concentrated on Murano. Venetian glass was world-renowned during the Renaissance.",
+      "id": "building_45.439263_12.343192"
+    },
+    {
+      "lat": 45.43933036906537,
+      "lng": 12.343856836911112,
+      "streetName": "Calle dei Scudelleri",
+      "streetNameEnglish": "Street of the Bowl Makers",
+      "streetDescription": "Named after craftsmen who made wooden or ceramic bowls and dishes. These artisans were essential for producing everyday items for Venetian households.",
+      "id": "building_45.439330_12.343857"
+    },
+    {
+      "lat": 45.43930865702073,
+      "lng": 12.344568939485573,
+      "streetName": "Rio Terà dei Catecumeni",
+      "streetNameEnglish": "Filled Canal of the Catechumens",
+      "streetDescription": "Named after an institution that prepared converts (particularly Jews and Muslims) for baptism into Christianity, reflecting Venice's position as a crossroads of cultures and religions.",
+      "id": "building_45.439309_12.344569"
+    },
+    {
+      "lat": 45.43916919649881,
+      "lng": 12.34527717040817,
+      "streetName": "Calle del Campanile",
+      "streetNameEnglish": "Street of the Bell Tower",
+      "streetDescription": "Named for its proximity to a church bell tower, which would have been a prominent landmark in the neighborhood around Calle de le Tole.",
+      "id": "building_45.439169_12.345277"
+    },
+    {
+      "lat": 45.439193970263034,
+      "lng": 12.345723079142061,
+      "streetName": "Sottoportego della Misericordia",
+      "streetNameEnglish": "Underpass of Mercy",
+      "streetDescription": "Likely named after a nearby Scuola (confraternity) dedicated to acts of mercy and charity, which were important religious and social institutions in Renaissance Venice.",
+      "id": "building_45.439194_12.345723"
+    },
+    {
+      "lat": 45.43961510492812,
+      "lng": 12.341935052078021,
+      "streetName": "Calle dei Tintori",
+      "streetNameEnglish": "Street of the Dyers",
+      "streetDescription": "Named after textile dyers who worked in this area. The textile industry was one of Venice's most important, and dyers used distinctive techniques and imported dyestuffs.",
+      "id": "building_45.439615_12.341935"
+    },
+    {
+      "lat": 45.43963129694337,
+      "lng": 12.342605642167122,
+      "streetName": "Fondamenta della Fava",
+      "streetNameEnglish": "Foundation of the Bean",
+      "streetDescription": "May refer to a shop selling beans, or to the Church of Santa Maria della Fava nearby. Beans were an important staple in Venetian diet.",
+      "id": "building_45.439631_12.342606"
+    },
+    {
+      "lat": 45.43975684927888,
+      "lng": 12.343288930300403,
+      "streetName": "Ruga dei Oresi",
+      "streetNameEnglish": "Row of the Goldsmiths",
+      "streetDescription": "A street where goldsmiths and jewelry makers had their workshops and stores. 'Ruga' typically indicated a commercial street lined with shops of the same trade.",
+      "id": "building_45.439757_12.343289"
+    },
+    {
+      "lat": 45.43975374600613,
+      "lng": 12.344515832410545,
+      "streetName": "Calle dei Consorti",
+      "streetNameEnglish": "Street of the Consortium",
+      "streetDescription": "Named after a business consortium or association of merchants who may have had their headquarters or warehouses in this street.",
+      "id": "building_45.439754_12.344516"
+    },
+    {
+      "lat": 45.43965619038078,
+      "lng": 12.345300750703156,
+      "streetName": "Campiello delle Tole",
+      "streetNameEnglish": "Little Square of the Planks",
+      "streetDescription": "A small square directly connected to Calle de le Tole, named after the wooden planks ('tole') used in construction or sold by merchants in this area.",
+      "id": "building_45.439656_12.345301"
+    },
+    {
+      "lat": 45.439691230224476,
+      "lng": 12.345807681863027,
+      "streetName": "Calle della Pietà",
+      "streetNameEnglish": "Street of Mercy",
+      "streetDescription": "Named after an orphanage or charitable institution in the area. The Pietà was famously associated with Antonio Vivaldi, who taught music to orphaned girls.",
+      "id": "building_45.439691_12.345808"
+    },
+    {
+      "lat": 45.44015239758798,
+      "lng": 12.341945650259577,
+      "streetName": "Sottoportego dei Preti",
+      "streetNameEnglish": "Underpass of the Priests",
+      "streetDescription": "A covered passageway possibly used by priests traveling between a church and rectory, or named for clerical residences nearby.",
+      "id": "building_45.440152_12.341946"
+    },
+    {
+      "lat": 45.44018166331491,
+      "lng": 12.342732766586327,
+      "streetName": "Rio Terà dei Pensieri",
+      "streetNameEnglish": "Filled Canal of Thoughts",
+      "streetDescription": "A poetically named street that was once a canal. May reference a location where philosophers or scholars gathered, or simply a quiet, contemplative area.",
+      "id": "building_45.440182_12.342733"
+    },
+    {
+      "lat": 45.440169874583034,
+      "lng": 12.343283476274157,
+      "streetName": "Corte Contarini",
+      "streetNameEnglish": "Contarini Court",
+      "streetDescription": "Named after the Contarini family, one of the founding families of Venice who produced eight doges. Their influence would have been felt throughout the city.",
+      "id": "building_45.440170_12.343283"
+    },
+    {
+      "lat": 45.44012844111898,
+      "lng": 12.343885587760486,
+      "streetName": "Calle del Squero",
+      "streetNameEnglish": "Street of the Boatyard",
+      "streetDescription": "Named after a 'squero' or small boatyard where gondolas and other small vessels were built and repaired, essential to Venetian transportation.",
+      "id": "building_45.440128_12.343886"
+    },
+    {
+      "lat": 45.440053263230425,
+      "lng": 12.344680192804407,
+      "streetName": "Ramo dei Bombaseri",
+      "streetNameEnglish": "Branch of the Cotton Weavers",
+      "streetDescription": "A side street named after cotton fabric producers. The textile industry was crucial to Venetian commerce, with cotton being an important imported material.",
+      "id": "building_45.440053_12.344680"
+    },
+    {
+      "lat": 45.44062206055011,
+      "lng": 12.342604110184794,
+      "streetName": "Salizada dei Spezieri",
+      "streetNameEnglish": "Paved Way of the Spice Merchants",
+      "streetDescription": "One of the first paved streets in the area, named after spice merchants. Venice was the main European hub for the spice trade with the East during the Renaissance.",
+      "id": "building_45.440622_12.342604"
+    },
+    {
+      "lat": 45.440637242235525,
+      "lng": 12.343384790223796,
+      "streetName": "Calle dei Furlani",
+      "streetNameEnglish": "Street of the Friulians",
+      "streetDescription": "Named after immigrants from Friuli who settled in this area. Venice often had neighborhoods named after the regional origin of its inhabitants.",
+      "id": "building_45.440637_12.343385"
+    },
+    {
+      "lat": 45.44068008171177,
+      "lng": 12.343883235970276,
+      "streetName": "Fondamenta degli Orefici",
+      "streetNameEnglish": "Foundation of the Goldsmiths",
+      "streetDescription": "A canal-side street where goldsmiths and jewelry makers had their workshops. Venetian jewelry was famous throughout Europe for its craftsmanship.",
+      "id": "building_45.440680_12.343883"
+    },
+    {
+      "lat": 45.44104498308521,
+      "lng": 12.342648221333592,
+      "streetName": "Calle dei Fcitizeni",
+      "streetNameEnglish": "Street of the Spindle Makers",
+      "streetDescription": "Named after craftsmen who made spindles for the textile industry. This specialized craft supported Venice's important cloth production.",
+      "id": "building_45.441045_12.342648"
+    },
+    {
+      "lat": 45.44107391176471,
+      "lng": 12.343350615985443,
+      "streetName": "Rio Terà dei Frari",
+      "streetNameEnglish": "Filled Canal of the Friars",
+      "streetDescription": "A former canal filled to create a street, named for its proximity to Franciscan friars (frari) who had a monastery in the vicinity.",
+      "id": "building_45.441074_12.343351"
+    }
+  ],
+  "id": "polygon-1746056196666"
+}

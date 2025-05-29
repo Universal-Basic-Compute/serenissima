@@ -1,0 +1,68 @@
+{
+  "id": "war_galley",
+  "name": "War Galley",
+  "category": "finished_goods",
+  "subCategory": "naval_vessels",
+  "description": "A powerful Venetian warship combining oars and sails, designed for naval combat and patrol duties. With reinforced hull, multiple cannon emplacements, and space for marines, these vessels project Venetian military power throughout the Mediterranean.",
+  "varieties": [
+    {
+      "type": "light_war_galley",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 0.7,
+      "speedMultiplier": 1.3,
+      "combatMultiplier": 0.7,
+      "crewRequirement": 100,
+      "modelVariant": "models/resources/war_galley_light.glb"
+    },
+    {
+      "type": "standard_war_galley",
+      "productionDifficulty": "high",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "speedMultiplier": 1,
+      "combatMultiplier": 1,
+      "crewRequirement": 150,
+      "modelVariant": "models/resources/war_galley_standard.glb"
+    },
+    {
+      "type": "heavy_war_galley",
+      "productionDifficulty": "very_high",
+      "popularity": "medium",
+      "valueMultiplier": 1.5,
+      "speedMultiplier": 0.8,
+      "combatMultiplier": 1.4,
+      "crewRequirement": 200,
+      "modelVariant": "models/resources/war_galley_heavy.glb"
+    },
+    {
+      "type": "flagship_galley",
+      "productionDifficulty": "extremely_high",
+      "popularity": "low",
+      "valueMultiplier": 2,
+      "speedMultiplier": 0.7,
+      "combatMultiplier": 1.8,
+      "crewRequirement": 250,
+      "modelVariant": "models/resources/war_galley_flagship.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1280,
+    "notableProducers": [
+      "Venetian Arsenal",
+      "Republic Naval Yards"
+    ],
+    "historicalSignificance": "The war galley represented the backbone of Venetian naval power, allowing the Republic to maintain control over vital trade routes and project military force throughout the Mediterranean. The standardized construction methods of the Venetian Arsenal allowed Venice to produce these vessels at an unprecedented rate, with some accounts claiming a complete galley could be assembled in as little as a day once all components were prepared. This industrial efficiency gave Venice a crucial advantage in rapidly replacing combat losses during conflicts.",
+    "historicalBattles": [
+      "Battle of Curzola (1298)",
+      "Battle of Chioggia (1380)",
+      "Battle of Zonchio (1499)",
+      "Battle of Lepanto (1571)"
+    ]
+  },
+  "icon": "/images/resources/war_galley.png",
+  "importPrice": 1177329.6,
+  "lifetimeHours": null,
+  "consumptionHours": 1168,
+  "tier": 4
+}

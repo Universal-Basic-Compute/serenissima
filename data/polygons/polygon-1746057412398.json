@@ -1,0 +1,870 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.431108655281214,
+      "lng": 12.364442326417636
+    },
+    {
+      "lat": 45.43265210709465,
+      "lng": 12.36284372984476
+    },
+    {
+      "lat": 45.43272739634728,
+      "lng": 12.362414576402378
+    },
+    {
+      "lat": 45.43269728065828,
+      "lng": 12.361738659730625
+    },
+    {
+      "lat": 45.4320497894577,
+      "lng": 12.359442688813877
+    },
+    {
+      "lat": 45.43172604107173,
+      "lng": 12.359335400453281
+    },
+    {
+      "lat": 45.43019009319177,
+      "lng": 12.35961435019083
+    },
+    {
+      "lat": 45.42877457480232,
+      "lng": 12.359442688813877
+    },
+    {
+      "lat": 45.42671146847117,
+      "lng": 12.3588526028306
+    },
+    {
+      "lat": 45.425862240951545,
+      "lng": 12.360034181082401
+    },
+    {
+      "lat": 45.42515443192726,
+      "lng": 12.361536218130741
+    },
+    {
+      "lat": 45.42465745433042,
+      "lng": 12.363714171850834
+    },
+    {
+      "lat": 45.42973244399269,
+      "lng": 12.362694932425175
+    },
+    {
+      "lat": 45.43156994800412,
+      "lng": 12.362258760212507
+    },
+    {
+      "lat": 45.43205180672471,
+      "lng": 12.361958352802839
+    },
+    {
+      "lat": 45.43226261862128,
+      "lng": 12.362730828999128
+    },
+    {
+      "lat": 45.43158500615142,
+      "lng": 12.363385287998762
+    },
+    {
+      "lat": 45.43165276776452,
+      "lng": 12.363653508900251
+    },
+    {
+      "lat": 45.43101279373005,
+      "lng": 12.364307967899885
+    }
+  ],
+  "centroid": {
+    "lat": 45.43021994308285,
+    "lng": 12.361810591252652
+  },
+  "historicalName": "Strada de la Carità",
+  "englishName": "Street of Charity",
+  "historicalDescription": "This area was part of the Dorsoduro sestiere and was known for the presence of the Chiesa di Santa Maria della Carità, a church dedicated to the Virgin Mary of Charity. The church and its surrounding area were important religious and cultural centers in 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 223708.36,
+  "center": {
+    "lat": 45.427977538499576,
+    "lng": 12.361311272827065
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.42628685471136,
+        "lng": 12.3594433919565
+      },
+      "water": {
+        "lat": 45.42612116486329,
+        "lng": 12.35934366857002
+      },
+      "historicalName": "Fondamenta della Carità",
+      "englishName": "Foundation of Charity",
+      "historicalDescription": "Named after the adjoining Strada de la Carità, this dock served the charitable institutions in the area, particularly the Scuola Grande della Carità which later became part of the Gallerie dell'Accademia. It was a busy landing point for supplies destined for the various charitable works.",
+      "id": "canal_45.426287_12.359443"
+    },
+    {
+      "edge": {
+        "lat": 45.425862240951545,
+        "lng": 12.360034181082401
+      },
+      "water": {
+        "lat": 45.425689314247236,
+        "lng": 12.359963687793282
+      },
+      "historicalName": "Riva dei Benefattori",
+      "englishName": "Shore of the Benefactors",
+      "historicalDescription": "This landing was named for the wealthy patrons who would arrive by gondola to make donations to the charitable institutions along Strada de la Carità. Noble families would ceremoniously dock here when delivering alms or endowments to the nearby hospices.",
+      "id": "canal_45.425862_12.360034"
+    },
+    {
+      "edge": {
+        "lat": 45.42550833643941,
+        "lng": 12.360785199606571
+      },
+      "water": {
+        "lat": 45.42533053404481,
+        "lng": 12.360746504294362
+      },
+      "historicalName": "Fondamenta degli Accademici",
+      "englishName": "Foundation of the Academics",
+      "historicalDescription": "After the establishment of the Accademia in the 18th century (though historically relevant to the Renaissance period), this dock served the prestigious art institution. Artists, teachers, and students would arrive here, often transporting paintings and art supplies.",
+      "id": "canal_45.425508_12.360785"
+    },
+    {
+      "edge": {
+        "lat": 45.42515443192726,
+        "lng": 12.361536218130741
+      },
+      "water": {
+        "lat": 45.424974697419316,
+        "lng": 12.361526482821402
+      },
+      "historicalName": "Riva di San Vidal",
+      "englishName": "Shore of Saint Vidal",
+      "historicalDescription": "Named after the nearby Church of San Vidal, this dock served parishioners and clergy. The church, dedicated to the martyr San Vitale, was an important religious landmark close to Strada de la Carità, and the dock facilitated access for religious processions and ceremonies.",
+      "id": "canal_45.425154_12.361536"
+    },
+    {
+      "edge": {
+        "lat": 45.42498877272831,
+        "lng": 12.362262202704105
+      },
+      "water": {
+        "lat": 45.42480923763192,
+        "lng": 12.362277702123924
+      },
+      "historicalName": "Fondamenta dei Pisani",
+      "englishName": "Foundation of the Pisani Family",
+      "historicalDescription": "Named after the noble Pisani family who had significant property holdings near Strada de la Carità. This dock served their palazzo and was used by family members, servants, and visiting dignitaries associated with this influential Venetian family.",
+      "id": "canal_45.424989_12.362262"
+    },
+    {
+      "edge": {
+        "lat": 45.42482311352937,
+        "lng": 12.36298818727747
+      },
+      "water": {
+        "lat": 45.42464532179671,
+        "lng": 12.363026981691032
+      },
+      "historicalName": "Riva delle Elemosine",
+      "englishName": "Shore of Alms",
+      "historicalDescription": "This dock was where food and supplies donated to the poor would arrive by boat. Located along Strada de la Carità, it served as the main supply point for the charitable institutions that gave the street its name, with regular deliveries of grain, wine, and other necessities for distribution.",
+      "id": "canal_45.424823_12.362988"
+    },
+    {
+      "edge": {
+        "lat": 45.42927108129612,
+        "lng": 12.36278759055478
+      },
+      "water": {
+        "lat": 45.42912529475468,
+        "lng": 12.362937700245402
+      },
+      "historicalName": "Fondamenta dei Gonella",
+      "englishName": "Foundation of the Gonella Family",
+      "historicalDescription": "Named after a merchant family that traded in textiles and had workshops near Strada de la Carità. The Gonella family, though less famous than some Venetian dynasties, played an important role in the commercial life of this district during the Renaissance period.",
+      "id": "canal_45.429271_12.362788"
+    },
+    {
+      "edge": {
+        "lat": 45.42973244399269,
+        "lng": 12.362694932425175
+      },
+      "water": {
+        "lat": 45.42962133764885,
+        "lng": 12.362896483394964
+      },
+      "historicalName": "Riva degli Scultori",
+      "englishName": "Shore of the Sculptors",
+      "historicalDescription": "This dock served the workshops of sculptors who had establishments near Strada de la Carità. It was used for unloading marble and stone brought from mainland quarries, making it a crucial logistical point for the Renaissance artists working in the area.",
+      "id": "canal_45.429732_12.362695"
+    },
+    {
+      "edge": {
+        "lat": 45.43019181999555,
+        "lng": 12.362585889372008
+      },
+      "water": {
+        "lat": 45.430182535455025,
+        "lng": 12.362841845865443
+      },
+      "historicalName": "Fondamenta di Sant'Agnese",
+      "englishName": "Foundation of Saint Agnes",
+      "historicalDescription": "Named after a small chapel dedicated to Saint Agnes that once stood near Strada de la Carità. This dock served the religious complex and the surrounding neighborhood, providing a landing point for devotees coming to worship or participate in the feast day celebrations.",
+      "id": "canal_45.430192_12.362586"
+    },
+    {
+      "edge": {
+        "lat": 45.43065119599841,
+        "lng": 12.362476846318842
+      },
+      "water": {
+        "lat": 45.43077314219017,
+        "lng": 12.362665244507305
+      },
+      "historicalName": "Riva del Magistrato alla Carità",
+      "englishName": "Shore of the Charity Magistrate",
+      "historicalDescription": "This dock was used by officials overseeing Venice's charitable institutions. The Magistrato alla Carità was a governmental body responsible for supervising hospices and almshouses, and they would arrive at this dock when conducting inspections of the facilities along Strada de la Carità.",
+      "id": "canal_45.430651_12.362477"
+    },
+    {
+      "edge": {
+        "lat": 45.43111057200126,
+        "lng": 12.362367803265673
+      },
+      "water": {
+        "lat": 45.43127526179431,
+        "lng": 12.362470839591142
+      },
+      "historicalName": "Fondamenta del Leone Bianco",
+      "englishName": "Foundation of the White Lion",
+      "historicalDescription": "Named after an inn or merchant house bearing the sign of a white lion that once stood near Strada de la Carità. This dock served commercial interests in the area and was likely used for delivering goods to nearby businesses and residences during the Renaissance period.",
+      "id": "canal_45.431111_12.362368"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43121405844507,
+        "lng": 12.35942838369913
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057352428",
+        "targetPointIndex": 6,
+        "targetPoint": {
+          "lat": 45.43123788949838,
+          "lng": 12.359281255721783
+        },
+        "distance": 11.782636863242281,
+        "id": "a1df86ef-7597-4253-9664-fb6009ab7749",
+        "historicalName": "Ponte della Carità Antica",
+        "englishName": "Bridge of the Ancient Charity",
+        "historicalDescription": "Named for its proximity to the historic charitable institution that gave the Strada de la Carità its name. The bridge would have served as an important crossing point for those seeking assistance from the charitable confraternity established in this area during the 15th century.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43122597397172,
+            "lng": 12.359354819710457
+          }
+        }
+      },
+      "id": "bridge_45.431214_12.359428"
+    },
+    {
+      "edge": {
+        "lat": 45.43019009319177,
+        "lng": 12.35961435019083
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057372815",
+        "targetPointIndex": 6,
+        "targetPoint": {
+          "lat": 45.4302160158523,
+          "lng": 12.359419845838886
+        },
+        "distance": 15.449256341507427,
+        "id": "e605e704-c3af-4b9b-96aa-b45baadad359",
+        "historicalName": "Ponte dei Benefattori",
+        "englishName": "Bridge of the Benefactors",
+        "historicalDescription": "This bridge honors the wealthy Venetian families who funded charitable works along the Strada de la Carità. During the Renaissance, many noble families demonstrated their piety and civic duty by establishing endowments for the poor, and this bridge would commemorate their philanthropy in this charitable district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43020305452204,
+            "lng": 12.359517098014859
+          }
+        }
+      },
+      "id": "bridge_45.430190_12.359614"
+    },
+    {
+      "edge": {
+        "lat": 45.429718253728616,
+        "lng": 12.359557129731845
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057372815",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.42974166878422,
+          "lng": 12.359403752584797
+        },
+        "distance": 12.248668640403235,
+        "id": "e605e704-c3af-4b9b-96aa-b45baadad359",
+        "historicalName": "Ponte dei Pazienti",
+        "englishName": "Bridge of the Patients",
+        "historicalDescription": "Named for the sick and infirm who would cross this bridge to reach the small hospice that once operated near Strada de la Carità. Renaissance Venice had numerous small hospitals and care facilities run by religious orders, and this bridge would have been a common route for those seeking medical attention.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42972996125641,
+            "lng": 12.359480441158322
+          }
+        }
+      },
+      "id": "bridge_45.429718_12.359557"
+    },
+    {
+      "edge": {
+        "lat": 45.42924641426547,
+        "lng": 12.359499909272861
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057372815",
+        "targetPointIndex": 8,
+        "targetPoint": {
+          "lat": 45.42926732171613,
+          "lng": 12.359387659330707
+        },
+        "distance": 9.062728214832237,
+        "id": "e605e704-c3af-4b9b-96aa-b45baadad359",
+        "historicalName": "Ponte dei Centurioni Veneziani",
+        "englishName": "Bridge of the Venetian Centurions",
+        "historicalDescription": "Commemorates a group of Venetian elite guards who maintained a small headquarters near this crossing in the 16th century. These guards would patrol the wealthy areas near Strada de la Carità, protecting the charitable institutions and noble residences from theft and disorder.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4292568679908,
+            "lng": 12.359443784301785
+          }
+        }
+      },
+      "id": "bridge_45.429246_12.359500"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.425098802748686,
+      "lng": 12.362717959741016,
+      "streetName": "Calle della Misericordia",
+      "streetNameEnglish": "Street of Mercy",
+      "streetDescription": "Named after the charitable works performed by the Scuola Grande della Misericordia. This street would have been near institutions that provided care for the poor, reflecting the charitable focus of the Carità district.",
+      "id": "building_45.425099_12.362718"
+    },
+    {
+      "lat": 45.425512825834666,
+      "lng": 12.361375564618864,
+      "streetName": "Rio Terà dei Pensieri",
+      "streetNameEnglish": "Filled Canal of Thoughts",
+      "streetDescription": "A former canal that was filled in (rio terà) near where philosophers and scholars from the nearby Scuola della Carità would gather to discuss ideas and share thoughts.",
+      "id": "building_45.425513_12.361376"
+    },
+    {
+      "lat": 45.425602649192285,
+      "lng": 12.36195302823681,
+      "streetName": "Fondamenta degli Incurabili",
+      "streetNameEnglish": "Foundation of the Incurables",
+      "streetDescription": "Named after the Ospedale degli Incurabili, a hospital founded in the early 16th century for those with incurable diseases, particularly syphilis. It would be located near the Carità district where many charitable institutions were concentrated.",
+      "id": "building_45.425603_12.361953"
+    },
+    {
+      "lat": 45.4256270730763,
+      "lng": 12.362715105944114,
+      "streetName": "Calle dei Pittori",
+      "streetNameEnglish": "Street of the Painters",
+      "streetDescription": "Named for the many artists who had workshops in this area, particularly those associated with the Scuola Grande della Carità, which later became the Accademia di Belle Arti.",
+      "id": "building_45.425627_12.362715"
+    },
+    {
+      "lat": 45.42604922824233,
+      "lng": 12.360208852836738,
+      "streetName": "Sottoportego della Carità",
+      "streetNameEnglish": "Passageway of Charity",
+      "streetDescription": "A covered passageway (sottoportego) that would have led directly to or near the Scuola Grande della Carità, one of Venice's major confraternities dedicated to charitable works.",
+      "id": "building_45.426049_12.360209"
+    },
+    {
+      "lat": 45.4259453742611,
+      "lng": 12.360838076717814,
+      "streetName": "Salizada dei Maestri",
+      "streetNameEnglish": "Paved Street of the Masters",
+      "streetDescription": "A wider, paved street (salizada) where master craftsmen and teachers associated with the Scuola della Carità would have had their workshops and homes.",
+      "id": "building_45.425945_12.360838"
+    },
+    {
+      "lat": 45.42593610901833,
+      "lng": 12.36152845397683,
+      "streetName": "Calle del Convento",
+      "streetNameEnglish": "Street of the Convent",
+      "streetDescription": "Named for a nearby convent that would have been part of the religious and charitable institutions in the Carità area, possibly associated with the Church of Santa Maria della Carità.",
+      "id": "building_45.425936_12.361528"
+    },
+    {
+      "lat": 45.42608093271413,
+      "lng": 12.361958269283798,
+      "streetName": "Ruga dei Spezieri",
+      "streetNameEnglish": "Street of the Spice Merchants",
+      "streetDescription": "A commercial street where spice merchants and apothecaries had their shops, supplying both cooking ingredients and medicinal herbs to the nearby charitable institutions and hospitals.",
+      "id": "building_45.426081_12.361958"
+    },
+    {
+      "lat": 45.42605594254079,
+      "lng": 12.362665010764632,
+      "streetName": "Campiello della Scuola",
+      "streetNameEnglish": "Small Square of the School",
+      "streetDescription": "A small square named for its proximity to the Scuola Grande della Carità, which functioned as both a religious confraternity and a center for artistic education in Renaissance Venice.",
+      "id": "building_45.426056_12.362665"
+    },
+    {
+      "lat": 45.42636582973322,
+      "lng": 12.360033536642598,
+      "streetName": "Calle dei Guardiani",
+      "streetNameEnglish": "Street of the Guardians",
+      "streetDescription": "Named for the guardians or custodians of the Scuola Grande della Carità who would have lived nearby to monitor and protect the valuable artistic treasures inside the building.",
+      "id": "building_45.426366_12.360034"
+    },
+    {
+      "lat": 45.426476104687524,
+      "lng": 12.360685064298886,
+      "streetName": "Fondamenta delle Convertite",
+      "streetNameEnglish": "Foundation of the Converted Women",
+      "streetDescription": "Named after a house for reformed prostitutes, reflecting the charitable mission of institutions in this area that offered rehabilitation and support to marginalized women.",
+      "id": "building_45.426476_12.360685"
+    },
+    {
+      "lat": 45.426462934025565,
+      "lng": 12.36133277541104,
+      "streetName": "Rio Terà delle Muneghette",
+      "streetNameEnglish": "Filled Canal of the Little Nuns",
+      "streetDescription": "A former canal filled to create a street, named for the convent of novice nuns (muneghette) who would have resided near the charitable institutions of the Carità district.",
+      "id": "building_45.426463_12.361333"
+    },
+    {
+      "lat": 45.42652689261774,
+      "lng": 12.362164527845403,
+      "streetName": "Calle del Paradiso",
+      "streetNameEnglish": "Street of Paradise",
+      "streetDescription": "A poetic name given to streets near churches or charitable institutions, suggesting the spiritual reward of paradise for those who performed acts of charity in the area.",
+      "id": "building_45.426527_12.362165"
+    },
+    {
+      "lat": 45.42652844022157,
+      "lng": 12.362666429212437,
+      "streetName": "Sottoportego dei Benefattori",
+      "streetNameEnglish": "Passageway of the Benefactors",
+      "streetDescription": "A covered passage named in honor of the wealthy patrons who donated to the charitable works of the Scuola della Carità and other institutions in the area.",
+      "id": "building_45.426528_12.362666"
+    },
+    {
+      "lat": 45.42693009651029,
+      "lng": 12.359465799501445,
+      "streetName": "Salizada dei Confratelli",
+      "streetNameEnglish": "Paved Street of the Confraternity Members",
+      "streetDescription": "A paved street where members of the Scuola Grande della Carità would have gathered or lived, reflecting their central role in the neighborhood's charitable and religious activities.",
+      "id": "building_45.426930_12.359466"
+    },
+    {
+      "lat": 45.426902251580714,
+      "lng": 12.36015440518602,
+      "streetName": "Calle della Pietà",
+      "streetNameEnglish": "Street of Compassion",
+      "streetDescription": "Named for the virtue of compassion that was central to the mission of the charitable institutions in the area, possibly referring to artistic depictions of the Pietà (the Virgin Mary holding Christ) that were common in the area.",
+      "id": "building_45.426902_12.360154"
+    },
+    {
+      "lat": 45.42687705980403,
+      "lng": 12.360734072918339,
+      "streetName": "Ruga dei Teleri",
+      "streetNameEnglish": "Street of the Canvas Makers",
+      "streetDescription": "Where canvas makers had their workshops, supplying the numerous artists working in and around the Scuola Grande della Carità with materials for their paintings.",
+      "id": "building_45.426877_12.360734"
+    },
+    {
+      "lat": 45.426816611684636,
+      "lng": 12.361538582387993,
+      "streetName": "Campiello delle Orfane",
+      "streetNameEnglish": "Small Square of the Orphan Girls",
+      "streetDescription": "Named for an orphanage for girls that would have been part of the charitable network in the Carità district, reflecting Venice's concern for abandoned children.",
+      "id": "building_45.426817_12.361539"
+    },
+    {
+      "lat": 45.42686189949307,
+      "lng": 12.3620844577621,
+      "streetName": "Calle dei Tintori",
+      "streetNameEnglish": "Street of the Dyers",
+      "streetDescription": "Where textile dyers had their workshops, creating the richly colored fabrics that adorned both the wealthy Venetian homes and the charitable institutions in the Carità district.",
+      "id": "building_45.426862_12.362084"
+    },
+    {
+      "lat": 45.427430159697046,
+      "lng": 12.359608946142286,
+      "streetName": "Fondamenta Santa Maria della Carità",
+      "streetNameEnglish": "Foundation of Saint Mary of Charity",
+      "streetDescription": "Named for the Church of Santa Maria della Carità, one of the central religious institutions in the area that gave the district its name and charitable focus.",
+      "id": "building_45.427430_12.359609"
+    },
+    {
+      "lat": 45.42731531867777,
+      "lng": 12.360142819657383,
+      "streetName": "Rio Terà dei Catecumeni",
+      "streetNameEnglish": "Filled Canal of the Catechumens",
+      "streetDescription": "A former canal named for the Casa dei Catecumeni, an institution founded to house and educate Jewish and Muslim converts to Christianity, demonstrating the educational mission of institutions in the Carità area.",
+      "id": "building_45.427315_12.360143"
+    },
+    {
+      "lat": 45.42729932085193,
+      "lng": 12.360752860820345,
+      "streetName": "Calle dei Cerchieri",
+      "streetNameEnglish": "Street of the Coopers",
+      "streetDescription": "Named for the barrel makers who had workshops here, supplying containers for storing food, wine, and other supplies for the charitable institutions in the Carità district.",
+      "id": "building_45.427299_12.360753"
+    },
+    {
+      "lat": 45.427387376615286,
+      "lng": 12.361439082377212,
+      "streetName": "Sottoportego dell'Arte",
+      "streetNameEnglish": "Passageway of Art",
+      "streetDescription": "A covered passage leading to studios or workshops of artists associated with the Scuola Grande della Carità, which became an important center for Venetian art in the Renaissance.",
+      "id": "building_45.427387_12.361439"
+    },
+    {
+      "lat": 45.42734746807793,
+      "lng": 12.362804511365688,
+      "streetName": "Salizada dei Frari",
+      "streetNameEnglish": "Paved Street of the Friars",
+      "streetDescription": "A paved street named for the Franciscan friars who would have been involved in charitable works in the area, connecting the Carità district with the nearby Frari church and monastery.",
+      "id": "building_45.427347_12.362805"
+    },
+    {
+      "lat": 45.42785584767918,
+      "lng": 12.359585235524401,
+      "streetName": "Calle dei Boteri",
+      "streetNameEnglish": "Street of the Cask Makers",
+      "streetDescription": "Where barrel and cask makers had their workshops, providing storage containers for the food, wine, and supplies distributed by charitable institutions in the area.",
+      "id": "building_45.427856_12.359585"
+    },
+    {
+      "lat": 45.42778521188746,
+      "lng": 12.36015653706438,
+      "streetName": "Ruga dei Oresi",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "A commercial street where goldsmiths had their shops, crafting religious objects and decorations for the churches and confraternities in the Carità district.",
+      "id": "building_45.427785_12.360157"
+    },
+    {
+      "lat": 45.42773652646634,
+      "lng": 12.360853420694966,
+      "streetName": "Campiello del Capitello",
+      "streetNameEnglish": "Small Square of the Shrine",
+      "streetDescription": "Named for a small votive shrine or capitello that would have been located here, where locals could offer prayers related to the charitable mission of the area.",
+      "id": "building_45.427737_12.360853"
+    },
+    {
+      "lat": 45.427712382774835,
+      "lng": 12.361527590476287,
+      "streetName": "Calle dei Scudelleri",
+      "streetNameEnglish": "Street of the Bowl Makers",
+      "streetDescription": "Named for the craftsmen who made wooden and ceramic bowls, serving the needs of both households and the charitable institutions that fed the poor in the Carità district.",
+      "id": "building_45.427712_12.361528"
+    },
+    {
+      "lat": 45.427745648823354,
+      "lng": 12.362092724855797,
+      "streetName": "Fondamenta delle Procuratie",
+      "streetNameEnglish": "Foundation of the Procurators",
+      "streetDescription": "Named for the Procurators of St. Mark who oversaw charitable endowments and would have had administrative connections to the institutions in the Carità district.",
+      "id": "building_45.427746_12.362093"
+    },
+    {
+      "lat": 45.42779114089891,
+      "lng": 12.362779419946966,
+      "streetName": "Rio Terà dei Carmini",
+      "streetNameEnglish": "Filled Canal of the Carmelites",
+      "streetDescription": "A former canal near the Church of Santa Maria dei Carmini, filled to create a street that would connect the Carmelite religious community with the charitable institutions of the Carità district.",
+      "id": "building_45.427791_12.362779"
+    },
+    {
+      "lat": 45.42828465815004,
+      "lng": 12.360022060376398,
+      "streetName": "Calle dei Vedei",
+      "streetNameEnglish": "Street of the Glassblowers",
+      "streetDescription": "Named for glassblowers who might have had small workshops here, creating both decorative pieces for wealthy patrons and utilitarian items for the charitable institutions in the area.",
+      "id": "building_45.428285_12.360022"
+    },
+    {
+      "lat": 45.428278736323406,
+      "lng": 12.36071520773013,
+      "streetName": "Sottoportego delle Elemosine",
+      "streetNameEnglish": "Passageway of Alms",
+      "streetDescription": "A covered passage where alms were traditionally distributed to the poor by the Scuola della Carità, embodying the direct charitable work of the confraternity.",
+      "id": "building_45.428279_12.360715"
+    },
+    {
+      "lat": 45.42823343213501,
+      "lng": 12.361334016961276,
+      "streetName": "Salizada dei Nobili",
+      "streetNameEnglish": "Paved Street of the Nobles",
+      "streetDescription": "A wider, paved street where noble families who were patrons of the Scuola Grande della Carità would have had their residences, symbolizing the connection between Venice's elite and its charitable institutions.",
+      "id": "building_45.428233_12.361334"
+    },
+    {
+      "lat": 45.42832857537347,
+      "lng": 12.36201548704543,
+      "streetName": "Calle dei Laneri",
+      "streetNameEnglish": "Street of the Wool Workers",
+      "streetDescription": "Named for the wool workers who had shops here, producing textiles including clothing that would be distributed to the poor through the charitable institutions of the Carità.",
+      "id": "building_45.428329_12.362015"
+    },
+    {
+      "lat": 45.42870283014882,
+      "lng": 12.360043261631354,
+      "streetName": "Ruga dei Marangoni",
+      "streetNameEnglish": "Street of the Carpenters",
+      "streetDescription": "Where carpenters had their workshops, crafting furniture and architectural elements for the Scuola Grande della Carità and other institutions in the area.",
+      "id": "building_45.428703_12.360043"
+    },
+    {
+      "lat": 45.4286323475439,
+      "lng": 12.36088325131413,
+      "streetName": "Campiello della Carità",
+      "streetNameEnglish": "Small Square of Charity",
+      "streetDescription": "A small square at the heart of the Carità district, possibly directly in front of the Scuola Grande della Carità, symbolizing the central importance of charitable works in this area.",
+      "id": "building_45.428632_12.360883"
+    },
+    {
+      "lat": 45.428748173929534,
+      "lng": 12.362001145681361,
+      "streetName": "Calle dei Remeri",
+      "streetNameEnglish": "Street of the Oar Makers",
+      "streetDescription": "Named for the craftsmen who made oars for Venetian boats, reflecting the maritime connections that supported the economic life of the area and funded its charitable institutions.",
+      "id": "building_45.428748_12.362001"
+    },
+    {
+      "lat": 45.429094714099065,
+      "lng": 12.360135496497879,
+      "streetName": "Fondamenta dei Testatori",
+      "streetNameEnglish": "Foundation of the Testators",
+      "streetDescription": "Named in honor of those who left bequests in their wills to support the charitable institutions in the Carità district, ensuring their continued operation through endowments.",
+      "id": "building_45.429095_12.360135"
+    },
+    {
+      "lat": 45.42911008740798,
+      "lng": 12.360750456085572,
+      "streetName": "Rio Terà della Toletta",
+      "streetNameEnglish": "Filled Canal of the Small Table",
+      "streetDescription": "A former canal now filled in, named for a small wooden desk or table (toletta) where records of charitable distributions might have been kept by the Scuola della Carità.",
+      "id": "building_45.429110_12.360750"
+    },
+    {
+      "lat": 45.42906670486868,
+      "lng": 12.36144935544933,
+      "streetName": "Calle delle Donzelle",
+      "streetNameEnglish": "Street of the Maidens",
+      "streetDescription": "Named for a home for young unmarried women that would have been part of the charitable network in the Carità district, protecting them until they could be married with a provided dowry.",
+      "id": "building_45.429067_12.361449"
+    },
+    {
+      "lat": 45.429206040788294,
+      "lng": 12.361977259793305,
+      "streetName": "Sottoportego dei Pennelli",
+      "streetNameEnglish": "Passageway of the Brushes",
+      "streetDescription": "A covered passage where artists' supply shops might have been located, providing materials to the painters working in and around the Scuola Grande della Carità.",
+      "id": "building_45.429206_12.361977"
+    },
+    {
+      "lat": 45.42960079577765,
+      "lng": 12.360108636944473,
+      "streetName": "Salizada dei Tintori",
+      "streetNameEnglish": "Paved Street of the Dyers",
+      "streetDescription": "A wider, paved street where textile dyers worked, their craft requiring larger workshops and better drainage that a salizada would provide, supporting the visual richness of the Carità district.",
+      "id": "building_45.429601_12.360109"
+    },
+    {
+      "lat": 45.42963972608716,
+      "lng": 12.360838133847972,
+      "streetName": "Calle del Pestrin",
+      "streetNameEnglish": "Street of the Grain Mill",
+      "streetDescription": "Named for a small grain mill that would have processed flour for bread distributed to the poor through the charitable networks of the Carità district.",
+      "id": "building_45.429640_12.360838"
+    },
+    {
+      "lat": 45.42956269713589,
+      "lng": 12.361330294905162,
+      "streetName": "Ruga della Seta",
+      "streetNameEnglish": "Street of Silk",
+      "streetDescription": "A commercial street where silk merchants and weavers had their shops, creating luxury textiles that wealthy patrons would donate to adorn the churches and charitable institutions in the area.",
+      "id": "building_45.429563_12.361330"
+    },
+    {
+      "lat": 45.42962221573719,
+      "lng": 12.362039937993314,
+      "streetName": "Campiello dei Devoti",
+      "streetNameEnglish": "Small Square of the Devoted",
+      "streetDescription": "Named for the devout lay people who supported and participated in the religious and charitable activities of the Scuola Grande della Carità through prayer and volunteer work.",
+      "id": "building_45.429622_12.362040"
+    },
+    {
+      "lat": 45.430128562590305,
+      "lng": 12.360102980770733,
+      "streetName": "Calle dei Mercanti",
+      "streetNameEnglish": "Street of the Merchants",
+      "streetDescription": "Where merchants had their offices and warehouses, their commercial success helping to fund the charitable works of the Scuola Grande della Carità through donations and bequests.",
+      "id": "building_45.430129_12.360103"
+    },
+    {
+      "lat": 45.43009635598481,
+      "lng": 12.360795119823456,
+      "streetName": "Fondamenta dei Mendicanti",
+      "streetNameEnglish": "Foundation of the Beggars",
+      "streetDescription": "Named for the poor who would gather here to receive alms from the charitable institutions in the Carità district, reflecting Venice's efforts to manage poverty through organized charity.",
+      "id": "building_45.430096_12.360795"
+    },
+    {
+      "lat": 45.42996463393952,
+      "lng": 12.36129133673499,
+      "streetName": "Rio Terà delle Procuratie",
+      "streetNameEnglish": "Filled Canal of the Procurators",
+      "streetDescription": "A former canal filled in to create a street, named for the Procurators of St. Mark who administered charitable endowments and had oversight of institutions in the Carità district.",
+      "id": "building_45.429965_12.361291"
+    },
+    {
+      "lat": 45.43002883420437,
+      "lng": 12.362099741019106,
+      "streetName": "Calle dei Fabbri",
+      "streetNameEnglish": "Street of the Blacksmiths",
+      "streetDescription": "Named for the blacksmiths who had workshops here, creating both decorative metalwork for the Scuola Grande della Carità and practical items for daily use in the area's institutions.",
+      "id": "building_45.430029_12.362100"
+    },
+    {
+      "lat": 45.430549931566155,
+      "lng": 12.360249838213555,
+      "streetName": "Sottoportego degli Artisti",
+      "streetNameEnglish": "Passageway of the Artists",
+      "streetDescription": "A covered passage where artists had small studios or gathered to discuss their work for the Scuola Grande della Carità, which became a major center for art in Renaissance Venice.",
+      "id": "building_45.430550_12.360250"
+    },
+    {
+      "lat": 45.43042635260971,
+      "lng": 12.360833754924855,
+      "streetName": "Salizada dei Gesuati",
+      "streetNameEnglish": "Paved Street of the Jesuates",
+      "streetDescription": "Named for the Jesuate order who had a presence in the area and collaborated with the charitable institutions of the Carità district in providing services to the poor and sick.",
+      "id": "building_45.430426_12.360834"
+    },
+    {
+      "lat": 45.430554914394925,
+      "lng": 12.361337490376256,
+      "streetName": "Calle della Scuola",
+      "streetNameEnglish": "Street of the School",
+      "streetDescription": "Named directly for the Scuola Grande della Carità, the main confraternity building that dominated this district and housed both charitable operations and artistic treasures.",
+      "id": "building_45.430555_12.361337"
+    },
+    {
+      "lat": 45.4305283773886,
+      "lng": 12.362153564949784,
+      "streetName": "Ruga dei Librai",
+      "streetNameEnglish": "Street of the Booksellers",
+      "streetDescription": "Where booksellers and printers had their shops, supplying religious and educational texts to the scholarly community associated with the institutions in the Carità district.",
+      "id": "building_45.430528_12.362154"
+    },
+    {
+      "lat": 45.43096745541257,
+      "lng": 12.36010119769733,
+      "streetName": "Campiello degli Infermi",
+      "streetNameEnglish": "Small Square of the Infirm",
+      "streetDescription": "Named for a small hospice or care facility for the sick that would have been part of the charitable network in the Carità district, particularly focused on those too ill to work.",
+      "id": "building_45.430967_12.360101"
+    },
+    {
+      "lat": 45.43085954815585,
+      "lng": 12.360697243763068,
+      "streetName": "Calle dei Notai",
+      "streetNameEnglish": "Street of the Notaries",
+      "streetDescription": "Where legal professionals had their offices, documenting the charitable donations, wills, and administrative matters of the Scuola Grande della Carità and other institutions in the area.",
+      "id": "building_45.430860_12.360697"
+    },
+    {
+      "lat": 45.43093304476062,
+      "lng": 12.361304031235639,
+      "streetName": "Fondamenta dei Cordami",
+      "streetNameEnglish": "Foundation of the Rope Makers",
+      "streetDescription": "Named for rope makers who worked along this canal-side street, their products essential for Venice's maritime economy that in turn supported the charitable institutions of the Carità district.",
+      "id": "building_45.430933_12.361304"
+    },
+    {
+      "lat": 45.43090261023654,
+      "lng": 12.36206923606897,
+      "streetName": "Rio Terà della Carità Vecchia",
+      "streetNameEnglish": "Filled Canal of the Old Charity",
+      "streetDescription": "A former canal filled in to create a street, named for an earlier charitable institution that preceded the more famous Scuola Grande della Carità.",
+      "id": "building_45.430903_12.362069"
+    },
+    {
+      "lat": 45.43148178154926,
+      "lng": 12.360188073890983,
+      "streetName": "Calle del Capitello Votivo",
+      "streetNameEnglish": "Street of the Votive Shrine",
+      "streetDescription": "Named for a street shrine where people would offer prayers and small donations, combining personal devotion with support for the charitable mission of the area.",
+      "id": "building_45.431482_12.360188"
+    },
+    {
+      "lat": 45.43143709239972,
+      "lng": 12.360861044885013,
+      "streetName": "Sottoportego delle Donazioni",
+      "streetNameEnglish": "Passageway of Donations",
+      "streetDescription": "A covered passage where goods and supplies donated to the charitable institutions might have been received and sorted before distribution to those in need.",
+      "id": "building_45.431437_12.360861"
+    },
+    {
+      "lat": 45.431482888082755,
+      "lng": 12.361313443293998,
+      "streetName": "Salizada dei Loredan",
+      "streetNameEnglish": "Paved Street of the Loredan Family",
+      "streetDescription": "Named for the noble Loredan family who would have been important patrons of the Scuola Grande della Carità and other charitable institutions in the area.",
+      "id": "building_45.431483_12.361313"
+    },
+    {
+      "lat": 45.43190769679997,
+      "lng": 12.360186041264516,
+      "streetName": "Calle del Traghetto della Carità",
+      "streetNameEnglish": "Street of the Charity Ferry Crossing",
+      "streetDescription": "Named for a gondola ferry crossing point that would have connected the Carità district to other parts of Venice, facilitating access to its charitable institutions.",
+      "id": "building_45.431908_12.360186"
+    },
+    {
+      "lat": 45.431911311321954,
+      "lng": 12.36065947784356,
+      "streetName": "Ruga dei Calafati",
+      "streetNameEnglish": "Street of the Caulkers",
+      "streetDescription": "Where ship caulkers had their workshops, maintaining the boats that were essential to Venice's economy and the transport of goods to support the charitable institutions of the Carità.",
+      "id": "building_45.431911_12.360659"
+    },
+    {
+      "lat": 45.431874437331224,
+      "lng": 12.361430526641746,
+      "streetName": "Campiello della Misericordia",
+      "streetNameEnglish": "Small Square of Mercy",
+      "streetDescription": "A small square named for the virtue of mercy that inspired the charitable works of the Scuola Grande della Carità and other institutions in the area.",
+      "id": "building_45.431874_12.361431"
+    },
+    {
+      "lat": 45.43221863389119,
+      "lng": 12.361476065526432,
+      "streetName": "Calle degli Assistenti",
+      "streetNameEnglish": "Street of the Assistants",
+      "streetDescription": "Named for the staff or volunteers who worked in the charitable institutions of the Carità district, providing direct care and services to those in need.",
+      "id": "building_45.432219_12.361476"
+    }
+  ],
+  "id": "polygon-1746057412398"
+}

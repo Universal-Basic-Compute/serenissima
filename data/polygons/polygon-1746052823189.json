@@ -1,0 +1,130 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.42590630302151,
+      "lng": 12.316444475008907
+    },
+    {
+      "lat": 45.426410799387405,
+      "lng": 12.31437380964941
+    },
+    {
+      "lat": 45.42664422155341,
+      "lng": 12.312839586092892
+    },
+    {
+      "lat": 45.425296383484216,
+      "lng": 12.313418943240109
+    },
+    {
+      "lat": 45.42523614416,
+      "lng": 12.313762265994015
+    }
+  ],
+  "centroid": {
+    "lat": 45.42589877032131,
+    "lng": 12.314167815997067
+  },
+  "historicalName": "Sacca della Misericordia",
+  "englishName": "Mercy's Shallows",
+  "historicalDescription": "A shallow lagoon area in the Dorsoduro sestiere, known for its marshy wetlands and fishing activities during the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 22187.05,
+  "center": {
+    "lat": 45.42589877032131,
+    "lng": 12.314167815997067
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.42540368387538,
+        "lng": 12.314432818247738
+      },
+      "water": {
+        "lat": 45.42523530861545,
+        "lng": 12.314522943564654
+      },
+      "historicalName": "Fondamenta dei Galeotti",
+      "englishName": "Foundation of the Galley Slaves",
+      "historicalDescription": "This dock near Sacca della Misericordia would have been where galley slaves were brought to work on Venetian ships. The nearby Arsenal employed countless forced laborers, and this landing would have served as a point of embarkation for these unfortunate souls heading to the galleys that made Venice's naval power possible.",
+      "id": "canal_45.425404_12.314433"
+    },
+    {
+      "edge": {
+        "lat": 45.42557122359076,
+        "lng": 12.315103370501461
+      },
+      "water": {
+        "lat": 45.42549093388281,
+        "lng": 12.31533269777271
+      },
+      "historicalName": "Riva dei Cappuccini",
+      "englishName": "Shore of the Capuchins",
+      "historicalDescription": "This dock in Sacca della Misericordia would be named after the Capuchin friars who established a monastery in this northern area of Cannaregio during the 16th century. The Capuchins were known for their charitable work with the poor, which aligns with the 'Misericordia' (mercy) theme of this area. Ships bringing supplies to the monastery would have docked here.",
+      "id": "canal_45.425571_12.315103"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.426410799387405,
+        "lng": 12.31437380964941
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052814583",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.42660092518156,
+          "lng": 12.314282614542904
+        },
+        "distance": 22.306762604024854,
+        "id": "1d4f757b-4133-48a9-97f5-9149b0fb2985",
+        "historicalName": "Ponte della Sacca",
+        "englishName": "Bridge of the Basin",
+        "historicalDescription": "Named after the Sacca della Misericordia, the artificial basin created in the 15th century to improve navigation and provide mooring for larger vessels. The bridge would have connected the main Cannaregio district to this important maritime area, where shipbuilding and repairs were common activities.",
+        "location": {
+          "midpoint": {
+            "lat": 45.426505862284486,
+            "lng": 12.314328212096157
+          }
+        }
+      },
+      "id": "bridge_45.426411_12.314374"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.425614013567376,
+      "lng": 12.314076514617756,
+      "streetName": "Fondamenta della Sacca Misericordia",
+      "streetNameEnglish": "Foundation of the Misericordia Basin",
+      "streetDescription": "This fondamenta (walkway along a canal) runs along the edge of the Sacca della Misericordia, a small artificial basin created in the 15th century in the Cannaregio district. The name 'Misericordia' comes from the nearby Scuola Grande della Misericordia, one of Venice's important confraternities dedicated to charitable works.",
+      "id": "building_45.425614_12.314077"
+    },
+    {
+      "lat": 45.42617615457612,
+      "lng": 12.313585828639797,
+      "streetName": "Calle dei Remeri della Sacca",
+      "streetNameEnglish": "Street of the Oar-makers of the Basin",
+      "streetDescription": "This street would have been home to artisans who crafted oars (remeri) for Venetian boats. The Sacca della Misericordia area, being close to the northern lagoon, housed many maritime craftsmen. Oar-makers were essential to Venetian maritime culture, producing the distinctive oars used by gondoliers and other boatmen.",
+      "id": "building_45.426176_12.313586"
+    },
+    {
+      "lat": 45.426195469749146,
+      "lng": 12.314168522647172,
+      "streetName": "Rio Terà della Madonna dell'Orto",
+      "streetNameEnglish": "Filled Canal of the Madonna of the Garden",
+      "streetDescription": "This street would have been a canal that was filled in (rio terà). It references the nearby Madonna dell'Orto church, a significant 14th-century Gothic church located just south of the Sacca della Misericordia. The church got its name from a miraculous statue of the Virgin Mary found in a garden (orto) nearby.",
+      "id": "building_45.426195_12.314169"
+    },
+    {
+      "lat": 45.42614405260126,
+      "lng": 12.314790822635377,
+      "streetName": "Sottoportego dei Bombardieri",
+      "streetNameEnglish": "Passageway of the Bombardiers",
+      "streetDescription": "This covered passageway (sottoportego) would have been associated with the bombardieri, or artillerymen, who may have had quarters or workshops in this area near the Sacca della Misericordia. Venice maintained a dedicated corps of bombardiers for its naval and defensive needs, and they would have practiced their craft in less populated areas like this northern part of the city.",
+      "id": "building_45.426144_12.314791"
+    }
+  ],
+  "id": "polygon-1746052823189"
+}

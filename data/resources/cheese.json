@@ -1,0 +1,28 @@
+{
+  "id": "cheese",
+  "name": "Cheese",
+  "category": "finished_goods",
+  "subCategory": "food",
+  "description": "Aged dairy product, available in various textures and flavors. A versatile food, eaten alone, with bread, or used in cooking.",
+  "varieties": [
+    {
+      "type": "hard_cheese",
+      "valueMultiplier": 1.2,
+      "notes": "Good for grating or long storage."
+    },
+    {
+      "type": "soft_cheese",
+      "valueMultiplier": 1,
+      "notes": "Fresh and creamy, best eaten soon."
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "Cheese was an important source of protein and a valuable trade good. Venetian merchants imported and exported various types of cheese.",
+    "culturalContext": "Different social classes consumed different qualities and types of cheese."
+  },
+  "importPrice": 1200.0,
+  "lifetimeHours": 12600,
+  "consumptionHours": 1,
+  "tier": 2
+}

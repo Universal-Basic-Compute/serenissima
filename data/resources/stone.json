@@ -1,0 +1,12 @@
+{
+  "id": "stone",
+  "name": "Stone",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": "Durable building material quarried from the mainland, essential for Venetian construction.",
+  "icon": "/images/resources/stone.png",
+  "importPrice": 180.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

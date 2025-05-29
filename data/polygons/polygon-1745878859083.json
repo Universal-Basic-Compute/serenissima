@@ -1,0 +1,326 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.430964796916975,
+      "lng": 12.33259224825597
+    },
+    {
+      "lat": 45.43105138213739,
+      "lng": 12.334137200648549
+    },
+    {
+      "lat": 45.430241993372505,
+      "lng": 12.33433568411565
+    },
+    {
+      "lat": 45.42942129895985,
+      "lng": 12.334775566394093
+    },
+    {
+      "lat": 45.4291991823651,
+      "lng": 12.334485887820485
+    },
+    {
+      "lat": 45.42892435892793,
+      "lng": 12.333992361361744
+    },
+    {
+      "lat": 45.42853282733649,
+      "lng": 12.332957028681996
+    }
+  ],
+  "centroid": {
+    "lat": 45.42976226285946,
+    "lng": 12.333896568182642
+  },
+  "historicalName": "Calle dei Saloni presso Santa Maria Formosa",
+  "englishName": "Saloni Street near Saint Mary Formosa",
+  "historicalDescription": "This area in the Castello sestiere was known for its proximity to the Church of Santa Maria Formosa, one of the oldest churches in Venice dating back to the 7th century. The street name 'Saloni' likely referred to large hall-like buildings in the area.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 31953.71,
+  "center": {
+    "lat": 45.42976226285946,
+    "lng": 12.333896568182642
+  },
+  "coatOfArmsCenter": {
+    "lat": 45.43558541423064,
+    "lng": 12.3296118244153
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43100808952718,
+        "lng": 12.33336472445226
+      },
+      "water": {
+        "lat": 45.43118038782331,
+        "lng": 12.333291170264566
+      },
+      "historicalName": "Fondamenta dei Mercanti",
+      "englishName": "Merchants' Foundation",
+      "historicalDescription": "This dock served the merchant shops near Santa Maria Formosa. During the Renaissance, this area was known for textile trading and the mercantile activities of various guilds. The name reflects the economic importance of this landing for commerce in the parish.",
+      "id": "canal_45.431008_12.333365"
+    },
+    {
+      "edge": {
+        "lat": 45.4291991823651,
+        "lng": 12.334485887820485
+      },
+      "water": {
+        "lat": 45.42905421883394,
+        "lng": 12.334637606547277
+      },
+      "historicalName": "Riva di Santa Maria Formosa",
+      "englishName": "Shore of Santa Maria Formosa",
+      "historicalDescription": "Named after the nearby church of Santa Maria Formosa, one of Venice's oldest churches founded in the 7th century. This dock would have served as the main water entrance to the church and the campo (square) in front of it, allowing worshippers and clergy to arrive directly by boat.",
+      "id": "canal_45.429199_12.334486"
+    },
+    {
+      "edge": {
+        "lat": 45.42892435892793,
+        "lng": 12.333992361361744
+      },
+      "water": {
+        "lat": 45.42874507073271,
+        "lng": 12.334012858444463
+      },
+      "historicalName": "Fondamenta dei Sartori",
+      "englishName": "Tailors' Foundation",
+      "historicalDescription": "This dock name references the tailors' guild that had workshops in the area of Calle dei Saloni. 'Sartori' refers to tailors, and during the Renaissance period, Venice was renowned for textile production and fine clothing. Guild members would have used this dock to receive materials and ship finished garments.",
+      "id": "canal_45.428924_12.333992"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.430241993372505,
+        "lng": 12.33433568411565
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878844120",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43030806922017,
+          "lng": 12.334432243640187
+        },
+        "distance": 10.524159255174165,
+        "id": "100f3253-7045-4c04-8faf-ed51b29980c8",
+        "name": "Ponte Sconosciuto (Unknown Bridge) - Error generating name",
+        "location": {
+          "midpoint": {
+            "lat": 45.43027503129633,
+            "lng": 12.334383963877919
+          }
+        },
+        "historicalName": "Ponte dei Saloni",
+        "englishName": "Bridge of the Great Halls",
+        "historicalDescription": "Named after the Calle dei Saloni (Street of the Great Halls) where it is located. During the Renaissance, this area near Santa Maria Formosa contained several nobili palaces with impressive reception halls (saloni) used for gatherings of Venetian nobility."
+      },
+      "id": "bridge_45.430242_12.334336"
+    },
+    {
+      "edge": {
+        "lat": 45.42901922125259,
+        "lng": 12.33288407259679
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878927349",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.428996495455586,
+          "lng": 12.33276429966792
+        },
+        "distance": 9.682153753647608,
+        "id": "c97ef147-5762-453e-b22f-3fdc1a8c1396",
+        "name": "Ponte Sconosciuto (Unknown Bridge) - Error generating name",
+        "location": {
+          "midpoint": {
+            "lat": 45.42900785835408,
+            "lng": 12.332824186132356
+          }
+        },
+        "historicalName": "Ponte dei Formosini",
+        "englishName": "Bridge of the Formosa People",
+        "historicalDescription": "Named for its proximity to the Church of Santa Maria Formosa, one of Venice's oldest churches founded in the 7th century. Local residents of this parish were known as 'Formosini' and would have used this bridge daily."
+      },
+      "id": "bridge_45.429019_12.332884"
+    },
+    {
+      "edge": {
+        "lat": 45.42950561516869,
+        "lng": 12.332811116511586
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878927349",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.42948714190697,
+          "lng": 12.332701056438099
+        },
+        "distance": 8.830776294914076,
+        "id": "c97ef147-5762-453e-b22f-3fdc1a8c1396",
+        "historicalName": "Ponte dei Barbieri",
+        "englishName": "Bridge of the Barbers",
+        "historicalDescription": "During the Renaissance period, the area near Santa Maria Formosa contained several workshops of barbers (barbieri) who served as both haircutters and primitive surgeons. This bridge would have connected their workshops to residential areas.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42949637853783,
+            "lng": 12.332756086474841
+          }
+        }
+      },
+      "id": "bridge_45.429506_12.332811"
+    },
+    {
+      "edge": {
+        "lat": 45.42999200908478,
+        "lng": 12.33273816042638
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878927349",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.42997778835835,
+          "lng": 12.332637813208278
+        },
+        "distance": 7.988599372901184,
+        "id": "c97ef147-5762-453e-b22f-3fdc1a8c1396",
+        "historicalName": "Ponte dei Querini",
+        "englishName": "Bridge of the Querini Family",
+        "historicalDescription": "Named after the noble Querini family who had a palace near Santa Maria Formosa. The Querini were one of Venice's oldest nobili families, dating back to the foundation of the city, and were influential in the governance and commerce of Renaissance Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.429984898721564,
+            "lng": 12.33268798681733
+          }
+        }
+      },
+      "id": "bridge_45.429992_12.332738"
+    },
+    {
+      "edge": {
+        "lat": 45.430478403000876,
+        "lng": 12.332665204341176
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878927349",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43046843480973,
+          "lng": 12.332574569978457
+        },
+        "distance": 7.158866639257524,
+        "id": "c97ef147-5762-453e-b22f-3fdc1a8c1396",
+        "historicalName": "Ponte della Malvasia",
+        "englishName": "Bridge of the Malvasia Wine Shop",
+        "historicalDescription": "In Renaissance Venice, 'malvasie' were shops selling sweet wines from Greece, particularly Malmsey wine. Historical records indicate a popular malvasia operated near Calle dei Saloni, and this bridge would have been named for this establishment frequented by locals and visitors alike.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43047341890531,
+            "lng": 12.332619887159815
+          }
+        }
+      },
+      "id": "bridge_45.430478_12.332665"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.42902656931766,
+      "lng": 12.33324284098137,
+      "buildingType": "palazzo",
+      "historicalName": "Palazzo Donà delle Rose",
+      "englishName": "Donà delle Rose Palace",
+      "historicalDescription": "Built in the late 15th century for the noble Donà family, this elegant palazzo combines Gothic and Renaissance elements. The Donà family was prominent in Venetian politics, producing several doges. The 'delle Rose' suffix refers to the family branch that owned extensive rose gardens outside the city. Located near the corner of Calle dei Saloni, the palace features a water entrance and an internal courtyard with a decorative well.",
+      "streetName": "Calle del Paradiso",
+      "streetNameEnglish": "Street of Paradise",
+      "streetDescription": "Named after the Palazzo del Paradiso, a noble residence that existed in this area near Santa Maria Formosa in the 15th century. The palace was known for its beautiful courtyard and decorations.",
+      "id": "building_45.429027_12.333243"
+    },
+    {
+      "lat": 45.42951043654568,
+      "lng": 12.333259959336898,
+      "buildingType": "chiesa",
+      "historicalName": "Chiesa di San Leonardo",
+      "englishName": "Church of Saint Leonard",
+      "historicalDescription": "A modest parish church dating to the early 14th century, rebuilt in Renaissance style during the 1530s. Dedicated to Saint Leonard, patron of prisoners and women in childbirth, it served the local community around Calle dei Saloni. Though small compared to Venice's grander churches, it housed notable works by the Bellini school and served as an important gathering place for neighborhood religious ceremonies and feast days.",
+      "streetName": "Fondamenta dei Formeri",
+      "streetNameEnglish": "Foundation of the Form-makers",
+      "streetDescription": "This canal-side street would reference the craftsmen who made wooden forms for Venetian ships. The shipbuilding industry was crucial to Venice's maritime power, and many associated trades were located throughout the city.",
+      "id": "building_45.429510_12.333260"
+    },
+    {
+      "lat": 45.429394443470464,
+      "lng": 12.333905581681796,
+      "buildingType": "bottega",
+      "historicalName": "Bottega Pisani dei Vetrai",
+      "englishName": "Pisani Glassworkers' Workshop",
+      "historicalDescription": "Established in 1487 by the Pisani family, this workshop specialized in fine Venetian glasswork, despite most glass production being centered on Murano. Located at the entrance to Calle dei Saloni, it received special permission from the Council of Ten to operate within the city due to its production of specialized religious vessels for churches. The workshop was known for creating delicate ceremonial chalices and decorative glass items for wealthy patrons.",
+      "streetName": "Rio Terà dei Mercanti",
+      "streetNameEnglish": "Filled-in Canal of the Merchants",
+      "streetDescription": "A 'Rio Terà' is a filled-in canal, and this one would reference the merchants who operated in this commercial area. The proximity to Santa Maria Formosa made it an important trading zone in Renaissance Venice.",
+      "id": "building_45.429394_12.333906"
+    },
+    {
+      "lat": 45.42986395632937,
+      "lng": 12.33327115741536,
+      "buildingType": "fondaco",
+      "historicalName": "Fondaco dei Greci",
+      "englishName": "Greek Merchants' Warehouse",
+      "historicalDescription": "Built in the mid-15th century, this fondaco served the Greek merchant community in Venice, providing warehouse space, living quarters, and a small chapel. While smaller than the famous Fondaco dei Tedeschi, it played a crucial role in Venice's eastern Mediterranean trade. Located along Calle dei Saloni, the building's architectural style blends Byzantine influences with Venetian Gothic elements, reflecting the cultural exchange between Venice and its Greek territories.",
+      "streetName": "Calle della Malvasia",
+      "streetNameEnglish": "Street of the Malvasia Wine",
+      "streetDescription": "Named after a tavern that served Malvasia wine, a sweet wine from Greece that was popular in Renaissance Venice. Such taverns were common throughout the city and often gave their names to nearby streets.",
+      "id": "building_45.429864_12.333271"
+    },
+    {
+      "lat": 45.42980480261792,
+      "lng": 12.333752889751008,
+      "buildingType": "scuola",
+      "historicalName": "Scuola dei Sartori",
+      "englishName": "Guild Hall of the Tailors",
+      "historicalDescription": "Constructed in 1508, this scuola piccola served Venice's tailors' guild, which controlled the lucrative trade of fine clothing production. The building features a meeting hall on the upper floor and workshops below. Located midway along Calle dei Saloni, it contains frescoes depicting Saint Homobono, patron saint of tailors. The guild strictly regulated apprenticeships and maintained quality standards for Venetian fashion, which was renowned throughout Europe.",
+      "streetName": "Sottoportego dei Oresi",
+      "streetNameEnglish": "Passageway of the Goldsmiths",
+      "streetDescription": "A covered passageway named after the goldsmiths who had workshops in this area. Luxury crafts were highly regulated in Venice, with artisans of similar trades often clustering in specific neighborhoods.",
+      "id": "building_45.429805_12.333753"
+    },
+    {
+      "lat": 45.43027546662664,
+      "lng": 12.333196041381319,
+      "buildingType": "spezieria",
+      "historicalName": "Spezieria all'Angelo",
+      "englishName": "Apothecary at the Angel",
+      "historicalDescription": "Operating since 1475, this apothecary was famous for importing and processing exotic medicinal ingredients from Venice's eastern territories. Its name derives from the angel statue displayed above its entrance on Calle dei Saloni. The spezieria served both medical and culinary purposes, supplying physicians, monasteries, and noble households with spices, herbal remedies, and early pharmaceuticals. Its original interior features preserved wooden cabinets with painted ceramic jars for storing various medicinal substances.",
+      "streetName": "Salizada dei Greci",
+      "streetNameEnglish": "Paved Road of the Greeks",
+      "streetDescription": "This would reference the Greek community that had a significant presence in Venice. A 'salizada' was one of the first paved streets in Venice, indicating its importance. The Greek community had connections to Santa Maria Formosa area.",
+      "id": "building_45.430275_12.333196"
+    },
+    {
+      "lat": 45.43034647052719,
+      "lng": 12.333838604563388,
+      "buildingType": "casa",
+      "historicalName": "Casa Bembo",
+      "englishName": "Bembo House",
+      "historicalDescription": "A refined residential building owned by a branch of the influential Bembo family, constructed in the early 16th century. While more modest than their main palazzo, this house near Santa Maria Formosa served as a secondary residence. The family produced notable scholars and Pietro Bembo, the renowned humanist cardinal who standardized the Italian language. The building's façade features delicate stone tracery and the family coat of arms with its distinctive chevron design.",
+      "streetName": "Corte Querini",
+      "streetNameEnglish": "Querini Courtyard",
+      "streetDescription": "Named after the Querini family, one of Venice's oldest noble families who owned property near Santa Maria Formosa. Many small courtyards (corti) in Venice were named after the prominent families whose palaces opened onto them.",
+      "id": "building_45.430346_12.333839"
+    },
+    {
+      "lat": 45.430758047298504,
+      "lng": 12.333920748014803,
+      "buildingType": "osteria",
+      "historicalName": "Osteria del Leone Nero",
+      "englishName": "Black Lion Tavern",
+      "historicalDescription": "Established in 1492, this tavern was a popular gathering place for merchants, artisans, and occasional nobles seeking anonymity. Located at the intersection of Calle dei Saloni and a smaller alleyway, it derived its name from the black lion insignia displayed above its door. The osteria was known for serving wine from Venetian territories on the mainland and simple foods. It appears in several government reports as a location where political discussions sometimes veered into seditious territory.",
+      "streetName": "Ruga dei Spezieri",
+      "streetNameEnglish": "Street of the Spice Merchants",
+      "streetDescription": "A 'ruga' was a commercial street with shops on both sides. This one would be named after the spice merchants who were crucial to Venice's trade with the East. Spices were among the most valuable commodities in Renaissance Venice.",
+      "id": "building_45.430758_12.333921"
+    }
+  ],
+  "id": "polygon-1745878859083"
+}

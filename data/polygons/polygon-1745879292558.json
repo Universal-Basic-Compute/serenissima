@@ -1,0 +1,356 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.437207716757584,
+      "lng": 12.319946053827685
+    },
+    {
+      "lat": 45.43866819242671,
+      "lng": 12.319667104090136
+    },
+    {
+      "lat": 45.43866819242671,
+      "lng": 12.319055560434741
+    },
+    {
+      "lat": 45.43890156390199,
+      "lng": 12.318647864664477
+    },
+    {
+      "lat": 45.43978987230079,
+      "lng": 12.317789557779712
+    },
+    {
+      "lat": 45.4396844805101,
+      "lng": 12.317220929468554
+    },
+    {
+      "lat": 45.43925538332987,
+      "lng": 12.316405537928027
+    },
+    {
+      "lat": 45.43854021411115,
+      "lng": 12.315793994272632
+    },
+    {
+      "lat": 45.438397179179645,
+      "lng": 12.315557959879321
+    },
+    {
+      "lat": 45.43777233812206,
+      "lng": 12.314978602732104
+    },
+    {
+      "lat": 45.43623655479492,
+      "lng": 12.31560087522356
+    },
+    {
+      "lat": 45.437087263468634,
+      "lng": 12.319763663614673
+    },
+    {
+      "lat": 45.43716254680437,
+      "lng": 12.319152119959277
+    },
+    {
+      "lat": 45.43724535835764,
+      "lng": 12.319195035303515
+    },
+    {
+      "lat": 45.43716254680437,
+      "lng": 12.319774392450732
+    }
+  ],
+  "centroid": {
+    "lat": 45.438118626886435,
+    "lng": 12.317903283441947
+  },
+  "historicalName": "Sacca della Misericordia",
+  "englishName": "Mercy's Sack",
+  "historicalDescription": "In the 15th century, this area was a shallow lagoon used as a landfill and later filled in to create new land. It was not yet developed into the artificial island seen today.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 95878.81,
+  "center": {
+    "lat": 45.43767971345316,
+    "lng": 12.317254990104356
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43934571810139,
+        "lng": 12.318218711222094
+      },
+      "water": {
+        "lat": 45.43952272623098,
+        "lng": 12.318264211736404
+      },
+      "historicalName": "Fondamenta della Misericordia",
+      "englishName": "Foundation of Mercy",
+      "historicalDescription": "This dock takes its name directly from the Sacca della Misericordia area where it's located. The name references the adjacent Scuola Grande della Misericordia, a significant 16th-century confraternity building designed by Jacopo Sansovino. The brotherhood that occupied this building was dedicated to charitable works and mercy, providing aid to the poor and sick of Venice, thus the name 'Misericordia' (Mercy).",
+      "id": "canal_45.439346_12.318219"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43666190913177,
+        "lng": 12.317682269419116
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879238426",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.436623190563424,
+          "lng": 12.317988484099969
+        },
+        "distance": 24.277263238669754,
+        "id": "c2f4bf04-f8bd-4c3a-aa83-091138ad65b0",
+        "historicalName": "Ponte della Misericordia",
+        "englishName": "Bridge of Mercy",
+        "historicalDescription": "Named after the Sacca della Misericordia area where it is located. This bridge connected the neighborhood to the Scuola Grande della Misericordia, one of Venice's important confraternities founded in the 13th century. The area was known for its charitable works and assistance to the poor, with the confraternity providing food, medical care, and other forms of mercy to Venetians in need.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4366425498476,
+            "lng": 12.317835376759543
+          }
+        }
+      },
+      "id": "bridge_45.436662_12.317682"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43675502211532,
+      "lng": 12.316263781861307,
+      "streetName": "Fondamenta della Sacca",
+      "streetNameEnglish": "Foundation of the Sacca",
+      "streetDescription": "Named for its location along the edge of Sacca della Misericordia, a 'sacca' being a reclaimed area created by depositing sediment to extend landmass.",
+      "id": "building_45.436755_12.316264"
+    },
+    {
+      "lat": 45.43667203521876,
+      "lng": 12.316854689471525,
+      "streetName": "Calle dei Remeri",
+      "streetNameEnglish": "Street of the Oar Makers",
+      "streetDescription": "The remeri (oar makers) often had workshops in this northern area of Venice close to the shipyards, as their craft was essential to Venetian maritime activities.",
+      "id": "building_45.436672_12.316855"
+    },
+    {
+      "lat": 45.43677230024874,
+      "lng": 12.317432348548113,
+      "streetName": "Rio Terà dei Serviti",
+      "streetNameEnglish": "Filled Canal of the Servite Order",
+      "streetDescription": "Named after the Servite Order that maintained a monastery in the area during the Renaissance period. A 'rio terà' indicates a former canal that was filled in to create a street.",
+      "id": "building_45.436772_12.317432"
+    },
+    {
+      "lat": 45.43704912005792,
+      "lng": 12.316883961293527,
+      "streetName": "Calle dei Misericordianti",
+      "streetNameEnglish": "Street of the Members of the Misericordia",
+      "streetDescription": "Named after the Brotherhood of Mercy (Misericordia), a charitable confraternity that was active in this area providing assistance to the poor and sick.",
+      "id": "building_45.437049_12.316884"
+    },
+    {
+      "lat": 45.437212035428814,
+      "lng": 12.317468204033437,
+      "streetName": "Fondamenta dei Arsenalotti",
+      "streetNameEnglish": "Foundation of the Arsenal Workers",
+      "streetDescription": "Many Arsenal workers (arsenalotti) lived in this northern area of Venice, within reasonable walking distance to the Arsenal where they constructed ships for the Republic.",
+      "id": "building_45.437212_12.317468"
+    },
+    {
+      "lat": 45.43720920403987,
+      "lng": 12.318118591326522,
+      "streetName": "Corte dei Tagliapietra",
+      "streetNameEnglish": "Court of the Stonemasons",
+      "streetDescription": "Named for the stonemasons who had workshops in this area, supplying marble and stone for the numerous palaces and churches of Venice.",
+      "id": "building_45.437209_12.318119"
+    },
+    {
+      "lat": 45.43715516706375,
+      "lng": 12.318907484144777,
+      "streetName": "Sottoportego della Madonna",
+      "streetNameEnglish": "Passageway of the Madonna",
+      "streetDescription": "A covered passageway (sottoportego) named for a shrine to the Virgin Mary that would have been located along this route, as was common in Renaissance Venice.",
+      "id": "building_45.437155_12.318907"
+    },
+    {
+      "lat": 45.43755772273613,
+      "lng": 12.315655157719217,
+      "streetName": "Ruga dei Conciapelli",
+      "streetNameEnglish": "Street of the Tanners",
+      "streetDescription": "Tanners often worked in more remote areas like Sacca della Misericordia due to the malodorous nature of their trade, which involved treating animal hides.",
+      "id": "building_45.437558_12.315655"
+    },
+    {
+      "lat": 45.437665257506325,
+      "lng": 12.316378760569453,
+      "streetName": "Campiello del Forno",
+      "streetNameEnglish": "Small Square of the Bakery",
+      "streetDescription": "A small square where a community bakery (forno) would have been located, providing bread for the local neighborhood in Renaissance times.",
+      "id": "building_45.437665_12.316379"
+    },
+    {
+      "lat": 45.43753231939565,
+      "lng": 12.317414732760545,
+      "streetName": "Calle del Squero Nuovo",
+      "streetNameEnglish": "Street of the New Boatyard",
+      "streetDescription": "Named for a boatyard (squero) established in the area during an expansion of shipbuilding activities, likely in the 15th or 16th century.",
+      "id": "building_45.437532_12.317415"
+    },
+    {
+      "lat": 45.43764061469829,
+      "lng": 12.318137562729191,
+      "streetName": "Fondamenta dei Cordami",
+      "streetNameEnglish": "Foundation of the Rope Makers",
+      "streetDescription": "Rope makers needed long stretches of open space for their work, making the Sacca della Misericordia area ideal for this maritime-related craft essential to Venetian shipping.",
+      "id": "building_45.437641_12.318138"
+    },
+    {
+      "lat": 45.43750158434037,
+      "lng": 12.318764080904284,
+      "streetName": "Salizada della Fraterna",
+      "streetNameEnglish": "Paved Street of the Brotherhood",
+      "streetDescription": "A salizada (paved street, elevated above normal water levels) named for a local religious brotherhood or confraternity that was active in the area.",
+      "id": "building_45.437502_12.318764"
+    },
+    {
+      "lat": 45.437653668966526,
+      "lng": 12.319335340835362,
+      "streetName": "Calle della Misericordia",
+      "streetNameEnglish": "Street of Mercy",
+      "streetDescription": "Directly named after the Sacca della Misericordia area itself, reflecting the connection to the Scuola Grande della Misericordia, a major confraternity in Renaissance Venice.",
+      "id": "building_45.437654_12.319335"
+    },
+    {
+      "lat": 45.43799570053004,
+      "lng": 12.31573298479833,
+      "streetName": "Rio Terà dei Beccarie",
+      "streetNameEnglish": "Filled Canal of the Butchers",
+      "streetDescription": "Where butchers (beccarie) once had their shops, typically located in less populous areas like this northern district due to the nature of their trade.",
+      "id": "building_45.437996_12.315733"
+    },
+    {
+      "lat": 45.43807950720517,
+      "lng": 12.316219714976858,
+      "streetName": "Sottoportego dei Sartori",
+      "streetNameEnglish": "Passageway of the Tailors",
+      "streetDescription": "Named for tailors who may have had workshops along this covered passageway, representing one of the important guilds of Renaissance Venice.",
+      "id": "building_45.438080_12.316220"
+    },
+    {
+      "lat": 45.438044208203785,
+      "lng": 12.31682461344095,
+      "streetName": "Calle dei Verieri",
+      "streetNameEnglish": "Street of the Glassmakers",
+      "streetDescription": "Though most glassmakers were relocated to Murano by the Renaissance, some auxiliary glass trade activities or residences of glassmakers might have remained in this area.",
+      "id": "building_45.438044_12.316825"
+    },
+    {
+      "lat": 45.43796158643313,
+      "lng": 12.317580029897666,
+      "streetName": "Fondamenta dei Mori",
+      "streetNameEnglish": "Foundation of the Moors",
+      "streetDescription": "Named for North African merchants who lived or conducted business in this area, reflecting Venice's extensive Mediterranean trade networks.",
+      "id": "building_45.437962_12.317580"
+    },
+    {
+      "lat": 45.43804022754618,
+      "lng": 12.318114645502805,
+      "streetName": "Corte Sanudo",
+      "streetNameEnglish": "Sanudo Court",
+      "streetDescription": "Named after the Sanudo family, a nobili Venetian family who may have owned property in this area during the Renaissance period.",
+      "id": "building_45.438040_12.318115"
+    },
+    {
+      "lat": 45.43806291262617,
+      "lng": 12.318807580707693,
+      "streetName": "Calle del Capitello Vecchio",
+      "streetNameEnglish": "Street of the Old Shrine",
+      "streetDescription": "Named for an ancient shrine or small religious monument (capitello) that would have been a landmark in the neighborhood for centuries.",
+      "id": "building_45.438063_12.318808"
+    },
+    {
+      "lat": 45.438039668918314,
+      "lng": 12.319354533694135,
+      "streetName": "Rio Terà dell'Abbazia",
+      "streetNameEnglish": "Filled Canal of the Abbey",
+      "streetDescription": "Referring to a former canal that was filled in, near religious property owned by a monastic abbey in the area.",
+      "id": "building_45.438040_12.319355"
+    },
+    {
+      "lat": 45.43848468009869,
+      "lng": 12.316176264786819,
+      "streetName": "Salizada dei Derelitti",
+      "streetNameEnglish": "Paved Street of the Destitute",
+      "streetDescription": "Possibly named for an ospedale (hospital/orphanage) that cared for abandoned children or the destitute, reflecting the charitable activities common in this area.",
+      "id": "building_45.438485_12.316176"
+    },
+    {
+      "lat": 45.438567184502695,
+      "lng": 12.317008166808648,
+      "streetName": "Fondamenta degli Ormesini",
+      "streetNameEnglish": "Foundation of the Silk Weavers",
+      "streetDescription": "Named for silk weavers who specialized in ormesino, a lightweight silk fabric that was one of Venice's valuable exports during the Renaissance.",
+      "id": "building_45.438567_12.317008"
+    },
+    {
+      "lat": 45.43850612907198,
+      "lng": 12.317566789821191,
+      "streetName": "Calle dei Bombardieri",
+      "streetNameEnglish": "Street of the Gunners",
+      "streetDescription": "Named for artillery specialists who may have lived in this area, reflecting Venice's military organization and its proximity to the Arsenal.",
+      "id": "building_45.438506_12.317567"
+    },
+    {
+      "lat": 45.438510667417745,
+      "lng": 12.318095339352137,
+      "streetName": "Sottoportego della Sensa",
+      "streetNameEnglish": "Passageway of the Ascension",
+      "streetDescription": "Named for the Festa della Sensa (Feast of the Ascension), one of Venice's most important festivals that celebrated the city's symbolic marriage to the sea.",
+      "id": "building_45.438511_12.318095"
+    },
+    {
+      "lat": 45.43844962663432,
+      "lng": 12.318765722531074,
+      "streetName": "Campiello dei Picaferro",
+      "streetNameEnglish": "Small Square of the Ironworkers",
+      "streetDescription": "Named for ironworkers who had forges in this area, supplying metal components for shipbuilding and construction.",
+      "id": "building_45.438450_12.318766"
+    },
+    {
+      "lat": 45.43894701589441,
+      "lng": 12.316957277306917,
+      "streetName": "Calle della Madonna dell'Orto",
+      "streetNameEnglish": "Street of Madonna of the Garden",
+      "streetDescription": "Named for its proximity to the Madonna dell'Orto church, a significant religious landmark in this northern district of Venice since the 14th century.",
+      "id": "building_45.438947_12.316957"
+    },
+    {
+      "lat": 45.43895775995131,
+      "lng": 12.317604433718266,
+      "streetName": "Fondamenta Navagero",
+      "streetNameEnglish": "Navagero Foundation",
+      "streetDescription": "Named after the Navagero family, a noble Venetian family that may have owned property or held influence in this area during the Renaissance.",
+      "id": "building_45.438958_12.317604"
+    },
+    {
+      "lat": 45.4388764631095,
+      "lng": 12.318240254773848,
+      "streetName": "Ruga dei Tinelli",
+      "streetNameEnglish": "Street of the Small Wine Barrels",
+      "streetDescription": "Named for wine merchants or shops that sold wine in small barrels (tinelli), possibly indicating an area where modest taverns or wine sellers were once concentrated.",
+      "id": "building_45.438876_12.318240"
+    },
+    {
+      "lat": 45.43941675578132,
+      "lng": 12.31743497871908,
+      "streetName": "Calle dei Marinaretti",
+      "streetNameEnglish": "Street of the Young Sailors",
+      "streetDescription": "Possibly named for young sailors or apprentices who lived in this area near the northern lagoon edge, reflecting Venice's maritime identity.",
+      "id": "building_45.439417_12.317435"
+    }
+  ],
+  "id": "polygon-1745879292558"
+}

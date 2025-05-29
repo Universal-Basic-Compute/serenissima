@@ -1,0 +1,99 @@
+{
+  "name": "Weighing Station",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Trade Facilities",
+  "size": 1,
+  "unlockCondition": "10,000,000 ducats and official connections, or government license",
+  "calculationsAnalysis": "The Weighing Station balances government service with modest revenue generation. The construction cost of 1,900,000 ducats reflects the specialized equipment and official infrastructure required, while the income of 25,000 ducats (1.32% return) represents the fees collected for standardized measurements. The maintenance cost of 13,500 ducats (54% of income) creates a modest profit margin appropriate for a semi-governmental service. The employment capacity of 8 represents the officials and workers needed to operate measurement equipment and maintain records. The construction time of 3 days (259200000ms) reflects the specialized construction requirements. This building creates a strategic investment in commercial infrastructure that benefits the entire trading system while generating modest direct returns, reflecting Venice's sophisticated approach to standardization and commercial regulation.",
+  "shortDescription": "Official product measurement facility ensuring accurate weights and measures for commerce.",
+  "fullDescription": "Accuracy in commerce was essential to Venice's reputation, and these official stations provided standardized weights and measures for all significant transactions. Featuring precisely calibrated scales, volume measures, and length standards, these government-regulated facilities prevented fraud while collecting small fees for their services. The official certification they provided gave merchants confidence in their transactions.",
+  "flavorText": "A gram too light or an inch too short may seem trivial, until one calculates the difference across a thousand transactions—then one understands why the Republic is so precise in its measures.",
+  "constructionCosts": {
+    "ducats": 1900000,
+    "timber": 500,
+    "bricks": 1220,
+    "stone": 840,
+    "glass": 90,
+    "iron": 420
+  },
+  "maintenanceCost": 1350,
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "grain": 2,
+          "salt": 1
+        },
+        "outputs": {
+          "banking_services": 1
+        },
+        "craftMinutes": 15
+      },
+      {
+        "inputs": {
+          "wine": 2
+        },
+        "outputs": {
+          "banking_services": 1
+        },
+        "craftMinutes": 10
+      },
+      {
+        "inputs": {
+          "spiced_wine": 1
+        },
+        "outputs": {
+          "banking_services": 1
+        },
+        "craftMinutes": 20
+      },
+      {
+        "inputs": {
+          "gold": 1
+        },
+        "outputs": {
+          "banking_services": 1
+        },
+        "craftMinutes": 30
+      }
+    ],
+    "storageCapacity": 200,
+    "stores": [
+      "grain",
+      "salt",
+      "wine",
+      "spiced_wine",
+      "gold",
+      "banking_services",
+      "maps",
+      "smuggler_maps"
+    ],
+    "sells": [
+      "banking_services",
+      "maps"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Scale mechanisms, official stamps, merchant discussions",
+    "activitySounds": "Weights being placed, goods being positioned, official declarations",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "harvest seasons": "Increased grain and produce weighing",
+    "shipping arrivals": "Peaks of activity following major ship arrivals",
+    "contract days": "Extended hours and additional staff"
+  },
+  "aiInteractionPoints": [
+    "Main weighing platform",
+    "Certification desk",
+    "Dispute resolution area",
+    "Smaller scales area",
+    "Queue management position",
+    "Record-keeping office"
+  ],
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 4320
+}

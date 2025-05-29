@@ -1,0 +1,36 @@
+{
+  "id": "sailcloth",
+  "name": "Sailcloth",
+  "category": "processed_materials",
+  "subCategory": "naval_supplies",
+  "description": "Durable woven fabric for ship sails and awnings.",
+  "varieties": [
+    {
+      "type": "standard_sailcloth",
+      "weaveDensity": "medium",
+      "windEfficiency": "good",
+      "valueMultiplier": 1,
+      "primaryUse": "merchant_vessels"
+    },
+    {
+      "type": "light_sailcloth",
+      "weaveDensity": "low",
+      "windEfficiency": "excellent",
+      "durability": "reduced",
+      "valueMultiplier": 1.2,
+      "primaryUse": "racing_vessels"
+    },
+    {
+      "type": "heavy_sailcloth",
+      "weaveDensity": "high",
+      "windEfficiency": "moderate",
+      "durability": "excellent",
+      "valueMultiplier": 1.3,
+      "primaryUse": "naval_vessels"
+    }
+  ],
+  "importPrice": 1080.0,
+  "lifetimeHours": 26250,
+  "consumptionHours": 117,
+  "tier": 2
+}

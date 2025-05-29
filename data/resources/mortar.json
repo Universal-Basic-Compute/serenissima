@@ -1,0 +1,31 @@
+{
+  "id": "mortar",
+  "name": "Mortar",
+  "category": "processed_materials",
+  "subCategory": "construction",
+  "description": "Binding material used to hold bricks and stones together in construction.",
+  "varieties": [
+    {
+      "type": "standard_mortar",
+      "waterResistance": "moderate",
+      "valueMultiplier": 1,
+      "primaryUse": "general_construction"
+    },
+    {
+      "type": "hydraulic_mortar",
+      "waterResistance": "excellent",
+      "valueMultiplier": 1.5,
+      "primaryUse": "foundations_water_exposed_areas"
+    },
+    {
+      "type": "fine_mortar",
+      "appearance": "smooth",
+      "valueMultiplier": 1.3,
+      "primaryUse": "visible_joints_decorative_work"
+    }
+  ],
+  "importPrice": 279.0,
+  "lifetimeHours": 150,
+  "consumptionHours": null,
+  "tier": 0
+}

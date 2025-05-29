@@ -1,0 +1,731 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43540492667468,
+      "lng": 12.35054035748381
+    },
+    {
+      "lat": 45.43520918369618,
+      "lng": 12.351345020188278
+    },
+    {
+      "lat": 45.43474993788914,
+      "lng": 12.351259189499801
+    },
+    {
+      "lat": 45.43467465133471,
+      "lng": 12.351731258286422
+    },
+    {
+      "lat": 45.434569249989764,
+      "lng": 12.351699071778244
+    },
+    {
+      "lat": 45.43447890582311,
+      "lng": 12.352246242417282
+    },
+    {
+      "lat": 45.434629479353845,
+      "lng": 12.352246242417282
+    },
+    {
+      "lat": 45.434268102205166,
+      "lng": 12.354424196137375
+    },
+    {
+      "lat": 45.436120135631114,
+      "lng": 12.355475622071213
+    },
+    {
+      "lat": 45.43602226546715,
+      "lng": 12.356065708054489
+    },
+    {
+      "lat": 45.436120135631114,
+      "lng": 12.356194454087204
+    },
+    {
+      "lat": 45.43602979394733,
+      "lng": 12.356484132660812
+    },
+    {
+      "lat": 45.436413745104566,
+      "lng": 12.356827455414718
+    },
+    {
+      "lat": 45.43627823322973,
+      "lng": 12.357310253037399
+    },
+    {
+      "lat": 45.4364062166756,
+      "lng": 12.357363897217697
+    },
+    {
+      "lat": 45.436376102949744,
+      "lng": 12.35779305066008
+    },
+    {
+      "lat": 45.43627070478271,
+      "lng": 12.357846694840378
+    },
+    {
+      "lat": 45.436052379381834,
+      "lng": 12.359123426331466
+    },
+    {
+      "lat": 45.43573618247616,
+      "lng": 12.359316545380539
+    },
+    {
+      "lat": 45.43539739811114,
+      "lng": 12.358662086380905
+    },
+    {
+      "lat": 45.43481769570225,
+      "lng": 12.358147102250046
+    },
+    {
+      "lat": 45.435510326458804,
+      "lng": 12.356580692185348
+    },
+    {
+      "lat": 45.43544256947732,
+      "lng": 12.356591421021408
+    },
+    {
+      "lat": 45.435555497734605,
+      "lng": 12.35555072392363
+    },
+    {
+      "lat": 45.4331237259677,
+      "lng": 12.355829673661178
+    },
+    {
+      "lat": 45.43332700502057,
+      "lng": 12.353168922318405
+    },
+    {
+      "lat": 45.432769868091945,
+      "lng": 12.351409393204635
+    },
+    {
+      "lat": 45.432431065919076,
+      "lng": 12.350658374680465
+    },
+    {
+      "lat": 45.43212990672461,
+      "lng": 12.350615459336227
+    },
+    {
+      "lat": 45.43198685554427,
+      "lng": 12.350347238434738
+    },
+    {
+      "lat": 45.43246871070539,
+      "lng": 12.349413829697555
+    },
+    {
+      "lat": 45.43262681853371,
+      "lng": 12.34954257573027
+    },
+    {
+      "lat": 45.434027182820465,
+      "lng": 12.350175577057785
+    },
+    {
+      "lat": 45.43491556795536,
+      "lng": 12.350272136582321
+    }
+  ],
+  "centroid": {
+    "lat": 45.43477472138267,
+    "lng": 12.354184059542039
+  },
+  "historicalName": "Calle San Zuane in Rialto",
+  "englishName": "Saint John's Street in Rialto",
+  "historicalDescription": "This narrow street was located in the bustling Rialto district, known for its merchants, artisans, and the famous Rialto Bridge. The area was a center of trade and commerce in 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 122349.19,
+  "center": {
+    "lat": 45.43371378819052,
+    "lng": 12.351937223477572
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43516401108053,
+        "lng": 12.357363897217697
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057305470",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43506614032096,
+          "lng": 12.35729952420134
+        },
+        "distance": 11.985946581756322,
+        "id": "83de76f2-e0c0-4dd2-a156-3ddefb281a4b",
+        "historicalName": "Ponte dei Cambisti",
+        "englishName": "Bridge of the Money Changers",
+        "historicalDescription": "Named after the money changers who operated near Rialto, one of Venice's primary financial centers. The cambisti were essential figures in Renaissance Venice's international commerce, exchanging various currencies for merchants and traders in the busy San Zuane area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43511507570075,
+            "lng": 12.357331710709518
+          }
+        }
+      },
+      "id": "bridge_45.435164_12.357364"
+    },
+    {
+      "edge": {
+        "lat": 45.43544256947732,
+        "lng": 12.356591421021408
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057291098",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.435333405143766,
+          "lng": 12.356371479882187
+        },
+        "distance": 21.02034894167759,
+        "id": "3e9bac0a-cd6a-450f-a870-6f15e2319e87",
+        "historicalName": "Ponte della Stadera",
+        "englishName": "Bridge of the Scale",
+        "historicalDescription": "Referring to the official weighing scales used to measure goods in the nearby commercial area. The Rialto district was home to merchants who needed accurate measurements for trade, and this bridge would have been near where public scales were maintained by the Republic.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43538798731054,
+            "lng": 12.356481450451797
+          }
+        }
+      },
+      "id": "bridge_45.435443_12.356591"
+    },
+    {
+      "edge": {
+        "lat": 45.43458278902784,
+        "lng": 12.355662303818649
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057291098",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.434481398498,
+          "lng": 12.355818944825119
+        },
+        "distance": 16.628071874812793,
+        "id": "3e9bac0a-cd6a-450f-a870-6f15e2319e87",
+        "historicalName": "Ponte dei Bancogiro",
+        "englishName": "Bridge of the Bank Circuit",
+        "historicalDescription": "Named for Venice's revolutionary public banking system that operated near Rialto. The Bancogiro, established in 1619, allowed merchants to transfer credits between accounts without physical currency, making it one of the first clearing houses in Europe near San Zuane.",
+        "location": {
+          "midpoint": {
+            "lat": 45.434532093762925,
+            "lng": 12.355740624321884
+          }
+        }
+      },
+      "id": "bridge_45.434583_12.355662"
+    },
+    {
+      "edge": {
+        "lat": 45.43409643467446,
+        "lng": 12.355718093766159
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057291098",
+        "targetPointIndex": 6,
+        "targetPoint": {
+          "lat": 45.43399328445132,
+          "lng": 12.355877953423446
+        },
+        "distance": 16.94544208748791,
+        "id": "3e9bac0a-cd6a-450f-a870-6f15e2319e87",
+        "historicalName": "Ponte dei Sensali",
+        "englishName": "Bridge of the Brokers",
+        "historicalDescription": "Dedicated to the sensali (brokers) who facilitated trade deals between merchants in the Rialto area. These licensed intermediaries were vital to Venice's commercial system, connecting buyers and sellers while ensuring adherence to the Republic's regulations.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43404485956289,
+            "lng": 12.355798023594803
+          }
+        }
+      },
+      "id": "bridge_45.434096_12.355718"
+    },
+    {
+      "edge": {
+        "lat": 45.43361008032108,
+        "lng": 12.355773883713669
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057291098",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.433505170404636,
+          "lng": 12.355936962021774
+        },
+        "distance": 17.26285549905872,
+        "id": "3e9bac0a-cd6a-450f-a870-6f15e2319e87",
+        "historicalName": "Ponte di San Giovanni Elemosinario",
+        "englishName": "Bridge of Saint John the Almsgiver",
+        "historicalDescription": "Named after the nearby church of San Giovanni Elemosinario in the Rialto area. This church was rebuilt after the fire of 1514 that devastated the Rialto district, and the bridge would have connected worshippers to this important parish church.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43355762536286,
+            "lng": 12.355855422867721
+          }
+        }
+      },
+      "id": "bridge_45.433610_12.355774"
+    },
+    {
+      "edge": {
+        "lat": 45.433174545730914,
+        "lng": 12.355164485825485
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057352428",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.43306178905024,
+          "lng": 12.355142607211803
+        },
+        "distance": 12.653663908382114,
+        "id": "db315bcf-5840-40a2-ab86-9d25e62c6087",
+        "historicalName": "Ponte dei Tedeschi",
+        "englishName": "Bridge of the Germans",
+        "historicalDescription": "Referencing the German merchants who maintained a significant presence in Venice's trade network. The Fondaco dei Tedeschi (German trading house) was near Rialto, and this bridge would have been part of the route German merchants took between their quarters and the San Zuane commercial area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433118167390575,
+            "lng": 12.355153546518643
+          }
+        }
+      },
+      "id": "bridge_45.433175_12.355164"
+    },
+    {
+      "edge": {
+        "lat": 45.43322536549414,
+        "lng": 12.354499297989792
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057352428",
+        "targetPointIndex": 8,
+        "targetPoint": {
+          "lat": 45.43310131561962,
+          "lng": 12.354490830421184
+        },
+        "distance": 13.809532114347792,
+        "id": "db315bcf-5840-40a2-ab86-9d25e62c6087",
+        "historicalName": "Ponte della Seda",
+        "englishName": "Bridge of Silk",
+        "historicalDescription": "Named for the silk merchants and workshops that operated in this area of Rialto. Venice was a major center for luxury silk trade in the Renaissance, with many artisans processing raw silk into finished textiles near San Zuane.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43316334055688,
+            "lng": 12.354495064205487
+          }
+        }
+      },
+      "id": "bridge_45.433225_12.354499"
+    },
+    {
+      "edge": {
+        "lat": 45.433276185257355,
+        "lng": 12.353834110154098
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057352428",
+        "targetPointIndex": 9,
+        "targetPoint": {
+          "lat": 45.43314084218901,
+          "lng": 12.353839053630566
+        },
+        "distance": 15.054405268934175,
+        "id": "db315bcf-5840-40a2-ab86-9d25e62c6087",
+        "historicalName": "Ponte dei Giurati",
+        "englishName": "Bridge of the Jurors",
+        "historicalDescription": "Named after the commercial court jurors who would have used this route to reach the Rialto courts. The Venetian Republic maintained specialized courts for resolving merchant disputes, staffed by giurati (jurors) with expertise in commercial matters.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43320851372319,
+            "lng": 12.353836581892331
+          }
+        }
+      },
+      "id": "bridge_45.433276_12.353834"
+    },
+    {
+      "edge": {
+        "lat": 45.432431065919076,
+        "lng": 12.350658374680465
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057352428",
+        "targetPointIndex": 10,
+        "targetPoint": {
+          "lat": 45.43235971707215,
+          "lng": 12.35085911941502
+        },
+        "distance": 17.55886282925601,
+        "id": "db315bcf-5840-40a2-ab86-9d25e62c6087",
+        "historicalName": "Ponte del Fontego",
+        "englishName": "Bridge of the Warehouse",
+        "historicalDescription": "Referring to the public warehouses (fontego) where goods were stored near the Rialto contract. These state-controlled storage facilities were crucial to Venice's trade system, ensuring taxation and quality control of merchandise entering the city.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43239539149562,
+            "lng": 12.350758747047742
+          }
+        }
+      },
+      "id": "bridge_45.432431_12.350658"
+    },
+    {
+      "edge": {
+        "lat": 45.434027182820465,
+        "lng": 12.350175577057785
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057051612",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43396703982063,
+          "lng": 12.349960647163982
+        },
+        "distance": 18.054958326966027,
+        "id": "18c614a2-c33f-4696-9a8d-7d33440cc6dd",
+        "historicalName": "Ponte dei Nicolotti",
+        "englishName": "Bridge of the Nicolotti Faction",
+        "historicalDescription": "Named for one of Venice's two traditional factions of fishermen and gondoliers. The Nicolotti (followers of San Nicolò) had territories that extended into parts of the Rialto area, and this bridge would have been used by members of this important working-class faction.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43399711132055,
+            "lng": 12.350068112110883
+          }
+        }
+      },
+      "id": "bridge_45.434027_12.350176"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.432439313207595,
+      "lng": 12.350122244103353,
+      "streetName": "Calle dei Mercanti di Rialto",
+      "streetNameEnglish": "Street of the Rialto Merchants",
+      "streetDescription": "Named after the merchants who conducted business in the Rialto contract area, this street would have been home to various traders and vendors who supplied goods to the bustling commercial center.",
+      "id": "building_45.432439_12.350122"
+    },
+    {
+      "lat": 45.432888139223245,
+      "lng": 12.350124634753998,
+      "streetName": "Ruga degli Orefici",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "This street would have housed goldsmiths and jewelers who had workshops in the Rialto area. The concentration of valuable trade in this area required proximity to the commercial heart of Venice.",
+      "id": "building_45.432888_12.350125"
+    },
+    {
+      "lat": 45.43289026253671,
+      "lng": 12.35072527322432,
+      "streetName": "Rio Terà dei Banchieri",
+      "streetNameEnglish": "Filled Canal of the Bankers",
+      "streetDescription": "Named after the bankers who operated in the area, this former canal was filled in to create a street. The Rialto was the financial center of Venice, where many banking families established their operations.",
+      "id": "building_45.432890_12.350725"
+    },
+    {
+      "lat": 45.43296236000209,
+      "lng": 12.351453141471733,
+      "streetName": "Calle del Fontego dei Tedeschi",
+      "streetNameEnglish": "Street of the German Trading House",
+      "streetDescription": "Named for its proximity to the Fontego dei Tedeschi, the warehouse and residence for German merchants operating in Venice. This important commercial building was near the Rialto Bridge.",
+      "id": "building_45.432962_12.351453"
+    },
+    {
+      "lat": 45.43326413768609,
+      "lng": 12.350147953096952,
+      "streetName": "Sottoportego dei Cambiavalute",
+      "streetNameEnglish": "Passageway of the Money Changers",
+      "streetDescription": "This covered passageway would have been frequented by money changers who exchanged foreign currencies for Venetian ducats. Located near San Zuane in Rialto, it served the international merchants in the area.",
+      "id": "building_45.433264_12.350148"
+    },
+    {
+      "lat": 45.43326557951517,
+      "lng": 12.350634094894536,
+      "streetName": "Calle della Seta",
+      "streetNameEnglish": "Street of Silk",
+      "streetDescription": "Named for the silk merchants and traders who sold this valuable commodity. Silk was one of Venice's most important luxury imports, and this street would have featured shops selling silk fabrics.",
+      "id": "building_45.433266_12.350634"
+    },
+    {
+      "lat": 45.43340960384464,
+      "lng": 12.35128525827382,
+      "streetName": "Salizada dei Spezieri",
+      "streetNameEnglish": "Paved Street of the Spice Merchants",
+      "streetDescription": "One of the first paved streets in the area, it was named after the spice merchants who sold exotic spices from the East. The spice trade was a cornerstone of Venetian commerce in the Rialto area.",
+      "id": "building_45.433410_12.351285"
+    },
+    {
+      "lat": 45.43324842228226,
+      "lng": 12.352073910148443,
+      "streetName": "Calle dei Bombaseri",
+      "streetNameEnglish": "Street of the Cotton Merchants",
+      "streetDescription": "Named after the merchants who traded in cotton ('bombaso' in Venetian dialect). Cotton was an important textile import to Venice, and these merchants would have had shops near the commercial center of Rialto.",
+      "id": "building_45.433248_12.352074"
+    },
+    {
+      "lat": 45.43328167947213,
+      "lng": 12.352597936385074,
+      "streetName": "Rio Terà del Banco Giro",
+      "streetNameEnglish": "Filled Canal of the Circulating Bank",
+      "streetDescription": "Named after the Banco Giro, Venice's public bank established in 1619. Though the bank was established after the Renaissance, the name reflects the important financial activities that took place in this area near Rialto.",
+      "id": "building_45.433282_12.352598"
+    },
+    {
+      "lat": 45.433415585189294,
+      "lng": 12.354020859648784,
+      "streetName": "Calle dei Sensali",
+      "streetNameEnglish": "Street of the Brokers",
+      "streetDescription": "Named for the brokers who facilitated trade deals between merchants. These middlemen were essential to Venetian commerce in the Rialto contract area, connecting buyers and sellers.",
+      "id": "building_45.433416_12.354021"
+    },
+    {
+      "lat": 45.433385142511355,
+      "lng": 12.354619646197692,
+      "streetName": "Ruga dei Drappieri",
+      "streetNameEnglish": "Street of the Drapers",
+      "streetDescription": "This street housed merchants who sold cloth and textiles. The textile trade was central to Venice's economy, and drapers would have had a significant presence near San Zuane in Rialto.",
+      "id": "building_45.433385_12.354620"
+    },
+    {
+      "lat": 45.43329620971615,
+      "lng": 12.355169393864834,
+      "streetName": "Calle dei Stagneri",
+      "streetNameEnglish": "Street of the Tinsmiths",
+      "streetDescription": "Named for the tinsmiths who had workshops in this area. These artisans created various tin items for household and commercial use, serving the needs of the Rialto contract and surrounding neighborhood.",
+      "id": "building_45.433296_12.355169"
+    },
+    {
+      "lat": 45.43375230320709,
+      "lng": 12.350677094957973,
+      "streetName": "Fondamenta della Pescaria",
+      "streetNameEnglish": "Foundation of the Fish Contract",
+      "streetDescription": "Named for its proximity to the fish contract that operated in the Rialto area. This waterside street would have been busy with fishmongers and customers seeking fresh seafood from the lagoon.",
+      "id": "building_45.433752_12.350677"
+    },
+    {
+      "lat": 45.43384311808995,
+      "lng": 12.351231703880167,
+      "streetName": "Calle dei Cinque Savi",
+      "streetNameEnglish": "Street of the Five Sages",
+      "streetDescription": "Named after the Cinque Savi alla Mercanzia, the five officials who regulated Venetian trade. Their office would have been near this street in the commercial heart of the Rialto area.",
+      "id": "building_45.433843_12.351232"
+    },
+    {
+      "lat": 45.43374549456169,
+      "lng": 12.351983722433491,
+      "streetName": "Campiello del Paron",
+      "streetNameEnglish": "Small Square of the Master",
+      "streetDescription": "Named after a respected craftsman or guild master who would have had a workshop or residence in this small square near San Zuane in Rialto.",
+      "id": "building_45.433745_12.351984"
+    },
+    {
+      "lat": 45.43380391850434,
+      "lng": 12.352699927413475,
+      "streetName": "Calle del Sturion",
+      "streetNameEnglish": "Street of the Sturgeon",
+      "streetDescription": "Named either after a inn or tavern called 'The Sturgeon' that was located here, or after sturgeon merchants who sold this prized fish. This name reflects the gastronomic commerce of the area.",
+      "id": "building_45.433804_12.352700"
+    },
+    {
+      "lat": 45.433721730158496,
+      "lng": 12.353315305524141,
+      "streetName": "Sottoportego dei Marzeri",
+      "streetNameEnglish": "Passageway of the Mercers",
+      "streetDescription": "This covered passageway was named for the mercers (small goods merchants) who sold textiles, ribbons, and haberdashery items. These merchants would have had small shops in the bustling Rialto commercial district.",
+      "id": "building_45.433722_12.353315"
+    },
+    {
+      "lat": 45.433799285419006,
+      "lng": 12.353868695206076,
+      "streetName": "Calle della Malvasia",
+      "streetNameEnglish": "Street of the Malmsey Wine",
+      "streetDescription": "Named after taverns serving Malvasia (Malmsey), a sweet wine from Greece that was popular in Venice. Wine shops were common in the commercial areas around Rialto to serve merchants and visitors.",
+      "id": "building_45.433799_12.353869"
+    },
+    {
+      "lat": 45.43370151829473,
+      "lng": 12.354431866527653,
+      "streetName": "Rio Terà delle Becarie",
+      "streetNameEnglish": "Filled Canal of the Butchers",
+      "streetDescription": "This former canal was filled to create a street where butcher shops were located. Keeping the meat contract in a specific area was common practice in Renaissance Venice for sanitation and control purposes.",
+      "id": "building_45.433702_12.354432"
+    },
+    {
+      "lat": 45.43386666573664,
+      "lng": 12.355122575300777,
+      "streetName": "Calle del Paradiso",
+      "streetNameEnglish": "Street of Paradise",
+      "streetDescription": "Named after a notable house sign or tavern called 'Paradise,' this street would have been recognized by this distinctive landmark in the San Zuane in Rialto area.",
+      "id": "building_45.433867_12.355123"
+    },
+    {
+      "lat": 45.43427656004955,
+      "lng": 12.3507314722794,
+      "streetName": "Ruga dei Oresi",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "Another street dedicated to goldsmiths and jewelers, reflecting the concentration of this luxury trade near the commercial center of Rialto where wealthy merchants and nobles would shop.",
+      "id": "building_45.434277_12.350731"
+    },
+    {
+      "lat": 45.43415112943218,
+      "lng": 12.351422622613537,
+      "streetName": "Calle del Fontego della Farina",
+      "streetNameEnglish": "Street of the Flour Warehouse",
+      "streetDescription": "Named for its proximity to a public warehouse for flour. Food staples were carefully regulated in Venice, and this street would have been near where flour was stored and distributed.",
+      "id": "building_45.434151_12.351423"
+    },
+    {
+      "lat": 45.43418540344952,
+      "lng": 12.352027698771934,
+      "streetName": "Salizada dei Consorti",
+      "streetNameEnglish": "Paved Street of the Consortium",
+      "streetDescription": "Named after a merchant consortium or business partnership that operated in the area. Business consortiums were common in Renaissance Venice to share risks in trade ventures.",
+      "id": "building_45.434185_12.352028"
+    },
+    {
+      "lat": 45.434275127978424,
+      "lng": 12.352517174467216,
+      "streetName": "Calle del Lion Bianco",
+      "streetNameEnglish": "Street of the White Lion",
+      "streetDescription": "Named after a shop or inn sign depicting a white lion, this street would have been identified by this notable landmark near the San Zuane in Rialto area.",
+      "id": "building_45.434275_12.352517"
+    },
+    {
+      "lat": 45.43421335140652,
+      "lng": 12.353253176213439,
+      "streetName": "Corte dei Remer",
+      "streetNameEnglish": "Court of the Oar-makers",
+      "streetDescription": "A small courtyard named after the craftsmen who made oars for Venetian boats. These specialized artisans would have had workshops near the commercial center to supply the maritime needs of merchants.",
+      "id": "building_45.434213_12.353253"
+    },
+    {
+      "lat": 45.434147015963106,
+      "lng": 12.353884390119454,
+      "streetName": "Calle dei Fcitizeni",
+      "streetNameEnglish": "Street of the Spindle-makers",
+      "streetDescription": "Named for the craftsmen who made spindles for the textile industry. Their proximity to the textile merchants of the Rialto area would have been advantageous for business.",
+      "id": "building_45.434147_12.353884"
+    },
+    {
+      "lat": 45.43420672364825,
+      "lng": 12.354502590221017,
+      "streetName": "Rio Terà delle Procuratie",
+      "streetNameEnglish": "Filled Canal of the Procurators",
+      "streetDescription": "Named after the Procurators of St. Mark, high officials who administered properties. This filled canal could have led to properties or offices administered by these officials in the Rialto area.",
+      "id": "building_45.434207_12.354503"
+    },
+    {
+      "lat": 45.43424648811685,
+      "lng": 12.355148005680373,
+      "streetName": "Calle del Magazen",
+      "streetNameEnglish": "Street of the Warehouse",
+      "streetDescription": "Named for a significant warehouse that stored goods for the nearby Rialto contract. Storage facilities were essential to Venice's commercial infrastructure.",
+      "id": "building_45.434246_12.355148"
+    },
+    {
+      "lat": 45.43461396049561,
+      "lng": 12.350780864103827,
+      "streetName": "Sottoportego del Traghetto",
+      "streetNameEnglish": "Passageway of the Ferry",
+      "streetDescription": "This covered passageway led to a gondola ferry crossing point on the Grand Canal. Traghetti were essential for moving between the banks of the canal in the Rialto area.",
+      "id": "building_45.434614_12.350781"
+    },
+    {
+      "lat": 45.434752926596516,
+      "lng": 12.355185017230646,
+      "streetName": "Calle della Bissa",
+      "streetNameEnglish": "Street of the Serpent",
+      "streetDescription": "Named either after a shop sign depicting a serpent or after a winding, snake-like shape of the street itself. Located in the dense urban fabric near San Zuane in Rialto.",
+      "id": "building_45.434753_12.355185"
+    },
+    {
+      "lat": 45.43505589492775,
+      "lng": 12.35062831506833,
+      "streetName": "Salizada del Fontego",
+      "streetNameEnglish": "Paved Street of the Warehouse",
+      "streetDescription": "One of the first paved streets in the area, leading to an important public or private warehouse (fontego). Its paved status indicates its importance in the commercial network of Rialto.",
+      "id": "building_45.435056_12.350628"
+    },
+    {
+      "lat": 45.43504561157801,
+      "lng": 12.355116878213533,
+      "streetName": "Calle dei Librai",
+      "streetNameEnglish": "Street of the Booksellers",
+      "streetDescription": "Named for the booksellers and publishers who had shops here. Venice was a major center of printing and publishing during the Renaissance, with many bookshops near the commercial center.",
+      "id": "building_45.435046_12.355117"
+    },
+    {
+      "lat": 45.43506456187808,
+      "lng": 12.357807961955317,
+      "streetName": "Rio Terà dei Pensieri",
+      "streetNameEnglish": "Filled Canal of Thoughts",
+      "streetDescription": "This poetically named former canal might have been near a church or monastery where contemplation was encouraged, or simply a quiet area amid the busy Rialto district.",
+      "id": "building_45.435065_12.357808"
+    },
+    {
+      "lat": 45.435517700156105,
+      "lng": 12.356985872840387,
+      "streetName": "Calle dei Boteri",
+      "streetNameEnglish": "Street of the Barrel-makers",
+      "streetDescription": "Named for the craftsmen who made wooden barrels essential for storing wine, oil, and other liquids. These artisans would have served the merchants of the Rialto contract area.",
+      "id": "building_45.435518_12.356986"
+    },
+    {
+      "lat": 45.4355632490137,
+      "lng": 12.357805212720148,
+      "streetName": "Ruga Vecchia San Giovanni",
+      "streetNameEnglish": "Old Street of Saint John",
+      "streetDescription": "Named for its proximity to the Church of San Zuane (Saint John) in Rialto. The designation 'vecchia' (old) suggests it was an established street in the earlier development of the area.",
+      "id": "building_45.435563_12.357805"
+    },
+    {
+      "lat": 45.43549840141623,
+      "lng": 12.358325564890734,
+      "streetName": "Calle dei Pandori",
+      "streetNameEnglish": "Street of the Bread-makers",
+      "streetDescription": "Named after bakers who specialized in 'pandoro' or other specialty breads. Food producers would have been scattered throughout the commercial districts to serve workers and residents.",
+      "id": "building_45.435498_12.358326"
+    },
+    {
+      "lat": 45.43602677373564,
+      "lng": 12.357020342182734,
+      "streetName": "Sottoportego delle Acque",
+      "streetNameEnglish": "Passageway of the Waters",
+      "streetDescription": "This covered passageway might have been prone to flooding during acqua alta (high water), reflecting Venice's constant negotiation with its lagoon environment even in the commercial heart of Rialto.",
+      "id": "building_45.436027_12.357020"
+    },
+    {
+      "lat": 45.435996297078184,
+      "lng": 12.35775514594553,
+      "streetName": "Calle del Cappello Nero",
+      "streetNameEnglish": "Street of the Black Hat",
+      "streetDescription": "Named after a shop sign depicting a black hat or after a hat-maker's shop. Distinctive shop signs were important landmarks in Renaissance Venice, especially in commercial areas like Rialto.",
+      "id": "building_45.435996_12.357755"
+    },
+    {
+      "lat": 45.43597611022601,
+      "lng": 12.35845328720594,
+      "streetName": "Fondamenta dei Vin",
+      "streetNameEnglish": "Foundation of the Wines",
+      "streetDescription": "This waterside street would have been where wine boats unloaded their cargo from mainland vineyards. Wine was both an important trade good and daily necessity in Renaissance Venice.",
+      "id": "building_45.435976_12.358453"
+    }
+  ],
+  "id": "polygon-1746057275948"
+}

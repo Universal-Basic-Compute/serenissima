@@ -1,0 +1,590 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.42581862186383,
+      "lng": 12.32913697063303
+    },
+    {
+      "lat": 45.425404479043,
+      "lng": 12.33361089526987
+    },
+    {
+      "lat": 45.423469262321085,
+      "lng": 12.333353403204441
+    },
+    {
+      "lat": 45.423183115697555,
+      "lng": 12.33314955531931
+    },
+    {
+      "lat": 45.42313040431922,
+      "lng": 12.330360057943821
+    },
+    {
+      "lat": 45.42322829683979,
+      "lng": 12.329533937567234
+    },
+    {
+      "lat": 45.4237102267739,
+      "lng": 12.32963049709177
+    },
+    {
+      "lat": 45.42377046772639,
+      "lng": 12.329201343649387
+    },
+    {
+      "lat": 45.42334877970899,
+      "lng": 12.329115512960911
+    },
+    {
+      "lat": 45.42343161153243,
+      "lng": 12.328064087027073
+    },
+    {
+      "lat": 45.423732817138614,
+      "lng": 12.32812846004343
+    }
+  ],
+  "centroid": {
+    "lat": 45.42383891663316,
+    "lng": 12.33029861097366
+  },
+  "historicalName": "Calle San Giacomo in Sestiere di Santa Croce",
+  "englishName": "Saint James Street in the District of Holy Cross",
+  "historicalDescription": "This street was located in the sestiere of Santa Croce, known for its many churches and proximity to the Grand Canal. The nearby Church of San Giacomo dell'Orio, dating back to the 9th century, was a prominent landmark in the area during the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 102048.29,
+  "center": {
+    "lat": 45.4243893665516,
+    "lng": 12.33092842401072
+  },
+  "coatOfArmsCenter": {
+    "lat": 45.433076303768594,
+    "lng": 12.325536805264768
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.425759458603714,
+        "lng": 12.329776102724008
+      },
+      "water": {
+        "lat": 45.42593613099036,
+        "lng": 12.329728036719244
+      },
+      "historicalName": "Fondamenta dei Cristallai",
+      "englishName": "Foundation of the Crystal Makers",
+      "historicalDescription": "Named after the skilled artisans who crafted fine crystal glassware. Santa Croce had several workshops of specialized glassmakers who created high-quality crystal pieces for wealthy Venetian families and export.",
+      "id": "canal_45.425759_12.329776"
+    },
+    {
+      "edge": {
+        "lat": 45.425700295343596,
+        "lng": 12.330415234814984
+      },
+      "water": {
+        "lat": 45.42587998601527,
+        "lng": 12.330426493252755
+      },
+      "historicalName": "Riva di San Giacomo",
+      "englishName": "Saint James' Shore",
+      "historicalDescription": "Directly named after the nearby Calle San Giacomo, this dock would have served as the main water access point for the church of San Giacomo and surrounding neighborhood in Santa Croce.",
+      "id": "canal_45.425700_12.330415"
+    },
+    {
+      "edge": {
+        "lat": 45.42564113208348,
+        "lng": 12.331054366905962
+      },
+      "water": {
+        "lat": 45.42581367836052,
+        "lng": 12.331126723888833
+      },
+      "historicalName": "Fondamenta dei Tolentini",
+      "englishName": "Foundation of the Tolentines",
+      "historicalDescription": "Named after the Theatine Order who established the Church of San Nicolò da Tolentino in Santa Croce during the 16th century. This dock would have served the religious community and visitors to the church.",
+      "id": "canal_45.425641_12.331054"
+    },
+    {
+      "edge": {
+        "lat": 45.42558196882336,
+        "lng": 12.33169349899694
+      },
+      "water": {
+        "lat": 45.4257387906619,
+        "lng": 12.33181899661864
+      },
+      "historicalName": "Riva dei Tessitori",
+      "englishName": "Shore of the Weavers",
+      "historicalDescription": "Santa Croce was home to numerous textile workshops, and this dock would have been used by weavers to receive raw materials and ship finished textiles, a crucial industry in Renaissance Venice's economy.",
+      "id": "canal_45.425582_12.331693"
+    },
+    {
+      "edge": {
+        "lat": 45.42552280556324,
+        "lng": 12.332332631087917
+      },
+      "water": {
+        "lat": 45.425660001361905,
+        "lng": 12.332498354021949
+      },
+      "historicalName": "Fondamenta della Croce",
+      "englishName": "Foundation of the Cross",
+      "historicalDescription": "Referencing the name of the sestiere itself (Santa Croce - Holy Cross), this dock would have been an important landing point for the district, possibly near a prominent cross marker or a church dedicated to the Holy Cross.",
+      "id": "canal_45.425523_12.332333"
+    },
+    {
+      "edge": {
+        "lat": 45.42546364230312,
+        "lng": 12.332971763178893
+      },
+      "water": {
+        "lat": 45.42558138858438,
+        "lng": 12.333165490487586
+      },
+      "historicalName": "Riva dei Conciatori",
+      "englishName": "Shore of the Tanners",
+      "historicalDescription": "The leather tanning industry was typically located in peripheral areas due to its odors. This area of Santa Croce, being somewhat removed from the city center, would have been suitable for leather processing workshops.",
+      "id": "canal_45.425464_12.332972"
+    },
+    {
+      "edge": {
+        "lat": 45.42316993785297,
+        "lng": 12.332452180975437
+      },
+      "water": {
+        "lat": 45.42309714272161,
+        "lng": 12.332686522356388
+      },
+      "historicalName": "Fondamenta dei Giardini",
+      "englishName": "Foundation of the Gardens",
+      "historicalDescription": "Unlike most of Venice, parts of Santa Croce had space for gardens and orchards. This dock might have been near notable gardens or served for transporting produce grown in the district's green spaces.",
+      "id": "canal_45.423170_12.332452"
+    },
+    {
+      "edge": {
+        "lat": 45.42315676000838,
+        "lng": 12.331754806631565
+      },
+      "water": {
+        "lat": 45.42305690898809,
+        "lng": 12.331967958006057
+      },
+      "historicalName": "Riva degli Scalpellini",
+      "englishName": "Shore of the Stonemasons",
+      "historicalDescription": "Stonemasons were vital to Venice's construction industry. This dock in Santa Croce would have been used for unloading stone materials brought in from the mainland and islands for building projects throughout the city.",
+      "id": "canal_45.423157_12.331755"
+    },
+    {
+      "edge": {
+        "lat": 45.4231435821638,
+        "lng": 12.331057432287693
+      },
+      "water": {
+        "lat": 45.423000790870155,
+        "lng": 12.331213261003011
+      },
+      "historicalName": "Fondamenta dei Frati Minori",
+      "englishName": "Foundation of the Minor Friars",
+      "historicalDescription": "Named after the Franciscan friars (Frati Minori) who had a presence in Santa Croce. This dock would have served their monastery and facilitated their charitable work in the community.",
+      "id": "canal_45.423144_12.331057"
+    },
+    {
+      "edge": {
+        "lat": 45.42313040431922,
+        "lng": 12.330360057943821
+      },
+      "water": {
+        "lat": 45.42295087228917,
+        "lng": 12.330375628173266
+      },
+      "historicalName": "Riva delle Beccarie",
+      "englishName": "Shore of the Butchers",
+      "historicalDescription": "Butcher shops (beccarie) needed water access for waste disposal and receiving livestock. This dock in Santa Croce would have served the local meat contract, positioned away from more prestigious residential areas due to its nature.",
+      "id": "canal_45.423130_12.330360"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.42492067486252,
+        "lng": 12.333546522253513
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052711032",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.42490373296733,
+          "lng": 12.33374620146316
+        },
+        "distance": 15.69670617280356,
+        "id": "15fe6123-32fb-41ed-94a1-f197d0266ffc",
+        "historicalName": "Ponte di San Giacomo",
+        "englishName": "Bridge of Saint James",
+        "historicalDescription": "Named after the nearby Church of San Giacomo (Saint James) in Santa Croce sestiere. Many Venetian bridges were named after nearby churches or patron saints of the area, making this a historically accurate naming convention for a bridge in Calle San Giacomo.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42491220391493,
+            "lng": 12.333646361858337
+          }
+        }
+      },
+      "id": "bridge_45.424921_12.333547"
+    },
+    {
+      "edge": {
+        "lat": 45.424436870682044,
+        "lng": 12.333482149237156
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052711032",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.42444063638966,
+          "lng": 12.333644277520595
+        },
+        "distance": 12.65975511205797,
+        "id": "15fe6123-32fb-41ed-94a1-f197d0266ffc",
+        "historicalName": "Ponte dei Tiraoro",
+        "englishName": "Bridge of the Goldbeaters",
+        "historicalDescription": "The 'tiraoro' were Venetian artisans who specialized in creating gold leaf and gold thread, a prestigious craft in Renaissance Venice. This area of Santa Croce was known for various artisan workshops, and this bridge would commemorate the goldbeaters' guild that likely operated in the vicinity during the 15th-16th centuries.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42443875353585,
+            "lng": 12.333563213378875
+          }
+        }
+      },
+      "id": "bridge_45.424437_12.333482"
+    },
+    {
+      "edge": {
+        "lat": 45.42395306650157,
+        "lng": 12.333417776220799
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052711032",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.423977539812,
+          "lng": 12.333542353578029
+        },
+        "distance": 10.096026630919615,
+        "id": "15fe6123-32fb-41ed-94a1-f197d0266ffc",
+        "historicalName": "Ponte della Croce Rossa",
+        "englishName": "Bridge of the Red Cross",
+        "historicalDescription": "This name references both the Sestiere di Santa Croce (Holy Cross) and a distinctive red cross that might have been displayed on a nearby building or shrine. During the Renaissance, religious symbols often marked important locations in Venice, and this bridge would commemorate such a landmark in the Santa Croce district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.423965303156784,
+            "lng": 12.333480064899414
+          }
+        }
+      },
+      "id": "bridge_45.423953_12.333418"
+    },
+    {
+      "edge": {
+        "lat": 45.423469262321085,
+        "lng": 12.333353403204441
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052711032",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.42351444323434,
+          "lng": 12.333440429635463
+        },
+        "distance": 8.447988618289507,
+        "id": "15fe6123-32fb-41ed-94a1-f197d0266ffc",
+        "historicalName": "Ponte dei Contarini",
+        "englishName": "Bridge of the Contarini Family",
+        "historicalDescription": "Named after the noble Contarini family, one of Venice's most prominent nobili families who produced eight Doges between the 11th and 18th centuries. The Contarini likely owned property near Calle San Giacomo in Santa Croce, and it was common practice to name bridges after influential families who lived or owned palaces in the vicinity.",
+        "location": {
+          "midpoint": {
+            "lat": 45.423491852777715,
+            "lng": 12.333396916419952
+          }
+        }
+      },
+      "id": "bridge_45.423469_12.333353"
+    },
+    {
+      "edge": {
+        "lat": 45.42477571950123,
+        "lng": 12.32863271533823
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052744386",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.424766399289744,
+          "lng": 12.328428584887448
+        },
+        "distance": 15.964345426584648,
+        "id": "1890a27d-0f40-4dba-9037-f0e04d4513ae",
+        "historicalName": "Ponte dei Filacanape",
+        "englishName": "Bridge of the Ropemakers",
+        "historicalDescription": "The 'filacanape' were craftsmen who made ropes, an essential trade for the maritime republic of Venice. Santa Croce's proximity to the Grand Canal and various boatyards (squeri) would have made it a logical location for ropemakers' workshops. This bridge would commemorate this vital maritime trade that would have been practiced near the waterways of Santa Croce in Renaissance Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42477105939548,
+            "lng": 12.328530650112839
+          }
+        }
+      },
+      "id": "bridge_45.424776_12.328633"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.42363690208293,
+      "lng": 12.328624789668158,
+      "streetName": "Calle dei Tessitori di Seta",
+      "streetNameEnglish": "Street of the Silk Weavers",
+      "streetDescription": "Named after the silk weavers who operated workshops in this area during the 15th-16th centuries. The Venetian silk industry was prominent in Santa Croce, with many artisans living and working near San Giacomo.",
+      "id": "building_45.423637_12.328625"
+    },
+    {
+      "lat": 45.42358356803191,
+      "lng": 12.329908060651592,
+      "streetName": "Fondamenta dei Toletta",
+      "streetNameEnglish": "Foundation of the Small Table",
+      "streetDescription": "Named after a small table or counter that was historically used by merchants to display their wares in this area. This spot near San Giacomo was known for small merchant stalls during contract days.",
+      "id": "building_45.423584_12.329908"
+    },
+    {
+      "lat": 45.423494626237435,
+      "lng": 12.330726456418116,
+      "streetName": "Rio Terà del Melone",
+      "streetNameEnglish": "Filled Canal of the Melon",
+      "streetDescription": "Once a canal that was filled in during the 16th century renovations. The name comes from the melon vendors who set up stalls along this route after the canal was converted to a street, supplying fresh produce to the Santa Croce district.",
+      "id": "building_45.423495_12.330726"
+    },
+    {
+      "lat": 45.42363425102487,
+      "lng": 12.331221710741131,
+      "streetName": "Sottoportego della Colomba",
+      "streetNameEnglish": "Passageway of the Dove",
+      "streetDescription": "Named after a relief sculpture or sign of a dove that once adorned an archway in this covered passage. The dove symbolized the Holy Spirit and was connected to religious processions from the nearby Church of San Giacomo.",
+      "id": "building_45.423634_12.331222"
+    },
+    {
+      "lat": 45.42349214914058,
+      "lng": 12.331854455840523,
+      "streetName": "Calle del Forno di San Giacomo",
+      "streetNameEnglish": "Street of the San Giacomo Bakery",
+      "streetDescription": "Named after one of the public ovens that operated here since medieval times. This bakery was especially important to the community surrounding San Giacomo, providing bread to local families.",
+      "id": "building_45.423492_12.331854"
+    },
+    {
+      "lat": 45.42361283161106,
+      "lng": 12.332587905487724,
+      "streetName": "Salizada dei Luganegheri",
+      "streetNameEnglish": "Paved Street of the Sausage Makers",
+      "streetDescription": "A paved street (salizada) named after the sausage makers who had their shops here. This food production area served the San Giacomo neighborhood, with the guild of luganegheri being particularly active in Santa Croce during the 16th century.",
+      "id": "building_45.423613_12.332588"
+    },
+    {
+      "lat": 45.42407325654467,
+      "lng": 12.328661309390728,
+      "streetName": "Ruga dei Merletti",
+      "streetNameEnglish": "Row of Lace Makers",
+      "streetDescription": "A commercial street named after the lace makers who sold their delicate handmade products here. This craft was particularly associated with female artisans working in the Santa Croce district, near the San Giacomo area.",
+      "id": "building_45.424073_12.328661"
+    },
+    {
+      "lat": 45.42395324085025,
+      "lng": 12.329307176477895,
+      "streetName": "Campiello dei Pignatte",
+      "streetNameEnglish": "Small Square of the Pots",
+      "streetDescription": "Named after the earthenware pot makers or sellers who had workshops around this small square. Their products were essential for Venetian kitchens, and this manufacturing activity was concentrated near San Giacomo in the 15th century.",
+      "id": "building_45.423953_12.329307"
+    },
+    {
+      "lat": 45.424018154361775,
+      "lng": 12.329979405610315,
+      "streetName": "Calle della Filanda",
+      "streetNameEnglish": "Street of the Spinning Mill",
+      "streetDescription": "Named after a wool or silk spinning workshop that operated here during the Renaissance period. Textile production was a major industry in Santa Croce, with various stages of production taking place in buildings along this street.",
+      "id": "building_45.424018_12.329979"
+    },
+    {
+      "lat": 45.42411596780526,
+      "lng": 12.330570608001183,
+      "streetName": "Fondamenta dei Bragadin",
+      "streetNameEnglish": "Foundation of the Bragadin Family",
+      "streetDescription": "Named after the noble Bragadin family who owned property along this canal-side street. This nobili family had significant influence in the San Giacomo area of Santa Croce during the 15th and 16th centuries.",
+      "id": "building_45.424116_12.330571"
+    },
+    {
+      "lat": 45.424069761849445,
+      "lng": 12.33134542640283,
+      "streetName": "Rio Terà dei Scarperi",
+      "streetNameEnglish": "Filled Canal of the Shoemakers",
+      "streetDescription": "A former canal filled in during urban renovations, named after the shoemakers who established their workshops along this street. The guild of shoemakers had a strong presence in Santa Croce, particularly around San Giacomo.",
+      "id": "building_45.424070_12.331345"
+    },
+    {
+      "lat": 45.42411280877283,
+      "lng": 12.33199541413362,
+      "streetName": "Corte dei Ballarin",
+      "streetNameEnglish": "Court of the Ballarin Family",
+      "streetDescription": "A small courtyard named after the Ballarin family, who were merchants and owned property in this area of Santa Croce. Their residence faced this courtyard near San Giacomo during the 16th century.",
+      "id": "building_45.424113_12.331995"
+    },
+    {
+      "lat": 45.42405094853436,
+      "lng": 12.332438418821766,
+      "streetName": "Calle dei Vetreri",
+      "streetNameEnglish": "Street of the Glassmakers",
+      "streetDescription": "Named after glassmakers who had small workshops in this area before most glass production was consolidated on Murano. Some finishing work and glass bead production continued here in Santa Croce near San Giacomo throughout the Renaissance.",
+      "id": "building_45.424051_12.332438"
+    },
+    {
+      "lat": 45.4244148892797,
+      "lng": 12.329461385755097,
+      "streetName": "Sottoportego dei Cereri",
+      "streetNameEnglish": "Passageway of the Candlemakers",
+      "streetDescription": "A covered passageway named after the candlemakers who worked in this area. Their craft was essential for lighting homes and churches in the San Giacomo neighborhood, and many operated from small workshops along this covered passage.",
+      "id": "building_45.424415_12.329461"
+    },
+    {
+      "lat": 45.424532816800316,
+      "lng": 12.329855964437279,
+      "streetName": "Ramo del Buso",
+      "streetNameEnglish": "Branch of the Hole",
+      "streetDescription": "A small side street named after a hole or opening in a wall that once existed here, possibly referring to a drainage point or architectural feature. This peculiar landmark became a reference point for locals in the San Giacomo area.",
+      "id": "building_45.424533_12.329856"
+    },
+    {
+      "lat": 45.424536507126724,
+      "lng": 12.330653338377772,
+      "streetName": "Calle della Madonna del Carmelo",
+      "streetNameEnglish": "Street of Our Lady of Carmel",
+      "streetDescription": "Named after a shrine or image of the Madonna that was particularly venerated by residents of this street near San Giacomo. The Carmelite devotion was popular in Renaissance Venice, especially in the Santa Croce district.",
+      "id": "building_45.424537_12.330653"
+    },
+    {
+      "lat": 45.42441051660018,
+      "lng": 12.331305013452344,
+      "streetName": "Fondamenta dei Timonieri",
+      "streetNameEnglish": "Foundation of the Helmsmen",
+      "streetDescription": "A canal-side street named after the helmsmen who lived in this area. Many ship navigators made their homes in Santa Croce near San Giacomo due to its proximity to the maritime activities of the western side of Venice.",
+      "id": "building_45.424411_12.331305"
+    },
+    {
+      "lat": 45.424500967296076,
+      "lng": 12.331875488344947,
+      "streetName": "Salizada dei Pegolotti",
+      "streetNameEnglish": "Paved Street of the Pitch Workers",
+      "streetDescription": "A paved street named after workers who processed pitch used for waterproofing boats. This naval-related craft was concentrated in Santa Croce, with many workshops near San Giacomo serving the nearby boatyards.",
+      "id": "building_45.424501_12.331875"
+    },
+    {
+      "lat": 45.42448663566971,
+      "lng": 12.332569066807851,
+      "streetName": "Calle dei Guardiani della Scuola",
+      "streetNameEnglish": "Street of the Guardians of the School",
+      "streetDescription": "Named after the guardians or caretakers of a scuola (confraternity building) that once stood near San Giacomo. These lay religious brotherhoods were important civic institutions in Renaissance Venice, particularly in the Santa Croce district.",
+      "id": "building_45.424487_12.332569"
+    },
+    {
+      "lat": 45.42501474129663,
+      "lng": 12.329460362389844,
+      "streetName": "Corte della Munizion",
+      "streetNameEnglish": "Court of the Munitions",
+      "streetDescription": "A courtyard named after a small arsenal or storage facility for weapons that existed here in the 15th-16th centuries. Its location in Santa Croce near San Giacomo made it strategically important for the defense of this part of the city.",
+      "id": "building_45.425015_12.329460"
+    },
+    {
+      "lat": 45.4249606827468,
+      "lng": 12.330002701687283,
+      "streetName": "Rio Terà dei Tintori di Lana",
+      "streetNameEnglish": "Filled Canal of the Wool Dyers",
+      "streetDescription": "A former canal filled in during the 16th century, named after the wool dyers who established workshops along this street. The textile industry was particularly strong in Santa Croce, with specialized dye houses operating near San Giacomo.",
+      "id": "building_45.424961_12.330003"
+    },
+    {
+      "lat": 45.42492874209103,
+      "lng": 12.330693905720064,
+      "streetName": "Calle della Fraterna di San Giacomo",
+      "streetNameEnglish": "Street of the Brotherhood of San Giacomo",
+      "streetDescription": "Named after a lay religious brotherhood associated with the Church of San Giacomo. This confraternity provided charitable services to the community and organized religious processions throughout the Santa Croce district.",
+      "id": "building_45.424929_12.330694"
+    },
+    {
+      "lat": 45.42492669903072,
+      "lng": 12.331185895101214,
+      "streetName": "Sottoportego del Campanile",
+      "streetNameEnglish": "Passageway of the Bell Tower",
+      "streetDescription": "A covered passage that led toward or passed under the bell tower of the Church of San Giacomo. This architectural feature was an important landmark and reference point for navigation through the narrow streets of Santa Croce.",
+      "id": "building_45.424927_12.331186"
+    },
+    {
+      "lat": 45.424981255726834,
+      "lng": 12.331787005062488,
+      "streetName": "Fondamenta dei Ramai",
+      "streetNameEnglish": "Foundation of the Coppersmiths",
+      "streetDescription": "A canal-side street named after the coppersmiths who had workshops along this waterway. Metal crafting was an important industry in Santa Croce, with these artisans producing cookware and decorative items near San Giacomo.",
+      "id": "building_45.424981_12.331787"
+    },
+    {
+      "lat": 45.424871354923596,
+      "lng": 12.332609113557771,
+      "streetName": "Calle dei Oratori",
+      "streetNameEnglish": "Street of the Oratories",
+      "streetDescription": "Named after small private chapels or prayer rooms that existed along this street. Several nobili families in the San Giacomo area maintained these oratories for private worship during the Renaissance period.",
+      "id": "building_45.424871_12.332609"
+    },
+    {
+      "lat": 45.42535074217228,
+      "lng": 12.329382263433573,
+      "streetName": "Ruga dei Calegheri",
+      "streetNameEnglish": "Row of the Cobblers",
+      "streetDescription": "A commercial street named after the cobblers or shoemakers who set up shops along this row. The leather craft was particularly important in the Santa Croce district, with many workshops concentrated near San Giacomo.",
+      "id": "building_45.425351_12.329382"
+    },
+    {
+      "lat": 45.42537962963417,
+      "lng": 12.329883871186636,
+      "streetName": "Campiello dei Miracoli",
+      "streetNameEnglish": "Small Square of Miracles",
+      "streetDescription": "Named after reported miraculous events or a miraculous image that was venerated in this small square. Local religious devotion was strong in the San Giacomo area, with this site becoming a place of popular piety during the Renaissance.",
+      "id": "building_45.425380_12.329884"
+    },
+    {
+      "lat": 45.42532641873176,
+      "lng": 12.330717432300496,
+      "streetName": "Calle del Convento Vecchio",
+      "streetNameEnglish": "Street of the Old Convent",
+      "streetDescription": "Named after a former convent that existed here before the Renaissance restructuring of the city. Although the religious house was repurposed or demolished, its memory was preserved in the street name near San Giacomo.",
+      "id": "building_45.425326_12.330717"
+    },
+    {
+      "lat": 45.42532563502978,
+      "lng": 12.331377487847808,
+      "streetName": "Rio Terà dei Calegari",
+      "streetNameEnglish": "Filled Canal of the Shoemakers",
+      "streetDescription": "Once a canal that was filled in during urban renovations, named after the shoemakers who established their workshops along this route. The concentration of leather workers in this area of Santa Croce near San Giacomo was significant during the 15th-16th centuries.",
+      "id": "building_45.425326_12.331377"
+    },
+    {
+      "lat": 45.42533547043202,
+      "lng": 12.331882390504832,
+      "streetName": "Sottoportego del Fontego",
+      "streetNameEnglish": "Passageway of the Warehouse",
+      "streetDescription": "A covered passage leading to or past a fontego (warehouse) where goods were stored after arriving by boat. This commercial infrastructure was important to the trading activities in the San Giacomo area of Santa Croce.",
+      "id": "building_45.425335_12.331882"
+    },
+    {
+      "lat": 45.42532178452877,
+      "lng": 12.332432572322688,
+      "streetName": "Calle del Traghetto di Santa Croce",
+      "streetNameEnglish": "Street of the Santa Croce Ferry",
+      "streetDescription": "Named after a gondola ferry crossing point that connected this part of Santa Croce to other districts across the Grand Canal. The traghetto was an essential transportation link for residents of the San Giacomo neighborhood during the Renaissance.",
+      "id": "building_45.425322_12.332433"
+    }
+  ],
+  "id": "polygon-1746052735791"
+}

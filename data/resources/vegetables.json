@@ -1,0 +1,28 @@
+{
+  "id": "vegetables",
+  "name": "Vegetables",
+  "category": "raw_materials",
+  "subCategory": "food",
+  "description": "Assorted fresh vegetables, essential for daily meals, stews, and providing vital nutrients. Sourced from local gardens and regional farms.",
+  "varieties": [
+    {
+      "type": "leafy_greens",
+      "valueMultiplier": 1,
+      "notes": "Cabbage, spinach, lettuce."
+    },
+    {
+      "type": "root_vegetables",
+      "valueMultiplier": 1.1,
+      "notes": "Carrots, onions, turnips."
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "Vegetables formed a core part of the Venetian diet, especially for the common populace. The islands of the lagoon were famous for their market gardens.",
+    "culturalContext": "Seasonal vegetables were a highlight of market days, influencing daily cooking."
+  },
+  "importPrice": 450.0,
+  "lifetimeHours": 1800,
+  "consumptionHours": 1,
+  "tier": 1
+}

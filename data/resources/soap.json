@@ -1,0 +1,33 @@
+{
+  "id": "soap",
+  "name": "Soap",
+  "category": "finished_goods",
+  "subCategory": "household",
+  "description": "Cleansing product made from olive oil and lye, famous throughout Europe for its quality.",
+  "varieties": [
+    {
+      "type": "common_soap",
+      "productionDifficulty": "low",
+      "popularity": "high",
+      "valueMultiplier": 1.0
+    },
+    {
+      "type": "scented_soap",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 1.6
+    },
+    {
+      "type": "luxury_soap",
+      "productionDifficulty": "high",
+      "popularity": "low",
+      "valueMultiplier": 2.5
+    }
+  ],
+  "historicalNotes": "Venetian soap was highly prized throughout Europe for its superior quality. Made primarily from olive oil rather than animal fats, it was gentler on skin and clothing. By the 15th century, Venice had become a major producer of fine soaps, with specialized workshops developing signature scents using herbs, flowers, and exotic fragrances from the East. The soap trade represented an important value-added industry, transforming imported olive oil into a luxury export product.",
+  "icon": "/images/resources/soap.png",
+  "importPrice": 1458.0,
+  "lifetimeHours": 8775,
+  "consumptionHours": 10,
+  "tier": 2
+}

@@ -1,0 +1,61 @@
+{
+  "name": "Canal House",
+  "pointType": "canal",
+  "category": "home",
+  "subCategory": "Basic Residences",
+  "size": 1,
+  "unlockCondition": "12,000,000 ducats total wealth, waterfront property",
+  "calculationsAnalysis": "The Canal House represents specialized waterfront residential property with direct transportation access. The construction cost of 2,000,000 ducats reflects the premium waterfront location and specialized water-level construction, while the income of 35,000 ducats (1.75% return) represents the premium rent such properties commanded. The maintenance cost of 11,000 ducats (31% of income) shows an increased maintenance ratio, reflecting the challenges of maintaining structures in direct contact with water. The residentsCapacity of 8 represents a prosperous family with servants. The construction time of 5 days (432000000ms) reflects the specialized waterfront construction requirements. This building creates a strategic residential option with transportation advantages, reflecting Venice's unique water-based urban structure.",
+  "shortDescription": "Multi-story residence with direct canal access for convenient transportation.",
+  "fullDescription": "A practical yet prestigious home with a private water entrance (porta d'acqua) directly on a canal. These versatile buildings allow residents to receive goods and visitors directly by boat. The water-level entrance typically includes a small private dock and storage area, with living quarters above.",
+  "flavorText": "In Venice, a door to the water is worth more than a door to the street—for water is the true street of the Serenissima.",
+  "constructionCosts": {
+    "ducats": 2000000,
+    "timber": 570,
+    "bricks": 1130,
+    "stone": 950,
+    "glass": 130,
+    "marble": 60
+  },
+  "maintenanceCost": 1100,
+  "residentsCapacity": 8,
+  "soundDesign": {
+    "ambientSound": "Water lapping against foundation, boat traffic",
+    "activitySounds": "Boat docking, goods being unloaded, water gate opening",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "winter": "Fog rising from canal, ice protection at waterline",
+    "acqua alta": "Water barriers at doorways, elevated walkways visible",
+    "carnival": "Colorful lanterns hanging over water entrance, decorated gondola"
+  },
+  "aiInteractionPoints": [
+    "Water entrance",
+    "Private dock",
+    "Street entrance",
+    "Rooftop terrace"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 80,
+    "stores": [
+      "rags",
+      "soap",
+      "paper",
+      "iron",
+      "disguise_materials",
+      "forgery_tools",
+      "wine",
+      "bread",
+      "books"
+    ],
+    "sells": [
+      "disguise_materials",
+      "forgery_tools"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 7200
+}

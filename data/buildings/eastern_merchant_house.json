@@ -1,0 +1,103 @@
+{
+  "name": "Eastern Merchant House",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Trade Facilities",
+  "size": 2,
+  "unlockCondition": "30,000,000 ducats total wealth, Eastern trade connections, Merchant Guild membership",
+  "canImport": true,
+  "commercialStorage": true,
+  "calculationsAnalysis": "The Eastern Merchant House balances substantial investment with lucrative Eastern trade returns. The construction cost of 5,000,000 ducats reflects the specialized architecture and prestigious location required, while the income of 60,000 ducats (1.2% return) represents the high-value Eastern luxury goods trade. The maintenance cost of 30,000 ducats (50% of income) reflects the costs of maintaining cultural specialists and exotic goods handling. The employment capacity of 20 represents the staff needed to manage complex Eastern trade relationships. The construction time of 10 days (864000000ms) represents a significant project for advanced players. This building creates a strategic investment in the lucrative Eastern trade routes that were historically crucial to Venice's commercial dominance, with appropriate requirements reflecting the specialized knowledge and connections needed.",
+  "shortDescription": "Trading post specialized in Eastern goods, combining warehouse, offices, and cultural showcase.",
+  "fullDescription": "Venice's gateway to the riches of the East, these specialized trading houses focus on goods from the Ottoman Empire, Persia, and beyond. Featuring architecture and decoration influenced by Eastern styles, these buildings provide both commercial facilities and cultural spaces where Eastern and Western merchants can negotiate. Often housing translators and cultural experts, they facilitate the flow of exotic goods that made Venice wealthy.",
+  "flavorText": "Here the silk road reaches its final destination, as do the dreams of a thousand caravans—and the nightmares of Venice's competitors.",
+  "constructionCosts": {
+    "ducats": 5000000,
+    "timber": 1090,
+    "bricks": 2720,
+    "stone": 1630,
+    "glass": 440,
+    "marble": 220
+  },
+  "maintenanceCost": 3000,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "raw_silk": 2,
+        "prepared_silk": 3
+      },
+      "outputs": {
+        "luxury_silk_garments": 2
+      },
+      "craftMinutes": 360
+    },
+    {
+      "inputs": {
+        "spices": 1,
+        "wine": 3
+      },
+      "outputs": {
+        "spiced_wine": 3
+      },
+      "craftMinutes": 120
+    },
+    {
+      "inputs": {
+        "paper": 2,
+        "gold_leaf": 1
+      },
+      "outputs": {
+        "maps": 2
+      },
+      "craftMinutes": 180
+    }
+  ],
+    "storageCapacity": 500,
+    "stores": [
+      "raw_silk",
+      "silk_fabric",
+      "luxury_silk_garments",
+      "dyestuffs",
+      "wine",
+      "spiced_wine",
+      "gold",
+      "jewelry",
+      "maps",
+      "paper",
+      "spices",
+      "dyes",
+      "merchant_contacts"
+    ],
+    "sells": [
+      "luxury_silk_garments",
+      "silk_fabric",
+      "spiced_wine",
+      "jewelry",
+      "maps"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Multiple languages, eastern musical elements, spice grinding",
+    "activitySounds": "Silk fabric handling, spice measuring, multilingual negotiations",
+    "musicTheme": "La Via della Seta"
+  },
+  "seasonalEffects": {
+    "summer": "Peak shipping season from Eastern ports",
+    "religious observances": "Accommodations for Ramadan and other Eastern religious periods",
+    "trading cycles": "Activity fluctuates with caravan arrivals from the East"
+  },
+  "aiInteractionPoints": [
+    "Trade negotiation rooms",
+    "Specialized goods inspection areas",
+    "Translation office",
+    "Secure goods vault",
+    "Spice processing area",
+    "Cultural exchange space",
+    "Dock receiving area"
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 14400
+}

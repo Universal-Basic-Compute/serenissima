@@ -1,0 +1,107 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.438344686614414,
+      "lng": 12.3422928202592
+    },
+    {
+      "lat": 45.43830704574769,
+      "lng": 12.342612003131972
+    },
+    {
+      "lat": 45.437968276817216,
+      "lng": 12.344435905262099
+    },
+    {
+      "lat": 45.43746011960795,
+      "lng": 12.344323252483473
+    },
+    {
+      "lat": 45.437535402446244,
+      "lng": 12.344060396000014
+    },
+    {
+      "lat": 45.437879820150506,
+      "lng": 12.343236957832442
+    }
+  ],
+  "centroid": {
+    "lat": 45.43791589189734,
+    "lng": 12.343493555828202
+  },
+  "historicalName": "Calle San Zuane Lateran, Sestiere Castello",
+  "englishName": "Saint John Lateran Street, Castello District",
+  "historicalDescription": "This street was located in the Castello sestiere, one of the central districts of Venice. It was named after the nearby Church of San Giovanni in Laterano, a historic church dating back to the 11th century. The area was primarily residential, with houses and palaces of noble Venetian families.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 5674.72,
+  "center": {
+    "lat": 45.43791589189734,
+    "lng": 12.343493555828202
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.438137661282454,
+        "lng": 12.343523954197035
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056196666",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43820649310997,
+          "lng": 12.343498791566748
+        },
+        "distance": 7.901538046452877,
+        "id": "eb3836ba-c193-4139-a678-5347dbb255d5",
+        "historicalName": "Ponte dei Cavalieri Lateranensi",
+        "englishName": "Bridge of the Knights of Saint John Lateran",
+        "historicalDescription": "This bridge name references the Knights of Saint John Lateran, a religious order with historical presence in this area of Castello. The nearby 'Calle San Zuane Lateran' itself is named after San Giovanni in Laterano (Saint John Lateran), suggesting the order's influence in this district during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.438172077196214,
+            "lng": 12.343511372881892
+          }
+        }
+      },
+      "id": "bridge_45.438138_12.343524"
+    },
+    {
+      "edge": {
+        "lat": 45.437968276817216,
+        "lng": 12.344435905262099
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056451160",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43782922627719,
+          "lng": 12.344504566837044
+        },
+        "distance": 16.363507074743957,
+        "id": "9538931b-c812-459f-9079-59663fc9b953",
+        "historicalName": "Ponte degli Ospitalieri",
+        "englishName": "Bridge of the Hospitallers",
+        "historicalDescription": "The Hospitallers (Knights of Malta) had a presence in Venice, particularly in the Castello area. This bridge name would commemorate their charitable works and presence near the San Zuane Lateran area, where they may have operated a hospice or commandery in service to pilgrims and the sick during the Renaissance era.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4378987515472,
+            "lng": 12.34447023604957
+          }
+        }
+      },
+      "id": "bridge_45.437968_12.344436"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43785091018236,
+      "lng": 12.34363612213905,
+      "streetName": "Calle dei Crociferi",
+      "streetNameEnglish": "Street of the Crosiers",
+      "streetDescription": "This name refers to the Order of the Crosiers (Ordine dei Crociferi), a religious brotherhood that maintained a hospital and church near San Giovanni Laterano in Castello during the Renaissance period. The Crociferi were known for their charitable work caring for the sick and pilgrims, and their presence in this area dates back to the 12th century. The street would have been named for their prominent establishment in the neighborhood.",
+      "id": "building_45.437851_12.343636"
+    }
+  ],
+  "id": "polygon-1746056214187"
+}

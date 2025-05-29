@@ -1,0 +1,107 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.439803808847245,
+      "lng": 12.33949729233629
+    },
+    {
+      "lat": 45.43962690113015,
+      "lng": 12.339626038369005
+    },
+    {
+      "lat": 45.439521509035046,
+      "lng": 12.339808428582018
+    },
+    {
+      "lat": 45.43875741045815,
+      "lng": 12.339808428582018
+    },
+    {
+      "lat": 45.43897572539312,
+      "lng": 12.338778460320299
+    },
+    {
+      "lat": 45.439638193128665,
+      "lng": 12.339288080033128
+    }
+  ],
+  "centroid": {
+    "lat": 45.439387257998725,
+    "lng": 12.339467788037126
+  },
+  "historicalName": "Calle de la Gexia de San Salvador",
+  "englishName": "Alley of the Church of San Salvador",
+  "historicalDescription": "This narrow street was located in the San Marco sestiere, adjacent to the Church of San Salvador, an important religious site in 15th century Venice. The area was known for its proximity to Piazza San Marco and the bustling mercantile activity in the Rialto district.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 5565.7,
+  "center": {
+    "lat": 45.43911022760539,
+    "lng": 12.339411855893966
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43962690113015,
+        "lng": 12.339626038369005
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056033630",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43966632840166,
+          "lng": 12.339701184848963
+        },
+        "distance": 7.320881096878111,
+        "id": "3fad73bc-137b-43e7-abe1-45926309dc2d",
+        "historicalName": "Ponte del Salvadore",
+        "englishName": "Bridge of the Savior",
+        "historicalDescription": "This bridge takes its name from the nearby Church of San Salvador (Savior), which was one of the most important churches in Renaissance Venice. Located along the Calle de la Gexia de San Salvador, this bridge would have been a crucial crossing point for parishioners and clergy connected to the church, as well as merchants heading to the nearby Rialto contract area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439646614765905,
+            "lng": 12.339663611608984
+          }
+        }
+      },
+      "id": "bridge_45.439627_12.339626"
+    },
+    {
+      "edge": {
+        "lat": 45.439638193128665,
+        "lng": 12.339288080033128
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056070563",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43970970906677,
+          "lng": 12.339271986779039
+        },
+        "distance": 8.050726510748522,
+        "id": "78d05624-8941-452a-b6e5-6d9eafeb69a6",
+        "historicalName": "Ponte dei Cambiavalute",
+        "englishName": "Bridge of the Money Changers",
+        "historicalDescription": "During the Renaissance, the area near San Salvador was a commercial hub with many bankers and money changers (cambiavalute) who served merchants from all over the world. This bridge would have been frequented by these financial professionals who facilitated the exchange of foreign currencies that flowed into this cosmopolitan trading center, making it an important connection in Venice's banking network.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43967395109772,
+            "lng": 12.339280033406084
+          }
+        }
+      },
+      "id": "bridge_45.439638_12.339288"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43927585974904,
+      "lng": 12.339330806363149,
+      "streetName": "Calle dei Mercanti Orafi",
+      "streetNameEnglish": "Street of the Gold Merchants",
+      "streetDescription": "This calle was historically home to several gold merchants and jewelers who operated near the Church of San Salvador during the 15th and 16th centuries. The area around San Salvador was known for luxury trades due to its proximity to Rialto and San Marco, making it a natural location for goldsmiths and jewelers to establish their workshops and storefronts. These artisans often supplied ornate religious items to the church as well as luxury goods to wealthy Venetian nobility.",
+      "id": "building_45.439276_12.339331"
+    }
+  ],
+  "id": "polygon-1746056083350"
+}

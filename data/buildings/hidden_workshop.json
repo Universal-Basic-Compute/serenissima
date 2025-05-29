@@ -1,0 +1,116 @@
+{
+  "name": "Hidden Workshop",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Illicit Production",
+  "size": 1,
+  "unlockCondition": "10,000,000 ducats capital, Criminal Contacts (established quality), low guard presence",
+  "calculationsAnalysis": "The Hidden Workshop represents specialized illicit production with high risk and high reward. The construction cost of 3,000,000 ducats reflects the specialized equipment and secrecy measures required, while the income of 45,000 ducats (1.5% return) represents the premium prices commanded by illegal goods. The maintenance cost of 30,000 ducats (66.7% of income) creates a substantial profit margin appropriate for high-risk criminal enterprise. The employment capacity of 5 represents the minimal trusted staff needed for security. The construction time of 7 days (604800000ms) reflects the need for discreet construction. This building creates a strategic investment in criminal production with appropriate underworld requirements reflecting the historical reality of Venice's shadow economy.",
+  "shortDescription": "Concealed facility for producing illegal goods and contraband, hidden from authorities.",
+  "fullDescription": "Operating in the shadows of Venice's economy, hidden workshops produce a variety of illegal or restricted goods. Featuring specialized equipment, security measures, and discreet access, these facilities maintain a low profile while serving criminal networks. Their locations are carefully chosen to minimize detection, often disguised as legitimate businesses or tucked away in obscure locations.",
+  "flavorText": "The most profitable workshops in Venice are those that appear on no tax record and bear no guild sign—for what the law forbids, the contract often desires most desperately.",
+  "constructionCosts": {
+    "ducats": 3000000,
+    "timber": 970,
+    "bricks": 1940,
+    "stone": 1550,
+    "iron": 580
+  },
+  "maintenanceCost": 3000,
+  "productionInformation": {
+  "Arti": [
+    {
+      "inputs": {
+        "tools": 1,
+        "paper": 1,
+        "dyestuffs": 1
+      },
+      "outputs": {
+        "forgery_tools": 1
+      },
+      "craftMinutes": 120
+    },
+    {
+      "inputs": {
+        "spices": 3,
+        "wine": 2
+      },
+      "outputs": {
+        "poison_components": 2
+      },
+      "craftMinutes": 180
+    },
+    {
+      "inputs": {
+        "silk_fabric": 1,
+        "dyestuffs": 2
+      },
+      "outputs": {
+        "disguise_materials": 2
+      },
+      "craftMinutes": 90
+    },
+    {
+      "inputs": {
+        "paper": 2,
+        "criminal_contacts": 1
+      },
+      "outputs": {
+        "smuggler_maps": 3
+      },
+      "craftMinutes": 120
+    },
+    {
+      "inputs": {
+        "paper": 3,
+        "gold": 1
+      },
+      "outputs": {
+        "blackmail_evidence": 1
+      },
+      "craftMinutes": 240
+    }
+  ],
+    "storageCapacity": 50,
+    "stores": [
+      "paper",
+      "tools",
+      "rags",
+      "poison_components",
+      "forgery_tools",
+      "disguise_materials",
+      "smuggler_maps",
+      "blackmail_evidence",
+      "criminal_contacts"
+    ],
+    "sells": [
+      "poison_components",
+      "forgery_tools",
+      "disguise_materials",
+      "smuggler_maps",
+      "blackmail_evidence"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Muffled work sounds, quiet conversations, occasional lookout signals",
+    "activitySounds": "Tools working, hushed instructions, alert signals",
+    "musicTheme": "Consiglio dei Dieci"
+  },
+  "seasonalEffects": {
+    "carnival": "Increased production, cover of festivities",
+    "guard crackdowns": "Reduced operations, heightened security",
+    "political transitions": "Opportunity for forgery and information products"
+  },
+  "aiInteractionPoints": [
+    "Secret entrance",
+    "Production area",
+    "Lookout post",
+    "Hidden storage",
+    "Escape route",
+    "Customer meeting area"
+  ],
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 10080
+}

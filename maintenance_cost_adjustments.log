@@ -1,0 +1,95 @@
+
+================================================================================
+MAINTENANCE COST ADJUSTMENT - 2025-05-13 23:09:14
+Division factor: 10.0
+================================================================================
+
+
+================================================================================
+MAINTENANCE COST ADJUSTMENT - 2025-05-13 23:09:20
+Division factor: 10.0
+================================================================================
+
+2025-05-13 23:09:22 | Apothecary | C:\Citizens\reyno\serenissima\data\buildings\commercial\retail_shops\apothecary.json | 7500 -> 750 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Bottega | C:\Citizens\reyno\serenissima\data\buildings\commercial\retail_shops\bottega.json | 6000 -> 600 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Luxury Showroom | C:\Citizens\reyno\serenissima\data\buildings\commercial\retail_shops\luxury_showroom.json | 20000 -> 2000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Contract Stall | C:\Citizens\reyno\serenissima\data\buildings\commercial\retail_shops\contract_stall.json | 1000 -> 100 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Merceria | C:\Citizens\reyno\serenissima\data\buildings\commercial\retail_shops\merceria.json | 6000 -> 600 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Broker's Office | C:\Citizens\reyno\serenissima\data\buildings\commercial\trade_facilities\broker_s_office.json | 8000 -> 800 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Customs House | C:\Citizens\reyno\serenissima\data\buildings\commercial\trade_facilities\customs_house.json | 25000 -> 2500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Eastern Merchant House | C:\Citizens\reyno\serenissima\data\buildings\commercial\trade_facilities\eastern_merchant_house.json | 30000 -> 3000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Fondaco dei Tedeschi | C:\Citizens\reyno\serenissima\data\buildings\commercial\trade_facilities\fondaco_dei_tedeschi.json | 35000 -> 3500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Weighing Station | C:\Citizens\reyno\serenissima\data\buildings\commercial\trade_facilities\weighing_station.json | 13500 -> 1350 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Smuggler's Den | C:\Citizens\reyno\serenissima\data\buildings\criminal\illicit_operations\smuggler_s_den.json | 25000 -> 2500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Hidden Workshop | C:\Citizens\reyno\serenissima\data\buildings\criminal\illicit_production\hidden_workshop.json | 30000 -> 3000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Spy Safehouse | C:\Citizens\reyno\serenissima\data\buildings\criminal\intelligence_operations\spy_safehouse.json | 35000 -> 3500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Granary | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\storage_facilities\granary.json | 25000 -> 2500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Secure Vault | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\storage_facilities\secure_vault.json | 40000 -> 4000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Small Warehouse | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\storage_facilities\small_warehouse.json | 12500 -> 1250 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Wine Cellar | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\storage_facilities\wine_cellar.json | 17500 -> 1750 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Bridge | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\transportation_facilities\bridge.json | 25000 -> 2500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Cargo Landing | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\transportation_facilities\cargo_landing.json | 45000 -> 4500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Gondola Station | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\transportation_facilities\gondola_station.json | 20000 -> 2000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Private Dock | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\transportation_facilities\private_dock.json | 22500 -> 2250 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Public Dock | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\transportation_facilities\public_dock.json | 15000 -> 1500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Porter Guild Hall | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\transportation_services\porter_guild_hall.json | 15000 -> 1500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Canal Maintenance Office | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\water_management\canal_maintenance_office.json | 40000 -> 4000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Cistern | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\water_management\cistern.json | 12500 -> 1250 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Flood Control Station | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\water_management\flood_control_station.json | 60000 -> 6000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Public Well | C:\Citizens\reyno\serenissima\data\buildings\infrastructure\water_management\public_well.json | 7500 -> 750 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | City Gate | C:\Citizens\reyno\serenissima\data\buildings\military_defence\defensive_structures\city_gate.json | 25000 -> 2500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Defensive Bastion | C:\Citizens\reyno\serenissima\data\buildings\military_defence\defensive_structures\defensive_bastion.json | 75000 -> 7500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Harbor Chain Tower | C:\Citizens\reyno\serenissima\data\buildings\military_defence\defensive_structures\harbor_chain_tower.json | 30000 -> 3000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Arsenal Gate | C:\Citizens\reyno\serenissima\data\buildings\military_defence\naval_facilities\arsenal_gate.json | 50000 -> 5000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Arsenal Workshop | C:\Citizens\reyno\serenissima\data\buildings\military_defence\naval_facilities\arsenal_workshop.json | 60000 -> 6000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Naval Administration Office | C:\Citizens\reyno\serenissima\data\buildings\military_defence\naval_facilities\naval_administration_office.json | 60000 -> 6000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Armory | C:\Citizens\reyno\serenissima\data\buildings\military_defence\security_facilities\armory.json | 40000 -> 4000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Guard Post | C:\Citizens\reyno\serenissima\data\buildings\military_defence\security_facilities\guard_post.json | 12500 -> 1250 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Prison | C:\Citizens\reyno\serenissima\data\buildings\military_defence\security_facilities\prison.json | 50000 -> 5000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Watchtower | C:\Citizens\reyno\serenissima\data\buildings\military_defence\security_facilities\watchtower.json | 17500 -> 1750 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Bakery | C:\Citizens\reyno\serenissima\data\buildings\production\food_industry\bakery.json | 5000 -> 500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Glassblower Workshop | C:\Citizens\reyno\serenissima\data\buildings\production\glass_industry\glassblower_workshop.json | 20000 -> 2000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Glass Foundry | C:\Citizens\reyno\serenissima\data\buildings\production\glass_industry\glass_foundry.json | 60000 -> 6000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Goldsmith Workshop | C:\Citizens\reyno\serenissima\data\buildings\production\luxury_industry\goldsmith_workshop.json | 35000 -> 3500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Mint | C:\Citizens\reyno\serenissima\data\buildings\production\metallurgy_industry\mint.json | 100000 -> 10000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Blacksmith | C:\Citizens\reyno\serenissima\data\buildings\production\metal_industry\blacksmith.json | 10000 -> 1000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Weapons Smith | C:\Citizens\reyno\serenissima\data\buildings\production\metal_industry\weapons_smith.json | 30000 -> 3000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Paper Mill | C:\Citizens\reyno\serenissima\data\buildings\production\publishing_industry\paper_mill.json | 20000 -> 2000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Printing House | C:\Citizens\reyno\serenissima\data\buildings\production\publishing_industry\printing_house.json | 35000 -> 3500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Shipyard | C:\Citizens\reyno\serenissima\data\buildings\production\shipbuilding_industry\shipyard.json | 75000 -> 7500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Dye Works | C:\Citizens\reyno\serenissima\data\buildings\production\textile_industry\dye_works.json | 17500 -> 1750 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Silk Conditioning House | C:\Citizens\reyno\serenissima\data\buildings\production\textile_industry\silk_conditioning_house.json | 30000 -> 3000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Boat Workshop | C:\Citizens\reyno\serenissima\data\buildings\production\transportation_industry\boat_workshop.json | 20000 -> 2000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Courthouse | C:\Citizens\reyno\serenissima\data\buildings\public_government\civic_buildings\courthouse.json | 35000 -> 3500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Public Archives | C:\Citizens\reyno\serenissima\data\buildings\public_government\civic_buildings\public_archives.json | 25000 -> 2500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Town Hall | C:\Citizens\reyno\serenissima\data\buildings\public_government\civic_buildings\town_hall.json | 25000 -> 2500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Art Academy | C:\Citizens\reyno\serenissima\data\buildings\public_government\educational_cultural\art_academy.json | 30000 -> 3000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Navigation School | C:\Citizens\reyno\serenissima\data\buildings\public_government\educational_cultural\navigation_school.json | 20000 -> 2000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Theater | C:\Citizens\reyno\serenissima\data\buildings\public_government\educational_cultural\theater.json | 45000 -> 4500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Hospital | C:\Citizens\reyno\serenissima\data\buildings\public_government\health_safety\hospital.json | 60000 -> 6000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Public Bath | C:\Citizens\reyno\serenissima\data\buildings\public_government\health_safety\public_bath.json | 12500 -> 1250 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Quarantine Station | C:\Citizens\reyno\serenissima\data\buildings\public_government\health_safety\quarantine_station.json | 35000 -> 3500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Chapel | C:\Citizens\reyno\serenissima\data\buildings\public_government\religious_buildings\chapel.json | 10000 -> 1000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Parish Church | C:\Citizens\reyno\serenissima\data\buildings\public_government\religious_buildings\parish_church.json | 40000 -> 4000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Artisan's House | C:\Citizens\reyno\serenissima\data\buildings\residential\basic_residences\artisan_s_house.json | 10000 -> 1000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Canal House | C:\Citizens\reyno\serenissima\data\buildings\residential\basic_residences\canal_house.json | 11000 -> 1100 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Fisherman's Cottage | C:\Citizens\reyno\serenissima\data\buildings\residential\basic_residences\fisherman_s_cottage.json | 8000 -> 800 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Merchant's House | C:\Citizens\reyno\serenissima\data\buildings\residential\basic_residences\merchant_s_house.json | 7500 -> 750 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Grand Canal Palace | C:\Citizens\reyno\serenissima\data\buildings\residential\noble_residences\grand_canal_palace.json | 75000 -> 7500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Nobili Palazzo | C:\Citizens\reyno\serenissima\data\buildings\residential\noble_residences\patrician_palazzo.json | 30000 -> 3000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Glass Guild Hall | C:\Citizens\reyno\serenissima\data\buildings\special\guild_headquarters\glass_guild_hall.json | 60000 -> 6000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Goldsmith Guild Hall | C:\Citizens\reyno\serenissima\data\buildings\special\guild_headquarters\goldsmith_guild_hall.json | 60000 -> 6000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Merchant Guild Hall | C:\Citizens\reyno\serenissima\data\buildings\special\guild_headquarters\merchant_guild_hall.json | 75000 -> 7500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Shipwright Guild Hall | C:\Citizens\reyno\serenissima\data\buildings\special\guild_headquarters\shipwright_guild_hall.json | 70000 -> 7000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Silk Guild Hall | C:\Citizens\reyno\serenissima\data\buildings\special\guild_headquarters\silk_guild_hall.json | 65000 -> 6500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Clocktower | C:\Citizens\reyno\serenissima\data\buildings\special\unique_structures\clocktower.json | 75000 -> 7500 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Doge's Palace | C:\Citizens\reyno\serenissima\data\buildings\special\unique_structures\doge_s_palace.json | 150000 -> 15000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | Rialto Bridge | C:\Citizens\reyno\serenissima\data\buildings\special\unique_structures\rialto_bridge.json | 150000 -> 15000 (÷10.0) | SUCCESS
+2025-05-13 23:09:22 | St. Mark's Basilica | C:\Citizens\reyno\serenissima\data\buildings\special\unique_structures\st__mark_s_basilica.json | 125000 -> 12500 (÷10.0) | SUCCESS
+
+SUMMARY:
+Processed: 76 buildings
+Adjusted: 76 buildings
+Successfully saved: 76 buildings
+================================================================================
+

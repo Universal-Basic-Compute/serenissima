@@ -1,0 +1,191 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.447220915581156,
+      "lng": 12.321658987485721
+    },
+    {
+      "lat": 45.44803382426571,
+      "lng": 12.322045225583866
+    },
+    {
+      "lat": 45.44828973753811,
+      "lng": 12.323150295698001
+    },
+    {
+      "lat": 45.447981136094924,
+      "lng": 12.323214668714359
+    },
+    {
+      "lat": 45.448041351143246,
+      "lng": 12.323836941205814
+    },
+    {
+      "lat": 45.447717694502664,
+      "lng": 12.323633093320682
+    },
+    {
+      "lat": 45.4472510235191,
+      "lng": 12.325521368467166
+    },
+    {
+      "lat": 45.446799402762196,
+      "lng": 12.3266800827616
+    },
+    {
+      "lat": 45.44601658488484,
+      "lng": 12.326379675351932
+    }
+  ],
+  "centroid": {
+    "lat": 45.447483518921324,
+    "lng": 12.324013370954349
+  },
+  "historicalName": "Calle de le Capuzzine in Sestiere di Cannaregio",
+  "englishName": "Alley of the Capuchin Nuns in the Cannaregio District",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for the nearby Capuchin convent and church of Santa Maria dei Miracoli, a popular pilgrimage site completed in the late 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 43117.29,
+  "center": {
+    "lat": 45.44707838793763,
+    "lng": 12.323738462669347
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44653272661183,
+        "lng": 12.32435652340927
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055595653",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44641713215438,
+          "lng": 12.324346560918643
+        },
+        "distance": 12.876992235538408,
+        "id": "145833c9-52bf-4cbc-bc44-90bb1d00d8ad",
+        "historicalName": "Ponte delle Capuzzine",
+        "englishName": "Bridge of the Capuchin Nuns",
+        "historicalDescription": "Named after the Capuchin nuns (Capuzzine in Venetian dialect) who had a convent nearby in the Cannaregio district. The street 'Calle de le Capuzzine' itself was named for these religious women who established themselves in this area during the 16th century, following the Counter-Reformation movement.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4464749293831,
+            "lng": 12.324351542163956
+          }
+        }
+      },
+      "id": "bridge_45.446533_12.324357"
+    },
+    {
+      "edge": {
+        "lat": 45.446704773854165,
+        "lng": 12.323682139428383
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055595653",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44658702915757,
+          "lng": 12.32367600866492
+        },
+        "distance": 13.101345506250833,
+        "id": "145833c9-52bf-4cbc-bc44-90bb1d00d8ad",
+        "historicalName": "Ponte dei Ricamatori",
+        "englishName": "Bridge of the Embroiderers",
+        "historicalDescription": "Named for the embroidery artisans who had workshops in this area of Cannaregio during the Renaissance period. Venice was famous for its textile arts, and many specialized craftspeople, including embroiderers who created fine works for both ecclesiastical vestments and noble attire, operated in this district near the Capuchin convent.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44664590150587,
+            "lng": 12.323679074046652
+          }
+        }
+      },
+      "id": "bridge_45.446705_12.323682"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.446440465915096,
+      "lng": 12.326196559234994,
+      "streetName": "Calle del Monastero delle Clarisse",
+      "streetNameEnglish": "Street of the Monastery of the Poor Clares",
+      "streetDescription": "Named after the nearby convent of Clarisse nuns (Poor Clares) who resided in Cannaregio during the Renaissance. These nuns followed strict vows of poverty and were well-respected in the community for their devotional life and charitable works.",
+      "id": "building_45.446440_12.326197"
+    },
+    {
+      "lat": 45.44695018049165,
+      "lng": 12.324281790936817,
+      "streetName": "Fondamenta dei Merlettai",
+      "streetNameEnglish": "Foundation of the Lacemakers",
+      "streetDescription": "This fondamenta (street along a canal) was named for the lacemakers who established workshops in this area of Cannaregio. Venetian lace was renowned throughout Europe, and this craft was particularly associated with nearby islands like Burano, with many artisans also working in this neighborhood.",
+      "id": "building_45.446950_12.324282"
+    },
+    {
+      "lat": 45.44684827533331,
+      "lng": 12.324942661688747,
+      "streetName": "Sottoportego della Preghiera",
+      "streetNameEnglish": "Covered Passage of Prayer",
+      "streetDescription": "This covered passageway (sottoportego) near the Capuchin convent was where locals would stop to say prayers before small devotional shrines built into the walls. Such passages were common near religious establishments in Renaissance Venice.",
+      "id": "building_45.446848_12.324943"
+    },
+    {
+      "lat": 45.44684505836921,
+      "lng": 12.325419954145776,
+      "streetName": "Rio Terà delle Vergini",
+      "streetNameEnglish": "Filled Canal of the Virgins",
+      "streetDescription": "A former canal that was filled in (rio terà) and named after the Convent of the Vergini, one of the most aristocratic convents in Venice. Located in Cannaregio, this convent housed daughters of noble Venetian families and enjoyed special privileges from the Republic.",
+      "id": "building_45.446845_12.325420"
+    },
+    {
+      "lat": 45.44733562003916,
+      "lng": 12.322323660779315,
+      "streetName": "Calle dei Lanifici",
+      "streetNameEnglish": "Street of the Wool Workshops",
+      "streetDescription": "Named after the wool workshops that operated in this area of Cannaregio. The wool trade was vital to Venice's economy during the Renaissance, with many workshops concentrated in this northern district where they had access to fresh water and space for drying textiles.",
+      "id": "building_45.447336_12.322324"
+    },
+    {
+      "lat": 45.44742323608486,
+      "lng": 12.322947301258656,
+      "streetName": "Salizada di San Girolamo",
+      "streetNameEnglish": "Paved Street of Saint Jerome",
+      "streetDescription": "One of the first paved streets (salizada) in the area, named after the nearby Church of San Girolamo (Saint Jerome). This church was an important religious landmark in Cannaregio during the Renaissance period and influenced many street names in the vicinity.",
+      "id": "building_45.447423_12.322947"
+    },
+    {
+      "lat": 45.44731426659291,
+      "lng": 12.323640381091808,
+      "streetName": "Corte Valier",
+      "streetNameEnglish": "Valier Court",
+      "streetDescription": "Named after the Valier family, a notable Venetian nobili family who had a palazzo in this area of Cannaregio. The Valiers produced several important figures in Venetian history, including Doge Silvestro Valier (1694-1700), though the family was prominent throughout the Renaissance.",
+      "id": "building_45.447314_12.323640"
+    },
+    {
+      "lat": 45.44731755102307,
+      "lng": 12.324297987896731,
+      "streetName": "Ruga degli Ebrei",
+      "streetNameEnglish": "Street of the Jews",
+      "streetDescription": "A commercial street (ruga) that connected to the Venetian Ghetto in Cannaregio, established in 1516 as the first formalized Jewish quarter in Europe. Jewish merchants would conduct business along this route between the ghetto and the commercial centers of Venice.",
+      "id": "building_45.447318_12.324298"
+    },
+    {
+      "lat": 45.44787988393185,
+      "lng": 12.322275585582844,
+      "streetName": "Calle della Confraternita della Misericordia",
+      "streetNameEnglish": "Street of the Brotherhood of Mercy",
+      "streetDescription": "Named after the charitable confraternity (scuola) that operated in this area of Cannaregio. The Scuola della Misericordia was one of Venice's six major confraternities and provided social services including care for orphans, dowries for poor maidens, and assistance for the elderly.",
+      "id": "building_45.447880_12.322276"
+    },
+    {
+      "lat": 45.44788904722442,
+      "lng": 12.322926426913186,
+      "streetName": "Fondamenta del Noviziato",
+      "streetNameEnglish": "Foundation of the Novitiate",
+      "streetDescription": "This canalside street was named for its proximity to where young women would complete their novitiate before taking full vows as Capuchin nuns. This preparatory period typically lasted a year and was a critical phase in religious life in Renaissance Venice.",
+      "id": "building_45.447889_12.322926"
+    }
+  ],
+  "id": "polygon-1746055610394"
+}

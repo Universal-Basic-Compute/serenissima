@@ -1,0 +1,780 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44773088425899,
+      "lng": 12.31897777552127
+    },
+    {
+      "lat": 45.44784378792275,
+      "lng": 12.321702899880401
+    },
+    {
+      "lat": 45.44652656445057,
+      "lng": 12.321177186913483
+    },
+    {
+      "lat": 45.4462867431556,
+      "lng": 12.321466865487091
+    },
+    {
+      "lat": 45.44536842812019,
+      "lng": 12.324814262337677
+    },
+    {
+      "lat": 45.44542864595756,
+      "lng": 12.32596224779605
+    },
+    {
+      "lat": 45.44524046500234,
+      "lng": 12.326380672402374
+    },
+    {
+      "lat": 45.4448114100772,
+      "lng": 12.326659622139923
+    },
+    {
+      "lat": 45.444781300837114,
+      "lng": 12.326874198861114
+    },
+    {
+      "lat": 45.44496195603659,
+      "lng": 12.327335538811676
+    },
+    {
+      "lat": 45.44551144537898,
+      "lng": 12.32772177690982
+    },
+    {
+      "lat": 45.444901737701045,
+      "lng": 12.33024305338382
+    },
+    {
+      "lat": 45.444427516062326,
+      "lng": 12.330146493859283
+    },
+    {
+      "lat": 45.44354680815706,
+      "lng": 12.329652967400543
+    },
+    {
+      "lat": 45.4432758183432,
+      "lng": 12.329384746499054
+    },
+    {
+      "lat": 45.44252306203049,
+      "lng": 12.329041423745148
+    },
+    {
+      "lat": 45.44264350371545,
+      "lng": 12.326294841713898
+    },
+    {
+      "lat": 45.44307257512859,
+      "lng": 12.325940790123932
+    },
+    {
+      "lat": 45.44344142338413,
+      "lng": 12.325801315255157
+    },
+    {
+      "lat": 45.44371241240249,
+      "lng": 12.325672569222442
+    },
+    {
+      "lat": 45.444570535706525,
+      "lng": 12.323913040108673
+    },
+    {
+      "lat": 45.44492431958442,
+      "lng": 12.323119106240265
+    },
+    {
+      "lat": 45.44554908143946,
+      "lng": 12.320919694848053
+    },
+    {
+      "lat": 45.44623405335291,
+      "lng": 12.319921913094513
+    },
+    {
+      "lat": 45.44693407100063,
+      "lng": 12.318409147210113
+    }
+  ],
+  "centroid": {
+    "lat": 45.44496994196827,
+    "lng": 12.325101365990626
+  },
+  "historicalName": "Calle del Forno in Sestiere San Polo",
+  "englishName": "Oven Street in the District of Saint Paul",
+  "historicalDescription": "A street known for its bakeries and located near the Rialto contract, an important commercial hub of 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 168912.38,
+  "center": {
+    "lat": 45.44461129034009,
+    "lng": 12.325563528813925
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.44773088425899,
+        "lng": 12.31897777552127
+      },
+      "water": {
+        "lat": 45.44782812530675,
+        "lng": 12.318762101200482
+      },
+      "historicalName": "Fondamenta dei Panificatori",
+      "englishName": "Foundation of the Breadmakers",
+      "historicalDescription": "Named for the bakeries near Calle del Forno ('Oven Street') in San Polo, this dock served the guild of breadmakers who received grain deliveries and distributed their products throughout Venice by boat.",
+      "id": "canal_45.447731_12.318978"
+    },
+    {
+      "edge": {
+        "lat": 45.44775911017493,
+        "lng": 12.319659056611053
+      },
+      "water": {
+        "lat": 45.447865207001016,
+        "lng": 12.319452037274464
+      },
+      "historicalName": "Riva di San Boldo",
+      "englishName": "Bank of Saint Boldo",
+      "historicalDescription": "Located near the Church of San Boldo in San Polo, this landing served local parishioners and merchants. The church was an important religious landmark in this district during the Renaissance period.",
+      "id": "canal_45.447759_12.319659"
+    },
+    {
+      "edge": {
+        "lat": 45.44778733609087,
+        "lng": 12.320340337700836
+      },
+      "water": {
+        "lat": 45.44790330321718,
+        "lng": 12.320144368395496
+      },
+      "historicalName": "Fondamenta della Farina",
+      "englishName": "Foundation of the Flour",
+      "historicalDescription": "This dock was where flour shipments arrived to supply the bakeries of Calle del Forno. It played a crucial role in Venice's food supply chain, as bread was a staple food for all social classes.",
+      "id": "canal_45.447787_12.320340"
+    },
+    {
+      "edge": {
+        "lat": 45.44781556200681,
+        "lng": 12.321021618790619
+      },
+      "water": {
+        "lat": 45.447942374112415,
+        "lng": 12.320839809088074
+      },
+      "historicalName": "Riva dei Meloni",
+      "englishName": "Bank of the Melons",
+      "historicalDescription": "A small dock where fruit vendors, particularly those selling melons, would receive their goods. Located near San Polo, it served the local contract that would have operated in the vicinity of Calle del Forno.",
+      "id": "canal_45.447816_12.321022"
+    },
+    {
+      "edge": {
+        "lat": 45.44255317245173,
+        "lng": 12.328354778237335
+      },
+      "water": {
+        "lat": 45.44242241193367,
+        "lng": 12.3285308057269
+      },
+      "historicalName": "Fondamenta dei Fruttaroli",
+      "englishName": "Foundation of the Fruiterers",
+      "historicalDescription": "This landing served the fruit and vegetable vendors who operated in the San Polo district. These merchants formed a significant guild in Renaissance Venice and needed water access for fresh produce deliveries.",
+      "id": "canal_45.442553_12.328355"
+    },
+    {
+      "edge": {
+        "lat": 45.442583282872974,
+        "lng": 12.327668132729523
+      },
+      "water": {
+        "lat": 45.44243970596012,
+        "lng": 12.327822544578755
+      },
+      "historicalName": "Riva del Traghetto San Silvestro",
+      "englishName": "Bank of the San Silvestro Ferry",
+      "historicalDescription": "A dock that served as a gondola ferry crossing point near the Church of San Silvestro, connecting San Polo with other districts. These traghetto services were vital for transportation across the Grand Canal.",
+      "id": "canal_45.442583_12.327668"
+    },
+    {
+      "edge": {
+        "lat": 45.44261339329421,
+        "lng": 12.32698148722171
+      },
+      "water": {
+        "lat": 45.44245644475259,
+        "lng": 12.327106705210435
+      },
+      "historicalName": "Fondamenta dei Pistori",
+      "englishName": "Foundation of the Bakers",
+      "historicalDescription": "Named for the pistori (bakers) guild, this dock was directly associated with Calle del Forno. Bakers would receive deliveries here and distribute their finished bread products to vendors throughout the city.",
+      "id": "canal_45.442613_12.326981"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44536842812019,
+        "lng": 12.324814262337677
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055595653",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44543322796033,
+          "lng": 12.325033206426456
+        },
+        "distance": 18.53811413467082,
+        "id": "187f3fe9-9693-4aaa-a28d-52aff52672c7",
+        "historicalName": "Ponte del Forno",
+        "englishName": "Bridge of the Bakery",
+        "historicalDescription": "Named after the bakery (forno) that operated in Calle del Forno in San Polo since the 15th century. Bakeries were vital institutions in Renaissance Venice, regulated by the Republic to ensure stable bread prices and supply.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44540082804026,
+            "lng": 12.324923734382066
+          }
+        }
+      },
+      "id": "bridge_45.445368_12.324814"
+    },
+    {
+      "edge": {
+        "lat": 45.44524046500234,
+        "lng": 12.326380672402374
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055579728",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44516123564915,
+          "lng": 12.326525641523762
+        },
+        "distance": 14.335963369211626,
+        "id": "9d845413-f8bf-48e9-adce-5ae51e833536",
+        "historicalName": "Ponte dei Panificatori",
+        "englishName": "Bridge of the Bread Makers",
+        "historicalDescription": "This bridge honors the guild of bread makers who had several workshops in the San Polo district. The bread makers' guild was one of the oldest in Venice, dating back to the 13th century, and was particularly concentrated near Calle del Forno.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44520085032575,
+            "lng": 12.326453156963069
+          }
+        }
+      },
+      "id": "bridge_45.445240_12.326381"
+    },
+    {
+      "edge": {
+        "lat": 45.4448114100772,
+        "lng": 12.326659622139923
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055579728",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44485826256684,
+          "lng": 12.326702667318745
+        },
+        "distance": 6.198271488534052,
+        "id": "9d845413-f8bf-48e9-adce-5ae51e833536",
+        "historicalName": "Ponte della Farina",
+        "englishName": "Bridge of the Flour",
+        "historicalDescription": "Named for the flour merchants and warehouses that existed nearby in San Polo. Flour distribution was strictly controlled by the Republic, and this area served as a distribution point for the precious commodity needed by the bakeries on Calle del Forno.",
+        "location": {
+          "midpoint": {
+            "lat": 45.444834836322016,
+            "lng": 12.326681144729335
+          }
+        }
+      },
+      "id": "bridge_45.444811_12.326660"
+    },
+    {
+      "edge": {
+        "lat": 45.44496195603659,
+        "lng": 12.327335538811676
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055579728",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44501445386215,
+          "lng": 12.32720960482256
+        },
+        "distance": 11.427971426577532,
+        "id": "9d845413-f8bf-48e9-adce-5ae51e833536",
+        "historicalName": "Ponte dei Pistor",
+        "englishName": "Bridge of the Bakers",
+        "historicalDescription": "'Pistor' is the Venetian dialect term for baker. This bridge would have connected residential areas to the bakeries along Calle del Forno. The bakers' guild was well-respected in Renaissance Venice as they provided an essential service to the city.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44498820494937,
+            "lng": 12.327272571817119
+          }
+        }
+      },
+      "id": "bridge_45.444962_12.327336"
+    },
+    {
+      "edge": {
+        "lat": 45.444427516062326,
+        "lng": 12.330146493859283
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055751637",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44436622873616,
+          "lng": 12.330223158564667
+        },
+        "distance": 9.067187698863142,
+        "id": "9b4cdb76-44dd-4151-a0a9-72178c20abba",
+        "historicalName": "Ponte dei Tiepolo",
+        "englishName": "Bridge of the Tiepolo Family",
+        "historicalDescription": "Named after the prominent Tiepolo family who owned property in the San Polo district. This nobili family produced several doges and important political figures in Venetian history, and likely had a palazzo near this bridge in the 15th-16th centuries.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44439687239924,
+            "lng": 12.330184826211976
+          }
+        }
+      },
+      "id": "bridge_45.444428_12.330146"
+    },
+    {
+      "edge": {
+        "lat": 45.4432758183432,
+        "lng": 12.329384746499054
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055841290",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.44328143942364,
+          "lng": 12.3294758516456
+        },
+        "distance": 7.135091269557788,
+        "id": "5d54869d-81f5-412a-8991-4d098f0e1f61",
+        "historicalName": "Ponte di Santa Agata",
+        "englishName": "Bridge of Saint Agatha",
+        "historicalDescription": "Named for a small chapel or shrine to Saint Agatha that once stood nearby. Saint Agatha was considered a protector against fire - a particularly important saint to venerate in an area with bakeries, which were frequent sources of fires in Renaissance Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44327862888342,
+            "lng": 12.329430299072328
+          }
+        }
+      },
+      "id": "bridge_45.443276_12.329385"
+    },
+    {
+      "edge": {
+        "lat": 45.444570535706525,
+        "lng": 12.323913040108673
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879581983",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.4445405676431,
+          "lng": 12.323611382811452
+        },
+        "distance": 23.76832400106658,
+        "id": "3ab24964-33be-4438-881d-20ae8b1589a3",
+        "historicalName": "Ponte della Scuola",
+        "englishName": "Bridge of the Guild Hall",
+        "historicalDescription": "This bridge likely connected to a scuola or guild hall in San Polo. The scuole were important religious and social organizations in Renaissance Venice, combining charitable works with professional associations, and several minor scuole existed in the San Polo district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44455555167481,
+            "lng": 12.323762211460062
+          }
+        }
+      },
+      "id": "bridge_45.444571_12.323913"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44297089872729,
+      "lng": 12.326653018616607,
+      "streetName": "Calle dei Forni",
+      "streetNameEnglish": "Street of the Ovens",
+      "streetDescription": "Named after the multiple bakeries that operated in this area of San Polo during the Renaissance. Bread production was vital to Venetian life, and this street housed several small bakeries serving the local community.",
+      "id": "building_45.442971_12.326653"
+    },
+    {
+      "lat": 45.44292195643424,
+      "lng": 12.32737844752063,
+      "streetName": "Ruga dei Panificatori",
+      "streetNameEnglish": "Row of the Bread Makers",
+      "streetDescription": "A street where members of the bread makers' guild would have their shops. The 'Ruga' designation was typically given to streets with commercial activities, and bread production was a regulated trade in Renaissance Venice.",
+      "id": "building_45.442922_12.327378"
+    },
+    {
+      "lat": 45.44303908909018,
+      "lng": 12.32793567453024,
+      "streetName": "Rio Terà del Mulino",
+      "streetNameEnglish": "Filled Canal of the Mill",
+      "streetDescription": "References a filled-in canal near San Polo where a water mill once operated. Rio Terà streets were former canals that had been filled in for urban development, and mills were essential for grinding grain for the nearby bakeries.",
+      "id": "building_45.443039_12.327936"
+    },
+    {
+      "lat": 45.44294354447986,
+      "lng": 12.328730732482674,
+      "streetName": "Calle del Pastarol",
+      "streetNameEnglish": "Street of the Pasta Maker",
+      "streetDescription": "Named after artisans who made pasta in this area of San Polo. While bread was the staple, pasta production became increasingly important in Venetian cuisine during the Renaissance period.",
+      "id": "building_45.442944_12.328731"
+    },
+    {
+      "lat": 45.443454595263354,
+      "lng": 12.326088714336649,
+      "streetName": "Salizada dei Cereali",
+      "streetNameEnglish": "Paved Street of the Grains",
+      "streetDescription": "A paved street ('salizada' indicating it was one of the first to be paved) where grain merchants would have operated. Its proximity to Calle del Forno made it convenient for bakers to purchase their raw materials.",
+      "id": "building_45.443455_12.326089"
+    },
+    {
+      "lat": 45.44334941587383,
+      "lng": 12.326677066004276,
+      "streetName": "Sottoportego del Pestrin",
+      "streetNameEnglish": "Passageway of the Grain Pounder",
+      "streetDescription": "A covered passageway named after the 'pestrin,' a person who operated a pestle and mortar to pound grain. These passageways were common in Venice, connecting streets while providing shelter from rain.",
+      "id": "building_45.443349_12.326677"
+    },
+    {
+      "lat": 45.4434136464505,
+      "lng": 12.327340914773755,
+      "streetName": "Calle Pistor",
+      "streetNameEnglish": "Baker's Street",
+      "streetDescription": "Named using the Venetian term 'pistor' for baker, reflecting the traditional baking profession that was prominent in this area near Calle del Forno in San Polo.",
+      "id": "building_45.443414_12.327341"
+    },
+    {
+      "lat": 45.443414316841725,
+      "lng": 12.328070103806468,
+      "streetName": "Corte dei Crivellari",
+      "streetNameEnglish": "Court of the Sieve Makers",
+      "streetDescription": "A small courtyard named after the craftsmen who made sieves essential for sifting flour in the baking process. These specialized artisans would have served the numerous bakeries in the San Polo district.",
+      "id": "building_45.443414_12.328070"
+    },
+    {
+      "lat": 45.44347701162489,
+      "lng": 12.328678297185098,
+      "streetName": "Campiello della Farina",
+      "streetNameEnglish": "Small Square of the Flour",
+      "streetDescription": "A small campo where flour might have been traded or distributed to nearby bakeries. Campielli were the smaller squares that formed important nodes in Venetian neighborhood life.",
+      "id": "building_45.443477_12.328678"
+    },
+    {
+      "lat": 45.44393296493371,
+      "lng": 12.326150586554682,
+      "streetName": "Fondamenta dei Grani",
+      "streetNameEnglish": "Foundation of the Grains",
+      "streetDescription": "A street running alongside a canal where boats would deliver grains to be used in the bakeries of San Polo. 'Fondamenta' streets typically bordered canals and served as unloading areas for goods.",
+      "id": "building_45.443933_12.326151"
+    },
+    {
+      "lat": 45.443859226421175,
+      "lng": 12.326678027428285,
+      "streetName": "Calle dei Soleri",
+      "streetNameEnglish": "Street of the Granary Keepers",
+      "streetDescription": "Named after those who maintained the grain soleri (granaries) that supplied the bakeries in the area. Grain storage was carefully regulated in Renaissance Venice to ensure food security.",
+      "id": "building_45.443859_12.326678"
+    },
+    {
+      "lat": 45.443917462533385,
+      "lng": 12.3273645173063,
+      "streetName": "Ruga dei Tamisi",
+      "streetNameEnglish": "Row of the Sieves",
+      "streetDescription": "A commercial street where sieves ('tamisi' in Venetian dialect) used for sifting flour were sold. This specialized equipment was essential for the baking trade that flourished around Calle del Forno.",
+      "id": "building_45.443917_12.327365"
+    },
+    {
+      "lat": 45.4438276262614,
+      "lng": 12.328131055553278,
+      "streetName": "Calle dei Nani",
+      "streetNameEnglish": "Street of the Nani Family",
+      "streetDescription": "Named after the noble Nani family who likely owned property in this area of San Polo. Nobili families often had streets named after them in the districts where they held influence or property.",
+      "id": "building_45.443828_12.328131"
+    },
+    {
+      "lat": 45.443827259439615,
+      "lng": 12.32872614576702,
+      "streetName": "Rio Terà delle Provvigioni",
+      "streetNameEnglish": "Filled Canal of the Provisions",
+      "streetDescription": "A former canal filled in to create a street where food provisions were stored or distributed. Its location near Calle del Forno would have made it convenient for supplying bakeries.",
+      "id": "building_45.443827_12.328726"
+    },
+    {
+      "lat": 45.4438022690865,
+      "lng": 12.329203326227665,
+      "streetName": "Sottoportego dei Barili",
+      "streetNameEnglish": "Passageway of the Barrels",
+      "streetDescription": "A covered passage named after the barrels used to transport and store flour, grains, and other provisions for the baking industry concentrated in this part of San Polo.",
+      "id": "building_45.443802_12.329203"
+    },
+    {
+      "lat": 45.44433720665565,
+      "lng": 12.325386526135617,
+      "streetName": "Calle del Forno Vecchio",
+      "streetNameEnglish": "Street of the Old Oven",
+      "streetDescription": "Named to distinguish it from the main Calle del Forno, this street would have been the site of one of the oldest bakeries in the area, possibly predating others in this baking district.",
+      "id": "building_45.444337_12.325387"
+    },
+    {
+      "lat": 45.44432587200194,
+      "lng": 12.326038343402438,
+      "streetName": "Salizada dei Frumenti",
+      "streetNameEnglish": "Paved Street of the Wheat",
+      "streetDescription": "An early paved street where wheat merchants conducted business. The grain trade was carefully regulated in Venice, and this street would have played a role in supplying the local bakeries.",
+      "id": "building_45.444326_12.326038"
+    },
+    {
+      "lat": 45.44428634749133,
+      "lng": 12.326761557587178,
+      "streetName": "Corte della Bilancia",
+      "streetNameEnglish": "Court of the Scale",
+      "streetDescription": "A courtyard named after the public scales used to weigh grain and flour transactions. Accurate weighing was essential to fair trade and taxation in Renaissance Venice.",
+      "id": "building_45.444286_12.326762"
+    },
+    {
+      "lat": 45.44436769072895,
+      "lng": 12.327293332220524,
+      "streetName": "Calle dei Biscottini",
+      "streetNameEnglish": "Street of the Small Biscuits",
+      "streetDescription": "Named after a specialty baked good produced in this area. Biscotti and other preserved baked goods were important for long sea voyages, making them a valuable Venetian product.",
+      "id": "building_45.444368_12.327293"
+    },
+    {
+      "lat": 45.44432801878235,
+      "lng": 12.328064527856684,
+      "streetName": "Ramo del Sesamo",
+      "streetNameEnglish": "Branch of the Sesame",
+      "streetDescription": "A small branch street named after the sesame seeds used in various Venetian baked goods. Spices and seeds were important imports that found their way into local cuisine.",
+      "id": "building_45.444328_12.328065"
+    },
+    {
+      "lat": 45.444326059244226,
+      "lng": 12.32872202558183,
+      "streetName": "Calle della Pasticceria",
+      "streetNameEnglish": "Street of the Pastry Shop",
+      "streetDescription": "Named after pastry shops that operated alongside bakeries in the San Polo district. Pastry making was a specialized craft distinct from bread baking but often located in the same areas.",
+      "id": "building_45.444326_12.328722"
+    },
+    {
+      "lat": 45.44437756557975,
+      "lng": 12.329394778427483,
+      "streetName": "Fondamenta del Traghetto di San Polo",
+      "streetNameEnglish": "Foundation of the San Polo Ferry",
+      "streetDescription": "A canalside street near a ferry crossing point in San Polo. Traghetti were essential for crossing the Grand Canal before many bridges were built, connecting the baking district to other parts of Venice.",
+      "id": "building_45.444378_12.329395"
+    },
+    {
+      "lat": 45.444822681264505,
+      "lng": 12.3242764552835,
+      "streetName": "Calle della Scuola dei Fornai",
+      "streetNameEnglish": "Street of the Bakers' Guild",
+      "streetDescription": "Named after the location of the bakers' guild hall. Professional guilds (scuole) were central to Renaissance Venetian economic organization and social welfare.",
+      "id": "building_45.444823_12.324276"
+    },
+    {
+      "lat": 45.444715081184995,
+      "lng": 12.324750762237853,
+      "streetName": "Rio Terà dei Magazzini",
+      "streetNameEnglish": "Filled Canal of the Warehouses",
+      "streetDescription": "A former canal filled to create a street where warehouses stored flour and grains. Located in San Polo near Calle del Forno, these warehouses would have supplied the local baking industry.",
+      "id": "building_45.444715_12.324751"
+    },
+    {
+      "lat": 45.44468530392916,
+      "lng": 12.32545429686315,
+      "streetName": "Calle del Sale",
+      "streetNameEnglish": "Street of the Salt",
+      "streetDescription": "Named after the essential preservative and flavor enhancer used in baking. Salt was a state monopoly in Venice, and its distribution was tightly controlled, making it a valuable commodity for bakers.",
+      "id": "building_45.444685_12.325454"
+    },
+    {
+      "lat": 45.44478709381162,
+      "lng": 12.32611454553549,
+      "streetName": "Sottoportego del Lievito",
+      "streetNameEnglish": "Passageway of the Yeast",
+      "streetDescription": "A covered passage named after the yeast cultures maintained by bakers. Yeast was carefully cultivated and shared among bakers in Renaissance Venice, making it a valuable resource in bread production.",
+      "id": "building_45.444787_12.326115"
+    },
+    {
+      "lat": 45.444760264554624,
+      "lng": 12.327392730756745,
+      "streetName": "Calle dei Conti",
+      "streetNameEnglish": "Street of the Counts",
+      "streetDescription": "Named after noble families with the title of Count who owned property in this part of San Polo. Aristocratic families often invested in commercial properties, including bakeries and grain warehouses.",
+      "id": "building_45.444760_12.327393"
+    },
+    {
+      "lat": 45.44476630947146,
+      "lng": 12.32805573047151,
+      "streetName": "Corte dei Palmieri",
+      "streetNameEnglish": "Court of the Palm Bearers",
+      "streetDescription": "Named after the Palmieri family or after those who carried palm fronds in religious processions. This courtyard would have been a small community space near the baking district of San Polo.",
+      "id": "building_45.444766_12.328056"
+    },
+    {
+      "lat": 45.444726489670195,
+      "lng": 12.328591664669986,
+      "streetName": "Ruga dei Dolci",
+      "streetNameEnglish": "Row of the Sweets",
+      "streetDescription": "A commercial street where confectioners sold sweet baked goods. While distinct from bread baking, confectionery was often found in proximity to bakeries in Renaissance Venice.",
+      "id": "building_45.444726_12.328592"
+    },
+    {
+      "lat": 45.44475249314051,
+      "lng": 12.329214044979734,
+      "streetName": "Calle della Misura",
+      "streetNameEnglish": "Street of the Measure",
+      "streetDescription": "Named after the standard measures used to sell grain and flour. The Venetian Republic strictly regulated weights and measures to ensure fair trade, particularly for essential food items.",
+      "id": "building_45.444752_12.329214"
+    },
+    {
+      "lat": 45.44527634620332,
+      "lng": 12.323464745185749,
+      "streetName": "Fondamenta San Silvestro",
+      "streetNameEnglish": "Foundation of Saint Sylvester",
+      "streetDescription": "A canalside street named after the nearby Church of San Silvestro in San Polo. Parish churches were important landmarks and administrative centers in Venetian neighborhoods.",
+      "id": "building_45.445276_12.323465"
+    },
+    {
+      "lat": 45.44519445666178,
+      "lng": 12.324296599932351,
+      "streetName": "Calle del Forno Pubblico",
+      "streetNameEnglish": "Street of the Public Oven",
+      "streetDescription": "Named after a communal oven where locals could bring their dough to be baked. Public ovens were important facilities in Renaissance Venice, particularly for households without private baking facilities.",
+      "id": "building_45.445194_12.324297"
+    },
+    {
+      "lat": 45.44513215480863,
+      "lng": 12.325326824481206,
+      "streetName": "Salizada della Pagnotta",
+      "streetNameEnglish": "Paved Street of the Bread Loaf",
+      "streetDescription": "An early paved street named after a specific type of round bread loaf. Different bread shapes and types were associated with different occasions and social classes in Renaissance Venice.",
+      "id": "building_45.445132_12.325327"
+    },
+    {
+      "lat": 45.44520522501092,
+      "lng": 12.327958969321926,
+      "streetName": "Calle dei Tiepolo",
+      "streetNameEnglish": "Street of the Tiepolo Family",
+      "streetDescription": "Named after the prominent Tiepolo family who likely owned property in San Polo. Noble families often had commercial interests, potentially including bakeries or grain warehouses in this area.",
+      "id": "building_45.445205_12.327959"
+    },
+    {
+      "lat": 45.44567895904426,
+      "lng": 12.321581417855313,
+      "streetName": "Rio Terà della Madonetta",
+      "streetNameEnglish": "Filled Canal of the Small Madonna",
+      "streetDescription": "A former canal filled to create a street, named after a small shrine to the Madonna that likely stood nearby. Religious shrines were common landmarks in Renaissance Venetian neighborhoods.",
+      "id": "building_45.445679_12.321581"
+    },
+    {
+      "lat": 45.44560548474842,
+      "lng": 12.322268938479379,
+      "streetName": "Corte del Frumento",
+      "streetNameEnglish": "Court of the Wheat",
+      "streetDescription": "A small courtyard where wheat might have been traded or temporarily stored before being milled and baked. Located near Calle del Forno, it would have been part of the local grain-to-bread supply chain.",
+      "id": "building_45.445605_12.322269"
+    },
+    {
+      "lat": 45.44566974935769,
+      "lng": 12.323013305665148,
+      "streetName": "Calle dei Impastatori",
+      "streetNameEnglish": "Street of the Dough Kneaders",
+      "streetDescription": "Named after the workers who kneaded dough in the bakeries. This physically demanding role was essential in bread production in Renaissance Venice, particularly in the baking district of San Polo.",
+      "id": "building_45.445670_12.323013"
+    },
+    {
+      "lat": 45.446087076374596,
+      "lng": 12.321050229239557,
+      "streetName": "Sottoportego delle Focacce",
+      "streetNameEnglish": "Passageway of the Focaccia Breads",
+      "streetDescription": "A covered passage named after the flatbreads that were a popular alternative to leavened breads. Different types of breads served different purposes in Venetian cuisine and society.",
+      "id": "building_45.446087_12.321050"
+    },
+    {
+      "lat": 45.44656355360805,
+      "lng": 12.320326403648886,
+      "streetName": "Calle dei Pisani",
+      "streetNameEnglish": "Street of the Pisani Family",
+      "streetDescription": "Named after the noble Pisani family who owned property in this area of San Polo. Nobili families often invested in commercial ventures, including the lucrative grain and baking trades.",
+      "id": "building_45.446564_12.320326"
+    },
+    {
+      "lat": 45.44654606978502,
+      "lng": 12.320855449006713,
+      "streetName": "Ramo del Farro",
+      "streetNameEnglish": "Branch of the Spelt",
+      "streetDescription": "A small branch street named after spelt, a grain used in some specialty breads. Various grains were used in Renaissance Venetian baking, with different varieties commanding different prices and status.",
+      "id": "building_45.446546_12.320855"
+    },
+    {
+      "lat": 45.447068519439846,
+      "lng": 12.319071734153367,
+      "streetName": "Calle dei Molini",
+      "streetNameEnglish": "Street of the Mills",
+      "streetDescription": "Named after grain mills that would have been essential to the baking industry. Located near Calle del Forno in San Polo, this street may have connected bakeries to their flour suppliers.",
+      "id": "building_45.447069_12.319072"
+    },
+    {
+      "lat": 45.447031776520525,
+      "lng": 12.319592477355457,
+      "streetName": "Fondamenta del Segale",
+      "streetNameEnglish": "Foundation of the Rye",
+      "streetDescription": "A canalside street named after rye, a grain used for darker breads. Canalside locations were ideal for receiving grain shipments, making this a logical part of the baking district's infrastructure.",
+      "id": "building_45.447032_12.319592"
+    },
+    {
+      "lat": 45.44706746694959,
+      "lng": 12.32025446523149,
+      "streetName": "Calle della Pala",
+      "streetNameEnglish": "Street of the Peel",
+      "streetDescription": "Named after the long-handled peels used to place bread in ovens. This specialized baking tool was essential to the many bakeries operating around Calle del Forno in San Polo.",
+      "id": "building_45.447067_12.320254"
+    },
+    {
+      "lat": 45.44697028423084,
+      "lng": 12.321077885846746,
+      "streetName": "Campiello dei Pistori",
+      "streetNameEnglish": "Small Square of the Bakers",
+      "streetDescription": "A small square where bakers might have gathered or where a small grain contract might have operated. 'Pistori' was the Venetian term for bakers, making this a center of the local baking community.",
+      "id": "building_45.446970_12.321078"
+    },
+    {
+      "lat": 45.44747111001809,
+      "lng": 12.31917076399883,
+      "streetName": "Calle del Formentino",
+      "streetNameEnglish": "Street of the Small Wheat",
+      "streetDescription": "Named after a variety of small-grained wheat used in certain breads. Different grain varieties had different uses in Renaissance Venetian baking, reflecting a sophisticated understanding of ingredients.",
+      "id": "building_45.447471_12.319171"
+    },
+    {
+      "lat": 45.44750945492322,
+      "lng": 12.320302251574471,
+      "streetName": "Rio Terà dei Panifici",
+      "streetNameEnglish": "Filled Canal of the Bakeries",
+      "streetDescription": "A former canal filled to create a street where multiple bakeries operated. This infrastructure improvement would have facilitated the growth of the baking industry in San Polo.",
+      "id": "building_45.447509_12.320302"
+    },
+    {
+      "lat": 45.447501031173395,
+      "lng": 12.321018570224027,
+      "streetName": "Calle della Crusca",
+      "streetNameEnglish": "Street of the Bran",
+      "streetDescription": "Named after the bran separated from flour during milling. Bran was often used for cheaper breads for the lower classes, while white flour was reserved for more expensive products in Renaissance Venice.",
+      "id": "building_45.447501_12.321019"
+    }
+  ],
+  "id": "polygon-1746055561861"
+}

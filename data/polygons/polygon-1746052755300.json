@@ -1,0 +1,184 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.424939588614734,
+      "lng": 12.326282817675533
+    },
+    {
+      "lat": 45.424683569424765,
+      "lng": 12.328203279330197
+    },
+    {
+      "lat": 45.42344863702456,
+      "lng": 12.327452260806027
+    },
+    {
+      "lat": 45.423659481054045,
+      "lng": 12.325006086184445
+    },
+    {
+      "lat": 45.42413387724126,
+      "lng": 12.325413781954708
+    },
+    {
+      "lat": 45.42454049937171,
+      "lng": 12.326025325610104
+    }
+  ],
+  "centroid": {
+    "lat": 45.42423427545518,
+    "lng": 12.326397258593502
+  },
+  "historicalName": "Fondamenta de le Scuole de San Rocco",
+  "englishName": "Foundations of the Schools of San Rocco",
+  "historicalDescription": "This area in the San Polo sestiere was known for housing the Scuole Grandi di San Rocco, a prominent confraternity dedicated to Saint Roch, which was established in the late 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 25638.46,
+  "center": {
+    "lat": 45.42423427545518,
+    "lng": 12.326397258593502
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.423518918367726,
+        "lng": 12.3266368692655
+      },
+      "water": {
+        "lat": 45.42334382732776,
+        "lng": 12.32669551645371
+      },
+      "historicalName": "Riva di San Rocco",
+      "englishName": "Dock of Saint Roch",
+      "historicalDescription": "This landing point would naturally be named after the nearby Scuola Grande di San Rocco, one of Venice's most important confraternities dedicated to Saint Roch, patron saint of plague victims. During the Renaissance period, this dock would have been used by members of the confraternity and visitors coming to the prestigious building with its Tintoretto paintings.",
+      "id": "canal_45.423519_12.326637"
+    },
+    {
+      "edge": {
+        "lat": 45.42358919971088,
+        "lng": 12.325821477724972
+      },
+      "water": {
+        "lat": 45.423436775281,
+        "lng": 12.325685426925668
+      },
+      "historicalName": "Fondamenta dei Confratelli",
+      "englishName": "Foundation of the Confraternity Brothers",
+      "historicalDescription": "This dock name references the brotherhood members (confratelli) who would have used this landing when attending functions at the Scuola Grande di San Rocco. The confraternity was founded in 1478 during a plague epidemic, and this dock would have served the officials and wealthy merchants who were members of this prestigious charitable organization in Renaissance Venice.",
+      "id": "canal_45.423589_12.325821"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.42485424888474,
+        "lng": 12.326922971560421
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052744386",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.42496217831776,
+          "lng": 12.326998073412838
+        },
+        "distance": 13.355931576106373,
+        "id": "137eee62-c336-439d-a8e0-12625ea5c111",
+        "historicalName": "Ponte di San Rocco",
+        "englishName": "Bridge of Saint Roch",
+        "historicalDescription": "Named after the nearby Scuola Grande di San Rocco, one of Venice's most prestigious confraternities established in the 15th century. The bridge would have provided access to this important religious and charitable institution dedicated to Saint Roch, protector against plague, which was particularly significant during the Renaissance period when Venice suffered multiple epidemics.",
+        "location": {
+          "midpoint": {
+            "lat": 45.424908213601256,
+            "lng": 12.32696052248663
+          }
+        }
+      },
+      "id": "bridge_45.424854_12.326923"
+    },
+    {
+      "edge": {
+        "lat": 45.42476890915476,
+        "lng": 12.327563125445309
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052744386",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.424864288803754,
+          "lng": 12.327713329150143
+        },
+        "distance": 15.807907200592703,
+        "id": "137eee62-c336-439d-a8e0-12625ea5c111",
+        "historicalName": "Ponte dei Confratelli",
+        "englishName": "Bridge of the Brotherhood Members",
+        "historicalDescription": "Located near the Fondamenta de le Scuole de San Rocco, this bridge would have been named for the members of the confraternity (confratelli) who regularly crossed it to attend meetings and religious services at the Scuola Grande. These prominent citizens were responsible for charitable works and supporting Venetian arts, commissioning works from masters like Tintoretto who decorated the interior of the Scuola.",
+        "location": {
+          "midpoint": {
+            "lat": 45.424816598979255,
+            "lng": 12.327638227297726
+          }
+        }
+      },
+      "id": "bridge_45.424769_12.327563"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.423950130211686,
+      "lng": 12.32566648619327,
+      "streetName": "Calle dei Confratelli di San Rocco",
+      "streetNameEnglish": "Street of the Confraternity of Saint Roch",
+      "streetDescription": "Named after the members of the Scuola Grande di San Rocco, the prestigious confraternity dedicated to Saint Roch, patron saint of plague victims. The confraternity commissioned their magnificent building near this location in the 16th century and would have been prominent residents in the area.",
+      "id": "building_45.423950_12.325666"
+    },
+    {
+      "lat": 45.423861867911114,
+      "lng": 12.326335089978095,
+      "streetName": "Rio Terà della Carità Pestilenziale",
+      "streetNameEnglish": "Filled Canal of the Pestilential Charity",
+      "streetDescription": "This former canal was filled in ('terà' indicates a filled canal) and named to commemorate the charitable work done during plague outbreaks. The Scuola Grande di San Rocco was specifically established to provide care and assistance during the frequent plague epidemics of Renaissance Venice.",
+      "id": "building_45.423862_12.326335"
+    },
+    {
+      "lat": 45.4239195708682,
+      "lng": 12.327048638791556,
+      "streetName": "Sottoportego dei Tintoretto",
+      "streetNameEnglish": "Underpass of Tintoretto",
+      "streetDescription": "Named after Jacopo Tintoretto, the famous Venetian painter who created the remarkable cycle of paintings that adorn the interior of the Scuola Grande di San Rocco. Tintoretto worked extensively in this area from 1564 to 1587, creating what is often called his 'Sistine Chapel'.",
+      "id": "building_45.423920_12.327049"
+    },
+    {
+      "lat": 45.423964775376554,
+      "lng": 12.327666344597969,
+      "streetName": "Salizada dei Miracolati",
+      "streetNameEnglish": "Paved Street of the Healed",
+      "streetDescription": "This raised and paved street ('salizada' indicates a paved street) was named in honor of those who believed they were miraculously healed through the intercession of Saint Roch. The relics of the saint, housed in the nearby church, were thought to have healing powers, particularly against plague.",
+      "id": "building_45.423965_12.327666"
+    },
+    {
+      "lat": 45.42430240506139,
+      "lng": 12.326359455714435,
+      "streetName": "Calle dei Lavoranti delle Telerie",
+      "streetNameEnglish": "Street of the Linen Workers",
+      "streetDescription": "Named for the linen workers who had workshops in this area during the Renaissance. The production of fine textiles was an important industry in Venice, and many craftspeople would have been located near the prestigious Scuola Grande with its wealthy patrons.",
+      "id": "building_45.424302_12.326359"
+    },
+    {
+      "lat": 45.42428991430018,
+      "lng": 12.327013107634315,
+      "streetName": "Ruga degli Intagliatori",
+      "streetNameEnglish": "Street of the Wood Carvers",
+      "streetDescription": "A 'ruga' was typically a commercial street, and this one would have housed workshops of the skilled wood carvers who created the ornate decorations found in the Scuola Grande di San Rocco. These artisans were responsible for the elaborate carved wooden elements that still grace the building today.",
+      "id": "building_45.424290_12.327013"
+    },
+    {
+      "lat": 45.424393546314846,
+      "lng": 12.327548573567913,
+      "streetName": "Fondamenta dei Provveditori alla Sanità",
+      "streetNameEnglish": "Foundation of the Health Officials",
+      "streetDescription": "This canalside walkway ('fondamenta') was named after the Venetian health officials who would have worked closely with the Scuola Grande di San Rocco during times of epidemic. These magistrates enforced quarantine measures and other public health initiatives that helped Venice manage outbreaks of plague more effectively than many other European cities.",
+      "id": "building_45.424394_12.327549"
+    }
+  ],
+  "id": "polygon-1746052755300"
+}

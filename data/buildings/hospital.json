@@ -1,0 +1,56 @@
+{
+  "name": "Hospital",
+  "pointType": "building",
+  "category": "Public & Government",
+  "subCategory": "Health & Safety",
+  "size": 3,
+  "unlockCondition": "30,000,000 ducats, Medical Guild connection, government approval",
+  "calculationsAnalysis": "The Hospital represents major public health infrastructure with significant operational scale. The construction cost of 12,500,000 ducats reflects the extensive specialized facilities required, while the income of 75,000 ducats (0.6% return) represents patient fees, endowments, and public funding. The maintenance cost of 60,000 ducats (80% of income) creates a realistic scenario where healthcare required modest charitable and public support but provided essential services. The employment capacity of 50 represents the physicians, nurses, and support staff needed. The construction time of 30 days (2592000000ms) reflects the major public project. This building creates a strategic investment in public health that improves population wellbeing and disease resistance, reflecting Venice's historically advanced approach to healthcare and epidemic management.",
+  "shortDescription": "Medical care facility providing treatment and recovery services to the ill and injured.",
+  "fullDescription": "Providing essential healthcare to Venice's population, hospitals combine medical treatment, convalescence, and often charity for the poor. Featuring treatment rooms, patient wards, apothecary stations, surgical areas, and isolation facilities, these large institutions represent significant civic investment in public health. Venice's position as a trading hub made medical facilities particularly important for managing diseases from abroad.",
+  "flavorText": "Between the physician's knowledge and God's mercy lies the hospital—where both science and faith work together to preserve Venice's most precious resource: her people.",
+  "constructionCosts": {
+    "ducats": 12500000,
+    "timber": 3260,
+    "bricks": 7610,
+    "stone": 8690,
+    "glass": 1090,
+    "iron": 1630
+  },
+  "maintenanceCost": 6000,
+  "soundDesign": {
+    "ambientSound": "Quiet voices, occasional patient sounds, herbal preparation",
+    "activitySounds": "Physician consultations, treatment procedures, prayers for healing",
+    "musicTheme": "Maschera di Medico"
+  },
+  "seasonalEffects": {
+    "disease outbreaks": "Increased activity, preventative measures",
+    "winter": "Respiratory illness focus, higher occupancy",
+    "summer": "Heat-related treatments, garden medicine production"
+  },
+  "aiInteractionPoints": [
+    "Patient wards",
+    "Treatment rooms",
+    "Apothecary laboratory",
+    "Physician consultation area",
+    "Surgical theater",
+    "Medicinal garden",
+    "Chapel",
+    "Charitable ward"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "wine",
+      "olive_oil",
+      "water",
+      "bread"
+    ],
+    "sells": []
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 2,
+  "constructionMinutes": 43200
+}

@@ -1,0 +1,231 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43796020800858,
+      "lng": 12.328447594517517
+    },
+    {
+      "lat": 45.438490945172724,
+      "lng": 12.329209341877746
+    },
+    {
+      "lat": 45.43817476193137,
+      "lng": 12.329718961590576
+    },
+    {
+      "lat": 45.4382011106025,
+      "lng": 12.329751148098754
+    },
+    {
+      "lat": 45.438543642207364,
+      "lng": 12.329268350476074
+    },
+    {
+      "lat": 45.43869796895429,
+      "lng": 12.329815521115112
+    },
+    {
+      "lat": 45.438268864271734,
+      "lng": 12.330330505245971
+    },
+    {
+      "lat": 45.43791503865773,
+      "lng": 12.330652370327758
+    },
+    {
+      "lat": 45.43770801200363,
+      "lng": 12.330716743344116
+    },
+    {
+      "lat": 45.43714715416089,
+      "lng": 12.330738201016235
+    },
+    {
+      "lat": 45.43679708570194,
+      "lng": 12.3308401249588
+    },
+    {
+      "lat": 45.436386787646974,
+      "lng": 12.33111907469635
+    },
+    {
+      "lat": 45.436115763442416,
+      "lng": 12.330078377598571
+    },
+    {
+      "lat": 45.43618728384505,
+      "lng": 12.329890622967529
+    },
+    {
+      "lat": 45.43678955732412,
+      "lng": 12.33036805617218
+    },
+    {
+      "lat": 45.436894954522074,
+      "lng": 12.330400242680359
+    },
+    {
+      "lat": 45.436894954522074,
+      "lng": 12.33036269175415
+    },
+    {
+      "lat": 45.43666157474765,
+      "lng": 12.330196394795227
+    },
+    {
+      "lat": 45.436217397671676,
+      "lng": 12.329831614369201
+    },
+    {
+      "lat": 45.436371730780884,
+      "lng": 12.329493656033325
+    },
+    {
+      "lat": 45.43662016855784,
+      "lng": 12.329187884205627
+    },
+    {
+      "lat": 45.4374369941448,
+      "lng": 12.328941120976257
+    },
+    {
+      "lat": 45.437734360892705,
+      "lng": 12.328715815419006
+    }
+  ],
+  "centroid": {
+    "lat": 45.43731375303353,
+    "lng": 12.329916278879844
+  },
+  "areaInSquareMeters": 33803.09,
+  "historicalName": "Contrada San Polo",
+  "englishName": "District of Saint Paul",
+  "historicalDescription": "This area was part of the San Polo sestiere, one of the six districts of Venice. It was known for its artisan workshops, particularly those of shoemakers and tanners, as well as the Church of San Polo.",
+  "nameConfidence": "high",
+  "center": {
+    "lat": 45.43731375303353,
+    "lng": 12.329916278879844
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43714715416089,
+        "lng": 12.330738201016235
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072871983",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43716973914819,
+          "lng": 12.330791845196533
+        },
+        "distance": 4.881159813323041,
+        "id": "39a62b74-fde2-47c4-a598-2b5a445d2b21",
+        "historicalName": "Ponte dei Velutai",
+        "englishName": "Bridge of the Velvet Makers",
+        "historicalDescription": "Located in San Polo, this bridge was named after the velvet weavers' guild workshops that were concentrated in this area during the Renaissance. Velvet production was a prestigious textile craft in Venice, and many artisans in the San Polo district specialized in this luxury fabric that was exported throughout Europe.",
+        "location": {
+          "midpoint": {
+            "lat": 45.437158446654536,
+            "lng": 12.330765023106384
+          }
+        }
+      },
+      "id": "bridge_45.437147_12.330738"
+    },
+    {
+      "edge": {
+        "lat": 45.43679708570194,
+        "lng": 12.3308401249588
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072871983",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43681214245454,
+          "lng": 12.330904497975158
+        },
+        "distance": 5.294394362611413,
+        "id": "39a62b74-fde2-47c4-a598-2b5a445d2b21",
+        "historicalName": "Ponte della Marangona",
+        "englishName": "Bridge of the Carpenter's Bell",
+        "historicalDescription": "This bridge in San Polo takes its name from the 'Marangona', the largest bell in St. Mark's Campanile that would signal the beginning and end of the workday for carpenters and craftsmen. The area around this bridge in San Polo was home to many woodworkers and carpenters who contributed to Venice's shipbuilding and furniture-making industries.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43680461407824,
+            "lng": 12.33087231146698
+          }
+        }
+      },
+      "id": "bridge_45.436797_12.330840"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.436514508648635,
+      "lng": 12.329719436395054,
+      "streetName": "Calle dei Mercanti di San Polo",
+      "streetNameEnglish": "Street of the Merchants of San Polo",
+      "streetDescription": "This calle would have been named after the merchants who conducted business in the San Polo district, which was a commercial hub near the Rialto contract. Many merchant families established their businesses in this contrada during the Renaissance period.",
+      "id": "building_45.436515_12.329719"
+    },
+    {
+      "lat": 45.43708167607411,
+      "lng": 12.32968677351004,
+      "streetName": "Rio Terà dei Frari",
+      "streetNameEnglish": "Filled Canal of the Friars",
+      "streetDescription": "Named for its proximity to the Basilica di Santa Maria Gloriosa dei Frari, one of the most important churches in Venice. Rio Terà indicates this was once a canal that was filled in, creating a street that would have connected the neighborhood to this significant Franciscan church in San Polo.",
+      "id": "building_45.437082_12.329687"
+    },
+    {
+      "lat": 45.43699811793944,
+      "lng": 12.33040671468677,
+      "streetName": "Sottoportego dei Marangoni",
+      "streetNameEnglish": "Passageway of the Carpenters",
+      "streetDescription": "This covered passageway would have been associated with the guild of carpenters (marangoni) who were essential to Venice's shipbuilding industry. San Polo hosted several artisan workshops, and carpentry was a vital trade in the maritime republic.",
+      "id": "building_45.436998_12.330407"
+    },
+    {
+      "lat": 45.4375032998409,
+      "lng": 12.329168661927296,
+      "streetName": "Ruga dei Oresi di San Polo",
+      "streetNameEnglish": "Row of the Goldsmiths of San Polo",
+      "streetDescription": "This street would have been home to goldsmiths and jewelry makers. 'Ruga' typically designated commercial streets with specialized shops under arcades. The goldsmiths' guild was highly respected in Renaissance Venice, and they likely had workshops in this contrada.",
+      "id": "building_45.437503_12.329169"
+    },
+    {
+      "lat": 45.43750106051819,
+      "lng": 12.329726880839882,
+      "streetName": "Calle Pisani di San Polo",
+      "streetNameEnglish": "Pisani Family Street of San Polo",
+      "streetDescription": "Named after the noble Pisani family who likely owned property in this area. Many Venetian streets were named after prominent nobili families who built palazzi in the neighborhood. The Pisani were one of Venice's most influential families during the Renaissance.",
+      "id": "building_45.437501_12.329727"
+    },
+    {
+      "lat": 45.43791456222895,
+      "lng": 12.329136934226803,
+      "streetName": "Salizada dei Meloni",
+      "streetNameEnglish": "Paved Street of the Melons",
+      "streetDescription": "This 'salizada' (paved street) was likely named after melon vendors or a contract area specializing in melons. San Polo's proximity to the Rialto contract meant that many food vendors and specialty contracts were spread throughout the contrada.",
+      "id": "building_45.437915_12.329137"
+    },
+    {
+      "lat": 45.437985630538286,
+      "lng": 12.32965616596355,
+      "streetName": "Fondamenta dei Traghettatori",
+      "streetNameEnglish": "Foundation of the Ferrymen",
+      "streetDescription": "This riverside street would have been named for the gondoliers who operated ferry crossings (traghetti) across the Grand Canal. San Polo, bordering the Grand Canal, would have had several such ferry points, essential for transportation in a city of islands.",
+      "id": "building_45.437986_12.329656"
+    },
+    {
+      "lat": 45.43791336448906,
+      "lng": 12.330375078385961,
+      "streetName": "Corte Mocenigo",
+      "streetNameEnglish": "Mocenigo Court",
+      "streetDescription": "A small courtyard named after the powerful Mocenigo family, who produced several Doges of Venice. The family likely owned property or a palazzo in the San Polo district, and the small court would have been part of or adjacent to their property.",
+      "id": "building_45.437913_12.330375"
+    }
+  ],
+  "id": "polygon-1746072856331"
+}

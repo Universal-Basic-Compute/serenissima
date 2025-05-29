@@ -1,0 +1,48 @@
+{
+  "id": "salt",
+  "name": "Salt",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": {
+    "short": "Essential mineral for food preservation and trade.",
+    "full": "White crystalline mineral harvested from the Venetian lagoon's salt pans. A strategic resource that formed the foundation of Venice's early wealth and remains a state monopoly.",
+    "flavor": "The humble salt crystal—Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
+  },
+  "varieties": [
+    {
+      "type": "coarse_salt",
+      "purity": "medium",
+      "valueMultiplier": 0.8,
+      "primarilyUsedFor": "basic_preservation"
+    },
+    {
+      "type": "fine_salt",
+      "purity": "high",
+      "valueMultiplier": 1.2,
+      "primarilyUsedFor": "cooking_and_quality_preservation"
+    },
+    {
+      "type": "fleur_de_sel",
+      "purity": "very_high",
+      "valueMultiplier": 2,
+      "primarilyUsedFor": "luxury_cuisine"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
+      "Chioggia Salt Pans",
+      "Venetian Lagoon"
+    ],
+    "historicalSignificance": "Salt was one of Venice's earliest and most important commodities, forming the foundation of its trading empire. The Republic maintained strict control over salt production and trade.",
+    "historicalContracts": [
+      "Venetian State Salt Monopoly",
+      "European food preservation contracts"
+    ],
+    "culturalContext": "Salt production was so vital to Venice that special laws protected salt workers and facilities, with severe penalties for interference with the salt trade."
+  },
+  "importPrice": 300.0,
+  "lifetimeHours": null,
+  "consumptionHours": 29,
+  "tier": 2
+}

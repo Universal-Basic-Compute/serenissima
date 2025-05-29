@@ -1,0 +1,126 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43244947360707,
+      "lng": 12.328120073883143
+    },
+    {
+      "lat": 45.43327765283549,
+      "lng": 12.329627475349513
+    },
+    {
+      "lat": 45.43313460456434,
+      "lng": 12.329927882759181
+    },
+    {
+      "lat": 45.43200149886873,
+      "lng": 12.328860363571254
+    },
+    {
+      "lat": 45.43220854645863,
+      "lng": 12.32843121012887
+    }
+  ],
+  "centroid": {
+    "lat": 45.43261435526686,
+    "lng": 12.328993401138392
+  },
+  "historicalName": "Calle Giustinian, San Marco",
+  "englishName": "Giustinian Alley, St. Mark's District",
+  "historicalDescription": "A narrow street located in the central San Marco sestiere, near Piazza San Marco and the Ducal Palace. The area was a hub of political and commercial activity in 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 7897.65,
+  "center": {
+    "lat": 45.43261435526686,
+    "lng": 12.328993401138392
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43220854645863,
+        "lng": 12.32843121012887
+      },
+      "water": {
+        "lat": 45.43207958168217,
+        "lng": 12.328252547575458
+      },
+      "historicalName": "Fondamenta Giustinian",
+      "englishName": "Giustinian's Foundation",
+      "historicalDescription": "Named after the prominent Giustinian family who owned property in this area of San Marco. The Giustinian were a nobili Venetian family who contributed several Doges to the Republic and maintained a significant presence in the San Marco district during the Renaissance period. This dock would have served their palazzo and the surrounding neighborhood.",
+      "id": "canal_45.432209_12.328431"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43286356322128,
+        "lng": 12.328873774616328
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056660534",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43290693540193,
+          "lng": 12.32884695252618
+        },
+        "distance": 5.25732514452172,
+        "id": "f80b04b0-6d26-42b5-8f76-2b4017ee6353",
+        "historicalName": "Ponte dei Giustinian",
+        "englishName": "Bridge of the Giustinian",
+        "historicalDescription": "Named after the noble Giustinian family whose palazzo was located along Calle Giustinian in San Marco. The Giustinian were one of Venice's oldest nobili families, contributing several procurators and senators to the Republic from the 13th through 18th centuries. Their presence in this area would have made this bridge an important access point to their family properties.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43288524931161,
+            "lng": 12.328860363571254
+          }
+        }
+      },
+      "id": "bridge_45.432864_12.328874"
+    },
+    {
+      "edge": {
+        "lat": 45.43313460456434,
+        "lng": 12.329927882759181
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056711688",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.433153426726015,
+          "lng": 12.330019077865687
+        },
+        "distance": 7.417358866209158,
+        "id": "2ed5e76d-19b8-4f0c-83d9-0550006810d8",
+        "historicalName": "Ponte della Fenice Nuova",
+        "englishName": "Bridge of the New Phoenix",
+        "historicalDescription": "Located near the route connecting San Marco to Teatro La Fenice (though the modern theater was built later), this bridge would have served as a passage for Venetian nobility attending performances. The name reflects the Renaissance Venetian appreciation for the arts and references one of the most significant cultural landmarks in the vicinity of Calle Giustinian in the San Marco district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433144015645176,
+            "lng": 12.329973480312434
+          }
+        }
+      },
+      "id": "bridge_45.433135_12.329928"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.432499109789276,
+      "lng": 12.32870022860157,
+      "streetName": "Calle dei Mercanti di Seta",
+      "streetNameEnglish": "Street of the Silk Merchants",
+      "streetDescription": "This name reflects the presence of silk merchants in the San Marco district during the Renaissance. The area near Calle Giustinian was known for luxury trade, and silk was one of Venice's most prized imports from the East. Silk merchants would have established shops in this prestigious location to serve the noble families and wealthy citizens of the San Marco district.",
+      "id": "building_45.432499_12.328700"
+    },
+    {
+      "lat": 45.43288389373005,
+      "lng": 12.329316037106123,
+      "streetName": "Sottoportego dei Camerlenghi",
+      "streetNameEnglish": "Underpass of the Treasurers",
+      "streetDescription": "This name references the Camerlenghi, who were treasury officials in the Venetian Republic responsible for state finances. The San Marco area housed many government functions, and this sottoportego (covered passageway) would likely connect to buildings where financial matters were handled. The Giustinian family, being prominent in Venetian politics, would have been well-acquainted with these officials, making this a fitting name for a passage near Calle Giustinian.",
+      "id": "building_45.432884_12.329316"
+    }
+  ],
+  "id": "polygon-1746056675315"
+}

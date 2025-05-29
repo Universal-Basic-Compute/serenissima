@@ -1,0 +1,15 @@
+{
+  "id": "hemp",
+  "name": "Hemp",
+  "category": "raw_materials",
+  "subCategory": "textile_fiber",
+  "description": {
+    "short": "Strong natural fiber used for rope and sailcloth.",
+    "full": "Durable plant fibers harvested from hemp plants grown on the Venetian mainland and imported from surrounding regions. Essential for maritime industries.",
+    "flavor": "Without these humble fibers, no ship would sail, no cargo would be secured, and Venice's maritime empire would unravel like a poorly spun thread."
+  },
+  "importPrice": 210.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": null,
+  "tier": 0
+}

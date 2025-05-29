@@ -1,0 +1,29 @@
+{
+  "id": "soda_ash",
+  "name": "Soda Ash",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": {
+    "short": "Alkaline material required for glassmaking.",
+    "full": "Imported alkali material derived from burned marine plants, primarily from Egypt and Syria. Essential for lowering the melting point of sand in glass production.",
+    "flavor": "The secret of true cristallo lies not in Venetian hands, but in distant shores where plants are transformed into the white powder that makes our glass shine like diamonds."
+  },
+  "varieties": [],
+  "historicalNotes": {
+    "introductionYear": 1200,
+    "notableProducers": [
+      "Egyptian coastal regions",
+      "Syrian plant harvesters"
+    ],
+    "historicalSignificance": "Soda ash, derived from the ashes of specific marine plants, was a critical import for Venice's glassmaking industry. The Republic maintained exclusive trade agreements with suppliers in Egypt and Syria to ensure a steady supply of this essential material. The quality of Venetian glass depended heavily on the purity of this imported alkali, and the city's glassmakers developed specific techniques to purify and prepare it for use.",
+    "historicalContracts": [
+      "Murano glass foundries",
+      "Venetian soap makers"
+    ],
+    "culturalContext": "The secret knowledge of proper soda ash preparation and purification was closely guarded by Venetian glassmakers. The material was so valuable that the Republic established special warehouses for its storage and distribution, with strict controls to prevent theft or unauthorized use."
+  },
+  "importPrice": 660.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

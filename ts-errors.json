@@ -1,0 +1,39 @@
+{
+  "totalErrors": 3,
+  "totalWarnings": 0,
+  "exitCode": 1,
+  "timestamp": "2025-05-23T10:40:53.282Z",
+  "errors": [
+    {
+      "filePath": "components/PolygonViewer/BuildingCreationPanel.tsx",
+      "line": 237,
+      "column": 1,
+      "code": "TS1003",
+      "message": "Identifier expected.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/BuildingCreationPanel.tsx",
+      "line": 237,
+      "column": 5,
+      "code": "TS1005",
+      "message": "';' expected.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/BuildingCreationPanel.tsx",
+      "line": 239,
+      "column": 1,
+      "code": "TS1185",
+      "message": "Merge conflict marker encountered.",
+      "type": "error"
+    }
+  ],
+  "rawOutputLines": 4,
+  "firstFewLines": [
+    "components/PolygonViewer/BuildingCreationPanel.tsx(237,1): error TS1003: Identifier expected.\r",
+    "components/PolygonViewer/BuildingCreationPanel.tsx(237,5): error TS1005: ';' expected.\r",
+    "components/PolygonViewer/BuildingCreationPanel.tsx(239,1): error TS1185: Merge conflict marker encountered.\r"
+  ],
+  "compilerExitCode": 1
+}

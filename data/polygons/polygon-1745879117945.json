@@ -1,0 +1,416 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.432771079263105,
+      "lng": 12.32163260999493
+    },
+    {
+      "lat": 45.43358419616226,
+      "lng": 12.321042524011654
+    },
+    {
+      "lat": 45.43402086521743,
+      "lng": 12.322244153650326
+    },
+    {
+      "lat": 45.43441988743411,
+      "lng": 12.322941527994198
+    },
+    {
+      "lat": 45.43488666455976,
+      "lng": 12.323188291223568
+    },
+    {
+      "lat": 45.435270623494766,
+      "lng": 12.323274121912045
+    },
+    {
+      "lat": 45.43538355209611,
+      "lng": 12.323359952600521
+    },
+    {
+      "lat": 45.435466366260165,
+      "lng": 12.323799834878963
+    },
+    {
+      "lat": 45.435308266387,
+      "lng": 12.324175344141048
+    },
+    {
+      "lat": 45.43515016607088,
+      "lng": 12.324572311075253
+    },
+    {
+      "lat": 45.43475867766754,
+      "lng": 12.325913415582699
+    },
+    {
+      "lat": 45.434690919783556,
+      "lng": 12.326514230402035
+    },
+    {
+      "lat": 45.43466833380416,
+      "lng": 12.326814637811703
+    },
+    {
+      "lat": 45.433501379236155,
+      "lng": 12.327029214532894
+    },
+    {
+      "lat": 45.43322281232007,
+      "lng": 12.32436846319012
+    },
+    {
+      "lat": 45.4329216573505,
+      "lng": 12.322104678781551
+    }
+  ],
+  "centroid": {
+    "lat": 45.434376590444224,
+    "lng": 12.323935956986473
+  },
+  "historicalName": "Contrada San Sebastiano in Dorsoduro",
+  "englishName": "District of Saint Sebastian in Dorsoduro",
+  "historicalDescription": "This area was part of the Dorsoduro sestiere, known for its churches, including the nearby Church of San Sebastiano. It was a residential district popular among artisans and the working class.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 75355.13,
+  "center": {
+    "lat": 45.43395184564659,
+    "lng": 12.324276573267923
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43408485652016,
+        "lng": 12.326921926172298
+      },
+      "water": {
+        "lat": 45.43406005324715,
+        "lng": 12.327175793833185
+      },
+      "historicalName": "Fondamenta dei Pittori",
+      "englishName": "Foundation of the Painters",
+      "historicalDescription": "This dock was named after the numerous artists and painters who had workshops in the San Sebastiano area during the Renaissance. The church of San Sebastiano itself contains important works by Paolo Veronese who worked extensively in this contrada. The area was known for attracting artists due to its proximity to both the Grand Canal and the quieter southern lagoon.",
+      "id": "canal_45.434085_12.326922"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43441988743411,
+        "lng": 12.322941527994198
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879262533",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.434404473676835,
+          "lng": 12.322802754519806
+        },
+        "distance": 10.963061253183985,
+        "id": "468a6d66-c3fb-4e73-803c-3b3dfff64412",
+        "historicalName": "Ponte degli Arcieri",
+        "englishName": "Bridge of the Archers",
+        "historicalDescription": "Named after the archers who practiced near the Church of San Sebastiano, patron saint of archers. The area in Dorsoduro likely had a practice ground for the Venetian Republic's military bowmen during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43441218055547,
+            "lng": 12.322872141257001
+          }
+        }
+      },
+      "id": "bridge_45.434420_12.322942"
+    },
+    {
+      "edge": {
+        "lat": 45.43475867766754,
+        "lng": 12.325913415582699
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879420223",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.434799067477265,
+          "lng": 12.326061189133775
+        },
+        "distance": 12.374225837849371,
+        "id": "8be5e23f-4b65-4699-9dff-6cca2ceae394",
+        "historicalName": "Ponte dei Scultori",
+        "englishName": "Bridge of the Sculptors",
+        "historicalDescription": "This bridge refers to the numerous sculptors and stoneworkers who had workshops in this area of Dorsoduro during the 15th-16th centuries, contributing to Venice's architectural splendor and the decoration of San Sebastiano church.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4347788725724,
+            "lng": 12.325987302358236
+          }
+        }
+      },
+      "id": "bridge_45.434759_12.325913"
+    },
+    {
+      "edge": {
+        "lat": 45.43336209577811,
+        "lng": 12.325698838861507
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879086976",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43330413595111,
+          "lng": 12.325703195862188
+        },
+        "distance": 6.453799622691829,
+        "id": "9efdd101-515a-4aa4-b6bc-bdf34d939e2a",
+        "historicalName": "Ponte di San Basilio",
+        "englishName": "Bridge of Saint Basil",
+        "historicalDescription": "Named after the nearby ancient church of San Basilio that once stood in this contrada. Though the original church no longer exists, it was an important religious landmark in Renaissance Dorsoduro, near the contrada of San Sebastiano.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43333311586461,
+            "lng": 12.325701017361848
+          }
+        }
+      },
+      "id": "bridge_45.433362_12.325699"
+    },
+    {
+      "edge": {
+        "lat": 45.43329245404909,
+        "lng": 12.325033651025814
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879086976",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43319684973011,
+          "lng": 12.324930719665899
+        },
+        "distance": 13.323689467377879,
+        "id": "9efdd101-515a-4aa4-b6bc-bdf34d939e2a",
+        "historicalName": "Ponte dei Veronesi",
+        "englishName": "Bridge of the Veronese People",
+        "historicalDescription": "Named for the merchants and artisans from Verona who settled in this district during the 15th century. This references the strong trade connections between Venice and the mainland cities, with immigrant communities often clustering in specific neighborhoods.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433244651889595,
+            "lng": 12.324982185345856
+          }
+        }
+      },
+      "id": "bridge_45.433292_12.325034"
+    },
+    {
+      "edge": {
+        "lat": 45.43322281232007,
+        "lng": 12.32436846319012
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879086976",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.4330895635091,
+          "lng": 12.32415824346961
+        },
+        "distance": 22.1044018802067,
+        "id": "9efdd101-515a-4aa4-b6bc-bdf34d939e2a",
+        "historicalName": "Ponte di Paolo Veronese",
+        "englishName": "Bridge of Paolo Veronese",
+        "historicalDescription": "Honoring the famous Renaissance painter Paolo Veronese, who created numerous masterpieces for the Church of San Sebastiano in Dorsoduro during the 16th century. His connection to this specific contrada was profound, as much of his finest work adorns this church.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433156187914584,
+            "lng": 12.324263353329865
+          }
+        }
+      },
+      "id": "bridge_45.433223_12.324368"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43321252375035,
+      "lng": 12.32244872394802,
+      "streetName": "Rio Terà San Sebastiano",
+      "streetNameEnglish": "Filled Canal of Saint Sebastian",
+      "streetDescription": "Named after the nearby Church of San Sebastiano, which was built in the 16th century and contains important works by Paolo Veronese. Rio Terà indicates this was once a canal that was filled in to create a street.",
+      "id": "building_45.433213_12.322449"
+    },
+    {
+      "lat": 45.43328419235454,
+      "lng": 12.322946489886393,
+      "streetName": "Calle dei Pittori",
+      "streetNameEnglish": "Street of the Painters",
+      "streetDescription": "This name references the many artists who lived and worked in the Dorsoduro area, particularly those associated with the decoration of the Church of San Sebastiano, including Paolo Veronese who spent many years working there.",
+      "id": "building_45.433284_12.322946"
+    },
+    {
+      "lat": 45.43329582254345,
+      "lng": 12.323652699999048,
+      "streetName": "Fondamenta degli Incurabili",
+      "streetNameEnglish": "Foundation of the Incurables",
+      "streetDescription": "Named after the Ospedale degli Incurabili (Hospital for Incurables), founded in 1522, which was located in this area. It was one of the four famous hospitals of Venice, originally treating syphilis patients.",
+      "id": "building_45.433296_12.323653"
+    },
+    {
+      "lat": 45.43373220844867,
+      "lng": 12.322354108095134,
+      "streetName": "Calle dei Veronese",
+      "streetNameEnglish": "Veronese's Street",
+      "streetDescription": "Named in honor of Paolo Veronese, the famous painter who lived in this area while working on the extensive decoration of the Church of San Sebastiano from 1555 to 1570.",
+      "id": "building_45.433732_12.322354"
+    },
+    {
+      "lat": 45.433664280614,
+      "lng": 12.322997946151698,
+      "streetName": "Salizada delle Confraternite",
+      "streetNameEnglish": "Paved Street of the Confraternities",
+      "streetDescription": "Named for the religious confraternities (scuole) that were active in this area of Dorsoduro. Salizada indicates it was one of the first paved streets in the district.",
+      "id": "building_45.433664_12.322998"
+    },
+    {
+      "lat": 45.43359527007702,
+      "lng": 12.323640175772324,
+      "streetName": "Campiello dei Cordami",
+      "streetNameEnglish": "Small Square of the Ropes",
+      "streetDescription": "Named after the rope-making activities that took place in this area, reflecting the maritime industries common in Dorsoduro which was close to the shipyards (Squeri).",
+      "id": "building_45.433595_12.323640"
+    },
+    {
+      "lat": 45.43365854200219,
+      "lng": 12.324240038778662,
+      "streetName": "Calle della Carità",
+      "streetNameEnglish": "Street of Charity",
+      "streetDescription": "Named after the Scuola Grande della Carità, one of Venice's important confraternities. Though the main building was elsewhere, this area would have had properties or activities associated with the charitable works of this institution.",
+      "id": "building_45.433659_12.324240"
+    },
+    {
+      "lat": 45.433680186814186,
+      "lng": 12.324975111112188,
+      "streetName": "Sottoportego dei Tagliapietra",
+      "streetNameEnglish": "Passageway of the Stonemasons",
+      "streetDescription": "Named after the stonemasons who had workshops in this area. These artisans were crucial for Venetian construction and artistic decoration. Sottoportego refers to a covered passageway beneath a building.",
+      "id": "building_45.433680_12.324975"
+    },
+    {
+      "lat": 45.43369836099355,
+      "lng": 12.325422853612796,
+      "streetName": "Fondamenta dei Calafati",
+      "streetNameEnglish": "Foundation of the Caulkers",
+      "streetDescription": "Named after the caulkers who waterproofed ships by filling seams with oakum and pitch. This waterfront street would have been near boat repair facilities, reflecting Dorsoduro's proximity to shipbuilding areas.",
+      "id": "building_45.433698_12.325423"
+    },
+    {
+      "lat": 45.43373697984196,
+      "lng": 12.326059333087432,
+      "streetName": "Calle del Traghetto",
+      "streetNameEnglish": "Street of the Ferry",
+      "streetDescription": "Named for a gondola ferry crossing point that connected Dorsoduro to another sestiere across the Grand Canal, providing an important transportation link for the local community.",
+      "id": "building_45.433737_12.326059"
+    },
+    {
+      "lat": 45.4336394881109,
+      "lng": 12.326708319084435,
+      "streetName": "Rio Terà dei Catecumeni",
+      "streetNameEnglish": "Filled Canal of the Catechumens",
+      "streetDescription": "Named after the Casa dei Catecumeni, established in 1557 for the instruction of non-Christians (particularly Jews and Muslims) who wished to convert to Christianity. This institution was located in the Dorsoduro district.",
+      "id": "building_45.433639_12.326708"
+    },
+    {
+      "lat": 45.43404207058252,
+      "lng": 12.323675115103015,
+      "streetName": "Corte dei Carmini",
+      "streetNameEnglish": "Court of the Carmelites",
+      "streetDescription": "Named for its proximity to the Church of Santa Maria dei Carmini and the Carmelite order, which had a significant presence in the Dorsoduro district since the 14th century.",
+      "id": "building_45.434042_12.323675"
+    },
+    {
+      "lat": 45.434030566161354,
+      "lng": 12.324284390742614,
+      "streetName": "Calle degli Organi",
+      "streetNameEnglish": "Street of the Organs",
+      "streetDescription": "Named after the organ builders who had workshops here, creating instruments for Venice's many churches including San Sebastiano, which had an important musical tradition.",
+      "id": "building_45.434031_12.324284"
+    },
+    {
+      "lat": 45.434196293940225,
+      "lng": 12.324875560933938,
+      "streetName": "Fondamenta delle Zattere",
+      "streetNameEnglish": "Foundation of the Rafts",
+      "streetDescription": "Named after the rafts (zattere) that would dock along this waterfront bringing timber from the mountains. This is a major waterfront area in Dorsoduro facing the Giudecca Canal.",
+      "id": "building_45.434196_12.324876"
+    },
+    {
+      "lat": 45.43419928488387,
+      "lng": 12.32546023281744,
+      "streetName": "Calle dei Botteri",
+      "streetNameEnglish": "Street of the Barrel Makers",
+      "streetDescription": "Named after the artisans who made wooden barrels (botti) essential for storing wine, water, and other goods. These craftsmen would have served the nearby maritime trade.",
+      "id": "building_45.434199_12.325460"
+    },
+    {
+      "lat": 45.434188659856346,
+      "lng": 12.326287576519817,
+      "streetName": "Ramo dei Zecchini",
+      "streetNameEnglish": "Branch of the Zecchini",
+      "streetDescription": "Named after the Zecchini family or possibly referencing the Venetian gold coins (zecchini). Ramo indicates a small branch off a larger street.",
+      "id": "building_45.434189_12.326288"
+    },
+    {
+      "lat": 45.43447883005659,
+      "lng": 12.323677593166556,
+      "streetName": "Sottoportego della Scuola",
+      "streetNameEnglish": "Passageway of the School",
+      "streetDescription": "Named after a scuola piccola (minor confraternity) that would have had its meeting hall in this area, possibly connected to the Church of San Sebastiano or another local parish.",
+      "id": "building_45.434479_12.323678"
+    },
+    {
+      "lat": 45.43451015269461,
+      "lng": 12.324197857861968,
+      "streetName": "Calle dei Guardiani",
+      "streetNameEnglish": "Street of the Guardians",
+      "streetDescription": "Named after the night watchmen or guardians who patrolled this area of Venice, maintaining order and security in the Dorsoduro district.",
+      "id": "building_45.434510_12.324198"
+    },
+    {
+      "lat": 45.434649923201555,
+      "lng": 12.324987828994365,
+      "streetName": "Fondamenta Nani",
+      "streetNameEnglish": "Nani Foundation",
+      "streetDescription": "Named after the noble Nani family who had a palazzo in Dorsoduro. This nobili family produced several important figures in Venetian political and cultural life during the Renaissance.",
+      "id": "building_45.434650_12.324988"
+    },
+    {
+      "lat": 45.4346166299768,
+      "lng": 12.325417543493037,
+      "streetName": "Calle dei Cerchieri",
+      "streetNameEnglish": "Street of the Hoop Makers",
+      "streetDescription": "Named after craftsmen who made wooden hoops (cerchi) for barrels and casks, supporting Venice's wine trade and shipping industries that were active in this area near the waterfront.",
+      "id": "building_45.434617_12.325418"
+    },
+    {
+      "lat": 45.43449456900068,
+      "lng": 12.326164363127607,
+      "streetName": "Campiello San Basegio",
+      "streetNameEnglish": "Small Square of Saint Basil",
+      "streetDescription": "Named after the nearby Church of San Basegio (Saint Basil), reflecting the Greek Orthodox influence in Venice due to the city's strong connections with Byzantium and the Eastern Mediterranean.",
+      "id": "building_45.434495_12.326164"
+    },
+    {
+      "lat": 45.43498677445174,
+      "lng": 12.323530176360148,
+      "streetName": "Calle dei Dottori",
+      "streetNameEnglish": "Street of the Doctors",
+      "streetDescription": "Named for the physicians who may have lived or practiced in this area, possibly associated with the nearby Ospedale degli Incurabili or serving the local community in the Dorsoduro district.",
+      "id": "building_45.434987_12.323530"
+    },
+    {
+      "lat": 45.43497350400157,
+      "lng": 12.324191477756981,
+      "streetName": "Rio Terà delle Procuratie",
+      "streetNameEnglish": "Filled Canal of the Procurators",
+      "streetDescription": "Named after properties owned by the Procurators of Saint Mark, high officials who administered charitable foundations and estates for the Republic. This was originally a canal that was filled in to create a street.",
+      "id": "building_45.434974_12.324191"
+    }
+  ],
+  "id": "polygon-1745879117945"
+}

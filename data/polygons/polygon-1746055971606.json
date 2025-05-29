@@ -1,0 +1,129 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44285275986973,
+      "lng": 12.337235054097153
+    },
+    {
+      "lat": 45.442363465739824,
+      "lng": 12.339123329243638
+    },
+    {
+      "lat": 45.44200966580237,
+      "lng": 12.338951667866684
+    },
+    {
+      "lat": 45.44226937022835,
+      "lng": 12.337224325261094
+    },
+    {
+      "lat": 45.44227689787503,
+      "lng": 12.336977562031723
+    }
+  ],
+  "centroid": {
+    "lat": 45.44235443190306,
+    "lng": 12.337902387700058
+  },
+  "historicalName": "Calle dei Sartori presso San Zulian",
+  "englishName": "Street of the Tailors near Saint Julian",
+  "historicalDescription": "This narrow street in the San Marco sestiere was known for its concentration of tailor shops and proximity to the Church of San Zulian (Saint Julian) in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 8270.02,
+  "center": {
+    "lat": 45.44235443190306,
+    "lng": 12.337902387700058
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44268966182643,
+        "lng": 12.337864479145981
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055928225",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44280257394179,
+          "lng": 12.337859114727951
+        },
+        "distance": 12.56222779218709,
+        "id": "26c149b0-e12a-47a7-a718-a0f52e559c57",
+        "historicalName": "Ponte di San Zulian",
+        "englishName": "Bridge of Saint Julian",
+        "historicalDescription": "Named after the nearby Church of San Zulian (Saint Julian), which has been present in this area since the 9th century. The bridge would have served as an important crossing point for parishioners attending the church and connecting the surrounding neighborhoods.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44274611788411,
+            "lng": 12.337861796936966
+          }
+        }
+      },
+      "id": "bridge_45.442690_12.337864"
+    },
+    {
+      "edge": {
+        "lat": 45.442526563783126,
+        "lng": 12.33849390419481
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055928225",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44263006751808,
+          "lng": 12.33846171768663
+        },
+        "distance": 11.779845270682737,
+        "id": "26c149b0-e12a-47a7-a718-a0f52e559c57",
+        "historicalName": "Ponte dei Sarti",
+        "englishName": "Bridge of the Tailors",
+        "historicalDescription": "This bridge name references the tailors' guild (Arte dei Sarti) that was prominent in the Calle dei Sartori area. Many tailoring workshops would have been located along this street, and the bridge would have been a key passage for these artisans transporting their finished garments to wealthy clients throughout Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44257831565061,
+            "lng": 12.33847781094072
+          }
+        }
+      },
+      "id": "bridge_45.442527_12.338494"
+    },
+    {
+      "edge": {
+        "lat": 45.44213951801536,
+        "lng": 12.338087996563889
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055995050",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44203099403802,
+          "lng": 12.338273963055588
+        },
+        "distance": 18.871188141086016,
+        "id": "9fa28572-ef5c-4e0c-aaaf-549fd9a0b408",
+        "historicalName": "Ponte della Merceria",
+        "englishName": "Bridge of the Mercery",
+        "historicalDescription": "Named for its proximity to the Mercerie, the main commercial thoroughfare of Renaissance Venice that connected the Rialto contract area to Piazza San Marco. This bridge would have been crossed daily by merchants and shopkeepers heading to their businesses in this busy shopping district near San Zulian.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44208525602669,
+            "lng": 12.338180979809739
+          }
+        }
+      },
+      "id": "bridge_45.442140_12.338088"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44237287086174,
+      "lng": 12.337540285499045,
+      "streetName": "Calle dei Merciai di San Zulian",
+      "streetNameEnglish": "Street of the Mercers of San Zulian",
+      "streetDescription": "This name references the mercers (fabric and small goods merchants) who would have had shops near the Church of San Zulian (Saint Julian) in this commercial district. Located near Calle dei Sartori (Tailors' Street), this would form a natural extension of the textile and clothing trades that clustered in this central area of Venice, close to the bustling Mercerie shopping district connecting Rialto to San Marco.",
+      "id": "building_45.442373_12.337540"
+    }
+  ],
+  "id": "polygon-1746055971606"
+}

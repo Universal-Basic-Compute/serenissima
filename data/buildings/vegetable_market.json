@@ -1,0 +1,46 @@
+{
+  "name": "Vegetable Market",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "retail_food",
+  "size": 1,
+  "unlockCondition": "Basic trading license",
+  "calculationsAnalysis": "The Vegetable Market serves as a key distribution point for fresh produce. Construction costs are moderate, reflecting a larger, more permanent structure than a simple stall. Income is derived from the sale of various vegetables, with maintenance covering spoilage and operational costs. Employs a few staff for sorting, stocking, and sales.",
+  "shortDescription": "A bustling market for fresh, locally sourced and imported vegetables.",
+  "fullDescription": "The Vegetable Market is a central hub where citizens can purchase a variety of fresh vegetables. These markets are vital for the city's food supply, offering produce from lagoon gardens and regional farms. Quality and freshness are paramount.",
+  "flavorText": "From the humble carrot to the exotic artichoke, every meal begins with the bounty of the earth, traded with a smile and a keen eye for quality.",
+  "constructionCosts": {
+    "ducats": 250000,
+    "timber": 110,
+    "bricks": 230
+  },
+  "maintenanceCost": 300,
+  "productionInformation": {
+    "storageCapacity": 200,
+    "stores": [
+      "vegetables"
+    ],
+    "sells": [
+      "vegetables"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Market chatter, vegetable chopping, sorting sounds",
+    "activitySounds": "Haggling, weighing produce, customer interactions",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "harvest": "Abundance of seasonal vegetables",
+    "winter": "Higher prices for out-of-season produce"
+  },
+  "aiInteractionPoints": [
+    "Display stalls",
+    "Storage area",
+    "Sales counter"
+  ],
+  "buildTier": 1,
+  "workTier": 1,
+  "consumeTier": 1,
+  "canImport": true,
+  "constructionMinutes": 2160
+}

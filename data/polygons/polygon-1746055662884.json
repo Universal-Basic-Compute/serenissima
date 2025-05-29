@@ -1,0 +1,448 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44687478013674,
+      "lng": 12.329920154108821
+    },
+    {
+      "lat": 45.448116726858174,
+      "lng": 12.330789189829646
+    },
+    {
+      "lat": 45.448733926572594,
+      "lng": 12.328632693781673
+    },
+    {
+      "lat": 45.44931348600975,
+      "lng": 12.32621870566827
+    },
+    {
+      "lat": 45.44859091748379,
+      "lng": 12.324480634226619
+    },
+    {
+      "lat": 45.448357586086836,
+      "lng": 12.324351888193904
+    }
+  ],
+  "centroid": {
+    "lat": 45.448331237191304,
+    "lng": 12.327398877634822
+  },
+  "historicalName": "Fondamenta de la Misericordia",
+  "englishName": "Foundations of Mercy",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for the Scuola Grande della Misericordia, a large charitable confraternity building constructed in the late 15th century. The nearby Rio della Sensa canal was an important thoroughfare.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 66616.85,
+  "center": {
+    "lat": 45.44807575837065,
+    "lng": 12.32780964201755
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.448322460096314,
+        "lng": 12.330070357813655
+      },
+      "water": {
+        "lat": 45.44832161777248,
+        "lng": 12.330326735513875
+      },
+      "historicalName": "Riva dei Santi Apostoli",
+      "englishName": "Dock of the Holy Apostles",
+      "historicalDescription": "Named after the nearby Church of Santi Apostoli, this dock served as an important landing point for religious processions during feast days of the apostles in Renaissance Venice. It was frequently used by clerics traveling between parishes in the northern districts.",
+      "id": "canal_45.448322_12.330070"
+    },
+    {
+      "edge": {
+        "lat": 45.448528193334454,
+        "lng": 12.329351525797664
+      },
+      "water": {
+        "lat": 45.44855379029125,
+        "lng": 12.329605297271156
+      },
+      "historicalName": "Fondamenta degli Abbondanzieri",
+      "englishName": "Foundation of the Grain Suppliers",
+      "historicalDescription": "This dock was primarily used by merchants who supplied grain to the Misericordia district. The Abbondanzieri were officials responsible for maintaining adequate food supplies in the Republic, and this landing point was crucial for distributing grain to the northern parts of the city.",
+      "id": "canal_45.448528_12.329352"
+    },
+    {
+      "edge": {
+        "lat": 45.448733926572594,
+        "lng": 12.328632693781673
+      },
+      "water": {
+        "lat": 45.4488097952134,
+        "lng": 12.328865150753275
+      },
+      "historicalName": "Riva della Madonna dell'Orto",
+      "englishName": "Dock of Madonna of the Garden",
+      "historicalDescription": "Named after the iconic Madonna dell'Orto church near the Misericordia area, this dock served pilgrims and visitors to the church which housed important works by Tintoretto. The church gained prominence in the 15th century, making this dock increasingly important for religious visitors.",
+      "id": "canal_45.448734_12.328633"
+    },
+    {
+      "edge": {
+        "lat": 45.448927113051646,
+        "lng": 12.327828031077205
+      },
+      "water": {
+        "lat": 45.449087649436244,
+        "lng": 12.327943650364144
+      },
+      "historicalName": "Fondamenta dei Miracoli",
+      "englishName": "Foundation of Miracles",
+      "historicalDescription": "Located near the Santa Maria dei Miracoli church, this dock served the marble-clad Renaissance jewel completed in the late 15th century. The name references the miraculous icon of the Virgin Mary housed in the church, and the dock was used to transport the precious marbles used in the church's construction.",
+      "id": "canal_45.448927_12.327828"
+    },
+    {
+      "edge": {
+        "lat": 45.4491202995307,
+        "lng": 12.327023368372737
+      },
+      "water": {
+        "lat": 45.449290906758534,
+        "lng": 12.326942177583327
+      },
+      "historicalName": "Riva dei Mori",
+      "englishName": "Dock of the Moors",
+      "historicalDescription": "This dock near Misericordia was named for the Moorish merchants who frequently used it for trade. Venice had significant trade relations with North Africa and the Middle East, and this dock specifically served merchants bringing exotic goods and spices from these regions to the northern districts.",
+      "id": "canal_45.449120_12.327023"
+    },
+    {
+      "edge": {
+        "lat": 45.44907262983443,
+        "lng": 12.325639348521053
+      },
+      "water": {
+        "lat": 45.44916523874802,
+        "lng": 12.325419562040613
+      },
+      "historicalName": "Fondamenta degli Ospedalieri",
+      "englishName": "Foundation of the Hospitallers",
+      "historicalDescription": "This dock served the hospital and charitable facilities in the Misericordia area. The Ospedalieri were members of the religious orders dedicated to caring for the sick and poor. This landing was used to transport supplies, medicines, and sometimes patients to the charitable institutions in the district.",
+      "id": "canal_45.449073_12.325639"
+    },
+    {
+      "edge": {
+        "lat": 45.44883177365911,
+        "lng": 12.325059991373836
+      },
+      "water": {
+        "lat": 45.44888425352232,
+        "lng": 12.324814765623186
+      },
+      "historicalName": "Riva dei Servi di Maria",
+      "englishName": "Dock of the Servants of Mary",
+      "historicalDescription": "Named after the Servite Order who maintained a monastery in the area, this dock near Misericordia was primarily used by the religious brothers of the order. The Servites (Servants of Mary) were established in Venice in the 13th century, and this dock facilitated their movement between their monastery and other religious houses in Renaissance Venice.",
+      "id": "canal_45.448832_12.325060"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44728876237722,
+        "lng": 12.33020983268243
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055693144",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44720561578336,
+          "lng": 12.330318170245217
+        },
+        "distance": 12.526223264784829,
+        "id": "9c93531e-883b-40f2-acae-ce2c1daa4199",
+        "historicalName": "Ponte della Misericordia",
+        "englishName": "Bridge of Mercy",
+        "historicalDescription": "Named after the adjacent Fondamenta de la Misericordia and the Scuola Grande della Misericordia, a historic confraternity building established in the 14th century dedicated to charitable works. The bridge would have served as an important connection point for those seeking aid from this charitable institution.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44724718908029,
+            "lng": 12.330264001463824
+          }
+        }
+      },
+      "id": "bridge_45.447289_12.330210"
+    },
+    {
+      "edge": {
+        "lat": 45.44770274461769,
+        "lng": 12.330499511256038
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055693144",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44764845187101,
+          "lng": 12.330620365794228
+        },
+        "distance": 11.195123430009946,
+        "id": "9c93531e-883b-40f2-acae-ce2c1daa4199",
+        "historicalName": "Ponte dei Pescatori",
+        "englishName": "Bridge of the Fishermen",
+        "historicalDescription": "This bridge was commonly used by local fishermen who lived in the northern districts of Cannaregio near Fondamenta de la Misericordia. The adjacent canals provided access to the lagoon for fishing boats, making this area a natural hub for the fishing community in Renaissance Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44767559824435,
+            "lng": 12.330559938525134
+          }
+        }
+      },
+      "id": "bridge_45.447703_12.330500"
+    },
+    {
+      "edge": {
+        "lat": 45.44819282987016,
+        "lng": 12.324970584406673
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055650628",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.44821129368713,
+          "lng": 12.32476243407052
+        },
+        "distance": 16.366926692946475,
+        "id": "2949e5b9-36a1-45e3-9e10-8091e1343ea3",
+        "historicalName": "Ponte dei Saccomani",
+        "englishName": "Bridge of the Saccomani",
+        "historicalDescription": "Named after the Saccomani family, a noble Venetian family who owned property and palaces near the Fondamenta de la Misericordia during the Renaissance period. The family contributed to the local economy and were patrons of several charitable initiatives in the district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.448202061778645,
+            "lng": 12.324866509238596
+          }
+        }
+      },
+      "id": "bridge_45.448193_12.324971"
+    },
+    {
+      "edge": {
+        "lat": 45.44802807365348,
+        "lng": 12.325589280619441
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055650628",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.44802123805346,
+          "lng": 12.325397447054796
+        },
+        "distance": 14.98412460819509,
+        "id": "2949e5b9-36a1-45e3-9e10-8091e1343ea3",
+        "historicalName": "Ponte dell'Abbondanza",
+        "englishName": "Bridge of Abundance",
+        "historicalDescription": "This bridge was named for the abundance of goods that would cross it daily, as the Fondamenta de la Misericordia area was known for small contracts and trade activities. The name reflects the economic vitality of this part of Cannaregio during the Renaissance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44802465585347,
+            "lng": 12.325493363837118
+          }
+        }
+      },
+      "id": "bridge_45.448028_12.325589"
+    },
+    {
+      "edge": {
+        "lat": 45.447863317436806,
+        "lng": 12.32620797683221
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055650628",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.447831182419776,
+          "lng": 12.326032460039071
+        },
+        "distance": 14.15059665399991,
+        "id": "2949e5b9-36a1-45e3-9e10-8091e1343ea3",
+        "historicalName": "Ponte degli Sbirri",
+        "englishName": "Bridge of the Guards",
+        "historicalDescription": "Named after the city guards (sbirri) who patrolled this area of Cannaregio. The bridge was strategically important for surveillance and maintaining order in the relatively populous neighborhood surrounding the Fondamenta de la Misericordia.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44784724992829,
+            "lng": 12.32612021843564
+          }
+        }
+      },
+      "id": "bridge_45.447863_12.326208"
+    },
+    {
+      "edge": {
+        "lat": 45.44769856122013,
+        "lng": 12.326826673044978
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055650628",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.4476411267861,
+          "lng": 12.326667473023347
+        },
+        "distance": 13.965046963192913,
+        "id": "2949e5b9-36a1-45e3-9e10-8091e1343ea3",
+        "historicalName": "Ponte dei Mendicanti",
+        "englishName": "Bridge of the Beggars",
+        "historicalDescription": "This bridge took its name from the poor who would gather near the charitable institutions around Fondamenta de la Misericordia seeking alms. During the Renaissance, this area was known for its charitable works, attracting those in need of assistance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.447669844003116,
+            "lng": 12.326747073034163
+          }
+        }
+      },
+      "id": "bridge_45.447699_12.326827"
+    },
+    {
+      "edge": {
+        "lat": 45.447533805003445,
+        "lng": 12.327445369257747
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055650628",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44745107115243,
+          "lng": 12.327302486007623
+        },
+        "distance": 14.452456693188243,
+        "id": "2949e5b9-36a1-45e3-9e10-8091e1343ea3",
+        "historicalName": "Ponte dei Servi di Maria",
+        "englishName": "Bridge of the Servants of Mary",
+        "historicalDescription": "Named after the Servite Order (Servi di Maria) who had established a monastery near the Fondamenta de la Misericordia in the Renaissance period. The religious order was known for their devotion to the Virgin Mary and their service to the poor in this northern district of Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44749243807794,
+            "lng": 12.327373927632685
+          }
+        }
+      },
+      "id": "bridge_45.447534_12.327445"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44734135138663,
+      "lng": 12.329533388322107,
+      "streetName": "Calle dei Beccai della Misericordia",
+      "streetNameEnglish": "Street of the Butchers of Mercy",
+      "streetDescription": "Named after the butchers who operated shops in this area near the Misericordia district. In Renaissance Venice, butchers were organized in a guild and specific areas were designated for meat preparation due to sanitation concerns.",
+      "id": "building_45.447341_12.329533"
+    },
+    {
+      "lat": 45.44780910590179,
+      "lng": 12.327504242419606,
+      "streetName": "Sottoportego della Cappella di San Cristoforo",
+      "streetNameEnglish": "Passageway of the Chapel of Saint Christopher",
+      "streetDescription": "References a small chapel dedicated to Saint Christopher that existed near the Fondamenta de la Misericordia. Saint Christopher was particularly venerated by sailors and travelers in Venice as a protector during journeys.",
+      "id": "building_45.447809_12.327504"
+    },
+    {
+      "lat": 45.44769992580543,
+      "lng": 12.32830668501649,
+      "streetName": "Rio Terà Contarini",
+      "streetNameEnglish": "Filled Canal of the Contarini",
+      "streetDescription": "Named after the noble Contarini family who owned palaces in this area. The Contarini were one of Venice's most distinguished families, providing eight Doges to the Republic between the 13th and 17th centuries.",
+      "id": "building_45.447700_12.328307"
+    },
+    {
+      "lat": 45.44770910532417,
+      "lng": 12.328935316238454,
+      "streetName": "Calle dei Mercanti Albanesi",
+      "streetNameEnglish": "Street of the Albanian Merchants",
+      "streetDescription": "Commemorates the Albanian merchants who settled in this area of Venice. Following Ottoman expansion in the Balkans in the 15th century, many Albanian traders sought refuge in Venice and established businesses in the northern districts.",
+      "id": "building_45.447709_12.328935"
+    },
+    {
+      "lat": 45.447800549186155,
+      "lng": 12.329379507038643,
+      "streetName": "Fondamenta dei Vogatori",
+      "streetNameEnglish": "Foundation of the Rowers",
+      "streetDescription": "Named after the professional oarsmen who lived in this area. These skilled workers were essential to Venice's transportation system, manning the gondolas and larger vessels that were the primary means of getting around the city.",
+      "id": "building_45.447801_12.329380"
+    },
+    {
+      "lat": 45.447781694835086,
+      "lng": 12.329992253977354,
+      "streetName": "Salizada dei Bombardieri",
+      "streetNameEnglish": "Paved Road of the Cannon Makers",
+      "streetDescription": "Named for the artillery craftsmen who worked nearby. Venice's Arsenal employed skilled bombardieri who cast and maintained cannons for the Republic's navy, and some lived in workshops near the Misericordia area.",
+      "id": "building_45.447782_12.329992"
+    },
+    {
+      "lat": 45.44814241897997,
+      "lng": 12.326318889191798,
+      "streetName": "Corte dei Scola",
+      "streetNameEnglish": "Court of the Scola Family",
+      "streetDescription": "Named after a merchant family of Jewish origin who lived in this area after the establishment of the Venetian Ghetto in 1516. While required to live in the Ghetto, some Jewish merchants maintained business connections throughout northern Venice.",
+      "id": "building_45.448142_12.326319"
+    },
+    {
+      "lat": 45.44830755520321,
+      "lng": 12.326941190257806,
+      "streetName": "Calle dei Confratelli",
+      "streetNameEnglish": "Street of the Brotherhood Members",
+      "streetDescription": "References the brothers of the Scuola Grande della Misericordia, one of Venice's important confraternities. The members of this charitable brotherhood provided services to the poor and sick in this district of Venice.",
+      "id": "building_45.448308_12.326941"
+    },
+    {
+      "lat": 45.44826850808459,
+      "lng": 12.327555533286622,
+      "streetName": "Ruga dei Filacanevi",
+      "streetNameEnglish": "Commercial Street of the Hemp Spinners",
+      "streetDescription": "Named for the craftsmen who spun hemp into rope for Venice's shipping industry. The production of ropes was vital for the maritime republic, and many rope makers had workshops in the northern districts near the Arsenal.",
+      "id": "building_45.448269_12.327556"
+    },
+    {
+      "lat": 45.448141949254556,
+      "lng": 12.328197571896604,
+      "streetName": "Campiello del Capitello Votivo",
+      "streetNameEnglish": "Small Square of the Votive Shrine",
+      "streetDescription": "Named after a small shrine erected in gratitude following the plague of 1630. Such shrines were common throughout Venice, particularly in areas like Misericordia where the plague had claimed many lives.",
+      "id": "building_45.448142_12.328198"
+    },
+    {
+      "lat": 45.44827097189298,
+      "lng": 12.32886255267912,
+      "streetName": "Rio Terà della Sartoria",
+      "streetNameEnglish": "Filled Canal of the Tailors",
+      "streetDescription": "Named for the tailors' workshops that occupied this former canal after it was filled in. Venetian tailors were organized in a guild and created clothing for nobles, merchants, and sailors alike in the Renaissance period.",
+      "id": "building_45.448271_12.328863"
+    },
+    {
+      "lat": 45.44864556760061,
+      "lng": 12.325681065197045,
+      "streetName": "Sottoportego dei Forneri",
+      "streetNameEnglish": "Passageway of the Bakers",
+      "streetDescription": "References the bakers who operated communal ovens in this undercrossing near Misericordia. Since private homes rarely had ovens due to fire concerns, neighborhood bakers were essential to daily Venetian life.",
+      "id": "building_45.448646_12.325681"
+    },
+    {
+      "lat": 45.44874210126414,
+      "lng": 12.326292550971974,
+      "streetName": "Calle della Madonna Nera",
+      "streetNameEnglish": "Street of the Black Madonna",
+      "streetDescription": "Named after a Byzantine-style icon of the Madonna with dark features that was venerated in a small shrine in this street. Such icons were particularly treasured in Venice due to the city's Eastern trade connections.",
+      "id": "building_45.448742_12.326293"
+    },
+    {
+      "lat": 45.44868932251572,
+      "lng": 12.326894549105548,
+      "streetName": "Ramo dei Frati Serviti",
+      "streetNameEnglish": "Branch of the Servite Friars",
+      "streetDescription": "Named for the Order of Servites who maintained a small hospice in this area near Misericordia. The Servite Order, dedicated to service and charity, established several small residences throughout Venice during the Renaissance.",
+      "id": "building_45.448689_12.326895"
+    },
+    {
+      "lat": 45.44864207112526,
+      "lng": 12.327587759850623,
+      "streetName": "Fondamenta degli Spezieri",
+      "streetNameEnglish": "Foundation of the Spice Merchants",
+      "streetDescription": "References the spice merchants who operated warehouses along this canal-side walkway. Venice was the European center for the spice trade during the Renaissance, and merchants stored valuable spices from the East in warehouses throughout the city.",
+      "id": "building_45.448642_12.327588"
+    }
+  ],
+  "id": "polygon-1746055662884"
+}

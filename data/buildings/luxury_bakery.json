@@ -1,0 +1,64 @@
+{
+  "name": "Luxury Bakery",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "retail_food",
+  "size": 1,
+  "unlockCondition": "Master Baker qualification, access to fine ingredients (sugar, spices)",
+  "calculationsAnalysis": "The Luxury Bakery produces high-value pastries for a discerning clientele. Higher construction costs reflect finer equipment and decor. Income is substantial due to premium pricing, though input costs (flour, sugar) are also higher. Employs highly skilled pastry chefs.",
+  "shortDescription": "Creates exquisite pastries and baked sweets for the affluent.",
+  "fullDescription": "A Luxury Bakery caters to the refined tastes of Venice's elite, producing delicate pastries, cakes, and sweetmeats. These establishments use high-quality ingredients like fine flour and imported sugar, showcasing the baker's artistry.",
+  "flavorText": "Where flour and sugar are transformed by art into fleeting moments of pure delight.",
+  "constructionCosts": {
+    "ducats": 600000,
+    "timber": 100,
+    "bricks": 520,
+    "stone": 310,
+    "iron": 30
+  },
+  "maintenanceCost": 700,
+  "productionInformation": {
+  "Arti": [
+    {
+      "inputs": {
+        "flour": 3,
+        "spices": 1,
+        "olive_oil": 1
+      },
+      "outputs": {
+        "pastries": 6
+      },
+      "craftMinutes": 120
+    }
+  ],
+    "storageCapacity": 100,
+    "stores": [
+      "flour",
+      "olive_oil",
+      "fuel",
+      "pastries"
+    ],
+    "sells": [
+      "pastries"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Gentle oven sounds, delicate mixing, hushed conversations",
+    "activitySounds": "Intricate decoration work, careful packaging, polite customer service",
+    "musicTheme": "Salotti Veneziani"
+  },
+  "seasonalEffects": {
+    "carnival": "Specialty carnival pastries and masks made of sugar",
+    "weddings": "Elaborate wedding cakes and confections"
+  },
+  "aiInteractionPoints": [
+    "Display cases",
+    "Preparation area",
+    "Sales counter",
+    "Consultation area for special orders"
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 7200
+}

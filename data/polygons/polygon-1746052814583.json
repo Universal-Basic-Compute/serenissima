@@ -1,0 +1,404 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.428707330342384,
+      "lng": 12.317957240893307
+    },
+    {
+      "lat": 45.42599666091104,
+      "lng": 12.316723424746456
+    },
+    {
+      "lat": 45.42647856721245,
+      "lng": 12.315028268649044
+    },
+    {
+      "lat": 45.42696799908891,
+      "lng": 12.312045652224484
+    },
+    {
+      "lat": 45.42708094430392,
+      "lng": 12.311981279208126
+    },
+    {
+      "lat": 45.42877509541037,
+      "lng": 12.313054162814083
+    },
+    {
+      "lat": 45.42894074301185,
+      "lng": 12.31414850409216
+    },
+    {
+      "lat": 45.42897086070534,
+      "lng": 12.315049726321163
+    }
+  ],
+  "centroid": {
+    "lat": 45.427739775123285,
+    "lng": 12.314498532368603
+  },
+  "historicalName": "Calle Larga dei Lavraneri, Sestiere di Dorsoduro",
+  "englishName": "Wide Street of the Wool Workers, Dorsoduro District",
+  "historicalDescription": "This area was known for its wool workers and their workshops in the 15th century, located in the Dorsoduro sestiere near the Giudecca Canal.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 102570.77,
+  "center": {
+    "lat": 45.42768695666526,
+    "lng": 12.315041241949935
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.42750448208053,
+        "lng": 12.312249500109615
+      },
+      "water": {
+        "lat": 45.427477962515965,
+        "lng": 12.311996014687765
+      },
+      "historicalName": "Fondamenta dei Lavraneri",
+      "englishName": "Foundation of the Laurel Makers",
+      "historicalDescription": "Named after the Lavraneri district in Dorsoduro, this dock served the artisans who specialized in crafting laurel wreaths and decorations, which were used in Venetian ceremonies and celebrations. The laurel craftsmen had workshops along this canal during the Renaissance period.",
+      "id": "canal_45.427504_12.312250"
+    },
+    {
+      "edge": {
+        "lat": 45.42792801985715,
+        "lng": 12.312517721011105
+      },
+      "water": {
+        "lat": 45.42795215563377,
+        "lng": 12.312263751513717
+      },
+      "historicalName": "Riva della Calcina",
+      "englishName": "Shore of the Lime Kiln",
+      "historicalDescription": "This dock in Dorsoduro was historically associated with lime kilns that operated nearby, providing essential materials for Venetian construction. Lime was crucial for creating mortar used in building the city's foundations and structures, making this an important industrial landing in Renaissance Venice.",
+      "id": "canal_45.427928_12.312518"
+    },
+    {
+      "edge": {
+        "lat": 45.42835155763376,
+        "lng": 12.312785941912594
+      },
+      "water": {
+        "lat": 45.42843314889186,
+        "lng": 12.31255753981294
+      },
+      "historicalName": "Fondamenta degli Avogadori",
+      "englishName": "Foundation of the Advocates",
+      "historicalDescription": "Named after the Avogadori di Comun, important judicial magistrates in the Venetian Republic who acted as public prosecutors. This dock near Dorsoduro would have been used by these officials and their staff when traveling to hearings and investigations in this part of the city.",
+      "id": "canal_45.428352_12.312786"
+    },
+    {
+      "edge": {
+        "lat": 45.42894074301185,
+        "lng": 12.31414850409216
+      },
+      "water": {
+        "lat": 45.429116958842414,
+        "lng": 12.31409714508078
+      },
+      "historicalName": "Riva dei Tintori di Seta",
+      "englishName": "Shore of the Silk Dyers",
+      "historicalDescription": "This landing served the workshops of silk dyers who operated in the Dorsoduro district. Venice was renowned for its silk industry during the Renaissance, and specific areas were designated for dyeing these luxury textiles. The proximity to water was essential for their craft.",
+      "id": "canal_45.428941_12.314149"
+    },
+    {
+      "edge": {
+        "lat": 45.42897086070534,
+        "lng": 12.315049726321163
+      },
+      "water": {
+        "lat": 45.42914245350101,
+        "lng": 12.315126553564252
+      },
+      "historicalName": "Fondamenta San Trovaso",
+      "englishName": "Foundation of Saint Gervasius and Protasius",
+      "historicalDescription": "Named after the nearby Church of San Trovaso (dedicated to Saints Gervasius and Protasius), this dock in Dorsoduro served both religious and commercial purposes. It was particularly important for bringing supplies to the church and the surrounding parish during Renaissance times.",
+      "id": "canal_45.428971_12.315050"
+    },
+    {
+      "edge": {
+        "lat": 45.4289049781146,
+        "lng": 12.3157766049642
+      },
+      "water": {
+        "lat": 45.42904750489367,
+        "lng": 12.315932937870842
+      },
+      "historicalName": "Riva dei Varoteri",
+      "englishName": "Shore of the Furriers",
+      "historicalDescription": "This dock was named for the furriers' guild whose members worked nearby in Dorsoduro. Fur was a valuable commodity in Renaissance Venice, and specific areas were designated for its processing and trading. The guild maintained workshops in this area where they prepared and sold luxury furs.",
+      "id": "canal_45.428905_12.315777"
+    },
+    {
+      "edge": {
+        "lat": 45.42883909552386,
+        "lng": 12.316503483607235
+      },
+      "water": {
+        "lat": 45.42894983048757,
+        "lng": 12.316705443111056
+      },
+      "historicalName": "Fondamenta delle Maravegie",
+      "englishName": "Foundation of Wonders",
+      "historicalDescription": "This poetically named dock in Dorsoduro was where exotic goods and curiosities from distant lands were often unloaded. 'Maravegie' is Venetian dialect for 'meraviglie' (wonders), reflecting Venice's position as a gateway for rare and unusual items from the East during the Renaissance period.",
+      "id": "canal_45.428839_12.316503"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.42660092518156,
+        "lng": 12.314282614542904
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052823189",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.426410799387405,
+          "lng": 12.31437380964941
+        },
+        "distance": 22.306762604024854,
+        "id": "14f59aa9-8934-4d4c-8a81-2db03608c44b",
+        "historicalName": "Ponte dei Lavraneri",
+        "englishName": "Bridge of the Laurel Workers",
+        "historicalDescription": "Named after the 'lavraneri' or laurel workers who inhabited this area of Dorsoduro during the Renaissance period. These craftsmen specialized in processing laurel leaves for medicinal, culinary, and ceremonial purposes. The bridge would have connected their workshops and homes along Calle Larga dei Lavraneri, facilitating the movement of goods and materials throughout this specialized artisanal district.",
+        "location": {
+          "midpoint": {
+            "lat": 45.426505862284486,
+            "lng": 12.314328212096157
+          }
+        }
+      },
+      "id": "bridge_45.426601_12.314283"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.42643970325238,
+      "lng": 12.315769496551422,
+      "streetName": "Calle del Battiloro",
+      "streetNameEnglish": "Street of the Gold Beater",
+      "streetDescription": "Named after the artisans who hammered gold into thin leaves for decorative purposes. This craft was important in Venice for gilding glass, furniture, and decorative objects, particularly in Dorsoduro where many artisans worked.",
+      "id": "building_45.426440_12.315769"
+    },
+    {
+      "lat": 45.42644430535643,
+      "lng": 12.316470420928232,
+      "streetName": "Rio Terà dei Risi",
+      "streetNameEnglish": "Filled Canal of Rice",
+      "streetDescription": "This former canal was filled in and named after the rice trade. Rice was an important commodity imported through Venice and often stored in warehouses in this area of Dorsoduro before distribution.",
+      "id": "building_45.426444_12.316470"
+    },
+    {
+      "lat": 45.42684056110764,
+      "lng": 12.313870901289901,
+      "streetName": "Calle dei Squeri Minori",
+      "streetNameEnglish": "Street of the Minor Shipyards",
+      "streetDescription": "Near the Lavraneri area, smaller shipyards (squeri) operated to build and repair smaller vessels. This street would commemorate these lesser-known but vital maritime facilities that supported Venice's naval dominance.",
+      "id": "building_45.426841_12.313871"
+    },
+    {
+      "lat": 45.42692554886123,
+      "lng": 12.314512732962575,
+      "streetName": "Fondamenta della Calcina",
+      "streetNameEnglish": "Foundation of the Lime",
+      "streetDescription": "Named after lime kilns that once operated in this area of Dorsoduro. Lime was crucial for construction throughout Venice, and this area was known for processing it before distribution to building sites.",
+      "id": "building_45.426926_12.314513"
+    },
+    {
+      "lat": 45.42684111757665,
+      "lng": 12.315077764619211,
+      "streetName": "Calle dei Lavraneri Piccola",
+      "streetNameEnglish": "Small Street of the Lavraneri",
+      "streetDescription": "A smaller street branching off from the main Calle Larga dei Lavraneri, named after the same family or guild of laurel workers who prepared laurel leaves for medicinal and culinary purposes in Renaissance Venice.",
+      "id": "building_45.426841_12.315078"
+    },
+    {
+      "lat": 45.42695083932668,
+      "lng": 12.315925173724038,
+      "streetName": "Sottoportego delle Erbe",
+      "streetNameEnglish": "Covered Passage of Herbs",
+      "streetDescription": "A covered passageway where herbalists might have sold their wares. The Dorsoduro area had gardens where medicinal herbs were grown, and this passage could have connected to such a marketplace.",
+      "id": "building_45.426951_12.315925"
+    },
+    {
+      "lat": 45.42697824767503,
+      "lng": 12.316520341332156,
+      "streetName": "Calle degli Armeni",
+      "streetNameEnglish": "Street of the Armenians",
+      "streetDescription": "Named for the Armenian merchants who established a presence in this part of Dorsoduro. Armenian traders were important in Venice's commerce with the East, dealing in textiles, spices, and other luxury goods.",
+      "id": "building_45.426978_12.316520"
+    },
+    {
+      "lat": 45.4273678974534,
+      "lng": 12.313387636814229,
+      "streetName": "Ruga dei Crociferi",
+      "streetNameEnglish": "Street of the Cross-Bearers",
+      "streetDescription": "Named after the religious order of the Crociferi (Cross-Bearers) who may have had a hospice or small church in this area of Dorsoduro during the Renaissance period.",
+      "id": "building_45.427368_12.313388"
+    },
+    {
+      "lat": 45.42726294471939,
+      "lng": 12.313937115281695,
+      "streetName": "Salizada dei Cerchieri",
+      "streetNameEnglish": "Paved Street of the Hoop Makers",
+      "streetDescription": "A paved street named after the cerchieri, craftsmen who made wooden hoops for barrels. These artisans were essential to Venice's wine and oil trade, providing components for storage containers.",
+      "id": "building_45.427263_12.313937"
+    },
+    {
+      "lat": 45.42735120274587,
+      "lng": 12.314638637958435,
+      "streetName": "Corte Mocenigo",
+      "streetNameEnglish": "Mocenigo Court",
+      "streetDescription": "Named after the prominent Mocenigo family who may have owned property in this area of Dorsoduro. The Mocenigo were a noble Venetian family that produced several doges and supported arts and commerce.",
+      "id": "building_45.427351_12.314639"
+    },
+    {
+      "lat": 45.427432691492704,
+      "lng": 12.315063854936485,
+      "streetName": "Calle dei Tagiapiera",
+      "streetNameEnglish": "Street of the Stonemasons",
+      "streetDescription": "Named after the stonemasons who worked in this area, quarrying, cutting, and carving stone for Venice's palaces and churches. Stonemasons were crucial to Venetian architecture and had workshops throughout the city.",
+      "id": "building_45.427433_12.315064"
+    },
+    {
+      "lat": 45.42739567794333,
+      "lng": 12.315905415982897,
+      "streetName": "Rio Terà della Toletta",
+      "streetNameEnglish": "Filled Canal of the Small Table",
+      "streetDescription": "A former canal filled in and named after a small customs table (toletta) where goods might have been inspected before entering the city. Located in Dorsoduro, it would have been part of Venice's complex customs system.",
+      "id": "building_45.427396_12.315905"
+    },
+    {
+      "lat": 45.42736247105177,
+      "lng": 12.316334420999514,
+      "streetName": "Fondamenta degli Incurabili",
+      "streetNameEnglish": "Foundation of the Incurables",
+      "streetDescription": "Named after a hospital for incurable diseases that existed in this area of Dorsoduro during the Renaissance. Such institutions were important in Venice's advanced healthcare system.",
+      "id": "building_45.427362_12.316334"
+    },
+    {
+      "lat": 45.42770588834131,
+      "lng": 12.313277621507568,
+      "streetName": "Calle delle Muneghette",
+      "streetNameEnglish": "Street of the Little Nuns",
+      "streetDescription": "Named after a small convent of nuns who may have resided in this area. Religious houses for women were common throughout Venice, often housing daughters of noble families.",
+      "id": "building_45.427706_12.313278"
+    },
+    {
+      "lat": 45.42776337735923,
+      "lng": 12.313941879366222,
+      "streetName": "Sottoportego del Traghetto di San Basegio",
+      "streetNameEnglish": "Covered Passage of the San Basegio Ferry",
+      "streetDescription": "A covered passage leading to one of the ferry crossing points near the Lavraneri area in Dorsoduro. Traghetti (ferries) were vital for crossing the Grand Canal before many bridges were built.",
+      "id": "building_45.427763_12.313942"
+    },
+    {
+      "lat": 45.427869661356766,
+      "lng": 12.314544266517222,
+      "streetName": "Calle della Raffineria",
+      "streetNameEnglish": "Street of the Refinery",
+      "streetDescription": "Named after sugar refineries that operated in this area of Dorsoduro. Venice was a major importer of sugar, which was then refined locally before distribution throughout Europe.",
+      "id": "building_45.427870_12.314544"
+    },
+    {
+      "lat": 45.42778598290444,
+      "lng": 12.315297274467182,
+      "streetName": "Ramo dei Cuoridoro",
+      "streetNameEnglish": "Branch of the Gold Leather Makers",
+      "streetDescription": "A small branch street named after artisans who created gold-decorated leather (cuoridoro), a luxury good for which Venice was famous, used for wall coverings, furniture, and book bindings.",
+      "id": "building_45.427786_12.315297"
+    },
+    {
+      "lat": 45.42771823732954,
+      "lng": 12.31655711173846,
+      "streetName": "Campiello dei Saponeri",
+      "streetNameEnglish": "Small Square of the Soap Makers",
+      "streetDescription": "A small square where soap makers might have had their workshops. Soap production was an important industry in Renaissance Venice, using imported olive oil and local ashes.",
+      "id": "building_45.427718_12.316557"
+    },
+    {
+      "lat": 45.428268403768676,
+      "lng": 12.313301466744283,
+      "streetName": "Calle della Dogana da Mar",
+      "streetNameEnglish": "Street of the Sea Customs House",
+      "streetDescription": "Named for its proximity to the maritime customs house in Dorsoduro. The Dogana da Mar was where all goods arriving by sea were registered and taxed, a crucial institution for Venice's commercial empire.",
+      "id": "building_45.428268_12.313301"
+    },
+    {
+      "lat": 45.42828982455846,
+      "lng": 12.31380016023375,
+      "streetName": "Fondamenta dei Fornasieri",
+      "streetNameEnglish": "Foundation of the Kiln Workers",
+      "streetDescription": "Named after workers who operated kilns for bricks, glass, and ceramics. This area of Dorsoduro, near Lavraneri, might have housed kilns due to fire safety considerations (being somewhat removed from the densest parts of the city).",
+      "id": "building_45.428290_12.313800"
+    },
+    {
+      "lat": 45.42831127817032,
+      "lng": 12.314415705696758,
+      "streetName": "Calle dei Magazeni del Sale",
+      "streetNameEnglish": "Street of the Salt Warehouses",
+      "streetDescription": "Named after warehouses where salt was stored. Salt was a state monopoly in Venice and vital to the economy; Dorsoduro's location made it suitable for salt warehouses with direct access to ships.",
+      "id": "building_45.428311_12.314416"
+    },
+    {
+      "lat": 45.428301722793385,
+      "lng": 12.315264903190188,
+      "streetName": "Rio Terà dei Linaroli",
+      "streetNameEnglish": "Filled Canal of the Linen Makers",
+      "streetDescription": "A former canal filled in and named after linen makers who processed flax into fabric. Textile production was central to Venice's economy, with different neighborhoods specializing in different aspects.",
+      "id": "building_45.428302_12.315265"
+    },
+    {
+      "lat": 45.428203596566384,
+      "lng": 12.31585310778254,
+      "streetName": "Salizada degli Artieri",
+      "streetNameEnglish": "Paved Street of the Artisans",
+      "streetDescription": "A paved street named generally after the various artisans who had workshops in this part of Dorsoduro. Venetian craft guilds often clustered in specific neighborhoods for efficiency and regulation.",
+      "id": "building_45.428204_12.315853"
+    },
+    {
+      "lat": 45.42828630451363,
+      "lng": 12.316472126578201,
+      "streetName": "Calle del Pestrin Nuovo",
+      "streetNameEnglish": "Street of the New Mill",
+      "streetDescription": "Named after a newer grain mill that would have processed imported grain. Feeding Venice's large population required numerous mills, and newer facilities might have been established in less densely populated areas like parts of Dorsoduro.",
+      "id": "building_45.428286_12.316472"
+    },
+    {
+      "lat": 45.42819361508529,
+      "lng": 12.31702413014449,
+      "streetName": "Fondamenta della Fornace",
+      "streetNameEnglish": "Foundation of the Furnace",
+      "streetDescription": "Named after glass furnaces that operated in this area. Due to fire risks, some glass production facilities were located in less congested areas, making Dorsoduro near Lavraneri a plausible location.",
+      "id": "building_45.428194_12.317024"
+    },
+    {
+      "lat": 45.42866813192748,
+      "lng": 12.313966895752994,
+      "streetName": "Corte dei Lazaretto",
+      "streetNameEnglish": "Court of the Quarantine",
+      "streetDescription": "A small court named after a quarantine facility that might have processed goods or people before they entered the city proper. Venice pioneered quarantine practices to prevent plague and other diseases.",
+      "id": "building_45.428668_12.313967"
+    },
+    {
+      "lat": 45.428712772204136,
+      "lng": 12.314558035692594,
+      "streetName": "Calle dei Avogadori",
+      "streetNameEnglish": "Street of the State Attorneys",
+      "streetDescription": "Named after the state attorneys (Avogadori di Comun) who might have had residences or offices in this area. These officials were responsible for safeguarding the interests of the state in legal matters.",
+      "id": "building_45.428713_12.314558"
+    },
+    {
+      "lat": 45.42860740729854,
+      "lng": 12.31528314224111,
+      "streetName": "Rio Terà delle Procuratie Nuove",
+      "streetNameEnglish": "Filled Canal of the New Procuracies",
+      "streetDescription": "A filled canal named after newer administrative offices that might have been established in this area of Dorsoduro. As Venice's government expanded, additional facilities were needed beyond the central San Marco area.",
+      "id": "building_45.428607_12.315283"
+    }
+  ],
+  "id": "polygon-1746052814583"
+}

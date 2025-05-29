@@ -1,0 +1,98 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.426734578261765,
+      "lng": 12.311809617831173
+    },
+    {
+      "lat": 45.426674340472275,
+      "lng": 12.312421161486569
+    },
+    {
+      "lat": 45.42516837484341,
+      "lng": 12.313247281863156
+    },
+    {
+      "lat": 45.424950006492125,
+      "lng": 12.312539178683224
+    },
+    {
+      "lat": 45.4251081353826,
+      "lng": 12.311713058306637
+    },
+    {
+      "lat": 45.42560510901188,
+      "lng": 12.311101514651241
+    }
+  ],
+  "centroid": {
+    "lat": 45.42570675741067,
+    "lng": 12.312138635470333
+  },
+  "historicalName": "Fondamenta de San Gerardo Sagredo",
+  "englishName": "Walkway of Saint Gerard Sagredo",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for its proximity to the Church of San Gerardo Sagredo, dedicated to the 11th-century Venetian saint. The fondamenta, or walkway, along the nearby canal was named after this church.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 20373.99,
+  "center": {
+    "lat": 45.42570675741067,
+    "lng": 12.312138635470333
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.4251081353826,
+        "lng": 12.311713058306637
+      },
+      "water": {
+        "lat": 45.42494719267337,
+        "lng": 12.311598639627574
+      },
+      "historicalName": "Riva degli Armaioli",
+      "englishName": "Dock of the Armorers",
+      "historicalDescription": "This dock was named after the armorers' workshops that were located nearby in the San Gerardo Sagredo area during the 15th-16th centuries. Venice had a significant arms industry that supplied its naval forces, and this landing would have served the craftsmen who specialized in producing plate armor, helmets, and shields for the Republic's military needs.",
+      "id": "canal_45.425108_12.311713"
+    },
+    {
+      "edge": {
+        "lat": 45.42616984363683,
+        "lng": 12.311455566241207
+      },
+      "water": {
+        "lat": 45.42629480689241,
+        "lng": 12.311271240839506
+      },
+      "historicalName": "Fondamenta dei Merletti",
+      "englishName": "Foundation of the Lacemakers",
+      "historicalDescription": "Located near San Gerardo Sagredo, this dock was associated with Venice's renowned lace-making industry. From the 16th century onward, Venetian lace (punto in aria) was highly prized throughout Europe. This landing likely served workshops or households where predominantly women created intricate needle lace patterns, with finished goods being transported by water to contracts or noble households.",
+      "id": "canal_45.426170_12.311456"
+    }
+  ],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.42547828248313,
+      "lng": 12.312286094405659,
+      "streetName": "Calle dei Ceramisti",
+      "streetNameEnglish": "Street of the Ceramic Makers",
+      "streetDescription": "This street name references the ceramic artisans who historically had workshops in this area near San Gerardo Sagredo. Venice had a significant ceramic industry during the Renaissance, influenced by Eastern techniques. The area around Fondamenta de San Gerardo Sagredo would have been suitable for such workshops due to its proximity to water transportation for raw materials and finished goods.",
+      "id": "building_45.425478_12.312286"
+    },
+    {
+      "lat": 45.42588962045106,
+      "lng": 12.311713077000665,
+      "streetName": "Rio Terà del Monastero",
+      "streetNameEnglish": "Filled Canal of the Monastery",
+      "streetDescription": "This name reflects the common Venetian practice of filling in smaller canals (rio terà means 'filled canal') near religious establishments. The area around San Gerardo Sagredo likely had a small monastery or religious community associated with the saint. Gerardo Sagredo was a Benedictine monk who became Bishop of Csanád and was martyred in 1046, later canonized as a saint, making this name historically appropriate for a pathway near where religious brothers may have lived.",
+      "id": "building_45.425890_12.311713"
+    },
+    {
+      "lat": 45.42576558438178,
+      "lng": 12.312443423949443,
+      "streetName": "Sottoportego della Carità",
+      "streetNameEnglish": "Passage of Charity",
+      "streetDescription": "This name refers to a covered passageway (sottoportego) where charitable activities or a charitable institution might have been located. During the Renaissance, Venice had numerous charitable confraternities (Scuole) that provided social services. Near San Gerardo Sagredo, such a passageway might have connected to a building where alms were distributed or where a charitable brotherhood met. The name reflects the strong tradition of organized charity in Renaissance Venice.",
+      "id": "building_45.425766_12.312443"
+    }
+  ]
+}

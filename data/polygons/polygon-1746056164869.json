@@ -1,0 +1,92 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43890271335929,
+      "lng": 12.338700833500047
+    },
+    {
+      "lat": 45.43860535276858,
+      "lng": 12.340015115917344
+    },
+    {
+      "lat": 45.437649271389475,
+      "lng": 12.339569869220872
+    },
+    {
+      "lat": 45.437781015848905,
+      "lng": 12.338829579532762
+    },
+    {
+      "lat": 45.43796545757537,
+      "lng": 12.33886713045897
+    },
+    {
+      "lat": 45.43813860640262,
+      "lng": 12.337804975689073
+    },
+    {
+      "lat": 45.43848866653905,
+      "lng": 12.338014187992234
+    },
+    {
+      "lat": 45.43846984615683,
+      "lng": 12.338073196590562
+    }
+  ],
+  "centroid": {
+    "lat": 45.43825011625501,
+    "lng": 12.338734361112731
+  },
+  "historicalName": "Cale de la Malvasia Vechia, Sestiere San Marco",
+  "englishName": "Old Malvasia Street, District of St. Mark",
+  "historicalDescription": "This area was known for its taverns and wine shops, particularly those selling Malvasia wine, a sweet wine originating from Greece that was popular in Venice during the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 13966.29,
+  "center": {
+    "lat": 45.43827786228774,
+    "lng": 12.339080352424935
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43848866653905,
+        "lng": 12.338014187992234
+      },
+      "id": "bridge_45.438489_12.338014"
+    },
+    {
+      "edge": {
+        "lat": 45.43846984615683,
+        "lng": 12.338073196590562
+      },
+      "id": "bridge_45.438470_12.338073"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43804615960169,
+      "lng": 12.339034698492929,
+      "streetName": "Calle dei Mercanti da Levante",
+      "streetNameEnglish": "Street of the Levantine Merchants",
+      "streetDescription": "This narrow street near Malvasia Vecchia would have been frequented by merchants from the eastern Mediterranean, particularly Greek and Ottoman traders who were permitted to conduct business in Venice. The Republic maintained strong commercial ties with the Levant throughout the Renaissance period, and these merchants often had designated areas for their commerce in San Marco.",
+      "id": "building_45.438046_12.339035"
+    },
+    {
+      "lat": 45.43849484660859,
+      "lng": 12.33845791833713,
+      "streetName": "Rio Terà dei Sensali",
+      "streetNameEnglish": "Filled Canal of the Brokers",
+      "streetDescription": "This former canal, filled in during the 16th century expansions, would have been where brokers or 'sensali' operated. These official intermediaries were essential to Venetian commerce, facilitating trades between foreign merchants and local buyers. Their role was especially important in the San Marco district where much of the city's international trade was conducted, particularly near establishments like the malvasia (wine shop) where business deals were often negotiated.",
+      "id": "building_45.438495_12.338458"
+    },
+    {
+      "lat": 45.43846226531001,
+      "lng": 12.33914165577209,
+      "streetName": "Sottoportego della Malvasia",
+      "streetNameEnglish": "Passageway of the Wine Shop",
+      "streetDescription": "This covered passageway would have led to or passed beneath the famous malvasia (wine shop) that gave the main street its name. Malvasie were important establishments serving sweet wines from Greece and were often gathering places for merchants and nobles. This sottoportego would have connected the main thoroughfare to smaller courtyards or adjacent streets, creating the labyrinthine urban texture characteristic of Renaissance Venice.",
+      "id": "building_45.438462_12.339142"
+    }
+  ]
+}

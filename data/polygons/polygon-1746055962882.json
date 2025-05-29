@@ -1,0 +1,163 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.442672097915924,
+      "lng": 12.335416516385056
+    },
+    {
+      "lat": 45.44238604863922,
+      "lng": 12.336231907925583
+    },
+    {
+      "lat": 45.44227689787503,
+      "lng": 12.336784442982651
+    },
+    {
+      "lat": 45.4415391837252,
+      "lng": 12.33629628094194
+    },
+    {
+      "lat": 45.44212634475033,
+      "lng": 12.33483179481981
+    }
+  ],
+  "centroid": {
+    "lat": 45.44220011458114,
+    "lng": 12.335912188611008
+  },
+  "historicalName": "Calle degli Albanesi, San Marco",
+  "englishName": "Alley of the Albanians, St. Mark's district",
+  "historicalDescription": "This narrow street in the San Marco sestiere was known for its Albanian community during the 15th century, as many Albanians fled to Venice after the Ottoman conquest of their homeland.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 9870.51,
+  "center": {
+    "lat": 45.44197626180815,
+    "lng": 12.335961901176358
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.442672097915924,
+        "lng": 12.335416516385056
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055950767",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.442732318631464,
+          "lng": 12.335427245221116
+        },
+        "distance": 6.7483496347815,
+        "id": "5b0a01e8-b81b-4137-b2e3-e48cf772c2d6",
+        "historicalName": "Ponte degli Albanesi",
+        "englishName": "Bridge of the Albanians",
+        "historicalDescription": "Named after the Albanian community that settled in this area of Venice during the 15th century. Many Albanians fled to Venice after the Ottoman invasions of their homeland, and they formed a distinctive community near San Marco, contributing to Venice's maritime and military endeavors.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442702208273694,
+            "lng": 12.335421880803086
+          }
+        }
+      },
+      "id": "bridge_45.442672_12.335417"
+    },
+    {
+      "edge": {
+        "lat": 45.44238604863922,
+        "lng": 12.336231907925583
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055950767",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44252719118279,
+          "lng": 12.336119255146958
+        },
+        "distance": 17.98766356992665,
+        "id": "5b0a01e8-b81b-4137-b2e3-e48cf772c2d6",
+        "historicalName": "Ponte dei Dalmati",
+        "englishName": "Bridge of the Dalmatians",
+        "historicalDescription": "This bridge references the historical connections between Venice and Dalmatia, as many Dalmatian merchants and sailors frequented this area near San Marco. The Venetian Republic controlled much of the Dalmatian coast during the Renaissance, creating strong trade and cultural ties.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442456619911006,
+            "lng": 12.33617558153627
+          }
+        }
+      },
+      "id": "bridge_45.442386_12.336232"
+    },
+    {
+      "edge": {
+        "lat": 45.44183276423776,
+        "lng": 12.335564037880875
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055995050",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.44173364832614,
+          "lng": 12.335661491475083
+        },
+        "distance": 13.389337288509088,
+        "id": "4b49107a-5cce-4bb7-9622-997e7c9fc7cf",
+        "historicalName": "Ponte della Scuola Grande",
+        "englishName": "Bridge of the Great School",
+        "historicalDescription": "Named for its proximity to one of Venice's important confraternities or 'scuole grandi' near San Marco. These institutions were central to Venetian civic and religious life during the Renaissance, providing charitable services and serving as centers for devotional activities.",
+        "location": {
+          "midpoint": {
+            "lat": 45.441783206281954,
+            "lng": 12.335612764677979
+          }
+        }
+      },
+      "id": "bridge_45.441833_12.335564"
+    },
+    {
+      "edge": {
+        "lat": 45.44212634475033,
+        "lng": 12.33483179481981
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055950767",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.442152691576155,
+          "lng": 12.33480497272966
+        },
+        "distance": 3.6002370170836095,
+        "id": "5b0a01e8-b81b-4137-b2e3-e48cf772c2d6",
+        "historicalName": "Ponte dei Dragomanni",
+        "englishName": "Bridge of the Dragomans",
+        "historicalDescription": "Named after the official interpreters and translators (dragomanni) of the Venetian Republic who facilitated diplomatic and commercial interactions with the Ottoman Empire and other eastern powers. This name reflects the cosmopolitan nature of the San Marco district, which was a center for international diplomacy.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442139518163245,
+            "lng": 12.334818383774735
+          }
+        }
+      },
+      "id": "bridge_45.442126_12.334832"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.441881110307875,
+      "lng": 12.3355916640629,
+      "streetName": "Calle dei Mercanti Albanesi",
+      "streetNameEnglish": "Street of the Albanian Merchants",
+      "streetDescription": "This name reflects the significant Albanian merchant presence in Venice during the Renaissance. Near the existing Calle degli Albanesi in San Marco, Albanian merchants established trading posts and businesses, particularly after fleeing Ottoman expansion in the 15th century. They formed a small but notable commercial community specializing in importing goods from the Eastern Mediterranean.",
+      "id": "building_45.441881_12.335592"
+    },
+    {
+      "lat": 45.4420153698075,
+      "lng": 12.336002360286445,
+      "streetName": "Sottoportego dei Dogi Bizantini",
+      "streetNameEnglish": "Passageway of the Byzantine Doges",
+      "streetDescription": "This covered passageway name acknowledges Venice's deep historical connections to Byzantium. In the San Marco area, where Byzantine influence was strongly felt in architecture and art, this passageway would reference the early Venetian doges who maintained close diplomatic and commercial ties with Constantinople. The name honors the Byzantine heritage that shaped Venetian culture, particularly evident in the nearby Basilica di San Marco.",
+      "id": "building_45.442015_12.336002"
+    }
+  ],
+  "id": "polygon-1746055962882"
+}

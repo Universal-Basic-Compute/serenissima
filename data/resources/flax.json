@@ -1,0 +1,12 @@
+{
+  "id": "flax",
+  "name": "Flax",
+  "category": "raw_materials",
+  "subCategory": "textile",
+  "description": "Plant fiber used for producing linen textiles and rope.",
+  "icon": "/images/resources/flax.png",
+  "importPrice": 150.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": null,
+  "tier": 0
+}

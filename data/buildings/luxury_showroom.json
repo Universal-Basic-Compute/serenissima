@@ -1,0 +1,69 @@
+{
+  "name": "Luxury Showroom",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "retail_goods",
+  "size": 1,
+  "unlockCondition": "15,000,000 ducats total wealth, Noble connections, Merchant Guild membership",
+  "calculationsAnalysis": "The Luxury Showroom represents high-end retail with substantial investment and returns. The construction cost of 3,000,000 ducats reflects the premium materials and prestigious location required, while the income of 35,000 ducats (1.2% return) represents the high margins on luxury goods. The maintenance cost of 20,000 ducats (57% of income) reflects the high standards of upkeep and security required. The employment capacity of 5 represents the specialized staff needed to serve elite clientele. The construction time of 5 days (432000000ms) creates a meaningful progression tier for advanced players. This building creates a strategic choice to invest in high-end retail with appropriate wealth and connection requirements reflecting the exclusive nature of luxury commerce in Renaissance Venice.",
+  "shortDescription": "High-end display space for luxury goods catering to nobility and wealthy merchants.",
+  "fullDescription": "The pinnacle of Venetian retail, these elegant spaces showcase the finest products Venice has to offer. Unlike crowded contract shops, luxury showrooms feature carefully curated displays, private consultation areas, and by-appointment service for elite clients. Often specializing in a particular luxury good—Murano glass, jewelry, imported rarities—these establishments cultivate an exclusive atmosphere that justifies premium prices.",
+  "flavorText": "Here we do not simply sell objects, but rather the very essence of refinement and distinction that separates the truly cultured from the merely wealthy.",
+  "constructionCosts": {
+    "ducats": 3000000,
+    "timber": 610,
+    "bricks": 1220,
+    "stone": 920,
+    "glass": 310,
+    "marble": 180
+  },
+  "maintenanceCost": 2000,
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "fine_glassware",
+      "gold",
+      "silk_fabric",
+      "gold_leaf",
+      "spiced_wine",
+      "glass",
+      "raw_silk",
+      "dyestuffs",
+      "jewelry",
+      "luxury_silk_garments",
+      "venetian_lace",
+      "books",
+      "maps"
+    ],
+    "sells": [
+      "jewelry",
+      "luxury_silk_garments",
+      "spiced_wine",
+      "venetian_lace",
+      "fine_glassware",
+      "maps",
+      "books"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Hushed conversation, subtle ambient music",
+    "activitySounds": "Glass display cases opening, delicate handling of merchandise, discreet financial discussions",
+    "musicTheme": "Sospiri Veneziani"
+  },
+  "seasonalEffects": {
+    "winter": "Seasonal luxury collections, holiday gift displays",
+    "carnival": "Exclusive mask designs, noble costume accessories",
+    "diplomatic season": "Foreign luxury goods prominently featured"
+  },
+  "aiInteractionPoints": [
+    "Main display area",
+    "Private consultation room",
+    "Exclusive client entrance",
+    "Custom commission desk"
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 4,
+  "constructionMinutes": 7200
+}

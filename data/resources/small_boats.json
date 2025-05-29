@@ -1,0 +1,64 @@
+{
+  "id": "small_boats",
+  "name": "Small Boats",
+  "category": "finished_goods",
+  "subCategory": "transportation",
+  "description": "Various small watercraft designed for Venice's canals and lagoon. These versatile vessels serve multiple purposes from fishing and transportation to recreation and utility work.",
+  "varieties": [
+    {
+      "type": "sandolo",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 0.9,
+      "primaryUse": "general_purpose",
+      "capacity": 4,
+      "modelVariant": "models/resources/small_boats_sandolo.glb"
+    },
+    {
+      "type": "fishing_boat",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "primaryUse": "fishing",
+      "capacity": 3,
+      "modelVariant": "models/resources/small_boats_fishing.glb"
+    },
+    {
+      "type": "cargo_boat",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 1.2,
+      "primaryUse": "cargo_transport",
+      "capacity": 2,
+      "modelVariant": "models/resources/small_boats_cargo.glb"
+    },
+    {
+      "type": "pupparino",
+      "productionDifficulty": "high",
+      "popularity": "low",
+      "valueMultiplier": 1.5,
+      "primaryUse": "speed_and_recreation",
+      "capacity": 4,
+      "modelVariant": "models/resources/small_boats_pupparino.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
+      "Venetian Boat Builders",
+      "Local Squeri (Boatyards)"
+    ],
+    "historicalSignificance": "Small boats were the workhorses of Venice, serving countless functions from fishing and transportation to cargo delivery and recreation. Their designs evolved to perfectly suit Venice's unique environment, with shallow drafts for canal navigation and versatile configurations for different purposes. These vessels connected the islands of the lagoon and enabled the daily activities that sustained Venetian life.",
+    "historicalContracts": [
+      "Fishermen",
+      "Local merchants",
+      "Households",
+      "Transportation services"
+    ]
+  },
+  "importPrice": 16110.0,
+  "lifetimeHours": null,
+  "consumptionHours": 584,
+  "tier": 2,
+  "storageCapacity": 100
+}

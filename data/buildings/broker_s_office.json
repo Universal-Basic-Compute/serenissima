@@ -1,0 +1,93 @@
+{
+  "name": "Broker's Office",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Trade Facilities",
+  "size": 1,
+  "unlockCondition": "8,000,000 ducats capital, Merchant Guild membership",
+  "calculationsAnalysis": "The Broker's Office represents specialized commercial services with modest infrastructure but significant returns. The construction cost of 1,200,000 ducats reflects the secure, professional space required, while the income of 22,000 ducats (1.83% return) represents the lucrative fees earned from facilitating transactions without inventory costs. The maintenance cost of 8,000 ducats (36.4% of income) creates a healthy profit margin reflecting the low-overhead nature of brokerage. The employment capacity of 4 represents the broker and administrative staff. The construction time of 2 days (172800000ms) reflects the relatively simple construction requirements. This building creates a strategic option for players to participate in trade without direct goods handling, reflecting Venice's sophisticated commercial ecosystem where intermediaries played crucial roles.",
+  "shortDescription": "Specialized office for trade intermediaries who connect buyers with sellers for a commission.",
+  "fullDescription": "The oil that keeps Venice's commercial machinery running smoothly, brokers facilitate transactions without ever taking ownership of goods. These offices feature secure document storage, private meeting rooms for confidential negotiations, and often a public-facing area where potential clients can make inquiries. Brokers specialize by industry or trade route, building networks of connections that make them invaluable intermediaries.",
+  "flavorText": "The shrewd broker sells not silk nor spice nor silver, but something far more valuable: the perfect connection, made at precisely the right moment.",
+  "constructionCosts": {
+    "ducats": 1200000,
+    "timber": 370,
+    "bricks": 900,
+    "stone": 570,
+    "glass": 150
+  },
+  "maintenanceCost": 800,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "paper": 3,
+        "criminal_contacts": 1
+      },
+      "outputs": {
+        "smuggler_maps": 2
+      },
+      "craftMinutes": 120
+    },
+    {
+      "inputs": {
+        "paper": 5,
+        "criminal_contacts": 1,
+        "gold": 1
+      },
+      "outputs": {
+        "blackmail_evidence": 1
+      },
+      "craftMinutes": 240
+    },
+    {
+      "inputs": {
+        "tools": 1,
+        "paper": 2,
+        "dyestuffs": 1
+      },
+      "outputs": {
+        "forgery_tools": 1
+      },
+      "craftMinutes": 180
+    }
+  ],
+    "storageCapacity": 50,
+    "stores": [
+      "maps",
+      "banking_services",
+      "criminal_contacts",
+      "paper",
+      "smuggler_maps",
+      "blackmail_evidence",
+      "forgery_tools"
+    ],
+    "sells": [
+      "smuggler_maps",
+      "blackmail_evidence",
+      "forgery_tools",
+      "banking_services"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Quill scratching, muted business discussions, paper handling",
+    "activitySounds": "Contract sealing, coin counting, deal negotiations",
+    "musicTheme": "Diplomazia Veneziana"
+  },
+  "seasonalEffects": {
+    "trading seasons": "Activity levels fluctuate with shipping seasons",
+    "contract disruptions": "Particularly busy during price fluctuations or political changes",
+    "end of fiscal periods": "Increased activity during closing periods"
+  },
+  "aiInteractionPoints": [
+    "Main broker's desk",
+    "Private meeting room",
+    "Document review area",
+    "Client waiting space",
+    "Clerk's position"
+  ],
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 2880
+}

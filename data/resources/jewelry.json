@@ -1,0 +1,67 @@
+{
+  "id": "jewelry",
+  "name": "Jewelry",
+  "category": "finished_goods",
+  "subCategory": "luxury_goods",
+  "description": "Exquisite ornamental pieces crafted from precious metals and gems. Venetian jewelry combines Byzantine, Islamic, and European influences into distinctive styles sought by elites across the Mediterranean.",
+  "varieties": [
+    {
+      "type": "necklace",
+      "productionDifficulty": "high",
+      "popularity": "very_high",
+      "valueMultiplier": 1.2,
+      "materialRequirement": "high",
+      "modelVariant": "models/resources/jewelry_necklace.glb"
+    },
+    {
+      "type": "ring",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 0.8,
+      "materialRequirement": "low",
+      "modelVariant": "models/resources/jewelry_ring.glb"
+    },
+    {
+      "type": "earrings",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 0.9,
+      "materialRequirement": "medium",
+      "modelVariant": "models/resources/jewelry_earrings.glb"
+    },
+    {
+      "type": "brooch",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1,
+      "materialRequirement": "medium",
+      "modelVariant": "models/resources/jewelry_brooch.glb"
+    },
+    {
+      "type": "ceremonial_piece",
+      "productionDifficulty": "very_high",
+      "popularity": "low",
+      "valueMultiplier": 2.5,
+      "materialRequirement": "very_high",
+      "modelVariant": "models/resources/jewelry_ceremonial.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1100,
+    "notableProducers": [
+      "Venetian Goldsmiths Guild",
+      "Rialto Jewelers"
+    ],
+    "historicalSignificance": "Venetian jewelry represented a fusion of Eastern and Western styles, reflecting the city's position as a crossroads of cultures. The goldsmith trade was strictly regulated, with high standards enforced to maintain Venice's reputation for quality. Jewelry served not only as personal adornment but as portable wealth, diplomatic gifts, and markers of social status.",
+    "historicalContracts": [
+      "Venetian nobility",
+      "European courts",
+      "Byzantine elites",
+      "Ottoman nobility"
+    ]
+  },
+  "importPrice": 140544.0,
+  "lifetimeHours": null,
+  "consumptionHours": 2336,
+  "tier": 4
+}

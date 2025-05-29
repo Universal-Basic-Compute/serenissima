@@ -1,0 +1,217 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44608115368707,
+      "lng": 12.329477757518701
+    },
+    {
+      "lat": 45.44669084861773,
+      "lng": 12.329842537944726
+    },
+    {
+      "lat": 45.44821129368713,
+      "lng": 12.32476243407052
+    },
+    {
+      "lat": 45.44828656218036,
+      "lng": 12.324215263431482
+    },
+    {
+      "lat": 45.44785753042349,
+      "lng": 12.323947042529992
+    },
+    {
+      "lat": 45.44719515919793,
+      "lng": 12.325824588840417
+    },
+    {
+      "lat": 45.44681128140488,
+      "lng": 12.327058404987268
+    },
+    {
+      "lat": 45.44638223842704,
+      "lng": 12.328345865314416
+    }
+  ],
+  "centroid": {
+    "lat": 45.4471895084532,
+    "lng": 12.32668423682969
+  },
+  "historicalName": "Calle de le Convertite",
+  "englishName": "Street of the Converted Women",
+  "historicalDescription": "This narrow street in the Castello sestiere was known for housing a convent that took in reformed prostitutes in the 15th century. The nearby Rio de le Convertite canal is also named after this historical landmark.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 33682.61,
+  "center": {
+    "lat": 45.4471895084532,
+    "lng": 12.32668423682969
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44745107115243,
+        "lng": 12.327302486007623
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055662884",
+        "targetPointIndex": 6,
+        "targetPoint": {
+          "lat": 45.447533805003445,
+          "lng": 12.327445369257747
+        },
+        "distance": 14.452456693188243,
+        "id": "80d2d585-39ab-4e14-93e8-6750d08f96f9",
+        "historicalName": "Ponte delle Devote",
+        "englishName": "Bridge of the Devout Women",
+        "historicalDescription": "Named for its proximity to Calle de le Convertite, where a convent for reformed prostitutes existed. These women, having converted to a pious life, were known locally as 'le devote' (the devout ones).",
+        "location": {
+          "midpoint": {
+            "lat": 45.44749243807794,
+            "lng": 12.327373927632685
+          }
+        }
+      },
+      "id": "bridge_45.447451_12.327302"
+    },
+    {
+      "edge": {
+        "lat": 45.4476411267861,
+        "lng": 12.326667473023347
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055662884",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.44769856122013,
+          "lng": 12.326826673044978
+        },
+        "distance": 13.965046963192913,
+        "id": "80d2d585-39ab-4e14-93e8-6750d08f96f9",
+        "historicalName": "Ponte dei Calegheri",
+        "englishName": "Bridge of the Shoemakers",
+        "historicalDescription": "Named after the shoemakers' guild that had workshops near Calle de le Convertite. Shoemaking was an important craft in Renaissance Venice, with these artisans providing footwear for nobles and commoners alike.",
+        "location": {
+          "midpoint": {
+            "lat": 45.447669844003116,
+            "lng": 12.326747073034163
+          }
+        }
+      },
+      "id": "bridge_45.447641_12.326667"
+    },
+    {
+      "edge": {
+        "lat": 45.447831182419776,
+        "lng": 12.326032460039071
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055662884",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.447863317436806,
+          "lng": 12.32620797683221
+        },
+        "distance": 14.15059665399991,
+        "id": "80d2d585-39ab-4e14-93e8-6750d08f96f9",
+        "historicalName": "Ponte della Penitenza",
+        "englishName": "Bridge of Penitence",
+        "historicalDescription": "This bridge earned its name from being on a route often taken by penitent women entering the convent in Calle de le Convertite. It symbolized the transition from their former lives to a life of religious devotion and penitence.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44784724992829,
+            "lng": 12.32612021843564
+          }
+        }
+      },
+      "id": "bridge_45.447831_12.326032"
+    },
+    {
+      "edge": {
+        "lat": 45.44802123805346,
+        "lng": 12.325397447054796
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055662884",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.44802807365348,
+          "lng": 12.325589280619441
+        },
+        "distance": 14.98412460819509,
+        "id": "80d2d585-39ab-4e14-93e8-6750d08f96f9",
+        "historicalName": "Ponte dei Tramonti",
+        "englishName": "Bridge of Sunsets",
+        "historicalDescription": "Located in a position where Venetians could observe spectacular sunsets over the lagoon. The bridge became a notable landmark near Calle de le Convertite, offering moments of contemplation for both residents and converted women.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44802465585347,
+            "lng": 12.325493363837118
+          }
+        }
+      },
+      "id": "bridge_45.448021_12.325397"
+    },
+    {
+      "edge": {
+        "lat": 45.44821129368713,
+        "lng": 12.32476243407052
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055662884",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.44819282987016,
+          "lng": 12.324970584406673
+        },
+        "distance": 16.366926692946475,
+        "id": "80d2d585-39ab-4e14-93e8-6750d08f96f9",
+        "historicalName": "Ponte dei Catecumeni",
+        "englishName": "Bridge of Catechumens",
+        "historicalDescription": "Named for its connection to the nearby institution where catechumens (people receiving instruction before baptism) were housed. This bridge was often crossed by instructors and priests visiting both the catechumens and the converted women in Calle de le Convertite.",
+        "location": {
+          "midpoint": {
+            "lat": 45.448202061778645,
+            "lng": 12.324866509238596
+          }
+        }
+      },
+      "id": "bridge_45.448211_12.324762"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44660959383754,
+      "lng": 12.32897898398102,
+      "streetName": "Calle delle Pentite",
+      "streetNameEnglish": "Street of the Penitent Women",
+      "streetDescription": "This name references the female penitents who lived near the Convertite area. 'Pentite' was a term used for reformed prostitutes who entered religious life as an act of penance. This calle would have been near the convent that housed these women who sought redemption through religious devotion.",
+      "id": "building_45.446610_12.328979"
+    },
+    {
+      "lat": 45.44701498443252,
+      "lng": 12.32766201907806,
+      "streetName": "Fondamenta della Pietà Femminile",
+      "streetNameEnglish": "Foundation of Female Mercy",
+      "streetDescription": "Located near the Convertite district, this fondamenta (street along a canal) would have been named after charitable institutions devoted to helping women in need. The concept of 'pietà' (mercy) was central to the Renaissance Venetian practice of establishing shelters and assistance for fallen women seeking to change their lives.",
+      "id": "building_45.447015_12.327662"
+    },
+    {
+      "lat": 45.44742004800989,
+      "lng": 12.325835744916242,
+      "streetName": "Rio Terà del Soccorso",
+      "streetNameEnglish": "Filled Canal of Aid/Assistance",
+      "streetDescription": "A 'rio terà' is a filled-in canal converted to a street. 'Soccorso' refers to assistance or aid, likely referencing a nearby institution that provided help to women in distress. This would connect to the charitable mission of the Convertite area which focused on providing refuge and rehabilitation.",
+      "id": "building_45.447420_12.325836"
+    },
+    {
+      "lat": 45.44735348135287,
+      "lng": 12.32649045167842,
+      "streetName": "Sottoportego della Redenzione",
+      "streetNameEnglish": "Passageway of Redemption",
+      "streetDescription": "A 'sottoportego' is a covered passageway under a building. This name would reference the spiritual redemption sought by women entering the religious community near Calle de le Convertite. Such passageways were often symbolic transitions in Venetian architecture, here representing the passage from secular to religious life for former prostitutes.",
+      "id": "building_45.447353_12.326490"
+    }
+  ],
+  "id": "polygon-1746055650628"
+}

@@ -1,0 +1,100 @@
+{
+  "name": "Blacksmith",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Metal Industry",
+  "size": 1,
+  "unlockCondition": "2,000,000 ducats capital, Metal Workers Guild connection",
+  "calculationsAnalysis": "The Blacksmith represents basic metal production with modest but reliable returns. The construction cost of 750,000 ducats reflects the forge and specialized equipment required, while the income of 12,000 ducats (1.6% return) represents sales of metal goods and components. The maintenance cost of 20,000 ducats (167% of income) creates a negative profit margin reflecting the essential but resource-intensive nature of basic metalworking. The employment capacity of 5 represents the blacksmith, apprentices, and assistants needed. The construction time of 2 days (172800000ms) reflects the straightforward construction requirements. This building creates an accessible investment in metal production that supports numerous other industries, reflecting the historical importance of blacksmiths in Venice's industrial ecosystem, where metal components were essential for shipbuilding, construction, and daily life.",
+  "shortDescription": "Workshop producing iron tools, fittings, and basic metal goods for everyday use.",
+  "fullDescription": "An essential service in any district, blacksmiths craft the metal components needed for construction, shipping, and daily life. Featuring a forge, anvils, quenching tanks, and metalworking tools, these workshops combine practical craftsmanship with industrial production. From nails and hinges to tools and decorative ironwork, blacksmiths support nearly every other industry in Venice.",
+  "flavorText": "Without my hinges, your doors would not swing; without my nails, your ships would come apart; without my locks, your wealth would vanish—yet few think of the blacksmith until something breaks.",
+  "constructionCosts": {
+    "ducats": 750000,
+    "timber": 180,
+    "bricks": 610,
+    "stone": 300,
+    "iron": 90
+  },
+  "maintenanceCost": 1000,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "iron": 3
+      },
+      "outputs": {
+        "tools": 2
+      },
+      "craftMinutes": 90
+    },
+    {
+      "inputs": {
+        "iron": 2
+      },
+      "outputs": {
+        "iron_fittings": 3
+      },
+      "craftMinutes": 60
+    },
+    {
+      "inputs": {
+        "iron_ore": 4,
+        "fuel": 1
+      },
+      "outputs": {
+        "processed_iron": 2
+      },
+      "craftMinutes": 120
+    },
+    {
+      "inputs": {
+        "processed_iron": 2,
+        "fuel": 1
+      },
+      "outputs": {
+        "weapons": 1
+      },
+      "craftMinutes": 150
+    }
+  ],
+    "storageCapacity": 150,
+    "stores": [
+      "iron",
+      "processed_iron",
+      "iron_fittings",
+      "tools",
+      "weapons",
+      "fuel",
+      "timber"
+    ],
+    "sells": [
+      "tools",
+      "iron_fittings",
+      "weapons",
+      "processed_iron"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Hammering on anvil, bellows pumping, forge roaring",
+    "activitySounds": "Metal being quenched with steam hiss, filing, customer orders",
+    "musicTheme": "Arsenale in Movimento"
+  },
+  "seasonalEffects": {
+    "winter": "More comfortable working conditions, higher heating efficiency",
+    "summer": "Extremely hot working conditions, reduced efficiency",
+    "construction season": "Increased demand for building hardware"
+  },
+  "aiInteractionPoints": [
+    "Forge",
+    "Anvil workstation",
+    "Customer counter",
+    "Finishing workbench",
+    "Tool wall",
+    "Order pickup area"
+  ],
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 2880
+}

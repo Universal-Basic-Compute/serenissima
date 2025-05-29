@@ -1,0 +1,248 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.4357053045796,
+      "lng": 12.34428566072149
+    },
+    {
+      "lat": 45.43506914080319,
+      "lng": 12.344371491409966
+    },
+    {
+      "lat": 45.43381561367639,
+      "lng": 12.344323211647698
+    },
+    {
+      "lat": 45.4337290326967,
+      "lng": 12.342847996689507
+    },
+    {
+      "lat": 45.43367633116577,
+      "lng": 12.342354470230767
+    },
+    {
+      "lat": 45.43517077691746,
+      "lng": 12.342177444435784
+    },
+    {
+      "lat": 45.43518959840002,
+      "lng": 12.342322283722588
+    },
+    {
+      "lat": 45.43545686277484,
+      "lng": 12.342719250656792
+    },
+    {
+      "lat": 45.435667661952216,
+      "lng": 12.343733125664421
+    }
+  ],
+  "centroid": {
+    "lat": 45.434831146996245,
+    "lng": 12.34323721501989
+  },
+  "historicalName": "Campo San Zaccaria",
+  "englishName": "Saint Zechariah Square",
+  "historicalDescription": "This campo was located in the sestiere of Castello, near the Chiesa di San Zaccaria, a 15th-century church dedicated to St. Zechariah. The church and square were important landmarks in Venice during this period.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 32252.72,
+  "center": {
+    "lat": 45.43457604384116,
+    "lng": 12.343283792634884
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.433772323186545,
+        "lng": 12.343585604168602
+      },
+      "water": {
+        "lat": 45.433597069691025,
+        "lng": 12.343643268546334
+      },
+      "historicalName": "Riva di San Zaccaria",
+      "englishName": "Saint Zacharias Waterfront",
+      "historicalDescription": "Named after the adjacent 9th-century church of San Zaccaria, this dock served as the main landing point for visitors to the church and monastery. The church housed important relics and was traditionally visited by the Doge during Easter celebrations, making this dock significant for both religious processions and daily commerce in the area.",
+      "id": "canal_45.433772_12.343586"
+    },
+    {
+      "edge": {
+        "lat": 45.4337290326967,
+        "lng": 12.342847996689507
+      },
+      "water": {
+        "lat": 45.43355444945478,
+        "lng": 12.342786341561759
+      },
+      "historicalName": "Fondamenta delle Monache Benedettine",
+      "englishName": "Foundation of the Benedictine Nuns",
+      "historicalDescription": "This dock was connected to the Benedictine convent attached to San Zaccaria church, where daughters of noble Venetian families resided. The nuns of San Zaccaria were renowned for their fine needlework and the production of ecclesiastical vestments, making this dock an important point for the delivery of materials and the shipment of their completed works to churches throughout Venice and beyond.",
+      "id": "canal_45.433729_12.342848"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43506914080319,
+        "lng": 12.344371491409966
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056451160",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43493333777788,
+          "lng": 12.344515261066146
+        },
+        "distance": 18.811472512387656,
+        "id": "a02ffc95-6008-46c4-8a48-37a3b304830f",
+        "historicalName": "Ponte di San Zaccaria",
+        "englishName": "Bridge of Saint Zacharias",
+        "historicalDescription": "Named after the nearby Church of San Zaccaria, one of Venice's oldest churches dating back to the 9th century. This bridge would have been a key crossing point for worshippers visiting the church, which housed important relics and was frequently visited by the Doge during state ceremonies.",
+        "location": {
+          "midpoint": {
+            "lat": 45.435001239290536,
+            "lng": 12.344443376238056
+          }
+        }
+      },
+      "id": "bridge_45.435069_12.344371"
+    },
+    {
+      "edge": {
+        "lat": 45.434174479749664,
+        "lng": 12.342295461632439
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056903912",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.434161931203725,
+          "lng": 12.342222147919365
+        },
+        "distance": 5.888281782709824,
+        "id": "69f25d43-9587-405a-bd72-8514e2dd8d47",
+        "historicalName": "Ponte delle Monache",
+        "englishName": "Bridge of the Nuns",
+        "historicalDescription": "This bridge references the Benedictine nuns who resided in the convent adjacent to the Church of San Zaccaria during the Renaissance period. These nuns were typically daughters of noble Venetian families and the convent was one of the most prestigious in Venice, making this bridge an important connection to their cloistered residence.",
+        "location": {
+          "midpoint": {
+            "lat": 45.434168205476695,
+            "lng": 12.342258804775902
+          }
+        }
+      },
+      "id": "bridge_45.434174_12.342295"
+    },
+    {
+      "edge": {
+        "lat": 45.434672628333566,
+        "lng": 12.342236453034111
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056903912",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43469646842163,
+          "lng": 12.34217565629644
+        },
+        "distance": 5.4342706112457275,
+        "id": "69f25d43-9587-405a-bd72-8514e2dd8d47",
+        "historicalName": "Ponte dei Reliquiari",
+        "englishName": "Bridge of the Reliquaries",
+        "historicalDescription": "Named for the famous relics housed in the Church of San Zaccaria, including the body of Saint Zacharias himself (father of John the Baptist) and other holy treasures. This bridge would have been crossed by pilgrims and the faithful coming to venerate these important relics, which were a source of influence for the area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4346845483776,
+            "lng": 12.342206054665276
+          }
+        }
+      },
+      "id": "bridge_45.434673_12.342236"
+    },
+    {
+      "edge": {
+        "lat": 45.435667661952216,
+        "lng": 12.343733125664421
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056377511",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43574010111454,
+          "lng": 12.343646259952278
+        },
+        "distance": 10.527100226745336,
+        "id": "8775f742-5b5a-477d-917e-e17999455878",
+        "historicalName": "Ponte dei Dogi",
+        "englishName": "Bridge of the Doges",
+        "historicalDescription": "Named to commemorate the traditional Easter Monday procession when the Doge would visit San Zaccaria in full regalia. This ceremonial visit was one of Venice's most important state rituals, established by Doge Pietro Tradonico in the 9th century and continuing throughout the Renaissance, making this bridge part of the processional route of Venice's rulers.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43570388153338,
+            "lng": 12.34368969280835
+          }
+        }
+      },
+      "id": "bridge_45.435668_12.343733"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43418291040772,
+      "lng": 12.342851359465703,
+      "streetName": "Calle dei Canonici",
+      "streetNameEnglish": "Street of the Canons",
+      "streetDescription": "Named after the canons (priests) who served at the Church of San Zaccaria. The monastery and church of San Zaccaria were among the most prestigious religious institutions in Venice, and the canons had residences nearby.",
+      "id": "building_45.434183_12.342851"
+    },
+    {
+      "lat": 45.43416140594637,
+      "lng": 12.343430355393888,
+      "streetName": "Sottoportego delle Monache",
+      "streetNameEnglish": "Passageway of the Nuns",
+      "streetDescription": "This name references the Benedictine nuns who inhabited the convent of San Zaccaria from the 9th century. The convent was famous for housing daughters of noble Venetian families and was directly connected to the church.",
+      "id": "building_45.434161_12.343430"
+    },
+    {
+      "lat": 45.43450096350176,
+      "lng": 12.342755667908508,
+      "streetName": "Ruga delle Reliquie",
+      "streetNameEnglish": "Street of the Relics",
+      "streetDescription": "San Zaccaria church was known for housing important relics, including the body of St. Zacharias (father of John the Baptist) and other sacred artifacts. This street would reference the pilgrimages made to venerate these relics.",
+      "id": "building_45.434501_12.342756"
+    },
+    {
+      "lat": 45.43449615710061,
+      "lng": 12.343484610368387,
+      "streetName": "Salizada del Doge",
+      "streetNameEnglish": "Paved Street of the Doge",
+      "streetDescription": "Named in recognition of the traditional annual visit by the Doge to San Zaccaria on Easter Sunday. This ceremonial procession was one of the most important public rituals in Venice, symbolizing the relationship between church and state.",
+      "id": "building_45.434496_12.343485"
+    },
+    {
+      "lat": 45.43495851429543,
+      "lng": 12.342919280642644,
+      "streetName": "Rio Terà dei Greci",
+      "streetNameEnglish": "Filled-in Canal of the Greeks",
+      "streetDescription": "Named for the Greek community that settled nearby. The area between San Zaccaria and San Giorgio dei Greci was known to have Greek merchants and sailors, given its proximity to the eastern Mediterranean shipping routes.",
+      "id": "building_45.434959_12.342919"
+    },
+    {
+      "lat": 45.43504341178353,
+      "lng": 12.343415314641963,
+      "streetName": "Calle dei Orefici di San Zaccaria",
+      "streetNameEnglish": "Street of the Goldsmiths of San Zaccaria",
+      "streetDescription": "Named for the goldsmiths who had workshops near the campo. These artisans would have produced liturgical objects for the church as well as decorative items for the wealthy patrons who frequented the area.",
+      "id": "building_45.435043_12.343415"
+    },
+    {
+      "lat": 45.435442929528165,
+      "lng": 12.343463059994288,
+      "streetName": "Fondamenta delle Gorne",
+      "streetNameEnglish": "Foundation of the Gutters",
+      "streetDescription": "Named after the drainage system (gorne) that would have been installed to manage water flow in this low-lying area near the Bacino di San Marco. Venice's relationship with water management was crucial to its urban development, and streets were often named after such practical infrastructure.",
+      "id": "building_45.435443_12.343463"
+    }
+  ],
+  "id": "polygon-1746056923664"
+}

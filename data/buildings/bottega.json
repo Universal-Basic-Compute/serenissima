@@ -1,0 +1,119 @@
+{
+  "name": "Bottega",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Retail Shops",
+  "size": 1,
+  "unlockCondition": "2,500,000 ducats total wealth, 5 citizens",
+  "calculationsAnalysis": "The Bottega represents a step up in commercial investment with a construction cost of 600,000 ducats and income of 11,000 ducats, providing a 1.8% return per cycle. The maintenance cost of 6,000 ducats (55% of income) reflects the more complex structure and workshop equipment. With an employment capacity of 3, it creates a significant jump in workforce requirements, representing the master craftsman and apprentices typical of Renaissance workshops. The construction time of 2 days (172800000ms) creates a meaningful progression from the Contract Stall while remaining accessible to early-game players. This building serves as a bridge between simple retail and specialized production.",
+  "shortDescription": "Specialized shop with workshop in back, common for artisans and merchants.",
+  "fullDescription": "The backbone of Venetian retail, these versatile shops combine a front retail area with a rear workshop where goods are produced or customized. With large shutters that open to the street during business hours, botteghe create an inviting shopping environment while allowing craftspeople to work efficiently in the same location.",
+  "flavorText": "The hands create in the back, the voice sells in the front—the perfect marriage of craft and commerce.",
+  "constructionCosts": {
+    "ducats": 600000,
+    "timber": 250,
+    "bricks": 500,
+    "stone": 150,
+    "glass": 25
+  },
+  "maintenanceCost": 600,
+  "productionInformation": {
+    "Arti": [
+    {
+      "inputs": {
+        "silk_fabric": 2,
+        "dyed_textiles": 1
+      },
+      "outputs": {
+        "luxury_silk_garments": 1
+      },
+      "craftMinutes": 240
+    },
+    {
+      "inputs": {
+        "glass": 3,
+        "fuel": 1
+      },
+      "outputs": {
+        "fine_glassware": 1
+      },
+      "craftMinutes": 180
+    },
+    {
+      "inputs": {
+        "molten_glass": 2,
+        "gold_leaf": 1
+      },
+      "outputs": {
+        "fine_glassware": 2
+      },
+      "craftMinutes": 240
+    },
+    {
+      "inputs": {
+        "paper": 10,
+        "dyestuffs": 1
+      },
+      "outputs": {
+        "books": 1
+      },
+      "craftMinutes": 300
+    },
+    {
+      "inputs": {
+        "silk_fabric": 3,
+        "gold_leaf": 1,
+        "dyestuffs": 1
+      },
+      "outputs": {
+        "luxury_silk_garments": 2
+      },
+      "craftMinutes": 360
+    }
+  ],
+    "storageCapacity": 100,
+    "stores": [
+      "raw_silk",
+      "silk_fabric",
+      "dyestuffs",
+      "tools",
+      "sand",
+      "soda_ash",
+      "fuel",
+      "glass",
+      "fine_glassware",
+      "gold",
+      "luxury_silk_garments",
+      "paper",
+      "books"
+    ],
+    "sells": [
+      "silk_fabric",
+      "glass",
+      "fine_glassware",
+      "books",
+      "luxury_silk_garments",
+      "tools"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Workshop sounds specific to craft, customer conversations",
+    "activitySounds": "Tools working, sales transactions, apprentice instructions",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "winter": "Partially closed shutters, interior more visible at night with lanterns",
+    "carnival": "Specialized carnival merchandise, festive decorations",
+    "high season": "Extended hours, more workers visible"
+  },
+  "aiInteractionPoints": [
+    "Shop counter",
+    "Workshop area",
+    "Street display",
+    "Entrance"
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 2880
+}

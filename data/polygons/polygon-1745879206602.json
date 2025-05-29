@@ -1,0 +1,832 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43760127242219,
+      "lng": 12.314625907746247
+    },
+    {
+      "lat": 45.43630639512214,
+      "lng": 12.315441299286775
+    },
+    {
+      "lat": 45.434891030131226,
+      "lng": 12.316170860138826
+    },
+    {
+      "lat": 45.434123104483355,
+      "lng": 12.316278148499421
+    },
+    {
+      "lat": 45.43379183921307,
+      "lng": 12.316836047974519
+    },
+    {
+      "lat": 45.43330999534874,
+      "lng": 12.316921878662995
+    },
+    {
+      "lat": 45.432677569033544,
+      "lng": 12.31529109558194
+    },
+    {
+      "lat": 45.431292229483546,
+      "lng": 12.315484214631013
+    },
+    {
+      "lat": 45.43105129739497,
+      "lng": 12.311900783387117
+    },
+    {
+      "lat": 45.431743974377504,
+      "lng": 12.309755016175203
+    },
+    {
+      "lat": 45.43698395090395,
+      "lng": 12.314368415680818
+    }
+  ],
+  "centroid": {
+    "lat": 45.43397933253766,
+    "lng": 12.314824878887718
+  },
+  "historicalName": "Fondamenta de Santa Marta in Sestiere Dorsoduro",
+  "englishName": "Quay of St. Martha in the Dorsoduro District",
+  "historicalDescription": "Area near the Church of Santa Marta along the canal, part of the Dorsoduro sestiere. Known for shipping and maritime activities in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 200123.05,
+  "center": {
+    "lat": 45.433067188467305,
+    "lng": 12.313442369799048
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43124404306583,
+        "lng": 12.314767528382234
+      },
+      "water": {
+        "lat": 45.43106419821054,
+        "lng": 12.314763757595461
+      },
+      "historicalName": "Riva di Santa Marta",
+      "englishName": "Shore of Saint Martha",
+      "historicalDescription": "Named after the church of Santa Marta in Dorsoduro, this dock served as the main landing point for people visiting the church and monastery established in the 13th century.",
+      "id": "canal_45.431244_12.314768"
+    },
+    {
+      "edge": {
+        "lat": 45.43119585664812,
+        "lng": 12.314050842133454
+      },
+      "water": {
+        "lat": 45.43101932224189,
+        "lng": 12.314001750952416
+      },
+      "historicalName": "Fondamenta dei Ceramisti",
+      "englishName": "Foundation of the Ceramicists",
+      "historicalDescription": "This dock was frequented by artisans who created decorative ceramics and pottery. The Dorsoduro area was known for various craft workshops during the Renaissance period.",
+      "id": "canal_45.431196_12.314051"
+    },
+    {
+      "edge": {
+        "lat": 45.4311476702304,
+        "lng": 12.313334155884675
+      },
+      "water": {
+        "lat": 45.43097895128817,
+        "lng": 12.313245334132311
+      },
+      "historicalName": "Riva dei Benedettini",
+      "englishName": "Shore of the Benedictines",
+      "historicalDescription": "Named for the Benedictine monks who had a significant presence near Santa Marta. This dock would have been used for supplies and visitors to their monastic buildings.",
+      "id": "canal_45.431148_12.313334"
+    },
+    {
+      "edge": {
+        "lat": 45.43109948381269,
+        "lng": 12.312617469635896
+      },
+      "water": {
+        "lat": 45.43094108080205,
+        "lng": 12.312496053441997
+      },
+      "historicalName": "Fondamenta delle Convertite",
+      "englishName": "Foundation of the Converted Women",
+      "historicalDescription": "This dock served a convent for reformed prostitutes near Santa Marta, an institution established to provide shelter and rehabilitation for women seeking to leave prostitution.",
+      "id": "canal_45.431099_12.312617"
+    },
+    {
+      "edge": {
+        "lat": 45.43105129739497,
+        "lng": 12.311900783387117
+      },
+      "water": {
+        "lat": 45.43090400250543,
+        "lng": 12.311753686681374
+      },
+      "historicalName": "Riva dei Zattieri",
+      "englishName": "Shore of the Raftsmen",
+      "historicalDescription": "Located near the wider Giudecca Canal, this dock was used by raftsmen who transported timber from the mainland into Venice, crucial for the city's shipbuilding industry.",
+      "id": "canal_45.431051_12.311901"
+    },
+    {
+      "edge": {
+        "lat": 45.43128218972248,
+        "lng": 12.311185527649812
+      },
+      "water": {
+        "lat": 45.431151585732636,
+        "lng": 12.311009299016513
+      },
+      "historicalName": "Fondamenta della Lana",
+      "englishName": "Foundation of the Wool",
+      "historicalDescription": "This dock served wool merchants and processors in Dorsoduro. The wool trade was highly regulated and vital to Venice's economy during the Renaissance.",
+      "id": "canal_45.431282_12.311186"
+    },
+    {
+      "edge": {
+        "lat": 45.431513082049996,
+        "lng": 12.310470271912507
+      },
+      "water": {
+        "lat": 45.43140011980529,
+        "lng": 12.310270816836391
+      },
+      "historicalName": "Riva dei Vetrari",
+      "englishName": "Shore of the Glassmakers",
+      "historicalDescription": "While most glassmaking was concentrated on Murano, some glassmakers had workshops in Dorsoduro, and this dock would have served their transportation needs.",
+      "id": "canal_45.431513_12.310470"
+    },
+    {
+      "edge": {
+        "lat": 45.43214704949492,
+        "lng": 12.31010989306025
+      },
+      "water": {
+        "lat": 45.43205991362723,
+        "lng": 12.309885667669484
+      },
+      "historicalName": "Fondamenta delle Erbe",
+      "englishName": "Foundation of the Herbs",
+      "historicalDescription": "A landing where boats bringing herbs, vegetables, and medicinal plants would dock. These would supply local contracts and apothecaries in the Santa Marta area.",
+      "id": "canal_45.432147_12.310110"
+    },
+    {
+      "edge": {
+        "lat": 45.43255012461234,
+        "lng": 12.310464769945296
+      },
+      "water": {
+        "lat": 45.432474002858015,
+        "lng": 12.310232544013806
+      },
+      "historicalName": "Riva dei Brentatori",
+      "englishName": "Shore of the Wine Carriers",
+      "historicalDescription": "Named after the brentatori, workers who carried wine in special wooden containers called 'brente'. This dock would have been crucial for wine deliveries to Dorsoduro.",
+      "id": "canal_45.432550_12.310465"
+    },
+    {
+      "edge": {
+        "lat": 45.43295319972976,
+        "lng": 12.310819646830344
+      },
+      "water": {
+        "lat": 45.432891515284275,
+        "lng": 12.310578878270388
+      },
+      "historicalName": "Fondamenta San Nicolò",
+      "englishName": "Foundation of Saint Nicholas",
+      "historicalDescription": "Named after a small chapel dedicated to Saint Nicholas that once stood nearby. Saint Nicholas was particularly important to Venetian sailors and merchants.",
+      "id": "canal_45.432953_12.310820"
+    },
+    {
+      "edge": {
+        "lat": 45.43335627484718,
+        "lng": 12.311174523715392
+      },
+      "water": {
+        "lat": 45.433313765525114,
+        "lng": 12.310925471138034
+      },
+      "historicalName": "Riva delle Saline",
+      "englishName": "Shore of the Salt Works",
+      "historicalDescription": "This dock was connected to Venice's vital salt trade, possibly where salt from the lagoon salt pans was unloaded before being stored or traded.",
+      "id": "canal_45.433356_12.311175"
+    },
+    {
+      "edge": {
+        "lat": 45.433759349964596,
+        "lng": 12.311529400600438
+      },
+      "water": {
+        "lat": 45.433742317110195,
+        "lng": 12.311274237652396
+      },
+      "historicalName": "Fondamenta dei Remeri",
+      "englishName": "Foundation of the Oar Makers",
+      "historicalDescription": "Dedicated to the craftsmen who made oars for Venetian boats and galleys. The remeri guild was essential to Venice's maritime power and had workshops in various districts including Dorsoduro.",
+      "id": "canal_45.433759_12.311529"
+    },
+    {
+      "edge": {
+        "lat": 45.434162425082015,
+        "lng": 12.311884277485486
+      },
+      "water": {
+        "lat": 45.43417832177954,
+        "lng": 12.311628964789925
+      },
+      "historicalName": "Riva del Lazaretto",
+      "englishName": "Shore of the Quarantine Station",
+      "historicalDescription": "This dock may have been used for boats heading to or from quarantine facilities, reflecting Venice's advanced public health measures during plague outbreaks.",
+      "id": "canal_45.434162_12.311884"
+    },
+    {
+      "edge": {
+        "lat": 45.43456550019944,
+        "lng": 12.312239154370534
+      },
+      "water": {
+        "lat": 45.43462079199332,
+        "lng": 12.311995249159878
+      },
+      "historicalName": "Fondamenta dei Granai",
+      "englishName": "Foundation of the Granaries",
+      "historicalDescription": "This dock served nearby granaries where Venice stored its vital grain supplies. Food security was a major concern for the maritime republic.",
+      "id": "canal_45.434566_12.312239"
+    },
+    {
+      "edge": {
+        "lat": 45.43496857531686,
+        "lng": 12.312594031255582
+      },
+      "water": {
+        "lat": 45.43506465934018,
+        "lng": 12.31237735156844
+      },
+      "historicalName": "Riva dei Cerchiai",
+      "englishName": "Shore of the Coopers",
+      "historicalDescription": "Named for the barrel makers who supplied containers essential for storing and shipping goods. Their craft was vital to Venetian commerce and shipping.",
+      "id": "canal_45.434969_12.312594"
+    },
+    {
+      "edge": {
+        "lat": 45.43537165043428,
+        "lng": 12.312948908140628
+      },
+      "water": {
+        "lat": 45.435502346523116,
+        "lng": 12.312772811833879
+      },
+      "historicalName": "Fondamenta degli Incurabili",
+      "englishName": "Foundation of the Incurables",
+      "historicalDescription": "This dock served the Ospedale degli Incurabili (Hospital for Incurables) founded in the 16th century near Santa Marta to treat those with syphilis and other chronic diseases.",
+      "id": "canal_45.435372_12.312949"
+    },
+    {
+      "edge": {
+        "lat": 45.435774725551695,
+        "lng": 12.313303785025676
+      },
+      "water": {
+        "lat": 45.43592933105551,
+        "lng": 12.313172800065251
+      },
+      "historicalName": "Riva dei Carbonai",
+      "englishName": "Shore of the Charcoal Sellers",
+      "historicalDescription": "This dock was where charcoal, essential for heating and cooking, was delivered to the Dorsoduro district by boats from the mainland forests.",
+      "id": "canal_45.435775_12.313304"
+    },
+    {
+      "edge": {
+        "lat": 45.436177800669114,
+        "lng": 12.313658661910724
+      },
+      "water": {
+        "lat": 45.436346365430154,
+        "lng": 12.313569243700275
+      },
+      "historicalName": "Fondamenta dei Marmorari",
+      "englishName": "Foundation of the Marble Workers",
+      "historicalDescription": "Used by craftsmen who worked with marble for Venetian buildings and monuments. The dock would have facilitated the unloading of heavy marble blocks from quarries.",
+      "id": "canal_45.436178_12.313659"
+    },
+    {
+      "edge": {
+        "lat": 45.43658087578653,
+        "lng": 12.31401353879577
+      },
+      "water": {
+        "lat": 45.436756581839155,
+        "lng": 12.313958741565337
+      },
+      "historicalName": "Riva dei Tabacchi",
+      "englishName": "Shore of the Tobacco",
+      "historicalDescription": "Following tobacco's introduction to Venice in the late Renaissance, this dock may have been where tobacco shipments were received for processing or distribution in the city.",
+      "id": "canal_45.436581_12.314014"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43299378219115,
+        "lng": 12.316106487122468
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879183695",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43287087977511,
+          "lng": 12.31629281579456
+        },
+        "distance": 19.953794211184725,
+        "id": "4d822ef9-2d2e-4161-9e76-874a4cdc8328",
+        "historicalName": "Ponte dei Marinai",
+        "englishName": "Bridge of the Sailors",
+        "historicalDescription": "Located near Fondamenta de Santa Marta in Sestiere Dorsoduro, this bridge earned its name from the many sailors who would pass through this area due to its proximity to the maritime facilities. Santa Marta was historically close to the Arsenale's western operations and served as a gathering place for mariners heading to their vessels or returning from voyages. The bridge would have been a critical crossing point for those in naval service during the Republic's maritime dominance of the 15th-16th centuries.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43293233098313,
+            "lng": 12.316199651458515
+          }
+        }
+      },
+      "id": "bridge_45.432994_12.316106"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.431512233755996,
+      "lng": 12.311065513379939,
+      "streetName": "Calle dei Marinai",
+      "streetNameEnglish": "Street of the Sailors",
+      "streetDescription": "Named for the sailors who frequented this area near the Santa Marta docks, reflecting the maritime importance of this part of Dorsoduro.",
+      "id": "building_45.431512_12.311066"
+    },
+    {
+      "lat": 45.431468586222465,
+      "lng": 12.311658279039628,
+      "streetName": "Rio Terà delle Muneghe",
+      "streetNameEnglish": "Filled Canal of the Nuns",
+      "streetDescription": "Refers to a former canal that was filled in near the convent of Santa Marta, where nuns (muneghe in Venetian dialect) resided.",
+      "id": "building_45.431469_12.311658"
+    },
+    {
+      "lat": 45.43153457510064,
+      "lng": 12.312238050219563,
+      "streetName": "Fondamenta dei Burchieri",
+      "streetNameEnglish": "Foundation of the Barge Workers",
+      "streetDescription": "Named after the workers who operated the 'burchi' (cargo barges) that would dock along this waterfront in Santa Marta.",
+      "id": "building_45.431535_12.312238"
+    },
+    {
+      "lat": 45.43143400384053,
+      "lng": 12.31306310390218,
+      "streetName": "Calle del Convento",
+      "streetNameEnglish": "Street of the Convent",
+      "streetDescription": "Leads to the historical convent of Santa Marta which was an important religious institution in this area of Dorsoduro.",
+      "id": "building_45.431434_12.313063"
+    },
+    {
+      "lat": 45.43144353711951,
+      "lng": 12.31363619496115,
+      "streetName": "Sottoportego della Misericordia",
+      "streetNameEnglish": "Underpass of Mercy",
+      "streetDescription": "Named after charitable works conducted in this area, possibly in connection with the religious orders of Santa Marta.",
+      "id": "building_45.431444_12.313636"
+    },
+    {
+      "lat": 45.43149693932195,
+      "lng": 12.31474804060052,
+      "streetName": "Calle delle Corderie",
+      "streetNameEnglish": "Street of the Rope Makers",
+      "streetDescription": "Reflects the rope-making industry that was vital to Venetian shipbuilding and was present in this district near the docks.",
+      "id": "building_45.431497_12.314748"
+    },
+    {
+      "lat": 45.431986211103585,
+      "lng": 12.310458060281933,
+      "streetName": "Campiello dei Magazzini",
+      "streetNameEnglish": "Small Square of the Warehouses",
+      "streetDescription": "Named for the storage facilities that would have served the busy Santa Marta port area in Renaissance Venice.",
+      "id": "building_45.431986_12.310458"
+    },
+    {
+      "lat": 45.432035036417375,
+      "lng": 12.311008771127549,
+      "streetName": "Ruga dei Calafati",
+      "streetNameEnglish": "Street of the Caulkers",
+      "streetDescription": "Named after the skilled workers who sealed ships' hulls, who would have worked in the nearby shipyards of Santa Marta.",
+      "id": "building_45.432035_12.311009"
+    },
+    {
+      "lat": 45.43191561128054,
+      "lng": 12.311614263498601,
+      "streetName": "Fondamenta dei Vinattieri",
+      "streetNameEnglish": "Foundation of the Wine Merchants",
+      "streetDescription": "Named for the wine merchants who would have had their businesses along this waterfront, importing wine by boat.",
+      "id": "building_45.431916_12.311614"
+    },
+    {
+      "lat": 45.4320117989775,
+      "lng": 12.312285045412935,
+      "streetName": "Calle dei Cantieri",
+      "streetNameEnglish": "Street of the Shipyards",
+      "streetDescription": "References the boat building activities that took place near Santa Marta, an important maritime industrial area.",
+      "id": "building_45.432012_12.312285"
+    },
+    {
+      "lat": 45.431909085314466,
+      "lng": 12.312957262908578,
+      "streetName": "Rio Terà degli Ospedali",
+      "streetNameEnglish": "Filled Canal of the Hospitals",
+      "streetDescription": "Named for medical facilities that once existed in this area, possibly related to the charitable works of the Santa Marta religious community.",
+      "id": "building_45.431909_12.312957"
+    },
+    {
+      "lat": 45.43192668775904,
+      "lng": 12.31371414303501,
+      "streetName": "Salizada dei Mercanti",
+      "streetNameEnglish": "Paved Road of the Merchants",
+      "streetDescription": "A main paved street (salizada) where merchants would conduct business, connected to the commercial activities of the Santa Marta port.",
+      "id": "building_45.431927_12.313714"
+    },
+    {
+      "lat": 45.43193796124566,
+      "lng": 12.314810859275697,
+      "streetName": "Corte dei Barozzi",
+      "streetNameEnglish": "Court of the Barozzi Family",
+      "streetDescription": "Named after the Barozzi, an ancient nobili family who may have owned property in this area of Dorsoduro.",
+      "id": "building_45.431938_12.314811"
+    },
+    {
+      "lat": 45.4323799361082,
+      "lng": 12.311130854122117,
+      "streetName": "Calle degli Artigiani",
+      "streetNameEnglish": "Street of the Artisans",
+      "streetDescription": "Reflects the concentration of craftspeople who worked in this industrial area near Santa Marta.",
+      "id": "building_45.432380_12.311131"
+    },
+    {
+      "lat": 45.43234471235165,
+      "lng": 12.312228597588602,
+      "streetName": "Fondamenta delle Spezierie",
+      "streetNameEnglish": "Foundation of the Spice Warehouses",
+      "streetDescription": "Named for warehouses where spices imported from the East would be stored after arrival at the nearby port.",
+      "id": "building_45.432345_12.312229"
+    },
+    {
+      "lat": 45.43245878022646,
+      "lng": 12.312943110820804,
+      "streetName": "Sottoportego dei Pescatori",
+      "streetNameEnglish": "Underpass of the Fishermen",
+      "streetDescription": "Named for the fishermen who would sell their catch in this area, using the underpass as shelter during inclement weather.",
+      "id": "building_45.432459_12.312943"
+    },
+    {
+      "lat": 45.43231540205404,
+      "lng": 12.313567801295626,
+      "streetName": "Calle dei Marangoni",
+      "streetNameEnglish": "Street of the Carpenters",
+      "streetDescription": "Named after the skilled woodworkers who would have been essential to the shipbuilding industry around Santa Marta.",
+      "id": "building_45.432315_12.313568"
+    },
+    {
+      "lat": 45.43239586182222,
+      "lng": 12.314212411249462,
+      "streetName": "Rio Terà delle Convertite",
+      "streetNameEnglish": "Filled Canal of the Converted Women",
+      "streetDescription": "References a former institution for reformed prostitutes that may have been established by the religious orders in this area.",
+      "id": "building_45.432396_12.314212"
+    },
+    {
+      "lat": 45.432318327209984,
+      "lng": 12.31477462027386,
+      "streetName": "Calle dei Naviganti",
+      "streetNameEnglish": "Street of the Navigators",
+      "streetDescription": "Honors the sea captains and navigators who would have lived in this maritime district near Santa Marta.",
+      "id": "building_45.432318_12.314775"
+    },
+    {
+      "lat": 45.43281726615428,
+      "lng": 12.311086320727401,
+      "streetName": "Fondamenta dei Mozzi",
+      "streetNameEnglish": "Foundation of the Ship Boys",
+      "streetDescription": "Named for the young apprentice sailors who would gather here before boarding ships at the Santa Marta docks.",
+      "id": "building_45.432817_12.311086"
+    },
+    {
+      "lat": 45.43278948604973,
+      "lng": 12.311707235732685,
+      "streetName": "Campiello delle Ancore",
+      "streetNameEnglish": "Small Square of the Anchors",
+      "streetDescription": "Likely named for anchor storage or manufacturing that took place in this square near the waterfront.",
+      "id": "building_45.432789_12.311707"
+    },
+    {
+      "lat": 45.432882466071064,
+      "lng": 12.312279491240815,
+      "streetName": "Calle della Fornace",
+      "streetNameEnglish": "Street of the Kiln",
+      "streetDescription": "Named for a kiln or furnace that would have been used for industrial purposes in this working-class area of Dorsoduro.",
+      "id": "building_45.432882_12.312279"
+    },
+    {
+      "lat": 45.43285736005361,
+      "lng": 12.312985690738582,
+      "streetName": "Sottoportego dei Remeri",
+      "streetNameEnglish": "Underpass of the Oar Makers",
+      "streetDescription": "Named for the craftsmen who made oars for Venetian boats, an essential craft that supported the maritime industry.",
+      "id": "building_45.432857_12.312986"
+    },
+    {
+      "lat": 45.432780636535554,
+      "lng": 12.313710830521387,
+      "streetName": "Corte Zen",
+      "streetNameEnglish": "Zen Court",
+      "streetDescription": "Named after the Zen family, a notable Venetian noble family who may have owned property in the Santa Marta area.",
+      "id": "building_45.432781_12.313711"
+    },
+    {
+      "lat": 45.43277410918598,
+      "lng": 12.314314170123277,
+      "streetName": "Calle dei Biscottieri",
+      "streetNameEnglish": "Street of the Biscuit Makers",
+      "streetDescription": "Named for bakers who made hardtack biscuits that were essential provisions for long sea voyages, located near the port.",
+      "id": "building_45.432774_12.314314"
+    },
+    {
+      "lat": 45.43287948288783,
+      "lng": 12.314774187884483,
+      "streetName": "Fondamenta dei Vetrai",
+      "streetNameEnglish": "Foundation of the Glass Makers",
+      "streetDescription": "While most glass production was on Murano, this might indicate a secondary glass trade or warehousing location in Santa Marta.",
+      "id": "building_45.432879_12.314774"
+    },
+    {
+      "lat": 45.43325745787077,
+      "lng": 12.311552561598692,
+      "streetName": "Ruga dei Sarti",
+      "streetNameEnglish": "Street of the Tailors",
+      "streetDescription": "Named for tailors who may have specialized in making sailors' clothes and maritime uniforms in this seafaring district.",
+      "id": "building_45.433257_12.311553"
+    },
+    {
+      "lat": 45.43325630794061,
+      "lng": 12.312431253766663,
+      "streetName": "Calle delle Vele",
+      "streetNameEnglish": "Street of the Sails",
+      "streetDescription": "Named for sailmakers who crafted and repaired the sails for ships that docked at the Santa Marta port.",
+      "id": "building_45.433256_12.312431"
+    },
+    {
+      "lat": 45.433266147529785,
+      "lng": 12.313681957205942,
+      "streetName": "Rio Terà del Sale",
+      "streetNameEnglish": "Filled Canal of Salt",
+      "streetDescription": "References the salt trade, a state monopoly in Venice, with warehouses likely situated along this former canal near the port.",
+      "id": "building_45.433266_12.313682"
+    },
+    {
+      "lat": 45.433382531392006,
+      "lng": 12.314212613529447,
+      "streetName": "Salizada dei Mercenari",
+      "streetNameEnglish": "Paved Road of the Mercenaries",
+      "streetDescription": "Possibly where hired soldiers gathered or were housed when the Republic employed mercenary forces.",
+      "id": "building_45.433383_12.314213"
+    },
+    {
+      "lat": 45.43334384939363,
+      "lng": 12.314957480559762,
+      "streetName": "Calle dei Chiovere",
+      "streetNameEnglish": "Street of the Nail Makers",
+      "streetDescription": "Named for craftsmen who made nails essential for shipbuilding, located in this industrial part of Santa Marta.",
+      "id": "building_45.433344_12.314957"
+    },
+    {
+      "lat": 45.433329828625375,
+      "lng": 12.31543650048838,
+      "streetName": "Sottoportego dei Tiraoro",
+      "streetNameEnglish": "Underpass of the Gold-Thread Drawers",
+      "streetDescription": "Named for artisans who drew gold into fine thread for luxury textiles, possibly working in studios near this passage.",
+      "id": "building_45.433330_12.315437"
+    },
+    {
+      "lat": 45.433365088697556,
+      "lng": 12.316053612178939,
+      "streetName": "Fondamenta degli Alberi",
+      "streetNameEnglish": "Foundation of the Masts",
+      "streetDescription": "Named for the storage or preparation of ship masts (alberi) that would have lined this waterfront in the shipbuilding district.",
+      "id": "building_45.433365_12.316054"
+    },
+    {
+      "lat": 45.43372975350018,
+      "lng": 12.312393979366618,
+      "streetName": "Calle dei Bottai",
+      "streetNameEnglish": "Street of the Barrel Makers",
+      "streetDescription": "Named for coopers who made barrels essential for storing provisions for sea voyages, located near the Santa Marta port.",
+      "id": "building_45.433730_12.312394"
+    },
+    {
+      "lat": 45.43378563383331,
+      "lng": 12.313007053080279,
+      "streetName": "Campiello della Pescheria",
+      "streetNameEnglish": "Small Square of the Fish Contract",
+      "streetDescription": "A small square where fish would have been sold, serving the local community in Santa Marta.",
+      "id": "building_45.433786_12.313007"
+    },
+    {
+      "lat": 45.43376779348559,
+      "lng": 12.313519459706917,
+      "streetName": "Ruga dei Cartai",
+      "streetNameEnglish": "Street of the Paper Makers",
+      "streetDescription": "Named for papermakers who may have had workshops in this area, possibly supplying ships' logs and navigational documents.",
+      "id": "building_45.433768_12.313519"
+    },
+    {
+      "lat": 45.433764186079216,
+      "lng": 12.314182821555097,
+      "streetName": "Calle del Fabbro",
+      "streetNameEnglish": "Street of the Blacksmith",
+      "streetDescription": "Named for blacksmiths who would have been essential to the shipbuilding and maritime industries in Santa Marta.",
+      "id": "building_45.433764_12.314183"
+    },
+    {
+      "lat": 45.43368163426179,
+      "lng": 12.314799696708626,
+      "streetName": "Rio Terà della Lana",
+      "streetNameEnglish": "Filled Canal of Wool",
+      "streetDescription": "References the wool trade that was important to Venice, with warehouses or processing facilities along this former canal.",
+      "id": "building_45.433682_12.314800"
+    },
+    {
+      "lat": 45.433766610644156,
+      "lng": 12.315520792963271,
+      "streetName": "Salizada dei Patroni",
+      "streetNameEnglish": "Paved Road of the Ship Owners",
+      "streetDescription": "A prestigious street where wealthy ship owners may have lived or had offices near their vessels at Santa Marta.",
+      "id": "building_45.433767_12.315521"
+    },
+    {
+      "lat": 45.43375057483316,
+      "lng": 12.316149137598625,
+      "streetName": "Corte Contarini",
+      "streetNameEnglish": "Contarini Court",
+      "streetDescription": "Named after the prominent Contarini family, one of Venice's oldest noble families, who may have owned property in Dorsoduro.",
+      "id": "building_45.433751_12.316149"
+    },
+    {
+      "lat": 45.43418687918917,
+      "lng": 12.31290103831572,
+      "streetName": "Calle del Monastero",
+      "streetNameEnglish": "Street of the Monastery",
+      "streetDescription": "Named for its proximity to the monastery that was part of the Santa Marta religious complex.",
+      "id": "building_45.434187_12.312901"
+    },
+    {
+      "lat": 45.43420843004394,
+      "lng": 12.313484309612354,
+      "streetName": "Fondamenta degli Agrumi",
+      "streetNameEnglish": "Foundation of the Citrus Fruits",
+      "streetDescription": "Possibly where citrus fruits, important for preventing scurvy on long voyages, were unloaded and stored near the port.",
+      "id": "building_45.434208_12.313484"
+    },
+    {
+      "lat": 45.434259461272454,
+      "lng": 12.314343577987378,
+      "streetName": "Sottoportego dei Carboneri",
+      "streetNameEnglish": "Underpass of the Charcoal Sellers",
+      "streetDescription": "Named for vendors of charcoal, an essential fuel for cooking and heating in Renaissance Venice.",
+      "id": "building_45.434259_12.314344"
+    },
+    {
+      "lat": 45.43418274032841,
+      "lng": 12.314923835997602,
+      "streetName": "Calle dei Squerarioli",
+      "streetNameEnglish": "Street of the Boat Builders",
+      "streetDescription": "Named for the craftsmen who built small wooden boats in the boatyards (squeri) of Santa Marta.",
+      "id": "building_45.434183_12.314924"
+    },
+    {
+      "lat": 45.43419818114432,
+      "lng": 12.31545590088033,
+      "streetName": "Rio Terà delle Provvediture",
+      "streetNameEnglish": "Filled Canal of Provisions",
+      "streetDescription": "References a former canal where ships' provisions were loaded, essential for the maritime operations in Santa Marta.",
+      "id": "building_45.434198_12.315456"
+    },
+    {
+      "lat": 45.43457716214528,
+      "lng": 12.313061194217932,
+      "streetName": "Calle della Fornasa",
+      "streetNameEnglish": "Street of the Large Furnace",
+      "streetDescription": "Named for a large industrial furnace that would have served the maritime industries in Santa Marta.",
+      "id": "building_45.434577_12.313061"
+    },
+    {
+      "lat": 45.43471022654565,
+      "lng": 12.313501273346718,
+      "streetName": "Fondamenta dei Timonieri",
+      "streetNameEnglish": "Foundation of the Helmsmen",
+      "streetDescription": "Named for the skilled ship's helmsmen who would have frequented this waterfront area near Santa Marta.",
+      "id": "building_45.434710_12.313501"
+    },
+    {
+      "lat": 45.43466283702424,
+      "lng": 12.314311106694039,
+      "streetName": "Campiello dei Frati",
+      "streetNameEnglish": "Small Square of the Friars",
+      "streetDescription": "Named for the friars who would have been associated with the religious institutions in Santa Marta.",
+      "id": "building_45.434663_12.314311"
+    },
+    {
+      "lat": 45.434568648724955,
+      "lng": 12.314921281625299,
+      "streetName": "Calle della Scuola Marittima",
+      "streetNameEnglish": "Street of the Maritime School",
+      "streetDescription": "Possibly referencing a location where navigational skills were taught to future sailors and captains.",
+      "id": "building_45.434569_12.314921"
+    },
+    {
+      "lat": 45.43470653553881,
+      "lng": 12.315485814280517,
+      "streetName": "Sottoportego delle Munizioni",
+      "streetNameEnglish": "Underpass of the Munitions",
+      "streetDescription": "Named for a storage area for ship's weapons and ammunition near the Santa Marta docks.",
+      "id": "building_45.434707_12.315486"
+    },
+    {
+      "lat": 45.43501397203805,
+      "lng": 12.313653954101031,
+      "streetName": "Ruga dei Doratori",
+      "streetNameEnglish": "Street of the Gilders",
+      "streetDescription": "Named for artisans who applied gold leaf to decorative elements of ships and gondolas in this maritime district.",
+      "id": "building_45.435014_12.313654"
+    },
+    {
+      "lat": 45.435097117917934,
+      "lng": 12.314213030788183,
+      "streetName": "Calle dei Varoteri",
+      "streetNameEnglish": "Street of the Furriers",
+      "streetDescription": "Named for fur workers who might have had shops in this area, supplying warm clothing for sailors and travelers.",
+      "id": "building_45.435097_12.314213"
+    },
+    {
+      "lat": 45.43509564065756,
+      "lng": 12.314839635035872,
+      "streetName": "Rio Terà dei Gondolieri",
+      "streetNameEnglish": "Filled Canal of the Gondoliers",
+      "streetDescription": "A former canal where gondoliers may have moored their boats while waiting for passengers from the Santa Marta area.",
+      "id": "building_45.435096_12.314840"
+    },
+    {
+      "lat": 45.43515700565437,
+      "lng": 12.31560060855905,
+      "streetName": "Corte Dandolo",
+      "streetNameEnglish": "Dandolo Court",
+      "streetDescription": "Named for the Dandolo family, a prestigious Venetian noble family who may have owned property in this part of Dorsoduro.",
+      "id": "building_45.435157_12.315601"
+    },
+    {
+      "lat": 45.435601236648104,
+      "lng": 12.31415479168266,
+      "streetName": "Calle dei Facchini",
+      "streetNameEnglish": "Street of the Porters",
+      "streetDescription": "Named for the laborers who carried goods to and from ships docked at the Santa Marta port.",
+      "id": "building_45.435601_12.314155"
+    },
+    {
+      "lat": 45.435534135519056,
+      "lng": 12.314856051842494,
+      "streetName": "Fondamenta dei Canapi",
+      "streetNameEnglish": "Foundation of the Ropes",
+      "streetDescription": "Named for the storage or sale of ship's ropes and cables along this waterfront area of Santa Marta.",
+      "id": "building_45.435534_12.314856"
+    },
+    {
+      "lat": 45.43605764832593,
+      "lng": 12.31430887218707,
+      "streetName": "Salizada della Dogana",
+      "streetNameEnglish": "Paved Road of the Customs House",
+      "streetDescription": "A main paved street leading to a customs checkpoint where goods entering Venice through Santa Marta would be taxed.",
+      "id": "building_45.436058_12.314309"
+    },
+    {
+      "lat": 45.436037263771375,
+      "lng": 12.314797287511528,
+      "streetName": "Calle del Campanil",
+      "streetNameEnglish": "Street of the Bell Tower",
+      "streetDescription": "Named for its proximity to the bell tower of the Santa Marta church complex.",
+      "id": "building_45.436037_12.314797"
+    },
+    {
+      "lat": 45.43646984415495,
+      "lng": 12.314876340429448,
+      "streetName": "Sottoportego dei Piloti",
+      "streetNameEnglish": "Underpass of the Pilots",
+      "streetDescription": "Named for the harbor pilots who guided ships safely into port and might have gathered in this sheltered area.",
+      "id": "building_45.436470_12.314876"
+    }
+  ],
+  "id": "polygon-1745879206602"
+}

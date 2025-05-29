@@ -1,0 +1,55 @@
+{
+  "id": "luxury_silk_garments",
+  "name": "Luxury Silk Garments",
+  "category": "finished_goods",
+  "subCategory": "luxury_goods",
+  "description": "Exquisite clothing crafted from the finest Venetian silk, featuring intricate embroidery and adorned with precious elements. These garments are sought by nobility across Europe.",
+  "varieties": [
+    {
+      "type": "robe",
+      "productionDifficulty": "high",
+      "popularity": "very_high",
+      "valueMultiplier": 1.2,
+      "modelVariant": "models/resources/luxury_silk_garments_robe.glb"
+    },
+    {
+      "type": "gown",
+      "productionDifficulty": "very_high",
+      "popularity": "high",
+      "valueMultiplier": 1.5,
+      "modelVariant": "models/resources/luxury_silk_garments_gown.glb"
+    },
+    {
+      "type": "doublet",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 0.9,
+      "modelVariant": "models/resources/luxury_silk_garments_doublet.glb"
+    },
+    {
+      "type": "ceremonial_garment",
+      "productionDifficulty": "very_high",
+      "popularity": "low",
+      "valueMultiplier": 2.5,
+      "modelVariant": "models/resources/luxury_silk_garments_ceremonial.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1300,
+    "notableProducers": [
+      "Venetian Tailor Guild",
+      "Court Tailors of the Doge"
+    ],
+    "historicalSignificance": "Venetian silk garments were coveted status symbols throughout Europe. Their distinctive styles and sumptuous materials made them favorites among nobility, and they were frequent diplomatic gifts between states. The Republic strictly regulated their production and export to maintain quality and exclusivity.",
+    "historicalContracts": [
+      "European royal courts",
+      "Venetian nobility",
+      "Papal court",
+      "Ottoman elite"
+    ]
+  },
+  "importPrice": 49392.0,
+  "lifetimeHours": 87600,
+  "consumptionHours": 234,
+  "tier": 4
+}

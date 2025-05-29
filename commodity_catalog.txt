@@ -1,0 +1,799 @@
+# Commodity Catalog of Renaissance Venice
+
+This document provides a comprehensive catalog of tradable goods in Renaissance Venice, organized by category and including key information for market analysis and trading decisions.
+
+## Raw Materials
+
+### Metals
+- **Gold**
+  - **Sources**: Hungary, Africa
+  - **Uses**: Jewelry, decoration, currency, gilding
+  - **Market Characteristics**: High value, stable demand, government-regulated
+  - **Storage Properties**: Non-perishable, high security requirements
+  - **Trading Units**: Ounces, small ingots
+
+- **Silver**
+  - **Sources**: Central Europe, Balkans
+  - **Uses**: Coinage, tableware, jewelry, mirrors
+  - **Market Characteristics**: Monetary metal, price linked to currency values
+  - **Storage Properties**: Non-perishable, security requirements
+  - **Trading Units**: Ounces, ingots, worked pieces by weight
+
+- **Copper**
+  - **Sources**: Alps, Hungary, Sweden
+  - **Uses**: Cookware, decorative items, bronze production, roofing
+  - **Market Characteristics**: Industrial metal, steady demand
+  - **Storage Properties**: Non-perishable, oxidizes if not protected
+  - **Trading Units**: Ingots, sheets, bars
+
+- **Tin**
+  - **Sources**: England, Bohemia
+  - **Uses**: Bronze production, pewter, food containers
+  - **Market Characteristics**: Essential industrial metal, limited sources
+  - **Storage Properties**: Non-perishable, low melting point
+  - **Trading Units**: Ingots, bars
+
+- **Iron**
+  - **Sources**: Alps, Germany, Sweden
+  - **Uses**: Tools, weapons, construction, ship fittings
+  - **Market Characteristics**: Fundamental industrial metal
+  - **Storage Properties**: Rusts if not protected, heavy
+  - **Trading Units**: Bars, ingots, pig iron
+
+- **Lead**
+  - **Sources**: England, Germany, Spain
+  - **Uses**: Roofing, pipes, type metal, weights
+  - **Market Characteristics**: Utilitarian metal, steady demand
+  - **Storage Properties**: Non-perishable, toxic, heavy
+  - **Trading Units**: Ingots, sheets, pigs
+
+### Textiles (Raw)
+- **Raw Silk**
+  - **Sources**: China, Persia, Italy (later)
+  - **Uses**: Luxury fabric production
+  - **Market Characteristics**: High value, luxury material
+  - **Storage Properties**: Requires dry conditions, vulnerable to pests
+  - **Trading Units**: Skeins, bundles
+
+- **Cotton**
+  - **Sources**: Egypt, Levant, later New World
+  - **Uses**: Fabric production, padding, lamp wicks
+  - **Market Characteristics**: Growing demand, imported material
+  - **Storage Properties**: Requires dry storage, flammable
+  - **Trading Units**: Bales
+
+- **Wool**
+  - **Sources**: England, Spain, Italian mainland
+  - **Uses**: Fabric production, felt making
+  - **Market Characteristics**: Staple material, quality varies by source
+  - **Storage Properties**: Must be kept dry, vulnerable to moths
+  - **Trading Units**: Sacks, bales
+
+- **Flax**
+  - **Sources**: Northern Europe, Italian mainland
+  - **Uses**: Linen production, rope making
+  - **Market Characteristics**: Utilitarian material, domestic and imported
+  - **Storage Properties**: Must be processed and stored properly
+  - **Trading Units**: Bundles
+
+### Building Materials
+- **Marble**
+  - **Sources**: Carrara, Greece, Istria
+  - **Uses**: Construction, sculpture, decoration
+  - **Market Characteristics**: Luxury building material, highly variable by quality
+  - **Storage Properties**: Non-perishable, heavy, requires careful handling
+  - **Trading Units**: Blocks, slabs
+
+- **Stone**
+  - **Sources**: Istria, mainland Italy
+  - **Uses**: Construction, paving
+  - **Market Characteristics**: Essential building material
+  - **Storage Properties**: Non-perishable, very heavy
+  - **Trading Units**: Blocks, cut pieces
+
+- **Timber**
+  - **Sources**: Alpine regions, Dalmatian coast
+  - **Uses**: Construction, shipbuilding, furniture
+  - **Market Characteristics**: Essential material, subject to depletion concerns
+  - **Storage Properties**: Must be seasoned properly, fire risk
+  - **Trading Units**: Logs, boards, beams
+
+- **Brick**
+  - **Sources**: Local production, terraferma
+  - **Uses**: Construction
+  - **Market Characteristics**: Basic building material
+  - **Storage Properties**: Non-perishable, breakable
+  - **Trading Units**: Thousands, cartloads
+
+### Organic Materials
+- **Beeswax**
+  - **Sources**: Local, Eastern Europe
+  - **Uses**: Candles, sealing, polishing
+  - **Market Characteristics**: Valuable utility material
+  - **Storage Properties**: Long-lasting if kept cool
+  - **Trading Units**: Blocks, cakes
+
+- **Tallow**
+  - **Sources**: Local, mainland territories
+  - **Uses**: Candles, soap, lubrication
+  - **Market Characteristics**: Common utility material
+  - **Storage Properties**: Perishable if not properly stored
+  - **Trading Units**: Blocks, barrels
+
+- **Hides**
+  - **Sources**: Local, Eastern Europe, North Africa
+  - **Uses**: Leather production
+  - **Market Characteristics**: Essential craft material
+  - **Storage Properties**: Requires preservation, odor issues
+  - **Trading Units**: Bundles, pieces
+
+- **Horn**
+  - **Sources**: Local, North Africa, mainland Europe
+  - **Uses**: Craft material, containers, tools
+  - **Market Characteristics**: Specialty craft material
+  - **Storage Properties**: Non-perishable
+  - **Trading Units**: Pieces, bundles
+
+### Dyestuffs
+- **Indigo**
+  - **Sources**: India, later Caribbean
+  - **Uses**: Blue dye for textiles
+  - **Market Characteristics**: Valuable imported dyestuff
+  - **Storage Properties**: Non-perishable if kept dry
+  - **Trading Units**: Cakes, powder in containers
+
+- **Cochineal**
+  - **Sources**: New World (after discovery)
+  - **Uses**: Red dye for textiles
+  - **Market Characteristics**: Extremely valuable, limited supply
+  - **Storage Properties**: Non-perishable if kept dry
+  - **Trading Units**: Dried insects, powder
+
+- **Madder**
+  - **Sources**: Mediterranean regions
+  - **Uses**: Red dye for textiles
+  - **Market Characteristics**: Common dyestuff
+  - **Storage Properties**: Root or powder form, stable if dry
+  - **Trading Units**: Sacks, barrels of ground root
+
+- **Weld**
+  - **Sources**: Europe
+  - **Uses**: Yellow dye for textiles
+  - **Market Characteristics**: Common local dyestuff
+  - **Storage Properties**: Dried plant material
+  - **Trading Units**: Bundles, sacks
+
+- **Brazilwood**
+  - **Sources**: Asia, later Brazil
+  - **Uses**: Red dye for textiles
+  - **Market Characteristics**: Valuable imported dyestuff
+  - **Storage Properties**: Wood chips or powder
+  - **Trading Units**: Logs, chips, ground powder
+
+## Processed Materials
+
+### Metals (Processed)
+- **Bronze**
+  - **Components**: Copper, tin
+  - **Uses**: Bells, statues, decorative elements
+  - **Market Characteristics**: Value-added metal alloy
+  - **Storage Properties**: Non-perishable
+  - **Trading Units**: Ingots, cast pieces
+
+- **Brass**
+  - **Components**: Copper, zinc
+  - **Uses**: Decorative hardware, instruments, tools
+  - **Market Characteristics**: Versatile alloy
+  - **Storage Properties**: Non-perishable
+  - **Trading Units**: Ingots, sheets, wire
+
+- **Steel**
+  - **Components**: Iron with carbon
+  - **Uses**: Fine tools, weapons, specialized equipment
+  - **Market Characteristics**: Premium metal, limited production
+  - **Storage Properties**: Requires protection from moisture
+  - **Trading Units**: Bars, blanks
+
+- **Pewter**
+  - **Components**: Tin with lead, copper, antimony
+  - **Uses**: Tableware, household items
+  - **Market Characteristics**: Common household metal
+  - **Storage Properties**: Non-perishable
+  - **Trading Units**: Ingots, cast pieces
+
+### Textiles (Processed)
+- **Silk Fabric**
+  - **Components**: Processed silk threads
+  - **Uses**: Luxury clothing, furnishings, ecclesiastical garments
+  - **Market Characteristics**: High-value luxury good
+  - **Storage Properties**: Requires protection from moisture, light, pests
+  - **Trading Units**: Bolts, yards
+
+- **Wool Cloth**
+  - **Components**: Processed wool
+  - **Uses**: Clothing, blankets, furnishings
+  - **Market Characteristics**: Staple textile, various qualities
+  - **Storage Properties**: Must be kept dry, protected from moths
+  - **Trading Units**: Bolts, yards
+
+- **Linen**
+  - **Components**: Processed flax
+  - **Uses**: Clothing, household textiles, sails
+  - **Market Characteristics**: Versatile utility fabric
+  - **Storage Properties**: Mildew-resistant but needs proper storage
+  - **Trading Units**: Bolts, yards
+
+- **Cotton Cloth**
+  - **Components**: Processed cotton
+  - **Uses**: Clothing, household items
+  - **Market Characteristics**: Growing in popularity
+  - **Storage Properties**: Requires dry storage
+  - **Trading Units**: Bolts, yards
+
+- **Velvet**
+  - **Components**: Silk, sometimes with gold thread
+  - **Uses**: Luxury clothing, furnishings
+  - **Market Characteristics**: Premium luxury textile
+  - **Storage Properties**: Requires careful handling and storage
+  - **Trading Units**: Smaller bolts, yards
+
+- **Brocade**
+  - **Components**: Silk with metallic threads
+  - **Uses**: Luxury clothing, furnishings, church vestments
+  - **Market Characteristics**: Highest-end decorative fabric
+  - **Storage Properties**: Requires careful handling and storage
+  - **Trading Units**: Smaller bolts, yards
+
+### Building Components
+- **Glass Panes**
+  - **Components**: Silica, soda ash, lime
+  - **Uses**: Windows, mirrors (with backing)
+  - **Market Characteristics**: Specialized product, Venetian specialty
+  - **Storage Properties**: Fragile, requires careful packing
+  - **Trading Units**: Crates of panes, individual large pieces
+
+- **Roof Tiles**
+  - **Components**: Fired clay
+  - **Uses**: Roofing
+  - **Market Characteristics**: Essential building component
+  - **Storage Properties**: Durable but breakable
+  - **Trading Units**: Hundreds, thousands
+
+- **Cut Stone**
+  - **Components**: Quarried stone
+  - **Uses**: Construction elements
+  - **Market Characteristics**: Premium building material
+  - **Storage Properties**: Very heavy, non-perishable
+  - **Trading Units**: Individual pieces, cartloads
+
+- **Lime**
+  - **Components**: Processed limestone
+  - **Uses**: Mortar, plaster, whitewash
+  - **Market Characteristics**: Essential construction material
+  - **Storage Properties**: Must be kept dry until use
+  - **Trading Units**: Barrels, sacks
+
+### Leather and Related
+- **Tanned Leather**
+  - **Components**: Processed hides
+  - **Uses**: Shoes, belts, bookbinding, furniture
+  - **Market Characteristics**: Versatile craft material
+  - **Storage Properties**: Must be kept dry, away from heat
+  - **Trading Units**: Rolls, sheets
+
+- **Vellum**
+  - **Components**: Calf skin, specially processed
+  - **Uses**: Manuscript pages, legal documents
+  - **Market Characteristics**: Premium writing material
+  - **Storage Properties**: Must be kept dry, flat storage
+  - **Trading Units**: Sheets
+
+- **Parchment**
+  - **Components**: Processed animal skin
+  - **Uses**: Documents, book pages
+  - **Market Characteristics**: Standard quality writing material
+  - **Storage Properties**: Must be kept dry
+  - **Trading Units**: Sheets, rolls
+
+- **Cordovan**
+  - **Components**: Fine leather from Córdoba
+  - **Uses**: Luxury shoes, bookbinding, wall coverings
+  - **Market Characteristics**: Premium leather product
+  - **Storage Properties**: Requires careful storage
+  - **Trading Units**: Sheets, rolls
+
+### Paper and Related
+- **Paper**
+  - **Components**: Linen rags, water
+  - **Uses**: Writing, printing, packaging
+  - **Market Characteristics**: Growing importance with printing
+  - **Storage Properties**: Must be kept dry
+  - **Trading Units**: Reams, sheets
+
+- **Ink**
+  - **Components**: Various formulations
+  - **Uses**: Writing, printing
+  - **Market Characteristics**: Essential for documentation
+  - **Storage Properties**: Can dry out or spoil
+  - **Trading Units**: Bottles, small casks
+
+- **Pounce**
+  - **Components**: Powdered pumice or cuttlefish bone
+  - **Uses**: Preparing parchment for writing
+  - **Market Characteristics**: Specialized scribal supply
+  - **Storage Properties**: Must be kept dry
+  - **Trading Units**: Small containers, pouches
+
+## Finished Goods
+
+### Glassware
+- **Fine Goblets**
+  - **Components**: Murano glass, often with gold or enamel
+  - **Uses**: Luxury tableware
+  - **Market Characteristics**: High-value Venetian specialty
+  - **Storage Properties**: Extremely fragile
+  - **Trading Units**: Individual pieces, matched sets
+
+- **Glass Beads**
+  - **Components**: Colored glass
+  - **Uses**: Jewelry, trade goods, decoration
+  - **Market Characteristics**: Major export item
+  - **Storage Properties**: Fragile, requires careful packing
+  - **Trading Units**: Strings, bags by count or weight
+
+- **Mirrors**
+  - **Components**: Glass with metal backing
+  - **Uses**: Luxury household item
+  - **Market Characteristics**: Venetian specialty, high value
+  - **Storage Properties**: Very fragile
+  - **Trading Units**: Individual pieces
+
+- **Window Glass**
+  - **Components**: Blown or cast glass
+  - **Uses**: Architecture
+  - **Market Characteristics**: Practical luxury item
+  - **Storage Properties**: Very fragile
+  - **Trading Units**: Crates, individual large pieces
+
+### Furniture and Woodwork
+- **Carved Chests**
+  - **Components**: Wood, metal fittings
+  - **Uses**: Storage, dowry items
+  - **Market Characteristics**: Household investment pieces
+  - **Storage Properties**: Bulky, somewhat fragile
+  - **Trading Units**: Individual pieces
+
+- **Tables and Chairs**
+  - **Components**: Various woods, sometimes upholstery
+  - **Uses**: Household furnishing
+  - **Market Characteristics**: Domestic necessity, status items
+  - **Storage Properties**: Bulky, somewhat fragile
+  - **Trading Units**: Individual pieces, small sets
+
+- **Cabinets**
+  - **Components**: Fine woods, often with inlay
+  - **Uses**: Storage of valuables
+  - **Market Characteristics**: Luxury household items
+  - **Storage Properties**: Very bulky, somewhat fragile
+  - **Trading Units**: Individual pieces
+
+- **Picture Frames**
+  - **Components**: Wood, often gilded
+  - **Uses**: Framing art
+  - **Market Characteristics**: Decorative luxury items
+  - **Storage Properties**: Fragile
+  - **Trading Units**: Individual pieces
+
+### Clothing and Accessories
+- **Fine Garments**
+  - **Components**: Luxury textiles, trimmings
+  - **Uses**: Clothing for nobility and wealthy
+  - **Market Characteristics**: High-value status items
+  - **Storage Properties**: Requires protection from moisture, pests
+  - **Trading Units**: Individual pieces
+
+- **Shoes**
+  - **Components**: Leather, sometimes fabric
+  - **Uses**: Footwear
+  - **Market Characteristics**: Necessary items, various qualities
+  - **Storage Properties**: Requires dry storage
+  - **Trading Units**: Pairs
+
+- **Gloves**
+  - **Components**: Fine leather, sometimes embroidered
+  - **Uses**: Hand covering, fashion accessory
+  - **Market Characteristics**: Luxury accessories
+  - **Storage Properties**: Requires dry storage
+  - **Trading Units**: Pairs
+
+- **Hats**
+  - **Components**: Felt, fabric, decorative elements
+  - **Uses**: Headwear, status indicators
+  - **Market Characteristics**: Fashion items, status indicators
+  - **Storage Properties**: Requires careful storage to maintain shape
+  - **Trading Units**: Individual pieces
+
+### Jewelry and Precious Items
+- **Gold Jewelry**
+  - **Components**: Gold, often with gems
+  - **Uses**: Personal adornment, wealth storage
+  - **Market Characteristics**: High-value luxury goods
+  - **Storage Properties**: Small, high security needed
+  - **Trading Units**: Individual pieces
+
+- **Silver Items**
+  - **Components**: Silver
+  - **Uses**: Tableware, personal items, religious objects
+  - **Market Characteristics**: Valuable household goods
+  - **Storage Properties**: Tarnishes if exposed to air
+  - **Trading Units**: Individual pieces, sets
+
+- **Gemstones**
+  - **Components**: Various precious and semi-precious stones
+  - **Uses**: Jewelry, decoration, investment
+  - **Market Characteristics**: High-value luxury goods
+  - **Storage Properties**: Small, high security needed
+  - **Trading Units**: Individual stones, parcels by weight
+
+- **Coral**
+  - **Components**: Mediterranean red coral
+  - **Uses**: Jewelry, talismans, decoration
+  - **Market Characteristics**: Valuable decorative material
+  - **Storage Properties**: Somewhat fragile
+  - **Trading Units**: Branches, beads, carved pieces
+
+### Books and Art
+- **Printed Books**
+  - **Components**: Paper, ink, bindings
+  - **Uses**: Knowledge, entertainment, prestige
+  - **Market Characteristics**: Growing market with printing technology
+  - **Storage Properties**: Must be kept dry
+  - **Trading Units**: Individual volumes
+
+- **Manuscripts**
+  - **Components**: Vellum or paper, ink, bindings
+  - **Uses**: Religious texts, legal documents, literature
+  - **Market Characteristics**: High-value traditional items
+  - **Storage Properties**: Must be kept dry
+  - **Trading Units**: Individual volumes
+
+- **Paintings**
+  - **Components**: Canvas or wood, pigments
+  - **Uses**: Decoration, religious devotion, portraiture
+  - **Market Characteristics**: Luxury items, growing market
+  - **Storage Properties**: Fragile, sensitive to environment
+  - **Trading Units**: Individual pieces
+
+- **Sculptures**
+  - **Components**: Marble, bronze, wood
+  - **Uses**: Decoration, religious devotion
+  - **Market Characteristics**: High-value art objects
+  - **Storage Properties**: Heavy, somewhat to very fragile
+  - **Trading Units**: Individual pieces
+
+### Household Items
+- **Ceramics**
+  - **Components**: Fired clay, sometimes glazed
+  - **Uses**: Tableware, storage containers
+  - **Market Characteristics**: Everyday to luxury items
+  - **Storage Properties**: Breakable
+  - **Trading Units**: Individual pieces, sets
+
+- **Metalware**
+  - **Components**: Copper, brass, bronze, iron
+  - **Uses**: Cookware, tools, household items
+  - **Market Characteristics**: Durable household goods
+  - **Storage Properties**: Non-perishable
+  - **Trading Units**: Individual pieces, sets
+
+- **Candles**
+  - **Components**: Beeswax or tallow
+  - **Uses**: Lighting
+  - **Market Characteristics**: Essential household items
+  - **Storage Properties**: Meltable, flammable
+  - **Trading Units**: Dozens, pounds
+
+- **Soap**
+  - **Components**: Fats, lye, sometimes fragrances
+  - **Uses**: Cleaning
+  - **Market Characteristics**: Household necessity
+  - **Storage Properties**: Must be kept dry
+  - **Trading Units**: Bars, cakes
+
+## Consumables
+
+### Spices
+- **Pepper**
+  - **Sources**: India, Southeast Asia
+  - **Uses**: Food preservation, flavoring
+  - **Market Characteristics**: Most common valuable spice
+  - **Storage Properties**: Long shelf life if kept dry
+  - **Trading Units**: Pounds, sacks
+
+- **Cinnamon**
+  - **Sources**: Ceylon, Southeast Asia
+  - **Uses**: Flavoring, medicine
+  - **Market Characteristics**: Valuable spice
+  - **Storage Properties**: Long shelf life if kept dry
+  - **Trading Units**: Sticks, ground powder by weight
+
+- **Nutmeg**
+  - **Sources**: Banda Islands (Indonesia)
+  - **Uses**: Flavoring, medicine
+  - **Market Characteristics**: Very valuable spice
+  - **Storage Properties**: Long shelf life if kept dry
+  - **Trading Units**: Whole nuts, ground powder by weight
+
+- **Cloves**
+  - **Sources**: Maluku Islands (Indonesia)
+  - **Uses**: Flavoring, medicine, preservative
+  - **Market Characteristics**: Valuable spice
+  - **Storage Properties**: Long shelf life if kept dry
+  - **Trading Units**: Whole cloves, ground powder by weight
+
+- **Saffron**
+  - **Sources**: Spain, Italy, Middle East
+  - **Uses**: Flavoring, dye, medicine
+  - **Market Characteristics**: Most expensive spice by weight
+  - **Storage Properties**: Loses potency over time
+  - **Trading Units**: Threads by weight (very small amounts)
+
+### Sweeteners
+- **Sugar**
+  - **Sources**: Cyprus, Egypt, later Caribbean
+  - **Uses**: Sweetening, preserving, medicine
+  - **Market Characteristics**: Valuable luxury becoming more common
+  - **Storage Properties**: Long shelf life if kept dry
+  - **Trading Units**: Loaves, crushed by weight
+
+- **Honey**
+  - **Sources**: Local, mainland territories
+  - **Uses**: Sweetening, medicine, preservative
+  - **Market Characteristics**: Common sweetener
+  - **Storage Properties**: Very long shelf life
+  - **Trading Units**: Jars, small barrels
+
+### Preserved Foods
+- **Dried Fruits**
+  - **Sources**: Mediterranean regions
+  - **Uses**: Food
+  - **Market Characteristics**: Valuable food items
+  - **Storage Properties**: Long shelf life if kept dry
+  - **Trading Units**: Pounds, sacks
+
+- **Salted Fish**
+  - **Sources**: North Sea, Mediterranean
+  - **Uses**: Food
+  - **Market Characteristics**: Important protein source
+  - **Storage Properties**: Moderate shelf life
+  - **Trading Units**: Barrels, individual large fish
+
+- **Olive Oil**
+  - **Sources**: Italy, Greece, Spain
+  - **Uses**: Cooking, lighting, soap making
+  - **Market Characteristics**: Essential Mediterranean commodity
+  - **Storage Properties**: Moderate shelf life
+  - **Trading Units**: Amphorae, barrels
+
+- **Wine**
+  - **Sources**: Italy, Greece, France, Spain
+  - **Uses**: Beverage, cooking, medicine
+  - **Market Characteristics**: Daily beverage, various qualities
+  - **Storage Properties**: Variable shelf life by type
+  - **Trading Units**: Barrels, bottles (for finest)
+
+### Medicinal Items
+- **Medicinal Herbs**
+  - **Sources**: Various local and imported
+  - **Uses**: Medicine
+  - **Market Characteristics**: Necessary health items
+  - **Storage Properties**: Variable shelf life
+  - **Trading Units**: Dried bundles, powders by weight
+
+- **Theriac**
+  - **Sources**: Venice (manufactured)
+  - **Uses**: Medicine, antidote
+  - **Market Characteristics**: Famous Venetian medical export
+  - **Storage Properties**: Long shelf life
+  - **Trading Units**: Small jars, containers
+
+## Utility Resources
+
+### Fuels
+- **Firewood**
+  - **Sources**: Mainland territories
+  - **Uses**: Heating, cooking, industrial processes
+  - **Market Characteristics**: Essential utility resource
+  - **Storage Properties**: Must be kept dry, fire hazard
+  - **Trading Units**: Cords, cartloads
+
+- **Charcoal**
+  - **Sources**: Mainland territories
+  - **Uses**: Industrial heating, smithing, cooking
+  - **Market Characteristics**: Premium fuel for specific uses
+  - **Storage Properties**: Must be kept dry, fire hazard
+  - **Trading Units**: Sacks, barrels
+
+- **Coal**
+  - **Sources**: England, Belgium
+  - **Uses**: Industrial heating
+  - **Market Characteristics**: Specialized industrial fuel
+  - **Storage Properties**: Fire hazard
+  - **Trading Units**: Tons
+
+### Industrial Supplies
+- **Pitch and Tar**
+  - **Sources**: Northern Europe, local production
+  - **Uses**: Shipbuilding, waterproofing
+  - **Market Characteristics**: Essential maritime industry supply
+  - **Storage Properties**: Flammable
+  - **Trading Units**: Barrels
+
+- **Alum**
+  - **Sources**: Papal States, Turkey
+  - **Uses**: Mordant for dyeing, tanning
+  - **Market Characteristics**: Essential industrial chemical
+  - **Storage Properties**: Long shelf life if kept dry
+  - **Trading Units**: Sacks, barrels
+
+- **Saltpeter**
+  - **Sources**: India, Eastern Europe
+  - **Uses**: Gunpowder production, food preservation
+  - **Market Characteristics**: Strategic material
+  - **Storage Properties**: Must be kept dry
+  - **Trading Units**: Sacks, barrels
+
+- **Sulfur**
+  - **Sources**: Sicily, volcanic regions
+  - **Uses**: Gunpowder, medicine, fumigation
+  - **Market Characteristics**: Industrial chemical
+  - **Storage Properties**: Flammable
+  - **Trading Units**: Blocks, ground powder
+
+### Agricultural Supplies
+- **Seeds**
+  - **Sources**: Various
+  - **Uses**: Agriculture
+  - **Market Characteristics**: Seasonal agricultural necessity
+  - **Storage Properties**: Must be kept dry, pest-free
+  - **Trading Units**: Sacks, small containers for expensive varieties
+
+- **Animal Feed**
+  - **Sources**: Local, mainland territories
+  - **Uses**: Livestock maintenance
+  - **Market Characteristics**: Basic agricultural necessity
+  - **Storage Properties**: Must be kept dry
+  - **Trading Units**: Sacks, cartloads
+
+## Production Chains
+
+### Glass Production Chain
+1. **Raw Materials**:
+   - Silica sand (local lagoon)
+   - Soda ash (imported from Syria/Egypt)
+   - Limestone (mainland quarries)
+   - Colorants (various sources)
+
+2. **Processing Stages**:
+   - Material preparation and mixing
+   - Melting in specialized furnaces
+   - Forming (blowing, casting, lampworking)
+   - Finishing (cutting, grinding, polishing)
+   - Decorating (gold leaf, enamel)
+
+3. **Final Products**:
+   - Luxury tableware
+   - Mirrors
+   - Beads
+   - Windows
+   - Decorative objects
+
+### Textile Production Chain
+1. **Raw Materials**:
+   - Raw silk (imported from Asia, later Italy)
+   - Cotton (imported from Egypt, Syria)
+   - Wool (imported from England, Spain)
+   - Flax (Northern Europe)
+   - Dyes (various sources)
+
+2. **Processing Stages**:
+   - Fiber preparation (cleaning, combing)
+   - Spinning into thread
+   - Weaving
+   - Dyeing (may occur at different stages)
+   - Finishing treatments
+
+3. **Final Products**:
+   - Luxury fabrics (silk velvet, brocade)
+   - Clothing
+   - Household textiles
+   - Ecclesiastical vestments
+   - Flags and banners
+
+### Shipbuilding Production Chain
+1. **Raw Materials**:
+   - Timber (various types from different sources)
+   - Metals for fittings
+   - Pitch and tar
+   - Hemp for ropes
+   - Canvas for sails
+
+2. **Processing Stages**:
+   - Timber seasoning and shaping
+   - Hull construction
+   - Interior fitting
+   - Rigging installation
+   - Finishing and waterproofing
+
+3. **Final Products**:
+   - Galleys (war vessels)
+   - Round ships (merchant vessels)
+   - Specialized vessels
+   - Gondolas
+   - Ship components
+
+### Book Production Chain
+1. **Raw Materials**:
+   - Paper or parchment
+   - Ink
+   - Binding materials (leather, thread)
+   - Decorative elements (gold leaf)
+
+2. **Processing Stages**:
+   - Manuscript writing or type setting
+   - Printing
+   - Illustration addition
+   - Page assembly
+   - Binding
+
+3. **Final Products**:
+   - Books (religious, classical, scientific)
+   - Pamphlets
+   - Maps
+   - Government documents
+   - Commercial records
+
+## Market Relationships
+
+### Complementary Goods
+- **Ships and Naval Stores**: Increased shipbuilding drives demand for pitch, hemp, timber
+- **Textiles and Dyes**: Textile production increases demand for dyestuffs
+- **Luxury Goods and Packaging**: Fine products require quality containers and presentation
+- **Books and Paper**: Printing industry drives paper demand
+
+### Substitute Goods
+- **Different Textile Fibers**: Wool, cotton, silk, linen can substitute based on price and availability
+- **Lighting Sources**: Olive oil, tallow, beeswax compete for lighting applications
+- **Building Materials**: Stone, brick, timber offer alternative construction options
+- **Writing Surfaces**: Paper, parchment, vellum serve similar purposes at different price points
+
+### Derived Demand
+- **Glass Production**: Creates demand for soda ash, silica, colorants
+- **Shipping Industry**: Drives demand for timber, canvas, rope
+- **Printing Industry**: Creates demand for paper, ink, binding materials
+- **Construction**: Drives demand for stone, timber, metals
+
+## Implementation Guidelines
+
+When working with commodities:
+
+1. **Consider the Full Value Chain**
+   - Trace commodities from raw materials through processing to final goods
+   - Identify bottlenecks where controlling one resource affects multiple products
+   - Recognize value-adding opportunities at each production stage
+
+2. **Analyze Market Connections**
+   - Identify complementary goods where demand moves together
+   - Recognize substitute products that compete for market share
+   - Understand how political or environmental events affect different commodity groups
+
+3. **Factor in Practical Considerations**
+   - Account for storage requirements and perishability
+   - Consider transportation challenges for heavy or fragile goods
+   - Recognize seasonal availability and price fluctuations
+
+4. **Balance Portfolio by Commodity Type**
+   - Diversify across different commodity categories
+   - Mix high-value luxury goods with stable necessity items
+   - Balance perishable goods with durable commodities
+   - Combine imported exotic items with locally produced goods

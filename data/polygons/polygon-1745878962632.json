@@ -1,0 +1,227 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.430952795947725,
+      "lng": 12.332098099057731
+    },
+    {
+      "lat": 45.43035798941222,
+      "lng": 12.33210882789379
+    },
+    {
+      "lat": 45.430367400956854,
+      "lng": 12.331094952886161
+    },
+    {
+      "lat": 45.43039940019683,
+      "lng": 12.330756994550285
+    },
+    {
+      "lat": 45.4303956355813,
+      "lng": 12.330684574906883
+    },
+    {
+      "lat": 45.42926246259036,
+      "lng": 12.329988022863478
+    },
+    {
+      "lat": 45.4286525793157,
+      "lng": 12.329674204408736
+    },
+    {
+      "lat": 45.4288652862679,
+      "lng": 12.32882662636003
+    },
+    {
+      "lat": 45.42926246259036,
+      "lng": 12.328987558900923
+    },
+    {
+      "lat": 45.4305149829708,
+      "lng": 12.329835845805084
+    },
+    {
+      "lat": 45.43104569109653,
+      "lng": 12.330268039811028
+    },
+    {
+      "lat": 45.431026868231896,
+      "lng": 12.330726697552574
+    },
+    {
+      "lat": 45.43095534128915,
+      "lng": 12.331067338097466
+    },
+    {
+      "lat": 45.4309271069447,
+      "lng": 12.331410660851372
+    },
+    {
+      "lat": 45.43096663502298,
+      "lng": 12.331424071896446
+    },
+    {
+      "lat": 45.43096287044531,
+      "lng": 12.331665470707787
+    },
+    {
+      "lat": 45.4309496944214,
+      "lng": 12.33170033942498
+    },
+    {
+      "lat": 45.43091581320298,
+      "lng": 12.33169497500695
+    }
+  ],
+  "centroid": {
+    "lat": 45.43037672313807,
+    "lng": 12.330778516721201
+  },
+  "historicalName": "Ponte del Formager in Sestiere San Polo",
+  "englishName": "Bridge of the Cheese Maker in the San Polo District",
+  "historicalDescription": "This bridge was likely named after a nearby cheese maker or cheese contract in the San Polo sestiere, one of the central districts of Venice known for its artisan shops and contracts in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 24798.06,
+  "center": {
+    "lat": 45.43054595009236,
+    "lng": 12.330463607911652
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43095534128915,
+        "lng": 12.331067338097466
+      },
+      "water": {
+        "lat": 45.43112509214209,
+        "lng": 12.331152070446212
+      },
+      "historicalName": "Riva del Formager",
+      "englishName": "Dock of the Cheese Maker",
+      "historicalDescription": "Named after the nearby Ponte del Formager (Bridge of the Cheese Maker) in San Polo sestiere. This dock would have been used by cheese merchants to unload their goods for sale in the surrounding contracts during the Renaissance period. Cheese was an important commodity in Venice, often imported from mainland territories under Venetian control.",
+      "id": "canal_45.430955_12.331067"
+    },
+    {
+      "edge": {
+        "lat": 45.43096287044531,
+        "lng": 12.331665470707787
+      },
+      "water": {
+        "lat": 45.431086179026245,
+        "lng": 12.331852060385986
+      },
+      "historicalName": "Fondamenta dei Lanaioli",
+      "englishName": "Foundation of the Wool Workers",
+      "historicalDescription": "Located in San Polo, this dock would have served the wool trade workers who were prevalent in this commercial district during the Renaissance. The wool industry was one of Venice's most important guilds, and San Polo was home to many artisans and merchants connected to textile production. This fondamenta would have been used for loading and unloading wool and textile goods.",
+      "id": "canal_45.430963_12.331665"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.429829049085825,
+        "lng": 12.33033629888518
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878927349",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.4299015517725,
+          "lng": 12.330449977992028
+        },
+        "distance": 11.986976938848606,
+        "id": "8f57e911-3f92-480a-911c-3768e17ffd57",
+        "location": {
+          "midpoint": {
+            "lat": 45.429865300429164,
+            "lng": 12.330393138438605
+          }
+        },
+        "historicalName": "Ponte dei Lanaioli",
+        "englishName": "Bridge of the Wool Workers",
+        "historicalDescription": "Named after the wool workers guild (Arte della Lana) that had workshops near San Polo. The wool trade was vital to Venice's economy during the Renaissance, and many workshops were concentrated in this area to process wool imported from England and Spain."
+      },
+      "id": "bridge_45.429829_12.330336"
+    },
+    {
+      "edge": {
+        "lat": 45.42926246259036,
+        "lng": 12.328987558900923
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878999491",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.42934689695697,
+          "lng": 12.328936402582022
+        },
+        "distance": 10.202120344800983,
+        "id": "2df8bc2b-6b21-4964-a361-4954d855f83d",
+        "name": "Ponte Sconosciuto (Unknown Bridge) - Error generating name",
+        "location": {
+          "midpoint": {
+            "lat": 45.429304679773665,
+            "lng": 12.328961980741472
+          }
+        },
+        "historicalName": "Ponte del Traghetto",
+        "englishName": "Bridge of the Ferry",
+        "historicalDescription": "This name refers to a nearby gondola ferry crossing point on the Grand Canal. Such crossings were essential in Renaissance Venice before many bridges were built. The San Polo area would have had several traghetti connecting it to other sestieri, making this a historically accurate name for a bridge near a former ferry landing."
+      },
+      "id": "bridge_45.429262_12.328988"
+    },
+    {
+      "edge": {
+        "lat": 45.42967996938384,
+        "lng": 12.32927032120231
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878999491",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.42978171814393,
+          "lng": 12.329180483602377
+        },
+        "distance": 13.309840849694638,
+        "id": "2df8bc2b-6b21-4964-a361-4954d855f83d",
+        "historicalName": "Ponte della Madonna",
+        "englishName": "Bridge of the Madonna",
+        "historicalDescription": "Named for a nearby shrine or church dedicated to the Virgin Mary. Religious dedications were common for Venetian bridges, especially those located near churches or shrines. San Polo contained several churches with Marian dedications, and such a bridge would likely have been near a small Madonna icon or tabernacle placed at the bridge entrance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.429730843763885,
+            "lng": 12.329225402402344
+          }
+        }
+      },
+      "id": "bridge_45.429680_12.329270"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.42909755115292,
+      "lng": 12.32952933397409,
+      "streetName": "Calle del Formager",
+      "streetNameEnglish": "Street of the Cheese Maker",
+      "streetDescription": "Named after the cheese makers who historically worked in this area of San Polo. 'Formager' is the Venetian term for cheese maker, and this street would naturally connect to or be near the Ponte del Formager (Cheese Maker's Bridge), following the common Venetian practice of naming streets after local trades or craftsmen.",
+      "id": "building_45.429098_12.329529"
+    },
+    {
+      "lat": 45.4295693291702,
+      "lng": 12.329458232848513,
+      "streetName": "Ruga dei Laneri",
+      "streetNameEnglish": "Street of the Wool Workers",
+      "streetDescription": "In Renaissance Venice, the wool trade was significant in the San Polo area. 'Laneri' refers to wool workers or wool merchants. 'Ruga' typically designated a wider commercial street where shops and workshops would be located, making this an appropriate name for a street where wool traders and craftsmen might have conducted business near the commercial center of San Polo.",
+      "id": "building_45.429569_12.329458"
+    },
+    {
+      "lat": 45.429928976021955,
+      "lng": 12.330019752292197,
+      "streetName": "Sottoportego dei Traghetti",
+      "streetNameEnglish": "Passageway of the Ferries",
+      "streetDescription": "San Polo borders the Grand Canal, where several traghetti (gondola ferry crossing points) have historically operated. A 'sottoportego' is a covered passageway that runs beneath buildings, and this name would be appropriate for a narrow covered passage that led toward one of the ferry points that connected San Polo to other parts of Venice across the Grand Canal.",
+      "id": "building_45.429929_12.330020"
+    }
+  ],
+  "id": "polygon-1745878962632"
+}

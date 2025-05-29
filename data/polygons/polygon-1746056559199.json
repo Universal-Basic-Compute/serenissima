@@ -1,0 +1,111 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43564403980309,
+      "lng": 12.330755679759209
+    },
+    {
+      "lat": 45.43473684450884,
+      "lng": 12.331630079898064
+    },
+    {
+      "lat": 45.434510984491794,
+      "lng": 12.331254570635979
+    },
+    {
+      "lat": 45.43492506049917,
+      "lng": 12.330916612300102
+    },
+    {
+      "lat": 45.43478201640377,
+      "lng": 12.33046063676757
+    },
+    {
+      "lat": 45.434759430460815,
+      "lng": 12.330267517718498
+    },
+    {
+      "lat": 45.43535795489464,
+      "lng": 12.329865186366264
+    }
+  ],
+  "centroid": {
+    "lat": 45.43495947586602,
+    "lng": 12.330735754777956
+  },
+  "historicalName": "Corte de l'Albero in Sestiere di San Marco",
+  "englishName": "Courtyard of the Tree in the District of St. Mark",
+  "historicalDescription": "A small courtyard located in the San Marco district, known for its artisan workshops and proximity to Piazza San Marco, the cultural and political heart of 15th-century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 8126.4,
+  "center": {
+    "lat": 45.43515085955428,
+    "lng": 12.330618380879772
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.435190442155964,
+        "lng": 12.331192879828636
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056541940",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43518733514655,
+          "lng": 12.33127453862748
+        },
+        "distance": 6.380968416397773,
+        "id": "7b3e5291-b258-42ca-b0bc-96f42ddd03a2",
+        "historicalName": "Ponte dell'Albero",
+        "englishName": "Bridge of the Tree",
+        "historicalDescription": "Named after the notable tree that once stood in the Corte de l'Albero in Sestiere di San Marco. This courtyard took its name from a significant tree that served as a landmark in this area of Venice, and the nearby bridge would naturally adopt this distinctive local reference.",
+        "location": {
+          "midpoint": {
+            "lat": 45.435188888651254,
+            "lng": 12.331233709228059
+          }
+        }
+      },
+      "id": "bridge_45.435190_12.331193"
+    },
+    {
+      "edge": {
+        "lat": 45.43478201640377,
+        "lng": 12.33046063676757
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056711688",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43474575887237,
+          "lng": 12.330491146652308
+        },
+        "distance": 4.682048556566897,
+        "id": "09a645aa-7a53-4945-ba4d-a6014aedde32",
+        "historicalName": "Ponte dei Cerimonieri",
+        "englishName": "Bridge of the Ceremonialists",
+        "historicalDescription": "Located near San Marco, this bridge would have been crossed by various ceremonial officials heading to and from the Doge's Palace for state functions. The Sestiere di San Marco was home to numerous civic and religious ceremonies, and specialized officials responsible for organizing Venetian public rituals would have frequently used bridges in this area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43476388763807,
+            "lng": 12.33047589170994
+          }
+        }
+      },
+      "id": "bridge_45.434782_12.330461"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.435329703368325,
+      "lng": 12.330605784646242,
+      "streetName": "Calle del Cappello d'Oro",
+      "streetNameEnglish": "Street of the Golden Hat",
+      "streetDescription": "This name would be appropriate for a street near Corte de l'Albero in San Marco, as it could reference a prestigious hatmaker's shop that once operated in this fashionable commercial district. The sestiere of San Marco was known for luxury artisans and shops catering to nobility. 'Cappello d'Oro' suggests a high-end establishment that might have served the wealthy merchants and nobles who frequented this central area of Venice close to Piazza San Marco.",
+      "id": "building_45.435330_12.330606"
+    }
+  ],
+  "id": "polygon-1746056559199"
+}

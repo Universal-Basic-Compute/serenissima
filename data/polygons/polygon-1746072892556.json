@@ -1,0 +1,165 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43893613236923,
+      "lng": 12.330045352863825
+    },
+    {
+      "lat": 45.43934641188749,
+      "lng": 12.330485235142268
+    },
+    {
+      "lat": 45.439847024139524,
+      "lng": 12.330833922314204
+    },
+    {
+      "lat": 45.44066003908447,
+      "lng": 12.33142937271551
+    },
+    {
+      "lat": 45.44110794509083,
+      "lng": 12.33193362801031
+    },
+    {
+      "lat": 45.44130366760749,
+      "lng": 12.331649313854731
+    },
+    {
+      "lat": 45.44085576315493,
+      "lng": 12.331112872051753
+    },
+    {
+      "lat": 45.44029493660006,
+      "lng": 12.33041549770788
+    },
+    {
+      "lat": 45.43977550837546,
+      "lng": 12.329798589634455
+    },
+    {
+      "lat": 45.43932759179139,
+      "lng": 12.329396258282221
+    }
+  ],
+  "centroid": {
+    "lat": 45.44014550201008,
+    "lng": 12.330710004257714
+  },
+  "areaInSquareMeters": 14312.03,
+  "historicalName": "Corte del Diavolo in San Polo",
+  "englishName": "Devil's Court in San Polo",
+  "historicalDescription": "A small courtyard located in the San Polo sestiere, known for its unusual name referencing the devil. The area was primarily residential with nearby shops and artisan workshops.",
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.44014550201008,
+    "lng": 12.330710004257714
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.439847024139524,
+        "lng": 12.330833922314204
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072917032",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.439782220088944,
+          "lng": 12.330842001290572
+        },
+        "distance": 7.233397833257585,
+        "id": "bf531daa-641a-45b3-bae6-5ab7b1c675d1",
+        "historicalName": "Ponte del Diavolo",
+        "englishName": "Devil's Bridge",
+        "historicalDescription": "Named after its proximity to the Corte del Diavolo (Devil's Courtyard) in San Polo. The area gained this name in the 16th century due to local legends about strange occurrences and mysterious figures seen at night. The bridge would have been a key access point to this infamous courtyard.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439814622114234,
+            "lng": 12.330837961802388
+          }
+        }
+      },
+      "id": "bridge_45.439847_12.330834"
+    },
+    {
+      "edge": {
+        "lat": 45.44085576315493,
+        "lng": 12.331112872051753
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072788813",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44089288423902,
+          "lng": 12.331069391941373
+        },
+        "distance": 5.342784267587234,
+        "id": "c00e8c51-c581-4025-8791-9092fe7e3887",
+        "historicalName": "Ponte dei Tintori di San Polo",
+        "englishName": "Bridge of the Dyers of San Polo",
+        "historicalDescription": "This bridge would have connected to an area where fabric dyers (tintori) had their workshops in the San Polo district. During the Renaissance, Venice was famous for its textile industry, and San Polo had numerous artisans involved in fabric production and dyeing. The workshops near Corte del Diavolo would have used the nearby canal for their water-intensive work.",
+        "location": {
+          "midpoint": {
+            "lat": 45.440874323696974,
+            "lng": 12.331091131996562
+          }
+        }
+      },
+      "id": "bridge_45.440856_12.331113"
+    },
+    {
+      "edge": {
+        "lat": 45.43977550837546,
+        "lng": 12.329798589634455
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072788813",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43975321634005,
+          "lng": 12.32973038815547
+        },
+        "distance": 5.8701609368656715,
+        "id": "c00e8c51-c581-4025-8791-9092fe7e3887",
+        "historicalName": "Ponte della Maschera Rossa",
+        "englishName": "Bridge of the Red Mask",
+        "historicalDescription": "Named after a local tradition of Carnival performances that took place near Corte del Diavolo. The 'red mask' was a character in Venetian Commedia dell'Arte performances that were popular in this area of San Polo during the Renaissance. This bridge would have been crossed by performers and spectators alike heading to carnival celebrations in the nearby campo.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43976436235776,
+            "lng": 12.329764488894963
+          }
+        }
+      },
+      "id": "bridge_45.439776_12.329799"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.439405223458564,
+      "lng": 12.330024732888974,
+      "streetName": "Calle dei Maschereri del Diavolo",
+      "streetNameEnglish": "Street of the Devil's Mask Makers",
+      "streetDescription": "This name references the mask makers who likely had workshops near Corte del Diavolo in San Polo. The association with 'del Diavolo' connects it to the nearby devil-named courtyard, while 'maschereri' refers to the artisans who created masks for Venice's famous Carnival celebrations, which were particularly vibrant in this commercial district.",
+      "id": "building_45.439405_12.330025"
+    },
+    {
+      "lat": 45.439765756054264,
+      "lng": 12.330573029685157,
+      "streetName": "Sottoportego dei Giocatori",
+      "streetNameEnglish": "Underpassage of the Gamblers",
+      "streetDescription": "San Polo was known for its taverns and gambling establishments during the Renaissance. This name suggests a covered passageway where gamblers might have gathered, fitting for an area named after the devil, which had associations with gambling and games of chance. Gambling was alternately tolerated and forbidden in Renaissance Venice, making hidden passages ideal locations for such activities.",
+      "id": "building_45.439766_12.330573"
+    },
+    {
+      "lat": 45.440206660209654,
+      "lng": 12.330718402325205,
+      "streetName": "Rio Terà della Confraternita",
+      "streetNameEnglish": "Filled Canal of the Brotherhood",
+      "streetDescription": "This name indicates a former canal that was filled in and paved over, a common feature in Venice's evolving urban landscape. It references a religious brotherhood or confraternity that may have had their meeting hall or charitable operations in this area of San Polo. The juxtaposition of a religious brotherhood near a place named after the devil creates an interesting historical tension characteristic of Renaissance Venice's complex spiritual landscape.",
+      "id": "building_45.440207_12.330718"
+    }
+  ],
+  "id": "polygon-1746072892556"
+}

@@ -1,0 +1,311 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43635651805859,
+      "lng": 12.340621763207146
+    },
+    {
+      "lat": 45.43588598884151,
+      "lng": 12.341131382919976
+    },
+    {
+      "lat": 45.43598762348461,
+      "lng": 12.34150152776403
+    },
+    {
+      "lat": 45.43553591255861,
+      "lng": 12.342719250656792
+    },
+    {
+      "lat": 45.4352272413463,
+      "lng": 12.342316919304558
+    },
+    {
+      "lat": 45.43523100563952,
+      "lng": 12.342129164673516
+    },
+    {
+      "lat": 45.43362739398583,
+      "lng": 12.34226863954229
+    },
+    {
+      "lat": 45.433473053371145,
+      "lng": 12.341163569428154
+    },
+    {
+      "lat": 45.43537404859684,
+      "lng": 12.340439372994133
+    },
+    {
+      "lat": 45.435746711440714,
+      "lng": 12.340310626961418
+    },
+    {
+      "lat": 45.43593492406289,
+      "lng": 12.340106779076287
+    }
+  ],
+  "centroid": {
+    "lat": 45.43530731103514,
+    "lng": 12.34133718150257
+  },
+  "historicalName": "Calle de le Rasse, sestiere San Polo",
+  "englishName": "Alley of the Ducks, San Polo district",
+  "historicalDescription": "A narrow alley in the San Polo sestiere, near the Grand Canal and Rialto contract. Known for its proximity to the busy commercial district of Rialto in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 34147.04,
+  "center": {
+    "lat": 45.434715935517254,
+    "lng": 12.34141275399888
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43588598884151,
+        "lng": 12.341131382919976
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056403060",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43593207800524,
+          "lng": 12.341183992076607
+        },
+        "distance": 6.566167784387617,
+        "id": "6c67c03b-6f27-4aae-bcc7-cd160c0ee500",
+        "historicalName": "Ponte delle Rasse",
+        "englishName": "Bridge of the Sailcloths",
+        "historicalDescription": "Named after the 'rasse' or sailcloths that were manufactured and traded in this area of San Polo. Calle de le Rasse itself derives its name from this craft, as it was a street where artisans worked with heavy canvas materials used for ship sails during the height of Venetian maritime power.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43590903342337,
+            "lng": 12.341157687498292
+          }
+        }
+      },
+      "id": "bridge_45.435886_12.341131"
+    },
+    {
+      "edge": {
+        "lat": 45.43469646842163,
+        "lng": 12.34217565629644
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056923664",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.434672628333566,
+          "lng": 12.342236453034111
+        },
+        "distance": 5.4342706112457275,
+        "id": "66eadbb1-5a40-4adb-895b-8853619088bb",
+        "historicalName": "Ponte dei Velieri",
+        "englishName": "Bridge of the Sailmakers",
+        "historicalDescription": "This bridge honors the guild of sailmakers who had workshops near Calle de le Rasse in San Polo. During the Renaissance, these craftsmen were essential to Venice's naval and commercial fleet, providing the canvas sails that powered the Republic's extensive maritime trading network.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4346845483776,
+            "lng": 12.342206054665276
+          }
+        }
+      },
+      "id": "bridge_45.434696_12.342176"
+    },
+    {
+      "edge": {
+        "lat": 45.434161931203725,
+        "lng": 12.342222147919365
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056923664",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.434174479749664,
+          "lng": 12.342295461632439
+        },
+        "distance": 5.888281782709824,
+        "id": "66eadbb1-5a40-4adb-895b-8853619088bb",
+        "historicalName": "Ponte del Filatore",
+        "englishName": "Bridge of the Spinner",
+        "historicalDescription": "Located near workshops where raw materials for sailmaking were processed, this bridge was named for the spinners who prepared threads and cords used in creating sturdy canvas sailcloth. The spinning industry was closely connected to the 'rasse' production that gave Calle de le Rasse its name.",
+        "location": {
+          "midpoint": {
+            "lat": 45.434168205476695,
+            "lng": 12.342258804775902
+          }
+        }
+      },
+      "id": "bridge_45.434162_12.342222"
+    },
+    {
+      "edge": {
+        "lat": 45.43442355098399,
+        "lng": 12.340801471211144
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056876739",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43436195844974,
+          "lng": 12.340746640686877
+        },
+        "distance": 8.075264024002053,
+        "id": "cf146c54-c1b6-4d4b-81bc-48efcd1e896b",
+        "historicalName": "Ponte dei Cordai",
+        "englishName": "Bridge of the Ropemakers",
+        "historicalDescription": "Named for the ropemakers whose craft complemented the sailmaking industry in this part of San Polo. The cordai produced the essential ropes and cords that rigged Venetian ships, working in close proximity to the sailcloth makers of Calle de le Rasse to supply Venice's maritime enterprises.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43439275471687,
+            "lng": 12.34077405594901
+          }
+        }
+      },
+      "id": "bridge_45.434424_12.340801"
+    },
+    {
+      "edge": {
+        "lat": 45.43489879979042,
+        "lng": 12.340620422102639
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056876739",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.43483500992076,
+          "lng": 12.34057319117058
+        },
+        "distance": 7.99335883311033,
+        "id": "cf146c54-c1b6-4d4b-81bc-48efcd1e896b",
+        "historicalName": "Ponte della Nave d'Oro",
+        "englishName": "Bridge of the Golden Ship",
+        "historicalDescription": "Named after a once-prominent inn or merchant house near Calle de le Rasse that bore the sign of a golden ship, symbolizing Venice's wealth through maritime trade. Such landmarks often became navigation points in the labyrinthine city and eventually gave their names to nearby bridges.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43486690485559,
+            "lng": 12.34059680663661
+          }
+        }
+      },
+      "id": "bridge_45.434899_12.340620"
+    },
+    {
+      "edge": {
+        "lat": 45.43537404859684,
+        "lng": 12.340439372994133
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056876739",
+        "targetPointIndex": 6,
+        "targetPoint": {
+          "lat": 45.43530806139177,
+          "lng": 12.340399741654284
+        },
+        "distance": 7.962441353086592,
+        "id": "cf146c54-c1b6-4d4b-81bc-48efcd1e896b",
+        "historicalName": "Ponte dei Pisani",
+        "englishName": "Bridge of the Pisani Family",
+        "historicalDescription": "Named after the noble Pisani family who likely owned property or a palazzo near this bridge in San Polo. The Pisani were a prominent Venetian nobili family who served as merchants, naval commanders, and diplomats for the Republic, potentially having interests in the maritime industries that operated around Calle de le Rasse.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43534105499431,
+            "lng": 12.340419557324209
+          }
+        }
+      },
+      "id": "bridge_45.435374_12.340439"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43395191599068,
+      "lng": 12.341380221459593,
+      "streetName": "Calle dei Tessitori di Lana",
+      "streetNameEnglish": "Street of the Wool Weavers",
+      "streetDescription": "This street would reference the wool weaving trade that was prominent in the San Polo district. 'Rasse' in 'Calle de le Rasse' refers to coarse woolen cloth, making this a fitting complementary street name for the area known for textile production.",
+      "id": "building_45.433952_12.341380"
+    },
+    {
+      "lat": 45.4338525690551,
+      "lng": 12.342033525398715,
+      "streetName": "Rio Terà dei Mercanti di Rialto",
+      "streetNameEnglish": "Filled Canal of the Rialto Merchants",
+      "streetDescription": "This street would be named after merchants who operated near the Rialto contract. As a Rio Terà (filled-in canal), it would indicate a former waterway that was covered to create a street, common in Venice's urban development. The proximity to Rialto in San Polo makes this historically appropriate.",
+      "id": "building_45.433853_12.342034"
+    },
+    {
+      "lat": 45.43445640064279,
+      "lng": 12.341318943199335,
+      "streetName": "Sottoportego dei Lanaioli",
+      "streetNameEnglish": "Passageway of the Wool Workers",
+      "streetDescription": "A sottoportego (covered passageway) named after the wool workers who would have used this route. The name connects to the textile industry referenced in 'Calle de le Rasse' and would be typical for a smaller connecting passage in the San Polo district.",
+      "id": "building_45.434456_12.341319"
+    },
+    {
+      "lat": 45.43439513899048,
+      "lng": 12.341901653072346,
+      "streetName": "Fondamenta dei Tintori",
+      "streetNameEnglish": "Foundation of the Dyers",
+      "streetDescription": "A fondamenta is a street running alongside a canal. This name references the cloth dyers who would have needed water access for their trade. This complements the textile theme of 'Rasse' (woolen cloth) in the area and would be located where dyers would wash and rinse their fabrics.",
+      "id": "building_45.434395_12.341902"
+    },
+    {
+      "lat": 45.434734241016514,
+      "lng": 12.34136073977384,
+      "streetName": "Salizada dei Garzotti",
+      "streetNameEnglish": "Paved Street of the Carders",
+      "streetDescription": "A salizada is a paved street, often wider and more important. Garzotti were workers who carded wool (prepared it for spinning). This name would reference another step in the wool processing that was central to the San Polo district's economy and directly related to the 'rasse' (rough wool cloth) industry.",
+      "id": "building_45.434734_12.341361"
+    },
+    {
+      "lat": 45.43482689679277,
+      "lng": 12.341918855795534,
+      "streetName": "Corte Barbarigo",
+      "streetNameEnglish": "Barbarigo Court",
+      "streetDescription": "Named after the Barbarigo family, a prominent Venetian nobili family that likely owned property in the San Polo district. Several members of this family served as Doges of Venice. A corte is a small courtyard, often connected to a nobili residence.",
+      "id": "building_45.434827_12.341919"
+    },
+    {
+      "lat": 45.435204039528884,
+      "lng": 12.34080964073637,
+      "streetName": "Calle della Scuola dei Laneri",
+      "streetNameEnglish": "Street of the Wool Workers' Guild",
+      "streetDescription": "This name references the guild house (scuola) of the wool workers that would have been located in this area. Guilds were central to Venetian economic and social life, and the wool guild would have been particularly important in the San Polo district with its connection to the 'rasse' (woolen cloth) trade.",
+      "id": "building_45.435204_12.340810"
+    },
+    {
+      "lat": 45.435300361302005,
+      "lng": 12.341275733107542,
+      "streetName": "Ruga dei Drappieri",
+      "streetNameEnglish": "Street of the Drapers",
+      "streetDescription": "A ruga is a commercial street lined with shops. Drappieri were merchants who sold finished cloth. This street would have housed the shops selling the finished wool products, including 'rasse' (coarse wool cloth), making it a logical name for a commercial street in this district.",
+      "id": "building_45.435300_12.341276"
+    },
+    {
+      "lat": 45.4356442267385,
+      "lng": 12.340801964476901,
+      "streetName": "Campiello dei Follatori",
+      "streetNameEnglish": "Small Square of the Fullers",
+      "streetDescription": "A campiello is a small campo or square. Follatori were artisans who cleaned and thickened wool cloth through a process called fulling. This name references another specialized profession in the wool industry that would have operated near 'Calle de le Rasse' in the San Polo district.",
+      "id": "building_45.435644_12.340802"
+    },
+    {
+      "lat": 45.43568343163108,
+      "lng": 12.341380955696717,
+      "streetName": "Calle del Filatoio",
+      "streetNameEnglish": "Street of the Spinning Wheel",
+      "streetDescription": "This street would be named after the spinning wheels used in wool processing. The spinning of wool into thread was a crucial step in creating the 'rasse' (coarse wool cloth) that gives the nearby 'Calle de le Rasse' its name, making this a historically accurate name for the San Polo textile district.",
+      "id": "building_45.435683_12.341381"
+    },
+    {
+      "lat": 45.435636657669015,
+      "lng": 12.34199849450262,
+      "streetName": "Ramo della Lana Grezza",
+      "streetNameEnglish": "Branch of the Raw Wool",
+      "streetDescription": "A ramo is a small branch off a main street. This name refers to raw wool before processing. It would appropriately describe a small side street in this area where the initial stages of wool preparation might have taken place before the wool was made into 'rasse' (coarse cloth) in the San Polo district.",
+      "id": "building_45.435637_12.341998"
+    }
+  ],
+  "id": "polygon-1746056903912"
+}

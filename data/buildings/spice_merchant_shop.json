@@ -1,0 +1,49 @@
+{
+  "name": "Spice Merchant Shop",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "Luxury Goods",
+  "size": 1,
+  "unlockCondition": "Trade connections with the East, substantial capital",
+  "calculationsAnalysis": "The Spice Merchant Shop deals in high-value, low-volume exotic spices. Construction includes secure storage and an elegant storefront. Income is high per unit but sales volume may be lower than basic goods. Maintenance covers security and preservation of valuable stock. Employs knowledgeable merchants.",
+  "shortDescription": "Imports and sells rare and exotic spices from distant lands.",
+  "fullDescription": "A Spice Merchant's shop is a treasure trove of aromatic wonders from the East. Here, Venetians can find pepper, cinnamon, cloves, nutmeg, and other exotic seasonings that add flavor to food and signify wealth and sophistication. These shops are often opulent and carefully guarded.",
+  "flavorText": "The scent of a thousand leagues, the wealth of empires, all held within a single peppercorn.",
+  "constructionCosts": {
+    "ducats": 750000,
+    "timber": 240,
+    "bricks": 520,
+    "stone": 350,
+    "iron": 100
+  },
+  "maintenanceCost": 800,
+  "productionInformation": {
+    "storageCapacity": 100,
+    "stores": [
+      "spices"
+    ],
+    "sells": [
+      "spices"
+    ]
+  },
+  "soundDesign": {
+    "ambientSound": "Quiet atmosphere, occasional grinding of spices, hushed negotiations",
+    "activitySounds": "Weighing spices, opening chests, customer inquiries",
+    "musicTheme": "Misteri d'Oriente"
+  },
+  "seasonalEffects": {
+    "trade_fairs": "Arrival of new shipments, increased variety",
+    "plague_times": "Increased demand for certain spices believed to have medicinal properties"
+  },
+  "aiInteractionPoints": [
+    "Spice displays",
+    "Secure vault/storage",
+    "Consultation desk",
+    "Sales counter"
+  ],
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 4,
+  "canImport": true,
+  "constructionMinutes": 8640
+}

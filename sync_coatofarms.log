@@ -1,0 +1,107 @@
+2025-05-10 15:29:36,979 - INFO - Starting coat of arms synchronization 
+2025-05-10 15:29:36,980 - ERROR - AIRTABLE_API_KEY environment variable is not set
+2025-05-10 15:30:52,509 - INFO - Starting coat of arms synchronization 
+2025-05-10 15:30:52,510 - ERROR - AIRTABLE_API_KEY environment variable is not set
+2025-05-10 15:32:05,297 - INFO - Starting coat of arms synchronization 
+2025-05-10 15:32:05,741 - INFO - Retrieved 22 citizens from Airtable
+2025-05-10 15:32:05,741 - INFO - Found 0 citizens with coat of arms images
+2025-05-10 15:32:05,742 - INFO - Saved mapping file to public\coat-of-arms\mapping.json
+2025-05-10 15:32:05,742 - INFO - Summary: 0 images downloaded successfully, 0 failed
+2025-05-10 15:32:05,743 - INFO - Coat of arms synchronization completed
+2025-05-10 15:34:33,603 - INFO - Starting coat of arms synchronization 
+2025-05-10 15:34:34,133 - INFO - Retrieved 22 citizens from Airtable
+2025-05-10 15:34:34,133 - INFO - Examining 22 citizens for coat of arms images
+2025-05-10 15:34:34,133 - INFO - First citizen record fields: ['Wallet']
+2025-05-10 15:34:34,133 - INFO - Found 0 citizens with coat of arms images
+2025-05-10 15:34:34,134 - INFO - Saved mapping file to public\coat-of-arms\mapping.json
+2025-05-10 15:34:34,134 - INFO - Summary: 0 images downloaded successfully, 0 failed
+2025-05-10 15:34:34,134 - INFO - Coat of arms synchronization completed
+2025-05-10 15:40:55,808 - INFO - Starting coat of arms synchronization 
+2025-05-10 15:40:56,389 - INFO - Retrieved 22 citizens from Airtable
+2025-05-10 15:40:56,389 - INFO - Examining 22 citizens for coat of arms images
+2025-05-10 15:40:56,390 - INFO - First citizen record fields: ['Wallet']
+2025-05-10 15:40:56,390 - INFO - First citizen record: {'id': 'rec1uiNqcZoQIMvCO', 'createdTime': '2025-05-07T14:32:07.000Z', 'fields': {'Wallet': 'Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn'}}
+2025-05-10 15:40:56,390 - INFO - Using wallet or ID as username: Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn
+2025-05-10 15:40:56,390 - INFO - Citizen Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn has no coat of arms image
+2025-05-10 15:40:56,390 - INFO - All fields for Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn: {'Wallet': 'Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn'}
+2025-05-10 15:40:56,390 - INFO - Found coat of arms for citizen Marco in field 'CoatOfArmsImageUrl': /coat-of-arms/Marco.png
+2025-05-10 15:40:56,391 - INFO - Added coat of arms for Marco: https://serenissima.ai/coat-of-arms/Marco.png
+2025-05-10 15:40:56,391 - INFO - Found coat of arms for citizen EtiennodaMurano in field 'CoatOfArmsImageUrl': /coat-of-arms/Etienno_da_Murano_1746722931.png
+2025-05-10 15:40:56,391 - INFO - Added coat of arms for EtiennodaMurano: https://serenissima.ai/coat-of-arms/Etienno_da_Murano_1746722931.png
+2025-05-10 15:40:56,391 - INFO - Using wallet or ID as username: HRybzuBwmEE7AhTdw2mUMTXzK97jH6C9y9FijnBnpV4W
+2025-05-10 15:40:56,391 - INFO - Citizen HRybzuBwmEE7AhTdw2mUMTXzK97jH6C9y9FijnBnpV4W has no coat of arms image
+2025-05-10 15:40:56,391 - INFO - All fields for HRybzuBwmEE7AhTdw2mUMTXzK97jH6C9y9FijnBnpV4W: {'Wallet': 'HRybzuBwmEE7AhTdw2mUMTXzK97jH6C9y9FijnBnpV4W', 'Ducats': 2000000, 'LastActiveAt': '2025-05-08T07:04:43.807Z'}
+2025-05-10 15:40:56,391 - INFO - Found coat of arms for citizen meyti_tgz in field 'CoatOfArmsImageUrl': /coat-of-arms/meyti_tgz.png
+2025-05-10 15:40:56,391 - INFO - Added coat of arms for meyti_tgz: https://serenissima.ai/coat-of-arms/meyti_tgz.png
+2025-05-10 15:40:56,391 - INFO - Found coat of arms for citizen Bullitpro0f in field 'CoatOfArmsImageUrl': /coat-of-arms/Bullitpro0f.png
+2025-05-10 15:40:56,391 - INFO - Added coat of arms for Bullitpro0f: https://serenissima.ai/coat-of-arms/Bullitpro0f.png
+2025-05-10 15:40:56,392 - INFO - Found coat of arms for citizen Sofia in field 'CoatOfArmsImageUrl': /coat-of-arms/Sofia.png
+2025-05-10 15:40:56,392 - INFO - Added coat of arms for Sofia: https://serenissima.ai/coat-of-arms/Sofia.png
+2025-05-10 15:40:56,392 - INFO - Found coat of arms for citizen shiren in field 'CoatOfArmsImageUrl': /coat-of-arms/shiren.png
+2025-05-10 15:40:56,392 - INFO - Added coat of arms for shiren: https://serenissima.ai/coat-of-arms/shiren.png
+2025-05-10 15:40:56,392 - INFO - Found coat of arms for citizen John_Jeffries in field 'CoatOfArmsImageUrl': /coat-of-arms/John_Jeffries.png
+2025-05-10 15:40:56,392 - INFO - Added coat of arms for John_Jeffries: https://serenissima.ai/coat-of-arms/John_Jeffries.png
+2025-05-10 15:40:56,392 - INFO - Found coat of arms for citizen ConsiglioDeiDieci in field 'CoatOfArmsImageUrl': /coat-of-arms/ConsiglioDeiDieci.png
+2025-05-10 15:40:56,392 - INFO - Added coat of arms for ConsiglioDeiDieci: https://serenissima.ai/coat-of-arms/ConsiglioDeiDieci.png
+2025-05-10 15:40:56,392 - INFO - Using wallet or ID as username: BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V
+2025-05-10 15:40:56,392 - INFO - Citizen BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V has no coat of arms image
+2025-05-10 15:40:56,392 - INFO - All fields for BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V: {'Wallet': 'BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V'}
+2025-05-10 15:40:56,392 - INFO - Found coat of arms for citizen steven in field 'CoatOfArmsImageUrl': /coat-of-arms/steven_1746864002.png
+2025-05-10 15:40:56,392 - INFO - Added coat of arms for steven: https://serenissima.ai/coat-of-arms/steven_1746864002.png
+2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen BasstheWhale in field 'CoatOfArmsImageUrl': /coat-of-arms/BasstheWhale.png
+2025-05-10 15:40:56,393 - INFO - Added coat of arms for BasstheWhale: https://serenissima.ai/coat-of-arms/BasstheWhale.png
+2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen Bigbosefx2 in field 'CoatOfArmsImageUrl': /coat-of-arms/Bigbosefx2.png
+2025-05-10 15:40:56,393 - INFO - Added coat of arms for Bigbosefx2: https://serenissima.ai/coat-of-arms/Bigbosefx2.png
+2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen Xadme in field 'CoatOfArmsImageUrl': /coat-of-arms/Xadme.png
+2025-05-10 15:40:56,393 - INFO - Added coat of arms for Xadme: https://serenissima.ai/coat-of-arms/Xadme.png
+2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen Isabella in field 'CoatOfArmsImageUrl': /coat-of-arms/Isabella.png
+2025-05-10 15:40:56,393 - INFO - Added coat of arms for Isabella: https://serenissima.ai/coat-of-arms/Isabella.png
+2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen Tiara_raa99 in field 'CoatOfArmsImageUrl': /coat-of-arms/Tiara_raa99_1746854719.png
+2025-05-10 15:40:56,393 - INFO - Added coat of arms for Tiara_raa99: https://serenissima.ai/coat-of-arms/Tiara_raa99_1746854719.png
+2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen bigbosefx in field 'CoatOfArmsImageUrl': /coat-of-arms/bigbosefx.png
+2025-05-10 15:40:56,393 - INFO - Added coat of arms for bigbosefx: https://serenissima.ai/coat-of-arms/bigbosefx.png
+2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen ConsiglioDeiDieci in field 'CoatOfArmsImageUrl': /coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png
+2025-05-10 15:40:56,393 - INFO - Added coat of arms for ConsiglioDeiDieci: https://serenissima.ai/coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png
+2025-05-10 15:40:56,394 - INFO - Citizen meyti_tgz2 has no coat of arms image
+2025-05-10 15:40:56,395 - INFO - All fields for meyti_tgz2: {'Wallet': 'Hn7kRETV2xuhoUNWtYc2D8VFgNWhuZtgHCiwVDinhgV3', 'Username': 'meyti_tgz2', 'FamilyMotto': 'Honor and cunning bring dominion', 'CoatOfArms': 'A golden lion standing over a silver sea, with a red crescent above � symbol of trade between the East and Venice.', 'FirstName': 'mahdi', 'LastName': 'taghizadeh', 'Color': '#DAA520', 'LastActiveAt': '2025-05-08T18:46:43.745Z'}
+2025-05-10 15:40:56,395 - INFO - Found coat of arms for citizen Feola007 in field 'CoatOfArmsImageUrl': /coat-of-arms/Feola007.png
+2025-05-10 15:40:56,395 - INFO - Added coat of arms for Feola007: https://serenissima.ai/coat-of-arms/Feola007.png
+2025-05-10 15:40:56,395 - INFO - Found coat of arms for citizen Lucid in field 'CoatOfArmsImageUrl': /coat-of-arms/Lucid.png
+2025-05-10 15:40:56,395 - INFO - Added coat of arms for Lucid: https://serenissima.ai/coat-of-arms/Lucid.png
+2025-05-10 15:40:56,395 - INFO - Found 18 citizens with coat of arms images
+2025-05-10 15:40:56,396 - INFO - File already exists for Marco, replacing it: public\coat-of-arms\marco.png
+2025-05-10 15:40:56,397 - INFO - File already exists for meyti_tgz, replacing it: public\coat-of-arms\meyti_tgz.png
+2025-05-10 15:40:56,399 - INFO - File already exists for Bullitpro0f, replacing it: public\coat-of-arms\bullitpro0f.png
+2025-05-10 15:40:56,400 - INFO - File already exists for Sofia, replacing it: public\coat-of-arms\sofia.png
+2025-05-10 15:40:56,501 - ERROR - Error downloading https://serenissima.ai/coat-of-arms/Etienno_da_Murano_1746722931.png for citizen EtiennodaMurano: 404 Client Error: Not Found for url: https://serenissima.ai/coat-of-arms/Etienno_da_Murano_1746722931.png
+2025-05-10 15:40:56,504 - INFO - File already exists for shiren, replacing it: public\coat-of-arms\shiren.png
+2025-05-10 15:40:56,587 - INFO - Downloaded https://serenissima.ai/coat-of-arms/meyti_tgz.png for citizen meyti_tgz to public\coat-of-arms\meyti_tgz.png
+2025-05-10 15:40:56,589 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Marco.png for citizen Marco to public\coat-of-arms\marco.png
+2025-05-10 15:40:56,589 - INFO - File already exists for John_Jeffries, replacing it: public\coat-of-arms\john_jeffries.png
+2025-05-10 15:40:56,649 - INFO - Downloaded https://serenissima.ai/coat-of-arms/shiren.png for citizen shiren to public\coat-of-arms\shiren.png
+2025-05-10 15:40:56,651 - INFO - File already exists for steven, replacing it: public\coat-of-arms\steven.png
+2025-05-10 15:40:56,686 - ERROR - Error downloading https://serenissima.ai/coat-of-arms/ConsiglioDeiDieci.png for citizen ConsiglioDeiDieci: 404 Client Error: Not Found for url: https://serenissima.ai/coat-of-arms/ConsiglioDeiDieci.png
+2025-05-10 15:40:56,687 - INFO - File already exists for BasstheWhale, replacing it: public\coat-of-arms\bassthewhale.png
+2025-05-10 15:40:56,712 - ERROR - Error downloading https://serenissima.ai/coat-of-arms/steven_1746864002.png for citizen steven: 404 Client Error: Not Found for url: https://serenissima.ai/coat-of-arms/steven_1746864002.png
+2025-05-10 15:40:56,714 - INFO - File already exists for Bigbosefx2, replacing it: public\coat-of-arms\bigbosefx2.png
+2025-05-10 15:40:56,807 - INFO - Downloaded https://serenissima.ai/coat-of-arms/John_Jeffries.png for citizen John_Jeffries to public\coat-of-arms\john_jeffries.png
+2025-05-10 15:40:56,809 - INFO - File already exists for Xadme, replacing it: public\coat-of-arms\xadme.png
+2025-05-10 15:40:56,918 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Sofia.png for citizen Sofia to public\coat-of-arms\sofia.png
+2025-05-10 15:40:56,920 - INFO - File already exists for Isabella, replacing it: public\coat-of-arms\isabella.png
+2025-05-10 15:40:56,933 - INFO - Downloaded https://serenissima.ai/coat-of-arms/BasstheWhale.png for citizen BasstheWhale to public\coat-of-arms\bassthewhale.png
+2025-05-10 15:40:57,000 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Bigbosefx2.png for citizen Bigbosefx2 to public\coat-of-arms\bigbosefx2.png
+2025-05-10 15:40:57,002 - INFO - File already exists for bigbosefx, replacing it: public\coat-of-arms\bigbosefx.png
+2025-05-10 15:40:57,011 - ERROR - Error downloading https://serenissima.ai/coat-of-arms/Tiara_raa99_1746854719.png for citizen Tiara_raa99: 404 Client Error: Not Found for url: https://serenissima.ai/coat-of-arms/Tiara_raa99_1746854719.png
+2025-05-10 15:40:57,011 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Xadme.png for citizen Xadme to public\coat-of-arms\xadme.png
+2025-05-10 15:40:57,014 - INFO - File already exists for Feola007, replacing it: public\coat-of-arms\feola007.png
+2025-05-10 15:40:57,048 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Bullitpro0f.png for citizen Bullitpro0f to public\coat-of-arms\bullitpro0f.png
+2025-05-10 15:40:57,050 - INFO - File already exists for Lucid, replacing it: public\coat-of-arms\lucid.png
+2025-05-10 15:40:57,084 - ERROR - Error downloading https://serenissima.ai/coat-of-arms/bigbosefx.png for citizen bigbosefx: 404 Client Error: Not Found for url: https://serenissima.ai/coat-of-arms/bigbosefx.png
+2025-05-10 15:40:57,130 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Isabella.png for citizen Isabella to public\coat-of-arms\isabella.png
+2025-05-10 15:40:57,165 - INFO - Downloaded https://serenissima.ai/coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png for citizen ConsiglioDeiDieci to public\coat-of-arms\nlr.png
+2025-05-10 15:40:57,235 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Lucid.png for citizen Lucid to public\coat-of-arms\lucid.png
+2025-05-10 15:40:57,339 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Feola007.png for citizen Feola007 to public\coat-of-arms\feola007.png
+2025-05-10 15:40:57,342 - INFO - Saved mapping file to public\coat-of-arms\mapping.json
+2025-05-10 15:40:57,342 - INFO - Summary: 13 images downloaded successfully, 5 failed
+2025-05-10 15:40:57,343 - WARNING - Some downloads failed. Check the log for details.
+2025-05-10 15:40:57,343 - INFO - Coat of arms synchronization completed

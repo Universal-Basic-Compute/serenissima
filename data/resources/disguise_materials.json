@@ -1,0 +1,50 @@
+{
+  "id": "disguise_materials",
+  "name": "Disguise Materials",
+  "category": "finished_goods",
+  "subCategory": "criminal_supplies",
+  "description": "Specialized materials for altering appearance, including facial prosthetics, hair dyes, voice-changing devices, and costume elements. Essential tools for spies, infiltrators, and anyone wishing to avoid recognition.",
+  "varieties": [
+    {
+      "type": "facial_alterations",
+      "productionDifficulty": "high",
+      "popularity": "very_high",
+      "valueMultiplier": 1.2,
+      "primaryUse": "identity_concealment",
+      "modelVariant": "models/resources/disguise_materials_facial.glb"
+    },
+    {
+      "type": "voice_modifiers",
+      "productionDifficulty": "very_high",
+      "popularity": "medium",
+      "valueMultiplier": 1.5,
+      "primaryUse": "voice_disguise",
+      "modelVariant": "models/resources/disguise_materials_voice.glb"
+    },
+    {
+      "type": "class_transformation",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "primaryUse": "social_infiltration",
+      "modelVariant": "models/resources/disguise_materials_class.glb"
+    },
+    {
+      "type": "gender_alteration",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1.3,
+      "primaryUse": "complete_deception",
+      "modelVariant": "models/resources/disguise_materials_gender.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1300,
+    "historicalSignificance": "Venice's carnival tradition provided the perfect cover for disguise expertise to flourish. The city's position as a theater and opera center further developed sophisticated makeup and costume techniques. Spies from all European powers utilized Venetian disguise artists' skills, while the Republic's own intelligence operatives were masters of the craft.",
+    "culturalContext": "In a city where masks were worn for months during Carnival, the line between disguise for entertainment and disguise for deception was often blurred. Theatrical workshops openly sold materials that could be used for both purposes, creating a gray contract that served both legitimate performers and those with more clandestine intentions."
+  },
+  "importPrice": 5698.8,
+  "lifetimeHours": 8775,
+  "consumptionHours": 10,
+  "tier": 2
+}

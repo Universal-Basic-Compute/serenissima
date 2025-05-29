@@ -1,0 +1,34 @@
+{
+  "id": "rope",
+  "name": "Rope",
+  "category": "processed_materials",
+  "subCategory": "naval_supplies",
+  "description": "Strong, durable cordage essential for maritime activities and construction.",
+  "varieties": [
+    {
+      "type": "thin_cordage",
+      "diameter": "small",
+      "strength": "moderate",
+      "valueMultiplier": 0.8,
+      "primaryUse": "light_rigging"
+    },
+    {
+      "type": "standard_rope",
+      "diameter": "medium",
+      "strength": "good",
+      "valueMultiplier": 1,
+      "primaryUse": "general_purpose"
+    },
+    {
+      "type": "heavy_cable",
+      "diameter": "large",
+      "strength": "excellent",
+      "valueMultiplier": 1.3,
+      "primaryUse": "ship_anchors_heavy_lifting"
+    }
+  ],
+  "importPrice": 531.0,
+  "lifetimeHours": 8775,
+  "consumptionHours": 58,
+  "tier": 1
+}

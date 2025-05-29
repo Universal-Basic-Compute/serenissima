@@ -1,0 +1,428 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43985787237439,
+      "lng": 12.34621329055764
+    },
+    {
+      "lat": 45.43937984432133,
+      "lng": 12.347194979057091
+    },
+    {
+      "lat": 45.438867935773864,
+      "lng": 12.349828908309716
+    },
+    {
+      "lat": 45.43832590989679,
+      "lng": 12.34949631439187
+    },
+    {
+      "lat": 45.438069951422705,
+      "lng": 12.350300977096337
+    },
+    {
+      "lat": 45.438179110325706,
+      "lng": 12.350381443366784
+    },
+    {
+      "lat": 45.438348494412296,
+      "lng": 12.349764535293358
+    },
+    {
+      "lat": 45.43887546387439,
+      "lng": 12.350048849448937
+    },
+    {
+      "lat": 45.43863080009331,
+      "lng": 12.351363131866234
+    },
+    {
+      "lat": 45.43803607447884,
+      "lng": 12.351105639800805
+    },
+    {
+      "lat": 45.43796689309118,
+      "lng": 12.351384589538354
+    },
+    {
+      "lat": 45.4367548364544,
+      "lng": 12.350681850776452
+    },
+    {
+      "lat": 45.437639414517015,
+      "lng": 12.348251769408959
+    },
+    {
+      "lat": 45.43772598949729,
+      "lng": 12.34796209083535
+    },
+    {
+      "lat": 45.43782009258605,
+      "lng": 12.347202553448845
+    },
+    {
+      "lat": 45.43793301608544,
+      "lng": 12.345786347088982
+    }
+  ],
+  "centroid": {
+    "lat": 45.438275731200314,
+    "lng": 12.349185454392858
+  },
+  "historicalName": "Calle Seconda de la Fava en Sestier de San Marco",
+  "englishName": "Second Street of the Fava in the District of St. Mark",
+  "historicalDescription": "This area was part of the San Marco sestiere, known for its central location and proximity to important landmarks such as St. Mark's Basilica and the Doge's Palace. The street likely took its name from a prominent family or business dealing with fava beans.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 75110.14,
+  "center": {
+    "lat": 45.438215584687356,
+    "lng": 12.348456628083005
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43937984432133,
+        "lng": 12.347194979057091
+      },
+      "water": {
+        "lat": 45.439491388849554,
+        "lng": 12.346993888581814
+      },
+      "historicalName": "Riva della Fava",
+      "englishName": "Dock of the Bean",
+      "historicalDescription": "Named for its proximity to Calle Seconda de la Fava in San Marco, where bean merchants would bring their goods. Beans were an important staple food in Renaissance Venice, and merchants selling them clustered in this area near the church of San Zulian.",
+      "id": "canal_45.439380_12.347195"
+    },
+    {
+      "edge": {
+        "lat": 45.43925186718447,
+        "lng": 12.347853461370248
+      },
+      "water": {
+        "lat": 45.439381783107535,
+        "lng": 12.347676183710306
+      },
+      "historicalName": "Fondamenta dei Orefici",
+      "englishName": "Foundation of the Goldsmiths",
+      "historicalDescription": "Located near the San Marco district, this dock served the many goldsmiths and jewelers who had workshops in the area. The proximity to the wealthy patrons of San Marco made this an ideal location for luxury crafts, and the dock would have received shipments of precious metals and gems.",
+      "id": "canal_45.439252_12.347853"
+    },
+    {
+      "edge": {
+        "lat": 45.4391238900476,
+        "lng": 12.348511943683404
+      },
+      "water": {
+        "lat": 45.43928101077051,
+        "lng": 12.348387176383152
+      },
+      "historicalName": "Riva del Collegio",
+      "englishName": "Dock of the College",
+      "historicalDescription": "This landing was used by officials of the Collegio, an important governing body of the Venetian Republic that prepared matters for the Senate. Located in San Marco near government buildings, it would have seen frequent traffic from dignitaries and state officials traveling to and from meetings.",
+      "id": "canal_45.439124_12.348512"
+    },
+    {
+      "edge": {
+        "lat": 45.43899591291073,
+        "lng": 12.34917042599656
+      },
+      "water": {
+        "lat": 45.439175757954196,
+        "lng": 12.349166673079003
+      },
+      "historicalName": "Fondamenta dei Camerlenghi",
+      "englishName": "Foundation of the Treasurers",
+      "historicalDescription": "Named after the Camerlenghi, the treasury officials of the Republic who managed public finances. This dock in San Marco would have been used to transport tax collections, financial documents, and officials responsible for the city's economy, reflecting Venice's sophisticated financial administration.",
+      "id": "canal_45.438996_12.349170"
+    },
+    {
+      "edge": {
+        "lat": 45.438753131983844,
+        "lng": 12.350705990657586
+      },
+      "water": {
+        "lat": 45.43882659451323,
+        "lng": 12.350939971086374
+      },
+      "historicalName": "Riva dei Paramenti",
+      "englishName": "Dock of the Vestments",
+      "historicalDescription": "Near the churches in San Marco, this dock was where ecclesiastical textiles and ceremonial vestments would be loaded and unloaded. Religious processions were an important part of Venetian public life, and this dock would support the elaborate ceremonies that took place regularly in the nearby Basilica di San Marco.",
+      "id": "canal_45.438753_12.350706"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.438414230157676,
+        "lng": 12.345893082956147
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056196666",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43840912012273,
+          "lng": 12.345799232831855
+        },
+        "distance": 7.3444588011522525,
+        "id": "bb6d28c5-54f7-4dd6-b03d-8fe39cf0eecd",
+        "historicalName": "Ponte dei Notabili",
+        "englishName": "Bridge of the Notables",
+        "historicalDescription": "This bridge near Calle Seconda de la Fava was named after the prestigious Venetian families and officials who resided in this affluent area of San Marco. The neighborhood was home to many noble families who served in the Venetian government, making this name historically appropriate for a bridge in this location.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4384116751402,
+            "lng": 12.345846157894002
+          }
+        }
+      },
+      "id": "bridge_45.438414_12.345893"
+    },
+    {
+      "edge": {
+        "lat": 45.438895444229914,
+        "lng": 12.345999818823312
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056196666",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43891538449076,
+          "lng": 12.345903838983435
+        },
+        "distance": 7.80990096675569,
+        "id": "bb6d28c5-54f7-4dd6-b03d-8fe39cf0eecd",
+        "historicalName": "Ponte della Basilica",
+        "englishName": "Bridge of the Basilica",
+        "historicalDescription": "Located in the San Marco district not far from Calle Seconda de la Fava, this bridge would have been named for its proximity to the Basilica di San Marco, one of Venice's most important religious landmarks. The bridge would have been used by both locals and pilgrims making their way to worship at the basilica.",
+        "location": {
+          "midpoint": {
+            "lat": 45.438905414360335,
+            "lng": 12.345951828903374
+          }
+        }
+      },
+      "id": "bridge_45.438895_12.346000"
+    },
+    {
+      "edge": {
+        "lat": 45.43937665830215,
+        "lng": 12.346106554690476
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056196666",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.4394216488588,
+          "lng": 12.346008445135016
+        },
+        "distance": 9.144441208766315,
+        "id": "bb6d28c5-54f7-4dd6-b03d-8fe39cf0eecd",
+        "historicalName": "Ponte dei Gioiellieri di Fava",
+        "englishName": "Bridge of the Jewelers of Fava",
+        "historicalDescription": "This bridge directly connected to Calle Seconda de la Fava would have been named after the jewelry craftsmen who had workshops in this area during the Renaissance. The San Marco district was known for its luxury trades, and jewelers would have been prominent members of the local guild system, making this a historically plausible name for a bridge in this location.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439399153580474,
+            "lng": 12.346057499912746
+          }
+        }
+      },
+      "id": "bridge_45.439377_12.346107"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43716900919182,
+      "lng": 12.350168375684923,
+      "streetName": "Calle Primo de la Fava",
+      "streetNameEnglish": "First Street of the Fava",
+      "streetDescription": "Connected to Calle Seconda de la Fava, this street would logically be the 'first' street in the Fava area, named after the Church of Santa Maria della Fava, an important religious landmark in the San Marco district since the 16th century.",
+      "id": "building_45.437169_12.350168"
+    },
+    {
+      "lat": 45.43763252782562,
+      "lng": 12.349087590406388,
+      "streetName": "Calle dei Preti",
+      "streetNameEnglish": "Street of the Priests",
+      "streetDescription": "Near the Church of Santa Maria della Fava, this street would likely house clergy members who served at the church, a common naming convention in Renaissance Venice for streets near religious buildings.",
+      "id": "building_45.437633_12.349088"
+    },
+    {
+      "lat": 45.43768897724301,
+      "lng": 12.349564799602057,
+      "streetName": "Ruga dei Oresi de San Marco",
+      "streetNameEnglish": "Row of the Goldsmiths of San Marco",
+      "streetDescription": "The San Marco district was known for its luxury craftsmen. This street would have housed goldsmiths and jewelers who served the wealthy nobili families and the nearby Ducal Palace, following the Venetian tradition of clustering similar trades.",
+      "id": "building_45.437689_12.349565"
+    },
+    {
+      "lat": 45.43765057823779,
+      "lng": 12.350365307499372,
+      "streetName": "Salizada dei Specchieri",
+      "streetNameEnglish": "Paved Street of the Mirror Makers",
+      "streetDescription": "Mirror making was a prestigious Venetian craft, with the technique perfected on Murano island but sold in the San Marco district. This paved street (salizada) would have hosted shops selling these luxury items to wealthy clientele.",
+      "id": "building_45.437651_12.350365"
+    },
+    {
+      "lat": 45.43766074575623,
+      "lng": 12.350965574643002,
+      "streetName": "Sottoportego del Capitello",
+      "streetNameEnglish": "Passageway of the Small Shrine",
+      "streetDescription": "A covered passageway containing a small religious shrine or 'capitello', common in Renaissance Venice as displays of public devotion, particularly in the religiously significant Fava district near the church.",
+      "id": "building_45.437661_12.350966"
+    },
+    {
+      "lat": 45.43811631542264,
+      "lng": 12.346548650362502,
+      "streetName": "Rio Terà della Fava",
+      "streetNameEnglish": "Filled Canal of the Fava",
+      "streetDescription": "A former canal that was filled in ('terà' means 'filled') adjacent to the Church of Santa Maria della Fava. Venice frequently filled smaller canals for sanitation or expansion purposes during the Renaissance period.",
+      "id": "building_45.438116_12.346549"
+    },
+    {
+      "lat": 45.438048175032215,
+      "lng": 12.347154999626191,
+      "streetName": "Calle dei Albanesi",
+      "streetNameEnglish": "Street of the Albanians",
+      "streetDescription": "Near the Greek quarter, this street would have housed Albanian merchants and immigrants who formed a significant community in Renaissance Venice, especially after Ottoman expansions in the Balkans in the 15th and 16th centuries.",
+      "id": "building_45.438048_12.347155"
+    },
+    {
+      "lat": 45.4380608356183,
+      "lng": 12.347694244497218,
+      "streetName": "Campiello dei Greci",
+      "streetNameEnglish": "Small Square of the Greeks",
+      "streetDescription": "A small square near the Greek Orthodox community that settled in this area of San Marco. The Greek presence was significant in Renaissance Venice due to trade relationships and migration following the fall of Constantinople.",
+      "id": "building_45.438061_12.347694"
+    },
+    {
+      "lat": 45.43805888830001,
+      "lng": 12.348329555663412,
+      "streetName": "Fondamenta della Canonica",
+      "streetNameEnglish": "Foundation of the Canonry",
+      "streetDescription": "A waterfront street near the canonical residences associated with the Church of Santa Maria della Fava, where church canons would have resided. Religious foundations often had dedicated housing for clergy in Renaissance Venice.",
+      "id": "building_45.438059_12.348330"
+    },
+    {
+      "lat": 45.43813720709319,
+      "lng": 12.349051855528906,
+      "streetName": "Calle dei Stagneri",
+      "streetNameEnglish": "Street of the Tinsmiths",
+      "streetDescription": "A street where tinsmiths and pewter craftsmen would have had their workshops, following Venice's tradition of organizing streets by guild or trade occupation, contributing to the commercial activity near the Fava district.",
+      "id": "building_45.438137_12.349052"
+    },
+    {
+      "lat": 45.438154190692636,
+      "lng": 12.349691544913677,
+      "streetName": "Ruga dei Mercanti da Levante",
+      "streetNameEnglish": "Row of Merchants from the Levant",
+      "streetDescription": "A wider commercial street where Eastern Mediterranean merchants would sell exotic goods. Venice's position as a trade empire meant areas near San Marco often housed foreign merchants, especially those from the profitable Eastern trade routes.",
+      "id": "building_45.438154_12.349692"
+    },
+    {
+      "lat": 45.43801339643259,
+      "lng": 12.350256775252191,
+      "streetName": "Corte Grimani",
+      "streetNameEnglish": "Grimani Court",
+      "streetDescription": "A courtyard named after the prominent Grimani family who likely owned property in this area of San Marco. The Grimani were a nobili family that produced doges, cardinals, and other important figures in Renaissance Venice.",
+      "id": "building_45.438013_12.350257"
+    },
+    {
+      "lat": 45.43816778584047,
+      "lng": 12.35080661248814,
+      "streetName": "Calle del Paradiso Piccolo",
+      "streetNameEnglish": "Street of the Small Paradise",
+      "streetDescription": "Named either for a small garden or for a sign depicting paradise that would have adorned a building. Poetic or religious naming was common in Renaissance Venice, particularly in areas near churches like Santa Maria della Fava.",
+      "id": "building_45.438168_12.350807"
+    },
+    {
+      "lat": 45.43846237782232,
+      "lng": 12.34633701530725,
+      "streetName": "Salizada della Malvasia",
+      "streetNameEnglish": "Paved Street of the Malvasia Wine Shop",
+      "streetDescription": "A paved street named after a shop selling sweet Malvasia wine from Greece and Crete, reflecting Venice's dominance in the Mediterranean wine trade during the Renaissance period.",
+      "id": "building_45.438462_12.346337"
+    },
+    {
+      "lat": 45.43850122382825,
+      "lng": 12.347129968880957,
+      "streetName": "Calle dei Botteri",
+      "streetNameEnglish": "Street of the Barrel Makers",
+      "streetDescription": "Home to craftsmen who made barrels essential for wine and oil storage, this street would represent the practical trades that supported Venice's commercial empire, situated in a working district adjacent to the more prestigious San Marco area.",
+      "id": "building_45.438501_12.347130"
+    },
+    {
+      "lat": 45.4385369281841,
+      "lng": 12.3478187430755,
+      "streetName": "Sottoportego dei Pisani",
+      "streetNameEnglish": "Passageway of the Pisani Family",
+      "streetDescription": "A covered passage named after the influential Pisani family who likely owned property nearby. Nobili families often had streets or passages named after them in areas where they maintained palaces or commercial interests.",
+      "id": "building_45.438537_12.347819"
+    },
+    {
+      "lat": 45.43854480505691,
+      "lng": 12.348409134393286,
+      "streetName": "Rio Terà dei Libreri",
+      "streetNameEnglish": "Filled Canal of the Booksellers",
+      "streetDescription": "A former canal converted to a street where booksellers and printers operated, reflecting Venice's importance as a center of printing and publishing in Renaissance Europe, particularly in the cultured San Marco district.",
+      "id": "building_45.438545_12.348409"
+    },
+    {
+      "lat": 45.4385237867765,
+      "lng": 12.348968863432665,
+      "streetName": "Calle della Sacrestia",
+      "streetNameEnglish": "Street of the Sacristy",
+      "streetDescription": "A street leading to or near the sacristy of the Church of Santa Maria della Fava, where vestments and sacred vessels would be stored. Religious landmarks frequently influenced street naming in Renaissance Venice.",
+      "id": "building_45.438524_12.348969"
+    },
+    {
+      "lat": 45.43850604453389,
+      "lng": 12.350322848545508,
+      "streetName": "Fondamenta dei Scudi",
+      "streetNameEnglish": "Foundation of the Shields",
+      "streetDescription": "A waterfront street possibly named after a workshop that produced shields or a building decorated with heraldic shields, representing the military equipment makers that served Venice's maritime empire.",
+      "id": "building_45.438506_12.350323"
+    },
+    {
+      "lat": 45.43861221545657,
+      "lng": 12.350876373823185,
+      "streetName": "Calle dei Filacanevi",
+      "streetNameEnglish": "Street of the Hemp Spinners",
+      "streetDescription": "Where artisans processed hemp for rope making, essential to Venice's shipbuilding industry. Though shipbuilding occurred in the Arsenale, related trades were distributed throughout the city, including areas near San Marco.",
+      "id": "building_45.438612_12.350876"
+    },
+    {
+      "lat": 45.43906728843379,
+      "lng": 12.346479172737993,
+      "streetName": "Ruga degli Argentieri",
+      "streetNameEnglish": "Row of the Silversmiths",
+      "streetDescription": "A commercial street housing silversmiths' workshops and shops, typical of the luxury crafts found in the San Marco district that catered to wealthy Venetians and foreign visitors during the Renaissance.",
+      "id": "building_45.439067_12.346479"
+    },
+    {
+      "lat": 45.43900435442663,
+      "lng": 12.347154167742936,
+      "streetName": "Calle dei Bombardieri",
+      "streetNameEnglish": "Street of the Bombardiers",
+      "streetDescription": "Named for artillery specialists who served in Venice's military or for a nearby artillery storage facility. Military-related street names were common, reflecting Venice's status as a naval power during the Renaissance.",
+      "id": "building_45.439004_12.347154"
+    },
+    {
+      "lat": 45.4390539810587,
+      "lng": 12.347738057796416,
+      "streetName": "Corte Venier",
+      "streetNameEnglish": "Venier Court",
+      "streetDescription": "A courtyard named after the noble Venier family, who produced the 76th Doge of Venice, Antonio Venier (1382-1400). Nobili families like the Venier would have owned properties throughout the prestigious San Marco district.",
+      "id": "building_45.439054_12.347738"
+    },
+    {
+      "lat": 45.4389277994537,
+      "lng": 12.348402924456936,
+      "streetName": "Calle del Capitello Bizantino",
+      "streetNameEnglish": "Street of the Byzantine Capital",
+      "streetDescription": "Named for a visible architectural element—a Byzantine-style column capital—reflecting Venice's strong Byzantine heritage and influence, particularly evident in the San Marco area with its Byzantine architectural connections.",
+      "id": "building_45.438928_12.348403"
+    }
+  ],
+  "id": "polygon-1746056493504"
+}

@@ -1,0 +1,460 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.427118592658715,
+      "lng": 12.323471862627926
+    },
+    {
+      "lat": 45.42634303148102,
+      "lng": 12.326776344134274
+    },
+    {
+      "lat": 45.4245283272854,
+      "lng": 12.325746375872555
+    },
+    {
+      "lat": 45.42433254658303,
+      "lng": 12.32538159544653
+    },
+    {
+      "lat": 45.423662369038745,
+      "lng": 12.324716407610836
+    },
+    {
+      "lat": 45.42357953755387,
+      "lng": 12.324029762103024
+    },
+    {
+      "lat": 45.42355694712783,
+      "lng": 12.323246557070675
+    },
+    {
+      "lat": 45.42394851323314,
+      "lng": 12.32213075812048
+    }
+  ],
+  "centroid": {
+    "lat": 45.42463373312022,
+    "lng": 12.324437457873287
+  },
+  "historicalName": "Fondamenta de le Capuzine",
+  "englishName": "Quay of the Capuchin Nuns",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for the nearby Convent of the Capuchin Nuns, established in the early 15th century. The fondamenta (quay) likely took its name from this convent.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 89562.38,
+  "center": {
+    "lat": 45.425376706011356,
+    "lng": 12.324271501226841
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.426963480423176,
+        "lng": 12.324132758929196
+      },
+      "water": {
+        "lat": 45.42714259178368,
+        "lng": 12.324109333623648
+      },
+      "historicalName": "Riva dei Mugnai",
+      "englishName": "Dock of the Millers",
+      "historicalDescription": "This dock was historically used by millers who operated water-powered grain mills in the vicinity. These artisans were essential to Venetian food production and would receive grain shipments at this landing before processing them into flour for the city's bakeries.",
+      "id": "canal_45.426963_12.324133"
+    },
+    {
+      "edge": {
+        "lat": 45.426808368187636,
+        "lng": 12.324793655230465
+      },
+      "water": {
+        "lat": 45.426987055680826,
+        "lng": 12.324822923595438
+      },
+      "historicalName": "Fondamenta delle Reliquie",
+      "englishName": "Foundation of the Relics",
+      "historicalDescription": "Located near the Capuchin convent, this dock was where religious relics would arrive in Venice before being processed to the various churches. The Capuchin monks would often participate in ceremonies receiving these sacred objects, making this landing an important religious site.",
+      "id": "canal_45.426808_12.324794"
+    },
+    {
+      "edge": {
+        "lat": 45.4266532559521,
+        "lng": 12.325454551531735
+      },
+      "water": {
+        "lat": 45.42682283835518,
+        "lng": 12.32553995843283
+      },
+      "historicalName": "Riva degli Arcieri",
+      "englishName": "Dock of the Archers",
+      "historicalDescription": "This dock was named for the city's archery guild who practiced nearby. The Republic of Venice maintained specialized military units, and this landing served as a gathering point for the archers' regiment, who would embark from here when called to service on Venetian galleys.",
+      "id": "canal_45.426653_12.325455"
+    },
+    {
+      "edge": {
+        "lat": 45.42649814371656,
+        "lng": 12.326115447833004
+      },
+      "water": {
+        "lat": 45.42665021147821,
+        "lng": 12.32625231048426
+      },
+      "historicalName": "Fondamenta dei Chioveri",
+      "englishName": "Foundation of the Nail-makers",
+      "historicalDescription": "This dock served the nail-making workshops that were vital to Venice's shipbuilding industry. Located near the Capuchin area, metalworkers would receive raw materials here and ship their finished products to the Arsenal and other construction sites throughout the city.",
+      "id": "canal_45.426498_12.326115"
+    },
+    {
+      "edge": {
+        "lat": 45.42357953755387,
+        "lng": 12.324029762103024
+      },
+      "water": {
+        "lat": 45.42340595402668,
+        "lng": 12.32396263103922
+      },
+      "historicalName": "Riva della Carità",
+      "englishName": "Dock of Charity",
+      "historicalDescription": "Adjacent to the Capuchin convent, this dock was where alms and charitable donations would be delivered. The Capuchin order was known for its commitment to poverty and service to the poor, making this landing an important point for the distribution of food and supplies to Venice's needy.",
+      "id": "canal_45.423580_12.324030"
+    },
+    {
+      "edge": {
+        "lat": 45.42355694712783,
+        "lng": 12.323246557070675
+      },
+      "water": {
+        "lat": 45.4234148645994,
+        "lng": 12.323089417027681
+      },
+      "historicalName": "Fondamenta dei Cartai",
+      "englishName": "Foundation of the Paper-makers",
+      "historicalDescription": "This dock served Venice's paper-making industry, which was crucial for the city's prominence in early printing and publishing. Materials would arrive here before being crafted into paper for books, maps, and official documents of the Republic, supporting Venice's reputation as a center of Renaissance learning and commerce.",
+      "id": "canal_45.423557_12.323247"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.42440138172251,
+        "lng": 12.322322344478687
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052792551",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.42447937590566,
+          "lng": 12.322173673464718
+        },
+        "distance": 14.48562938643072,
+        "id": "a0b57aae-e45c-4ea3-b457-a123bb5aa4bf",
+        "historicalName": "Ponte delle Capuccine",
+        "englishName": "Bridge of the Capuchin Nuns",
+        "historicalDescription": "Named after the Capuchin nuns who established their convent along the Fondamenta de le Capuzine in the early 16th century. The bridge served as a primary access point to their religious complex, where the sisters were known for their charitable work with orphaned girls and the poor of Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42444037881408,
+            "lng": 12.322248008971702
+          }
+        }
+      },
+      "id": "bridge_45.424401_12.322322"
+    },
+    {
+      "edge": {
+        "lat": 45.42485425021188,
+        "lng": 12.322513930836893
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052792551",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.42496505804847,
+          "lng": 12.322409707858029
+        },
+        "distance": 14.763838163658125,
+        "id": "a0b57aae-e45c-4ea3-b457-a123bb5aa4bf",
+        "historicalName": "Ponte dei Merletti",
+        "englishName": "Bridge of the Lacemakers",
+        "historicalDescription": "This bridge earned its name from the skilled female lacemakers who lived and worked in the area near Fondamenta de le Capuzine. The Capuchin nuns taught lacemaking to poor young women, and the craft became an important cottage industry in this district during the Renaissance, with Venetian lace being highly prized throughout Europe.",
+        "location": {
+          "midpoint": {
+            "lat": 45.424909654130175,
+            "lng": 12.32246181934746
+          }
+        }
+      },
+      "id": "bridge_45.424854_12.322514"
+    },
+    {
+      "edge": {
+        "lat": 45.42530711870125,
+        "lng": 12.3227055171951
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052792551",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.42545074019128,
+          "lng": 12.32264574225134
+        },
+        "distance": 16.63735045749715,
+        "id": "a0b57aae-e45c-4ea3-b457-a123bb5aa4bf",
+        "historicalName": "Ponte della Carità Femminile",
+        "englishName": "Bridge of Feminine Charity",
+        "historicalDescription": "This bridge was named to commemorate the charitable works performed by the women's religious orders near Fondamenta de le Capuzine. It served as a pathway for local women bringing donations to the convent and for the nuns who would distribute alms and provide medical care to the needy families of the surrounding neighborhood.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42537892944627,
+            "lng": 12.32267562972322
+          }
+        }
+      },
+      "id": "bridge_45.425307_12.322706"
+    },
+    {
+      "edge": {
+        "lat": 45.42666572416935,
+        "lng": 12.323280276269719
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746052782991",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.426651748459776,
+          "lng": 12.32312317545599
+        },
+        "distance": 12.358090816217018,
+        "id": "94c9ed97-6856-4667-b778-8cb625efe47a",
+        "historicalName": "Ponte dei Gigli Bianchi",
+        "englishName": "Bridge of the White Lilies",
+        "historicalDescription": "Named for the white lily gardens maintained by the Capuchin nuns, which were visible from this crossing. The white lily symbolized purity and was associated with the Virgin Mary, to whom the nuns had special devotion. The flowers from these gardens were used to decorate the convent chapel and were also sold to provide modest income for the sisters' charitable works.",
+        "location": {
+          "midpoint": {
+            "lat": 45.426658736314565,
+            "lng": 12.323201725862855
+          }
+        }
+      },
+      "id": "bridge_45.426666_12.323280"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.423992040161565,
+      "lng": 12.322838384926579,
+      "streetName": "Calle delle Monache Capuccine",
+      "streetNameEnglish": "Street of the Capuchin Nuns",
+      "streetDescription": "Named after the Capuchin nuns who established their convent in this area during the 16th century. The Capuccine were known for their strict observance of poverty and austerity.",
+      "id": "building_45.423992_12.322838"
+    },
+    {
+      "lat": 45.42396439552543,
+      "lng": 12.323450610806624,
+      "streetName": "Rio Terà del Convento",
+      "streetNameEnglish": "Filled Canal of the Convent",
+      "streetDescription": "This street was originally a canal that was filled in (rio terà) and ran alongside the Capuchin convent. It served as an important access route to the religious complex.",
+      "id": "building_45.423964_12.323451"
+    },
+    {
+      "lat": 45.42409126492587,
+      "lng": 12.324031724476319,
+      "streetName": "Sottoportego della Clausura",
+      "streetNameEnglish": "Passageway of the Enclosure",
+      "streetDescription": "This covered passageway (sottoportego) references the strict enclosure (clausura) maintained by the Capuchin nuns, who were cloistered and had limited contact with the outside world.",
+      "id": "building_45.424091_12.324032"
+    },
+    {
+      "lat": 45.424524501922264,
+      "lng": 12.32284153727951,
+      "streetName": "Calle dei Benefattori",
+      "streetNameEnglish": "Street of the Benefactors",
+      "streetDescription": "Named after the wealthy Venetian families who donated funds for the establishment and maintenance of the Capuchin convent and its charitable works.",
+      "id": "building_45.424525_12.322842"
+    },
+    {
+      "lat": 45.42441728833279,
+      "lng": 12.32334762155071,
+      "streetName": "Corte della Badessa",
+      "streetNameEnglish": "Court of the Abbess",
+      "streetDescription": "This small courtyard near the convent was where the Abbess of the Capuchin order would occasionally receive important visitors or conduct necessary business with the outside world.",
+      "id": "building_45.424417_12.323348"
+    },
+    {
+      "lat": 45.424369284761276,
+      "lng": 12.324038042098508,
+      "streetName": "Calle del Parlatorio",
+      "streetNameEnglish": "Street of the Parlor",
+      "streetDescription": "Named after the parlatorio (visiting room) of the convent, the only place where cloistered nuns could speak with visitors through a grille, maintaining their separation from the secular world.",
+      "id": "building_45.424369_12.324038"
+    },
+    {
+      "lat": 45.42441824247425,
+      "lng": 12.324584003747903,
+      "streetName": "Ruga dei Linaroli",
+      "streetNameEnglish": "Street of the Linen Merchants",
+      "streetDescription": "This commercial street was home to linen merchants whose trade was connected to the Capuchin nuns, who were known for their skills in needlework and textile arts.",
+      "id": "building_45.424418_12.324584"
+    },
+    {
+      "lat": 45.4248454572203,
+      "lng": 12.32329478763377,
+      "streetName": "Calle del Refettorio",
+      "streetNameEnglish": "Street of the Refectory",
+      "streetDescription": "Named for its proximity to the dining hall (refettorio) of the Capuchin convent, where the nuns would take their modest meals in silence while listening to spiritual readings.",
+      "id": "building_45.424845_12.323295"
+    },
+    {
+      "lat": 45.42485051824998,
+      "lng": 12.324087996998571,
+      "streetName": "Salizada della Carità",
+      "streetNameEnglish": "Paved Street of Charity",
+      "streetDescription": "This paved street (salizada) was named for the charitable works performed by the Capuchin nuns, who provided food and care for the poor and sick of the neighborhood.",
+      "id": "building_45.424851_12.324088"
+    },
+    {
+      "lat": 45.42489603257097,
+      "lng": 12.324706254959846,
+      "streetName": "Campiello delle Novizie",
+      "streetNameEnglish": "Small Square of the Novices",
+      "streetDescription": "A small square near the area where novices (novizie) to the Capuchin order would first enter before taking their final vows, symbolizing their transition from secular to religious life.",
+      "id": "building_45.424896_12.324706"
+    },
+    {
+      "lat": 45.42497433258224,
+      "lng": 12.325280974922435,
+      "streetName": "Calle dei Voti",
+      "streetNameEnglish": "Street of the Vows",
+      "streetDescription": "Named in reference to the solemn vows of poverty, chastity, and obedience taken by the Capuchin nuns. The street may have led to the chapel where such ceremonies took place.",
+      "id": "building_45.424974_12.325281"
+    },
+    {
+      "lat": 45.42537904607192,
+      "lng": 12.323325816866866,
+      "streetName": "Fondamenta dell'Orto",
+      "streetNameEnglish": "Foundation of the Garden",
+      "streetDescription": "This canalside street ran alongside the vegetable gardens (orto) maintained by the Capuchin nuns, who grew much of their own food as part of their self-sufficient lifestyle.",
+      "id": "building_45.425379_12.323326"
+    },
+    {
+      "lat": 45.425283101229695,
+      "lng": 12.32413736522983,
+      "streetName": "Rio Terà della Provvidenza",
+      "streetNameEnglish": "Filled Canal of Providence",
+      "streetDescription": "This former canal was filled in and named after the concept of Divine Providence, reflecting the Capuchin nuns' trust in God's provision for their needs despite their vow of poverty.",
+      "id": "building_45.425283_12.324137"
+    },
+    {
+      "lat": 45.4253923215667,
+      "lng": 12.324707848175803,
+      "streetName": "Calle del Campanile Piccolo",
+      "streetNameEnglish": "Street of the Small Bell Tower",
+      "streetDescription": "Named after the modest bell tower of the Capuchin convent chapel. Unlike the grand campanili of Venetian churches, the Capuchins maintained a small bell tower in keeping with their simplicity.",
+      "id": "building_45.425392_12.324708"
+    },
+    {
+      "lat": 45.42538076794684,
+      "lng": 12.325394438662759,
+      "streetName": "Sottoportego delle Elemosine",
+      "streetNameEnglish": "Passageway of Alms",
+      "streetDescription": "This covered passageway was where the poor could come to receive alms and food distributed by the Capuchin nuns, who despite their own poverty were committed to helping those in need.",
+      "id": "building_45.425381_12.325394"
+    },
+    {
+      "lat": 45.42539628914507,
+      "lng": 12.325946383264288,
+      "streetName": "Calle dei Cilici",
+      "streetNameEnglish": "Street of the Hairshirts",
+      "streetDescription": "Named after the cilici (hair shirts) worn by some Capuchin nuns as a form of penance and mortification. This street recalls the ascetic practices of the order.",
+      "id": "building_45.425396_12.325946"
+    },
+    {
+      "lat": 45.42589154218784,
+      "lng": 12.32338863402363,
+      "streetName": "Ramo della Ruota",
+      "streetNameEnglish": "Branch of the Wheel",
+      "streetDescription": "Named after the 'ruota' or turning wheel in the convent wall where abandoned babies could be left anonymously for the nuns to take in and care for, a common charitable service in Renaissance Venice.",
+      "id": "building_45.425892_12.323389"
+    },
+    {
+      "lat": 45.42586807881239,
+      "lng": 12.32408968944896,
+      "streetName": "Calle San Francesco",
+      "streetNameEnglish": "Street of Saint Francis",
+      "streetDescription": "Named after Saint Francis of Assisi, the founder of the Franciscan order from which the Capuchins derived. The Capuchin nuns followed his teachings of radical poverty and simplicity.",
+      "id": "building_45.425868_12.324090"
+    },
+    {
+      "lat": 45.4258369809832,
+      "lng": 12.324565860219254,
+      "streetName": "Corte delle Oblate",
+      "streetNameEnglish": "Court of the Oblates",
+      "streetDescription": "This courtyard was associated with the oblates, women who dedicated themselves to the religious life and service of the convent without taking full vows as nuns.",
+      "id": "building_45.425837_12.324566"
+    },
+    {
+      "lat": 45.42584337577657,
+      "lng": 12.325361744802644,
+      "streetName": "Calle della Sacrestia",
+      "streetNameEnglish": "Street of the Sacristy",
+      "streetDescription": "This street led to the sacristy of the Capuchin convent chapel, where the sacred vessels and vestments used in religious services were stored and prepared.",
+      "id": "building_45.425843_12.325362"
+    },
+    {
+      "lat": 45.42578727401881,
+      "lng": 12.325843702367052,
+      "streetName": "Ruga dei Ricamatori",
+      "streetNameEnglish": "Street of the Embroiderers",
+      "streetDescription": "A commercial street where embroiderers worked and sold their wares. The Capuchin nuns were skilled in fine embroidery, particularly for church vestments and altar cloths.",
+      "id": "building_45.425787_12.325844"
+    },
+    {
+      "lat": 45.4263061465062,
+      "lng": 12.323922856737534,
+      "streetName": "Calle delle Vergini Consacrate",
+      "streetNameEnglish": "Street of the Consecrated Virgins",
+      "streetDescription": "This street honored the Capuchin nuns' vow of chastity and their status as brides of Christ, a fundamental aspect of female monastic identity in Renaissance Venice.",
+      "id": "building_45.426306_12.323923"
+    },
+    {
+      "lat": 45.42619995412678,
+      "lng": 12.324632652721096,
+      "streetName": "Salizada dei Benefici",
+      "streetNameEnglish": "Paved Street of Benefits",
+      "streetDescription": "This paved street was named for the spiritual and material benefits that the Capuchin convent brought to the neighborhood through their prayers and charitable works.",
+      "id": "building_45.426200_12.324633"
+    },
+    {
+      "lat": 45.42617599373226,
+      "lng": 12.325230479849044,
+      "streetName": "Campiello della Preghiera",
+      "streetNameEnglish": "Small Square of Prayer",
+      "streetDescription": "A small square near the convent chapel where local residents would sometimes gather to join in prayers with the nuns, particularly during religious festivals or times of civic distress.",
+      "id": "building_45.426176_12.325230"
+    },
+    {
+      "lat": 45.42622869166899,
+      "lng": 12.326046988072552,
+      "streetName": "Calle del Chiostro",
+      "streetNameEnglish": "Street of the Cloister",
+      "streetDescription": "Named for its proximity to the inner cloister of the Capuchin convent, the enclosed garden surrounded by a covered walkway where nuns could walk, pray, and meditate in silence.",
+      "id": "building_45.426229_12.326047"
+    },
+    {
+      "lat": 45.42666507999091,
+      "lng": 12.32405444978118,
+      "streetName": "Fondamenta Santa Chiara",
+      "streetNameEnglish": "Foundation of Saint Clare",
+      "streetDescription": "Named after Saint Clare of Assisi, who founded the Order of Poor Ladies (Second Order of St. Francis) from which the Capuchin nuns' tradition ultimately derived. This canalside street honored this important female spiritual figure.",
+      "id": "building_45.426665_12.324054"
+    },
+    {
+      "lat": 45.426686811026265,
+      "lng": 12.32461880686676,
+      "streetName": "Calle della Regola",
+      "streetNameEnglish": "Street of the Rule",
+      "streetDescription": "Named after the 'Regola' or Rule of Saint Francis, the set of guidelines that governed the life of the Capuchin nuns, emphasizing poverty, chastity, obedience, and enclosure.",
+      "id": "building_45.426687_12.324619"
+    }
+  ],
+  "id": "polygon-1746052772601"
+}

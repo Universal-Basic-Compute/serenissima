@@ -1,0 +1,402 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.42965402262102,
+      "lng": 12.325484262140316
+    },
+    {
+      "lat": 45.430083192812674,
+      "lng": 12.325816856058163
+    },
+    {
+      "lat": 45.43079846921373,
+      "lng": 12.323767648370785
+    },
+    {
+      "lat": 45.430866231771134,
+      "lng": 12.323778377206844
+    },
+    {
+      "lat": 45.43119751421401,
+      "lng": 12.322684035928768
+    },
+    {
+      "lat": 45.43132550918253,
+      "lng": 12.32186864438824
+    },
+    {
+      "lat": 45.43222899482186,
+      "lng": 12.321847186716122
+    },
+    {
+      "lat": 45.4327409635974,
+      "lng": 12.32163260999493
+    },
+    {
+      "lat": 45.43358419616226,
+      "lng": 12.320988879831356
+    },
+    {
+      "lat": 45.43334327385793,
+      "lng": 12.320334420831722
+    },
+    {
+      "lat": 45.43292918624432,
+      "lng": 12.319679961832088
+    },
+    {
+      "lat": 45.43204076983972,
+      "lng": 12.320559726388973
+    },
+    {
+      "lat": 45.43133303828928,
+      "lng": 12.320688472421688
+    },
+    {
+      "lat": 45.43079846921373,
+      "lng": 12.320581184061092
+    }
+  ],
+  "centroid": {
+    "lat": 45.431637416560115,
+    "lng": 12.32212230472651
+  },
+  "historicalName": "Fondamenta degli Ognisanti",
+  "englishName": "Foundations of All Saints",
+  "historicalDescription": "This area in the Dorsoduro sestiere was known for its proximity to the Church of Ognissanti, a prominent religious landmark dedicated to All Saints. The fondamenta, or walkway along the canal, would have been a busy thoroughfare for locals and visitors alike.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 57477.19,
+  "center": {
+    "lat": 45.431044466844625,
+    "lng": 12.32133077717181
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43065541338964,
+        "lng": 12.321194068820995
+      },
+      "water": {
+        "lat": 45.430505527656294,
+        "lng": 12.321052389727084
+      },
+      "historicalName": "Riva degli Ognissanti",
+      "englishName": "Landing of All Saints",
+      "historicalDescription": "Named after the nearby church of Ognissanti (All Saints). During the Renaissance, this dock would have served as a primary landing point for visitors to the church, particularly during religious festivals.",
+      "id": "canal_45.430655_12.321194"
+    },
+    {
+      "edge": {
+        "lat": 45.43051235756555,
+        "lng": 12.321806953580898
+      },
+      "water": {
+        "lat": 45.43033587509284,
+        "lng": 12.321757485997226
+      },
+      "historicalName": "Fondamenta dei Tintori",
+      "englishName": "Foundation of the Dyers",
+      "historicalDescription": "This dock was historically used by fabric dyers who needed access to water for their craft. The area around Fondamenta degli Ognissanti was known for textile production, and dyers would have been a crucial part of this industry in Renaissance Venice.",
+      "id": "canal_45.430512_12.321807"
+    },
+    {
+      "edge": {
+        "lat": 45.430369301741464,
+        "lng": 12.322419838340801
+      },
+      "water": {
+        "lat": 45.430191827068576,
+        "lng": 12.322461478640319
+      },
+      "historicalName": "Riva delle Gondole",
+      "englishName": "Landing of the Gondolas",
+      "historicalDescription": "A common docking area for gondoliers waiting to transport passengers. This would have been a bustling point in Renaissance Venice where nobles and merchants could hire transportation to other parts of the city.",
+      "id": "canal_45.430369_12.322420"
+    },
+    {
+      "edge": {
+        "lat": 45.430226245917375,
+        "lng": 12.323032723100704
+      },
+      "water": {
+        "lat": 45.43006239262783,
+        "lng": 12.323138433240185
+      },
+      "historicalName": "Fondamenta dei Pescatori",
+      "englishName": "Foundation of the Fishermen",
+      "historicalDescription": "Located near the Fondamenta degli Ognissanti, this dock served local fishermen who would bring their daily catch to sell to nearby households and contracts. Fishing was vital to Venice's economy and food supply during the Renaissance.",
+      "id": "canal_45.430226_12.323033"
+    },
+    {
+      "edge": {
+        "lat": 45.430083190093285,
+        "lng": 12.323645607860607
+      },
+      "water": {
+        "lat": 45.42993499558342,
+        "lng": 12.323790853850266
+      },
+      "historicalName": "Riva della Fornace",
+      "englishName": "Landing of the Kiln",
+      "historicalDescription": "Named for a nearby glass or brick furnace. Venice's glass production was legendary during the Renaissance, and kilns were situated in specific areas due to fire concerns. This dock would have received raw materials and dispatched finished products.",
+      "id": "canal_45.430083_12.323646"
+    },
+    {
+      "edge": {
+        "lat": 45.4299401342692,
+        "lng": 12.32425849262051
+      },
+      "water": {
+        "lat": 45.42980532475971,
+        "lng": 12.324428162948012
+      },
+      "historicalName": "Fondamenta dei Cordai",
+      "englishName": "Foundation of the Ropemakers",
+      "historicalDescription": "Ropemaking was essential for Venice's maritime industry. This dock near the Fondamenta degli Ognissanti would have specialized in loading and unloading materials for ropemakers, and possibly in shipping the finished ropes to the Arsenal or other shipyards.",
+      "id": "canal_45.429940_12.324258"
+    },
+    {
+      "edge": {
+        "lat": 45.42979707844511,
+        "lng": 12.324871377380413
+      },
+      "water": {
+        "lat": 45.42967292850993,
+        "lng": 12.325056830906046
+      },
+      "historicalName": "Riva dei Traghetti",
+      "englishName": "Landing of the Ferries",
+      "historicalDescription": "Before Venice had as many bridges as today, ferry crossings (traghetti) were essential. This dock would have been an official crossing point where gondoliers would transport people from one side of a canal to another, serving as a vital point in Renaissance Venice's transportation network.",
+      "id": "canal_45.429797_12.324871"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43032161827969,
+        "lng": 12.325133786829037
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879036720",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43049204292032,
+          "lng": 12.32513993196906
+        },
+        "distance": 18.95642155471968,
+        "id": "286e5dd0-8e21-4ed9-a562-b385caacf5e5",
+        "historicalName": "Ponte di Ognissanti",
+        "englishName": "Bridge of All Saints",
+        "historicalDescription": "Named after the nearby Church of Ognissanti (All Saints) which was an important religious site in the Dorsoduro district since the 14th century. The bridge would have provided access for parishioners from surrounding areas to reach the church for important religious festivals, particularly the Feast of All Saints on November 1st.",
+        "location": {
+          "midpoint": {
+            "lat": 45.430406830600006,
+            "lng": 12.325136859399048
+          }
+        }
+      },
+      "id": "bridge_45.430322_12.325134"
+    },
+    {
+      "edge": {
+        "lat": 45.43119751421401,
+        "lng": 12.322684035928768
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879056576",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43124119518348,
+          "lng": 12.322774223617925
+        },
+        "distance": 8.550971058741215,
+        "id": "f16440a4-d523-4aca-8f0e-ccd465d9c13d",
+        "historicalName": "Ponte dei Remeri",
+        "englishName": "Bridge of the Oar Makers",
+        "historicalDescription": "This name reflects the workshop of oar makers (remeri) that were historically located in this area of Venice. During the Renaissance, specialized craftsmen who created oars for gondolas and other vessels were essential to Venetian maritime power. The Fondamenta degli Ognissanti's proximity to water made it a practical location for such artisans.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43121935469875,
+            "lng": 12.322729129773347
+          }
+        }
+      },
+      "id": "bridge_45.431198_12.322684"
+    },
+    {
+      "edge": {
+        "lat": 45.43222899482186,
+        "lng": 12.321847186716122
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879086976",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.432378080627224,
+          "lng": 12.321948103241338
+        },
+        "distance": 18.352826968821088,
+        "id": "fe015843-8261-4a33-abf8-4a958b981f7b",
+        "historicalName": "Ponte della Lana",
+        "englishName": "Bridge of Wool",
+        "historicalDescription": "The wool trade was vital to Renaissance Venice's economy. This bridge likely connected residential areas to workshops where wool was processed and dyed. The Fondamenta degli Ognissanti area was known for textile production during the Renaissance period, with several wool processing facilities established along its canal.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43230353772454,
+            "lng": 12.32189764497873
+          }
+        }
+      },
+      "id": "bridge_45.432229_12.321847"
+    },
+    {
+      "edge": {
+        "lat": 45.43204076983972,
+        "lng": 12.320559726388973
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879165953",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43203456465967,
+          "lng": 12.320402410727995
+        },
+        "distance": 12.294964632109188,
+        "id": "d607c328-5e86-44bb-bec3-f03b9f2df215",
+        "historicalName": "Ponte dei Carmini",
+        "englishName": "Bridge of the Carmelites",
+        "historicalDescription": "Named for its proximity to the Church of Santa Maria dei Carmini, built by the Carmelite order in the 14th century. This bridge would have served as an important crossing point for monks and worshippers traveling between the church and the Fondamenta degli Ognissanti area, especially during religious processions and feast days.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4320376672497,
+            "lng": 12.320481068558484
+          }
+        }
+      },
+      "id": "bridge_45.432041_12.320560"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43010210824347,
+      "lng": 12.324882530796419,
+      "streetName": "Calle dei Remeri",
+      "streetNameEnglish": "Street of the Oar Makers",
+      "streetDescription": "Named after the oar makers who had workshops in this area. The 'remeri' were essential craftsmen in Venice, creating oars for gondolas and other boats that were the lifeblood of Venetian transportation.",
+      "id": "building_45.430102_12.324883"
+    },
+    {
+      "lat": 45.43057730416609,
+      "lng": 12.322858016798936,
+      "streetName": "Fondamenta Santa Maria della Salute",
+      "streetNameEnglish": "Foundation of Saint Mary of Health",
+      "streetDescription": "Named for its proximity to the famous church built as a votive offering after the plague of 1630-31. This fondamenta would have connected the Ognisanti area to the path leading toward this important landmark.",
+      "id": "building_45.430577_12.322858"
+    },
+    {
+      "lat": 45.4305831998007,
+      "lng": 12.323516150720799,
+      "streetName": "Rio Terà dei Monasteri",
+      "streetNameEnglish": "Filled-in Canal of the Monasteries",
+      "streetDescription": "This street was once a canal that was filled in (rio terà). The name references the numerous religious institutions in the area, including the Ognisanti monastery that gave the fondamenta its name.",
+      "id": "building_45.430583_12.323516"
+    },
+    {
+      "lat": 45.43048554677957,
+      "lng": 12.324070267369118,
+      "streetName": "Calle del Panificio",
+      "streetNameEnglish": "Street of the Bakery",
+      "streetDescription": "Named after a historical bakery that served the Ognisanti district. Bakeries were regulated by the Republic and were important community centers in Renaissance Venice.",
+      "id": "building_45.430486_12.324070"
+    },
+    {
+      "lat": 45.431058905112764,
+      "lng": 12.320947361594076,
+      "streetName": "Sottoportego della Carità",
+      "streetNameEnglish": "Passageway of Charity",
+      "streetDescription": "A covered passageway near where charitable works were performed, possibly connected to the Scuola della Carità or to the charitable activities of the Ognisanti monastery.",
+      "id": "building_45.431059_12.320947"
+    },
+    {
+      "lat": 45.430945861620835,
+      "lng": 12.32171890974382,
+      "streetName": "Salizada dei Gesuati",
+      "streetNameEnglish": "Paved Street of the Jesuates",
+      "streetDescription": "A wider, paved street (salizada) named after the Gesuati order who had a significant presence in this area of Dorsoduro before their suppression in 1668.",
+      "id": "building_45.430946_12.321719"
+    },
+    {
+      "lat": 45.430950209812195,
+      "lng": 12.322291230552537,
+      "streetName": "Campiello dei Sartori",
+      "streetNameEnglish": "Small Square of the Tailors",
+      "streetDescription": "A small square where tailors' shops may have been concentrated. Tailors formed an important guild in Renaissance Venice, making clothing for nobles and merchants.",
+      "id": "building_45.430950_12.322291"
+    },
+    {
+      "lat": 45.43095715495977,
+      "lng": 12.322809385702993,
+      "streetName": "Calle del Pestrin",
+      "streetNameEnglish": "Street of the Oil Press",
+      "streetDescription": "Named after an oil press that would have operated here. 'Pestrin' in Venetian dialect refers to a press used to extract olive oil, which was an important commodity in Renaissance Venice.",
+      "id": "building_45.430957_12.322809"
+    },
+    {
+      "lat": 45.43151893680212,
+      "lng": 12.321003073452253,
+      "streetName": "Ruga dei Speziali",
+      "streetNameEnglish": "Street of the Apothecaries",
+      "streetDescription": "A commercial street (ruga) where apothecaries sold spices, medicines, and other exotic goods. Spice merchants were particularly important given Venice's role in the spice trade.",
+      "id": "building_45.431519_12.321003"
+    },
+    {
+      "lat": 45.43150333328182,
+      "lng": 12.32153598827453,
+      "streetName": "Fondamenta dei Pescatori",
+      "streetNameEnglish": "Foundation of the Fishermen",
+      "streetDescription": "A canalside walkway where fishermen would have moored their boats and sold their catch. Fishing was crucial to Venetian diet and economy during the Renaissance.",
+      "id": "building_45.431503_12.321536"
+    },
+    {
+      "lat": 45.43197280912198,
+      "lng": 12.320882053052099,
+      "streetName": "Corte Grimani",
+      "streetNameEnglish": "Grimani Court",
+      "streetDescription": "Named after the Grimani family, who were prominent Venetian nobles that likely owned property in this area. The Grimani were a nobili family that produced several doges and cardinals.",
+      "id": "building_45.431973_12.320882"
+    },
+    {
+      "lat": 45.43197351351774,
+      "lng": 12.32158606995318,
+      "streetName": "Calle del Campanile",
+      "streetNameEnglish": "Street of the Bell Tower",
+      "streetDescription": "Named for its proximity to the bell tower of the Ognisanti church. Bell towers were important landmarks in Renaissance Venice, used to mark time and call worshippers to prayer.",
+      "id": "building_45.431974_12.321586"
+    },
+    {
+      "lat": 45.432297058460925,
+      "lng": 12.320869793868058,
+      "streetName": "Sottoportego dei Pellegrini",
+      "streetNameEnglish": "Passageway of the Pilgrims",
+      "streetDescription": "A covered walkway used by pilgrims visiting holy sites in Venice or preparing to embark on pilgrimages to the Holy Land from nearby docks.",
+      "id": "building_45.432297_12.320870"
+    },
+    {
+      "lat": 45.43286554202838,
+      "lng": 12.320363570397333,
+      "streetName": "Rio Terà della Lana",
+      "streetNameEnglish": "Filled-in Canal of Wool",
+      "streetDescription": "Once a canal that was filled in, named after the wool trade that was crucial to Venice's economy. The area may have housed wool workshops or storage facilities.",
+      "id": "building_45.432866_12.320364"
+    },
+    {
+      "lat": 45.43287137637159,
+      "lng": 12.320935640199675,
+      "streetName": "Calle dei Boteri",
+      "streetNameEnglish": "Street of the Cask Makers",
+      "streetDescription": "Named after the craftsmen who made wooden casks and barrels (boteri in Venetian dialect). These were essential containers for wine, oil, and other liquid goods transported by ship throughout the Mediterranean.",
+      "id": "building_45.432871_12.320936"
+    }
+  ],
+  "id": "polygon-1745879142005"
+}

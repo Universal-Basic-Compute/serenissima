@@ -1,0 +1,322 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44516367633084,
+      "lng": 12.33680590065477
+    },
+    {
+      "lat": 45.44358669310795,
+      "lng": 12.339643677792527
+    },
+    {
+      "lat": 45.44245756109437,
+      "lng": 12.33906432064531
+    },
+    {
+      "lat": 45.44349259963663,
+      "lng": 12.335448702893235
+    },
+    {
+      "lat": 45.44421523347083,
+      "lng": 12.336140712819077
+    }
+  ],
+  "centroid": {
+    "lat": 45.44378315272813,
+    "lng": 12.337420662960984
+  },
+  "historicalName": "Calle de la Scuola de San Rocco",
+  "englishName": "Street of the School of Saint Roch",
+  "historicalDescription": "In the 15th century, this area was part of the San Polo sestiere and was known for the Scuola Grande di San Rocco, a prominent confraternity dedicated to Saint Roch, which was founded nearby in 1478.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 49399.17,
+  "center": {
+    "lat": 45.44378315272813,
+    "lng": 12.337420662960984
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.44484827968626,
+        "lng": 12.337373456082322
+      },
+      "water": {
+        "lat": 45.44502805711344,
+        "lng": 12.337365488270478
+      },
+      "historicalName": "Riva di San Rocco",
+      "englishName": "Saint Roch's Bank",
+      "historicalDescription": "Named after the Scuola Grande di San Rocco, this landing would have served visitors to the important confraternity dedicated to Saint Roch, patron saint of plague victims. The Scuola, founded in 1478, became one of Venice's most prestigious confraternities, making this dock a significant access point for members and visitors.",
+      "id": "canal_45.444848_12.337373"
+    },
+    {
+      "edge": {
+        "lat": 45.44453288304169,
+        "lng": 12.337941011509873
+      },
+      "water": {
+        "lat": 45.444694594065986,
+        "lng": 12.338053246663382
+      },
+      "historicalName": "Fondamenta dei Confratelli",
+      "englishName": "Foundation of the Confraternity Members",
+      "historicalDescription": "This dock would have served the brothers of the Scuola Grande di San Rocco. 'Confratelli' refers to the brotherhood members who managed charitable works and religious activities. The confraternity grew wealthy in the 16th century, attracting nobility and wealthy merchants who would have used this landing when attending meetings.",
+      "id": "canal_45.444533_12.337941"
+    },
+    {
+      "edge": {
+        "lat": 45.44421748639711,
+        "lng": 12.338508566937424
+      },
+      "water": {
+        "lat": 45.44430644196859,
+        "lng": 12.338731379781237
+      },
+      "historicalName": "Riva dei Tintoretto",
+      "englishName": "Tintoretto's Bank",
+      "historicalDescription": "Named after Jacopo Tintoretto, the renowned Venetian painter who created numerous masterpieces for the Scuola Grande di San Rocco between 1564 and 1587. This dock would commemorate the artist who spent decades decorating the interior of the Scuola with over 60 paintings, making it appropriate for a landing near the building.",
+      "id": "canal_45.444217_12.338509"
+    },
+    {
+      "edge": {
+        "lat": 45.443902089752534,
+        "lng": 12.339076122364975
+      },
+      "water": {
+        "lat": 45.44392041221664,
+        "lng": 12.339331148885616
+      },
+      "historicalName": "Fondamenta della Carità",
+      "englishName": "Foundation of Charity",
+      "historicalDescription": "This name reflects the charitable works performed by the Scuola Grande di San Rocco, which was known for distributing alms to the poor, especially during plague outbreaks. The brotherhood provided medical care, food, and financial assistance to those in need, making 'Carità' (charity) an appropriate name for a dock near their headquarters.",
+      "id": "canal_45.443902_12.339076"
+    },
+    {
+      "edge": {
+        "lat": 45.44468945490084,
+        "lng": 12.336473306736924
+      },
+      "water": {
+        "lat": 45.444834494840705,
+        "lng": 12.336321696717766
+      },
+      "historicalName": "Riva dei Guaritori",
+      "englishName": "Bank of the Healers",
+      "historicalDescription": "This dock name references the healing association of Saint Roch, the patron saint of the Scuola. During plague epidemics that frequently struck Venice, physicians and healers would have arrived via this dock to tend to the sick. The Scuola Grande di San Rocco gained particular prominence during the plague of 1576, making this name historically significant for the area.",
+      "id": "canal_45.444689_12.336473"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44263006751808,
+        "lng": 12.33846171768663
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055971606",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.442526563783126,
+          "lng": 12.33849390419481
+        },
+        "distance": 11.779845270682737,
+        "id": "3713941c-3d6d-4e1e-b8c8-3a19ca384151",
+        "historicalName": "Ponte di San Rocco",
+        "englishName": "Bridge of Saint Roch",
+        "historicalDescription": "Named after the nearby Scuola Grande di San Rocco, one of the most important confraternities in Venice. San Rocco (Saint Roch) was revered as a protector against plague, and this bridge would have been a main access point for visitors to the Scuola, which was decorated with famous paintings by Tintoretto.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44257831565061,
+            "lng": 12.33847781094072
+          }
+        }
+      },
+      "id": "bridge_45.442630_12.338462"
+    },
+    {
+      "edge": {
+        "lat": 45.44280257394179,
+        "lng": 12.337859114727951
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055971606",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44268966182643,
+          "lng": 12.337864479145981
+        },
+        "distance": 12.56222779218709,
+        "id": "3713941c-3d6d-4e1e-b8c8-3a19ca384151",
+        "historicalName": "Ponte dei Confratelli",
+        "englishName": "Bridge of the Confraternity Members",
+        "historicalDescription": "This bridge was commonly used by members of the Scuola Grande di San Rocco confraternity. These confraternities were important civic and religious organizations in Renaissance Venice, providing charitable services and commissioning important works of art. Members would cross this bridge to attend meetings and ceremonies at the Scuola.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44274611788411,
+            "lng": 12.337861796936966
+          }
+        }
+      },
+      "id": "bridge_45.442803_12.337859"
+    },
+    {
+      "edge": {
+        "lat": 45.44314758678921,
+        "lng": 12.336653908810593
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055950767",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44304722101977,
+          "lng": 12.336600264630295
+        },
+        "distance": 11.919081076268558,
+        "id": "8b20d2fb-d4fd-4dd1-b087-b8a311b9aec0",
+        "historicalName": "Ponte dei Tintori",
+        "englishName": "Bridge of the Dyers",
+        "historicalDescription": "This bridge was named after the cloth dyers who operated workshops in this area of Venice during the Renaissance. The textile industry was vital to Venice's economy, and dyers were organized into a guild that had significant presence in this district, not far from the Scuola di San Rocco.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44309740390449,
+            "lng": 12.336627086720444
+          }
+        }
+      },
+      "id": "bridge_45.443148_12.336654"
+    },
+    {
+      "edge": {
+        "lat": 45.44332009321292,
+        "lng": 12.336051305851914
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055950767",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.443249209739655,
+          "lng": 12.336008390507676
+        },
+        "distance": 8.56351230600781,
+        "id": "8b20d2fb-d4fd-4dd1-b087-b8a311b9aec0",
+        "historicalName": "Ponte della Carità",
+        "englishName": "Bridge of Charity",
+        "historicalDescription": "Named for the charitable activities performed by the Scuola Grande di San Rocco nearby. The confraternity was known for its almsgiving and care for the sick, especially during plague outbreaks. This bridge would have been crossed by both those seeking assistance and those providing it in Renaissance Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44328465147629,
+            "lng": 12.336029848179795
+          }
+        }
+      },
+      "id": "bridge_45.443320_12.336051"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.442951213861164,
+      "lng": 12.338006135158007,
+      "streetName": "Calle dei Confratelli",
+      "streetNameEnglish": "Street of the Confraternity Members",
+      "streetDescription": "Named after the brothers of the Scuola Grande di San Rocco confraternity who would use this street to access their meeting hall. The confratelli were the wealthy patrons who funded the Scuola's activities and Tintoretto's famous painting cycle.",
+      "id": "building_45.442951_12.338006"
+    },
+    {
+      "lat": 45.44296914538542,
+      "lng": 12.338708776082884,
+      "streetName": "Rio Terà dei Miracolati",
+      "streetNameEnglish": "Filled Canal of the Healed",
+      "streetDescription": "This former canal, now filled in, was named after those who claimed to be healed by Saint Roch (San Rocco), the patron saint of plague victims. During epidemics, the grateful survivors would process along this path to give thanks at the Scuola.",
+      "id": "building_45.442969_12.338709"
+    },
+    {
+      "lat": 45.44286111391054,
+      "lng": 12.339210942015264,
+      "streetName": "Sottoportego della Carità Pestilenziale",
+      "streetNameEnglish": "Passageway of the Plague Charity",
+      "streetDescription": "A covered passageway near where the brothers of San Rocco would distribute alms and care to plague victims. The Scuola Grande di San Rocco was particularly dedicated to charitable works during epidemic outbreaks.",
+      "id": "building_45.442861_12.339211"
+    },
+    {
+      "lat": 45.44336098250779,
+      "lng": 12.336800303702592,
+      "streetName": "Fondamenta dei Teleri",
+      "streetNameEnglish": "Foundation of the Canvases",
+      "streetDescription": "Named for the large canvases (teleri) that Tintoretto painted for the Scuola Grande di San Rocco. This canal-side walkway might have been used to transport the massive paintings to the Scuola building in the 16th century.",
+      "id": "building_45.443361_12.336800"
+    },
+    {
+      "lat": 45.44342143347237,
+      "lng": 12.337279737326188,
+      "streetName": "Calle dei Pittori",
+      "streetNameEnglish": "Street of the Painters",
+      "streetDescription": "This street would commemorate the many artists who worked for the Scuola Grande di San Rocco, most famously Tintoretto, who spent over two decades creating the masterpieces that adorn the interior halls.",
+      "id": "building_45.443421_12.337280"
+    },
+    {
+      "lat": 45.44343855299383,
+      "lng": 12.337954445882968,
+      "streetName": "Salizada dei Frari",
+      "streetNameEnglish": "Paved Street of the Friars",
+      "streetDescription": "Named for its proximity to the Franciscan friars (Frari) whose basilica (Santa Maria Gloriosa dei Frari) is near the Scuola Grande di San Rocco. The salizada indicates this was one of the earlier paved streets in the area.",
+      "id": "building_45.443439_12.337954"
+    },
+    {
+      "lat": 45.4433542488889,
+      "lng": 12.338625491344292,
+      "streetName": "Ruga dei Laneri",
+      "streetNameEnglish": "Row of the Wool Workers",
+      "streetDescription": "This commercial street would have housed workshops for wool workers, part of Venice's important textile industry. Many guild members would have belonged to the nearby Scuola di San Rocco or contributed to its charitable works.",
+      "id": "building_45.443354_12.338625"
+    },
+    {
+      "lat": 45.44371657308467,
+      "lng": 12.336134127129387,
+      "streetName": "Campiello della Peste",
+      "streetNameEnglish": "Small Square of the Plague",
+      "streetDescription": "A small square commemorating the plague outbreaks that devastated Venice. San Rocco became popular as a protector against the plague, and this campiello might have been a gathering place during epidemics for prayer or distribution of medicine.",
+      "id": "building_45.443717_12.336134"
+    },
+    {
+      "lat": 45.44384800451779,
+      "lng": 12.337472445697049,
+      "streetName": "Corte Tintoretto",
+      "streetNameEnglish": "Tintoretto's Court",
+      "streetDescription": "Named after Jacopo Robusti, known as Tintoretto, who created the most important painting cycle for the Scuola Grande di San Rocco between 1564 and 1587. This courtyard would honor the artist's connection to the area.",
+      "id": "building_45.443848_12.337472"
+    },
+    {
+      "lat": 45.44384656768695,
+      "lng": 12.338021196944581,
+      "streetName": "Calle della Disciplina",
+      "streetNameEnglish": "Street of the Discipline",
+      "streetDescription": "Named for the disciplina, or ritual flagellation practiced by some religious confraternities as penance. Members of the Scuola di San Rocco would sometimes practice these devotional acts of penance, especially during Lent or plague outbreaks.",
+      "id": "building_45.443847_12.338021"
+    },
+    {
+      "lat": 45.44418299478248,
+      "lng": 12.336762319856945,
+      "streetName": "Ramo delle Processioni",
+      "streetNameEnglish": "Branch of the Processions",
+      "streetDescription": "A small side street (ramo) that would have been part of the ceremonial route for religious processions organized by the Scuola Grande di San Rocco, particularly during the feast day of Saint Roch on August 16th.",
+      "id": "building_45.444183_12.336762"
+    },
+    {
+      "lat": 45.44423163838673,
+      "lng": 12.337326958165574,
+      "streetName": "Fondamenta dell'Albergo",
+      "streetNameEnglish": "Foundation of the Meeting Hall",
+      "streetDescription": "Named after the Albergo, the meeting hall on the upper floor of the Scuola Grande di San Rocco where the confraternity's leaders would gather. This canal-side walkway would have provided access to this important chamber decorated with Tintoretto's paintings.",
+      "id": "building_45.444232_12.337327"
+    },
+    {
+      "lat": 45.444702204880095,
+      "lng": 12.336830677816247,
+      "streetName": "Calle del Tesoro",
+      "streetNameEnglish": "Street of the Treasury",
+      "streetDescription": "This street would reference the treasury of the Scuola Grande di San Rocco, which contained valuable relics including those of Saint Roch himself. The Scuola's wealth allowed it to commission extraordinary artworks and fund extensive charitable activities.",
+      "id": "building_45.444702_12.336831"
+    }
+  ],
+  "id": "polygon-1746055928225"
+}

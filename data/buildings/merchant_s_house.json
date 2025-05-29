@@ -1,0 +1,66 @@
+{
+  "name": "Merchant's House",
+  "pointType": "building",
+  "category": "home",
+  "subCategory": "Basic Residences",
+  "size": 1,
+  "unlockCondition": "7,500,000 ducats total wealth, Merchant Guild connection",
+  "calculationsAnalysis": "The Merchant's House represents middle-class housing with business capabilities. The construction cost of 1,600,000 ducats reflects the quality construction and business facilities, while the income of 30,000 ducats (1.9% return) represents both residential rent and commercial activities. The maintenance cost of 7,500 ducats (25% of income) creates an appropriate maintenance ratio for this tier, reflecting the more complex structure and higher standards. The residentsCapacity of 7 represents the merchant family with servants. The construction time of 4 days (345600000ms) reflects the more sophisticated construction. This building creates a progression into middle-class housing with appropriate guild requirements reflecting the social organization of Renaissance Venice, where guild membership was essential for commercial activities.",
+  "shortDescription": "Comfortable residence with dedicated office space for business dealings.",
+  "fullDescription": "A respectable home for Venice's merchant class, featuring separate areas for business and family life. Typically includes a ground floor counting room or office, a piano nobile (noble floor) for family living, and often additional floors for storage or servants. Represents success in Venice's trading world.",
+  "flavorText": "Ledgers below, living above—the merchant's house is a perfect balance of commerce and comfort, just as the merchant balances risk and reward.",
+  "constructionCosts": {
+    "ducats": 1600000,
+    "timber": 630,
+    "bricks": 1170,
+    "stone": 780,
+    "glass": 120
+  },
+  "maintenanceCost": 750,
+  "residentsCapacity": 7,
+  "soundDesign": {
+    "ambientSound": "Quill scratching on paper, quiet business discussions",
+    "activitySounds": "Coins counting, document shuffling, door knocking",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "winter": "Heated interior visible through windows, elegant winter decorations",
+    "carnival": "Quality decorations, guests in masks entering and leaving"
+  },
+  "aiInteractionPoints": [
+    "Business entrance",
+    "Family entrance",
+    "Second floor windows",
+    "Rooftop terrace"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 100,
+    "stores": [
+      "paper",
+      "tools",
+      "gold",
+      "wine",
+      "maps",
+      "books",
+      "banking_services",
+      "forgery_tools",
+      "silk_fabric",
+      "spiced_wine",
+      "jewelry"
+    ],
+    "sells": [
+      "maps",
+      "books",
+      "banking_services",
+      "forgery_tools",
+      "silk_fabric",
+      "spiced_wine",
+      "jewelry"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 5760
+}

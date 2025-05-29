@@ -1,0 +1,367 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.431568578726264,
+      "lng": 12.330501875488368
+    },
+    {
+      "lat": 45.434045589987846,
+      "lng": 12.331601581184474
+    },
+    {
+      "lat": 45.4342112221213,
+      "lng": 12.33143528422555
+    },
+    {
+      "lat": 45.43485868852405,
+      "lng": 12.330888113586512
+    },
+    {
+      "lat": 45.43474575887237,
+      "lng": 12.330491146652308
+    },
+    {
+      "lat": 45.43471564426039,
+      "lng": 12.330169281570521
+    },
+    {
+      "lat": 45.43460271432248,
+      "lng": 12.330126366226283
+    },
+    {
+      "lat": 45.434034296870124,
+      "lng": 12.330383858291713
+    },
+    {
+      "lat": 45.43330023937149,
+      "lng": 12.32971867045602
+    },
+    {
+      "lat": 45.433153426726015,
+      "lng": 12.330019077865687
+    },
+    {
+      "lat": 45.43195632474819,
+      "lng": 12.32893546542367
+    },
+    {
+      "lat": 45.43164763395665,
+      "lng": 12.329670390693751
+    },
+    {
+      "lat": 45.432464531519685,
+      "lng": 12.330045899955836
+    },
+    {
+      "lat": 45.43246076704191,
+      "lng": 12.330115637390223
+    },
+    {
+      "lat": 45.43165516302043,
+      "lng": 12.329734763710109
+    },
+    {
+      "lat": 45.43160245955284,
+      "lng": 12.330024442283717
+    }
+  ],
+  "centroid": {
+    "lat": 45.433188939976375,
+    "lng": 12.3302413659378
+  },
+  "historicalName": "Fondamenta dei Narisi in Cannaregio",
+  "englishName": "Wharf of the Narisi Family in Cannaregio",
+  "historicalDescription": "A bustling area along a canal in the Cannaregio sestiere, known for its many artisan workshops and proximity to the Jewish Ghetto, which was established in 1516.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 35776.2,
+  "center": {
+    "lat": 45.43313118653068,
+    "lng": 12.330518778413884
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43206398097858,
+        "lng": 12.33072181662759
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056735293",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43204120250662,
+          "lng": 12.330764859297314
+        },
+        "distance": 4.2066739785317395,
+        "id": "9d199da4-0f45-4683-8ecb-c83d312fcee8",
+        "historicalName": "Ponte dei Narisi",
+        "englishName": "Bridge of the Narisi",
+        "historicalDescription": "Named after the Narisi family who owned property along the fondamenta in Cannaregio during the Renaissance period. This nobili family contributed to the commercial development of this canal-side area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.432052591742604,
+            "lng": 12.330743337962453
+          }
+        }
+      },
+      "id": "bridge_45.432064_12.330722"
+    },
+    {
+      "edge": {
+        "lat": 45.432559383230895,
+        "lng": 12.33094175776681
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056735293",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43253735784022,
+          "lng": 12.33098372755293
+        },
+        "distance": 4.089422027066788,
+        "id": "9d199da4-0f45-4683-8ecb-c83d312fcee8",
+        "historicalName": "Ponte della Sensa",
+        "englishName": "Bridge of the Ascension",
+        "historicalDescription": "Located near where processions would pass during the Festa della Sensa (Ascension Day celebrations), one of Venice's most important festivals when the Doge performed the Marriage to the Sea ceremony. This celebration was particularly significant in Cannaregio's waterways.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43254837053556,
+            "lng": 12.330962742659871
+          }
+        }
+      },
+      "id": "bridge_45.432559_12.330942"
+    },
+    {
+      "edge": {
+        "lat": 45.433054785483215,
+        "lng": 12.331161698906032
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056735293",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43303351317381,
+          "lng": 12.331202595808545
+        },
+        "distance": 3.9722411991581623,
+        "id": "9d199da4-0f45-4683-8ecb-c83d312fcee8",
+        "historicalName": "Ponte dei Tessitori di Lino",
+        "englishName": "Bridge of the Linen Weavers",
+        "historicalDescription": "Named for the linen weavers who operated workshops in this area of Cannaregio during the Renaissance. The textile industry was vital to Venice's economy, with specific areas dedicated to different fabric types.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43304414932851,
+            "lng": 12.33118214735729
+          }
+        }
+      },
+      "id": "bridge_45.433055_12.331162"
+    },
+    {
+      "edge": {
+        "lat": 45.43355018773553,
+        "lng": 12.331381640045253
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056735293",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43352966850741,
+          "lng": 12.33142146406416
+        },
+        "distance": 3.855137882631247,
+        "id": "9d199da4-0f45-4683-8ecb-c83d312fcee8",
+        "historicalName": "Ponte della Madonna dei Miracoli",
+        "englishName": "Bridge of the Madonna of Miracles",
+        "historicalDescription": "Named in reference to the nearby Chiesa di Santa Maria dei Miracoli, a Renaissance marble church completed in the late 15th century. This bridge would have served pilgrims and locals visiting this important sacred site.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43353992812147,
+            "lng": 12.331401552054707
+          }
+        }
+      },
+      "id": "bridge_45.433550_12.331382"
+    },
+    {
+      "edge": {
+        "lat": 45.43474575887237,
+        "lng": 12.330491146652308
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056559199",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43478201640377,
+          "lng": 12.33046063676757
+        },
+        "distance": 4.682048556566897,
+        "id": "8613a226-a5b6-4f6f-b3e6-fc1b811be91c",
+        "historicalName": "Ponte degli Ormesini",
+        "englishName": "Bridge of the Ormesini",
+        "historicalDescription": "Named after the 'ormesini' (a type of lightweight silk fabric) produced in this district of Cannaregio. Venice's silk industry was renowned throughout Europe, and specific bridges often referenced the specialized crafts practiced in their vicinity.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43476388763807,
+            "lng": 12.33047589170994
+          }
+        }
+      },
+      "id": "bridge_45.434746_12.330491"
+    },
+    {
+      "edge": {
+        "lat": 45.434034296870124,
+        "lng": 12.330383858291713
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056660534",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43402120251726,
+          "lng": 12.330319485275355
+        },
+        "distance": 5.229726949894557,
+        "id": "e94766be-0380-49a1-8998-9af32ae23b1f",
+        "historicalName": "Ponte dei Fondachi",
+        "englishName": "Bridge of the Warehouses",
+        "historicalDescription": "Named for the warehouses (fondachi) that lined this part of the Cannaregio canal, where goods from across the Mediterranean would be stored after arrival. The Fondamenta dei Narisi was an important commercial area for storage and distribution.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43402774969369,
+            "lng": 12.330351671783534
+          }
+        }
+      },
+      "id": "bridge_45.434034_12.330384"
+    },
+    {
+      "edge": {
+        "lat": 45.43330023937149,
+        "lng": 12.32971867045602
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056660534",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43331349580163,
+          "lng": 12.329606017677394
+        },
+        "distance": 8.913011171341928,
+        "id": "e94766be-0380-49a1-8998-9af32ae23b1f",
+        "historicalName": "Ponte della Misericordia Nuova",
+        "englishName": "Bridge of the New Mercy",
+        "historicalDescription": "Named in connection to charitable works or a scuola (confraternity) dedicated to acts of mercy established in this area of Cannaregio during the Renaissance. Such confraternities were central to Venetian social welfare and civic identity.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43330686758656,
+            "lng": 12.329662344066707
+          }
+        }
+      },
+      "id": "bridge_45.433300_12.329719"
+    },
+    {
+      "edge": {
+        "lat": 45.433153426726015,
+        "lng": 12.330019077865687
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056675315",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43313460456434,
+          "lng": 12.329927882759181
+        },
+        "distance": 7.417358866209158,
+        "id": "14d4aa63-2a92-4c4d-ab01-eb2338d25c59",
+        "historicalName": "Ponte dei Vedrai di Murano",
+        "englishName": "Bridge of the Murano Glassmakers",
+        "historicalDescription": "Although glassmaking was centered on Murano island, many glassmakers maintained residences or commercial offices in Cannaregio, which was easily accessible by boat from Murano. This bridge marked a connection point for glass merchants traveling between the two locations.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433144015645176,
+            "lng": 12.329973480312434
+          }
+        }
+      },
+      "id": "bridge_45.433153_12.330019"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43209209081191,
+      "lng": 12.329686079035742,
+      "streetName": "Calle dei Speziali di Cannaregio",
+      "streetNameEnglish": "Street of the Apothecaries of Cannaregio",
+      "streetDescription": "Named after the apothecaries who had shops in this area of Cannaregio during the Renaissance. These merchants sold spices, herbs, and medicinal ingredients, which were particularly valuable in Venice due to its trade connections with the East.",
+      "id": "building_45.432092_12.329686"
+    },
+    {
+      "lat": 45.432090137377436,
+      "lng": 12.33020542070194,
+      "streetName": "Rio Terà dei Narisi",
+      "streetNameEnglish": "Filled Canal of the Narisi Family",
+      "streetDescription": "This street was originally a canal that was filled in (rio terà). It takes its name from the prominent Narisi family who owned properties in this area of Cannaregio and likely contributed to the local infrastructure development in the 15th-16th centuries.",
+      "id": "building_45.432090_12.330205"
+    },
+    {
+      "lat": 45.43240816310848,
+      "lng": 12.330271761004568,
+      "streetName": "Sottoportego della Madonna dei Narisi",
+      "streetNameEnglish": "Passageway of the Madonna of the Narisi",
+      "streetDescription": "Named after a small shrine or icon of the Madonna that was maintained by the Narisi family. Such religious markers were common in Renaissance Venice, often placed in passageways (sottoporteghi) and maintained by prominent local families as acts of devotion.",
+      "id": "building_45.432408_12.330272"
+    },
+    {
+      "lat": 45.43293412023628,
+      "lng": 12.330195161402195,
+      "streetName": "Salizada dei Tintori",
+      "streetNameEnglish": "Paved Street of the Dyers",
+      "streetDescription": "This paved street (salizada) was named after the cloth dyers who operated in this part of Cannaregio. Venice was renowned for its textile industry, and dyers were essential craftsmen who used imported pigments to color fabrics produced in the city.",
+      "id": "building_45.432934_12.330195"
+    },
+    {
+      "lat": 45.43299547978313,
+      "lng": 12.330828726291594,
+      "streetName": "Calle del Ghetto Vecchio",
+      "streetNameEnglish": "Street of the Old Ghetto",
+      "streetDescription": "A street leading toward or referencing the Old Ghetto, established in 1516 in Cannaregio. This was the world's first ghetto where Jewish residents were required to live, making it a historically significant location in Renaissance Venice.",
+      "id": "building_45.432995_12.330829"
+    },
+    {
+      "lat": 45.43344423496762,
+      "lng": 12.330146465284583,
+      "streetName": "Fondamenta dei Lanaioli",
+      "streetNameEnglish": "Foundation of the Wool Workers",
+      "streetDescription": "Named after the wool workers' guild that operated along this canal-side street (fondamenta). The wool industry was one of Venice's most important trades during the Renaissance, with many workshops established in the Cannaregio district.",
+      "id": "building_45.433444_12.330146"
+    },
+    {
+      "lat": 45.433301713175744,
+      "lng": 12.330796032625754,
+      "streetName": "Ruga dei Mercanti Levantini",
+      "streetNameEnglish": "Commercial Street of the Levantine Merchants",
+      "streetDescription": "This commercial street (ruga) was named for the Levantine merchants who traded here. Cannaregio's proximity to the Grand Canal made it an ideal location for foreign merchants from the Eastern Mediterranean to establish warehouses and conduct business.",
+      "id": "building_45.433302_12.330796"
+    },
+    {
+      "lat": 45.43386576850136,
+      "lng": 12.330871236526622,
+      "streetName": "Corte dei Narisi",
+      "streetNameEnglish": "Court of the Narisi Family",
+      "streetDescription": "A small courtyard named after the Narisi family, who would have owned the surrounding buildings. Such family courts were common in Renaissance Venice, often featuring a central well and serving as semi-private spaces for extended family households.",
+      "id": "building_45.433866_12.330871"
+    },
+    {
+      "lat": 45.43424572231279,
+      "lng": 12.330738851835797,
+      "streetName": "Campiello della Misericordia",
+      "streetNameEnglish": "Little Square of Mercy",
+      "streetDescription": "Named after its proximity to the Scuola Grande della Misericordia, one of Venice's important confraternities. This small square (campiello) would have served as a gathering place near the charitable institution that provided assistance to the poor in Renaissance Venice.",
+      "id": "building_45.434246_12.330739"
+    }
+  ],
+  "id": "polygon-1746056711688"
+}

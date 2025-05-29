@@ -1,0 +1,33 @@
+{
+  "id": "bricks",
+  "name": "Bricks",
+  "category": "processed_materials",
+  "subCategory": "construction",
+  "description": "Fired clay blocks used for construction throughout Venice.",
+  "varieties": [
+    {
+      "type": "common_brick",
+      "durability": "standard",
+      "valueMultiplier": 1,
+      "primaryUse": "general_construction"
+    },
+    {
+      "type": "facing_brick",
+      "durability": "high",
+      "appearance": "superior",
+      "valueMultiplier": 1.4,
+      "primaryUse": "visible_exteriors"
+    },
+    {
+      "type": "fire_brick",
+      "durability": "very_high",
+      "heatResistance": "excellent",
+      "valueMultiplier": 1.6,
+      "primaryUse": "furnaces_fireplaces"
+    }
+  ],
+  "importPrice": 540.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

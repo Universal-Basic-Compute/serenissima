@@ -1,0 +1,50 @@
+{
+  "id": "porter_equipment",
+  "name": "Porter Equipment",
+  "category": "finished_goods",
+  "subCategory": "transportation",
+  "description": "Specialized equipment for professional porters to transport goods through Venice's narrow streets and over countless bridges. Includes carrying poles, balanced containers, and harnesses designed for the unique challenges of Venetian terrain.",
+  "varieties": [
+    {
+      "type": "carrying_pole",
+      "productionDifficulty": "low",
+      "popularity": "high",
+      "valueMultiplier": 0.8,
+      "capacity": "balanced_loads",
+      "modelVariant": "models/resources/porter_pole.glb"
+    },
+    {
+      "type": "back_harness",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 1,
+      "capacity": "heavy_single_items",
+      "modelVariant": "models/resources/porter_harness.glb"
+    },
+    {
+      "type": "specialized_carriers",
+      "productionDifficulty": "high",
+      "popularity": "low",
+      "valueMultiplier": 1.5,
+      "capacity": "fragile_or_liquid_goods",
+      "modelVariant": "models/resources/porter_specialized.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
+      "Venetian Porters Guild",
+      "Local Craftsmen"
+    ],
+    "historicalSignificance": "In a city with no wheeled transport due to countless bridges and narrow streets, professional porters were essential to Venice's commercial system. Their specialized equipment evolved to address the unique challenges of transporting goods through the city's vertical terrain. Organized into guilds with specific territories and rates, porters formed a critical link in Venice's commercial infrastructure.",
+    "historicalContracts": [
+      "Rialto contract suppliers",
+      "Warehouse operations",
+      "Household moving services"
+    ]
+  },
+  "importPrice": 727.2,
+  "lifetimeHours": 17550,
+  "consumptionHours": 58,
+  "tier": 1
+}

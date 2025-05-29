@@ -1,0 +1,4 @@
+{
+  "selected_point_index": 5,
+  "reason": "Strategic location on Ruga dei Librai providing quality merchant housing for Cittadini class near our established commercial infrastructure including public dock and existing merchant's house, positioned in the heart of the San Luca commercial district with excellent access to booksellers and merchants, addressing the critical Cittadini housing crisis (46.7% homelessness rate)"
+}

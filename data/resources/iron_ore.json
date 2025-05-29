@@ -1,0 +1,15 @@
+{
+  "id": "iron_ore",
+  "name": "Iron Ore",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": {
+    "short": "Unprocessed iron-bearing rock.",
+    "full": "Heavy mineral ore containing iron, mined from the mainland territories under Venetian control and imported from Alpine regions.",
+    "flavor": "From these humble stones of earth comes the skeleton of our ships, the strength of our tools, and the protection of our warriorsâ€”truly the bones of civilization."
+  },
+  "importPrice": 300.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

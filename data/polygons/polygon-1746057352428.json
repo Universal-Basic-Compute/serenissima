@@ -1,0 +1,818 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43185527387523,
+      "lng": 12.35061235618565
+    },
+    {
+      "lat": 45.430093451815765,
+      "lng": 12.354474737167095
+    },
+    {
+      "lat": 45.43030427102725,
+      "lng": 12.354764415740703
+    },
+    {
+      "lat": 45.43038709264488,
+      "lng": 12.35583729934666
+    },
+    {
+      "lat": 45.43123788949838,
+      "lng": 12.359281255721783
+    },
+    {
+      "lat": 45.432668403968925,
+      "lng": 12.358294202804302
+    },
+    {
+      "lat": 45.43243500671485,
+      "lng": 12.355515434264873
+    },
+    {
+      "lat": 45.43254041204589,
+      "lng": 12.355536891936993
+    },
+    {
+      "lat": 45.43255546993426,
+      "lng": 12.35584802818272
+    },
+    {
+      "lat": 45.43302226248086,
+      "lng": 12.355794384002422
+    },
+    {
+      "lat": 45.43318036875839,
+      "lng": 12.353187276839947
+    },
+    {
+      "lat": 45.43264581718009,
+      "lng": 12.351384832381939
+    },
+    {
+      "lat": 45.43235971707215,
+      "lng": 12.35085911941502
+    },
+    {
+      "lat": 45.43211878954057,
+      "lng": 12.350741102218365
+    }
+  ],
+  "centroid": {
+    "lat": 45.431957444754104,
+    "lng": 12.35443795258632
+  },
+  "historicalName": "Calle San Domenego en Sestier de Castello",
+  "englishName": "Saint Dominic Street in the Castello District",
+  "historicalDescription": "This area in the Castello sestiere was known for the Church of San Domenico, a Dominican church and monastery established in the 13th century. The nearby Rio di San Domenico canal was also named after this church.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 143199.9,
+  "center": {
+    "lat": 45.43157252454341,
+    "lng": 12.354456343167072
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43160358500959,
+        "lng": 12.351164124897284
+      },
+      "water": {
+        "lat": 45.43157620448984,
+        "lng": 12.350910806725103
+      },
+      "historicalName": "Fondamenta dei Domenicani",
+      "englishName": "Foundation of the Dominicans",
+      "historicalDescription": "Named after the Dominican friars who had a significant presence in the Castello district. Since Calle San Domenego refers to Saint Dominic, founder of the Dominican Order, this dock would serve the monastery or church associated with these friars in the area.",
+      "id": "canal_45.431604_12.351164"
+    },
+    {
+      "edge": {
+        "lat": 45.43135189614395,
+        "lng": 12.35171589360892
+      },
+      "water": {
+        "lat": 45.43129754421584,
+        "lng": 12.351471571103042
+      },
+      "historicalName": "Riva degli Arsenalotti Minori",
+      "englishName": "Landing of the Minor Arsenal Workers",
+      "historicalDescription": "This dock would be used by workers from the nearby Venetian Arsenal, which was the largest industrial complex in Europe during the Renaissance. The 'minori' designation indicates this was a secondary landing point for arsenal workers living in this part of Castello.",
+      "id": "canal_45.431352_12.351716"
+    },
+    {
+      "edge": {
+        "lat": 45.43110020727831,
+        "lng": 12.352267662320555
+      },
+      "water": {
+        "lat": 45.43101198489498,
+        "lng": 12.352044307433282
+      },
+      "historicalName": "Fondamenta dei Fabbri d'Ancora",
+      "englishName": "Foundation of the Anchor Smiths",
+      "historicalDescription": "Castello's proximity to the Arsenal meant many specialized craftsmen lived in the area. This dock would be named after anchor smiths who were vital to Venice's maritime power, crafting anchors for the Republic's naval and merchant fleets.",
+      "id": "canal_45.431100_12.352268"
+    },
+    {
+      "edge": {
+        "lat": 45.43084851841268,
+        "lng": 12.35281943103219
+      },
+      "water": {
+        "lat": 45.4307228677847,
+        "lng": 12.352636039005079
+      },
+      "historicalName": "Riva delle Bandiere",
+      "englishName": "Landing of the Flags",
+      "historicalDescription": "This dock likely served as a ceremonial landing where flags and standards of the Republic were displayed during processions or celebrations. The name reflects Venice's rich tradition of pageantry and public ceremony near San Domenego.",
+      "id": "canal_45.430849_12.352819"
+    },
+    {
+      "edge": {
+        "lat": 45.43059682954704,
+        "lng": 12.353371199743824
+      },
+      "water": {
+        "lat": 45.430439242806194,
+        "lng": 12.35324764820415
+      },
+      "historicalName": "Fondamenta dei Castellani Vecchi",
+      "englishName": "Foundation of the Old Castellani",
+      "historicalDescription": "Named after the original inhabitants of the Castello district, one of the oldest populated areas of Venice. The Castellani were also one of the two major factions in medieval Venice (opposing the Nicolotti), and this dock would mark territory traditionally associated with their faction.",
+      "id": "canal_45.430597_12.353371"
+    },
+    {
+      "edge": {
+        "lat": 45.4303451406814,
+        "lng": 12.35392296845546
+      },
+      "water": {
+        "lat": 45.4301696314107,
+        "lng": 12.353866909247547
+      },
+      "historicalName": "Riva di Santa Maria Formosa Piccola",
+      "englishName": "Landing of Little Santa Maria Formosa",
+      "historicalDescription": "Named for its proximity to the parish of Santa Maria Formosa, one of the important churches in this part of Venice. The 'piccola' designation indicates this was a smaller, secondary landing serving the parish residents in the San Domenego area.",
+      "id": "canal_45.430345_12.353923"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43030427102725,
+        "lng": 12.354764415740703
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057372815",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43023107436083,
+          "lng": 12.354967378874164
+        },
+        "distance": 17.806967531512537,
+        "id": "a0fe2507-ad11-4c67-acb0-ef9c91a333ae",
+        "historicalName": "Ponte di San Domenego",
+        "englishName": "Bridge of Saint Dominic",
+        "historicalDescription": "Named after the Church of San Domenego in Castello, this bridge would have been a central crossing point in the area, connecting the community to the church that served as both a spiritual and social center.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43026767269404,
+            "lng": 12.354865897307434
+          }
+        }
+      },
+      "id": "bridge_45.430304_12.354764"
+    },
+    {
+      "edge": {
+        "lat": 45.43038709264488,
+        "lng": 12.35583729934666
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057372815",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43029130835473,
+          "lng": 12.355857872267109
+        },
+        "distance": 10.771037613790568,
+        "id": "a0fe2507-ad11-4c67-acb0-ef9c91a333ae",
+        "historicalName": "Ponte dei Domenicani",
+        "englishName": "Bridge of the Dominicans",
+        "historicalDescription": "This bridge references the Dominican friars who had a significant presence in the Castello district during the Renaissance period, likely near their monastery connected to the Church of San Domenego.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4303392004998,
+            "lng": 12.355847585806885
+          }
+        }
+      },
+      "id": "bridge_45.430387_12.355837"
+    },
+    {
+      "edge": {
+        "lat": 45.430557252015575,
+        "lng": 12.356526090621685
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057372815",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.430458456361116,
+          "lng": 12.35651018549953
+        },
+        "distance": 11.05546413090909,
+        "id": "a0fe2507-ad11-4c67-acb0-ef9c91a333ae",
+        "historicalName": "Ponte dell'Arsenale Vecchio",
+        "englishName": "Bridge of the Old Arsenal",
+        "historicalDescription": "Located near the ancient Venetian Arsenal in Castello, this bridge would have been used by workers and officials of Venice's famed shipbuilding complex, which was the largest industrial center in Europe during the Renaissance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43050785418835,
+            "lng": 12.356518138060608
+          }
+        }
+      },
+      "id": "bridge_45.430557_12.356526"
+    },
+    {
+      "edge": {
+        "lat": 45.43072741138628,
+        "lng": 12.35721488189671
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057372815",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.4306256043675,
+          "lng": 12.357162498731952
+        },
+        "distance": 12.035813013887841,
+        "id": "a0fe2507-ad11-4c67-acb0-ef9c91a333ae",
+        "historicalName": "Ponte dei Balestrieri",
+        "englishName": "Bridge of the Crossbowmen",
+        "historicalDescription": "Named for the crossbowmen who practiced or resided in this area of Castello, which was known for housing various military personnel who served the Venetian Republic's defense forces.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43067650787689,
+            "lng": 12.35718869031433
+          }
+        }
+      },
+      "id": "bridge_45.430727_12.357215"
+    },
+    {
+      "edge": {
+        "lat": 45.430897570756976,
+        "lng": 12.357903673171734
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057372815",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43079275237388,
+          "lng": 12.357814811964374
+        },
+        "distance": 13.561986726404566,
+        "id": "a0fe2507-ad11-4c67-acb0-ef9c91a333ae",
+        "historicalName": "Ponte della Celestia",
+        "englishName": "Bridge of the Celestia",
+        "historicalDescription": "Named after the nearby monastery of La Celestia in Castello, this bridge would have connected the religious complex to surrounding neighborhoods, facilitating movement for both the nuns and local residents.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43084516156543,
+            "lng": 12.357859242568054
+          }
+        }
+      },
+      "id": "bridge_45.430898_12.357904"
+    },
+    {
+      "edge": {
+        "lat": 45.43106773012768,
+        "lng": 12.358592464446758
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057372815",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.430959900380266,
+          "lng": 12.358467125196796
+        },
+        "distance": 15.473301646069027,
+        "id": "a0fe2507-ad11-4c67-acb0-ef9c91a333ae",
+        "historicalName": "Ponte dei Scudelleri",
+        "englishName": "Bridge of the Bowl-makers",
+        "historicalDescription": "Named for the artisans who crafted wooden bowls and dishes in workshops near Calle San Domenego, reflecting the common Venetian practice of naming bridges after local guilds and trades.",
+        "location": {
+          "midpoint": {
+            "lat": 45.431013815253976,
+            "lng": 12.358529794821777
+          }
+        }
+      },
+      "id": "bridge_45.431068_12.358592"
+    },
+    {
+      "edge": {
+        "lat": 45.43123788949838,
+        "lng": 12.359281255721783
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057412398",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43121405844507,
+          "lng": 12.35942838369913
+        },
+        "distance": 11.782636863242281,
+        "id": "61a1c9d7-fa07-4cf4-9234-942a27bfeb9c",
+        "historicalName": "Ponte dei Tagliapietra",
+        "englishName": "Bridge of the Stonemasons",
+        "historicalDescription": "Stonemasons were essential craftsmen in Venice, and this bridge in Castello would commemorate their guild, which would have been active in constructing and maintaining the district's buildings and public works.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43122597397172,
+            "lng": 12.359354819710457
+          }
+        }
+      },
+      "id": "bridge_45.431238_12.359281"
+    },
+    {
+      "edge": {
+        "lat": 45.43306178905024,
+        "lng": 12.355142607211803
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057275948",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.433174545730914,
+          "lng": 12.355164485825485
+        },
+        "distance": 12.653663908382114,
+        "id": "dd5656b4-af47-416b-a395-784f7d47eb3a",
+        "historicalName": "Ponte dei Loredan",
+        "englishName": "Bridge of the Loredan Family",
+        "historicalDescription": "Named after the noble Loredan family who owned property in this area of Castello. The Loredans produced several doges and military leaders who served the Venetian Republic during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.433118167390575,
+            "lng": 12.355153546518643
+          }
+        }
+      },
+      "id": "bridge_45.433062_12.355143"
+    },
+    {
+      "edge": {
+        "lat": 45.43310131561962,
+        "lng": 12.354490830421184
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057275948",
+        "targetPointIndex": 6,
+        "targetPoint": {
+          "lat": 45.43322536549414,
+          "lng": 12.354499297989792
+        },
+        "distance": 13.809532114347792,
+        "id": "dd5656b4-af47-416b-a395-784f7d47eb3a",
+        "historicalName": "Ponte delle Vergini",
+        "englishName": "Bridge of the Virgins",
+        "historicalDescription": "Located near a convent in the San Domenego area of Castello, this bridge would have been named for the nuns (often referred to as 'virgins') who resided in the religious community and used this crossing.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43316334055688,
+            "lng": 12.354495064205487
+          }
+        }
+      },
+      "id": "bridge_45.433101_12.354491"
+    },
+    {
+      "edge": {
+        "lat": 45.43314084218901,
+        "lng": 12.353839053630566
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057275948",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.433276185257355,
+          "lng": 12.353834110154098
+        },
+        "distance": 15.054405268934175,
+        "id": "dd5656b4-af47-416b-a395-784f7d47eb3a",
+        "historicalName": "Ponte della Tana",
+        "englishName": "Bridge of the Ropewalk",
+        "historicalDescription": "The 'Tana' was Venice's rope-making facility near the Arsenal in Castello, producing essential cordage for the Republic's naval vessels. This bridge would have served workers traveling between the ropewalk and residential areas.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43320851372319,
+            "lng": 12.353836581892331
+          }
+        }
+      },
+      "id": "bridge_45.433141_12.353839"
+    },
+    {
+      "edge": {
+        "lat": 45.43235971707215,
+        "lng": 12.35085911941502
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057275948",
+        "targetPointIndex": 8,
+        "targetPoint": {
+          "lat": 45.432431065919076,
+          "lng": 12.350658374680465
+        },
+        "distance": 17.55886282925601,
+        "id": "dd5656b4-af47-416b-a395-784f7d47eb3a",
+        "historicalName": "Ponte dei Marinai",
+        "englishName": "Bridge of the Sailors",
+        "historicalDescription": "This bridge in Castello would honor the sailors who lived in this district close to the Arsenal and port facilities. Many maritime workers settled in this area to be near their place of employment in the Venetian fleet.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43239539149562,
+            "lng": 12.350758747047742
+          }
+        }
+      },
+      "id": "bridge_45.432360_12.350859"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43059670062589,
+      "lng": 12.354476168818413,
+      "streetName": "Calle dei Greci",
+      "streetNameEnglish": "Street of the Greeks",
+      "streetDescription": "Named for the significant Greek community that settled in Castello, particularly near the Greek Orthodox Church of San Giorgio dei Greci. The Greek merchants established businesses and residences in this area during the Renaissance period.",
+      "id": "building_45.430597_12.354476"
+    },
+    {
+      "lat": 45.43055157088462,
+      "lng": 12.35501645766516,
+      "streetName": "Fondamenta dei Furlani",
+      "streetNameEnglish": "Foundation of the Friulians",
+      "streetDescription": "Named after immigrants from Friuli who settled in this part of Castello. They were known for their skills as stonemasons and builders, contributing significantly to Venice's architecture in the 15th and 16th centuries.",
+      "id": "building_45.430552_12.355016"
+    },
+    {
+      "lat": 45.43103428792021,
+      "lng": 12.353209369791317,
+      "streetName": "Rio Terà delle Muneghe",
+      "streetNameEnglish": "Filled Canal of the Nuns",
+      "streetDescription": "This was formerly a canal that was filled in (rio terà). It references the Augustinian nuns ('muneghe' in Venetian dialect) who maintained a convent nearby in Castello during the Renaissance period.",
+      "id": "building_45.431034_12.353209"
+    },
+    {
+      "lat": 45.43097287938023,
+      "lng": 12.35390112537119,
+      "streetName": "Calle dei Albanesi",
+      "streetNameEnglish": "Street of the Albanians",
+      "streetDescription": "Named for Albanian immigrants who fled Ottoman expansion and settled in Venice during the 15th century. Many served in Venice's military forces and formed a distinct community in Castello near San Domenego.",
+      "id": "building_45.430973_12.353901"
+    },
+    {
+      "lat": 45.4309767055219,
+      "lng": 12.354557060141058,
+      "streetName": "Calle dei Balestrieri",
+      "streetNameEnglish": "Street of the Crossbowmen",
+      "streetDescription": "Named after the crossbowmen who served in Venice's military forces. Castello was home to many military personnel due to its proximity to the Arsenale, Venice's naval and military complex.",
+      "id": "building_45.430977_12.354557"
+    },
+    {
+      "lat": 45.431049286877105,
+      "lng": 12.3551396119868,
+      "streetName": "Sottoportego dei Preti",
+      "streetNameEnglish": "Passageway of the Priests",
+      "streetDescription": "A covered passageway named for the clerics associated with the nearby Church of San Domenego or other ecclesiastical establishments in this religious-rich area of Castello.",
+      "id": "building_45.431049_12.355140"
+    },
+    {
+      "lat": 45.431046968664845,
+      "lng": 12.355684938881309,
+      "streetName": "Calle del Forno",
+      "streetNameEnglish": "Street of the Bakery",
+      "streetDescription": "Named for a historic bakery that served the neighborhood. Bakeries were essential community fixtures in Renaissance Venice, providing bread for the local population of Castello.",
+      "id": "building_45.431047_12.355685"
+    },
+    {
+      "lat": 45.43102663351097,
+      "lng": 12.356438592795293,
+      "streetName": "Ruga dei Spezieri",
+      "streetNameEnglish": "Commercial Street of the Spice Merchants",
+      "streetDescription": "A commercial street where spice merchants conducted business. Venice's role as a trading empire meant spices from the East were important commodities, and merchants specializing in them would have shops in commercial areas of Castello.",
+      "id": "building_45.431027_12.356439"
+    },
+    {
+      "lat": 45.43100661345472,
+      "lng": 12.357033186004212,
+      "streetName": "Salizada dei Greci",
+      "streetNameEnglish": "Paved Road of the Greeks",
+      "streetDescription": "A wider, paved street ('salizada' indicates it was one of the first to be paved with stone) associated with the Greek community near San Giorgio dei Greci in Castello, reflecting their prosperous status and importance.",
+      "id": "building_45.431007_12.357033"
+    },
+    {
+      "lat": 45.43099575045194,
+      "lng": 12.35766098952343,
+      "streetName": "Calle della Pietà",
+      "streetNameEnglish": "Street of Mercy",
+      "streetDescription": "Named for its proximity to an institution of mercy or charity, possibly a branch of the famous Ospedale della Pietà, which cared for abandoned children. Such institutions were common in Renaissance Venice's parishes.",
+      "id": "building_45.430996_12.357661"
+    },
+    {
+      "lat": 45.4313863496098,
+      "lng": 12.352610464705092,
+      "streetName": "Fondamenta dell'Arsenale",
+      "streetNameEnglish": "Foundation of the Arsenal",
+      "streetDescription": "A street running alongside a canal near Venice's Arsenale, the massive shipyard and armory complex that powered Venice's naval dominance. The Arsenale was the largest industrial complex in Renaissance Europe and dominated the eastern part of Castello.",
+      "id": "building_45.431386_12.352610"
+    },
+    {
+      "lat": 45.43137078037898,
+      "lng": 12.353081036438631,
+      "streetName": "Calle dei Bombardieri",
+      "streetNameEnglish": "Street of the Bombardiers",
+      "streetDescription": "Named for artillery specialists who worked at the nearby Arsenale. These skilled military technicians lived in Castello due to its proximity to their workplace, where they manufactured and maintained Venice's artillery.",
+      "id": "building_45.431371_12.353081"
+    },
+    {
+      "lat": 45.431354087873274,
+      "lng": 12.353845678028454,
+      "streetName": "Corte Morosini",
+      "streetNameEnglish": "Morosini Court",
+      "streetDescription": "A small courtyard named after the Morosini family, one of Venice's most prominent nobili families who likely owned property in this part of Castello. The Morosini produced several doges and military leaders throughout Venetian history.",
+      "id": "building_45.431354_12.353846"
+    },
+    {
+      "lat": 45.431358218251304,
+      "lng": 12.354452718197173,
+      "streetName": "Rio Terà dei Scudi",
+      "streetNameEnglish": "Filled Canal of the Shields",
+      "streetDescription": "A former canal that was filled in and possibly named for shield makers or a location where military shields were produced or stored, fitting for an area near the Arsenale in Castello.",
+      "id": "building_45.431358_12.354453"
+    },
+    {
+      "lat": 45.43141989240065,
+      "lng": 12.355175058093451,
+      "streetName": "Calle dei Remeri",
+      "streetNameEnglish": "Street of the Oar Makers",
+      "streetDescription": "Named for craftsmen who produced oars for Venice's galleys and gondolas. These essential artisans would have had workshops near the Arsenale and waterways of Castello to supply Venice's maritime needs.",
+      "id": "building_45.431420_12.355175"
+    },
+    {
+      "lat": 45.431361035969495,
+      "lng": 12.355688183965418,
+      "streetName": "Sottoportego dei Marinai",
+      "streetNameEnglish": "Passageway of the Sailors",
+      "streetDescription": "A covered passageway frequented by or housing sailors who served on Venetian ships. Castello's proximity to the harbor made it a natural residence for maritime workers.",
+      "id": "building_45.431361_12.355688"
+    },
+    {
+      "lat": 45.43135561388751,
+      "lng": 12.356358404518637,
+      "streetName": "Calle dei Armeni",
+      "streetNameEnglish": "Street of the Armenians",
+      "streetDescription": "Named for Armenian merchants and craftsmen who formed a community in Venice. Armenians were important traders between East and West and maintained a presence near San Domenego in Castello.",
+      "id": "building_45.431356_12.356358"
+    },
+    {
+      "lat": 45.431498640539715,
+      "lng": 12.35706656756424,
+      "streetName": "Fondamenta San Domenego",
+      "streetNameEnglish": "Foundation of Saint Dominic",
+      "streetDescription": "A waterside street directly associated with the Church of San Domenego, the Dominican establishment that gave the entire area its name in the Castello district.",
+      "id": "building_45.431499_12.357067"
+    },
+    {
+      "lat": 45.43136177113627,
+      "lng": 12.357661002329447,
+      "streetName": "Calle dei Fabbri",
+      "streetNameEnglish": "Street of the Blacksmiths",
+      "streetDescription": "Named for blacksmiths who had their workshops here, possibly supplying metal components to the nearby Arsenale or serving the general needs of the Castello district.",
+      "id": "building_45.431362_12.357661"
+    },
+    {
+      "lat": 45.431358891461706,
+      "lng": 12.358234462292774,
+      "streetName": "Rio Terà dei Saloni",
+      "streetNameEnglish": "Filled Canal of the Great Halls",
+      "streetDescription": "A filled-in canal named for large halls or assembly rooms that once existed nearby, possibly belonging to a guild, confraternity, or government function in the Castello district.",
+      "id": "building_45.431359_12.358234"
+    },
+    {
+      "lat": 45.4319591460577,
+      "lng": 12.351237182251444,
+      "streetName": "Calle della Madonna",
+      "streetNameEnglish": "Street of the Madonna",
+      "streetDescription": "Named for a street shrine with an image of the Virgin Mary, a common feature in Renaissance Venice where devotional images marked street corners and provided spiritual protection to neighborhoods.",
+      "id": "building_45.431959_12.351237"
+    },
+    {
+      "lat": 45.431949617798224,
+      "lng": 12.351983899149188,
+      "streetName": "Campiello dei Tagliapietra",
+      "streetNameEnglish": "Small Square of the Stonemasons",
+      "streetDescription": "A small square named for stonemasons who may have had workshops nearby. These craftsmen were essential to Venice's architectural development and would have been particularly active in institutional areas of Castello.",
+      "id": "building_45.431950_12.351984"
+    },
+    {
+      "lat": 45.431915586617244,
+      "lng": 12.352420553547242,
+      "streetName": "Calle dei Calafati",
+      "streetNameEnglish": "Street of the Caulkers",
+      "streetDescription": "Named for ship caulkers who sealed the hulls of vessels with pitch and oakum. These specialized workers were associated with the Arsenale and shipbuilding industry that dominated eastern Castello.",
+      "id": "building_45.431916_12.352421"
+    },
+    {
+      "lat": 45.431913939156324,
+      "lng": 12.35322856177219,
+      "streetName": "Ruga degli Orefici",
+      "streetNameEnglish": "Commercial Street of the Goldsmiths",
+      "streetDescription": "A commercial street where goldsmiths and jewelers had their shops. Even in the predominantly maritime and military district of Castello, luxury crafts found their place in the Renaissance Venetian economy.",
+      "id": "building_45.431914_12.353229"
+    },
+    {
+      "lat": 45.43189282650823,
+      "lng": 12.353698908174024,
+      "streetName": "Calle dei Sartori",
+      "streetNameEnglish": "Street of the Tailors",
+      "streetDescription": "Named for tailors who maintained shops in this area. Clothing production was an important craft in Renaissance Venice, with different specializations for various garments and social classes.",
+      "id": "building_45.431893_12.353699"
+    },
+    {
+      "lat": 45.43186251728359,
+      "lng": 12.354551008758031,
+      "streetName": "Fondamenta della Tana",
+      "streetNameEnglish": "Foundation of the Rope Factory",
+      "streetDescription": "Named after the Tana, Venice's rope-making factory, which produced the essential cordage for the Republic's maritime fleet. The Tana was part of the Arsenale complex in Castello and employed many local residents.",
+      "id": "building_45.431863_12.354551"
+    },
+    {
+      "lat": 45.43192338838483,
+      "lng": 12.355609683667021,
+      "streetName": "Salizada dei Consorti",
+      "streetNameEnglish": "Paved Road of the Consortium",
+      "streetDescription": "A paved street named for a business consortium or confraternity that operated in the area, possibly merchants who pooled resources for trading voyages or a charitable organization serving the Castello district.",
+      "id": "building_45.431923_12.355610"
+    },
+    {
+      "lat": 45.431928892962055,
+      "lng": 12.356358929934729,
+      "streetName": "Calle dei Forni",
+      "streetNameEnglish": "Street of the Ovens",
+      "streetDescription": "Named for multiple bakeries or industrial ovens used in the production of ship's biscuit, essential provisions for Venice's naval forces. The proximity to the Arsenale in Castello would make this a logical location for such production.",
+      "id": "building_45.431929_12.356359"
+    },
+    {
+      "lat": 45.43192984840071,
+      "lng": 12.35706519006806,
+      "streetName": "Rio Terà dei Pensieri",
+      "streetNameEnglish": "Filled Canal of Thoughts",
+      "streetDescription": "A whimsically named filled canal, possibly referring to a contemplative area near a religious institution in the San Domenego vicinity of Castello.",
+      "id": "building_45.431930_12.357065"
+    },
+    {
+      "lat": 45.4319602980946,
+      "lng": 12.357575901081232,
+      "streetName": "Calle dei Guardiani",
+      "streetNameEnglish": "Street of the Guardians",
+      "streetDescription": "Named for guards or watchmen who maintained security around important military or government installations in Castello, particularly near the strategically important Arsenale.",
+      "id": "building_45.431960_12.357576"
+    },
+    {
+      "lat": 45.43183253220948,
+      "lng": 12.358193029488891,
+      "streetName": "Sottoportego del Capitello",
+      "streetNameEnglish": "Passageway of the Small Shrine",
+      "streetDescription": "A covered passageway named for a street shrine or small religious monument that offered spiritual protection to passersby in this part of the San Domenego neighborhood.",
+      "id": "building_45.431833_12.358193"
+    },
+    {
+      "lat": 45.43233986473607,
+      "lng": 12.351276862538118,
+      "streetName": "Calle della Frezzeria",
+      "streetNameEnglish": "Street of the Arrow Makers",
+      "streetDescription": "Named for craftsmen who produced arrows for Venice's military forces. Like many military-related trades, arrow makers would logically establish workshops near the Arsenale in Castello.",
+      "id": "building_45.432340_12.351277"
+    },
+    {
+      "lat": 45.43228064421732,
+      "lng": 12.35201177093807,
+      "streetName": "Fondamenta dei Vetrai",
+      "streetNameEnglish": "Foundation of the Glassmakers",
+      "streetDescription": "Although most glassmaking was concentrated on Murano, this waterside street might have housed glassmakers or glass merchants operating in the Castello district near San Domenego.",
+      "id": "building_45.432281_12.352012"
+    },
+    {
+      "lat": 45.43239228050556,
+      "lng": 12.352428122160974,
+      "streetName": "Calle dei Scarpagnini",
+      "streetNameEnglish": "Street of the Shipwrights",
+      "streetDescription": "Named for shipbuilders who worked in or near the Arsenale. These skilled craftsmen were responsible for constructing Venice's formidable fleet and lived in the surrounding Castello neighborhoods.",
+      "id": "building_45.432392_12.352428"
+    },
+    {
+      "lat": 45.432300179471014,
+      "lng": 12.353080684897723,
+      "streetName": "Rio Terà della Celestia",
+      "streetNameEnglish": "Filled Canal of the Celestia",
+      "streetDescription": "Named for the nearby monastery of Santa Maria Celestia, a significant religious institution in the Castello district. The canal was filled in to create more urban space in this densely populated area.",
+      "id": "building_45.432300_12.353081"
+    },
+    {
+      "lat": 45.43238093402534,
+      "lng": 12.353697742697088,
+      "streetName": "Calle dei Forneri",
+      "streetNameEnglish": "Street of the Bakers",
+      "streetDescription": "Named for professional bakers who operated shops supplying bread to local residents and possibly ship's biscuit to the nearby Arsenale, making them essential to both civilian and military life in Castello.",
+      "id": "building_45.432381_12.353698"
+    },
+    {
+      "lat": 45.43238283610942,
+      "lng": 12.354364101172782,
+      "streetName": "Corte Pisani",
+      "streetNameEnglish": "Pisani Court",
+      "streetDescription": "A courtyard named after the Pisani family, a wealthy and influential nobili family who likely owned property in this area of Castello near San Domenego during the Renaissance period.",
+      "id": "building_45.432383_12.354364"
+    },
+    {
+      "lat": 45.432265416319815,
+      "lng": 12.35500206424637,
+      "streetName": "Calle dei Cordami",
+      "streetNameEnglish": "Street of the Ropes",
+      "streetDescription": "Named for rope storage or a secondary rope-making operation supplementing the Tana. Rope production was essential to Venice's maritime activities centered in Castello.",
+      "id": "building_45.432265_12.355002"
+    },
+    {
+      "lat": 45.43236983890352,
+      "lng": 12.355789697017965,
+      "streetName": "Salizada dei Provveditori",
+      "streetNameEnglish": "Paved Road of the Provisioners",
+      "streetDescription": "Named for the officials responsible for provisioning Venice's fleet and military forces. These government officials would have operated near the Arsenale in the Castello district.",
+      "id": "building_45.432370_12.355790"
+    },
+    {
+      "lat": 45.43236643557287,
+      "lng": 12.356475185414158,
+      "streetName": "Calle dei Filacanapa",
+      "streetNameEnglish": "Street of the Hemp Spinners",
+      "streetDescription": "Named for craftsmen who processed hemp into fibers for rope making, supporting the naval rope production at the nearby Tana in the Arsenale complex of Castello.",
+      "id": "building_45.432366_12.356475"
+    },
+    {
+      "lat": 45.432383747654974,
+      "lng": 12.356914440166467,
+      "streetName": "Rio Terà delle Galeazze",
+      "streetNameEnglish": "Filled Canal of the Great Galleys",
+      "streetDescription": "Named for the large war galleys that would have been constructed or moored nearby. This filled canal in Castello would have once connected to the waterways serving the Arsenale.",
+      "id": "building_45.432384_12.356914"
+    },
+    {
+      "lat": 45.43242872089863,
+      "lng": 12.357631002499497,
+      "streetName": "Fondamenta dei Pentolai",
+      "streetNameEnglish": "Foundation of the Pot Makers",
+      "streetDescription": "A waterside street named for craftsmen who produced cooking pots and other metal vessels, potentially supplying both domestic households and ship galleys with essential cooking equipment.",
+      "id": "building_45.432429_12.357631"
+    },
+    {
+      "lat": 45.432836501739935,
+      "lng": 12.353213896611695,
+      "streetName": "Calle dei Marangoni",
+      "streetNameEnglish": "Street of the Carpenters",
+      "streetDescription": "Named for the ship carpenters who were vital to Venice's shipbuilding industry. These skilled woodworkers would have been especially concentrated near the Arsenale in the Castello district.",
+      "id": "building_45.432837_12.353214"
+    },
+    {
+      "lat": 45.432834997986724,
+      "lng": 12.35380335735582,
+      "streetName": "Sottoportego dei Greci",
+      "streetNameEnglish": "Passageway of the Greeks",
+      "streetDescription": "A covered passageway associated with the Greek community that settled around San Giorgio dei Greci in Castello after being granted permission to establish their Orthodox church in the 16th century.",
+      "id": "building_45.432835_12.353803"
+    },
+    {
+      "lat": 45.432759960862064,
+      "lng": 12.354375221850102,
+      "streetName": "Calle dei Squeri",
+      "streetNameEnglish": "Street of the Boatyards",
+      "streetDescription": "Named for small private boatyards where gondolas and smaller vessels were built and repaired, complementing the massive state-run Arsenale nearby in Castello.",
+      "id": "building_45.432760_12.354375"
+    },
+    {
+      "lat": 45.432846275001985,
+      "lng": 12.35510015645289,
+      "streetName": "Rio Terà San Domenego",
+      "streetNameEnglish": "Filled Canal of Saint Dominic",
+      "streetDescription": "A former canal filled to create a street, named directly for the Church of San Domenego which formed the heart of this neighborhood in the Castello district.",
+      "id": "building_45.432846_12.355100"
+    }
+  ],
+  "id": "polygon-1746057352428"
+}

@@ -1,0 +1,224 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.440636639240594,
+      "lng": 12.33264981016661
+    },
+    {
+      "lat": 45.43996289129663,
+      "lng": 12.333781702370894
+    },
+    {
+      "lat": 45.439323011498814,
+      "lng": 12.333207709641707
+    },
+    {
+      "lat": 45.43866054006273,
+      "lng": 12.33237086042906
+    },
+    {
+      "lat": 45.438525033583545,
+      "lng": 12.332032902093184
+    },
+    {
+      "lat": 45.43834059368615,
+      "lng": 12.331716401429427
+    },
+    {
+      "lat": 45.43823143509556,
+      "lng": 12.331759316773665
+    },
+    {
+      "lat": 45.437783506253986,
+      "lng": 12.330836636872542
+    },
+    {
+      "lat": 45.438265311922144,
+      "lng": 12.33036993250395
+    },
+    {
+      "lat": 45.43975587215613,
+      "lng": 12.33186660513426
+    },
+    {
+      "lat": 45.43999676708366,
+      "lng": 12.332000715585005
+    }
+  ],
+  "centroid": {
+    "lat": 45.43904378198908,
+    "lng": 12.332053872090938
+  },
+  "areaInSquareMeters": 32574.08,
+  "historicalName": "Calle de la Botta in Sestiere di Cannaregio",
+  "englishName": "Barrel Street in the Cannaregio District",
+  "historicalDescription": "A narrow street located in the Cannaregio sestiere, known for its proximity to the Jewish Ghetto, which was established in 1516. The area was populated by artisans and working-class families during the 15th century.",
+  "nameConfidence": "medium",
+  "center": {
+    "lat": 45.43904378198908,
+    "lng": 12.332053872090938
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.44029976526861,
+        "lng": 12.333215756268752
+      },
+      "water": {
+        "lat": 45.44045063399101,
+        "lng": 12.333355321806241
+      },
+      "historicalName": "Fondamenta della Botta",
+      "englishName": "Foundation of the Barrel",
+      "historicalDescription": "This dock name derives from its proximity to Calle de la Botta in Cannaregio. 'Botta' referred to barrels used for storing wine and other goods. The area was likely associated with barrel makers or wine merchants who would receive shipments via this water landing. The dock would have served as an important commercial point for the transport of barreled goods throughout the Cannaregio district in Renaissance Venice.",
+      "id": "canal_45.440300_12.333216"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.439323011498814,
+        "lng": 12.333207709641707
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072967949",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43930090241547,
+          "lng": 12.333261353822005
+        },
+        "distance": 4.854008033292496,
+        "id": "a88dde77-e569-4c35-bce5-ec85ad88e1dd",
+        "historicalName": "Ponte della Botta",
+        "englishName": "Bridge of the Barrel",
+        "historicalDescription": "Named after the 'Calle de la Botta' where it is located. 'Botta' in Venetian dialect referred to a barrel or cask, suggesting this area might have been associated with wine merchants or barrel makers during the Renaissance period. The bridge would have served local residents and merchants in this part of Cannaregio.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43931195695714,
+            "lng": 12.333234531731856
+          }
+        }
+      },
+      "id": "bridge_45.439323_12.333208"
+    },
+    {
+      "edge": {
+        "lat": 45.43938323209763,
+        "lng": 12.331492436976683
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072917032",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43950073643877,
+          "lng": 12.331542025494135
+        },
+        "distance": 13.626674665073944,
+        "id": "7b623447-5387-4fa3-98f6-3943795dddbf",
+        "historicalName": "Ponte dei Vinai",
+        "englishName": "Bridge of the Wine Merchants",
+        "historicalDescription": "This name reflects the historical presence of wine merchants in the area of Cannaregio. The nearby 'Botta' (barrel) reference in the street name suggests wine storage was common in this district. Wine was a crucial trade commodity in Renaissance Venice, with merchants often establishing themselves in specific neighborhoods.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4394419842682,
+            "lng": 12.33151723123541
+          }
+        }
+      },
+      "id": "bridge_45.439383_12.331492"
+    },
+    {
+      "edge": {
+        "lat": 45.43975587215613,
+        "lng": 12.33186660513426
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746072917032",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43988089999612,
+          "lng": 12.331842432903803
+        },
+        "distance": 14.029796667991308,
+        "id": "7b623447-5387-4fa3-98f6-3943795dddbf",
+        "historicalName": "Ponte dei Maestri d'Ascia",
+        "englishName": "Bridge of the Shipwrights",
+        "historicalDescription": "Cannaregio was home to many artisans connected to Venice's maritime industry. The 'Maestri d'Ascia' were skilled shipwrights who crafted vessels for Venice's powerful navy and merchant fleet. This bridge would commemorate these essential craftsmen who might have had workshops in this northern district, within walking distance of the Arsenal.",
+        "location": {
+          "midpoint": {
+            "lat": 45.439818386076126,
+            "lng": 12.331854519019032
+          }
+        }
+      },
+      "id": "bridge_45.439756_12.331867"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43823112268678,
+      "lng": 12.331011348628259,
+      "streetName": "Calle dei Tinellieri",
+      "streetNameEnglish": "Street of the Vat Makers",
+      "streetDescription": "This name reflects the artisans who produced wooden vats (tinelli) for wine storage, a common trade in Cannaregio where many craftsmen workshops were located near the canals for easy transport of materials and finished goods.",
+      "id": "building_45.438231_12.331011"
+    },
+    {
+      "lat": 45.43872537520781,
+      "lng": 12.331077113293443,
+      "streetName": "Fondamenta degli Acquaroli",
+      "streetNameEnglish": "Foundation of the Water Carriers",
+      "streetDescription": "In Renaissance Venice, acquaroli were water carriers who delivered fresh water to homes from public wells. This name would be appropriate for a street along a canal in Cannaregio, where many service trades were based to support the noble families and merchants in the area.",
+      "id": "building_45.438725_12.331077"
+    },
+    {
+      "lat": 45.438643139009294,
+      "lng": 12.33174169354997,
+      "streetName": "Rio Terà della Misericordia Vecchia",
+      "streetNameEnglish": "Filled Canal of the Old Mercy",
+      "streetDescription": "This name suggests a filled-in canal near the Scuola della Misericordia, a significant confraternity in Cannaregio. 'Vecchia' indicates this was the older location, perhaps referencing a historical charitable institution that served the community before moving elsewhere.",
+      "id": "building_45.438643_12.331742"
+    },
+    {
+      "lat": 45.439179325863655,
+      "lng": 12.331694439925773,
+      "streetName": "Sottoportego dei Varoteri",
+      "streetNameEnglish": "Passageway of the Furriers",
+      "streetDescription": "This name refers to the guild of furriers (varoteri) who might have had workshops in this covered passageway near Calle de la Botta. Furriers were important craftsmen in Renaissance Venice, creating luxury items for nobles and wealthy merchants in the nearby commercial areas.",
+      "id": "building_45.439179_12.331694"
+    },
+    {
+      "lat": 45.439212264791024,
+      "lng": 12.332179576203693,
+      "streetName": "Salizada dei Garzotti",
+      "streetNameEnglish": "Paved Street of the Apprentices",
+      "streetDescription": "This name refers to a paved street where young apprentices (garzotti) may have lived or gathered. Cannaregio was home to many artisan workshops, and apprentices were a common sight in the commercial areas of this working-class district.",
+      "id": "building_45.439212_12.332180"
+    },
+    {
+      "lat": 45.43961789700715,
+      "lng": 12.332362859048517,
+      "streetName": "Corte Zen",
+      "streetNameEnglish": "Zen Court",
+      "streetDescription": "Named after the prominent Zen family who owned property in Cannaregio. The Zen were a nobili family who contributed several notable figures to Venetian history, including navigators and diplomats. This courtyard would have been part of their property or adjacent to their palace.",
+      "id": "building_45.439618_12.332363"
+    },
+    {
+      "lat": 45.43966748704861,
+      "lng": 12.332940533623342,
+      "streetName": "Calle del Traghetto di San Marcuola",
+      "streetNameEnglish": "Street of the San Marcuola Ferry",
+      "streetDescription": "This name indicates a street leading to one of the traghetti (gondola ferry crossings) near the Church of San Marcuola in Cannaregio. These crossing points were vital for connecting the different parts of the sestiere and for transportation across the Grand Canal.",
+      "id": "building_45.439667_12.332941"
+    },
+    {
+      "lat": 45.4401058306454,
+      "lng": 12.33284784604692,
+      "streetName": "Ruga dei Filacanapi",
+      "streetNameEnglish": "Row of the Rope Makers",
+      "streetDescription": "This name refers to the artisans who made ropes (filacanapi) for the Venetian ships. Located in Cannaregio near Calle de la Botta, this street would have housed workshops where hemp was twisted into the essential ropes needed for Venice's maritime industry, a crucial craft in the maritime republic.",
+      "id": "building_45.440106_12.332848"
+    }
+  ],
+  "id": "polygon-1746072933644"
+}

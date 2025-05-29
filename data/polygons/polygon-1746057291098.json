@@ -1,0 +1,315 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43545762659136,
+      "lng": 12.355700927628464
+    },
+    {
+      "lat": 45.43520918369618,
+      "lng": 12.35704203213591
+    },
+    {
+      "lat": 45.43514142635312,
+      "lng": 12.357202964676803
+    },
+    {
+      "lat": 45.43426057348996,
+      "lng": 12.35677381123442
+    },
+    {
+      "lat": 45.43404976905647,
+      "lng": 12.356591421021408
+    },
+    {
+      "lat": 45.43322160115864,
+      "lng": 12.356741624726242
+    },
+    {
+      "lat": 45.43283762828246,
+      "lng": 12.357149320496505
+    },
+    {
+      "lat": 45.43263434746688,
+      "lng": 12.35726733769316
+    },
+    {
+      "lat": 45.43252894231128,
+      "lng": 12.35605497921843
+    }
+  ],
+  "centroid": {
+    "lat": 45.433926788711815,
+    "lng": 12.356724935425705
+  },
+  "historicalName": "Ramo del Figareto in Sestiere San Marco",
+  "englishName": "Figareto Alley in the District of St. Mark",
+  "historicalDescription": "A narrow alley located in the San Marco sestiere, known for its artisan workshops and proximity to Piazza San Marco, the political and religious heart of 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 24039.32,
+  "center": {
+    "lat": 45.43475021904569,
+    "lng": 12.356423509601674
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.435333405143766,
+        "lng": 12.356371479882187
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057275948",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43544256947732,
+          "lng": 12.356591421021408
+        },
+        "distance": 21.02034894167759,
+        "id": "8ab834ea-ce2d-49c7-b89b-bdb07a443019",
+        "historicalName": "Ponte del Figareto",
+        "englishName": "Bridge of the Small Fig Tree",
+        "historicalDescription": "Named after the Ramo del Figareto itself, which likely got its name from a small fig tree that once grew in this area of San Marco. Small garden areas with fruit trees were not uncommon in the courtyards of wealthy Venetian residences during the Renaissance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43538798731054,
+            "lng": 12.356481450451797
+          }
+        }
+      },
+      "id": "bridge_45.435333_12.356371"
+    },
+    {
+      "edge": {
+        "lat": 45.43470099992154,
+        "lng": 12.356988387955612
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057305470",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43474993788914,
+          "lng": 12.357106405152267
+        },
+        "distance": 10.696281780588938,
+        "id": "6dfff9f7-4103-492e-9061-5e09163868da",
+        "historicalName": "Ponte dei Musici",
+        "englishName": "Bridge of the Musicians",
+        "historicalDescription": "This bridge name references the musicians who would have performed in the nearby squares and palaces of San Marco. The sestiere of San Marco was a cultural center and home to many performances, especially during Venetian festivals and carnivals.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43472546890534,
+            "lng": 12.35704739655394
+          }
+        }
+      },
+      "id": "bridge_45.434701_12.356988"
+    },
+    {
+      "edge": {
+        "lat": 45.43426057348996,
+        "lng": 12.35677381123442
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057305470",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43431327447531,
+          "lng": 12.356956201447433
+        },
+        "distance": 15.390900056340172,
+        "id": "6dfff9f7-4103-492e-9061-5e09163868da",
+        "historicalName": "Ponte della Fenice Piccola",
+        "englishName": "Bridge of the Little Phoenix",
+        "historicalDescription": "Named for its proximity to a smaller performance venue associated with La Fenice theater traditions. San Marco was home to numerous performance spaces, and this bridge would have connected patrons to one of the smaller theaters in the area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43428692398263,
+            "lng": 12.356865006340927
+          }
+        }
+      },
+      "id": "bridge_45.434261_12.356774"
+    },
+    {
+      "edge": {
+        "lat": 45.43404976905647,
+        "lng": 12.356591421021408
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057305470",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.433974481567944,
+          "lng": 12.356709438218063
+        },
+        "distance": 12.445258434956179,
+        "id": "6dfff9f7-4103-492e-9061-5e09163868da",
+        "historicalName": "Ponte dei Gemmari",
+        "englishName": "Bridge of the Gem Cutters",
+        "historicalDescription": "This bridge name honors the gem cutters who had workshops in this area of San Marco. Venice was a major center for jewelry crafting during the Renaissance, with many artisans working with precious stones imported from the East.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43401212531221,
+            "lng": 12.356650429619735
+          }
+        }
+      },
+      "id": "bridge_45.434050_12.356591"
+    },
+    {
+      "edge": {
+        "lat": 45.43322160115864,
+        "lng": 12.356741624726242
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057305470",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43323665886523,
+          "lng": 12.356848913086838
+        },
+        "distance": 8.537495302938988,
+        "id": "6dfff9f7-4103-492e-9061-5e09163868da",
+        "historicalName": "Ponte dei Rossini",
+        "englishName": "Bridge of the Rossini Family",
+        "historicalDescription": "Named after a prominent merchant family who lived near the Ramo del Figareto in the San Marco district. The Rossini family would have owned property in this area and potentially contributed to local infrastructure or charitable works.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43322913001194,
+            "lng": 12.35679526890654
+          }
+        }
+      },
+      "id": "bridge_45.433222_12.356742"
+    },
+    {
+      "edge": {
+        "lat": 45.433505170404636,
+        "lng": 12.355936962021774
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057275948",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.43361008032108,
+          "lng": 12.355773883713669
+        },
+        "distance": 17.26285549905872,
+        "id": "8ab834ea-ce2d-49c7-b89b-bdb07a443019",
+        "historicalName": "Ponte dei Ricamatori",
+        "englishName": "Bridge of the Embroiderers",
+        "historicalDescription": "This bridge celebrates the embroidery craftspeople who had workshops in this part of San Marco. Venetian embroidery was renowned throughout Europe, particularly for its gold and silver threadwork used in ecclesiastical vestments and noble attire.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43355762536286,
+            "lng": 12.355855422867721
+          }
+        }
+      },
+      "id": "bridge_45.433505_12.355937"
+    },
+    {
+      "edge": {
+        "lat": 45.43399328445132,
+        "lng": 12.355877953423446
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057275948",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43409643467446,
+          "lng": 12.355718093766159
+        },
+        "distance": 16.94544208748791,
+        "id": "8ab834ea-ce2d-49c7-b89b-bdb07a443019",
+        "historicalName": "Ponte della Cortina",
+        "englishName": "Bridge of the Curtain",
+        "historicalDescription": "Named for a decorative curtain or tapestry workshop that operated nearby in the Renaissance period. San Marco was home to many textile artisans who created luxurious fabrics and decorations for Venetian palaces and churches.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43404485956289,
+            "lng": 12.355798023594803
+          }
+        }
+      },
+      "id": "bridge_45.433993_12.355878"
+    },
+    {
+      "edge": {
+        "lat": 45.434481398498,
+        "lng": 12.355818944825119
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057275948",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43458278902784,
+          "lng": 12.355662303818649
+        },
+        "distance": 16.628071874812793,
+        "id": "8ab834ea-ce2d-49c7-b89b-bdb07a443019",
+        "historicalName": "Ponte dei Calamai",
+        "englishName": "Bridge of the Inkwells",
+        "historicalDescription": "This bridge name references the scribes and notaries who worked in this area of San Marco, near government offices. These professionals used inkwells (calamai) in their daily work documenting the Republic's commercial and legal affairs.",
+        "location": {
+          "midpoint": {
+            "lat": 45.434532093762925,
+            "lng": 12.355740624321884
+          }
+        }
+      },
+      "id": "bridge_45.434481_12.355819"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.434003664655826,
+      "lng": 12.356000310841106,
+      "streetName": "Calle dei Mercanti di Seta",
+      "streetNameEnglish": "Street of the Silk Merchants",
+      "streetDescription": "This name reflects the silk trade that was prominent in San Marco during the Renaissance. Nearby Ramo del Figareto would have connected to areas where silk merchants conducted business, as the San Marco district was a commercial hub with many luxury textile traders.",
+      "id": "building_45.434004_12.356000"
+    },
+    {
+      "lat": 45.43302334765185,
+      "lng": 12.356370889355311,
+      "streetName": "Sottoportego della Madonna dei Fiori",
+      "streetNameEnglish": "Passageway of the Madonna of Flowers",
+      "streetDescription": "This name references a likely religious shrine dedicated to the Madonna that would have been decorated with flowers. The 'figareto' in Ramo del Figareto suggests a place with fig trees, and this connecting passageway could have housed a small devotional altar decorated with local flora.",
+      "id": "building_45.433023_12.356371"
+    },
+    {
+      "lat": 45.43339624341329,
+      "lng": 12.356330990739476,
+      "streetName": "Rio Terà dei Figari",
+      "streetNameEnglish": "Filled Canal of the Fig Sellers",
+      "streetDescription": "A rio terà is a filled-in canal, and this name directly connects to the 'Figareto' reference (place of figs) in the nearby Ramo del Figareto. It suggests this was once a canal that was filled in and where fig sellers might have set up their stalls or where fig trees once grew.",
+      "id": "building_45.433396_12.356331"
+    },
+    {
+      "lat": 45.43388318981879,
+      "lng": 12.356465398704358,
+      "streetName": "Salizada dei Garzotti",
+      "streetNameEnglish": "Paved Street of the Apprentices",
+      "streetDescription": "A 'salizada' was one of the first paved streets in Venice, and 'garzotti' refers to apprentices or young workers. This name would be appropriate for an area near Ramo del Figareto in the commercial district of San Marco where many workshops would have employed young apprentices in various crafts.",
+      "id": "building_45.433883_12.356465"
+    },
+    {
+      "lat": 45.434328042791506,
+      "lng": 12.356391876516827,
+      "streetName": "Calle del Ridotto",
+      "streetNameEnglish": "Street of the Gambling House",
+      "streetDescription": "The Ridotto was Venice's famous gambling house established in the 17th century in San Marco. This street name would indicate a path that led toward or was near this famous establishment, which would be geographically appropriate for a street connected to Ramo del Figareto in the Sestiere San Marco.",
+      "id": "building_45.434328_12.356392"
+    },
+    {
+      "lat": 45.4348282954343,
+      "lng": 12.356300933634357,
+      "streetName": "Ruga degli Oresi",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "A 'ruga' typically indicates a commercial street lined with shops of the same trade. 'Oresi' refers to goldsmiths, who were prominent in the San Marco area. This name would be historically accurate for a street near Ramo del Figareto that hosted workshops of goldsmiths creating fine jewelry for Venice's wealthy citizens.",
+      "id": "building_45.434828_12.356301"
+    }
+  ],
+  "id": "polygon-1746057291098"
+}

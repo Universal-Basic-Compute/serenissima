@@ -1,0 +1,18 @@
+{
+  "DECREES": [
+    {
+      "DecreeId": "example-decree-id",
+      "Type": "Economic",
+      "Title": "Example Decree (DO NOT SYNC)",
+      "Description": "This is an example decree. It will not be synced to Airtable.",
+      "Rationale": "This serves as a template for the decree structure.",
+      "Status": "Example",
+      "Category": "Example",
+      "SubCategory": "Template",
+      "Proposer": "System",
+      "FlavorText": "Examples illuminate the path forward.",
+      "HistoricalInspiration": "None - this is just an example.",
+      "Notes": "This first item is always skipped during synchronization."
+    }
+  ]
+}

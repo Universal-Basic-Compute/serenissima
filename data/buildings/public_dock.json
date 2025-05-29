@@ -1,0 +1,65 @@
+{
+  "name": "Public Dock",
+  "pointType": "canal",
+  "category": "business",
+  "subCategory": "Transportation Facilities",
+  "size": 1,
+  "unlockCondition": "Waterfront property, 2,000,000 ducats capital",
+  "canImport": true,
+  "calculationsAnalysis": "The Public Dock's economic values balance infrastructure investment with modest returns. The construction cost of 1,000,000 ducats represents the substantial stonework required for water-resistant structures, while the income of 12,000 ducats (1.2% return) reflects the small fees collected from citizens. The maintenance cost of 15,000 ducats exceeds income, creating a realistic scenario where essential infrastructure requires subsidy but provides indirect benefits through increased connectivity and property values. This encourages players to build docks strategically rather than as direct revenue sources, mirroring Venice's historical approach to public infrastructure.",
+  "shortDescription": "Common-use water access point for boats, goods transfer, and public transportation.",
+  "fullDescription": "Essential to city mobility, public docks provide communal water access points throughout Venice's extensive canal system. Featuring mooring posts, loading areas, and often covered waiting spaces, these facilities form the backbone of the city's transportation network. Regular maintenance is required due to water damage and heavy usage from boats, goods, and pedestrian traffic.",
+  "flavorText": "The dock is Venice's true piazza—where goods and gossip flow equally, where the boatman knows more of city affairs than any senator.",
+  "constructionCosts": {
+    "ducats": 1000000,
+    "timber": 900,
+    "stone": 1340,
+    "iron": 180
+  },
+  "maintenanceCost": 1500,
+  "soundDesign": {
+    "ambientSound": "Water lapping against stone, boats knocking against moorings",
+    "activitySounds": "Boat arrivals and departures, loading/unloading, passenger conversations",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "acqua alta": "Partially submerged during high water events",
+    "fog": "Lanterns lit, slower boat traffic",
+    "summer": "Increased passenger volume, sunshades deployed"
+  },
+  "aiInteractionPoints": [
+    "Boat mooring area",
+    "Waiting shelter",
+    "Goods transfer platform",
+    "Steps to water",
+    "Dockmaster's position"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 200,
+    "stores": [
+      "timber",
+      "rope",
+      "small_boats",
+      "porter_equipment",
+      "gondola",
+      "hemp",
+      "salt",
+      "fish",
+      "preserved_fish",
+      "wine",
+      "tools",
+      "sailcloth"
+    ],
+    "sells": [
+      "small_boats",
+      "porter_equipment",
+      "gondola",
+      "rope"
+    ]
+  },
+  "buildTier": 1,
+  "workTier": 1,
+  "consumeTier": 2,
+  "constructionMinutes": 4320
+}

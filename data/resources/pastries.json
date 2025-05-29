@@ -1,0 +1,28 @@
+{
+  "id": "pastries",
+  "name": "Pastries",
+  "category": "finished_goods",
+  "subCategory": "food",
+  "description": "Sweet baked goods, often enjoyed as treats, for breakfast, or as desserts. Made by skilled bakers and confectioners.",
+  "varieties": [
+    {
+      "type": "sweet_bun",
+      "valueMultiplier": 1,
+      "notes": "A common, affordable treat."
+    },
+    {
+      "type": "fruit_tart",
+      "valueMultiplier": 1.5,
+      "notes": "More elaborate, often featuring seasonal fruits."
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": "medieval",
+    "historicalSignificance": "Venice, with its access to sugar and spices from the East, became known for its fine pastries and confections.",
+    "culturalContext": "Pastries were often served at celebrations and were a sign of hospitality."
+  },
+  "importPrice": 1050.0,
+  "lifetimeHours": 5400,
+  "consumptionHours": 1,
+  "tier": 3
+}

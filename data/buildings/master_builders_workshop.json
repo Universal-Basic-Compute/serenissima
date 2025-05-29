@@ -1,0 +1,83 @@
+{
+  "name": "Master Builder's Workshop",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "construction",
+  "size": 2,
+  "unlockCondition": "50,000,000 ducats total wealth, Engineering Guild Master, Senate Approval",
+  "commercialStorage": true,
+  "canImport": true,
+  "employmentCapacity": 100,
+  "calculationsAnalysis": "The Master Builder's Workshop is the cornerstone of large-scale construction efforts in Venice. It serves as a central repository for vast quantities of building materials and a hub for planning and initiating new building projects. Its high construction cost (10,000,000 ducats) and significant maintenance (50,000 ducats per cycle) reflect its critical role and scale. With an employment capacity of 100, it houses master builders, architects, logisticians, and skilled workers. While it may not generate direct income from sales in the traditional sense, its value lies in enabling efficient city growth and undertaking major construction endeavors. Construction time is substantial, reflecting its complexity.",
+  "shortDescription": "Central hub for storing building materials and coordinating large-scale construction projects.",
+  "fullDescription": "The Master Builder's Workshop is a sprawling complex dedicated to the art and science of construction. It houses extensive storage yards for timber, stone, bricks, marble, and other essential materials, alongside workshops for pre-fabricating components and offices for architectural design and project management. This facility is indispensable for undertaking ambitious building projects, from grand palaces to vital public works, streamlining the logistics and execution of constructing Venice.",
+  "flavorText": "Where blueprints become buildings, and the raw strength of materials is shaped by vision into the enduring fabric of Venice.",
+  "constructionCosts": {
+    "ducats": 10000000,
+    "timber": 2230,
+    "bricks": 3350,
+    "stone": 4190,
+    "iron": 1120,
+    "marble": 560,
+    "glass": 280
+  },
+  "maintenanceCost": 50000,
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 5000,
+    "stores": [
+      "timber",
+      "stone",
+      "sand",
+      "iron",
+      "rags",
+      "flax",
+      "hemp",
+      "limestone",
+      "bricks",
+      "glass",
+      "marble",
+      "cut_stone",
+      "processed_iron",
+      "iron_fittings",
+      "mortar",
+      "pitch",
+      "rope",
+      "paper",
+      "fuel",
+      "tools",
+      "gold_leaf",
+      "dyestuffs"
+    ],
+    "sells": []
+  },
+  "soundDesign": {
+    "ambientSound": "Large scale construction planning, material organization, distant hammering and sawing",
+    "activitySounds": "Cranes moving materials, architects discussing plans, workers receiving instructions",
+    "musicTheme": "Costruzione Monumentale"
+  },
+  "seasonalEffects": {
+    "winter": "Slower outdoor material handling, focus on indoor prefabrication and planning",
+    "construction_season": "Peak activity, continuous material flow and project dispatch"
+  },
+  "aiInteractionPoints": [
+    "Material receiving yards",
+    "Architectural design office",
+    "Project planning hall",
+    "Prefabrication workshops",
+    "Tool and equipment storage",
+    "Master builder's office"
+  ],
+  "assets": {
+    "models": "/assets/buildings/models/master_builders_workshop",
+    "variants": [
+      "model"
+    ],
+    "textures": "/assets/buildings/textures/master_builders_workshop/",
+    "thumbnail": "/assets/buildings/thumbnails/master_builders_workshop.png"
+  },
+  "buildTier": 4,
+  "workTier": 4,
+  "consumeTier": 0,
+  "constructionMinutes": 100800
+}

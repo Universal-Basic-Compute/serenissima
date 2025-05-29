@@ -1,0 +1,155 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43490849015433,
+      "lng": 12.348923699169111
+    },
+    {
+      "lat": 45.435115527079454,
+      "lng": 12.348864690570784
+    },
+    {
+      "lat": 45.435299977518376,
+      "lng": 12.349100724964094
+    },
+    {
+      "lat": 45.43620339953166,
+      "lng": 12.349562064914656
+    },
+    {
+      "lat": 45.43625986292727,
+      "lng": 12.349486963062239
+    },
+    {
+      "lat": 45.436937419267785,
+      "lng": 12.350044862537336
+    },
+    {
+      "lat": 45.437200911203114,
+      "lng": 12.349374310283613
+    },
+    {
+      "lat": 45.436478187525395,
+      "lng": 12.34844626596446
+    },
+    {
+      "lat": 45.43601895204564,
+      "lng": 12.347523586063337
+    },
+    {
+      "lat": 45.43536773467108,
+      "lng": 12.34795810392375
+    },
+    {
+      "lat": 45.43504024101274,
+      "lng": 12.348483816890669
+    },
+    {
+      "lat": 45.43489343289378,
+      "lng": 12.348639385013533
+    }
+  ],
+  "centroid": {
+    "lat": 45.43581034465256,
+    "lng": 12.348867372779798
+  },
+  "historicalName": "Calle del Bastion in Sestiere Castello",
+  "englishName": "Bastion Street in Castello District",
+  "historicalDescription": "This area in the sestiere of Castello was known for its proximity to the city's defensive walls and bastions in the 15th century. It was a residential area populated by working-class Venetians.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 23226,
+  "center": {
+    "lat": 45.435771129691545,
+    "lng": 12.348656107339627
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.435751688525016,
+        "lng": 12.349331394939375
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746057029127",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43575921498834,
+          "lng": 12.349406496791792
+        },
+        "distance": 5.91939062333372,
+        "id": "86909bd7-8186-49ea-9fb9-1b7d02be6db9",
+        "historicalName": "Ponte del Bastione",
+        "englishName": "Bridge of the Bastion",
+        "historicalDescription": "Named after the nearby military bastion that formed part of Venice's eastern defensive structures in Castello. The bastion was a strategic fortification that protected the naval arsenal and eastern approach to the city during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43575545175668,
+            "lng": 12.349368945865583
+          }
+        }
+      },
+      "id": "bridge_45.435752_12.349331"
+    },
+    {
+      "edge": {
+        "lat": 45.43601895204564,
+        "lng": 12.347523586063337
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056974299",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.436012470067745,
+          "lng": 12.347356063100916
+        },
+        "distance": 13.091015916704823,
+        "id": "7b379df1-71ea-4d27-9f4d-337f3857b497",
+        "historicalName": "Ponte degli Arsenalotti",
+        "englishName": "Bridge of the Arsenal Workers",
+        "historicalDescription": "Named for the skilled workers of the nearby Venetian Arsenal who would use this route in Castello to travel between their homes and the shipyard. The Arsenalotti were a privileged class of workers who built the ships that maintained Venetian naval dominance during the Renaissance.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4360157110567,
+            "lng": 12.347439824582127
+          }
+        }
+      },
+      "id": "bridge_45.436019_12.347524"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.4357766907093,
+      "lng": 12.348136674837761,
+      "streetName": "Calle dei Bombardieri di Castello",
+      "streetNameEnglish": "Street of the Bombardiers of Castello",
+      "streetDescription": "This street name references the bombardieri (artillery gunners) who were stationed near the bastion fortifications in Castello. These military personnel operated the cannons that protected Venice from naval attacks. Many bombardieri had residences and workshops in this area during the 15th-16th centuries, maintaining the artillery of the nearby Arsenale.",
+      "id": "building_45.435777_12.348137"
+    },
+    {
+      "lat": 45.43579618360729,
+      "lng": 12.348727248289995,
+      "streetName": "Rio Terà delle Munizioni",
+      "streetNameEnglish": "Filled Canal of the Munitions",
+      "streetDescription": "A rio terà is a filled-in canal that has been converted to a street. This name refers to the transportation and storage of munitions in this area which was near military fortifications. The proximity to the bastion in Castello made this area crucial for the storage of gunpowder, cannonballs, and other military supplies that would be quickly accessible to defend the eastern approaches to the city.",
+      "id": "building_45.435796_12.348727"
+    },
+    {
+      "lat": 45.43629877955831,
+      "lng": 12.34870014068169,
+      "streetName": "Salizada dei Provveditori alle Fortezze",
+      "streetNameEnglish": "Paved Way of the Fortress Superintendents",
+      "streetDescription": "A salizada was an early paved street, typically wider than a calle. This name honors the Provveditori alle Fortezze, Venetian officials who supervised the construction and maintenance of defensive structures, including the bastions of Castello. These magistrates would have frequently visited this area to inspect the fortifications during the 16th century when Venice was reinforcing its defenses.",
+      "id": "building_45.436299_12.348700"
+    },
+    {
+      "lat": 45.43666495517918,
+      "lng": 12.349497373950953,
+      "streetName": "Sottoportego della Sentinella",
+      "streetNameEnglish": "Passageway of the Sentinel",
+      "streetDescription": "A sottoportego is a covered passageway that passes beneath a building. This name references the sentinels or guards who would have used covered passages near the bastion in Castello to move between guard posts during inclement weather or to remain hidden from view. These passages were strategically important for the defense of the area, allowing guards to move quickly and discreetly around the fortifications.",
+      "id": "building_45.436665_12.349497"
+    }
+  ],
+  "id": "polygon-1746057007426"
+}

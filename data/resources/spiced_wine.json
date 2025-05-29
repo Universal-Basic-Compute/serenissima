@@ -1,0 +1,74 @@
+{
+  "id": "spiced_wine",
+  "name": "Spiced Wine",
+  "category": "finished_goods",
+  "subCategory": "luxury_consumables",
+  "description": "Premium wine infused with exotic Eastern spices, created through a carefully guarded Venetian process. Popular among wealthy patrons and at significant celebrations, its complex flavors showcase Venice's access to rare global ingredients.",
+  "varieties": [
+    {
+      "type": "hypocras",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1,
+      "primarySpices": [
+        "cinnamon",
+        "ginger"
+      ],
+      "modelVariant": "models/resources/spiced_wine_hypocras.glb"
+    },
+    {
+      "type": "claret",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 0.9,
+      "primarySpices": [
+        "cloves",
+        "nutmeg"
+      ],
+      "modelVariant": "models/resources/spiced_wine_claret.glb"
+    },
+    {
+      "type": "festive_blend",
+      "productionDifficulty": "high",
+      "popularity": "very_high",
+      "valueMultiplier": 1.3,
+      "primarySpices": [
+        "cinnamon",
+        "cardamom",
+        "star_anise"
+      ],
+      "seasonalAvailability": "winter",
+      "modelVariant": "models/resources/spiced_wine_festive.glb"
+    },
+    {
+      "type": "oriental_infusion",
+      "productionDifficulty": "very_high",
+      "popularity": "medium",
+      "valueMultiplier": 1.5,
+      "primarySpices": [
+        "saffron",
+        "pepper",
+        "rose_water"
+      ],
+      "modelVariant": "models/resources/spiced_wine_oriental.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1340,
+    "notableProducers": [
+      "Venetian Winemakers Guild",
+      "Monastery of San Giorgio"
+    ],
+    "historicalSignificance": "Spiced wine represented Venice's unique position as a crossroads of East and West. By combining local wines with exotic spices from their Eastern trade networks, Venetian vintners created distinctive beverages that showcased their global connections. These wines became important elements in celebrations and diplomatic gifts, demonstrating the cultural fusion that characterized Venetian commerce.",
+    "historicalContracts": [
+      "Venetian celebrations",
+      "European noble courts",
+      "Ducatsy merchant households",
+      "Religious festivals"
+    ]
+  },
+  "importPrice": 3713.4,
+  "lifetimeHours": 43800,
+  "consumptionHours": 4,
+  "tier": 3
+}

@@ -1,0 +1,65 @@
+{
+  "name": "Doge's Palace",
+  "pointType": "building",
+  "category": "Special Buildings",
+  "subCategory": "Unique Structures",
+  "size": 4,
+  "unlockCondition": "Government structure only, not privately constructable",
+  "calculationsAnalysis": "The Doge's Palace represents the ultimate governmental structure with extraordinary investment requirements. The construction cost of 50,000,000 ducats reflects the unparalleled architectural significance and materials, while the income of 175,000 ducats (0.35% return) represents administrative fees, tourism, and ceremonial functions. The maintenance cost of 150,000 ducats (85.7% of income) creates a realistic scenario where this centerpiece of government requires substantial ongoing investment but generates significant revenue through various functions. The employment capacity of 150 represents the extensive administrative staff, guards, and service personnel. The construction time of 90 days (7776000000ms) reflects the monumental construction project. This unique building serves as the centerpiece of Venetian governance with appropriate restrictions preventing private construction, reflecting the historical reality of this singular structure that embodied the Republic's political system.",
+  "shortDescription": "Seat of government for the Venetian Republic, housing the Doge and major councils.",
+  "fullDescription": "The political heart of Venice, the Doge's Palace (Palazzo Ducale) houses the Republic's key governmental institutions. Featuring the Great Council chamber, Senate hall, Doge's apartments, judicial facilities, and administrative offices, this architectural masterpiece combines practical governance with symbolic authority. Its distinctive design represents Venice's unique political identity, balancing power between the Doge, aristocracy, and complex council system.",
+  "flavorText": "These walls have witnessed a thousand years of decisions that shaped Venice and beyond—for while emperors may command with swords, the true art of governance is found in these chambers where words, votes, and laws determine the fate of nations.",
+  "constructionCosts": {
+    "ducats": 50000000,
+    "timber": 3710,
+    "bricks": 7410,
+    "stone": 14830,
+    "glass": 2220,
+    "marble": 3710,
+    "gold": 740
+  },
+  "maintenanceCost": 15000,
+  "soundDesign": {
+    "ambientSound": "Echoing chambers, distant debates, ceremonial announcements",
+    "activitySounds": "Council voting, diplomatic receptions, governmental proclamations",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "state ceremonies": "Elaborate decorations, increased ceremonial activity",
+    "election periods": "Conclave procedures, heightened security",
+    "diplomatic seasons": "Foreign ambassadors, treaty negotiations"
+  },
+  "aiInteractionPoints": [
+    "Great Council Chamber",
+    "Senate Hall",
+    "Doge's Apartments",
+    "Ceremonial Staircase",
+    "Diplomatic Reception Rooms",
+    "Governmental Offices",
+    "Bridge of Sighs",
+    "Water Entrance"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 100,
+    "stores": [
+      "paper",
+      "gold",
+      "blackmail_evidence",
+      "criminal_contacts",
+      "maps",
+      "banking_services",
+      "smuggler_maps",
+      "books"
+    ],
+    "sells": [
+      "maps",
+      "banking_services",
+      "smuggler_maps"
+    ]
+  },
+  "buildTier": 5,
+  "workTier": 4,
+  "consumeTier": 4,
+  "constructionMinutes": 129600
+}

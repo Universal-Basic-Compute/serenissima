@@ -1,0 +1,61 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44669193810681,
+      "lng": 12.329904425908719
+    },
+    {
+      "lat": 45.44605589819724,
+      "lng": 12.332018006612454
+    },
+    {
+      "lat": 45.445540286616776,
+      "lng": 12.331481564809476
+    },
+    {
+      "lat": 45.44605589819724,
+      "lng": 12.329566467572842
+    }
+  ],
+  "centroid": {
+    "lat": 45.44608600527951,
+    "lng": 12.330742616225873
+  },
+  "historicalName": "Calle de la Misericordia",
+  "englishName": "Alley of Mercy",
+  "historicalDescription": "This narrow alley was located in the Cannaregio sestiere, near the church of Santa Maria della Misericordia. The area was known for its charitable institutions and hospices serving the poor and sick.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 12245.52,
+  "center": {
+    "lat": 45.44608600527951,
+    "lng": 12.330742616225873
+  },
+  "canalPoints": [],
+  "bridgePoints": [],
+  "buildingPoints": [
+    {
+      "lat": 45.44606426505809,
+      "lng": 12.330238734952367,
+      "streetName": "Calle dei Misericordiosi",
+      "streetNameEnglish": "Street of the Merciful Brothers",
+      "streetDescription": "This name refers to the members of the Scuola della Misericordia, a confraternity dedicated to charitable works in Renaissance Venice. Located near the Calle de la Misericordia, this street would have housed some of the brothers who belonged to this important charitable organization, which provided assistance to the poor, widows, and orphans.",
+      "id": "building_45.446064_12.330239"
+    },
+    {
+      "lat": 45.445949260172,
+      "lng": 12.330963916624722,
+      "streetName": "Sottoportego della Carità Antica",
+      "streetNameEnglish": "Passageway of the Ancient Charity",
+      "streetDescription": "A covered passageway (sottoportego) that would have connected to a small courtyard where charitable distributions of food or alms took place. The 'Antica' designation suggests this was an established charitable location predating newer charitable institutions in the area, possibly operating under the auspices of the nearby Misericordia confraternity.",
+      "id": "building_45.445949_12.330964"
+    },
+    {
+      "lat": 45.446011727106054,
+      "lng": 12.331575694881181,
+      "streetName": "Rio Terà degli Ospitalieri",
+      "streetNameEnglish": "Filled Canal of the Hospitallers",
+      "streetDescription": "A rio terà is a former canal that was filled in to create a street. This name references the Knights Hospitallers, a religious order that maintained hospices for pilgrims and the sick. The order likely had a presence in this area of Venice during the Renaissance, providing medical care and assistance to travelers and the local population, aligning with the theme of mercy and charity reflected in the Misericordia name.",
+      "id": "building_45.446012_12.331576"
+    }
+  ]
+}

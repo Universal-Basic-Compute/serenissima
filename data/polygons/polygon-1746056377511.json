@@ -1,0 +1,267 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43806260122233,
+      "lng": 12.342637749362678
+    },
+    {
+      "lat": 45.43740764328441,
+      "lng": 12.344306083369942
+    },
+    {
+      "lat": 45.435762686665,
+      "lng": 12.344279261279793
+    },
+    {
+      "lat": 45.43574010111454,
+      "lng": 12.343646259952278
+    },
+    {
+      "lat": 45.43567234440894,
+      "lng": 12.343378039050789
+    },
+    {
+      "lat": 45.43601865560499,
+      "lng": 12.343420954395027
+    },
+    {
+      "lat": 45.43723825637352,
+      "lng": 12.342535825420113
+    },
+    {
+      "lat": 45.437825462157235,
+      "lng": 12.34258410518238
+    }
+  ],
+  "centroid": {
+    "lat": 45.436715968853875,
+    "lng": 12.343348534751625
+  },
+  "historicalName": "Fondamenta San Severo, Sestiere Castello",
+  "englishName": "San Severo Waterfront, Castello District",
+  "historicalDescription": "The area was known for its proximity to the Church of San Severo and its location along the San Severo canal in the Castello sestiere, one of the six main districts of Venice.",
+  "nameConfidence": "high",
+  "areaInSquareMeters": 23690.42,
+  "center": {
+    "lat": 45.436715968853875,
+    "lng": 12.343348534751625
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43806260122233,
+        "lng": 12.342637749362678
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056244077",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.43809232200476,
+          "lng": 12.342539074869343
+        },
+        "distance": 8.37823349145632,
+        "id": "c0e36d03-c8ca-41bf-b0ae-81a95988bae3",
+        "historicalName": "Ponte dei Benedettini",
+        "englishName": "Bridge of the Benedictines",
+        "historicalDescription": "Named for its proximity to properties owned by the Benedictine order in the Castello district. The Benedictines had significant influence in this area during the Renaissance period, with several churches and monasteries under their administration near San Severo.",
+        "location": {
+          "midpoint": {
+            "lat": 45.438077461613545,
+            "lng": 12.342588412116012
+          }
+        }
+      },
+      "id": "bridge_45.438063_12.342638"
+    },
+    {
+      "edge": {
+        "lat": 45.43574010111454,
+        "lng": 12.343646259952278
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056923664",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.435667661952216,
+          "lng": 12.343733125664421
+        },
+        "distance": 10.527100226745336,
+        "id": "46c3b588-c24c-487b-acdf-d0a60f3804c9",
+        "historicalName": "Ponte di San Severo",
+        "englishName": "Bridge of Saint Severo",
+        "historicalDescription": "Named directly after the Fondamenta San Severo where it is located. San Severo was a 4th-century bishop and martyr venerated in Venice, with a church dedicated to him in this area of Castello that dated back to at least the 11th century.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43570388153338,
+            "lng": 12.34368969280835
+          }
+        }
+      },
+      "id": "bridge_45.435740_12.343646"
+    },
+    {
+      "edge": {
+        "lat": 45.43601865560499,
+        "lng": 12.343420954395027
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056403060",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43605629799825,
+          "lng": 12.343308301616402
+        },
+        "distance": 9.735557647252014,
+        "id": "06125942-0c56-4e3a-a97b-537f49f27df7",
+        "historicalName": "Ponte dei Calegheri Vecchi",
+        "englishName": "Bridge of the Old Shoemakers",
+        "historicalDescription": "Named for the shoemakers' workshops that were historically located in this area of Castello. The guild of shoemakers (calegheri) had establishments along various canals in Venice, and this bridge would have been part of their daily routes in the San Severo area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.436037476801616,
+            "lng": 12.343364628005714
+          }
+        }
+      },
+      "id": "bridge_45.436019_12.343421"
+    },
+    {
+      "edge": {
+        "lat": 45.4364251891945,
+        "lng": 12.343125911403389
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056403060",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43647036114763,
+          "lng": 12.342970343280525
+        },
+        "distance": 13.136483935590144,
+        "id": "06125942-0c56-4e3a-a97b-537f49f27df7",
+        "historicalName": "Ponte dei Celestia",
+        "englishName": "Bridge of Celestia",
+        "historicalDescription": "Named after the nearby area called 'Celestia' in the Castello district, which was home to a convent of Celestine monks. This bridge would have connected the San Severo area with the paths leading to the Celestia monastery grounds, an important religious site in Renaissance Venice.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43644777517106,
+            "lng": 12.343048127341957
+          }
+        }
+      },
+      "id": "bridge_45.436425_12.343126"
+    },
+    {
+      "edge": {
+        "lat": 45.43683172278401,
+        "lng": 12.34283086841175
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056403060",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.436884424297006,
+          "lng": 12.342632384944649
+        },
+        "distance": 16.558312646521326,
+        "id": "06125942-0c56-4e3a-a97b-537f49f27df7",
+        "historicalName": "Ponte dei Scuolari",
+        "englishName": "Bridge of the Scholars",
+        "historicalDescription": "Named for its proximity to early educational institutions in the Castello district near San Severo. During the Renaissance, small schools for teaching grammar, rhetoric, and philosophy existed in this area, and students would cross this bridge daily.",
+        "location": {
+          "midpoint": {
+            "lat": 45.436858073540506,
+            "lng": 12.3427316266782
+          }
+        }
+      },
+      "id": "bridge_45.436832_12.342831"
+    },
+    {
+      "edge": {
+        "lat": 45.437825462157235,
+        "lng": 12.34258410518238
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056244077",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.437761080034356,
+          "lng": 12.34250420615215
+        },
+        "distance": 9.492822671828954,
+        "id": "c0e36d03-c8ca-41bf-b0ae-81a95988bae3",
+        "historicalName": "Ponte dei Greci Orientali",
+        "englishName": "Bridge of the Eastern Greeks",
+        "historicalDescription": "Named for the Greek Orthodox community that settled in this part of Castello. The San Severo area was not far from the Greek quarter, and this bridge would have been used by Greek merchants, scholars, and craftsmen traveling between their community and other parts of Venice during the Renaissance period.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4377932710958,
+            "lng": 12.342544155667266
+          }
+        }
+      },
+      "id": "bridge_45.437825_12.342584"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.436122550027456,
+      "lng": 12.343761104158794,
+      "streetName": "Calle dei Battilana",
+      "streetNameEnglish": "Street of the Wool Beaters",
+      "streetDescription": "Named after the artisans who beat wool to clean and soften it before spinning. The Castello district had several wool workshops near San Severo in the 15th-16th centuries, supporting Venice's important textile industry.",
+      "id": "building_45.436123_12.343761"
+    },
+    {
+      "lat": 45.43654321338125,
+      "lng": 12.34325439637921,
+      "streetName": "Rio Terà San Lorenzo",
+      "streetNameEnglish": "Filled Canal of Saint Lawrence",
+      "streetDescription": "This street was originally a canal that was filled in (rio terà) during the 16th century urban renovations. The name references the nearby Church of San Lorenzo, an important religious landmark in the Castello district since medieval times.",
+      "id": "building_45.436543_12.343254"
+    },
+    {
+      "lat": 45.43653672036262,
+      "lng": 12.343942029410229,
+      "streetName": "Sottoportego dei Reliquiari",
+      "streetNameEnglish": "Passageway of the Reliquary Makers",
+      "streetDescription": "This covered passageway (sottoportego) was home to craftsmen who created reliquaries for the many churches in Venice, including the nearby San Severo. These artisans worked with precious metals and were especially active during the 15th-16th centuries when Venice acquired numerous relics from Constantinople.",
+      "id": "building_45.436537_12.343942"
+    },
+    {
+      "lat": 45.43694637213912,
+      "lng": 12.3431602821449,
+      "streetName": "Salizada dei Greci Studiosi",
+      "streetNameEnglish": "Paved Street of the Greek Scholars",
+      "streetDescription": "A paved street (salizada) named after Greek scholars who lived and studied in this area of Castello, not far from the Greek community centered around San Giorgio dei Greci. After the fall of Constantinople in 1453, many Byzantine scholars found refuge in Venice, bringing valuable manuscripts and contributing to Renaissance learning.",
+      "id": "building_45.436946_12.343160"
+    },
+    {
+      "lat": 45.43701901832259,
+      "lng": 12.343826196727992,
+      "streetName": "Calle Grimani",
+      "streetNameEnglish": "Grimani Street",
+      "streetDescription": "Named after the noble Grimani family who had a palazzo in Castello. The Grimani were prominent patrons of the arts during the Renaissance and several family members served as doges. Their connection to San Severo area included donations to local churches and charitable institutions in the 16th century.",
+      "id": "building_45.437019_12.343826"
+    },
+    {
+      "lat": 45.43738039430366,
+      "lng": 12.343059885714915,
+      "streetName": "Fondamenta dei Codici",
+      "streetNameEnglish": "Foundation of the Manuscripts",
+      "streetDescription": "This waterside street (fondamenta) is named in reference to the manuscript copyists and illuminators who worked in this scholarly area near San Severo. In Renaissance Venice, the production of manuscripts and early printed books was a significant intellectual and commercial activity, especially with the nearby Benedictine monastery which housed an important library.",
+      "id": "building_45.437380_12.343060"
+    },
+    {
+      "lat": 45.43744223360087,
+      "lng": 12.343690100577108,
+      "streetName": "Ruga degli Amanuensi",
+      "streetNameEnglish": "Street of the Scribes",
+      "streetDescription": "A commercial street (ruga) where professional scribes had their workshops. Located near San Severo, these artisans produced documents, contracts, and correspondence for merchants, nobles, and the Republic's institutions. The proximity to the Scuola Grande di San Marco and various government offices created steady demand for their services throughout the Renaissance period.",
+      "id": "building_45.437442_12.343690"
+    }
+  ],
+  "id": "polygon-1746056377511"
+}

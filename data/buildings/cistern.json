@@ -1,0 +1,52 @@
+{
+  "name": "Cistern",
+  "pointType": "building",
+  "category": "Infrastructure",
+  "subCategory": "Water Management",
+  "size": 1,
+  "unlockCondition": "4,000,000 ducats capital, property ownership",
+  "calculationsAnalysis": "The Cistern represents essential water infrastructure with modest revenue. The construction cost of 1,500,000 ducats reflects the specialized underground construction and filtration systems required, while generating 5,000 ducats income reflects water usage fees and increased property values in serviced areas. The maintenance cost of 12,500 ducats creates an ongoing expense partially offset by this income. The employment capacity of 1 represents the minimal maintenance staff needed. The construction time of 6 days (518400000ms) reflects the specialized construction requirements. This building creates a strategic investment in water security that enables residential and commercial development in a saltwater environment, reflecting the historical ingenuity of Venice's water management systems that allowed a city to thrive in a lagoon without natural fresh water sources.",
+  "shortDescription": "Rainwater collection and storage system providing fresh water in the saltwater lagoon environment.",
+  "fullDescription": "Critical to survival in a saltwater environment, cisterns collect and store rainwater for drinking and domestic use. Featuring filtration systems, underground storage chambers, and often decorative wellheads, these sophisticated water management systems were essential infrastructure in Venice. Public cisterns served neighborhoods, while private ones provided water security for wealthy households and businesses.",
+  "flavorText": "In a city surrounded by water, none is fit to drink—the clever cistern transforms the heavens themselves into our water supply, proving that Venetian ingenuity can resolve even the most fundamental paradoxes.",
+  "constructionCosts": {
+    "ducats": 1500000,
+    "timber": 200,
+    "bricks": 1200,
+    "stone": 800,
+    "iron": 120,
+    "sand": 2000
+  },
+  "maintenanceCost": 1250,
+  "soundDesign": {
+    "ambientSound": "Water dripping, bucket and chain, quiet conversation",
+    "activitySounds": "Water drawing, bucket splashing, community gathering",
+    "musicTheme": "Acque Alte"
+  },
+  "seasonalEffects": {
+    "rainy seasons": "Rapid filling, abundance",
+    "drought": "Careful rationing, monitoring",
+    "winter": "Ice prevention measures"
+  },
+  "aiInteractionPoints": [
+    "Wellhead",
+    "Water collection area",
+    "Community gathering space",
+    "Maintenance access",
+    "Rainwater collection surface"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 500,
+    "stores": [
+      "water"
+    ],
+    "sells": [
+      "water"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 0,
+  "consumeTier": 0,
+  "constructionMinutes": 8640
+}

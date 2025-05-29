@@ -1,0 +1,55 @@
+{
+  "name": "Fisherman's Cottage",
+  "pointType": "canal",
+  "category": "home",
+  "subCategory": "Basic Residences",
+  "size": 1,
+  "unlockCondition": "None - available from start",
+  "calculationsAnalysis": "The Fisherman's Cottage balances historical accuracy with gameplay progression. With a construction cost of 400,000 ducats and income of 8,000 ducats, it provides a 1.0% return per cycle, reflecting the modest but stable income of working-class housing. The maintenance cost of 8,000 ducats (100% of income) represents the ongoing repairs needed for wooden structures in Venice's humid environment. The residentsCapacity of 4 accurately reflects the typical fishing family size, while providing players with early population growth. The construction time of 2 days (172800000ms) provides an accessible starting point for residential development with a reasonable payback period.",
+  "shortDescription": "Simple wooden home for working class citizens near the water.",
+  "fullDescription": "A modest wooden structure housing Venice's vital fishing families. These humble cottages typically include a ground floor for nets and equipment with living quarters above. The proximity to water is essential for their livelihood.",
+  "flavorText": "The fishermen rise before the bells of San Marco, for the lagoon's bounty favors the early and the bold.",
+  "constructionCosts": {
+    "ducats": 400000,
+    "timber": 460,
+    "bricks": 180
+  },
+  "maintenanceCost": 800,
+  "residentsCapacity": 4,
+  "soundDesign": {
+    "ambientSound": "Gentle water lapping, occasional seagulls",
+    "activitySounds": "Net mending, wood creaking",
+    "musicTheme": "Preghiera dei Pescatori"
+  },
+  "seasonalEffects": {
+    "winter": "Smoke from chimney more visible, frost on roof",
+    "carnival": "Simple decorations, small colored flags"
+  },
+  "aiInteractionPoints": [
+    "Front door",
+    "Dock",
+    "Side yard for net repairs"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 50,
+    "stores": [
+      "fish",
+      "preserved_fish",
+      "small_boats",
+      "rope",
+      "salt",
+      "timber",
+      "pitch"
+    ],
+    "sells": [
+      "fish",
+      "preserved_fish",
+      "small_boats"
+    ]
+  },
+  "buildTier": 1,
+  "workTier": 1,
+  "consumeTier": 1,
+  "constructionMinutes": 2880
+}

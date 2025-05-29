@@ -1,0 +1,134 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.445201760331706,
+      "lng": 12.334058393920765
+    },
+    {
+      "lat": 45.44430977345231,
+      "lng": 12.33592521139513
+    },
+    {
+      "lat": 45.44365865176182,
+      "lng": 12.335120548690663
+    },
+    {
+      "lat": 45.44407266064315,
+      "lng": 12.334299792732105
+    },
+    {
+      "lat": 45.444516775883585,
+      "lng": 12.333634604896412
+    },
+    {
+      "lat": 45.44470119559166,
+      "lng": 12.33343075701128
+    }
+  ],
+  "centroid": {
+    "lat": 45.44441013627738,
+    "lng": 12.33441155144106
+  },
+  "historicalName": "Campiello de la Scuola Vecchia della Misericordia",
+  "englishName": "Little Square of the Old School of Mercy",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for housing the Scuola Vecchia della Misericordia, one of the six major confraternities in Venice. The scuola was founded in the 13th century and was an important charitable institution in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 15708.76,
+  "center": {
+    "lat": 45.44441013627738,
+    "lng": 12.33441155144106
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.44490443137191,
+        "lng": 12.33468066641222
+      },
+      "water": {
+        "lat": 45.4450724549051,
+        "lng": 12.334772145467525
+      },
+      "historicalName": "Fondamenta della Scuola Vecchia",
+      "englishName": "Dock of the Old School",
+      "historicalDescription": "This dock served the Scuola Vecchia della Misericordia, one of Venice's important confraternities. The fondamenta would have been used for the delivery of supplies and materials for the school's charitable activities, as well as for dignitaries and members arriving by water. The Scuola Vecchia (Old School) was established before the larger Scuola Grande della Misericordia was built nearby, making this landing historically significant to the neighborhood's development.",
+      "id": "canal_45.444904_12.334681"
+    },
+    {
+      "edge": {
+        "lat": 45.44460710241211,
+        "lng": 12.335302938903675
+      },
+      "water": {
+        "lat": 45.444661133550525,
+        "lng": 12.33554746154429
+      },
+      "historicalName": "Riva dei Confratelli della Misericordia",
+      "englishName": "Landing of the Misericordia Brotherhood",
+      "historicalDescription": "This dock was primarily used by the brothers of the Misericordia confraternity when traveling to and from their meetings and charitable works. The confratelli (brotherhood members) would have arrived by gondola or other small boats to this landing point near their meeting place. The Misericordia brotherhood was known for their charitable works, particularly caring for the sick and burying the dead, and this dock would have facilitated their movement throughout the city when responding to calls for assistance.",
+      "id": "canal_45.444607_12.335303"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.444516775883585,
+        "lng": 12.333634604896412
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055739112",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.444388810833885,
+          "lng": 12.33365638610373
+        },
+        "distance": 14.33016800102903,
+        "id": "7d206162-104d-49e9-a350-495068b87343",
+        "historicalName": "Ponte della Misericordia Vecchia",
+        "englishName": "Bridge of the Old Mercy",
+        "historicalDescription": "This bridge takes its name from its proximity to the Scuola Vecchia della Misericordia, one of Venice's historic confraternities dedicated to charitable works. The Scuola (school or brotherhood) was established in the 13th century and played an important role in providing assistance to the poor and needy. The bridge would have been a key access point for those seeking aid from the confraternity.",
+        "location": {
+          "midpoint": {
+            "lat": 45.444452793358735,
+            "lng": 12.333645495500072
+          }
+        }
+      },
+      "id": "bridge_45.444517_12.333635"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.444193502577065,
+      "lng": 12.334834212567777,
+      "streetName": "Calle dei Confratelli della Misericordia",
+      "streetNameEnglish": "Street of the Brothers of Mercy",
+      "streetDescription": "This name references the brothers who belonged to the Scuola Vecchia della Misericordia, the charitable confraternity that operated in this area. The brothers would have used this street regularly to access their meeting place and conduct charitable works in the neighborhood.",
+      "id": "building_45.444194_12.334834"
+    },
+    {
+      "lat": 45.444514793548805,
+      "lng": 12.334016868367437,
+      "streetName": "Rio Terà della Scuola Antica",
+      "streetNameEnglish": "Filled Canal of the Ancient School",
+      "streetDescription": "This name acknowledges that the street was once a canal (rio) that was filled in (terà) near the old Scuola building. Many Venetian streets were created by filling in smaller canals, and this naming pattern accurately reflects the city's continuous physical transformation throughout the Renaissance period.",
+      "id": "building_45.444515_12.334017"
+    },
+    {
+      "lat": 45.44457041308147,
+      "lng": 12.334654284788435,
+      "streetName": "Sottoportego del Capitello Votivo",
+      "streetNameEnglish": "Passage of the Votive Shrine",
+      "streetDescription": "This name refers to a covered passageway (sottoportego) that would have contained a small votive shrine or religious icon, common features in Renaissance Venice. The Scuola della Misericordia, as a religious confraternity, would have maintained such shrines in the vicinity of their meeting hall as expressions of their devotion.",
+      "id": "building_45.444570_12.334654"
+    },
+    {
+      "lat": 45.44492135839368,
+      "lng": 12.334089860496919,
+      "streetName": "Fondamenta degli Assistenti",
+      "streetNameEnglish": "Foundation of the Assistants",
+      "streetDescription": "This name indicates a street running alongside a canal where those who assisted the poor and sick (a primary mission of the Scuola della Misericordia) would have gathered or worked. Fondamente typically ran alongside canals, and this name honors the charitable work of those associated with the Scuola in providing assistance to the needy of Renaissance Venice.",
+      "id": "building_45.444921_12.334090"
+    }
+  ],
+  "id": "polygon-1746055720258"
+}

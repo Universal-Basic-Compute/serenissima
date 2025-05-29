@@ -1,0 +1,64 @@
+{
+  "name": "Defensive Bastion",
+  "pointType": "building",
+  "category": "Military & Defense",
+  "subCategory": "Defensive Structures",
+  "size": 3,
+  "unlockCondition": "Government authorization, Military Guild approval",
+  "calculationsAnalysis": "The Defensive Bastion represents major military infrastructure with modest revenue. The construction cost of 14,000,000 ducats reflects the massive fortifications and artillery platforms required, while generating 20,000 ducats income reflects security fees from protected areas and increased property values in secured districts. The maintenance cost of 75,000 ducats creates a substantial ongoing expense partially offset by this income. The employment capacity of 40 represents the soldiers, gunners, and support staff needed. The construction time of 30 days (2592000000ms) reflects the massive defensive project. This building creates a strategic military asset with appropriate government restrictions reflecting the historical importance of artillery fortifications in Venice's defensive strategy, where control of key approaches was essential to the city's security given its vulnerable lagoon position.",
+  "shortDescription": "Fortified defensive position with artillery platforms protecting strategic approaches.",
+  "fullDescription": "Protecting Venice's vulnerable approaches, defensive bastions provided artillery positions and observation posts at strategic locations. Featuring angled walls designed for cannon placement, ammunition storage, garrison quarters, and often signal stations, these substantial fortifications represented Renaissance military engineering. Venice's unique lagoon position required specialized defensive structures rather than traditional city walls.",
+  "flavorText": "While other cities hide behind walls, Venice stands protected by water and resolve—yet where those natural defenses might be challenged, we ensure our cannons speak with decisive authority.",
+  "constructionCosts": {
+    "ducats": 14000000,
+    "timber": 2400,
+    "bricks": 7190,
+    "stone": 14380,
+    "iron": 3590
+  },
+  "maintenanceCost": 7500,
+  "soundDesign": {
+    "ambientSound": "Flag flapping, distant cannon practice, garrison activity",
+    "activitySounds": "Artillery drills, military commands, defensive preparations",
+    "musicTheme": "Processione Ducale"
+  },
+  "seasonalEffects": {
+    "conflict periods": "Maximum readiness, full manning",
+    "peacetime": "Training focus, maintenance operations",
+    "naval exercises": "Coordination with fleet, signaling practice"
+  },
+  "aiInteractionPoints": [
+    "Main artillery platform",
+    "Command post",
+    "Garrison quarters",
+    "Ammunition magazine",
+    "Observation point",
+    "Signal station",
+    "Supply depot",
+    "Training area"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 200,
+    "stores": [
+      "building_materials",
+      "stone",
+      "timber",
+      "iron",
+      "weapons",
+      "ship_components",
+      "smuggler_maps",
+      "criminal_contacts",
+      "paper"
+    ],
+    "sells": [
+      "weapons",
+      "ship_components",
+      "smuggler_maps"
+    ]
+  },
+  "buildTier": 4,
+  "workTier": 2,
+  "consumeTier": 0,
+  "constructionMinutes": 43200
+}

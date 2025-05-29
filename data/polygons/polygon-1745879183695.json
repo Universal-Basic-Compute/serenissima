@@ -1,0 +1,336 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.434839653704586,
+      "lng": 12.317097478499027
+    },
+    {
+      "lat": 45.43422983069504,
+      "lng": 12.317558818449589
+    },
+    {
+      "lat": 45.43467402341558,
+      "lng": 12.320004993071171
+    },
+    {
+      "lat": 45.433732933000144,
+      "lng": 12.320906215300175
+    },
+    {
+      "lat": 45.43332637708646,
+      "lng": 12.32001572190723
+    },
+    {
+      "lat": 45.43287464485844,
+      "lng": 12.319350534071537
+    },
+    {
+      "lat": 45.43266383524795,
+      "lng": 12.31852441369495
+    },
+    {
+      "lat": 45.43258854591054,
+      "lng": 12.31751590310535
+    },
+    {
+      "lat": 45.43244549589269,
+      "lng": 12.3167863422533
+    },
+    {
+      "lat": 45.43206904674475,
+      "lng": 12.315649085630985
+    },
+    {
+      "lat": 45.43260360378603,
+      "lng": 12.315455966581913
+    },
+    {
+      "lat": 45.4331381557642,
+      "lng": 12.317129665007206
+    },
+    {
+      "lat": 45.433687760265464,
+      "lng": 12.317108207335087
+    },
+    {
+      "lat": 45.43415454344673,
+      "lng": 12.3167863422533
+    },
+    {
+      "lat": 45.43462885143421,
+      "lng": 12.316378646483036
+    }
+  ],
+  "centroid": {
+    "lat": 45.43344382008353,
+    "lng": 12.31775122224292
+  },
+  "historicalName": "Calle Larga San Marco",
+  "englishName": "Long Street of St Mark's",
+  "historicalDescription": "A wide street in the San Marco sestiere, near Piazza San Marco and the Doge's Palace. The area was a center of government and commerce in 15th century Venice.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 59489.6,
+  "center": {
+    "lat": 45.43338574259584,
+    "lng": 12.318321133516296
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.43332637708646,
+        "lng": 12.32001572190723
+      },
+      "id": "canal_45.433326_12.320016"
+    },
+    {
+      "edge": {
+        "lat": 45.43373293300014,
+        "lng": 12.320906215300175
+      },
+      "id": "canal_45.433733_12.320906"
+    },
+    {
+      "edge": {
+        "lat": 45.43462885143421,
+        "lng": 12.316378646483036
+      },
+      "id": "canal_45.434629_12.316379"
+    },
+    {
+      "edge": {
+        "lat": 45.43206904674475,
+        "lng": 12.315649085630985
+      },
+      "id": "canal_45.432069_12.315649"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.43420347820786,
+        "lng": 12.320455604185673
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879262533",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43427271911328,
+          "lng": 12.320576521037445
+        },
+        "distance": 12.177717753712212,
+        "id": "5ed0016e-43d2-4a6f-a3ce-a4706c0d6d90",
+        "historicalName": "Ponte dei Procuratori",
+        "englishName": "Bridge of the Procurators",
+        "historicalDescription": "Named after the Procurators of San Marco, high-ranking officials who administered the wealth and property of the Basilica. Their offices were located near Calle Larga San Marco, making this a common crossing point for these important magistrates.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43423809866057,
+            "lng": 12.32051606261156
+          }
+        }
+      },
+      "id": "bridge_45.434203_12.320456"
+    },
+    {
+      "edge": {
+        "lat": 45.43266383524795,
+        "lng": 12.31852441369495
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879165953",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43262935352627,
+          "lng": 12.31877162764694
+        },
+        "distance": 19.667642292202537,
+        "id": "5ad4477a-e024-418e-ab21-4a64fec6a4c7",
+        "historicalName": "Ponte delle Maschere",
+        "englishName": "Bridge of the Masks",
+        "historicalDescription": "This bridge near Calle Larga San Marco was a popular crossing point during Carnival celebrations. Venetian nobles and citizens wearing elaborate masks would cross here on their way to festivities in Piazza San Marco, giving the bridge its colorful name.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43264659438711,
+            "lng": 12.318648020670945
+          }
+        }
+      },
+      "id": "bridge_45.432664_12.318524"
+    },
+    {
+      "edge": {
+        "lat": 45.43258854591054,
+        "lng": 12.31751590310535
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879165953",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.43252394836136,
+          "lng": 12.317634371024626
+        },
+        "distance": 11.70678033360923,
+        "id": "5ad4477a-e024-418e-ab21-4a64fec6a4c7",
+        "historicalName": "Ponte dei Leoni",
+        "englishName": "Bridge of the Lions",
+        "historicalDescription": "Named for the lion statues or reliefs that once adorned this bridge in the San Marco district. The lion was the symbol of Venice's patron saint, Mark the Evangelist, making this name particularly appropriate for a bridge in the heart of the city.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43255624713595,
+            "lng": 12.317575137064988
+          }
+        }
+      },
+      "id": "bridge_45.432589_12.317516"
+    },
+    {
+      "edge": {
+        "lat": 45.43287087977511,
+        "lng": 12.31629281579456
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745879206602",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.43299378219115,
+          "lng": 12.316106487122468
+        },
+        "distance": 19.953794211184725,
+        "id": "235ed1bd-6570-4d26-9c22-6b496b72ee44",
+        "historicalName": "Ponte degli Orologi",
+        "englishName": "Bridge of the Clockmakers",
+        "historicalDescription": "This bridge was located near workshops of clockmakers who supplied timepieces to wealthy Venetian families and merchants. The proximity to Calle Larga San Marco made it an ideal location for these artisans who catered to the elite of Venetian society.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43293233098313,
+            "lng": 12.316199651458515
+          }
+        }
+      },
+      "id": "bridge_45.432871_12.316293"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.4325544444898,
+      "lng": 12.31605146705052,
+      "streetName": "Calle dei Orologiai",
+      "streetNameEnglish": "Street of the Clockmakers",
+      "streetDescription": "Named after the clockmakers who had their workshops near San Marco, crafting and repairing timepieces for Venice's wealthy families and maintaining the famous clock tower in the Piazza.",
+      "id": "building_45.432554_12.316051"
+    },
+    {
+      "lat": 45.43288522175418,
+      "lng": 12.31733581034829,
+      "streetName": "Sottoportego della Luna",
+      "streetNameEnglish": "Covered Passage of the Moon",
+      "streetDescription": "This covered passageway near Calle Larga San Marco was named for the moonlight that would illuminate its entrance at night, serving as a landmark for nighttime travelers returning to the San Marco district.",
+      "id": "building_45.432885_12.317336"
+    },
+    {
+      "lat": 45.43302990419224,
+      "lng": 12.318088138683772,
+      "streetName": "Rio Terà dei Procuratori",
+      "streetNameEnglish": "Filled Canal of the Procurators",
+      "streetDescription": "Named after the Procurators of Saint Mark, high-ranking officials who administered the wealth and property of the Basilica. This was a filled-in canal near their offices around Piazza San Marco.",
+      "id": "building_45.433030_12.318088"
+    },
+    {
+      "lat": 45.43303555235842,
+      "lng": 12.31860930548724,
+      "streetName": "Calle dei Maschereri",
+      "streetNameEnglish": "Street of the Mask Makers",
+      "streetDescription": "This street housed artisans who crafted the elaborate masks worn during Venice's famous Carnival celebrations, a tradition dating back to the 13th century that allowed citizens to temporarily transcend social boundaries.",
+      "id": "building_45.433036_12.318609"
+    },
+    {
+      "lat": 45.43339795508506,
+      "lng": 12.317398551876726,
+      "streetName": "Fondamenta dei Leoncini",
+      "streetNameEnglish": "Foundation of the Little Lions",
+      "streetDescription": "Named after small lion sculptures that adorned this waterfront street near San Marco, reflecting Venice's patron saint Mark, whose symbol was the winged lion.",
+      "id": "building_45.433398_12.317399"
+    },
+    {
+      "lat": 45.433395953150985,
+      "lng": 12.317953019317814,
+      "streetName": "Salizada della Biblioteca",
+      "streetNameEnglish": "Paved Street of the Library",
+      "streetDescription": "Leading toward the Biblioteca Marciana (St. Mark's Library), one of the earliest public manuscript repositories and libraries in Italy, established in the 16th century to house Cardinal Bessarion's donated collection.",
+      "id": "building_45.433396_12.317953"
+    },
+    {
+      "lat": 45.433344736433895,
+      "lng": 12.318538488747514,
+      "streetName": "Ruga degli Orafi",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "A commercial street near San Marco where goldsmiths and jewelers had their workshops, creating fine jewelry for Venice's nobili families and visitors to the wealthy trading republic.",
+      "id": "building_45.433345_12.318538"
+    },
+    {
+      "lat": 45.43345873337871,
+      "lng": 12.319249453693336,
+      "streetName": "Campiello dei Dogi",
+      "streetNameEnglish": "Little Square of the Doges",
+      "streetDescription": "A small square named in honor of Venice's elected leaders, the Doges, possibly located on a route they would take during ceremonial processions between the Doge's Palace and the greater San Marco area.",
+      "id": "building_45.433459_12.319249"
+    },
+    {
+      "lat": 45.433483492512266,
+      "lng": 12.319972485446984,
+      "streetName": "Calle del Ridotto",
+      "streetNameEnglish": "Street of the Gambling House",
+      "streetDescription": "Named after Venice's famous Ridotto, Europe's first public gambling house, established in 1638 near San Marco, where nobility and wealthy merchants would gather to play games of chance during carnival season.",
+      "id": "building_45.433483_12.319972"
+    },
+    {
+      "lat": 45.43391282552564,
+      "lng": 12.318093571336187,
+      "streetName": "Corte della Fenice",
+      "streetNameEnglish": "Court of the Phoenix",
+      "streetDescription": "A courtyard named either for an inn or tavern with a phoenix sign, or in reference to earlier structures that were rebuilt after fire, the phoenix being a symbol of rebirth from ashes.",
+      "id": "building_45.433913_12.318094"
+    },
+    {
+      "lat": 45.43386859101894,
+      "lng": 12.318595809288052,
+      "streetName": "Sottoportego dei Calegheri",
+      "streetNameEnglish": "Covered Passage of the Shoemakers",
+      "streetDescription": "Named after the shoemakers' guild that had workshops in this area, producing the famous high-heeled chopines (zoccoli) worn by Venetian women in the Renaissance period.",
+      "id": "building_45.433869_12.318596"
+    },
+    {
+      "lat": 45.43390626003975,
+      "lng": 12.31922525654094,
+      "streetName": "Calle dei Fabbri",
+      "streetNameEnglish": "Street of the Blacksmiths",
+      "streetDescription": "Where blacksmiths maintained their forges, producing metal components for ships, buildings, and decorative elements that adorned Venice's palaces. Metal workers were essential to Venice's maritime and architectural industries.",
+      "id": "building_45.433906_12.319225"
+    },
+    {
+      "lat": 45.43385786570434,
+      "lng": 12.319964552352323,
+      "streetName": "Fondamenta della Zecca",
+      "streetNameEnglish": "Foundation of the Mint",
+      "streetDescription": "Named for its proximity to La Zecca, Venice's mint, where the famous gold ducat was produced from 1284 onward, becoming one of the most trusted currencies in Renaissance Europe and essential to Venice's commercial dominance.",
+      "id": "building_45.433858_12.319965"
+    },
+    {
+      "lat": 45.433893108355576,
+      "lng": 12.320475455923651,
+      "streetName": "Rio Terà delle Colonne",
+      "streetNameEnglish": "Filled Canal of the Columns",
+      "streetDescription": "A filled-in canal near San Marco named for architectural columns that may have been stored or displayed there, possibly in connection with ongoing construction projects around the Piazza San Marco area.",
+      "id": "building_45.433893_12.320475"
+    },
+    {
+      "lat": 45.43434894940506,
+      "lng": 12.319904401202098,
+      "streetName": "Calle del Cappello Nero",
+      "streetNameEnglish": "Street of the Black Hat",
+      "streetDescription": "Likely named after a shop or inn sign depicting a black hat, a type of business that would have catered to the many visitors to the San Marco area, offering distinctive headwear that was an important status symbol in Renaissance Venice.",
+      "id": "building_45.434349_12.319904"
+    }
+  ],
+  "id": "polygon-1745879183695"
+}

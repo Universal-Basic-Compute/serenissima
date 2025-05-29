@@ -1,0 +1,229 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.43808919544004,
+      "lng": 12.337897612258887
+    },
+    {
+      "lat": 45.43794992347714,
+      "lng": 12.338755919143653
+    },
+    {
+      "lat": 45.43776171757571,
+      "lng": 12.338750554725623
+    },
+    {
+      "lat": 45.43757727518326,
+      "lng": 12.3395927683563
+    },
+    {
+      "lat": 45.4377127839385,
+      "lng": 12.339694692298865
+    },
+    {
+      "lat": 45.43736648313937,
+      "lng": 12.340209676429724
+    },
+    {
+      "lat": 45.437035236908045,
+      "lng": 12.340493990585303
+    },
+    {
+      "lat": 45.43645931553562,
+      "lng": 12.340676380798316
+    },
+    {
+      "lat": 45.435777989197895,
+      "lng": 12.339791251823401
+    },
+    {
+      "lat": 45.43640285233957,
+      "lng": 12.339174343749976
+    },
+    {
+      "lat": 45.43656471335037,
+      "lng": 12.338755919143653
+    },
+    {
+      "lat": 45.436508250259784,
+      "lng": 12.338396503135657
+    },
+    {
+      "lat": 45.43656471335037,
+      "lng": 12.337940527603125
+    },
+    {
+      "lat": 45.43671904550969,
+      "lng": 12.337634755775428
+    },
+    {
+      "lat": 45.43714063364714,
+      "lng": 12.337656213447547
+    },
+    {
+      "lat": 45.43764502960155,
+      "lng": 12.337876154586768
+    }
+  ],
+  "centroid": {
+    "lat": 45.43707969740338,
+    "lng": 12.338956078991393
+  },
+  "historicalName": "Corte de Ca' Giustinian, Sestiere di San Marco",
+  "englishName": "Courtyard of the Giustinian House, District of Saint Mark",
+  "historicalDescription": "An area near the Palazzo Giustinian, home to a prominent Venetian noble family. The district of San Marco was the political and religious center of Venice in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 34159.01,
+  "center": {
+    "lat": 45.43698319281915,
+    "lng": 12.339161692491246
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.437035236908045,
+        "lng": 12.340493990585303
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056244077",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.43708541566855,
+          "lng": 12.340589108915516
+        },
+        "distance": 9.285038356194212,
+        "id": "38dd7178-648b-48d0-8414-1c03cd041ab6",
+        "historicalName": "Ponte dei Giustinian",
+        "englishName": "Bridge of the Giustinian",
+        "historicalDescription": "Named after the prominent Giustinian family who owned the nearby Ca' Giustinian palace in the San Marco district. This noble family was influential in Venetian politics and commerce during the Renaissance period, and several members served as senators and ambassadors of the Republic.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4370603262883,
+            "lng": 12.340541549750409
+          }
+        }
+      },
+      "id": "bridge_45.437035_12.340494"
+    },
+    {
+      "edge": {
+        "lat": 45.436508250259784,
+        "lng": 12.338396503135657
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056876739",
+        "targetPointIndex": 9,
+        "targetPoint": {
+          "lat": 45.43645206065541,
+          "lng": 12.338458296433137
+        },
+        "distance": 7.892012312209564,
+        "id": "817b2164-1659-4511-85d1-3db74819f229",
+        "historicalName": "Ponte dei Virtuosi",
+        "englishName": "Bridge of the Virtuosos",
+        "historicalDescription": "This bridge references the proximity to cultural institutions near Ca' Giustinian in San Marco, where musicians, artists, and intellectuals would gather. During the Renaissance, this area was known for hosting performances and cultural exchanges, attracting virtuosos from across Europe to entertain Venice's elite families.",
+        "location": {
+          "midpoint": {
+            "lat": 45.4364801554576,
+            "lng": 12.338427399784397
+          }
+        }
+      },
+      "id": "bridge_45.436508_12.338397"
+    },
+    {
+      "edge": {
+        "lat": 45.43671904550969,
+        "lng": 12.337634755775428
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746056283856",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.43667328118021,
+          "lng": 12.337470693284954
+        },
+        "distance": 13.775377723657108,
+        "id": "ce2f7ead-34d4-417a-b67f-ba6a9d586691",
+        "historicalName": "Ponte della Fenice Antica",
+        "englishName": "Bridge of the Ancient Phoenix",
+        "historicalDescription": "Located near the historical location that would later house Teatro La Fenice, this bridge name references the cultural significance of the area before the famous theater was constructed. The San Marco district was known for its early performance venues, and this name would commemorate the artistic legacy that preceded the formal establishment of the opera house.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43669616334495,
+            "lng": 12.337552724530191
+          }
+        }
+      },
+      "id": "bridge_45.436719_12.337635"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43671091147523,
+      "lng": 12.338262390025603,
+      "streetName": "Calle del Leone Marciano",
+      "streetNameEnglish": "Street of the Marcian Lion",
+      "streetDescription": "Named after the winged lion symbol of St. Mark, the patron saint of Venice. This street would have been appropriate near the Sestiere di San Marco where symbols of Venetian authority were prominent.",
+      "id": "building_45.436711_12.338262"
+    },
+    {
+      "lat": 45.43662457941057,
+      "lng": 12.33903965780346,
+      "streetName": "Ruga dei Notabili",
+      "streetNameEnglish": "Arcade of the Notables",
+      "streetDescription": "This name references the noble families who might have conducted business or had residences near Ca' Giustinian. 'Ruga' typically indicated commercial streets with porticoes, where important merchants or officials would meet.",
+      "id": "building_45.436625_12.339040"
+    },
+    {
+      "lat": 45.436673954903604,
+      "lng": 12.339535845108832,
+      "streetName": "Salizada dei Musicisti",
+      "streetNameEnglish": "Paved Road of the Musicians",
+      "streetDescription": "The area near Ca' Giustinian has long been associated with music and performance. This salizada (one of the first paved streets in Venice) would honor the musicians who performed in nearby noble houses or churches.",
+      "id": "building_45.436674_12.339536"
+    },
+    {
+      "lat": 45.43716542487794,
+      "lng": 12.338300853536627,
+      "streetName": "Rio Terà del Ridotto",
+      "streetNameEnglish": "Filled Canal of the Ridotto",
+      "streetDescription": "References the famous Ridotto gambling house established in the San Marco district in 1638. 'Rio Terà' indicates a filled-in canal, common in Venice's urban development, which would have connected to this important social establishment.",
+      "id": "building_45.437165_12.338301"
+    },
+    {
+      "lat": 45.43710894974199,
+      "lng": 12.339042458010164,
+      "streetName": "Calle dei Diplomatici",
+      "streetNameEnglish": "Street of the Diplomats",
+      "streetDescription": "Near Ca' Giustinian in San Marco, many diplomatic missions would have been located. This calle would have been frequented by ambassadors and envoys making their way to and from the Doge's Palace for official business.",
+      "id": "building_45.437109_12.339042"
+    },
+    {
+      "lat": 45.43713899690239,
+      "lng": 12.339495465599903,
+      "streetName": "Sottoportego dei Giustiniani",
+      "streetNameEnglish": "Passageway of the Giustiniani",
+      "streetDescription": "Named directly for the Giustinian family, one of Venice's nobili houses. This covered passageway (sottoportego) would have connected buildings owned by the family or led to their courtyard (corte).",
+      "id": "building_45.437139_12.339495"
+    },
+    {
+      "lat": 45.43757228864902,
+      "lng": 12.338349425378684,
+      "streetName": "Fondamenta delle Maschere",
+      "streetNameEnglish": "Foundation of the Masks",
+      "streetDescription": "This waterside street (fondamenta) would reference Venice's carnival tradition and mask-making craft. The San Marco district was central to carnival celebrations, with artisans crafting elaborate masks for nobility and citizens alike.",
+      "id": "building_45.437572_12.338349"
+    },
+    {
+      "lat": 45.437486165638,
+      "lng": 12.338822815398736,
+      "streetName": "Calle della Fenice Antica",
+      "streetNameEnglish": "Street of the Ancient Phoenix",
+      "streetDescription": "Named in relation to an earlier theater or performance space that preceded the famous La Fenice theater. The San Marco area has long been a center for arts and performance in Venice, making this name historically appropriate.",
+      "id": "building_45.437486_12.338823"
+    }
+  ],
+  "id": "polygon-1746056319492"
+}

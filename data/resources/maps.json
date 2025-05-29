@@ -1,0 +1,59 @@
+{
+  "id": "maps",
+  "name": "Maps",
+  "category": "finished_goods",
+  "subCategory": "navigational_tools",
+  "description": "Detailed navigational charts and geographical maps produced by Venetian cartographers. Essential tools for maritime trade and exploration, and prized by collectors and scholars.",
+  "varieties": [
+    {
+      "type": "portolan_chart",
+      "productionDifficulty": "high",
+      "popularity": "very_high",
+      "valueMultiplier": 1.2,
+      "primaryUse": "maritime_navigation",
+      "modelVariant": "models/resources/maps_portolan.glb"
+    },
+    {
+      "type": "world_map",
+      "productionDifficulty": "very_high",
+      "popularity": "high",
+      "valueMultiplier": 1.5,
+      "primaryUse": "reference_collection",
+      "modelVariant": "models/resources/maps_world.glb"
+    },
+    {
+      "type": "city_plan",
+      "productionDifficulty": "medium",
+      "popularity": "medium",
+      "valueMultiplier": 0.9,
+      "primaryUse": "urban_planning",
+      "modelVariant": "models/resources/maps_city.glb"
+    },
+    {
+      "type": "trade_route_map",
+      "productionDifficulty": "high",
+      "popularity": "high",
+      "valueMultiplier": 1.3,
+      "primaryUse": "merchant_planning",
+      "modelVariant": "models/resources/maps_trade.glb"
+    }
+  ],
+  "historicalNotes": {
+    "introductionYear": 1300,
+    "notableProducers": [
+      "Fra Mauro",
+      "Venetian Cartographers Guild"
+    ],
+    "historicalSignificance": "Venetian cartography represented the cutting edge of geographical knowledge in the late medieval and Renaissance periods. The Republic's extensive maritime trade network provided a constant flow of new geographical information, while its position as a crossroads of cultures allowed for the synthesis of different cartographic traditions. Venetian maps were highly prized throughout Europe for their accuracy and detail, particularly their portolan charts for Mediterranean navigation.",
+    "historicalContracts": [
+      "Venetian naval officers",
+      "Mediterranean merchants",
+      "European explorers",
+      "Ottoman navigators"
+    ]
+  },
+  "importPrice": 399.6,
+  "lifetimeHours": null,
+  "consumptionHours": 584,
+  "tier": 3
+}

@@ -1,0 +1,169 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.441223017565235,
+      "lng": 12.332986435017563
+    },
+    {
+      "lat": 45.441245600921135,
+      "lng": 12.333115181050278
+    },
+    {
+      "lat": 45.44281135822309,
+      "lng": 12.334622582516648
+    },
+    {
+      "lat": 45.44307858649844,
+      "lng": 12.334944447598435
+    },
+    {
+      "lat": 45.44319149947379,
+      "lng": 12.334965905270554
+    },
+    {
+      "lat": 45.44325171963493,
+      "lng": 12.334863981327988
+    },
+    {
+      "lat": 45.44298449217966,
+      "lng": 12.334504565319993
+    },
+    {
+      "lat": 45.44291298039243,
+      "lng": 12.334112962803818
+    },
+    {
+      "lat": 45.44239357627035,
+      "lng": 12.333125909886338
+    },
+    {
+      "lat": 45.44201719348371,
+      "lng": 12.3328308668947
+    },
+    {
+      "lat": 45.44159940565004,
+      "lng": 12.332240780911423
+    }
+  ],
+  "centroid": {
+    "lat": 45.44242813002662,
+    "lng": 12.333846692599792
+  },
+  "historicalName": "Calle Salamon in Sestiere Cannaregio, presso la Chiesa di Santa Maria dei Miracoli",
+  "englishName": "Salamon Street in the Cannaregio District, near the Church of Saint Mary of Miracles",
+  "historicalDescription": "This area in the Cannaregio sestiere was known for its Jewish population in the 15th century, as it bordered the Jewish Ghetto. The nearby Church of Santa Maria dei Miracoli, built in the late 15th century, was a popular pilgrimage site.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 14369.22,
+  "center": {
+    "lat": 45.44242813002662,
+    "lng": 12.333846692599792
+  },
+  "canalPoints": [],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.441637040246626,
+        "lng": 12.33349203141687
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055995050",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.441542944559124,
+          "lng": 12.33347280891893
+        },
+        "distance": 10.56989687303764,
+        "id": "6ca86fda-5009-4689-9cf2-1820cda617c1",
+        "historicalName": "Ponte dei Salamoni",
+        "englishName": "Bridge of the Salamons",
+        "historicalDescription": "Named after the prominent Salamon family who resided in Calle Salamon in the Cannaregio district. The Salamon family was a notable Jewish family that contributed to Venetian commerce during the Renaissance period, particularly after the establishment of the Venetian Ghetto in 1516.",
+        "location": {
+          "midpoint": {
+            "lat": 45.441589992402875,
+            "lng": 12.3334824201679
+          }
+        }
+      },
+      "id": "bridge_45.441637_12.333492"
+    },
+    {
+      "edge": {
+        "lat": 45.442028479572116,
+        "lng": 12.333868881783463
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055995050",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.44195696896655,
+          "lng": 12.333857258877732
+        },
+        "distance": 8.00315439716258,
+        "id": "6ca86fda-5009-4689-9cf2-1820cda617c1",
+        "historicalName": "Ponte dei Miracoli",
+        "englishName": "Bridge of Miracles",
+        "historicalDescription": "This bridge takes its name from its proximity to the Church of Santa Maria dei Miracoli, a Renaissance architectural jewel built between 1481 and 1489. The church was constructed to house a miraculous image of the Virgin Mary that was said to have performed several miracles, making this name historically appropriate for a bridge in its vicinity.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44199272426933,
+            "lng": 12.333863070330597
+          }
+        }
+      },
+      "id": "bridge_45.442028_12.333869"
+    },
+    {
+      "edge": {
+        "lat": 45.4424199188976,
+        "lng": 12.334245732150055
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055995050",
+        "targetPointIndex": 5,
+        "targetPoint": {
+          "lat": 45.44237099337397,
+          "lng": 12.334241708836533
+        },
+        "distance": 5.4493176989477154,
+        "id": "6ca86fda-5009-4689-9cf2-1820cda617c1",
+        "historicalName": "Ponte degli Orefici di Cannaregio",
+        "englishName": "Bridge of the Goldsmiths of Cannaregio",
+        "historicalDescription": "This name references the goldsmiths and jewelry craftsmen who had workshops in this area of Cannaregio. The area near Santa Maria dei Miracoli was known for skilled artisans, and during the Renaissance period, various craft guilds including goldsmiths would have been active in this district, creating fine works that adorned the wealthy Venetian nobility.",
+        "location": {
+          "midpoint": {
+            "lat": 45.442395456135785,
+            "lng": 12.334243720493294
+          }
+        }
+      },
+      "id": "bridge_45.442420_12.334246"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.441609758606035,
+      "lng": 12.332882111829612,
+      "streetName": "Calle dei Miracolati",
+      "streetNameEnglish": "Street of the Miraculously Healed",
+      "streetDescription": "This street name refers to those who claimed to be healed after praying at the Chiesa di Santa Maria dei Miracoli. During the Renaissance, this church was known for miraculous healing, particularly after its construction in the late 15th century. Located near Calle Salamon in Cannaregio, this name reflects the spiritual significance of the nearby church and its importance to local residents who sought divine intervention for ailments.",
+      "id": "building_45.441610_12.332882"
+    },
+    {
+      "lat": 45.44211524971786,
+      "lng": 12.333434878734733,
+      "streetName": "Rio Terà dei Scalpellini",
+      "streetNameEnglish": "Filled Canal of the Stonemasons",
+      "streetDescription": "This filled canal would reference the stonemasons who worked on the exquisite marble façade of the Church of Santa Maria dei Miracoli. The church, completed in the 1480s, required skilled stonemasons for its ornate marble work. In Cannaregio near Calle Salamon, this area would have housed workshops for artisans working on the church's construction and maintenance. 'Rio Terà' indicates a former canal that was filled in to create a street, common in Venice's urban development.",
+      "id": "building_45.442115_12.333435"
+    },
+    {
+      "lat": 45.442590017509865,
+      "lng": 12.33420713137328,
+      "streetName": "Sottoportego dei Marmorari",
+      "streetNameEnglish": "Passageway of the Marble Workers",
+      "streetDescription": "This covered passageway would honor the marble workers who created the stunning polychrome marble decorations of Santa Maria dei Miracoli. The church is famous for its marble inlay work and decorative panels. A sottoportego (covered passageway) near Calle Salamon would have provided shelter for workers or storage for valuable marble materials. The guild of Marmorari (marble workers) held significant status in Renaissance Venice due to their specialized skills in working with imported luxury materials.",
+      "id": "building_45.442590_12.334207"
+    }
+  ],
+  "id": "polygon-1746055909289"
+}

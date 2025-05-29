@@ -1,0 +1,370 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.448091287958654,
+      "lng": 12.33092256134324
+    },
+    {
+      "lat": 45.44672514444499,
+      "lng": 12.334860044177102
+    },
+    {
+      "lat": 45.44634879055675,
+      "lng": 12.335541325266885
+    },
+    {
+      "lat": 45.44514444124067,
+      "lng": 12.334377246554421
+    },
+    {
+      "lat": 45.44579930937069,
+      "lng": 12.333089786227273
+    },
+    {
+      "lat": 45.446115449885035,
+      "lng": 12.332210021670388
+    },
+    {
+      "lat": 45.44676277969572,
+      "lng": 12.330015974696206
+    }
+  ],
+  "centroid": {
+    "lat": 45.4464267433075,
+    "lng": 12.333002422847931
+  },
+  "historicalName": "Calle Loredan in Sestiere Cannaregio",
+  "englishName": "Loredan Street in Cannaregio District",
+  "historicalDescription": "A residential street in the Cannaregio sestiere, near the northern edge of Venice. The area was known for its proximity to the Jewish Ghetto, which was established in 1516.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 62919,
+  "center": {
+    "lat": 45.44671753422673,
+    "lng": 12.332856314848717
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.44786359737304,
+        "lng": 12.331578808482217
+      },
+      "water": {
+        "lat": 45.44801128698095,
+        "lng": 12.331432479740469
+      },
+      "historicalName": "Fondamenta dei Loredan",
+      "englishName": "Loredan Foundation",
+      "historicalDescription": "Named after the prominent Loredan family who owned palaces in this area of Cannaregio. The Loredan family produced several doges of Venice, including Leonardo Loredan (1501-1521), who ruled during the War of the League of Cambrai.",
+      "id": "canal_45.447864_12.331579"
+    },
+    {
+      "edge": {
+        "lat": 45.44763590678743,
+        "lng": 12.332235055621194
+      },
+      "water": {
+        "lat": 45.44780022070335,
+        "lng": 12.332130777650459
+      },
+      "historicalName": "Riva dei Setaioli",
+      "englishName": "Silk Merchants' Shore",
+      "historicalDescription": "Cannaregio was home to many textile workshops, including silk merchants. This dock would have served as a loading point for valuable silk products, which were a crucial part of Venice's luxury trade with the East during the Renaissance.",
+      "id": "canal_45.447636_12.332235"
+    },
+    {
+      "edge": {
+        "lat": 45.44740821620182,
+        "lng": 12.33289130276017
+      },
+      "water": {
+        "lat": 45.44758751579908,
+        "lng": 12.332871002875072
+      },
+      "historicalName": "Fondamenta della Madonna dei Miracoli",
+      "englishName": "Foundation of the Madonna of Miracles",
+      "historicalDescription": "Named for its proximity to the Church of Santa Maria dei Miracoli, one of Venice's most elegant Renaissance churches. This dock would have served pilgrims and worshippers coming to visit this important religious site in the nearby area.",
+      "id": "canal_45.447408_12.332891"
+    },
+    {
+      "edge": {
+        "lat": 45.44718052561621,
+        "lng": 12.333547549899148
+      },
+      "water": {
+        "lat": 45.44734092561164,
+        "lng": 12.333663549406582
+      },
+      "historicalName": "Riva degli Ebrei",
+      "englishName": "Shore of the Jews",
+      "historicalDescription": "Located near Venice's Jewish Ghetto, established in 1516 in Cannaregio. This dock would have been an important access point for Jewish merchants and residents, as the ghetto was surrounded by canals and access was strictly controlled.",
+      "id": "canal_45.447181_12.333548"
+    },
+    {
+      "edge": {
+        "lat": 45.4469528350306,
+        "lng": 12.334203797038125
+      },
+      "water": {
+        "lat": 45.44704807305367,
+        "lng": 12.334421280982125
+      },
+      "historicalName": "Fondamenta dei Riformati",
+      "englishName": "Foundation of the Reformed",
+      "historicalDescription": "Named after the nearby Monastery of Reformed Franciscans that existed in Cannaregio during the Renaissance. The dock would have served the monastery for supplies and transportation of clergy members.",
+      "id": "canal_45.446953_12.334204"
+    },
+    {
+      "edge": {
+        "lat": 45.44672514444499,
+        "lng": 12.334860044177102
+      },
+      "water": {
+        "lat": 45.44676528831227,
+        "lng": 12.335109949739524
+      },
+      "historicalName": "Riva dei Lombardi",
+      "englishName": "Shore of the Lombards",
+      "historicalDescription": "Named for the Lombard merchants and bankers who established businesses in this area of Cannaregio. Immigrants from Lombardy formed a significant foreign community in Renaissance Venice, contributing to its commercial prosperity.",
+      "id": "canal_45.446725_12.334860"
+    },
+    {
+      "edge": {
+        "lat": 45.44594734078472,
+        "lng": 12.335153299029397
+      },
+      "water": {
+        "lat": 45.445892881272826,
+        "lng": 12.335397635805744
+      },
+      "historicalName": "Fondamenta delle Contesse",
+      "englishName": "Foundation of the Countesses",
+      "historicalDescription": "Named for the noble women who resided in the elegant palaces along this waterway. In Renaissance Venice, nobili families often had their palaces built with water gates, and this dock would have served the female members of these households.",
+      "id": "canal_45.445947_12.335153"
+    },
+    {
+      "edge": {
+        "lat": 45.4455458910127,
+        "lng": 12.334765272791909
+      },
+      "water": {
+        "lat": 45.445441548202105,
+        "lng": 12.33497409408794
+      },
+      "historicalName": "Riva dei Vinattieri",
+      "englishName": "Wine Merchants' Shore",
+      "historicalDescription": "Wine was a significant import to Venice, especially from mainland territories and Greece. This dock in Cannaregio would have specialized in the unloading and storage of wine barrels, serving the numerous taverns and households in the area.",
+      "id": "canal_45.445546_12.334765"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44579930937069,
+        "lng": 12.333089786227273
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055706124",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44576763600702,
+          "lng": 12.33286920881358
+        },
+        "distance": 17.56452773063974,
+        "id": "2553f8b8-d4d5-431f-ba4f-2cb5b8e28a1e",
+        "historicalName": "Ponte dei Loredan",
+        "englishName": "Bridge of the Loredan Family",
+        "historicalDescription": "Named after the prestigious Loredan family who owned property in this area of Cannaregio. The Loredans were an ancient Venetian nobili family that provided several Doges to the Republic, including Leonardo Loredan (1501-1521), who governed during the War of the League of Cambrai.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44578347268886,
+            "lng": 12.332979497520427
+          }
+        }
+      },
+      "id": "bridge_45.445799_12.333090"
+    },
+    {
+      "edge": {
+        "lat": 45.44720561578336,
+        "lng": 12.330318170245217
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055662884",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.44728876237722,
+          "lng": 12.33020983268243
+        },
+        "distance": 12.526223264784829,
+        "id": "bf976106-d9fc-406c-a43b-cf600ca08f4d",
+        "historicalName": "Ponte degli Ambasciatori",
+        "englishName": "Bridge of the Ambassadors",
+        "historicalDescription": "This bridge likely earned its name due to its proximity to palaces where foreign ambassadors might have resided or passed through when traveling to and from the Ducal Palace. Cannaregio, being one of the access points to the city from the mainland, was often traversed by diplomatic missions.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44724718908029,
+            "lng": 12.330264001463824
+          }
+        }
+      },
+      "id": "bridge_45.447206_12.330318"
+    },
+    {
+      "edge": {
+        "lat": 45.44764845187101,
+        "lng": 12.330620365794228
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055662884",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.44770274461769,
+          "lng": 12.330499511256038
+        },
+        "distance": 11.195123430009946,
+        "id": "bf976106-d9fc-406c-a43b-cf600ca08f4d",
+        "historicalName": "Ponte dei Setaioli",
+        "englishName": "Bridge of the Silk Workers",
+        "historicalDescription": "Named for the silk workers who operated in this area of Cannaregio during the Renaissance. Venice was famous for its silk industry, having learned the craft from Byzantine and Oriental traditions, and this bridge would have connected workshops or warehouses related to this prestigious guild.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44767559824435,
+            "lng": 12.330559938525134
+          }
+        }
+      },
+      "id": "bridge_45.447648_12.330620"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.44552655292221,
+      "lng": 12.33445511090431,
+      "streetName": "Calle dei Mercanti Bizantini",
+      "streetNameEnglish": "Street of Byzantine Merchants",
+      "streetDescription": "This street was named after Byzantine merchants who had established trading posts in Cannaregio during the early Renaissance. The Loredan family, who resided nearby, had significant commercial ties with Constantinople, making this naming historically relevant to the area.",
+      "id": "building_45.445527_12.334455"
+    },
+    {
+      "lat": 45.44609206124651,
+      "lng": 12.333089948059577,
+      "streetName": "Rio Terà della Seta",
+      "streetNameEnglish": "Filled Canal of Silk",
+      "streetDescription": "This former canal was filled in and named after the silk trade that flourished in this part of Cannaregio. Many silk weavers established workshops near the Loredan family properties, as the family were patrons of luxury textile arts in the 15th century.",
+      "id": "building_45.446092_12.333090"
+    },
+    {
+      "lat": 45.44596462877773,
+      "lng": 12.333969287279329,
+      "streetName": "Calle dei Notturni",
+      "streetNameEnglish": "Street of the Night Watchmen",
+      "streetDescription": "Named after the night watchmen who patrolled this area of Cannaregio, ensuring security for the wealthy families like the Loredans. The watch station was established in the early 16th century as part of Venice's sophisticated urban security system.",
+      "id": "building_45.445965_12.333969"
+    },
+    {
+      "lat": 45.44607132103717,
+      "lng": 12.334488993945156,
+      "streetName": "Fondamenta della Misericordia Nuova",
+      "streetNameEnglish": "Foundation of the New Mercy",
+      "streetDescription": "This waterfront street was named after a charitable institution founded in the late 15th century with contributions from the Loredan family. The confraternity provided assistance to the poor and sick residents of Cannaregio.",
+      "id": "building_45.446071_12.334489"
+    },
+    {
+      "lat": 45.44649244297017,
+      "lng": 12.332013572637495,
+      "streetName": "Sottoportego dei Cartai",
+      "streetNameEnglish": "Underpass of the Paper Makers",
+      "streetDescription": "This covered passageway was named after the paper makers who had workshops nearby. The production of high-quality paper was crucial for Venice's publishing industry, and several paper artisans operated in this part of Cannaregio during the Renaissance.",
+      "id": "building_45.446492_12.332014"
+    },
+    {
+      "lat": 45.44648166444785,
+      "lng": 12.33258771591981,
+      "streetName": "Ruga dei Orologi",
+      "streetNameEnglish": "Street of the Clockmakers",
+      "streetDescription": "This commercial street housed several clockmaking workshops in the 16th century. The Loredan family, known for their patronage of mechanical arts, helped establish this specialized trade in their neighborhood of Cannaregio.",
+      "id": "building_45.446482_12.332588"
+    },
+    {
+      "lat": 45.446470025829605,
+      "lng": 12.333097481140348,
+      "streetName": "Salizada dei Grechetti",
+      "streetNameEnglish": "Paved Street of the Little Greeks",
+      "streetDescription": "One of the few paved streets in Renaissance Venice, named after the small community of Greek Orthodox families who settled in this part of Cannaregio. They maintained close diplomatic relationships with noble families, including the Loredans.",
+      "id": "building_45.446470_12.333097"
+    },
+    {
+      "lat": 45.44656487286008,
+      "lng": 12.333904006704865,
+      "streetName": "Calle della Pergamena",
+      "streetNameEnglish": "Street of Parchment",
+      "streetDescription": "Named after the parchment makers who supplied materials for Venetian documents and manuscripts. Their workshops were established near the Loredan residences in Cannaregio, as the family had several members who served as diplomats and required quality writing materials.",
+      "id": "building_45.446565_12.333904"
+    },
+    {
+      "lat": 45.44650784447911,
+      "lng": 12.334491228107673,
+      "streetName": "Corte del Cappello Ducale",
+      "streetNameEnglish": "Court of the Ducal Hat",
+      "streetDescription": "This small courtyard was named after Leonardo Loredan, who became Doge of Venice in 1501. The ducal hat (corno ducale) symbolized his position, and this court was close to one of the Loredan family properties in Cannaregio.",
+      "id": "building_45.446508_12.334491"
+    },
+    {
+      "lat": 45.44699915336286,
+      "lng": 12.330596466742227,
+      "streetName": "Campiello dei Fabbri Navali",
+      "streetNameEnglish": "Small Square of Naval Blacksmiths",
+      "streetDescription": "This small square was named after the specialized blacksmiths who produced metal components for Venetian ships. The naval blacksmiths established workshops in Cannaregio due to its proximity to the Arsenal, and were supported by the influential Loredan family.",
+      "id": "building_45.446999_12.330596"
+    },
+    {
+      "lat": 45.44687117849487,
+      "lng": 12.331367267588144,
+      "streetName": "Rio Terà degli Ambasciatori",
+      "streetNameEnglish": "Filled Canal of the Ambassadors",
+      "streetDescription": "This former canal was filled in and named to commemorate the many foreign ambassadors who visited the Loredan palaces in Cannaregio. The Loredan family produced several diplomats who served the Republic of Venice in the 15th and 16th centuries.",
+      "id": "building_45.446871_12.331367"
+    },
+    {
+      "lat": 45.44696296195317,
+      "lng": 12.331816403527975,
+      "streetName": "Calle dei Librai",
+      "streetNameEnglish": "Street of the Booksellers",
+      "streetDescription": "Named after the booksellers who established shops in this area following the development of printing in Venice in the late 15th century. The Loredan family were known patrons of literature and collected an impressive library in their Cannaregio residence.",
+      "id": "building_45.446963_12.331816"
+    },
+    {
+      "lat": 45.44691617064707,
+      "lng": 12.332457197703375,
+      "streetName": "Sottoportego del Leone d'Oro",
+      "streetNameEnglish": "Underpass of the Golden Lion",
+      "streetDescription": "This passageway was named after a heraldic symbol associated with the Loredan family. The golden lion appeared in variations of their coat of arms, and this underpass connected two properties owned by different branches of the family in Cannaregio.",
+      "id": "building_45.446916_12.332457"
+    },
+    {
+      "lat": 45.4468565482164,
+      "lng": 12.333191610846931,
+      "streetName": "Fondamenta dei Canottieri",
+      "streetNameEnglish": "Foundation of the Oarsmen",
+      "streetDescription": "This waterfront street was named after the professional oarsmen who served on Venetian galleys. Many retired oarsmen settled in this part of Cannaregio, and some worked for the Loredan family as gondoliers or boat operators for their commercial ventures.",
+      "id": "building_45.446857_12.333192"
+    },
+    {
+      "lat": 45.447416632784815,
+      "lng": 12.331170943556671,
+      "streetName": "Calle della Stampa Aldina",
+      "streetNameEnglish": "Street of the Aldine Press",
+      "streetDescription": "Named after the famous Aldine Press, which revolutionized printing in Renaissance Venice. Aldus Manutius established connections with noble families including the Loredans, and this street in Cannaregio commemorates the spread of humanist literature that the press facilitated.",
+      "id": "building_45.447417_12.331171"
+    },
+    {
+      "lat": 45.44742503739499,
+      "lng": 12.332041191864702,
+      "streetName": "Ramo delle Spezierie Orientali",
+      "streetNameEnglish": "Branch of Oriental Spice Shops",
+      "streetDescription": "This small side street was named after specialty shops selling exotic spices from the East. The Loredan family invested heavily in the spice trade with the Orient, and this branch street in Cannaregio contained several shops selling their imported goods during the Renaissance period.",
+      "id": "building_45.447425_12.332041"
+    }
+  ],
+  "id": "polygon-1746055693144"
+}

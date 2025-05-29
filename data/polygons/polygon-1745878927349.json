@@ -1,0 +1,322 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.430959081261115,
+      "lng": 12.332511326748635
+    },
+    {
+      "lat": 45.43095155210446,
+      "lng": 12.332159957367685
+    },
+    {
+      "lat": 45.430315334739966,
+      "lng": 12.332133135277536
+    },
+    {
+      "lat": 45.43031909936087,
+      "lng": 12.330692789036538
+    },
+    {
+      "lat": 45.42864890900741,
+      "lng": 12.329721544858495
+    },
+    {
+      "lat": 45.428370318140395,
+      "lng": 12.33186731207041
+    },
+    {
+      "lat": 45.4285058490042,
+      "lng": 12.332827542897741
+    }
+  ],
+  "centroid": {
+    "lat": 45.4297243062312,
+    "lng": 12.331701944036721
+  },
+  "historicalName": "Calle de la Fava",
+  "englishName": "Street of the Broad Bean",
+  "historicalDescription": "A small street in the San Marco sestiere, named after the nearby contract where broad beans were commonly sold. The area was known for its bustling marketplaces and proximity to Piazza San Marco.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 42705.65,
+  "center": {
+    "lat": 45.42929543797705,
+    "lng": 12.331455640859804
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.42855604538507,
+        "lng": 12.3304368005958
+      },
+      "water": {
+        "lat": 45.42841284349348,
+        "lng": 12.330281723127896
+      },
+      "historicalName": "Riva di San Lio",
+      "englishName": "Shore of Saint Leo",
+      "historicalDescription": "Named after the nearby church of San Lio (Saint Leo), which dates back to the 9th century. This dock would have served the parish of San Lio, just a short distance from Calle de la Fava. The church was an important landmark in the Castello district and the riva would have been a vital landing point for goods and passengers serving this parish.",
+      "id": "canal_45.428556_12.330437"
+    },
+    {
+      "edge": {
+        "lat": 45.42846318176273,
+        "lng": 12.331152056333105
+      },
+      "water": {
+        "lat": 45.42829118970404,
+        "lng": 12.331077062690083
+      },
+      "historicalName": "Fondamenta dei Orafi",
+      "englishName": "Foundation of the Goldsmiths",
+      "historicalDescription": "During the Renaissance, the area near Calle de la Fava was known for its craftsmen, particularly goldsmiths and jewelers. This dock would have been used by these artisans to receive precious metals and export their finished works. The Goldsmiths' Guild (Arte degli Orafi) was among Venice's most prestigious guilds, and would have maintained specialized landing areas for their trade.",
+      "id": "canal_45.428463_12.331152"
+    },
+    {
+      "edge": {
+        "lat": 45.428370318140395,
+        "lng": 12.33186731207041
+      },
+      "water": {
+        "lat": 45.42819111090236,
+        "lng": 12.33188919937413
+      },
+      "historicalName": "Riva delle Fave",
+      "englishName": "Shore of the Beans",
+      "historicalDescription": "Directly connected to 'Calle de la Fava' (Street of the Bean), this dock likely served as a landing point for bean imports, a staple food in Renaissance Venice. The name 'Fava' suggests this area was historically associated with the trade or storage of beans. Many Venetian locations were named after the goods traded there, and this dock would have been where merchants unloaded this important food commodity.",
+      "id": "canal_45.428370_12.331867"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.4299015517725,
+        "lng": 12.330449977992028
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878962632",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.429829049085825,
+          "lng": 12.33033629888518
+        },
+        "distance": 11.986976938848606,
+        "id": "5d7f618b-da10-4911-aaf2-9a1635bee6a4",
+        "name": "Ponte Sconosciuto (Unknown Bridge) - Error generating name",
+        "location": {
+          "midpoint": {
+            "lat": 45.429865300429164,
+            "lng": 12.330393138438605
+          }
+        },
+        "historicalName": "Ponte della Fava",
+        "englishName": "Bridge of the Bean",
+        "historicalDescription": "Named after the Church of Santa Maria della Fava (St. Mary of the Bean) which was nearby. The church got its name from a miraculous appearance of the Madonna in a bean. This bridge would have been a main crossing point for parishioners attending the church in the Calle de la Fava area."
+      },
+      "id": "bridge_45.429902_12.330450"
+    },
+    {
+      "edge": {
+        "lat": 45.428996495455586,
+        "lng": 12.33276429966792
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878859083",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.42901922125259,
+          "lng": 12.33288407259679
+        },
+        "distance": 9.682153753647608,
+        "id": "72b8ba95-571d-454c-bf90-b554ed8c03e3",
+        "name": "Ponte Sconosciuto (Unknown Bridge) - Error generating name",
+        "location": {
+          "midpoint": {
+            "lat": 45.42900785835408,
+            "lng": 12.332824186132356
+          }
+        },
+        "historicalName": "Ponte dei Orefici",
+        "englishName": "Bridge of the Goldsmiths",
+        "historicalDescription": "During the Renaissance, many goldsmiths and jewelers maintained workshops near Calle de la Fava, which was close to the Rialto commercial district. This bridge would have connected their workshops to merchant areas where they could sell their wares."
+      },
+      "id": "bridge_45.428996_12.332764"
+    },
+    {
+      "edge": {
+        "lat": 45.42948714190697,
+        "lng": 12.332701056438099
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878859083",
+        "targetPointIndex": 2,
+        "targetPoint": {
+          "lat": 45.42950561516869,
+          "lng": 12.332811116511586
+        },
+        "distance": 8.830776294914076,
+        "id": "72b8ba95-571d-454c-bf90-b554ed8c03e3",
+        "historicalName": "Ponte del Paradiso",
+        "englishName": "Bridge of Paradise",
+        "historicalDescription": "Named after the nearby 'Corte del Paradiso' (Court of Paradise), a small square that existed in Renaissance Venice. The name likely originated from a religious painting or shrine that once decorated the area near Calle de la Fava.",
+        "location": {
+          "midpoint": {
+            "lat": 45.42949637853783,
+            "lng": 12.332756086474841
+          }
+        }
+      },
+      "id": "bridge_45.429487_12.332701"
+    },
+    {
+      "edge": {
+        "lat": 45.42997778835835,
+        "lng": 12.332637813208278
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878859083",
+        "targetPointIndex": 3,
+        "targetPoint": {
+          "lat": 45.42999200908478,
+          "lng": 12.33273816042638
+        },
+        "distance": 7.988599372901184,
+        "id": "72b8ba95-571d-454c-bf90-b554ed8c03e3",
+        "historicalName": "Ponte dei Merceri",
+        "englishName": "Bridge of the Mercers",
+        "historicalDescription": "The mercers (textile merchants) formed an important guild in Renaissance Venice. This bridge would have connected their shops to the main thoroughfare of the Mercerie, which runs from San Marco toward Rialto, passing near the Calle de la Fava area.",
+        "location": {
+          "midpoint": {
+            "lat": 45.429984898721564,
+            "lng": 12.33268798681733
+          }
+        }
+      },
+      "id": "bridge_45.429978_12.332638"
+    },
+    {
+      "edge": {
+        "lat": 45.43046843480973,
+        "lng": 12.332574569978457
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1745878859083",
+        "targetPointIndex": 4,
+        "targetPoint": {
+          "lat": 45.430478403000876,
+          "lng": 12.332665204341176
+        },
+        "distance": 7.158866639257524,
+        "id": "72b8ba95-571d-454c-bf90-b554ed8c03e3",
+        "historicalName": "Ponte dei Barcaioli",
+        "englishName": "Bridge of the Boatmen",
+        "historicalDescription": "In Renaissance Venice, barcaioli (boatmen) would often gather at specific locations to offer their services. This bridge near Calle de la Fava would have been a common meeting point for gondoliers and other boatmen waiting to transport goods and passengers through the nearby canals.",
+        "location": {
+          "midpoint": {
+            "lat": 45.43047341890531,
+            "lng": 12.332619887159815
+          }
+        }
+      },
+      "id": "bridge_45.430468_12.332575"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.428882974557474,
+      "lng": 12.3302462454198,
+      "streetName": "Calle dei Orefici",
+      "streetNameEnglish": "Street of the Goldsmiths",
+      "streetDescription": "Named after the goldsmiths who had workshops in this area near Rialto. The Venetian jewelry craft was highly regarded during the Renaissance, and many goldsmiths operated around Calle de la Fava.",
+      "id": "building_45.428883_12.330246"
+    },
+    {
+      "lat": 45.428761181455684,
+      "lng": 12.331122266723682,
+      "streetName": "Sotoportego del Fontego",
+      "streetNameEnglish": "Passage of the Fondaco (Warehouse)",
+      "streetDescription": "References a covered passageway near one of Venice's fondachi (warehouses). These were important commercial structures where foreign merchants could store goods, and several existed in the San Marco area near Calle de la Fava.",
+      "id": "building_45.428761_12.331122"
+    },
+    {
+      "lat": 45.42873437392608,
+      "lng": 12.331689538548337,
+      "streetName": "Rio Terà dei Baretteri",
+      "streetNameEnglish": "Filled Canal of the Cap Makers",
+      "streetDescription": "Named after the cap makers' guild that operated in this area. Rio Terà indicates this was once a canal that was filled in, a common occurrence in Venice's urban development history.",
+      "id": "building_45.428734_12.331690"
+    },
+    {
+      "lat": 45.428874957307954,
+      "lng": 12.33227108322995,
+      "streetName": "Calle dei Bombaseri",
+      "streetNameEnglish": "Street of the Cotton Merchants",
+      "streetDescription": "Cotton trade was significant in Renaissance Venice, with merchants importing cotton from Eastern Mediterranean contracts. This street would have housed shops selling cotton fabrics near the commercial center around Calle de la Fava.",
+      "id": "building_45.428875_12.332271"
+    },
+    {
+      "lat": 45.42919665715874,
+      "lng": 12.331046790288237,
+      "streetName": "Corte Morosini",
+      "streetNameEnglish": "Morosini Court",
+      "streetDescription": "Named after the prominent Morosini family, who were among Venice's nobili families. They produced doges, naval commanders, and influential political figures throughout Venetian history and likely owned property in this area.",
+      "id": "building_45.429197_12.331047"
+    },
+    {
+      "lat": 45.429247133431026,
+      "lng": 12.331551233991714,
+      "streetName": "Fondamenta delle Galere",
+      "streetNameEnglish": "Foundation of the Galleys",
+      "streetDescription": "References the walkway along a canal where galleys (Venetian ships) would dock. This name reflects Venice's maritime power during the Renaissance, with naval vessels occasionally mooring in canals throughout the city.",
+      "id": "building_45.429247_12.331551"
+    },
+    {
+      "lat": 45.42928101043661,
+      "lng": 12.332378986100817,
+      "streetName": "Salizada Santa Maria Formosa",
+      "streetNameEnglish": "Paved Street of Santa Maria Formosa",
+      "streetDescription": "Named after the nearby Santa Maria Formosa church, one of Venice's important parish churches founded in the 7th century. 'Salizada' indicates this was one of the first paved streets in Venice, showing its importance.",
+      "id": "building_45.429281_12.332379"
+    },
+    {
+      "lat": 45.42979858905246,
+      "lng": 12.33095823467906,
+      "streetName": "Calle del Paradiso",
+      "streetNameEnglish": "Street of Paradise",
+      "streetDescription": "A poetic name that might refer to a particularly beautiful or peaceful street. Such names were sometimes given to streets near churches or religious institutions, possibly near a church dedicated to the Virgin Mary in the vicinity of Calle de la Fava.",
+      "id": "building_45.429799_12.330958"
+    },
+    {
+      "lat": 45.42973048136064,
+      "lng": 12.331747223552526,
+      "streetName": "Ruga dei Pistori",
+      "streetNameEnglish": "Street of the Bakers",
+      "streetDescription": "Refers to the bakers who operated in this commercial street. 'Ruga' typically indicates a larger street with commercial activities. Bakeries were essential businesses in Renaissance Venice, providing bread to the local population.",
+      "id": "building_45.429730_12.331747"
+    },
+    {
+      "lat": 45.429657746155534,
+      "lng": 12.332326231151516,
+      "streetName": "Calle dei Fcitizeni",
+      "streetNameEnglish": "Street of the Spindle Makers",
+      "streetDescription": "Named for the craftsmen who made spindles for the wool and textile industries, which were crucial to Venice's economy during the Renaissance. These specialized artisans would have had workshops grouped together in this area.",
+      "id": "building_45.429658_12.332326"
+    },
+    {
+      "lat": 45.430170106542946,
+      "lng": 12.331746601801386,
+      "streetName": "Campiello del Remer",
+      "streetNameEnglish": "Small Square of the Oar Maker",
+      "streetDescription": "Named after craftsmen who made oars ('remi' in Italian) for Venice's numerous boats. These skilled artisans were essential to Venice's maritime activities and likely had workshops opening onto this small square.",
+      "id": "building_45.430170_12.331747"
+    },
+    {
+      "lat": 45.430101374102684,
+      "lng": 12.33236084016627,
+      "streetName": "Calle dei Stagneri",
+      "streetNameEnglish": "Street of the Tinsmiths",
+      "streetDescription": "Named after the craftsmen who worked with tin and other metals. These artisans produced household items, decorative elements, and various metal goods that were important in daily Venetian life during the Renaissance.",
+      "id": "building_45.430101_12.332361"
+    }
+  ],
+  "id": "polygon-1745878927349"
+}

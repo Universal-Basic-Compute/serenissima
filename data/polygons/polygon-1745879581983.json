@@ -1,0 +1,1044 @@
+{
+  "coordinates": [
+    {
+      "lat": 45.44276408645299,
+      "lng": 12.315328721373463
+    },
+    {
+      "lat": 45.44425452784012,
+      "lng": 12.31691658911028
+    },
+    {
+      "lat": 45.442643645025434,
+      "lng": 12.31966317114153
+    },
+    {
+      "lat": 45.44508253381871,
+      "lng": 12.321508530943776
+    },
+    {
+      "lat": 45.4445405676431,
+      "lng": 12.323611382811452
+    },
+    {
+      "lat": 45.44377277331475,
+      "lng": 12.325285081236744
+    },
+    {
+      "lat": 45.44247803764271,
+      "lng": 12.325971726744557
+    },
+    {
+      "lat": 45.44174032612294,
+      "lng": 12.323611382811452
+    },
+    {
+      "lat": 45.44097249368414,
+      "lng": 12.32189476904192
+    },
+    {
+      "lat": 45.43909050723917,
+      "lng": 12.319856290190602
+    },
+    {
+      "lat": 45.439150731777666,
+      "lng": 12.319362763731862
+    },
+    {
+      "lat": 45.43933140500743,
+      "lng": 12.319298390715504
+    },
+    {
+      "lat": 45.43955724573111,
+      "lng": 12.319341306059743
+    },
+    {
+      "lat": 45.44154460512106,
+      "lng": 12.317796353667164
+    }
+  ],
+  "centroid": {
+    "lat": 45.44192310617295,
+    "lng": 12.320674747112863
+  },
+  "historicalName": "Calle dei Carmelitani in Sestiere di Dorsoduro",
+  "englishName": "Carmelite Friars' Street in the Dorsoduro District",
+  "historicalDescription": "A street located near the Church and Monastery of Santa Maria dei Carmini, home to Carmelite friars. The area was known for its religious institutions and residential neighborhoods in the 15th century.",
+  "nameConfidence": "medium",
+  "areaInSquareMeters": 245644.89,
+  "center": {
+    "lat": 45.44192310617295,
+    "lng": 12.320674747112863
+  },
+  "canalPoints": [
+    {
+      "edge": {
+        "lat": 45.44313669679977,
+        "lng": 12.315725688307667
+      },
+      "water": {
+        "lat": 45.44319603914657,
+        "lng": 12.315483688445877
+      },
+      "historicalName": "Fondamenta dei Carmelitani",
+      "englishName": "Wharf of the Carmelites",
+      "historicalDescription": "Named after the Carmelite monks who established their convent in Dorsoduro during the 14th century. This fondamenta would have been the main landing dock for supplies and visitors to the Carmelite monastery.",
+      "id": "canal_45.443137_12.315726"
+    },
+    {
+      "edge": {
+        "lat": 45.443509307146556,
+        "lng": 12.316122655241871
+      },
+      "water": {
+        "lat": 45.44358931194963,
+        "lng": 12.315893056836776
+      },
+      "historicalName": "Riva di San Barnaba",
+      "englishName": "Shore of Saint Barnabas",
+      "historicalDescription": "Named after the nearby Church of San Barnaba in Dorsoduro, founded in the 9th century. This dock would have served parishioners and clergy attending services and religious festivals.",
+      "id": "canal_45.443509_12.316123"
+    },
+    {
+      "edge": {
+        "lat": 45.44388191749334,
+        "lng": 12.316519622176076
+      },
+      "water": {
+        "lat": 45.443982228856505,
+        "lng": 12.316306836880127
+      },
+      "historicalName": "Fondamenta degli Scultori",
+      "englishName": "Wharf of the Sculptors",
+      "historicalDescription": "Dorsoduro was home to many artisan workshops, including sculptors who would receive marble and stone deliveries via this dock for their commissions in churches and palazzi throughout Venice.",
+      "id": "canal_45.443882_12.316520"
+    },
+    {
+      "edge": {
+        "lat": 45.442293609762764,
+        "lng": 12.32538164076128
+      },
+      "water": {
+        "lat": 45.442313662752596,
+        "lng": 12.325636394812404
+      },
+      "historicalName": "Riva della Malvasia",
+      "englishName": "Shore of the Malvasia Wine",
+      "historicalDescription": "Named after the popular sweet wine imported from Greece. This dock would have been used by merchants selling this coveted beverage, which was particularly popular among Venetian nobility in the Renaissance period.",
+      "id": "canal_45.442294_12.325382"
+    },
+    {
+      "edge": {
+        "lat": 45.44210918188283,
+        "lng": 12.324791554778004
+      },
+      "water": {
+        "lat": 45.442120744769035,
+        "lng": 12.325047376339088
+      },
+      "historicalName": "Fondamenta dei Barcaroli",
+      "englishName": "Wharf of the Boatmen",
+      "historicalDescription": "A landing place for the barcaroli, professional boatmen who operated small vessels for hire. Near Calle dei Carmelitani, this dock would have been a gathering point for gondoliers and other small boat operators.",
+      "id": "canal_45.442109_12.324792"
+    },
+    {
+      "edge": {
+        "lat": 45.44192475400288,
+        "lng": 12.324201468794728
+      },
+      "water": {
+        "lat": 45.44192487378082,
+        "lng": 12.324457820151478
+      },
+      "historicalName": "Riva dei Carmini",
+      "englishName": "Shore of the Carmini",
+      "historicalDescription": "Named after the prominent Santa Maria dei Carmini church in Dorsoduro, built by Carmelite friars. This dock would have been used for processions and for bringing religious artifacts and materials to the church.",
+      "id": "canal_45.441925_12.324201"
+    },
+    {
+      "edge": {
+        "lat": 45.44174032612294,
+        "lng": 12.323611382811452
+      },
+      "water": {
+        "lat": 45.441724432913325,
+        "lng": 12.32386673106588
+      },
+      "historicalName": "Fondamenta delle Procuratie",
+      "englishName": "Wharf of the Procurators",
+      "historicalDescription": "Named for the Procurators of St. Mark, high-ranking Venetian officials who may have maintained property in this area. This dock would have served administrative functions for the Republic's officials.",
+      "id": "canal_45.441740_12.323611"
+    },
+    {
+      "edge": {
+        "lat": 45.44148438197667,
+        "lng": 12.323039178221608
+      },
+      "water": {
+        "lat": 45.44143839659311,
+        "lng": 12.323287008800287
+      },
+      "historicalName": "Riva dei Catecumeni",
+      "englishName": "Shore of the Catechumens",
+      "historicalDescription": "Near an institution established in 1557 for housing and converting Jews and Muslims to Christianity. This dock would have been the arrival point for those entering the catechumenate in Dorsoduro.",
+      "id": "canal_45.441484_12.323039"
+    },
+    {
+      "edge": {
+        "lat": 45.44122843783041,
+        "lng": 12.322466973631764
+      },
+      "water": {
+        "lat": 45.441141464979644,
+        "lng": 12.322691361357567
+      },
+      "historicalName": "Fondamenta del Squero",
+      "englishName": "Wharf of the Boatyard",
+      "historicalDescription": "Named after a nearby squero (traditional Venetian boatyard) where gondolas were built and repaired. This dock would have received timber and other materials for boat construction.",
+      "id": "canal_45.441228_12.322467"
+    },
+    {
+      "edge": {
+        "lat": 45.44097249368414,
+        "lng": 12.32189476904192
+      },
+      "water": {
+        "lat": 45.440838833909375,
+        "lng": 12.322066308820924
+      },
+      "historicalName": "Riva dei Corteleri",
+      "englishName": "Shore of the Knife Makers",
+      "historicalDescription": "Named for the guild of knife makers who had workshops in this area of Dorsoduro. This dock would have been used for receiving metal shipments and for distributing their finished products.",
+      "id": "canal_45.440972_12.321895"
+    },
+    {
+      "edge": {
+        "lat": 45.44059609639515,
+        "lng": 12.321487073271657
+      },
+      "water": {
+        "lat": 45.4404308310611,
+        "lng": 12.32158824008763
+      },
+      "historicalName": "Fondamenta degli Intagliatori",
+      "englishName": "Wharf of the Wood Carvers",
+      "historicalDescription": "Dedicated to the skilled artisans who carved decorative elements for furniture, gondolas, and architectural features. This dock would have been used for transporting valuable woods and finished pieces.",
+      "id": "canal_45.440596_12.321487"
+    },
+    {
+      "edge": {
+        "lat": 45.44021969910615,
+        "lng": 12.321079377501393
+      },
+      "water": {
+        "lat": 45.44004228211179,
+        "lng": 12.32112152145439
+      },
+      "historicalName": "Riva dei Frari",
+      "englishName": "Shore of the Friars",
+      "historicalDescription": "Though the Frari church is in San Polo, this dock in Dorsoduro could have served as a connection point for Franciscan friars traveling between monasteries, reflecting the religious network that existed in Renaissance Venice.",
+      "id": "canal_45.440220_12.321079"
+    },
+    {
+      "edge": {
+        "lat": 45.43984330181716,
+        "lng": 12.32067168173113
+      },
+      "water": {
+        "lat": 45.43966343759216,
+        "lng": 12.320671416632873
+      },
+      "historicalName": "Fondamenta dei Dorsoduranti",
+      "englishName": "Wharf of the Dorsoduro Residents",
+      "historicalDescription": "Named simply for the residents of the Dorsoduro district, this communal dock would have been used by locals for daily transportation and receiving household goods.",
+      "id": "canal_45.439843_12.320672"
+    },
+    {
+      "edge": {
+        "lat": 45.4399547176091,
+        "lng": 12.319032315581227
+      },
+      "water": {
+        "lat": 45.43979949811314,
+        "lng": 12.318902799793962
+      },
+      "historicalName": "Riva della Toletta",
+      "englishName": "Shore of the Tollbooth",
+      "historicalDescription": "Named after a small customs point where goods entering this part of Dorsoduro would be inspected and taxed. The term 'toletta' refers to the small toll or tax collected here.",
+      "id": "canal_45.439955_12.319032"
+    },
+    {
+      "edge": {
+        "lat": 45.440352189487086,
+        "lng": 12.318723325102711
+      },
+      "water": {
+        "lat": 45.4402165990652,
+        "lng": 12.318554892151418
+      },
+      "historicalName": "Fondamenta dei Linaroli",
+      "englishName": "Wharf of the Linen Merchants",
+      "historicalDescription": "Dedicated to traders in linen and flax products who operated in this area of Dorsoduro. This dock would have received raw materials and exported finished textiles.",
+      "id": "canal_45.440352_12.318723"
+    },
+    {
+      "edge": {
+        "lat": 45.44074966136508,
+        "lng": 12.318414334624196
+      },
+      "water": {
+        "lat": 45.44064268156697,
+        "lng": 12.3182082589144
+      },
+      "historicalName": "Riva dei Tedeschi",
+      "englishName": "Shore of the Germans",
+      "historicalDescription": "Named for German merchants who had established a presence in this part of Venice. This dock would have facilitated trade between Venice and German-speaking territories.",
+      "id": "canal_45.440750_12.318414"
+    },
+    {
+      "edge": {
+        "lat": 45.44114713324307,
+        "lng": 12.31810534414568
+      },
+      "water": {
+        "lat": 45.44107602196152,
+        "lng": 12.317869880341762
+      },
+      "historicalName": "Fondamenta della Scuola Grande",
+      "englishName": "Wharf of the Great Confraternity",
+      "historicalDescription": "Referencing one of Venice's important confraternities that may have owned property near Calle dei Carmelitani. These charitable organizations played a crucial role in Renaissance Venetian social welfare.",
+      "id": "canal_45.441147_12.318105"
+    },
+    {
+      "edge": {
+        "lat": 45.44154460512106,
+        "lng": 12.317796353667164
+      },
+      "water": {
+        "lat": 45.4415114725715,
+        "lng": 12.317544389998847
+      },
+      "historicalName": "Riva di Sant'Agnese",
+      "englishName": "Shore of Saint Agnes",
+      "historicalDescription": "Named after the Church of Sant'Agnese that once stood in Dorsoduro. This dock would have served the parish and visitors to religious celebrations honoring the saint.",
+      "id": "canal_45.441545_12.317796"
+    },
+    {
+      "edge": {
+        "lat": 45.44184947545404,
+        "lng": 12.31717944559374
+      },
+      "water": {
+        "lat": 45.44184407768662,
+        "lng": 12.316923209813824
+      },
+      "historicalName": "Fondamenta dei Trovasi",
+      "englishName": "Wharf of the Trovasi Family",
+      "historicalDescription": "Named after a nobili family that owned property in Dorsoduro during the Renaissance. Family-named docks were common in Venice, indicating ownership or patronage of that waterfront area.",
+      "id": "canal_45.441849_12.317179"
+    },
+    {
+      "edge": {
+        "lat": 45.442154345787024,
+        "lng": 12.316562537520314
+      },
+      "water": {
+        "lat": 45.44216871500908,
+        "lng": 12.31630700495063
+      },
+      "historicalName": "Riva dei Biscottai",
+      "englishName": "Shore of the Biscuit Makers",
+      "historicalDescription": "Named for bakers specializing in biscotti and hardtack, essential provisions for Venetian ships on long voyages. This dock would have been used to load these durable foodstuffs onto vessels departing Venice.",
+      "id": "canal_45.442154_12.316563"
+    },
+    {
+      "edge": {
+        "lat": 45.44245921612001,
+        "lng": 12.315945629446889
+      },
+      "water": {
+        "lat": 45.442487905125844,
+        "lng": 12.315692558812618
+      },
+      "historicalName": "Fondamenta delle Torreselle",
+      "englishName": "Wharf of the Small Towers",
+      "historicalDescription": "Named after decorative small towers that may have characterized buildings in this part of Dorsoduro. Architectural features often provided inspiration for place names in Renaissance Venice.",
+      "id": "canal_45.442459_12.315946"
+    }
+  ],
+  "bridgePoints": [
+    {
+      "edge": {
+        "lat": 45.44426957088762,
+        "lng": 12.320893411009694
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055488132",
+        "targetPointIndex": 0,
+        "targetPoint": {
+          "lat": 45.444184092520466,
+          "lng": 12.32079790993135
+        },
+        "distance": 12.076848762934873,
+        "id": "4011d209-d020-4175-bac9-e443d74e4d7a",
+        "historicalName": "Ponte dei Carmelitani",
+        "englishName": "Bridge of the Carmelites",
+        "historicalDescription": "Named after the Carmelite friars who had their monastery nearby in Dorsoduro. The Carmelite Order established a significant presence in this area during the Renaissance period, influencing local religious life and architecture.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44422683170404,
+            "lng": 12.320845660470521
+          }
+        }
+      },
+      "id": "bridge_45.444270_12.320893"
+    },
+    {
+      "edge": {
+        "lat": 45.44467605235317,
+        "lng": 12.321200970976735
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055488132",
+        "targetPointIndex": 1,
+        "targetPoint": {
+          "lat": 45.444640254302676,
+          "lng": 12.32115625305574
+        },
+        "distance": 5.292958119716478,
+        "id": "4011d209-d020-4175-bac9-e443d74e4d7a",
+        "historicalName": "Ponte degli Scalpellini",
+        "englishName": "Bridge of the Stonemasons",
+        "historicalDescription": "This bridge would reference the stonemasons who likely worked in this area of Dorsoduro during the Renaissance. Many craftsmen and artisans were concentrated in specific neighborhoods, and stonemasons would have been essential for Venetian construction projects.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44465815332792,
+            "lng": 12.321178612016237
+          }
+        }
+      },
+      "id": "bridge_45.444676_12.321201"
+    },
+    {
+      "edge": {
+        "lat": 45.4445405676431,
+        "lng": 12.323611382811452
+      },
+      "connection": {
+        "targetPolygonId": "polygon-1746055561861",
+        "targetPointIndex": 7,
+        "targetPoint": {
+          "lat": 45.444570535706525,
+          "lng": 12.323913040108673
+        },
+        "distance": 23.76832400106658,
+        "id": "99c1c8eb-7c92-4ee7-bbab-ba566739c36d",
+        "historicalName": "Ponte della Fornace",
+        "englishName": "Bridge of the Kiln",
+        "historicalDescription": "Named after a historical kiln or furnace that would have operated in this area of Dorsoduro. Venice had numerous furnaces for producing glass, ceramics, and bricks, essential materials for the city's construction and famous craft industries.",
+        "location": {
+          "midpoint": {
+            "lat": 45.44455555167481,
+            "lng": 12.323762211460062
+          }
+        }
+      },
+      "id": "bridge_45.444541_12.323611"
+    }
+  ],
+  "buildingPoints": [
+    {
+      "lat": 45.43958818193424,
+      "lng": 12.31990966519928,
+      "streetName": "Calle dei Vetrai",
+      "streetNameEnglish": "Street of the Glassmakers",
+      "streetDescription": "Named after the glassmakers who had workshops in this area of Dorsoduro. Though Murano was the center of Venetian glass production, some glassmakers maintained smaller workshops in this part of the city.",
+      "id": "building_45.439588_12.319910"
+    },
+    {
+      "lat": 45.44002243297783,
+      "lng": 12.319748620278311,
+      "streetName": "Fondamenta dei Gesuati",
+      "streetNameEnglish": "Foundation of the Jesuates",
+      "streetDescription": "Named after the Jesuate religious order who established a church in Dorsoduro. The church of Santa Maria dei Gesuati (later known as Santa Maria del Rosario) was an important landmark in this sestiere.",
+      "id": "building_45.440022_12.319749"
+    },
+    {
+      "lat": 45.43997935261881,
+      "lng": 12.32043245624527,
+      "streetName": "Rio Terà dei Tolentini",
+      "streetNameEnglish": "Filled Canal of the Tolentini",
+      "streetDescription": "Named after the Church of San Nicolò da Tolentino in the nearby area. 'Rio Terà' indicates this was once a canal that was filled in to create a street, a common practice in Venice's urban development.",
+      "id": "building_45.439979_12.320432"
+    },
+    {
+      "lat": 45.44038401828776,
+      "lng": 12.319250063620673,
+      "streetName": "Calle del Magazzen",
+      "streetNameEnglish": "Street of the Warehouse",
+      "streetDescription": "This name refers to a warehouse or storage facility that existed in this area of Dorsoduro. Many such facilities were essential to Venice's commercial activities during the Renaissance.",
+      "id": "building_45.440384_12.319250"
+    },
+    {
+      "lat": 45.44046371027811,
+      "lng": 12.319717115836815,
+      "streetName": "Salizada delle Monache",
+      "streetNameEnglish": "Paved Street of the Nuns",
+      "streetDescription": "Named after a convent that was located nearby. Salizada indicates this was one of the first paved streets in the area, showing its importance for local movement of people and goods.",
+      "id": "building_45.440464_12.319717"
+    },
+    {
+      "lat": 45.44043876676756,
+      "lng": 12.32037569677936,
+      "streetName": "Sottoportego del Carmine",
+      "streetNameEnglish": "Passageway of Carmel",
+      "streetDescription": "A covered passageway near the Carmelite church (Chiesa del Carmine) in Dorsoduro. This name directly relates to the Carmelitani mentioned in the reference location.",
+      "id": "building_45.440439_12.320376"
+    },
+    {
+      "lat": 45.440938422569026,
+      "lng": 12.319127898966538,
+      "streetName": "Calle della Scuola Grande",
+      "streetNameEnglish": "Street of the Great School",
+      "streetDescription": "Named after one of Venice's Scuole Grandi (Great Schools), which were important confraternities and charitable organizations during the Renaissance. Dorsoduro housed several of these institutions.",
+      "id": "building_45.440938_12.319128"
+    },
+    {
+      "lat": 45.44086772190522,
+      "lng": 12.319731567096973,
+      "streetName": "Fondamenta delle Zattere",
+      "streetNameEnglish": "Foundation of the Rafts",
+      "streetDescription": "Named after the wooden rafts that would dock along this waterfront in Dorsoduro. This was a major landing area for timber that was floated down from the Alpine regions.",
+      "id": "building_45.440868_12.319732"
+    },
+    {
+      "lat": 45.440843870112005,
+      "lng": 12.320428577530294,
+      "streetName": "Calle dei Frati",
+      "streetNameEnglish": "Street of the Friars",
+      "streetDescription": "Named after the friars who lived in a monastery near this street in Dorsoduro. Religious orders were prominent in Venetian urban geography.",
+      "id": "building_45.440844_12.320429"
+    },
+    {
+      "lat": 45.440943188879906,
+      "lng": 12.321047122274168,
+      "streetName": "Rio Terà Santa Margherita",
+      "streetNameEnglish": "Filled Canal of Saint Margaret",
+      "streetDescription": "Named after the nearby Campo Santa Margherita, one of the largest squares in Dorsoduro. This was once a canal that was filled in, as the 'Rio Terà' designation indicates.",
+      "id": "building_45.440943_12.321047"
+    },
+    {
+      "lat": 45.44135925324426,
+      "lng": 12.318587155728236,
+      "streetName": "Calle degli Incurabili",
+      "streetNameEnglish": "Street of the Incurables",
+      "streetDescription": "Named after the Ospedale degli Incurabili, a hospital founded in the 16th century that treated patients with syphilis and other diseases considered incurable at the time. It was located in Dorsoduro.",
+      "id": "building_45.441359_12.318587"
+    },
+    {
+      "lat": 45.441322891682304,
+      "lng": 12.319200594785658,
+      "streetName": "Fondamenta del Soccorso",
+      "streetNameEnglish": "Foundation of Assistance",
+      "streetDescription": "Named after a charitable institution that provided assistance to the poor. Such institutions were common in Renaissance Venice and reflected the city's approach to social welfare.",
+      "id": "building_45.441323_12.319201"
+    },
+    {
+      "lat": 45.441257068247594,
+      "lng": 12.31982876123111,
+      "streetName": "Calle della Carità",
+      "streetNameEnglish": "Street of Charity",
+      "streetDescription": "Named after the church of Santa Maria della Carità or a charitable institution in this area of Dorsoduro. Venice had numerous charitable organizations and this name reflects that tradition.",
+      "id": "building_45.441257_12.319829"
+    },
+    {
+      "lat": 45.441276161496376,
+      "lng": 12.320466267190382,
+      "streetName": "Sottoportego dei Preti",
+      "streetNameEnglish": "Passageway of the Priests",
+      "streetDescription": "A covered passageway where priests from nearby churches would often walk. Religious figures were common in the area around the Carmelite church in Dorsoduro.",
+      "id": "building_45.441276_12.320466"
+    },
+    {
+      "lat": 45.4413941298333,
+      "lng": 12.321051381847951,
+      "streetName": "Calle dei Carmini",
+      "streetNameEnglish": "Street of the Carmelites",
+      "streetDescription": "Named after the Carmelite Order and their church (Santa Maria dei Carmini) in Dorsoduro. This directly connects to the referenced location of 'Calle dei Carmelitani'.",
+      "id": "building_45.441394_12.321051"
+    },
+    {
+      "lat": 45.441311627162214,
+      "lng": 12.321699002681147,
+      "streetName": "Rio Terà San Barnaba",
+      "streetNameEnglish": "Filled Canal of Saint Barnabas",
+      "streetDescription": "Named after the Church of San Barnaba in Dorsoduro. This was formerly a canal that was filled in to create a street, as was common in Venice's urban development.",
+      "id": "building_45.441312_12.321699"
+    },
+    {
+      "lat": 45.44181079800211,
+      "lng": 12.318446680962825,
+      "streetName": "Calle dei Cerchieri",
+      "streetNameEnglish": "Street of the Hoop Makers",
+      "streetDescription": "Named after the craftsmen who made hoops for barrels, a crucial trade in wine-trading Venice. Barrel-making workshops were common in the working-class areas of Dorsoduro.",
+      "id": "building_45.441811_12.318447"
+    },
+    {
+      "lat": 45.44176635341924,
+      "lng": 12.31925547709438,
+      "streetName": "Fondamenta Priuli",
+      "streetNameEnglish": "Priuli Foundation",
+      "streetDescription": "Named after the Priuli family, one of Venice's noble families who owned property in this area of Dorsoduro. Many Venetian streets bear the names of prominent families who lived or owned property nearby.",
+      "id": "building_45.441766_12.319255"
+    },
+    {
+      "lat": 45.44184226623009,
+      "lng": 12.319735533568815,
+      "streetName": "Calle dei Saoneri",
+      "streetNameEnglish": "Street of the Soap Makers",
+      "streetDescription": "Named after the soap-making workshops that were once located in this part of Dorsoduro. Soap production was an important industry in Renaissance Venice.",
+      "id": "building_45.441842_12.319736"
+    },
+    {
+      "lat": 45.44175155916815,
+      "lng": 12.320558484458672,
+      "streetName": "Salizada San Pantalon",
+      "streetNameEnglish": "Paved Street of Saint Pantalon",
+      "streetDescription": "Named after the Church of San Pantalon in Dorsoduro. The 'salizada' designation indicates it was one of the first paved streets in the area.",
+      "id": "building_45.441752_12.320558"
+    },
+    {
+      "lat": 45.44181919512405,
+      "lng": 12.32179994887148,
+      "streetName": "Calle della Commenda",
+      "streetNameEnglish": "Street of the Commandery",
+      "streetDescription": "Named after a commandery, a property belonging to a military or religious order, likely related to the Carmelites or another order in Dorsoduro.",
+      "id": "building_45.441819_12.321800"
+    },
+    {
+      "lat": 45.441786900702446,
+      "lng": 12.322299350881279,
+      "streetName": "Rio Terà degli Schiavoni",
+      "streetNameEnglish": "Filled Canal of the Slavs",
+      "streetDescription": "Named after Slavic traders or residents who lived in this area. Venice had strong connections with the eastern Adriatic coast, and many Slavic people lived and worked in the city.",
+      "id": "building_45.441787_12.322299"
+    },
+    {
+      "lat": 45.441805680838435,
+      "lng": 12.323083636698444,
+      "streetName": "Calle dei Scarpagnini",
+      "streetNameEnglish": "Street of the Shoe Makers",
+      "streetDescription": "Named after the cobblers who had workshops in this area of Dorsoduro. Shoe-making was an important craft in Renaissance Venice.",
+      "id": "building_45.441806_12.323084"
+    },
+    {
+      "lat": 45.442254428701375,
+      "lng": 12.317155571972442,
+      "streetName": "Fondamenta della Fornace",
+      "streetNameEnglish": "Foundation of the Kiln",
+      "streetDescription": "Named after a kiln or furnace that operated in this area of Dorsoduro. Kilns were used for various industries including ceramics and glassmaking.",
+      "id": "building_45.442254_12.317156"
+    },
+    {
+      "lat": 45.44224805224854,
+      "lng": 12.317956844128782,
+      "streetName": "Calle del Rosario",
+      "streetNameEnglish": "Street of the Rosary",
+      "streetDescription": "Named after devotional practices related to the rosary, likely connected to the Dominican Church of Santa Maria del Rosario (Gesuati) in Dorsoduro.",
+      "id": "building_45.442248_12.317957"
+    },
+    {
+      "lat": 45.44218580527908,
+      "lng": 12.318534431718614,
+      "streetName": "Sottoportego delle Acque",
+      "streetNameEnglish": "Passageway of the Waters",
+      "streetDescription": "A covered passageway named for its proximity to water or frequent flooding, a common issue in lower-lying areas of Venice including parts of Dorsoduro.",
+      "id": "building_45.442186_12.318534"
+    },
+    {
+      "lat": 45.44231680568413,
+      "lng": 12.319077443726268,
+      "streetName": "Calle dei Gondolieri",
+      "streetNameEnglish": "Street of the Gondoliers",
+      "streetDescription": "Named after the gondoliers who may have lived in this area of Dorsoduro. Gondoliers were essential to Venetian transportation and formed a distinct social group.",
+      "id": "building_45.442317_12.319077"
+    },
+    {
+      "lat": 45.44226135717603,
+      "lng": 12.319698634859396,
+      "streetName": "Rio Terà dei Pensieri",
+      "streetNameEnglish": "Filled Canal of Thoughts",
+      "streetDescription": "A poetic name for what was once a canal, possibly referring to a quiet area where scholars or religious figures from nearby institutions would walk in contemplation.",
+      "id": "building_45.442261_12.319699"
+    },
+    {
+      "lat": 45.44225316651121,
+      "lng": 12.320556777517233,
+      "streetName": "Calle della Scuola dei Carmini",
+      "streetNameEnglish": "Street of the Carmelite School",
+      "streetDescription": "Named after the Scuola dei Carmini, a confraternity associated with the Carmelite church in Dorsoduro. This relates directly to the Carmelitani mentioned in the reference location.",
+      "id": "building_45.442253_12.320557"
+    },
+    {
+      "lat": 45.442160222763924,
+      "lng": 12.320970820854885,
+      "streetName": "Fondamenta San Sebastiano",
+      "streetNameEnglish": "Foundation of Saint Sebastian",
+      "streetDescription": "Named after the Church of San Sebastiano in Dorsoduro, famous for its paintings by Paolo Veronese. This waterside walkway would have served as an important access point to the church.",
+      "id": "building_45.442160_12.320971"
+    },
+    {
+      "lat": 45.44220137312277,
+      "lng": 12.3224184611077,
+      "streetName": "Calle del Monastero",
+      "streetNameEnglish": "Street of the Monastery",
+      "streetDescription": "Named after a monastery, possibly the Carmelite monastery, in this area of Dorsoduro. Monasteries were influential institutions in Renaissance Venetian society.",
+      "id": "building_45.442201_12.322418"
+    },
+    {
+      "lat": 45.44218658261004,
+      "lng": 12.322898161561232,
+      "streetName": "Salizada dei Pignoli",
+      "streetNameEnglish": "Paved Street of the Pine Nuts",
+      "streetDescription": "Named after vendors who sold pine nuts, which were used in Venetian cuisine. The 'salizada' designation indicates it was among the first paved streets in the area.",
+      "id": "building_45.442187_12.322898"
+    },
+    {
+      "lat": 45.442276192566915,
+      "lng": 12.32366636294315,
+      "streetName": "Calle dei Brustolon",
+      "streetNameEnglish": "Street of the Brustolon",
+      "streetDescription": "Named after the Brustolon family, possibly referring to Andrea Brustolon, a famous Venetian sculptor and woodcarver whose works were found in churches and palaces throughout the city.",
+      "id": "building_45.442276_12.323666"
+    },
+    {
+      "lat": 45.44222300562253,
+      "lng": 12.324389489603762,
+      "streetName": "Rio Terà delle Orsoline",
+      "streetNameEnglish": "Filled Canal of the Ursulines",
+      "streetDescription": "Named after the Ursuline nuns who had a convent in this area. This was once a canal that was filled in to create a street.",
+      "id": "building_45.442223_12.324389"
+    },
+    {
+      "lat": 45.44267834997089,
+      "lng": 12.316664914715357,
+      "streetName": "Calle degli Avvocati",
+      "streetNameEnglish": "Street of the Lawyers",
+      "streetDescription": "Named after lawyers who may have had their residences or offices in this area of Dorsoduro. Legal professionals were important in Venice's complex commercial and governance systems.",
+      "id": "building_45.442678_12.316665"
+    },
+    {
+      "lat": 45.44268433304287,
+      "lng": 12.31725783641718,
+      "streetName": "Fondamenta Rezzonico",
+      "streetNameEnglish": "Rezzonico Foundation",
+      "streetDescription": "Named after the Rezzonico family, who owned the grand palace Ca' Rezzonico in Dorsoduro. This wealthy family rose to prominence in the 17th century.",
+      "id": "building_45.442684_12.317258"
+    },
+    {
+      "lat": 45.44269560820029,
+      "lng": 12.317819298718225,
+      "streetName": "Calle del Squero Vecchio",
+      "streetNameEnglish": "Street of the Old Boatyard",
+      "streetDescription": "Named after an old squero (boatyard) where gondolas and other boats were built and repaired. Several such boatyards existed in Dorsoduro due to its extensive waterfront.",
+      "id": "building_45.442696_12.317819"
+    },
+    {
+      "lat": 45.44262068331913,
+      "lng": 12.318445806286023,
+      "streetName": "Sottoportego dei Cordiami",
+      "streetNameEnglish": "Passageway of the Rope Makers",
+      "streetDescription": "A covered passageway named after rope makers who worked in the area. Rope making was essential for Venice's maritime economy, and workshops were often located in working-class areas of Dorsoduro.",
+      "id": "building_45.442621_12.318446"
+    },
+    {
+      "lat": 45.442596421864955,
+      "lng": 12.320475824241193,
+      "streetName": "Calle della Toletta",
+      "streetNameEnglish": "Street of the Small Table",
+      "streetDescription": "Named after a small table or counter used by merchants, or possibly after a small devotional altar. This is a historically documented street name in Dorsoduro.",
+      "id": "building_45.442596_12.320476"
+    },
+    {
+      "lat": 45.442600772883715,
+      "lng": 12.321127351126703,
+      "streetName": "Rio Terà San Trovaso",
+      "streetNameEnglish": "Filled Canal of Saints Gervasius and Protasius",
+      "streetDescription": "Named after the Church of San Trovaso (a Venetian corruption of Saints Gervasius and Protasius) in Dorsoduro. This was once a canal that was filled to create a street.",
+      "id": "building_45.442601_12.321127"
+    },
+    {
+      "lat": 45.44260037979015,
+      "lng": 12.321727555996322,
+      "streetName": "Calle dei Guardiani della Scuola",
+      "streetNameEnglish": "Street of the School Guardians",
+      "streetDescription": "Named after the guardians or caretakers of a nearby scuola (confraternity), possibly the Scuola dei Carmini in Dorsoduro. These officials were important in maintaining the scuola's buildings and operations.",
+      "id": "building_45.442600_12.321728"
+    },
+    {
+      "lat": 45.44266828668874,
+      "lng": 12.322456858690348,
+      "streetName": "Fondamenta della Palada",
+      "streetNameEnglish": "Foundation of the Mooring Post",
+      "streetDescription": "Named after mooring posts used to secure boats along this waterfront in Dorsoduro. Such infrastructure was essential to Venice's water-based transportation system.",
+      "id": "building_45.442668_12.322457"
+    },
+    {
+      "lat": 45.44273780376655,
+      "lng": 12.323006991046181,
+      "streetName": "Calle dei Bandierari",
+      "streetNameEnglish": "Street of the Flag Bearers",
+      "streetDescription": "Named after flag bearers who participated in civic and religious processions. Processional displays were an important part of Venetian public life.",
+      "id": "building_45.442738_12.323007"
+    },
+    {
+      "lat": 45.4427433868338,
+      "lng": 12.323613841235721,
+      "streetName": "Salizada del Fontego",
+      "streetNameEnglish": "Paved Street of the Warehouse",
+      "streetDescription": "Named after a fontego (warehouse) that operated in this area. The 'salizada' designation indicates it was one of the first paved streets, likely due to commercial importance.",
+      "id": "building_45.442743_12.323614"
+    },
+    {
+      "lat": 45.442693463084446,
+      "lng": 12.324344791294665,
+      "streetName": "Calle dei Conversi",
+      "streetNameEnglish": "Street of the Converts",
+      "streetDescription": "Named after converts or lay brothers associated with the Carmelite monastery in Dorsoduro. Religious conversions were significant events in Renaissance Venice.",
+      "id": "building_45.442693_12.324345"
+    },
+    {
+      "lat": 45.44265962870784,
+      "lng": 12.324847840947081,
+      "streetName": "Rio Terà del Capitello",
+      "streetNameEnglish": "Filled Canal of the Capital",
+      "streetDescription": "Named after a capitello (small shrine or capital) that was a local landmark. This was once a canal that was filled in to create a street.",
+      "id": "building_45.442660_12.324848"
+    },
+    {
+      "lat": 45.44270418985903,
+      "lng": 12.32547643257518,
+      "streetName": "Calle della Pietà",
+      "streetNameEnglish": "Street of Mercy",
+      "streetDescription": "Named after a charitable institution or a religious artwork depicting the Pietà (the Virgin Mary cradling the dead body of Jesus). Works of mercy were central to Venetian religious life.",
+      "id": "building_45.442704_12.325476"
+    },
+    {
+      "lat": 45.4431467142481,
+      "lng": 12.316634804154148,
+      "streetName": "Fondamenta degli Incurabili",
+      "streetNameEnglish": "Foundation of the Incurables",
+      "streetDescription": "Named after the Ospedale degli Incurabili, a hospital in Dorsoduro that treated patients with diseases considered incurable in the Renaissance period.",
+      "id": "building_45.443147_12.316635"
+    },
+    {
+      "lat": 45.443186057966244,
+      "lng": 12.317221422296402,
+      "streetName": "Calle dei Centopietre",
+      "streetNameEnglish": "Street of the Hundred Stones",
+      "streetDescription": "Named after distinctive paving stones or a stonemason's workshop in this area of Dorsoduro. Stone was an important building material in Venice despite the city's lagoon setting.",
+      "id": "building_45.443186_12.317221"
+    },
+    {
+      "lat": 45.44306915380621,
+      "lng": 12.31783341744465,
+      "streetName": "Sottoportego del Purgatorio",
+      "streetNameEnglish": "Passageway of Purgatory",
+      "streetDescription": "A covered passageway named after the Catholic concept of Purgatory, possibly related to prayers or devotional practices at a nearby church in Dorsoduro.",
+      "id": "building_45.443069_12.317833"
+    },
+    {
+      "lat": 45.4431043323195,
+      "lng": 12.318470762724763,
+      "streetName": "Calle dei Librai",
+      "streetNameEnglish": "Street of the Booksellers",
+      "streetDescription": "Named after booksellers or printers who had shops in this area. Venice was a major center of printing and publishing in Renaissance Europe.",
+      "id": "building_45.443104_12.318471"
+    },
+    {
+      "lat": 45.443079432397674,
+      "lng": 12.320405365975999,
+      "streetName": "Rio Terà della Salute",
+      "streetNameEnglish": "Filled Canal of Health",
+      "streetDescription": "Named after the Church of Santa Maria della Salute in Dorsoduro, built as a votive offering for deliverance from the plague. This was once a canal that was filled in.",
+      "id": "building_45.443079_12.320405"
+    },
+    {
+      "lat": 45.44321612950179,
+      "lng": 12.32097041883043,
+      "streetName": "Calle dei Romiti",
+      "streetNameEnglish": "Street of the Hermits",
+      "streetDescription": "Named after hermits or recluses associated with religious orders in the area, possibly connected to the Carmelites who had traditions of eremitic spirituality.",
+      "id": "building_45.443216_12.320970"
+    },
+    {
+      "lat": 45.44320250450817,
+      "lng": 12.32161872886048,
+      "streetName": "Fondamenta dell'Abbazia",
+      "streetNameEnglish": "Foundation of the Abbey",
+      "streetDescription": "Named after an abbey or a property belonging to an abbey that was located in this area of Dorsoduro.",
+      "id": "building_45.443203_12.321619"
+    },
+    {
+      "lat": 45.44315146916715,
+      "lng": 12.322421636728652,
+      "streetName": "Calle del Parrocchetto",
+      "streetNameEnglish": "Street of the Parrot",
+      "streetDescription": "Named after a shop sign depicting a parrot, or possibly after an actual parrot kept by a wealthy resident. Exotic birds were status symbols in Renaissance Venice.",
+      "id": "building_45.443151_12.322422"
+    },
+    {
+      "lat": 45.44320353307247,
+      "lng": 12.32290915893357,
+      "streetName": "Salizada dei Dotti",
+      "streetNameEnglish": "Paved Street of the Learned",
+      "streetDescription": "Named after scholars or learned individuals who lived in the area, possibly connected to the University of Padua, where many Venetian nobili studied.",
+      "id": "building_45.443204_12.322909"
+    },
+    {
+      "lat": 45.443126144199226,
+      "lng": 12.323584681013319,
+      "streetName": "Calle dei Velluti",
+      "streetNameEnglish": "Street of Velvets",
+      "streetDescription": "Named after velvet fabric merchants or workshops. Luxury textiles were a major industry in Renaissance Venice, with specialized workshops throughout the city.",
+      "id": "building_45.443126_12.323585"
+    },
+    {
+      "lat": 45.44307264888808,
+      "lng": 12.324364915431566,
+      "streetName": "Rio Terà dei Catecumeni",
+      "streetNameEnglish": "Filled Canal of the Catechumens",
+      "streetDescription": "Named after the institution for catechumens (converts preparing for baptism), particularly Jews and Muslims converting to Christianity. Venice had a specific institution for this purpose.",
+      "id": "building_45.443073_12.324365"
+    },
+    {
+      "lat": 45.44313724169024,
+      "lng": 12.32497583353698,
+      "streetName": "Calle della Scuola Vecchia",
+      "streetNameEnglish": "Street of the Old School",
+      "streetDescription": "Named after an old scuola (confraternity) that was once located in this area of Dorsoduro. These institutions were important centers of social and religious life.",
+      "id": "building_45.443137_12.324976"
+    },
+    {
+      "lat": 45.44365242739881,
+      "lng": 12.317353653152413,
+      "streetName": "Sottoportego dell'Orazione",
+      "streetNameEnglish": "Passageway of Prayer",
+      "streetDescription": "A covered passageway named after prayer practices, possibly connected to processions or devotional routines associated with the Carmelite church in Dorsoduro.",
+      "id": "building_45.443652_12.317354"
+    },
+    {
+      "lat": 45.443607415461805,
+      "lng": 12.320978742455463,
+      "streetName": "Calle dei Traghettatori",
+      "streetNameEnglish": "Street of the Ferrymen",
+      "streetDescription": "Named after gondoliers who operated ferry services at fixed crossing points of the Grand Canal. Several traghetti (ferry stations) existed along Dorsoduro's Grand Canal frontage.",
+      "id": "building_45.443607_12.320979"
+    },
+    {
+      "lat": 45.44357285546603,
+      "lng": 12.321767140531486,
+      "streetName": "Fondamenta del Ponte Longo",
+      "streetNameEnglish": "Foundation of the Long Bridge",
+      "streetDescription": "Named after a long bridge that connected different parts of Dorsoduro. Bridges were crucial infrastructure in Venice's water-crossed urban landscape.",
+      "id": "building_45.443573_12.321767"
+    },
+    {
+      "lat": 45.443663191421216,
+      "lng": 12.322299346727995,
+      "streetName": "Calle dei Pittori",
+      "streetNameEnglish": "Street of the Painters",
+      "streetDescription": "Named after artists who had their workshops in this area. Dorsoduro was home to many artists during the Renaissance, attracted by important church commissions.",
+      "id": "building_45.443663_12.322299"
+    },
+    {
+      "lat": 45.443623678324045,
+      "lng": 12.323059165942844,
+      "streetName": "Rio Terà Angelo Raffaele",
+      "streetNameEnglish": "Filled Canal of Angel Raphael",
+      "streetDescription": "Named after the Church of Angelo Raffaele in Dorsoduro. This was once a canal that was filled in to create a street, as indicated by the 'Rio Terà' designation.",
+      "id": "building_45.443624_12.323059"
+    },
+    {
+      "lat": 45.44360809952132,
+      "lng": 12.323594343078838,
+      "streetName": "Calle dei Maestri",
+      "streetNameEnglish": "Street of the Masters",
+      "streetDescription": "Named after master craftsmen who had workshops in this area of Dorsoduro. Venice's economy relied heavily on specialized crafts organized into guilds.",
+      "id": "building_45.443608_12.323594"
+    },
+    {
+      "lat": 45.443570344874125,
+      "lng": 12.324313984607477,
+      "streetName": "Fondamenta delle Convertite",
+      "streetNameEnglish": "Foundation of the Converted Women",
+      "streetDescription": "Named after an institution for reformed prostitutes. Such institutions existed in Venice as part of the city's social welfare and moral reform efforts.",
+      "id": "building_45.443570_12.324314"
+    },
+    {
+      "lat": 45.443504060014924,
+      "lng": 12.324975430796957,
+      "streetName": "Calle del Campanile Storto",
+      "streetNameEnglish": "Street of the Crooked Bell Tower",
+      "streetDescription": "Named after a leaning bell tower that was a local landmark. Venice's soft subsoil often caused structural issues in its buildings.",
+      "id": "building_45.443504_12.324975"
+    },
+    {
+      "lat": 45.44406578684487,
+      "lng": 12.321153122819428,
+      "streetName": "Sottoportego dei Devoti",
+      "streetNameEnglish": "Passageway of the Devout",
+      "streetDescription": "A covered passageway named after devout individuals who may have used this route to access the Carmelite church or other religious institutions in Dorsoduro.",
+      "id": "building_45.444066_12.321153"
+    },
+    {
+      "lat": 45.44411434197228,
+      "lng": 12.321778916218484,
+      "streetName": "Calle dei Procuratori",
+      "streetNameEnglish": "Street of the Procurators",
+      "streetDescription": "Named after the Procurators of St. Mark, high-ranking Venetian officials who may have owned property in this area of Dorsoduro.",
+      "id": "building_45.444114_12.321779"
+    },
+    {
+      "lat": 45.44407407232056,
+      "lng": 12.322287633308743,
+      "streetName": "Rio Terà delle Muneghette",
+      "streetNameEnglish": "Filled Canal of the Little Nuns",
+      "streetDescription": "Named after a small convent or nuns from a particular order. This was once a canal that was filled in to create a street.",
+      "id": "building_45.444074_12.322288"
+    },
+    {
+      "lat": 45.44401285858547,
+      "lng": 12.323059374880375,
+      "streetName": "Calle dell'Artigiano",
+      "streetNameEnglish": "Street of the Artisan",
+      "streetDescription": "Named after craftsmen who worked in this area of Dorsoduro. Venice's economy depended heavily on skilled artisans across numerous trades.",
+      "id": "building_45.444013_12.323059"
+    },
+    {
+      "lat": 45.44405726405608,
+      "lng": 12.32367593600129,
+      "streetName": "Fondamenta del Monastero",
+      "streetNameEnglish": "Foundation of the Monastery",
+      "streetDescription": "Named after a monastery, possibly the Carmelite monastery, that had waterfront access at this location in Dorsoduro.",
+      "id": "building_45.444057_12.323676"
+    },
+    {
+      "lat": 45.4444694882035,
+      "lng": 12.322427657665859,
+      "streetName": "Calle della Pasina",
+      "streetNameEnglish": "Street of the Small Passage",
+      "streetDescription": "Named after a small passage or path that connected different areas in Dorsoduro. 'Pasina' is a Venetian dialect term for a small passage.",
+      "id": "building_45.444469_12.322428"
+    },
+    {
+      "lat": 45.444453789148604,
+      "lng": 12.322920936307908,
+      "streetName": "Salizada dei Devoti",
+      "streetNameEnglish": "Paved Street of the Devoted",
+      "streetDescription": "Named after devout individuals associated with religious institutions in the area. The 'salizada' designation indicates it was one of the first paved streets.",
+      "id": "building_45.444454_12.322921"
+    }
+  ],
+  "id": "polygon-1745879581983"
+}
