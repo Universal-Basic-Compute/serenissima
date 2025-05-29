@@ -19,14 +19,8 @@ log = logging.getLogger("generate_guild_images")
 # Load environment variables
 load_dotenv()
 
-# Constants
-PUBLIC_DIR = os.path.join(os.getcwd(), 'public')
-EMBLEMS_DIR = os.path.join(PUBLIC_DIR, 'images', 'guilds', 'emblems')
-BANNERS_DIR = os.path.join(PUBLIC_DIR, 'images', 'guilds', 'banners')
-
-# Ensure the image directories exist
-os.makedirs(EMBLEMS_DIR, exist_ok=True)
-os.makedirs(BANNERS_DIR, exist_ok=True)
+# Constants for backend upload
+DEFAULT_FASTAPI_URL = "http://localhost:8000" # Fallback, should be set in .env
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
     """Initialize Airtable connection."""
@@ -67,8 +61,17 @@ def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_identifie
     log.info(f"Generating {image_type} for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}) with aspect ratio {aspect_ratio}. Prompt: {prompt[:100]}...")
     
     ideogram_api_key = os.environ.get('IDEOGRAM_API_KEY')
+    fastapi_url = os.environ.get('FASTAPI_BACKEND_URL', DEFAULT_FASTAPI_URL)
+    upload_api_key = os.environ.get('UPLOAD_API_KEY')
+
     if not ideogram_api_key:
         log.error("IDEOGRAM_API_KEY environment variable is not set.")
+        return None
+    if not fastapi_url: # Should not happen with default
+        log.error("FASTAPI_BACKEND_URL environment variable is not set.")
+        return None
+    if not upload_api_key:
+        log.error("UPLOAD_API_KEY environment variable is not set for backend uploads.")
         return None
 
     # Add aspect ratio guidance to the prompt
@@ -111,35 +114,97 @@ def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_identifie
         image_response = requests.get(image_url, stream=True)
         image_response.raise_for_status()
 
-        # Determine save path
-        if image_type == "emblem":
-            save_dir = EMBLEMS_DIR
-            file_extension = "png" # Emblems often benefit from transparency
-        else: # banner
-            save_dir = BANNERS_DIR
-            file_extension = "png" # Banners can also be png
-
-        image_filename = f"{guild_identifier_for_filename}.{file_extension}"
-        image_path = os.path.join(save_dir, image_filename)
-
-        with open(image_path, 'wb') as f:
+        # Save to a temporary file first
+        import tempfile
+        file_extension = "png" # Standardize on PNG
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
             for chunk in image_response.iter_content(chunk_size=8192):
-                f.write(chunk)
+                tmp_file.write(chunk)
+            temp_file_path = tmp_file.name
         
-        log.info(f"Saved {image_type} for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}) to {image_path}")
+        log.info(f"Downloaded {image_type} for guild {guild_name_for_logging} to temporary file {temp_file_path}")
+
+        # Determine destination path for backend upload
+        destination_folder_on_server = f"images/guilds/{image_type}s" # e.g., images/guilds/emblems
+        target_filename_on_server = f"{guild_identifier_for_filename}.{file_extension}"
+
+        # Upload the temporary file to the backend
+        uploaded_relative_path = upload_file_to_backend(
+            fastapi_url,
+            upload_api_key,
+            temp_file_path,
+            destination_folder_on_server,
+            target_filename_on_server
+        )
         
-        # Return the public URL path
-        public_image_url = f"/images/guilds/{image_type}s/{image_filename}" # Uses guild_identifier_for_filename via image_filename
-        return public_image_url
+        # Clean up temporary file
+        try:
+            os.remove(temp_file_path)
+            log.debug(f"Removed temporary file: {temp_file_path}")
+        except OSError as e_remove:
+            log.error(f"Error removing temporary file {temp_file_path}: {e_remove}")
+
+        if uploaded_relative_path:
+            # Construct the public URL based on the backend's serving path
+            # The backend serves from /public_assets/ + relative_path
+            public_image_url = f"/public_assets/{uploaded_relative_path.lstrip('/')}"
+            log.info(f"Successfully uploaded {image_type} for {guild_name_for_logging}. Public URL: {public_image_url}")
+            return public_image_url
+        else:
+            log.error(f"Failed to upload {image_type} for {guild_name_for_logging} to backend.")
+            return None
 
     except requests.exceptions.RequestException as e:
-        log.error(f"Error calling Ideogram API for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}, Type: {image_type}): {e}")
+        log.error(f"Error during Ideogram API call or download for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}, Type: {image_type}): {e}")
     except KeyError:
         log.error(f"Unexpected response structure from Ideogram API for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}, Type: {image_type}).")
     except Exception as e:
         log.error(f"Error generating or saving {image_type} for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}): {e}")
     
     return None
+
+def upload_file_to_backend(
+    api_url: str, 
+    api_key: str, 
+    file_path: str, 
+    destination_server_path: str, # e.g., "images/guilds/emblems"
+    target_filename: str # e.g., "guild_id.png"
+) -> Optional[str]:
+    """
+    Uploads a file to the backend's /api/upload-asset endpoint.
+    Returns the relative path of the uploaded file on success, None otherwise.
+    """
+    upload_endpoint = f"{api_url.rstrip('/')}/api/upload-asset"
+    
+    try:
+        with open(file_path, 'rb') as f:
+            # The 'files' dict structure is {'file': (filename_on_server, file_object, content_type)}
+            # The 'destination_path' in data is the folder on the server.
+            files = {'file': (target_filename, f)} 
+            data = {'destination_path': destination_server_path}
+            headers = {'X-Upload-Api-Key': api_key}
+            
+            log.info(f"Uploading '{file_path}' as '{target_filename}' to '{destination_server_path}' on {upload_endpoint}...")
+            response = requests.post(upload_endpoint, files=files, data=data, headers=headers, timeout=60)
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                saved_relative_path = response_data.get('relative_path')
+                log.info(f"Success: {file_path} uploaded. Backend relative path: {saved_relative_path}")
+                return saved_relative_path 
+            else:
+                log.error(f"Failed to upload {file_path}. Status: {response.status_code}, Response: {response.text}")
+                return None
+    except requests.exceptions.RequestException as e:
+        log.error(f"Request error during upload of {file_path}: {e}")
+        return None
+    except IOError as e:
+        log.error(f"IO error reading {file_path}: {e}")
+        return None
+    except Exception as e:
+        log.error(f"Unexpected error during upload of {file_path}: {e}")
+        return None
 
 def update_guild_record(tables: Dict[str, Table], guild_record_id: str, field_name: str, new_value: str) -> bool:
     """Update a specific field in a guild's Airtable record."""
