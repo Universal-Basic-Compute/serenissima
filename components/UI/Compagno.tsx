@@ -725,22 +725,34 @@ Your response:`;
     }
   };
 
-  // Format date to be more readable and immersive
-  const formatNotificationDate = (dateString: string): JSX.Element => {
+  // Helper to get 'YYYY-MM-DD' from a date string
+  const getDayString = (dateString?: string): string | null => {
+    if (!dateString) return null;
     try {
-      // Use the message ID or timestamp as an additional seed for variety
-      const seed = dateString; // You could also use a message ID if available
-      const formattedDate = timeDescriptionService.formatDate(dateString, seed);
-      
-      // Return a JSX element with updated styling - grey, serif, and extra small
-      return (
-        <span className="text-gray-500 font-serif text-[10px]">
-          {formattedDate}
-        </span>
-      );
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return <span className="text-gray-500 font-serif text-[10px]">{dateString}</span>;
+      return new Date(dateString).toISOString().split('T')[0];
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // Format date for display in separators
+  const formatDateForSeparator = (dateString?: string): string => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+
+      if (date.toDateString() === today.toDateString()) {
+        return 'Aujourd\'hui';
+      }
+      if (date.toDateString() === yesterday.toDateString()) {
+        return 'Hier';
+      }
+      return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (e) {
+      return dateString; // Fallback
     }
   };
 
@@ -1415,28 +1427,39 @@ Your response:`;
                 </div>
               ) : (
                 <>
-                  {notifications.map((notification) => (
-                    <div 
-                      key={notification.notificationId} 
-                      className={`mb-3 p-3 rounded-lg border ${
-                        notification.readAt 
-                          ? 'border-gray-200 bg-white' 
-                          : 'border-amber-300 bg-amber-50 notification-unread shadow-md'
-                      }`}
-                      onClick={() => {
-                        if (!notification.readAt) {
-                          markNotificationsAsRead([notification.notificationId]);
-                        }
-                      }}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          {formatNotificationDate(notification.createdAt)}
+                  {notifications.reduce((acc, notification, index) => {
+                    const currentDay = getDayString(notification.createdAt);
+                    const previousDay = index > 0 ? getDayString(notifications[index - 1].createdAt) : null;
+                    const showDateSeparator = currentDay && currentDay !== previousDay;
+
+                    if (showDateSeparator) {
+                      acc.push(
+                        <div key={`date-${notification.notificationId}`} className="text-center my-3">
+                          <span className="text-xs text-gray-500 bg-amber-100 px-2 py-1 rounded-full">
+                            {formatDateForSeparator(notification.createdAt)}
+                          </span>
                         </div>
-                      </div>
-                      <div className="mt-1 text-xs markdown-content">
-                        <ReactMarkdown 
-                          remarkPlugins={[remarkGfm]}
+                      );
+                    }
+
+                    acc.push(
+                      <div 
+                        key={notification.notificationId} 
+                        className={`mb-3 p-3 rounded-lg border ${
+                          notification.readAt 
+                            ? 'border-gray-200 bg-white' 
+                            : 'border-amber-300 bg-amber-50 notification-unread shadow-md'
+                        }`}
+                        onClick={() => {
+                          if (!notification.readAt) {
+                            markNotificationsAsRead([notification.notificationId]);
+                          }
+                        }}
+                      >
+                        {/* Date is now displayed by the separator */}
+                        <div className="mt-1 text-xs markdown-content">
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
                           components={{
                             a: ({node, ...props}) => <a {...props} className="text-amber-700 underline hover:text-amber-500" target="_blank" rel="noopener noreferrer" />,
                             code: ({node, ...props}) => <code {...props} className="bg-amber-50 px-1 py-0.5 rounded text-sm font-mono" />,
@@ -1454,8 +1477,14 @@ Your response:`;
                           {notification.content}
                         </ReactMarkdown>
                       </div>
+                      {/* Display time using timeDescriptionService if needed, or remove if only day separator is desired */}
+                      <div className="text-right text-gray-400 text-[10px] mt-1">
+                        {timeDescriptionService.formatTime(notification.createdAt)}
+                      </div>
                     </div>
-                  ))}
+                    );
+                    return acc;
+                  }, [] as JSX.Element[])}
                 </>
               )}
               
@@ -1628,72 +1657,86 @@ Your response:`;
                               </div>
                             </div>
                           ) : (
-                            citizenMessages.map((message) => (
-                              <div 
-                                key={message.messageId || `msg-${message.createdAt}-${Math.random()}`} 
-                                className={`mb-3 ${
-                                  // message.sender is the AI kin or other citizen.
-                                  // username is the human player.
-                                  // If message.sender is the selectedCitizen (who the human is talking to), it's an incoming message.
-                                  // If message.sender is the human player (username), it's an outgoing message.
-                                  message.sender === username 
-                                    ? 'text-right'  // Human player's message
-                                    : 'text-left'   // AI/Other citizen's message
-                                }`}
-                              >
+                            citizenMessages.reduce((acc, message, index) => {
+                              const currentDay = getDayString(message.createdAt);
+                              const previousDay = index > 0 ? getDayString(citizenMessages[index - 1].createdAt) : null;
+                              const showDateSeparator = currentDay && currentDay !== previousDay;
+
+                              if (showDateSeparator) {
+                                acc.push(
+                                  <div key={`date-${message.messageId || index}`} className="text-center my-3">
+                                    <span className="text-xs text-gray-500 bg-amber-100 px-2 py-1 rounded-full">
+                                      {formatDateForSeparator(message.createdAt)}
+                                    </span>
+                                  </div>
+                                );
+                              }
+
+                              acc.push(
                                 <div 
-                                  className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                                    message.sender === username
-                                      ? 'bg-orange-600 text-white citizen-bubble rounded-br-none' 
-                                      : 'bg-gray-200 text-gray-800 assistant-bubble rounded-bl-none'
+                                  key={message.messageId || `msg-${message.createdAt}-${Math.random()}`} 
+                                  className={`mb-1 ${ // Reduced mb from mb-3 to mb-1
+                                    message.sender === username 
+                                      ? 'text-right'
+                                      : 'text-left'
                                   }`}
                                 >
-                                  <div style={{ position: 'relative', zIndex: 10 }} className="markdown-content">
-                                    {message.type === 'guild_application' ? (
-                                      <div className="guild-application">
-                                        <div className="font-bold text-amber-800 mb-2">📜 Guild Application</div>
-                                        <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
-                                      
-                                        {message.receiver === username && (
-                                          <div className="mt-3 flex space-x-2">
-                                            <button
-                                              onClick={() => { /* Approve logic */ }}
-                                              className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
-                                            > Approve </button>
-                                            <button
-                                              onClick={() => { /* Decline logic */ }}
-                                              className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
-                                            > Decline </button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    ) : message.type === 'guild_application_approved' ? (
-                                      <div className="guild-application-approved">
-                                        <div className="font-bold text-green-700 mb-2">✅ Guild Application Approved</div>
-                                        <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
-                                      </div>
-                                    ) : message.type === 'guild_application_rejected' ? (
-                                      <div className="guild-application-rejected">
-                                        <div className="font-bold text-red-700 mb-2">❌ Guild Application Rejected</div>
-                                        <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
-                                      </div>
-                                    ) : message.type === 'guild_application_response' ? (
-                                      <div className="guild-application-response">
-                                        <div className="font-bold text-amber-800 mb-2">📜 Application Response</div>
-                                        <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
-                                      </div>
-                                    ) : (
-                                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                          {message.content || "No content available"}
-                                       </ReactMarkdown>
-                                    )}
-                                  </div>
-                                  <div className="text-xs mt-1" style={{ position: 'relative', zIndex: 10 }}>
-                                    {formatNotificationDate(message.createdAt!)}
+                                  <div 
+                                    className={`inline-block p-3 rounded-lg max-w-[80%] ${
+                                      message.sender === username
+                                        ? 'bg-orange-600 text-white citizen-bubble rounded-br-none' 
+                                        : 'bg-gray-200 text-gray-800 assistant-bubble rounded-bl-none'
+                                    }`}
+                                  >
+                                    <div style={{ position: 'relative', zIndex: 10 }} className="markdown-content">
+                                      {message.type === 'guild_application' ? (
+                                        <div className="guild-application">
+                                          <div className="font-bold text-amber-800 mb-2">📜 Guild Application</div>
+                                          <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
+                                        
+                                          {message.receiver === username && (
+                                            <div className="mt-3 flex space-x-2">
+                                              <button
+                                                onClick={() => { /* Approve logic */ }}
+                                                className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                                              > Approve </button>
+                                              <button
+                                                onClick={() => { /* Decline logic */ }}
+                                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                                              > Decline </button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ) : message.type === 'guild_application_approved' ? (
+                                        <div className="guild-application-approved">
+                                          <div className="font-bold text-green-700 mb-2">✅ Guild Application Approved</div>
+                                          <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
+                                        </div>
+                                      ) : message.type === 'guild_application_rejected' ? (
+                                        <div className="guild-application-rejected">
+                                          <div className="font-bold text-red-700 mb-2">❌ Guild Application Rejected</div>
+                                          <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
+                                        </div>
+                                      ) : message.type === 'guild_application_response' ? (
+                                        <div className="guild-application-response">
+                                          <div className="font-bold text-amber-800 mb-2">📜 Application Response</div>
+                                          <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
+                                        </div>
+                                      ) : (
+                                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {message.content || "No content available"}
+                                         </ReactMarkdown>
+                                      )}
+                                    </div>
+                                    {/* Time display below the bubble, aligned with bubble's side */}
+                                    <div className={`text-[10px] mt-1 ${message.sender === username ? 'text-right pr-1 text-gray-400' : 'text-left pl-1 text-gray-500'}`}>
+                                      {timeDescriptionService.formatTime(message.createdAt!)}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))
+                              );
+                              return acc;
+                            }, [] as JSX.Element[])
                           )}
                            {isTyping && selectedCitizen === username && ( // Show typing indicator for self-chat AI response
                               <div className="text-left mb-3">
