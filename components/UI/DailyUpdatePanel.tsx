@@ -64,10 +64,12 @@ const DailyUpdatePanel: React.FC<DailyUpdatePanelProps> = ({ onClose }) => {
 
   // Effect to control panel visibility based on data loading and minimum time
   useEffect(() => {
-    if (!isLoading && isMinTimePassed) {
+    if (!isLoading && isMinTimePassed && !error) { // Added !error condition
       setIsPanelVisible(true);
+    } else if (error) { // If there's an error, ensure panel is not visible
+      setIsPanelVisible(false);
     }
-  }, [isLoading, isMinTimePassed]);
+  }, [isLoading, isMinTimePassed, error]);
 
   // Handle clicks outside the panel to close it (optional, good UX)
   useEffect(() => {
