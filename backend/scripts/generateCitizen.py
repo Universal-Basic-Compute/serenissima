@@ -346,15 +346,17 @@ def _get_random_venice_position() -> Optional[Dict[str, float]]:
 
     # If not a dry run, save to Airtable and update description/image
     if not args.dry_run and citizens:
-        log.info("Attempting to save generated citizens to Airtable and update profiles...")
+        log.info("Attempting to save generated citizens to Airtable, update profiles, and link repositories...")
         tables = initialize_airtable()
         if not tables:
-            log.error("Could not initialize Airtable. Skipping save and update.")
+            log.error("Could not initialize Airtable. Skipping save, update, and repo linking.")
         else:
             try:
                 # Import the update function here to avoid circular dependencies if any,
                 # and to ensure it's only imported when needed.
                 from updatecitizenDescriptionAndImage import update_citizen_description_and_image
+                # Import the repo linking function
+                from .linkrepos import link_repo_for_citizen
                 
                 for citizen_data in citizens:
                     log.info(f"Processing citizen {citizen_data.get('username')} for Airtable save.")
@@ -410,13 +412,23 @@ def _get_random_venice_position() -> Optional[Dict[str, float]]:
                             log.info(f"Successfully initiated update for description and image for {citizen_data.get('username')}.")
                         else:
                             log.warning(f"Failed to initiate update for description and image for {citizen_data.get('username')}.")
+
+                        # After successful save and profile update initiation, link the repo
+                        if citizen_data.get('username'):
+                            log.info(f"Attempting to link repository for citizen: {citizen_data.get('username')}")
+                            if link_repo_for_citizen(citizen_data.get('username')):
+                                log.info(f"Repository linking process successful for {citizen_data.get('username')}.")
+                            else:
+                                log.warning(f"Repository linking process failed or was skipped for {citizen_data.get('username')}.")
+                        else:
+                            log.warning("Cannot link repository, username not found after saving citizen.")
                             
                     except Exception as e_save:
                         log.error(f"Failed to save citizen {citizen_data.get('username')} to Airtable: {e_save}")
                         
-            except ImportError:
-                log.error("Could not import 'update_citizen_description_and_image'. Make sure the script is accessible.")
+            except ImportError as e_import:
+                log.error(f"Could not import a required module ('updatecitizenDescriptionAndImage' or '.linkrepos'). Make sure the scripts are accessible: {e_import}")
             except Exception as e_main_process:
-                log.error(f"An error occurred during Airtable save or profile update process: {e_main_process}")
+                log.error(f"An error occurred during Airtable save, profile update, or repo linking process: {e_main_process}")
     elif args.dry_run:
-        log.info("[DRY RUN] Skipping Airtable save and profile update.")
+        log.info("[DRY RUN] Skipping Airtable save, profile update, and repository linking.")
