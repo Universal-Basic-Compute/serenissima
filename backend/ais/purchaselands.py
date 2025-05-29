@@ -126,7 +126,7 @@ def create_notification(tables, citizen: str, land_id: str, price: float) -> boo
         notification = {
             "Citizen": citizen,
             "Type": "land_purchase",
-            "Content": f"You have successfully purchased land {land_id} for {price} ducats.",
+            "Content": f"🎉 Land Acquired! You have successfully purchased land **{land_id}** for **{price} ⚜️ Ducats**.",
             "CreatedAt": now,
             "ReadAt": None,
             "Details": json.dumps({
@@ -152,10 +152,10 @@ def create_admin_notification(tables, purchases: List[Dict]) -> None:
         now = datetime.now().isoformat()
         
         # Create a summary message
-        message = "AI Land Purchase Summary:\n\n"
+        message = "📜 **AI Land Purchase Summary** 📜\n\n"
         
         for purchase in purchases:
-            message += f"- {purchase['citizen']}: Purchased land {purchase['land_id']} for {purchase['price']} ducats\n"
+            message += f"- 👤 **{purchase['citizen']}**: Purchased land **{purchase['land_id']}** for **{purchase['price']} ⚜️ Ducats**\n"
         
         # Create the notification
         notification = {

@@ -123,7 +123,7 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
             # Send notification to land owner about the updated bid
             if land_owner:
                 try:
-                    notification_content = f"AI {ai_username} has increased their bid on your land {land_id} from {current_bid} to {new_bid} compute."
+                    notification_content = f"📈 Bid Update: AI **{ai_username}** has increased their bid on your land **{land_id}** from {current_bid} to **{new_bid} ⚜️ Ducats**."
                     tables["notifications"].create({
                         "Citizen": land_owner,
                         "Type": "bid_update",
@@ -167,7 +167,7 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
             # Send notification to land owner about the new bid
             if land_owner:
                 try:
-                    notification_content = f"AI {ai_username} has placed a bid of {bid_amount} compute on your land {land_id}."
+                    notification_content = f"📬 New Bid: AI **{ai_username}** has placed a bid of **{bid_amount} ⚜️ Ducats** on your land **{land_id}**."
                     tables["notifications"].create({
                         "Citizen": land_owner,
                         "Type": "new_bid",
@@ -196,10 +196,10 @@ def create_admin_notification(tables, ai_bid_counts: Dict[str, int]) -> None:
         now = datetime.now().isoformat()
         
         # Create a summary message
-        message = "AI Land Bidding Summary:\n\n"
+        message = "📊 **AI Land Bidding Summary** 📊\n\n"
         
         for ai_name, bid_count in ai_bid_counts.items():
-            message += f"- {ai_name}: {bid_count} bids\n"
+            message += f"- 👤 **{ai_name}**: {bid_count} bids placed/updated\n"
         
         # Create the notification
         notification = {

@@ -98,7 +98,7 @@ def send_notifications_to_ai(ai_username: str, notifications: List[Dict]) -> boo
         }
         
         # Format notifications into a readable message
-        notification_message = f"Here are your latest notifications from La Serenissima:\n\n"
+        notification_message = f"📜 **Latest Notifications from La Serenissima** 📜\n\n"
         
         for i, notification in enumerate(notifications, 1):
             notification_type = notification["fields"].get("Type", "general")
@@ -112,10 +112,10 @@ def send_notifications_to_ai(ai_username: str, notifications: List[Dict]) -> boo
             except:
                 formatted_date = created_at
             
-            notification_message += f"{i}. [{notification_type.upper()}] - {formatted_date}\n{content}\n\n"
+            notification_message += f"**{i}. [{notification_type.upper()}]** - _{formatted_date}_\n{content}\n\n"
         
         # Add instructions for the AI to process these notifications
-        notification_message += "Please process these notifications and update your understanding of recent events in La Serenissima."
+        notification_message += "ℹ️ Please process these notifications and update your understanding of recent events in La Serenissima."
         
         # Prepare the request payload
         payload = {
@@ -152,10 +152,10 @@ def create_admin_notification(tables, ai_notification_counts: Dict[str, int]) ->
         now = datetime.now().isoformat()
         
         # Create a summary message
-        message = "AI Notification Processing Summary:\n\n"
+        message = "📊 **AI Notification Processing Summary** 📊\n\n"
         
         for ai_name, notification_count in ai_notification_counts.items():
-            message += f"- {ai_name}: {notification_count} notifications processed\n"
+            message += f"- 👤 **{ai_name}**: {notification_count} notifications processed\n"
         
         # Create the notification
         notification = {

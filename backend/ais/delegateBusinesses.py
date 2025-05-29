@@ -76,7 +76,7 @@ def create_notification(tables: Dict[str, Table], citizen_username: str, title: 
     """Creates a notification for a citizen."""
     try:
         # Prepend the title to the content, as there's no dedicated title field.
-        full_content = f"{title}: {content}"
+        full_content = f"**{title}**: {content}" # Add bold to title
         
         notification_payload = {
             "Citizen": citizen_username,
@@ -87,7 +87,7 @@ def create_notification(tables: Dict[str, Table], citizen_username: str, title: 
             "Details": json.dumps(details) if details else None
         }
         tables['notifications'].create(notification_payload)
-        log.info(f"Created notification for {citizen_username}: {title}")
+        log.info(f"📬 Created notification for {citizen_username}: {title}")
     except Exception as e:
         log.error(f"Error creating notification for {citizen_username}: {e}")
 
@@ -162,16 +162,16 @@ def delegate_businesses_logic(tables: Dict[str, Table], dry_run: bool = False):
                             create_notification(
                                 tables,
                                 original_owner_username,
-                                f"Business Delegated: {business_name}",
-                                f"Your business '{business_name}' (ID: {business_building_id}) has been delegated to {delegatee_username} as you were managing too many businesses.",
-                                {"delegated_to": delegatee_username, "business_id": business_building_id}
+                                f"➡️ Business Delegated: {business_name}",
+                                f"Your business **{business_name}** (ID: {business_building_id}) has been delegated to **{delegatee_username}** as you were managing too many businesses.",
+                                {"delegated_to": delegatee_username, "business_id": business_building_id, "business_name": business_name}
                             )
                             create_notification(
                                 tables,
                                 delegatee_username,
-                                f"New Business Assigned: {business_name}",
-                                f"You have been assigned to run the business '{business_name}' (ID: {business_building_id}), previously managed by {original_owner_username}.",
-                                {"delegated_from": original_owner_username, "business_id": business_building_id}
+                                f"✨ New Business Assigned: {business_name}",
+                                f"You have been assigned to run the business **{business_name}** (ID: {business_building_id}), previously managed by **{original_owner_username}**.",
+                                {"delegated_from": original_owner_username, "business_id": business_building_id, "business_name": business_name}
                             )
                         except Exception as e:
                             log.error(f"Failed to update RunBy for business {business_id} to {delegatee_username}: {e}")
@@ -208,8 +208,8 @@ def delegate_businesses_logic(tables: Dict[str, Table], dry_run: bool = False):
              create_notification(
                 tables,
                 "ConsiglioDeiDieci", # Admin/System user
-                "AI Business Delegation Report",
-                f"Business delegation process completed. {len(delegation_summary)} actions taken/attempted.",
+                "📜 AI Business Delegation Report",
+                f"Business delegation process completed. {len(delegation_summary)} actions taken/attempted. See details for specifics.",
                 {"delegation_details": delegation_summary}
             )
     else:

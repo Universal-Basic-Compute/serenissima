@@ -867,12 +867,12 @@ def create_admin_notification(tables, ai_strategy_results: Dict[str, bool]) -> N
         # Create the notification
         from backend.engine.utils.activity_helpers import VENICE_TIMEZONE # Import VENICE_TIMEZONE
         notification = {
-            "Citizen": "admin",
+            "Citizen": "ConsiglioDeiDieci", # Standardized admin user
             "Type": "ai_building_strategy",
-            "Content": message,
+            "Content": f"🏗️ **AI Building Strategy Results** 🏗️\n\n{message}",
             "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
-            "ReadAt": datetime.now(VENICE_TIMEZONE).isoformat(), # Set to current time
-            "Status": "read", # Set status to read
+            "ReadAt": None, # Mark as unread for admin
+            "Status": "unread", # Explicitly unread
             "Details": json.dumps({
                 "ai_strategy_results": ai_strategy_results,
                 "timestamp": datetime.now(VENICE_TIMEZONE).isoformat() # Use VENICE_TIMEZONE
@@ -880,7 +880,7 @@ def create_admin_notification(tables, ai_strategy_results: Dict[str, bool]) -> N
         }
         
         tables["notifications"].create(notification)
-        print("Created admin notification with AI building strategy results")
+        log_success("📊 Created admin notification with AI building strategy results") # Use log_success
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 
@@ -1638,15 +1638,16 @@ Your response must be a JSON object with:
                                     return False
                                 
                                 # 5. Create a notification for the citizen
-                                notification_content = f"You have initiated construction of a {building_type_info['name']} on your land {land_id} for {construction_cost} ducats. It is awaiting materials and construction."
-                                notification = {
+                                notification_content_citizen = f"🏗️ Construction Started: You have initiated construction of a **{building_type_info['name']}** on your land **{land_id}** for **{construction_cost} ⚜️ Ducats**. It is awaiting materials and construction."
+                                notification_citizen = {
                                     "Citizen": ai_username,
-                                    "Type": "building_created",
-                                    "Content": f"You have successfully built a {building_type_info['name']} on your land {land_id} for {construction_cost} ducats.",
-                                    "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
+                                    "Type": "building_construction_started", # More specific type
+                                    "Content": notification_content_citizen,
+                                    "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
                                     "ReadAt": None,
                                     "Details": json.dumps({
                                         "building_id": building_id,
+                                        "building_name": computed_building_name,
                                         "building_type": building_type,
                                         "land_id": land_id,
                                         "cost": construction_cost,
@@ -1658,45 +1659,41 @@ Your response must be a JSON object with:
                                 }
                                 
                                 try:
-                                    tables["notifications"].create(notification)
-                                    log_success(f"Created notification for {ai_username} about new building")
+                                    tables["notifications"].create(notification_citizen)
+                                    log_success(f"📬 Created notification for {ai_username} about new building construction started.")
                                 except Exception as notification_error:
-                                    log_error(f"Error creating notification: {str(notification_error)}")
-                                    # Continue even if notification creation fails
+                                    log_error(f"Error creating notification for {ai_username}: {str(notification_error)}")
                                 
                                 # 6. Create a notification for the land owner if different from the building owner
                                 if land_id and ai_username:
-                                    # Get the land owner
                                     land_owner = None
-                                    # Fetch the land record directly from Airtable
-                                    land_records = tables["lands"].all(
-                                        formula=f"{{LandId}} = '{land_id}'"
-                                    )
+                                    land_records = tables["lands"].all(formula=f"{{LandId}} = '{_escape_airtable_value(land_id)}'")
                                     if land_records:
                                         land_owner = land_records[0]["fields"].get("Owner")
                                     
-                                    # If land owner is different from building owner, notify them
                                     if land_owner and land_owner != ai_username:
+                                        notification_content_land_owner = f"🏗️ New Construction on Your Land: **{ai_username}** has started building a **{building_type_info['name']}** (Building ID: {building_id}) on your land **{land_id}**."
+                                        # Removed "Please set a wage" as it might not always be applicable or is handled elsewhere.
                                         land_owner_notification = {
                                             "Citizen": land_owner,
-                                            "Type": "building_created",
-                                            "Content": f"{ai_username} has built a {building_type_info['name']} on your land {land_id}. Please set a wage for this building.",
-                                            "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
+                                            "Type": "building_on_owned_land", # More specific type
+                                            "Content": notification_content_land_owner,
+                                            "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
                                             "ReadAt": None,
                                             "Details": json.dumps({
                                                 "building_id": building_id,
+                                                "building_name": computed_building_name,
                                                 "building_type": building_type,
                                                 "land_id": land_id,
-                                                "owner": ai_username,
-                                                "action_required": "set_wage"
+                                                "builder_owner": ai_username # Citizen who owns/initiated the building
                                             })
                                         }
                                         
                                         try:
                                             tables["notifications"].create(land_owner_notification)
-                                            log_success(f"Created notification for land owner {land_owner} about new building requiring wage setting")
+                                            log_success(f"📬 Created notification for land owner {land_owner} about new building on their land.")
                                         except Exception as notification_error:
-                                            log_error(f"Error creating notification for land owner: {str(notification_error)}")
+                                            log_error(f"Error creating notification for land owner {land_owner}: {str(notification_error)}")
                                             # Continue even if notification creation fails
                                 
                                 return True

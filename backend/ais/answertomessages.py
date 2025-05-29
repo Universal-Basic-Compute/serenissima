@@ -371,10 +371,10 @@ def create_admin_notification(tables, ai_response_counts: Dict[str, int]) -> Non
         now = datetime.now().isoformat()
         
         # Create a summary message
-        message = "AI Message Response Summary:\n\n"
+        message = "💬 **AI Message Response Summary** 💬\n\n"
         
         for ai_name, response_count in ai_response_counts.items():
-            message += f"- {ai_name}: {response_count} responses\n"
+            message += f"- 👤 **{ai_name}**: {response_count} responses\n"
         
         # Create the notification
         notification = {

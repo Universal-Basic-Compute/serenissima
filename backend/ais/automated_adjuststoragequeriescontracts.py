@@ -422,17 +422,17 @@ def process_storage_queries(dry_run: bool = False):
 
                     try:
                         if dry_run:
-                            log.info(f"        [DRY RUN] Would create 'storage_query' contract {query_contract_id} for {actual_target_amount_for_query:.0f} of {resource_id}.")
+                            log.info(f"        [DRY RUN] Would create 'storage_query' contract {query_contract_id} for {actual_target_amount_for_query:.0f} of {res_name_log} from {biz_building_name} to {offer_info['storage_facility_record']['fields'].get('Name', offer_info['storage_facility_record']['fields'].get('BuildingId'))}.")
                             total_contracts_managed +=1
                         else:
                             tables["contracts"].create(contract_payload)
-                            log.info(f"        {LogColors.OKGREEN}Created 'storage_query' contract {query_contract_id} for {actual_target_amount_for_query:.0f} of {resource_id}.{LogColors.ENDC}")
+                            log.info(f"        {LogColors.OKGREEN}Created 'storage_query' contract {query_contract_id} for {actual_target_amount_for_query:.0f} of {res_name_log} from {biz_building_name} to {offer_info['storage_facility_record']['fields'].get('Name', offer_info['storage_facility_record']['fields'].get('BuildingId'))}.{LogColors.ENDC}")
                             total_contracts_managed +=1
                         
                         volume_to_offload_total -= actual_target_amount_for_query
                         remaining_amount_of_this_resource_to_offload -= actual_target_amount_for_query
                     except Exception as e_contract:
-                        log.error(f"        {LogColors.FAIL}Error creating 'storage_query' contract {query_contract_id}: {e_contract}{LogColors.ENDC}")
+                        log.error(f"        {LogColors.FAIL}Error creating 'storage_query' contract {query_contract_id} for {res_name_log}: {e_contract}{LogColors.ENDC}")
                     log.error(traceback.format_exc())
 
     log.info(f"{LogColors.OKGREEN}Storage Query Contract Adjustment process finished.{LogColors.ENDC}")

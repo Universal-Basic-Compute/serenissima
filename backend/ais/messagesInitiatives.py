@@ -370,26 +370,26 @@ def create_admin_notification(tables: Dict[str, Table], initiatives_summary: Dic
     """Crée une notification pour les administrateurs avec le résumé des initiatives."""
     try:
         now = datetime.now().isoformat()
-        content = f"Résumé des initiatives de messages IA ({now}):\n"
-        content += f"Citoyens IA traités: {initiatives_summary['processed_ai_count']}\n"
-        content += f"Messages initiés au total: {initiatives_summary['total_messages_sent']}\n\n"
+        content = f"💬 **Résumé des Initiatives de Messages IA** ({now}):\n"
+        content += f"👤 Citoyens IA traités: **{initiatives_summary['processed_ai_count']}**\n"
+        content += f"✉️ Messages initiés au total: **{initiatives_summary['total_messages_sent']}**\n\n"
         
         for ai_user, data in initiatives_summary.get("details", {}).items():
             if data['messages_sent_count'] > 0:
-                content += f"- {ai_user} a initié {data['messages_sent_count']} message(s) à : {', '.join(data['targets'])}\n"
+                content += f"- **{ai_user}** a initié {data['messages_sent_count']} message(s) à : **{', '.join(data['targets'])}**\n"
         
         if initiatives_summary['total_messages_sent'] == 0:
             content += "Aucun message n'a été initié lors de cette exécution."
 
         notification_payload = {
-            "Citizen": "admin", # Ou un utilisateur système dédié
+            "Citizen": "ConsiglioDeiDieci", # Ou un utilisateur système dédié
             "Type": "ai_message_initiative",
             "Content": content,
             "CreatedAt": now,
             "Details": json.dumps(initiatives_summary)
         }
         tables["notifications"].create(notification_payload)
-        print("Notification d'administration pour les initiatives de messages créée.")
+        print("📬 Notification d'administration pour les initiatives de messages créée.")
     except Exception as e:
         print(f"Erreur lors de la création de la notification d'administration : {e}")
 

@@ -340,25 +340,26 @@ def process_automated_imports(dry_run: bool = False, specific_buyer_building_id:
 
         for building in buildings_to_process_for_this_ai: # Iterate only eligible buildings for this AI
             building_custom_id = building["fields"].get("BuildingId")
+            building_name_log = building["fields"].get("Name", building_custom_id) # Get building name for logging
             building_type_str = building["fields"].get("Type") # Already known to be import-capable business
             building_def = building_type_defs.get(building_type_str) # Should exist
 
             storable_resources = building_def.get("productionInformation", {}).get("stores", [])
             if not storable_resources:
-                log.debug(f"Building {building_custom_id} (type: {building_type_str}) has no storable resources defined, skipping.")
+                log.debug(f"Building {building_name_log} ({building_custom_id}, type: {building_type_str}) has no storable resources defined, skipping.")
                 continue
 
-            # log.info(f"Processing building {building_custom_id} (RunBy: {ai_username}, Type: {building_type_str}). Storable resources: {storable_resources}")
+            # log.info(f"Processing building {building_name_log} ({building_custom_id}, RunBy: {ai_username}, Type: {building_type_str}). Storable resources: {storable_resources}")
 
             for resource_id in storable_resources:
                 resource_def = resource_type_defs.get(resource_id)
                 if not resource_def:
-                    log.warning(f"Resource definition for '{resource_id}' not found, skipping for building {building_custom_id}.")
+                    log.warning(f"Resource definition for '{resource_id}' not found, skipping for building {building_name_log} ({building_custom_id}).")
                     continue
                 
                 import_price = resource_def.get("importPrice")
                 if import_price is None or float(import_price) <= 0:
-                    log.warning(f"Resource '{resource_id}' has no valid importPrice ({import_price}), skipping for building {building_custom_id}.")
+                    log.warning(f"Resource '{resource_id}' has no valid importPrice ({import_price}), skipping for building {building_name_log} ({building_custom_id}).")
                     continue
                 
                 import_price_float = float(import_price)
