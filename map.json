@@ -148,7 +148,9 @@
             {"path": "backend/engine/dailywages.py", "role": "Processes daily wage payments from businesses to their employees."},
             {"path": "backend/engine/dailyrentpayments.py", "role": "Processes daily rent payments for housing and business premises."},
             {"path": "backend/engine/calculateIncomeAndTurnover.py", "role": "Calculates and updates daily, weekly, and monthly income/turnover for all citizens."},
-            {"path": "backend/engine/decrees/affectpublicbuildingstolandowners.py", "role": "Implements the decree assigning public infrastructure maintenance responsibility to landowners."}
+            {"path": "backend/engine/decrees/affectpublicbuildingstolandowners.py", "role": "Implements the decree assigning public infrastructure maintenance responsibility to landowners."},
+            {"path": "backend/engine/createActivities.py", "role": "Core script that assigns activities to citizens (AI and human) based on their needs, status, time of day, and available opportunities. Manages the daily life cycle of citizens."},
+            {"path": "backend/engine/paystoragecontracts.py", "role": "Processes daily payments for active 'storage_query' contracts, where a buyer pays a seller for reserved storage space."}
           ]
         },
         "ais": {
@@ -173,7 +175,8 @@
             {"path": "backend/ais/answertomessages.py", "role": "Kinos-driven AI generation of responses to player messages."},
             {"path": "backend/ais/processnotifications.py", "role": "Kinos-driven AI processing of game notifications to update their world model."},
             {"path": "backend/ais/generatethoughts.py", "role": "Kinos-driven AI generation of strategic thoughts, visible to players."},
-            {"path": "backend/ais/delegateBusinesses.py", "role": "Redistributes businesses if an AI citizen runs too many, to maintain balance."}
+            {"path": "backend/ais/delegateBusinesses.py", "role": "Redistributes businesses if an AI citizen runs too many, to maintain balance."},
+            {"path": "backend/ais/messagesInitiatives.py", "role": "Allows AI citizens to proactively initiate conversations with other citizens based on relationship scores and context, using Kinos Engine for message generation."}
           ]
         },
         "relevancies": {

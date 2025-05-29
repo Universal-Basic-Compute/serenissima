@@ -65,24 +65,24 @@ The `_calculate_trust_score_contributions_from_interactions` function aggregates
     *   Adds **`Price / 10,000`** to `TrustScore` for each transaction between them in the last 24 hours (based on `TRANSACTIONS.ExecutedAt`).
     *   Logged in `Notes` as: `transactions_interaction`.
 *   **Employee Fed (Employee to Employer)**:
-    *   If Citizen A is an employee of Citizen B:
-        *   Checks `CITIZENS.AteAt` for Citizen A.
-        *   If `AteAt` is within the last 24 hours: **+2.0** to `TrustScore`. Logged as `employee_fed`.
+    *   If Citizen A is an employee of Citizen B (Citizen B is the employer):
+        *   Checks `CITIZENS.AteAt` for Citizen A (the employee).
+        *   If `AteAt` is within the last 24 hours: **+2.0** to `TrustScore` (between A and B). Logged as `employee_fed`.
         *   Otherwise (or no `AteAt` record): **-15.0** to `TrustScore`. Logged as `employee_hungry` or `employee_hungry_no_record`.
 *   **Employee Housed (Employer to Employee)**:
-    *   If Citizen B is an employee of Citizen A:
-        *   Checks if Citizen B is listed as `Owner` in any `BUILDINGS` record where `Category` is 'home'.
-        *   If housed: **+3.0** to `TrustScore`. Logged as `employee_housed`.
+    *   If Citizen A is an employee of Citizen B (Citizen B is the employer):
+        *   Checks if Citizen A (the employee) is listed as `Occupant` in any `BUILDINGS` record where `Category` is 'home'.
+        *   If housed: **+3.0** to `TrustScore` (between A and B). Logged as `employee_housed`.
         *   Otherwise: **-20.0** to `TrustScore`. Logged as `employee_homeless`.
 *   **Employee Paid (Employer to Employee)**:
-    *   If Citizen B is an employee of Citizen A:
-        *   Checks the `TRANSACTIONS` table for the most recent `wage_payment` from Citizen A (Seller) to Citizen B (Buyer).
+    *   If Citizen A is an employee of Citizen B (Citizen B is the employer):
+        *   Checks the `TRANSACTIONS` table for the most recent `wage_payment` from Citizen B (Seller/Payer) to Citizen A (Buyer/Recipient).
         *   If the `ExecutedAt` timestamp of this payment is within the last 24 hours and the `Price` (wage amount) was greater than 0: **+15.0** to `TrustScore`. Logged as `employee_paid_recently`.
         *   Otherwise (no recent payment, payment was 0, or no payment record found): **-30.0** to `TrustScore`. Logged as `employee_wage_issue_late_or_zero`, `employee_wage_issue_no_timestamp`, or `employee_wage_issue_none_found`.
 *   **Public Welfare (Citizen with ConsiglioDeiDieci)**:
     *   This applies to the relationship between any citizen and "ConsiglioDeiDieci".
     *   **Hunger**: If the citizen's `CITIZENS.AteAt` timestamp is older than 24 hours (or missing).
-    *   **Homelessness**: If the citizen is not listed as `Owner` in any `BUILDINGS` record where `Category` is 'home'.
+    *   **Homelessness**: If the citizen is not listed as `Occupant` in any `BUILDINGS` record where `Category` is 'home'.
     *   Trust Score Adjustments:
         *   If Hungry AND Homeless: **-25.0** to `TrustScore`. Logged as `public_welfare_suffering`.
         *   If Hungry (but not homeless): **-10.0** to `TrustScore`. Logged as `public_welfare_hungry`.
