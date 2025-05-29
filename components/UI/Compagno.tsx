@@ -1521,7 +1521,7 @@ Your response:`;
                 </div>
                 
                 {/* Citizens list */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto min-h-0"> {/* Added min-h-0 */}
                   {isLoadingCitizens ? (
                     <div className="flex justify-center items-center h-32">
                       <FaSpinner className="animate-spin text-yellow-500 text-2xl" />
