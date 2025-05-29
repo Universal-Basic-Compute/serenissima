@@ -59,11 +59,11 @@ const DEFAULT_CITIZENNAME = 'visitor'; // Default username for anonymous citizen
 
 const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  // const [messages, setMessages] = useState<Message[]>([]); // Removed: Old Compagno messages
   const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [isTyping, setIsTyping] = useState(false); // Kept: Used for self-chat AI typing indicator
+  // const [isLoadingHistory, setIsLoadingHistory] = useState(false); // Removed: Old Compagno history
+  // const [pagination, setPagination] = useState<PaginationInfo | null>(null); // Removed: Old Compagno pagination
   const [username, setUsername] = useState<string>(DEFAULT_CITIZENNAME);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
@@ -1080,7 +1080,7 @@ Your response:`;
     if (messagesEndRef.current && isOpen) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, citizenMessages, isOpen]);
+  }, [citizenMessages, isOpen]); // Removed `messages` from dependencies
 
   // Update UI size when chats tab is active
   useEffect(() => {
