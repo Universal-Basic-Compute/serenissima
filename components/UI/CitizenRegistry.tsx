@@ -201,7 +201,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
           username: username,
           firstName: citizen.firstName || citizen.firstname || citizen.FirstName,
           lastName: citizen.lastName || citizen.lastname || citizen.LastName,
-          imageUrl: primaryImageUrl || `/images/citizens/${username}.jpg`, // Use imageUrl field
+          imageUrl: primaryImageUrl || `https://backend.serenissima.ai/public_assets/images/citizens/${username}.jpg`, // Use imageUrl field
         };
       })
       .filter(node => node !== null) as { id: string; username: string; firstName?: string; lastName?: string; imageUrl?: string | null; }[];
@@ -389,7 +389,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                           username={citizen.username}
                           firstName={citizen.firstName || citizen.firstname || citizen.FirstName}
                           lastName={citizen.lastName || citizen.lastname || citizen.LastName}
-                          coatOfArmsImageUrl={citizen.coatOfArmsImageUrl || `/coat-of-arms/${citizen.username}.png`}
+                          coatOfArmsImageUrl={citizen.coatOfArmsImageUrl || `https://backend.serenissima.ai/public/assets/images/coat-of-arms/${citizen.username}.png`}
                           familyMotto={citizen.familyMotto}
                           Ducats={citizen.Ducats || citizen.ducats}
                           socialClass={citizen.socialClass || citizen.socialclass || citizen.SocialClass}

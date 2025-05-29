@@ -1565,7 +1565,7 @@ async def generate_coat_of_arms(data: dict):
                 f.write(chunk)
         
         # Return the path to the saved image (relative to public folder)
-        relative_path = f"/coat-of-arms/{filename}"
+        relative_path = f"https://backend.serenissima.ai/public/assets/images/coat-of-arms/{filename}"
         print(f"Returning relative path: {relative_path}")
         
         return {

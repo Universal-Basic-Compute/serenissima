@@ -25,7 +25,7 @@
     }
   ],
   "historicalNotes": "Venetian soap was highly prized throughout Europe for its superior quality. Made primarily from olive oil rather than animal fats, it was gentler on skin and clothing. By the 15th century, Venice had become a major producer of fine soaps, with specialized workshops developing signature scents using herbs, flowers, and exotic fragrances from the East. The soap trade represented an important value-added industry, transforming imported olive oil into a luxury export product.",
-  "icon": "/images/resources/soap.png",
+  "icon": "https://backend.serenissima.ai/public_assets/images/resources/soap.png",
   "importPrice": 1458.0,
   "lifetimeHours": 8775,
   "consumptionHours": 10,

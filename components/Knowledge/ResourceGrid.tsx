@@ -40,7 +40,7 @@ const ResourceGrid: React.FC<ResourceGridProps> = ({
                   const target = e.target as HTMLImageElement;
                   if (!target.dataset.usedFallback) {
                     target.dataset.usedFallback = 'true';
-                    target.src = "/images/resources/icons/default.png";
+                    target.src = "https://backend.serenissima.ai/public_assets/images/resources/icons/default.png";
                   }
                 }}
               />

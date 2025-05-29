@@ -236,7 +236,7 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
     const typeFormatted = type.toLowerCase().replace(/[_-]/g, '_');
     // Prioritize .png, then .jpg
     // For now, let's assume a common pattern. This might need adjustment based on actual image availability.
-    return `/images/buildings/${typeFormatted}.png`; 
+    return `https://backend.serenissima.ai/public_assets/images/buildings/${typeFormatted}.png`; 
   };
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -245,25 +245,25 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
     const typeFormatted = target.alt.toLowerCase().replace(/[_-]/g, '_'); // Assuming alt is building type
 
     if (currentSrc.endsWith('.png')) {
-      target.src = `/images/buildings/${typeFormatted}.jpg`;
+      target.src = `https://backend.serenissima.ai/public_assets/images/buildings/${typeFormatted}.jpg`;
     } else if (currentSrc.endsWith('.jpg')) {
-      target.src = '/images/buildings/hidden_workshop.png'; // Final fallback
+      target.src = 'https://backend.serenissima.ai/public_assets/images/buildings/hidden_workshop.png'; // Final fallback
     } else {
       // If it wasn't .png or .jpg (e.g. already fallback), prevent infinite loop
-      target.src = '/images/buildings/hidden_workshop.png';
+      target.src = 'https://backend.serenissima.ai/public_assets/images/buildings/hidden_workshop.png';
     }
   };
 
   const getResourceImagePath = (resourceName: string): string => {
-    if (!resourceName) return '/images/resources/default.png';
+    if (!resourceName) return 'https://backend.serenissima.ai/public_assets/images/resources/default.png';
     const formattedName = resourceName.toLowerCase().replace(/\s+/g, '_');
-    return `/images/resources/${formattedName}.png`;
+    return `https://backend.serenissima.ai/public_assets/images/resources/${formattedName}.png`;
   };
 
   const handleResourceImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = event.currentTarget;
     // Basic fallback, can be expanded if multiple resource image types (jpg, etc.)
-    target.src = '/images/resources/default.png'; 
+    target.src = 'https://backend.serenissima.ai/public_assets/images/resources/default.png'; 
   };
 
   // This function will handle building when a contractor is chosen
@@ -734,14 +734,14 @@ const renderDetailedBuildingView = (
 (BuildingCreationPanel as any).handleBackToGridClick = () => {
   // This will be set correctly inside the component's scope
 };
-(BuildingCreationPanel as any).getBuildingImagePath = (type: string) => `/images/buildings/${type.toLowerCase().replace(/[_-]/g, '_')}.png`; // Kept for building image
+(BuildingCreationPanel as any).getBuildingImagePath = (type: string) => `https://backend.serenissima.ai/public_assets/images/buildings/${type.toLowerCase().replace(/[_-]/g, '_')}.png`; // Kept for building image
 (BuildingCreationPanel as any).handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => { // Kept for building image
   const target = event.currentTarget;
   const currentSrc = target.src;
   const typeFormatted = target.alt.toLowerCase().replace(/[_-]/g, '_');
-  if (currentSrc.endsWith('.png')) target.src = `/images/buildings/${typeFormatted}.jpg`;
-  else if (currentSrc.endsWith('.jpg')) target.src = '/images/buildings/hidden_workshop.png';
-  else target.src = '/images/buildings/hidden_workshop.png';
+  if (currentSrc.endsWith('.png')) target.src = `https://backend.serenissima.ai/public_assets/images/buildings/${typeFormatted}.jpg`;
+  else if (currentSrc.endsWith('.jpg')) target.src = 'https://backend.serenissima.ai/public_assets/images/buildings/hidden_workshop.png';
+  else target.src = 'https://backend.serenissima.ai/public_assets/images/buildings/hidden_workshop.png';
 };
 // getResourceImagePath and handleResourceImageError are now passed as arguments to renderDetailedBuildingView
 // So they don't need to be attached to (BuildingCreationPanel as any) for that specific use case.
@@ -765,14 +765,14 @@ export default BuildingCreationPanel;
 (BuildingCreationPanel as any).handleBackToGridClick = () => {
   // This will be set correctly inside the component's scope
 };
-(BuildingCreationPanel as any).getBuildingImagePath = (type: string) => `/images/buildings/${type.toLowerCase().replace(/[_-]/g, '_')}.png`; // Kept for building image
+(BuildingCreationPanel as any).getBuildingImagePath = (type: string) => `https://backend.serenissima.ai/public_assets/images/buildings/${type.toLowerCase().replace(/[_-]/g, '_')}.png`; // Kept for building image
 (BuildingCreationPanel as any).handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => { // Kept for building image
   const target = event.currentTarget;
   const currentSrc = target.src;
   const typeFormatted = target.alt.toLowerCase().replace(/[_-]/g, '_');
-  if (currentSrc.endsWith('.png')) target.src = `/images/buildings/${typeFormatted}.jpg`;
-  else if (currentSrc.endsWith('.jpg')) target.src = '/images/buildings/hidden_workshop.png';
-  else target.src = '/images/buildings/hidden_workshop.png';
+  if (currentSrc.endsWith('.png')) target.src = `https://backend.serenissima.ai/public_assets/images/buildings/${typeFormatted}.jpg`;
+  else if (currentSrc.endsWith('.jpg')) target.src = 'https://backend.serenissima.ai/public_assets/images/buildings/hidden_workshop.png';
+  else target.src = 'https://backend.serenissima.ai/public_assets/images/buildings/hidden_workshop.png';
 };
 // getResourceImagePath and handleResourceImageError are now passed as arguments to renderDetailedBuildingView
 // So they don't need to be attached to (BuildingCreationPanel as any) for that specific use case.

@@ -4,7 +4,7 @@
   "category": "raw_materials",
   "subCategory": "mineral",
   "description": "Durable building material quarried from the mainland, essential for Venetian construction.",
-  "icon": "/images/resources/stone.png",
+  "icon": "https://backend.serenissima.ai/public_assets/images/resources/stone.png",
   "importPrice": 180.0,
   "lifetimeHours": null,
   "consumptionHours": null,

@@ -131,7 +131,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
     }
     
     // Otherwise, ensure it starts with a slash for public directory
-    return `/images/resources/${iconName}`;
+    return `https://backend.serenissima.ai/public_assets/images/resources/${iconName}`;
   };
 
   // Helper function to get inputs from different possible structures
@@ -227,7 +227,7 @@ const ResourceDetailsModal: React.FC<ResourceDetailsModalProps> = ({ resource, o
                   const target = e.target as HTMLImageElement;
                   if (!target.dataset.fallback) {
                     target.dataset.fallback = 'true';
-                    target.src = "/images/resources/default.png";
+                    target.src = "https://backend.serenissima.ai/public_assets/images/resources/default.png";
                     // If that fails too, use a placeholder
                     target.onerror = () => {
                       target.src = `https://via.placeholder.com/80?text=${resource.name.charAt(0).toUpperCase()}`;

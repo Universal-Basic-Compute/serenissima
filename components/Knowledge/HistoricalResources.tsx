@@ -16,7 +16,7 @@ const HistoricalResources: React.FC<HistoricalResourcesProps> = ({ onSelectArtic
         <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
           <div className="h-48 overflow-hidden">
             <Image 
-              src="/images/historical-accuracy.png" 
+              src="https://backend.serenissima.ai/public_assets/images/knowledge/historical-accuracy.png" 
               alt="Historical Accuracy" 
               width={800}
               height={400}
@@ -45,7 +45,7 @@ const HistoricalResources: React.FC<HistoricalResourcesProps> = ({ onSelectArtic
         <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
           <div className="h-48 overflow-hidden">
             <Image 
-              src="/images/venetian-guilds.png" 
+              src="https://backend.serenissima.ai/public_assets/images/knowledge/venetian-guilds.png" 
               alt="Venetian Guilds" 
               width={800}
               height={400}
@@ -74,7 +74,7 @@ const HistoricalResources: React.FC<HistoricalResourcesProps> = ({ onSelectArtic
         <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
           <div className="h-48 overflow-hidden">
             <Image 
-              src="/images/guild-leadership.png" 
+              src="https://backend.serenissima.ai/public_assets/images/knowledge/guild-leadership.png" 
               alt="Guild Leadership" 
               width={800}
               height={400}
@@ -103,7 +103,7 @@ const HistoricalResources: React.FC<HistoricalResourcesProps> = ({ onSelectArtic
         <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
           <div className="h-48 overflow-hidden">
             <Image 
-              src="/images/trade-routes.png" 
+              src="https://backend.serenissima.ai/public_assets/images/knowledge/trade-routes.png" 
               alt="Venetian Trade Routes" 
               width={800}
               height={400}

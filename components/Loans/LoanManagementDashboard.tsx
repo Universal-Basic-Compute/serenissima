@@ -143,7 +143,7 @@ const LoanManagementDashboard: React.FC = () => {
           <div className="bg-parchment p-6 rounded-lg border-2 border-amber-700 shadow-md relative">
             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 opacity-20 pointer-events-none">
               <Image 
-                src="/images/seal-of-venice.png" 
+                src="https://backend.serenissima.ai/public_assets/images/knowledge/seal-of-venice.png" 
                 alt="Seal of Venice" 
                 width={60} 
                 height={60}
@@ -156,7 +156,7 @@ const LoanManagementDashboard: React.FC = () => {
           <div className="bg-parchment p-6 rounded-lg border-2 border-amber-700 shadow-md relative">
             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 opacity-20 pointer-events-none">
               <Image 
-                src="/images/seal-of-venice.png" 
+                src="https://backend.serenissima.ai/public_assets/images/knowledge/seal-of-venice.png" 
                 alt="Seal of Venice" 
                 width={60} 
                 height={60}
@@ -190,7 +190,7 @@ const LoanManagementDashboard: React.FC = () => {
                     {/* Add Venetian seal watermark */}
                     <div className="absolute opacity-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
                       <Image 
-                        src="/images/seal-of-venice.png" 
+                        src="https://backend.serenissima.ai/public_assets/images/knowledge/seal-of-venice.png" 
                         alt="Seal of Venice" 
                         width={150} 
                         height={150}
@@ -297,7 +297,7 @@ const LoanManagementDashboard: React.FC = () => {
             {/* Add Venetian seal watermark */}
             <div className="absolute opacity-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
               <Image 
-                src="/images/seal-of-venice.png" 
+                src="https://backend.serenissima.ai/public_assets/images/knowledge/seal-of-venice.png" 
                 alt="Seal of Venice" 
                 width={100} 
                 height={100}

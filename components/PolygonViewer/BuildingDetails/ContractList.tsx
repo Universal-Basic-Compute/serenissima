@@ -31,7 +31,7 @@ const ContractList: React.FC<ContractListProps> = ({ contracts }) => {
                     loading="lazy"
                     unoptimized={true}
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                      (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/resources/default.png';
                     }}
                   />
                 </div>

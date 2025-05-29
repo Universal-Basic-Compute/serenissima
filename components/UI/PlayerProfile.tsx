@@ -233,21 +233,21 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
             onError={(e) => {
               // Fallback for imageUrl: try username-based, then default
               if (displayData.username) {
-                (e.target as HTMLImageElement).src = `/images/citizens/${displayData.username}.jpg`;
+                (e.target as HTMLImageElement).src = `https://backend.serenissima.ai/public_assets/images/citizens/${displayData.username}.jpg`;
                 (e.target as HTMLImageElement).onerror = () => {
-                  (e.target as HTMLImageElement).src = '/images/citizens/default.jpg';
+                  (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
                 };
               } else {
-                (e.target as HTMLImageElement).src = '/images/citizens/default.jpg';
+                (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
               }
             }}
           />
         ) : displayData.username ? ( // Fallback to username.jpg if no imageUrl
           <img
-            src={`/images/citizens/${displayData.username}.jpg`}
+            src={`https://backend.serenissima.ai/public_assets/images/citizens/${displayData.username}.jpg`}
             alt={`${displayData.firstName} ${displayData.lastName} Profile`}
             className="w-full h-full object-cover"
-            onError={(e) => { (e.target as HTMLImageElement).src = '/images/citizens/default.jpg';}}
+            onError={(e) => { (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';}}
           />
         ) : ( // Placeholder if no images available
           <div className="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">

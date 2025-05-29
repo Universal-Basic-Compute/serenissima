@@ -4,7 +4,7 @@
   "category": "raw_materials",
   "subCategory": "mineral",
   "description": "Fine granular material essential for glass production and construction mortar.",
-  "icon": "/images/resources/sand.png",
+  "icon": "https://backend.serenissima.ai/public_assets/images/resources/sand.png",
   "importPrice": 30.0,
   "lifetimeHours": null,
   "consumptionHours": null,

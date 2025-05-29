@@ -1284,10 +1284,10 @@ Your response:`;
                       {transportResources.map((transport, index) => (
                         <div key={transport.id || index} className="bg-amber-100 rounded-lg p-2 text-sm flex items-center">
                           <img 
-                            src={`/images/resources/${(transport.Name || transport.name || 'default_boat').toLowerCase().replace(/\s+/g, '_')}.png`} 
+                            src={`https://backend.serenissima.ai/public_assets/images/resources/${(transport.Name || transport.name || 'default_boat').toLowerCase().replace(/\s+/g, '_')}.png`} 
                             alt={transport.Name || transport.name} 
                             className="w-8 h-8 mr-3 object-contain"
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/images/resources/default_boat.png';}}
+                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/resources/default_boat.png';}}
                           />
                           <div>
                             <div className="font-medium text-amber-800">{transport.Name || transport.name}</div>
@@ -1466,7 +1466,7 @@ Your response:`;
                     
                     // Try fallback to username-based path
                     if (citizen.username) {
-                      const fallbackSrc = `/images/citizens/${citizen.username}.jpg`;
+                      const fallbackSrc = `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.username}.jpg`;
                       console.log(`Trying fallback image: ${fallbackSrc}`);
                       (e.target as HTMLImageElement).src = fallbackSrc;
                       
@@ -1504,7 +1504,7 @@ Your response:`;
                 // Try username-based path directly if no imageurl
                 citizen.username ? (
                   <img 
-                    src={`/images/citizens/${citizen.username}.jpg`}
+                    src={`https://backend.serenissima.ai/public_assets/images/citizens/${citizen.username}.jpg`}
                     alt={`${citizen.firstName} ${citizen.lastName}`} 
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -1541,7 +1541,7 @@ Your response:`;
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       // Fallback to default coat of arms
-                      (e.target as HTMLImageElement).src = '/coat-of-arms/default.png';
+                      (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public/assets/images/coat-of-arms/default.png';
                     }}
                   />
                 </div>

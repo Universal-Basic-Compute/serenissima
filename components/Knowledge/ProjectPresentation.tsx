@@ -43,7 +43,7 @@ const ProjectPresentation: React.FC<ProjectPresentationProps> = ({ onClose }) =>
       <div className="flex justify-between items-center p-4 border-b border-amber-700 bg-gradient-to-r from-amber-900 to-amber-800">
         <div className="flex items-center">
           <Image 
-            src="/images/venice-lion.png" 
+            src="https://backend.serenissima.ai/public_assets/images/knowledge/venice-lion.png" 
             alt="Lion of Venice" 
             width={40} 
             height={40}
@@ -83,7 +83,7 @@ const ProjectPresentation: React.FC<ProjectPresentationProps> = ({ onClose }) =>
         {/* Background image with overlay */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/venice-background.jpg"
+            src="https://backend.serenissima.ai/public_assets/images/knowledge/venice-background.jpg"
             alt="Venice Background"
             fill
             style={{ objectFit: 'cover', objectPosition: 'center' }}
@@ -159,7 +159,7 @@ const ProjectPresentation: React.FC<ProjectPresentationProps> = ({ onClose }) =>
                   </h2>
                   <div className="aspect-w-16 aspect-h-9 mb-8 rounded-lg overflow-hidden">
                     <Image
-                      src="/images/presentation.jpg"
+                      src="https://backend.serenissima.ai/public_assets/images/knowledge/presentation.jpg"
                       alt="Venice Grand Canal"
                       fill
                       style={{ objectFit: 'cover' }}
@@ -239,7 +239,7 @@ const ProjectPresentation: React.FC<ProjectPresentationProps> = ({ onClose }) =>
                     </div>
                     <div className="md:w-1/2 rounded-lg overflow-hidden">
                       <Image
-                        src="/images/venice-merchant.jpg"
+                        src="https://backend.serenissima.ai/public_assets/images/knowledge/venice-merchant.jpg"
                         alt="Venetian Merchant"
                         width={500}
                         height={300}

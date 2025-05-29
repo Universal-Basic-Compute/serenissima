@@ -4,7 +4,7 @@
   "category": "raw_materials",
   "subCategory": "textile",
   "description": "Discarded cloth collected for paper production and other recycled uses.",
-  "icon": "/images/resources/rags.png",
+  "icon": "https://backend.serenissima.ai/public_assets/images/resources/rags.png",
   "importPrice": 60.0,
   "lifetimeHours": 8775,
   "consumptionHours": null,

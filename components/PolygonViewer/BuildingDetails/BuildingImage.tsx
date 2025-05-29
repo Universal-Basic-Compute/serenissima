@@ -15,7 +15,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
   shortDescription,
   flavorText
 }) => {
-  const [imagePath, setImagePath] = useState<string>('/images/buildings/hidden_workshop.png');
+  const [imagePath, setImagePath] = useState<string>('https://backend.serenissima.ai/public_assets/images/buildings/hidden_workshop.png');
   
   // Helper function to format building types for display
   const formatBuildingType = (type: string): string => {
@@ -67,7 +67,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
       // 2. Try converting type to snake_case (e.g., "canal-house" -> "canal_house.png")
       // This is often the convention for filenames if the type uses hyphens.
       const snakeCaseType = type.replace(/-/g, '_').toLowerCase();
-      const snakeCasePath = `/images/buildings/${snakeCaseType}.png`;
+      const snakeCasePath = `https://backend.serenissima.ai/public_assets/images/buildings/${snakeCaseType}.png`;
       console.log(`BuildingImage: Trying snake_case path: ${snakeCasePath}`);
       try {
         const response = await fetch(snakeCasePath, { method: 'HEAD' });
@@ -80,7 +80,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
       }
 
       // 3. Try type as is (e.g. if type is already "canal_house" or "some-building" and filename matches "some-building.png")
-      const directPath = `/images/buildings/${type.toLowerCase()}.png`;
+      const directPath = `https://backend.serenissima.ai/public_assets/images/buildings/${type.toLowerCase()}.png`;
       console.log(`BuildingImage: Trying direct path: ${directPath}`);
       try {
         const response = await fetch(directPath, { method: 'HEAD' });
@@ -93,12 +93,12 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
       }
       
       // 4. Fallback image
-      const fallbackPath = '/images/buildings/contract_stall.png';
+      const fallbackPath = 'https://backend.serenissima.ai/public_assets/images/buildings/contract_stall.png';
       console.log(`BuildingImage: No specific image found for building type: ${type}. Using default: ${fallbackPath}`);
       return fallbackPath;
     } catch (error) {
       console.error('BuildingImage: Error in getBuildingImagePath:', error);
-      return '/images/buildings/contract_stall.png'; // Ultimate fallback
+      return 'https://backend.serenissima.ai/public_assets/images/buildings/contract_stall.png'; // Ultimate fallback
     }
   };
 
@@ -108,7 +108,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
         .then(path => setImagePath(path))
         .catch(error => {
           console.error('Error resolving building image path:', error);
-          setImagePath('/images/buildings/contract_stall.png');
+          setImagePath('https://backend.serenissima.ai/public_assets/images/buildings/contract_stall.png');
         });
     }
   }, [buildingType, buildingVariant]);
@@ -123,7 +123,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
           onError={(e) => {
             console.error('Error loading building image, src was:', e.currentTarget.src);
             // Prevent infinite loop if the fallback image itself is missing or causes an error
-            const fallbackSrc = '/images/buildings/contract_stall.png';
+            const fallbackSrc = 'https://backend.serenissima.ai/public_assets/images/buildings/contract_stall.png';
             if (e.currentTarget.src !== `${window.location.origin}${fallbackSrc}`) {
               e.currentTarget.src = fallbackSrc;
             }

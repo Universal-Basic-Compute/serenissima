@@ -78,12 +78,12 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
         {/* Main citizen image - larger */}
         <div className="w-24 h-24 mr-4 rounded-lg border-2 border-amber-600 shadow-md overflow-hidden flex-shrink-0">
           <img 
-            src={`/images/citizens/${username || 'default'}.jpg`}
+            src={`https://backend.serenissima.ai/public_assets/images/citizens/${username || 'default'}.jpg`}
             alt={`${firstName} ${lastName}`}
             className="w-full h-full object-cover"
             onError={(e) => {
               // Fallback to default image if the specific one doesn't exist
-              (e.target as HTMLImageElement).src = '/images/citizens/default.jpg';
+              (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
             }}
           />
         </div>
@@ -110,7 +110,7 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     // Fallback to default coat of arms
-                    (e.target as HTMLImageElement).src = '/coat-of-arms/default.png';
+                    (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public/assets/images/coat-of-arms/default.png';
                   }}
                 />
               </div>

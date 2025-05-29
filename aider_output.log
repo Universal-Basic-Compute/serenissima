@@ -1882,7 +1882,7 @@ data\resources\raw_materials\salt.json
   "name": "Salt",
   "category": "raw_materials",
   "subCategory": "mineral",
-  "icon": "/images/resources/salt.png",
+  "icon": "https://backend.serenissima.ai/public_assets/images/resources/salt.png",
   "base_properties": {
     "base_value": 18,
     "weight": 1.0,
@@ -1896,7 +1896,7 @@ data\resources\raw_materials\salt.json
   "name": "Salt",
   "category": "raw_materials",
   "subCategory": "mineral",
-  "icon": "/images/resources/salt.png",
+  "icon": "https://backend.serenissima.ai/public_assets/images/resources/salt.png",
   "baseProperties": {
     "baseValue": 18,
     "weight": 1.0,

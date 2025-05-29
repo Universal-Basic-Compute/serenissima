@@ -5,7 +5,7 @@ sync_coatofarms.py - Synchronize coat of arms images from production server to l
 This script:
 1. Connects to the Airtable database to get all citizens
 2. For each citizen with a coat of arms image, downloads the image from the production server
-3. Saves the images to the local public/coat-of-arms/ folder
+3. Saves the images to the local publichttps://backend.serenissima.ai/public/assets/images/coat-of-arms/ folder
 4. Creates a mapping file for quick reference
 
 Usage:
@@ -208,7 +208,7 @@ def sync_coat_of_arms(dry_run: bool = False):
         # Add to mapping
         mapping[username] = {
             "production_url": url,
-            "local_path": f"/coat-of-arms/{filename.name}"
+            "local_path": f"https://backend.serenissima.ai/public/assets/images/coat-of-arms/{filename.name}"
         }
     
     # Download images in parallel

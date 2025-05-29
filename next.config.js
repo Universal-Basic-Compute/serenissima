@@ -17,8 +17,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/coat-of-arms/:path*',
-        destination: '/api/coat-of-arms/:path*',
+        source: 'https://backend.serenissima.ai/public/assets/images/coat-of-arms/:path*',
+        destination: '/apihttps://backend.serenissima.ai/public/assets/images/coat-of-arms/:path*',
       },
     ];
   },

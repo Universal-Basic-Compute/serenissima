@@ -4,7 +4,7 @@
   "category": "raw_materials",
   "subCategory": "agricultural",
   "description": "Fruit of the olive tree, used for producing olive oil, a staple of Venetian cuisine and trade.",
-  "icon": "/images/resources/olives.png",
+  "icon": "https://backend.serenissima.ai/public_assets/images/resources/olives.png",
   "importPrice": 210.0,
   "lifetimeHours": 750,
   "consumptionHours": 4,

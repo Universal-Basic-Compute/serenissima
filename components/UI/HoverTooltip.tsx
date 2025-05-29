@@ -212,12 +212,12 @@ export const HoverTooltip: React.FC = () => {
         {/* Add the building image */}
         <div className="w-96 h-80 mb-2 overflow-hidden rounded">
           <img 
-            src={buildingImagePath || `/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.png`} 
+            src={buildingImagePath || `https://backend.serenissima.ai/public_assets/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.png`} 
             alt={tooltipData.name || 'Building'}
             className="w-full h-full object-cover"
             onError={(e) => {
               // Fallback to default image if the specific one doesn't exist
-              e.currentTarget.src = '/images/buildings/contract_stall.png';
+              e.currentTarget.src = 'https://backend.serenissima.ai/public_assets/images/buildings/contract_stall.png';
             }}
           />
         </div>
@@ -255,7 +255,7 @@ export const HoverTooltip: React.FC = () => {
     if (citizen) {
       // If we have the citizen data, display it
       // Ensure we have the correct property names for image and social class
-      const imageUrl = citizen.imageUrl || `/images/citizens/${citizen.id || 'default'}.jpg`; // Use citizen.id from safeCitizen
+      const imageUrl = citizen.imageUrl || `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.id || 'default'}.jpg`; // Use citizen.id from safeCitizen
     
       // This console.log can be removed or kept, but the one above is more comprehensive now.
       // console.log('TOOLTIP: Using image URL:', imageUrl); 
@@ -278,7 +278,7 @@ export const HoverTooltip: React.FC = () => {
               onError={(e) => {
                 console.log(`TOOLTIP: Failed to load citizen image: ${imageUrl}, trying fallback`);
                 // Fallback to default image if the specific one doesn't exist
-                e.currentTarget.src = '/images/citizens/default.jpg';
+                e.currentTarget.src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
               }}
             />
           </div>
@@ -453,11 +453,11 @@ export const HoverTooltip: React.FC = () => {
                     <div className="flex items-center">
                       <div className="w-6 h-6 mr-2 bg-amber-800/50 rounded overflow-hidden flex items-center justify-center">
                         <img 
-                          src={`/images/resources/${resource.name.toLowerCase().replace(/\s+/g, '_')}.png`}
+                          src={`https://backend.serenissima.ai/public_assets/images/resources/${resource.name.toLowerCase().replace(/\s+/g, '_')}.png`}
                           alt={resource.name}
                           className="w-5 h-5 object-contain"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                            (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/resources/default.png';
                           }}
                         />
                       </div>
@@ -489,11 +489,11 @@ export const HoverTooltip: React.FC = () => {
                   <div className="flex items-center">
                     <div className="w-6 h-6 mr-2 bg-amber-800/50 rounded overflow-hidden flex items-center justify-center">
                       <img 
-                        src={`/images/resources/${resource.icon}`}
+                        src={`https://backend.serenissima.ai/public_assets/images/resources/${resource.icon}`}
                         alt={resource.name}
                         className="w-5 h-5 object-contain"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                          (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/resources/default.png';
                         }}
                       />
                     </div>

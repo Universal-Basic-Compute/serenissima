@@ -39,7 +39,7 @@ export interface ResourceNode {
 }
 
 export function getNormalizedResourceIconPath(iconFieldName?: string, resourceTypeName?: string): string {
-  const defaultPath = '/images/resources/default.png';
+  const defaultPath = 'https://backend.serenissima.ai/public_assets/images/resources/default.png';
   let finalPath: string;
 
   let iconToProcess: string | undefined = iconFieldName?.trim();
@@ -53,7 +53,7 @@ export function getNormalizedResourceIconPath(iconFieldName?: string, resourceTy
     }
     // Further sanitize (lowercase, replace spaces with underscores)
     baseName = baseName.toLowerCase().replace(/\s+/g, '_');
-    finalPath = `/images/resources/${baseName}.png`;
+    finalPath = `https://backend.serenissima.ai/public_assets/images/resources/${baseName}.png`;
   }
   // If no iconToProcess by this point, return default
   else if (!iconToProcess) {
@@ -64,7 +64,7 @@ export function getNormalizedResourceIconPath(iconFieldName?: string, resourceTy
     const parts = iconToProcess.split('/');
     const filenameWithExt = (parts.pop() || '').trim();
     
-    if (filenameWithExt === "" && iconToProcess.endsWith('/')) { // Path is a directory like /images/
+    if (filenameWithExt === "" && iconToProcess.endsWith('/')) { // Path is a directory like https://backend.serenissima.ai/public_assets/images/
         finalPath = iconToProcess; 
     } else {
       let baseFilename = filenameWithExt;
@@ -87,16 +87,16 @@ export function getNormalizedResourceIconPath(iconFieldName?: string, resourceTy
 
     if (baseIconString.startsWith('resources/')) {
       // icon was "resources/foo.png..." -> baseIconString is "resources/foo"
-      // Prepend /images/ if it's not already structured like /images/resources/foo
-      finalPath = `/images/${baseIconString}.png`;
+      // Prepend https://backend.serenissima.ai/public_assets/images/ if it's not already structured like https://backend.serenissima.ai/public_assets/images/resources/foo
+      finalPath = `https://backend.serenissima.ai/public_assets/images/${baseIconString}.png`;
     } else if (baseIconString.includes('/')) {
       // This case is for paths like "category/foo.png..." -> baseIconString is "category/foo"
-      // It implies the image is at /images/category/foo.png
-      finalPath = `/images/${baseIconString}.png`;
+      // It implies the image is at https://backend.serenissima.ai/public_assets/images/category/foo.png
+      finalPath = `https://backend.serenissima.ai/public_assets/images/${baseIconString}.png`;
     } else {
       // This case is for simple names like "foo.png..." or "Iron Ore" -> baseIconString is "foo" or "Iron Ore"
       const sanitizedBaseIcon = baseIconString.toLowerCase().replace(/\s+/g, '_');
-      finalPath = `/images/resources/${sanitizedBaseIcon}.png`;
+      finalPath = `https://backend.serenissima.ai/public_assets/images/resources/${sanitizedBaseIcon}.png`;
     }
   }
 

@@ -43,7 +43,7 @@ export default function RootLayout({
                       await fetch('/api/create-coat-of-arms-dir', { method: 'POST' });
                       
                       // Then check if the default image exists
-                      const response = await fetch('/coat-of-arms/default.png', { method: 'HEAD' });
+                      const response = await fetch('https://backend.serenissima.ai/public/assets/images/coat-of-arms/default.png', { method: 'HEAD' });
                       if (!response.ok) {
                         console.warn('Default coat of arms image not found. Using generated avatars instead.');
                       }

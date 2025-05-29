@@ -44,13 +44,13 @@ export class AssetService {
           // Create an array of URLs to try in order
           const urlsToTry = [
             // 1. Try with our proxy route first (avoids CORS issues)
-            `${window.location.origin}/coat-of-arms/${owner}.png`,
+            `${window.location.origin}https://backend.serenissima.ai/public/assets/images/coat-of-arms/${owner}.png`,
             
             // 2. Use the URL from the API if it's from our domain
             url && url.startsWith(window.location.origin) ? url as string : null,
             
             // 3. Try with serenissima.ai domain through our proxy - use owner username, not land ID
-            `/coat-of-arms/external/${encodeURIComponent(`https://serenissima.ai/coat-of-arms/${owner}.png`)}`
+            `https://backend.serenissima.ai/public/assets/images/coat-of-arms/external/${encodeURIComponent(`https://serenissima.aihttps://backend.serenissima.ai/public/assets/images/coat-of-arms/${owner}.png`)}`
           ].filter(Boolean); // Remove null entries
           
           // Debug log to see what URLs we're trying
@@ -62,7 +62,7 @@ export class AssetService {
             const allUrlsToTry = [
               ...urlsToTry,
               // Add a default fallback image as the last resort
-              `${window.location.origin}/coat-of-arms/default.png`
+              `${window.location.origin}https://backend.serenissima.ai/public/assets/images/coat-of-arms/default.png`
             ];
         
             for (let i = 0; i < allUrlsToTry.length; i++) {
@@ -175,7 +175,7 @@ export class AssetService {
     
     try {
       // Try the direct flat path for .png first
-      const pngImagePath = `/images/buildings/${buildingType}.png`;
+      const pngImagePath = `https://backend.serenissima.ai/public_assetshttps://backend.serenissima.ai/public_assets/images/buildings/${buildingType}.png`;
       
       // Check if the .png image exists
       try {
@@ -199,13 +199,13 @@ export class AssetService {
       }
       
       // Fallback image (assuming contract_stall.png exists or is the desired fallback)
-      const fallbackImagePath = '/images/buildings/contract_stall.png';
+      const fallbackImagePath = 'https://backend.serenissima.ai/public_assets/images/buildings/contract_stall.png';
       this.buildingImages[cacheKey] = fallbackImagePath;
       return fallbackImagePath;
 
     } catch (error) {
       console.error('Error fetching building image path:', error);
-      const fallbackImagePath = '/images/buildings/contract_stall.png';
+      const fallbackImagePath = 'https://backend.serenissima.ai/public_assets/images/buildings/contract_stall.png';
       this.buildingImages[cacheKey] = fallbackImagePath;
       return fallbackImagePath;
     }

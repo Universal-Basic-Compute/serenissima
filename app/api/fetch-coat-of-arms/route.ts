@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     await writeFile(filePath, imageBuffer);
     
     // Return the public URL path
-    const publicPath = `/coat-of-arms/${fileName}`;
+    const publicPath = `https://backend.serenissima.ai/public/assets/images/coat-of-arms/${fileName}`;
     
     return NextResponse.json({ 
       success: true, 

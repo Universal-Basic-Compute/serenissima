@@ -60,7 +60,7 @@
       "Battle of Lepanto (1571)"
     ]
   },
-  "icon": "/images/resources/war_galley.png",
+  "icon": "https://backend.serenissima.ai/public_assets/images/resources/war_galley.png",
   "importPrice": 1177329.6,
   "lifetimeHours": null,
   "consumptionHours": 1168,

@@ -1485,10 +1485,10 @@ Your response:`;
                               <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center">
                                   <img 
-                                    src={`/images/resources/${resourceIconName}.png`} 
+                                    src={`https://backend.serenissima.ai/public_assets/images/resources/${resourceIconName}.png`} 
                                     alt={resourceType} 
                                     className="w-16 h-16 mr-3 object-contain" // Increased size (x2) and margin
-                                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/resources/default.png'; }}
+                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/resources/default.png'; }}
                                   />
                                   <span className="text-amber-800 capitalize font-bold">{resourceType.replace(/_/g, ' ')}</span> {/* Removed colon, changed to font-bold */}
                                 </div>

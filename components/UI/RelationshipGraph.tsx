@@ -54,18 +54,18 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
       const imagePromises = nodes.map(node => {
         return new Promise<CitizenNode>(resolve => {
           const img = new Image();
-          // node.imageUrl should contain the primary URL or /images/citizens/username.jpg
-          // Final fallback to /images/citizens/default.jpg if node.imageUrl is null or fails
-          img.src = node.imageUrl || '/images/citizens/default.jpg';
+          // node.imageUrl should contain the primary URL or https://backend.serenissima.ai/public_assets/images/citizens/username.jpg
+          // Final fallback to https://backend.serenissima.ai/public_assets/images/citizens/default.jpg if node.imageUrl is null or fails
+          img.src = node.imageUrl || 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
 
           img.onload = () => {
             resolve({ ...node, img });
           };
           img.onerror = () => {
             // If the provided node.imageUrl failed, try the absolute default if not already tried
-            if (img.src !== '/images/citizens/default.jpg') {
+            if (img.src !== 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg') {
               const defaultImg = new Image();
-              defaultImg.src = '/images/citizens/default.jpg';
+              defaultImg.src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
               defaultImg.onload = () => resolve({ ...node, img: defaultImg });
               defaultImg.onerror = () => resolve({ ...node, img: undefined }); // Ultimate failure
             } else {

@@ -237,7 +237,7 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({
     // If icon is missing or undefined, use default
     if (!iconName) {
       console.log(`%c[ResourceDropdown] Icon name is empty, using default.png`, 'color: #ef4444;');
-      return `/images/resources/default.png`;
+      return `https://backend.serenissima.ai/public_assets/images/resources/default.png`;
     }
     
     // Check if the icon path already starts with a slash or http
@@ -263,7 +263,7 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({
     }
     
     // Use the new path format
-    const finalPath = `/images/resources/${iconName}`;
+    const finalPath = `https://backend.serenissima.ai/public_assets/images/resources/${iconName}`;
     console.log(`%c[ResourceDropdown] Final icon path: ${finalPath}`, 'color: #22c55e;');
     return finalPath;
   };
@@ -332,9 +332,9 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({
                                     
                                     // Fallback if image doesn't exist - only set once
                                     if (!(e.target as HTMLImageElement).dataset.fallback) {
-                                      console.log(`%c[ResourceDropdown] Trying fallback icon: /images/resources/default.png`, 'color: #22c55e;');
+                                      console.log(`%c[ResourceDropdown] Trying fallback icon: https://backend.serenissima.ai/public_assets/images/resources/default.png`, 'color: #22c55e;');
                                       (e.target as HTMLImageElement).dataset.fallback = "true";
-                                      (e.target as HTMLImageElement).src = `/images/resources/default.png`;
+                                      (e.target as HTMLImageElement).src = `https://backend.serenissima.ai/public_assets/images/resources/default.png`;
                                       
                                       // If that fails too, use a placeholder
                                       (e.target as HTMLImageElement).onerror = () => {

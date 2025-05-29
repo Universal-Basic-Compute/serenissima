@@ -2817,7 +2817,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
-            <h4 className="font-bold mb-2">GET /api/coat-of-arms/:path</h4>
+            <h4 className="font-bold mb-2">GET /apihttps://backend.serenissima.ai/public/assets/images/coat-of-arms/:path</h4>
             <p className="mb-2">Serves coat of arms images.</p>
             
             <h5 className="font-bold mt-4 mb-2">Parameters</h5>

@@ -63,7 +63,7 @@ const ResourceItem: React.FC<ResourceItemProps> = ({ resource, type = 'store' })
           onError={(e) => {
             const currentSrc = (e.target as HTMLImageElement).src;
             console.error(`Failed to load resource image: ${currentSrc}. Falling back to default.`);
-            (e.target as HTMLImageElement).src = '/images/resources/default.png';
+            (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/resources/default.png';
             // Prevent infinite loops if default.png also fails by removing the onerror handler.
             (e.target as HTMLImageElement).onerror = null; 
           }}

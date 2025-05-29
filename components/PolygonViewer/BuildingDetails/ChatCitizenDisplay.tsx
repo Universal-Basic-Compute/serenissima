@@ -54,7 +54,7 @@ const ChatCitizenDisplay: React.FC<ChatCitizenDisplayProps> = ({ citizen, title 
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.onerror = null; 
-              target.src = '/images/citizens/default.jpg';
+              target.src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
             }}
           />
         ) : (

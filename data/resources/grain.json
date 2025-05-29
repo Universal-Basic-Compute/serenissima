@@ -25,7 +25,7 @@
     }
   ],
   "historicalNotes": "Grain supply was a constant concern for Venice, which had limited agricultural land. The Republic maintained granaries and regulated prices to ensure food security, with much of its grain imported from its mainland territories and overseas possessions.",
-  "icon": "/images/resources/grain.png",
+  "icon": "https://backend.serenissima.ai/public_assets/images/resources/grain.png",
   "importPrice": 180.0,
   "lifetimeHours": 8775,
   "consumptionHours": 10,
