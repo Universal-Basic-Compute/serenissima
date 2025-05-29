@@ -578,7 +578,7 @@ def create_notification_for_business_employee(tables, building_id: str, building
         }
         
         tables["notifications"].create(notification)
-        print(f"Created notification for employee {citizen_id} about wage adjustment")
+        print(f"Created notification for employee {occupant_username_to_notify} about wage adjustment")
         return True
     except Exception as e:
         print(f"Error creating notification for employee: {str(e)}")
