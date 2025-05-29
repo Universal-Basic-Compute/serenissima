@@ -1844,7 +1844,7 @@ Your response:`;
                     </div>
                   
                     {/* Suggestions - Show only if chatting with self and no messages yet */}
-                    {selectedCitizen === username && citizenMessages.length === 0 && (
+                    {selectedCitizen === username && citizenMessages.length === 0 && !isLoadingCitizenMessages && ( // Added !isLoadingCitizenMessages
                       <div className="border-t border-gray-200 p-2 bg-amber-50">
                         <p className="text-xs text-gray-500 mb-2">Start a thought:</p>
                         <div className="flex flex-wrap gap-1">
