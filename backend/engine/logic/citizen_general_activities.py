@@ -1287,7 +1287,9 @@ def _handle_general_goto_work(
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str]
 ) -> bool:
     """Prio 70: Handles general goto_work if citizen has a workplace and is not there."""
-    if is_night: return False # Usually no work at night unless specific job
+    if is_night: # Usually no work at night unless specific job
+        log.info(f"{LogColors.OKBLUE}[Aller au Travail] Il fait nuit. Le citoyen {citizen_name} n'ira pas travailler.{LogColors.ENDC}")
+        return False
 
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
     if not workplace_record: return False # No workplace
