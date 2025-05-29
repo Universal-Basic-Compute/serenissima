@@ -8,13 +8,83 @@ import aiohttp
 import google.generativeai as genai # Import Gemini client
 from dotenv import load_dotenv
 from pathlib import Path
+import argparse # Added
+import tempfile # Added
+from typing import Optional, Dict # Added for type hinting
+import requests # Added for upload_file_to_backend
+import os # Added for getenv in upload_file_to_backend and main
+import sys # Added for sys.exit
+
+# --- BEGIN COPIED HELPER FUNCTION ---
+# Default API URL, can be overridden by env var or arg
+DEFAULT_FASTAPI_URL = "http://localhost:8000" 
+
+def upload_file_to_backend(
+    local_file_path: str,
+    filename_on_server: str, # Explicit filename for the server
+    destination_folder_on_server: str, # e.g., "images/resources" or "coat-of-arms"
+    api_url: str,
+    api_key: str
+) -> Optional[str]:
+    """
+    Uploads a file to the backend /api/upload-asset endpoint.
+
+    Args:
+        local_file_path (str): The path to the local file to upload.
+        filename_on_server (str): The desired filename for the asset on the server.
+        destination_folder_on_server (str): The relative path of the folder on the server 
+                                            within the persistent assets dir.
+        api_url (str): The base URL of the FastAPI backend.
+        api_key (str): The API key for the upload endpoint.
+
+    Returns:
+        Optional[str]: The full public URL of the uploaded asset from the backend,
+                       or None if upload failed.
+    """
+    upload_endpoint = f"{api_url.rstrip('/')}/api/upload-asset"
+    
+    try:
+        with open(local_file_path, 'rb') as f:
+            # The 'file' field in files should contain the desired filename on the server
+            files = {'file': (filename_on_server, f)}
+            data = {'destination_path': destination_folder_on_server} 
+            headers = {'X-Upload-Api-Key': api_key}
+            
+            print(f"Uploading '{local_file_path}' as '{filename_on_server}' to backend folder '{destination_folder_on_server}' via {upload_endpoint}...")
+            response = requests.post(upload_endpoint, files=files, data=data, headers=headers, timeout=180) # Increased timeout
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                if response_data.get("success") and response_data.get("relative_path"):
+                    relative_backend_path = response_data["relative_path"]
+                    # Construct the full public URL
+                    full_public_url = f"{api_url.rstrip('/')}/public_assets/{relative_backend_path.lstrip('/')}"
+                    print(f"Success: '{local_file_path}' uploaded. Public URL: '{full_public_url}'")
+                    return full_public_url
+                else:
+                    print(f"Upload successful but response format unexpected: {response_data}")
+                    return None
+            else:
+                print(f"Upload failed for {local_file_path}. Status: {response.status_code}, Response: {response.text}")
+                return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error during upload of {local_file_path}: {e}")
+        return None
+    except IOError as e:
+        print(f"IO error reading {local_file_path}: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error during upload of {local_file_path}: {e}")
+        return None
+# --- END COPIED HELPER FUNCTION ---
 
 # Load environment variables
 load_dotenv()
 
 # Get API keys
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") # Changed from CLAUDE_API_KEY
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") 
 IDEOGRAM_API_KEY = os.getenv("IDEOGRAM_API_KEY")
+# Backend URL and Upload API Key will be parsed in main()
 
 if not GEMINI_API_KEY:
     print("Error: GEMINI_API_KEY not set in environment variables")
@@ -26,18 +96,23 @@ if not IDEOGRAM_API_KEY:
 
 # Configure Gemini client
 genai.configure(api_key=GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel('gemini-2.5-pro-preview-03-25') # Specify the model without 'gemini/' prefix
+gemini_model = genai.GenerativeModel('gemini-1.5-pro-latest') # Updated model
 
 # Directory paths
 TECH_TREE_DIR = Path("components/Knowledge")
-IMAGES_DIR = Path("publichttps://backend.serenissima.ai/public_assets/images/knowledge/tech-tree")
-PROGRESS_FILE = Path("data/tech_tree_image_generation_progress.json")
-ERROR_LOG = Path("data/tech_tree_image_generation_errors.json")
+# IMAGES_DIR is no longer needed for final storage, as images are uploaded.
+# The path "publichttps://backend.serenissima.ai/public_assets/images/knowledge/tech-tree" was incorrect.
+# We will use "images/knowledge/tech-tree" as the destination_folder_on_server for uploads.
+DATA_DIR_FOR_LOGS = Path("data") # Parent for progress and error files
+PROGRESS_FILE = DATA_DIR_FOR_LOGS / "tech_tree_image_generation_progress.json"
+ERROR_LOG = DATA_DIR_FOR_LOGS / "tech_tree_image_generation_errors.json"
 
 # Ensure directories exist
 def ensure_directories_exist():
-    IMAGES_DIR.mkdir(parents=True, exist_ok=True)
-    PROGRESS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    # IMAGES_DIR.mkdir(parents=True, exist_ok=True) # No longer creating local public/images/tech-tree
+    DATA_DIR_FOR_LOGS.mkdir(parents=True, exist_ok=True) # For progress and error logs
+    # TECH_TREE_DIR is for reading, should exist.
+    TECH_TREE_DIR.mkdir(parents=True, exist_ok=True) 
 
 # Function to save progress
 def save_progress(processed_nodes):
