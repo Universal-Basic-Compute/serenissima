@@ -1263,7 +1263,7 @@ Your response:`;
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}
-          className="p-2 transition-all duration-300 flex items-center justify-center"
+          className="p-2 transition-all duration-300 flex items-center justify-center cursor-pointer"
           aria-label="Open Compagno chat assistant"
         >
           <div className="relative">
@@ -1447,7 +1447,7 @@ Your response:`;
                         key={notification.notificationId} 
                         className={`mb-3 p-3 rounded-lg border ${
                           notification.readAt 
-                            ? 'border-gray-200 bg-white' 
+                            ? 'border-gray-200 bg-stone-50'  // Changed bg-white to bg-stone-50
                             : 'border-amber-300 bg-amber-50 notification-unread shadow-md'
                         }`}
                         onClick={() => {
