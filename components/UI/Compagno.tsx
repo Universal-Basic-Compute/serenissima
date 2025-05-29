@@ -1315,8 +1315,8 @@ Your response:`;
             <div className="flex items-center">
               <div className="w-8 h-8 mr-2 flex items-center justify-center">
                 <img 
-                  src={citizens.find(c => c.username === username)?.coatOfArmsImageUrl || "/images/venetian-mask.png"}
-                  alt="" 
+                  src={username === DEFAULT_CITIZENNAME ? "/images/venetian-mask.png" : `https://backend.serenissima.ai/public_assets/images/coat_of_arms/${username}.png`}
+                  alt={username === DEFAULT_CITIZENNAME ? "Default Mask" : `${username}'s Coat of Arms`}
                   className="w-6 h-6 rounded-full object-cover"
                   onError={(e) => {
                     if (e.target) {
@@ -1531,27 +1531,26 @@ Your response:`;
                                 : 'hover:bg-amber-100'
                             }`}
                           >
-                            <div className="w-8 h-8 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800">
-                              {citizen.coatOfArmsImageUrl ? (
-                                <img 
-                                  src={citizen.coatOfArmsImageUrl} 
-                                  alt="" 
-                                  className="w-8 h-8 rounded-full object-cover"
-                                  onError={(e) => {
-                                    if (e.target) {
-                                      (e.target as HTMLImageElement).style.display = 'none';
-                                      const nextSibling = (e.target as HTMLImageElement).nextElementSibling;
-                                      if (nextSibling) {
-                                        (nextSibling as HTMLElement).style.display = 'flex';
-                                      }
-                                    }
-                                  }}
-                                />
-                              ) : (
-                                <div className="w-8 h-8 rounded-full bg-amber-300 flex items-center justify-center text-amber-800">
-                                  {citizen.firstName.charAt(0)}
-                                </div>
-                              )}
+                            <div className="w-8 h-8 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800 relative overflow-hidden">
+                              <img 
+                                src={`https://backend.serenissima.ai/public_assets/images/coat_of_arms/${citizen.username}.png`}
+                                alt={`${citizen.firstName} ${citizen.lastName} Coat of Arms`}
+                                className="w-full h-full rounded-full object-cover absolute top-0 left-0"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const fallbackEl = target.nextElementSibling;
+                                  if (fallbackEl) {
+                                    (fallbackEl as HTMLElement).style.display = 'flex';
+                                  }
+                                }}
+                              />
+                              <div 
+                                className="w-full h-full flex items-center justify-center text-amber-800" 
+                                style={{ display: 'none' }} // Initially hidden, shown by onError
+                              >
+                                {citizen.firstName.charAt(0) || citizen.username.charAt(0) || '?'}
+                              </div>
                             </div>
                             <div>
                               <div className="font-medium text-sm flex items-center">
@@ -1591,11 +1590,11 @@ Your response:`;
                       <div className="flex items-center">
                         {selectedCitizen === username ? (
                           <>
-                            <div className="w-6 h-6 mr-2">
+                            <div className="w-6 h-6 mr-2 relative rounded-full overflow-hidden">
                               <img 
-                                src={citizens.find(c => c.username === username)?.coatOfArmsImageUrl || "/images/venetian-mask.png"}
-                                alt="" 
-                                className="w-6 h-6 rounded-full object-cover"
+                                src={username === DEFAULT_CITIZENNAME ? "/images/venetian-mask.png" : `https://backend.serenissima.ai/public_assets/images/coat_of_arms/${username}.png`}
+                                alt={username === DEFAULT_CITIZENNAME ? "Default Mask" : `${username}'s Coat of Arms`}
+                                className="w-full h-full rounded-full object-cover absolute top-0 left-0"
                                 onError={(e) => { if (e.target) { (e.target as HTMLImageElement).src = "/images/venetian-mask.png";}}}
                               />
                             </div>
@@ -1603,25 +1602,26 @@ Your response:`;
                           </>
                         ) : (
                           <>
-                            <div className="w-6 h-6 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800 text-xs">
-                              {citizens.find(u => u.username === selectedCitizen)?.coatOfArmsImageUrl ? (
-                                  <img 
-                                    src={citizens.find(u => u.username === selectedCitizen)?.coatOfArmsImageUrl!} 
-                                    alt="" 
-                                    className="w-6 h-6 rounded-full object-cover"
-                                    onError={(e) => {
-                                      if (e.target) {
-                                        (e.target as HTMLImageElement).style.display = 'none';
-                                        const nextSibling = (e.target as HTMLImageElement).nextElementSibling;
-                                        if (nextSibling) { (nextSibling as HTMLElement).style.display = 'flex'; }
-                                      }
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="w-6 h-6 rounded-full bg-amber-300 flex items-center justify-center text-amber-800 text-xs">
-                                    {citizens.find(u => u.username === selectedCitizen)?.firstName.charAt(0) || '?'}
-                                  </div>
-                                )}
+                            <div className="w-6 h-6 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800 text-xs relative overflow-hidden">
+                              <img 
+                                src={`https://backend.serenissima.ai/public_assets/images/coat_of_arms/${selectedCitizen}.png`}
+                                alt={`${citizens.find(u => u.username === selectedCitizen)?.firstName || selectedCitizen} Coat of Arms`}
+                                className="w-full h-full rounded-full object-cover absolute top-0 left-0"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const fallbackEl = target.nextElementSibling;
+                                  if (fallbackEl) {
+                                    (fallbackEl as HTMLElement).style.display = 'flex';
+                                  }
+                                }}
+                              />
+                              <div 
+                                className="w-full h-full flex items-center justify-center text-amber-800 text-xs" 
+                                style={{ display: 'none' }} // Initially hidden
+                              >
+                                {citizens.find(u => u.username === selectedCitizen)?.firstName.charAt(0) || selectedCitizen.charAt(0) || '?'}
+                              </div>
                             </div>
                             <span className="font-medium">
                               {citizens.find(u => u.username === selectedCitizen)?.firstName || ''} {citizens.find(u => u.username === selectedCitizen)?.lastName || ''}
