@@ -1615,7 +1615,7 @@ Your response:`;
                           <FaSpinner className="animate-spin text-yellow-500 text-2xl" />
                           {isPreparingContext && <span className="ml-2 text-amber-700">Preparing context...</span>}
                         </div>
-                      ) : (
+                      ) : ( // Removed the selectedCitizen === 'compagno' block
                         // Citizen messages (handles self-chat and other citizen chat)
                         <>
                           {citizenMessages.length === 0 ? (
