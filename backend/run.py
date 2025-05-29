@@ -10,4 +10,4 @@ if __name__ == "__main__":
     print(f"Starting server on port {port}")
     
     # Use the port from environment variable
-    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)

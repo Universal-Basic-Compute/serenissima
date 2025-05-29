@@ -3,170 +3,96 @@
 # Log startup
 echo "Starting application setup..."
 
-# Install required Python packages from requirements.txt
-echo "Installing Python requirements..."
-pip install -r requirements.txt
+# Assuming this script is in backend/startup.sh and executed from the project root.
+# REPO_PATH will be the project root.
+REPO_PATH=$(pwd)
+BACKEND_DIR="$REPO_PATH/backend"
+LOG_DIR="$BACKEND_DIR/logs"
 
-# Install required Node.js packages
+# Create logs directory if it doesn't exist
+mkdir -p "$LOG_DIR"
+
+# Install required Python packages from requirements.txt (assuming it's at REPO_PATH)
+echo "Installing Python requirements..."
+pip install -r "$REPO_PATH/requirements.txt" # Or "$BACKEND_DIR/requirements.txt" if it's there
+
+# Install required Node.js packages (assuming package.json is at REPO_PATH)
 echo "Installing required Node.js packages..."
+# If npm install is slow or not strictly needed for the backend to *start*, consider moving it
+# or ensure it's fast.
 npm install dotenv @solana/web3.js @solana/spl-token
 
-# Make the distribution script executable
-chmod +x distributeIncome.py
+# Make scripts executable (Python scripts don't strictly need +x if run with `python3 ...`)
+# but it doesn't hurt. Ensure paths are correct.
+chmod +x "$BACKEND_DIR/distributeIncome.py"
 echo "Made distributeIncome.py executable"
-
-# Set up the cron job
-echo "Setting up cron job for income distribution..."
-
-# Get the absolute path to the repository
-REPO_PATH=$(pwd)
-
-# Create a temporary crontab file
-TEMP_CRONTAB=$(mktemp)
-
-# Export current crontab
-crontab -l > "$TEMP_CRONTAB" 2>/dev/null || echo "# Income distribution cron jobs" > "$TEMP_CRONTAB"
-
-# Add cron job for housing homeless citizens
-if ! grep -q "househomelesscitizens.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 12pm UTC daily
-    echo "0 12 * * * cd $REPO_PATH && python3 engine/househomelesscitizens.py >> $REPO_PATH/house_homeless_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Housing homeless citizens will run daily at 12pm UTC."
-else
-    echo "Housing homeless citizens cron job already exists. No changes made."
-fi
-
-# Make citizen generator and image generator executable
-chmod +x engine/generate_citizen.py
-chmod +x engine/generate_citizen_images.py
+chmod +x "$BACKEND_DIR/engine/generate_citizen.py"
+chmod +x "$BACKEND_DIR/engine/generate_citizen_images.py"
 echo "Made generate_citizen.py and generate_citizen_images.py executable"
 
-# Add cron job for immigration
-if ! grep -q "immigration.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 11am UTC daily
-    echo "0 11 * * * cd $REPO_PATH && python3 engine/immigration.py >> $REPO_PATH/immigration_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Immigration will run daily at 11am UTC."
+
+echo "Setting up cron jobs..."
+
+TEMP_CRONTAB_CURRENT=$(mktemp)
+TEMP_CRONTAB_NEW=$(mktemp)
+
+# Export current crontab to TEMP_CRONTAB_CURRENT, or create an empty temp file
+crontab -l > "$TEMP_CRONTAB_CURRENT" 2>/dev/null
+
+# Copy current crontab to new crontab file, or start fresh if no current crontab
+if [ -s "$TEMP_CRONTAB_CURRENT" ]; then
+    cp "$TEMP_CRONTAB_CURRENT" "$TEMP_CRONTAB_NEW"
 else
-    echo "Immigration cron job already exists. No changes made."
+    echo "# Serenissima cron jobs" > "$TEMP_CRONTAB_NEW"
 fi
 
-# Add cron job for public buildings assignment to land owners
-if ! grep -q "affectpublicbuildingstolandowners.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 1pm UTC daily
-    echo "0 13 * * * cd $REPO_PATH && python3 engine/decrees/affectpublicbuildingstolandowners.py >> $REPO_PATH/public_buildings_assignment_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Public buildings assignment will run daily at 1pm UTC."
-else
-    echo "Public buildings assignment cron job already exists. No changes made."
-fi
+# Function to add cron job if not exists in the new crontab file
+add_cron_job_if_not_exists() {
+    local job_identifier="$1" # Unique string to identify the job, e.g., script name
+    local cron_schedule="$2"
+    local script_path_relative_to_backend="$3" # e.g., engine/househomelesscitizens.py
+    local log_file_name="$4"                   # e.g., house_homeless_cron.log
 
-# Add cron job for daily loan payments
-if ! grep -q "dailyloanpayments.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 3pm UTC daily
-    echo "0 15 * * * cd $REPO_PATH && python3 engine/dailyloanpayments.py >> $REPO_PATH/daily_loan_payments_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Daily loan payments will run daily at 3pm UTC."
-else
-    echo "Daily loan payments cron job already exists. No changes made."
-fi
+    local full_script_path="$BACKEND_DIR/$script_path_relative_to_backend"
+    local full_log_path="$LOG_DIR/$log_file_name"
+    # The `cd $REPO_PATH` is important so python can find `backend.engine...` modules if needed,
+    # or if scripts use relative paths from project root.
+    # Alternatively, `cd $BACKEND_DIR` and adjust python paths.
+    # Using `cd $REPO_PATH` and `python3 $BACKEND_DIR/...` is explicit.
+    local cron_command="$cron_schedule cd $REPO_PATH && python3 $full_script_path >> $full_log_path 2>&1"
 
-# Add cron job for citizen housing mobility
-if ! grep -q "citizenhousingmobility.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 2pm UTC daily
-    echo "0 14 * * * cd $REPO_PATH && python3 engine/citizenhousingmobility.py >> $REPO_PATH/housing_mobility_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Citizen housing mobility will run daily at 2pm UTC."
-else
-    echo "Citizen housing mobility cron job already exists. No changes made."
-fi
+    if ! grep -qF "$job_identifier" "$TEMP_CRONTAB_NEW"; then
+        echo "$cron_command" >> "$TEMP_CRONTAB_NEW"
+        echo "Cron job for '$job_identifier' will be added."
+    else
+        echo "Cron job for '$job_identifier' already exists in new crontab. No changes made."
+    fi
+}
 
-# Add cron job for citizen work mobility
-if ! grep -q "citizenworkmobility.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 4pm UTC daily
-    echo "0 16 * * * cd $REPO_PATH && python3 engine/citizenworkmobility.py >> $REPO_PATH/work_mobility_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Citizen work mobility will run daily at 4pm UTC."
-else
-    echo "Citizen work mobility cron job already exists. No changes made."
-fi
+# Define and add cron jobs
+# Format: job_identifier, schedule, script_path_from_backend_dir, log_filename
+add_cron_job_if_not_exists "engine/househomelesscitizens.py" "0 12 * * *" "engine/househomelesscitizens.py" "house_homeless_cron.log"
+add_cron_job_if_not_exists "engine/immigration.py" "0 11 * * *" "engine/immigration.py" "immigration_cron.log"
+add_cron_job_if_not_exists "engine/decrees/affectpublicbuildingstolandowners.py" "0 13 * * *" "engine/decrees/affectpublicbuildingstolandowners.py" "public_buildings_assignment_cron.log"
+add_cron_job_if_not_exists "engine/dailyloanpayments.py" "0 15 * * *" "engine/dailyloanpayments.py" "daily_loan_payments_cron.log"
+add_cron_job_if_not_exists "engine/citizenhousingmobility.py" "0 14 * * *" "engine/citizenhousingmobility.py" "housing_mobility_cron.log"
+add_cron_job_if_not_exists "engine/citizenworkmobility.py" "0 16 * * *" "engine/citizenworkmobility.py" "work_mobility_cron.log"
+add_cron_job_if_not_exists "engine/citizensgetjobs.py" "0 10 * * *" "engine/citizensgetjobs.py" "citizen_jobs_cron.log"
+add_cron_job_if_not_exists "engine/dailywages.py" "0 17 * * *" "engine/dailywages.py" "daily_wages_cron.log"
+add_cron_job_if_not_exists "engine/dailyrentpayments.py" "0 18 * * *" "engine/dailyrentpayments.py" "daily_rent_payments_cron.log"
+add_cron_job_if_not_exists "engine/treasuryRedistribution.py" "0 8 * * *" "engine/treasuryRedistribution.py" "treasury_redistribution_cron.log"
+add_cron_job_if_not_exists "engine/distributeLeases.py" "0 9 * * *" "engine/distributeLeases.py" "lease_distribution_cron.log"
+# Add other cron jobs here using the same function call
 
-# Add cron job for citizen job assignment
-if ! grep -q "citizensgetjobs.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 10am UTC daily
-    echo "0 10 * * * cd $REPO_PATH && python3 engine/citizensgetjobs.py >> $REPO_PATH/citizen_jobs_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Citizen job assignment will run daily at 10am UTC."
-else
-    echo "Citizen job assignment cron job already exists. No changes made."
-fi
+# Install the new crontab from TEMP_CRONTAB_NEW
+crontab "$TEMP_CRONTAB_NEW"
+echo "Crontab updated with all specified jobs."
 
-# Add cron job for daily wage payments
-if ! grep -q "dailywages.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 5pm UTC daily
-    echo "0 17 * * * cd $REPO_PATH && python3 engine/dailywages.py >> $REPO_PATH/daily_wages_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Daily wage payments will run daily at 5pm UTC."
-else
-    echo "Daily wage payments cron job already exists. No changes made."
-fi
-
-# Add cron job for daily rent payments
-if ! grep -q "dailyrentpayments.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 6pm UTC daily
-    echo "0 18 * * * cd $REPO_PATH && python3 engine/dailyrentpayments.py >> $REPO_PATH/daily_rent_payments_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Daily rent payments will run daily at 6pm UTC."
-else
-    echo "Daily rent payments cron job already exists. No changes made."
-fi
-
-# Add cron job for treasury redistribution
-if ! grep -q "treasuryRedistribution.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 8am UTC daily
-    echo "0 8 * * * cd $REPO_PATH && python3 engine/treasuryRedistribution.py >> $REPO_PATH/treasury_redistribution_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Treasury redistribution will run daily at 8am UTC."
-else
-    echo "Treasury redistribution cron job already exists. No changes made."
-fi
-
-# Add cron job for lease distribution
-if ! grep -q "distributeLeases.py" "$TEMP_CRONTAB"; then
-    # Add the cron job to run at 9am UTC daily
-    echo "0 9 * * * cd $REPO_PATH && python3 engine/distributeLeases.py >> $REPO_PATH/lease_distribution_cron.log 2>&1" >> "$TEMP_CRONTAB"
-    
-    # Install the new crontab
-    crontab "$TEMP_CRONTAB"
-    echo "Cron job installed successfully. Lease distribution will run daily at 9am UTC."
-else
-    echo "Lease distribution cron job already exists. No changes made."
-fi
-
-# Clean up
-rm "$TEMP_CRONTAB"
+# Clean up temporary files
+rm "$TEMP_CRONTAB_CURRENT"
+rm "$TEMP_CRONTAB_NEW"
 
 # Start the application
-echo "Starting application..."
-python run.py
+echo "Starting application (FastAPI backend)..."
+# Ensure this is run from REPO_PATH so `backend.run` is correct, or `python $BACKEND_DIR/run.py`
+python "$BACKEND_DIR/run.py"
