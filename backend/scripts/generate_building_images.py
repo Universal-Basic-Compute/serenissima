@@ -20,6 +20,71 @@ from typing import Dict, List, Optional, Any
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 from pathlib import Path
+import tempfile # Added
+
+# --- BEGIN COPIED HELPER FUNCTION ---
+# (The upload_file_to_backend function defined above will be inserted here)
+# Default API URL, can be overridden by env var or arg
+DEFAULT_FASTAPI_URL = "http://localhost:8000" 
+
+def upload_file_to_backend(
+    local_file_path: str,
+    filename_on_server: str, # Explicit filename for the server
+    destination_folder_on_server: str, # e.g., "images/resources" or "coat-of-arms"
+    api_url: str,
+    api_key: str
+) -> Optional[str]:
+    """
+    Uploads a file to the backend /api/upload-asset endpoint.
+
+    Args:
+        local_file_path (str): The path to the local file to upload.
+        filename_on_server (str): The desired filename for the asset on the server.
+        destination_folder_on_server (str): The relative path of the folder on the server 
+                                            within the persistent assets dir.
+        api_url (str): The base URL of the FastAPI backend.
+        api_key (str): The API key for the upload endpoint.
+
+    Returns:
+        Optional[str]: The full public URL of the uploaded asset from the backend,
+                       or None if upload failed.
+    """
+    upload_endpoint = f"{api_url.rstrip('/')}/api/upload-asset"
+    
+    try:
+        with open(local_file_path, 'rb') as f:
+            # The 'file' field in files should contain the desired filename on the server
+            files = {'file': (filename_on_server, f)}
+            data = {'destination_path': destination_folder_on_server} 
+            headers = {'X-Upload-Api-Key': api_key}
+            
+            print(f"Uploading '{local_file_path}' as '{filename_on_server}' to backend folder '{destination_folder_on_server}' via {upload_endpoint}...")
+            response = requests.post(upload_endpoint, files=files, data=data, headers=headers, timeout=180) # Increased timeout
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                if response_data.get("success") and response_data.get("relative_path"):
+                    relative_backend_path = response_data["relative_path"]
+                    # Construct the full public URL
+                    full_public_url = f"{api_url.rstrip('/')}/public_assets/{relative_backend_path.lstrip('/')}"
+                    print(f"Success: '{local_file_path}' uploaded. Public URL: '{full_public_url}'")
+                    return full_public_url
+                else:
+                    print(f"Upload successful but response format unexpected: {response_data}")
+                    return None
+            else:
+                print(f"Upload failed for {local_file_path}. Status: {response.status_code}, Response: {response.text}")
+                return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error during upload of {local_file_path}: {e}")
+        return None
+    except IOError as e:
+        print(f"IO error reading {local_file_path}: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error during upload of {local_file_path}: {e}")
+        return None
+# --- END COPIED HELPER FUNCTION ---
 
 # Set up logging
 logging.basicConfig(
@@ -33,8 +98,12 @@ load_dotenv()
 
 # Constants
 BUILDINGS_DATA_DIR = os.path.join(os.getcwd(), 'data', 'buildings')
-BUILDINGS_IMAGE_DIR = os.path.join(os.getcwd(), 'public', 'images', 'buildings')
+# BUILDINGS_IMAGE_DIR is no longer the final destination for images.
+# We will upload to "images/buildings" on the server.
 
+# Global variables for API URL and Key, to be set in main()
+BACKEND_API_URL_GLOBAL = DEFAULT_FASTAPI_URL
+UPLOAD_API_KEY_GLOBAL = None
 
 def _fetch_prompt_from_kinos(building_data: Dict[str, Any]) -> Optional[str]:
     """
@@ -250,186 +319,137 @@ def create_image_prompt(building: Dict[str, Any]) -> str:
     log.info(f"Final prompt for {name}: {full_prompt}")
     return full_prompt
 
-def generate_image(prompt: str, base_filename: str, output_dir: str) -> Optional[str]:
+def generate_and_upload_image(prompt: str, base_filename: str) -> Optional[str]:
     """
-    Generate image using Ideogram API, save with correct extension, and return the full path.
+    Generate image using Ideogram API, download to temp, upload to backend, and return public URL.
     """
-    log.info(f"Generating image for base filename: {base_filename} in dir: {output_dir}")
-    
-    # Log the full prompt to the console
+    global BACKEND_API_URL_GLOBAL, UPLOAD_API_KEY_GLOBAL
+
+    log.info(f"Generating image for base filename: {base_filename}")
     log.info(f"PROMPT: {prompt}")
     
-    # Get Ideogram API key from environment
     ideogram_api_key = os.environ.get('IDEOGRAM_API_KEY')
     if not ideogram_api_key:
         log.error("IDEOGRAM_API_KEY environment variable is not set")
-        return False
+        return None # Changed from False to None for consistency
     
+    if not UPLOAD_API_KEY_GLOBAL:
+        log.error("UPLOAD_API_KEY_GLOBAL not set. Cannot upload image.")
+        return None
+
     try:
-        # Call the Ideogram API
         response = requests.post(
-            "https://api.ideogram.ai/v1/ideogram-v3/generate",
-            headers={
-                "Api-Key": ideogram_api_key,
-                "Content-Type": "application/json"
-            },
-            json={
-                "prompt": prompt,
-                "style_type": "REALISTIC",
-                "rendering_speed": "DEFAULT",
-                "model":"V_3"
-            }
+            "https://api.ideogram.ai/v1/ideogram-v3/generate", # Assuming v3 is desired
+            headers={"Api-Key": ideogram_api_key, "Content-Type": "application/json"},
+            json={"prompt": prompt, "style_type": "REALISTIC", "rendering_speed": "DEFAULT", "model": "V_3"}
         )
         
         if response.status_code != 200:
             log.error(f"Error from Ideogram API: {response.status_code} {response.text}")
-            return False
-        
-        # Log the full response for debugging
-        log.info(f"Ideogram API response: {response.text[:1000]}...")
-        
-        # Extract image URL from response
-        result = response.json()
-        
-        # Check if the expected data structure exists
-        if "data" not in result or not result["data"] or "url" not in result["data"][0]:
-            log.error(f"Unexpected response structure: {result}")
-            return False
-            
-        image_url = result.get("data", [{}])[0].get("url", "")
-        
-        if not image_url:
-            log.error("No image URL in response")
             return None
         
-        log.info(f"Image URL received: {image_url}")
+        result = response.json()
+        image_url_from_ideogram = result.get("data", [{}])[0].get("url")
+        
+        if not image_url_from_ideogram:
+            log.error("No image URL in Ideogram response")
+            return None
+        
+        log.info(f"Image URL received from Ideogram: {image_url_from_ideogram}")
 
         # Determine file extension from URL
-        parsed_url = urlparse(image_url)
-        image_path_on_server = parsed_url.path
-        original_extension = Path(image_path_on_server).suffix.lower() # .png, .jpg etc.
-        
-        if not original_extension or original_extension not in ['.png', '.jpg', '.jpeg']:
-            log.warning(f"Could not determine a valid extension from image URL {image_url} (path: {image_path_on_server}, ext: '{original_extension}'), defaulting to .png")
+        parsed_url = urlparse(image_url_from_ideogram)
+        original_extension = Path(parsed_url.path).suffix.lower() or ".png"
+        if original_extension not in ['.png', '.jpg', '.jpeg']:
+            log.warning(f"Invalid extension '{original_extension}', defaulting to .png")
             original_extension = ".png"
+        
+        filename_on_server = f"{base_filename}{original_extension}"
 
-        # Ensure the output directory exists
-        os.makedirs(output_dir, exist_ok=True)
-        
-        actual_output_path = os.path.join(output_dir, f"{base_filename}{original_extension}")
-        
-        # Download the image
-        log.info(f"Downloading image from URL: {image_url}")
-        image_response = requests.get(image_url, stream=True)
-        
+        # Download the image to a temporary file
+        image_response = requests.get(image_url_from_ideogram, stream=True)
         if not image_response.ok:
-            log.error(f"Failed to download image: {image_response.status_code} {image_response.reason}")
+            log.error(f"Failed to download image from Ideogram: {image_response.status_code}")
             return None
         
-        # Save the image
-        log.info(f"Saving image to {actual_output_path}")
-        with open(actual_output_path, 'wb') as f:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=original_extension) as tmp_file:
             for chunk in image_response.iter_content(chunk_size=8192):
-                f.write(chunk)
+                tmp_file.write(chunk)
+            tmp_file_path = tmp_file.name
         
-        # Verify the saved file
-        if os.path.exists(actual_output_path):
-            file_size = os.path.getsize(actual_output_path)
-            log.info(f"Successfully saved image to {actual_output_path} (size: {file_size} bytes)")
-            
-            if file_size < 1000:  # Suspiciously small for an image
-                log.warning(f"Warning: Saved file {actual_output_path} is very small ({file_size} bytes), might not be a valid image")
-                # Save the response content for inspection
-                with open(f"{actual_output_path}.response.json", 'w') as f: # Suffix before extension
-                    f.write(response.text)
+        log.info(f"Image downloaded to temporary file: {tmp_file_path}")
+
+        # Upload the temporary file
+        public_url = upload_file_to_backend(
+            local_file_path=tmp_file_path,
+            filename_on_server=filename_on_server,
+            destination_folder_on_server="images/buildings",
+            api_url=BACKEND_API_URL_GLOBAL,
+            api_key=UPLOAD_API_KEY_GLOBAL
+        )
+        
+        try:
+            os.remove(tmp_file_path)
+            log.info(f"Removed temporary file: {tmp_file_path}")
+        except OSError as e:
+            log.error(f"Error removing temporary file {tmp_file_path}: {e}")
+
+        if public_url:
+            log.info(f"Successfully generated and uploaded image for {base_filename}. URL: {public_url}")
         else:
-            log.error(f"Failed to save image to {actual_output_path}")
-            return None
-            
-        return actual_output_path
+            log.error(f"Failed to upload image for {base_filename} to backend.")
+        
+        return public_url
+
     except Exception as e:
-        log.error(f"Error generating image for {base_filename}: {e}")
+        log.error(f"Error generating/uploading image for {base_filename}: {e}")
         return None
 
 def process_building(building: Dict[str, Any], force_regenerate: bool = False) -> bool:
-    """Process a single building to generate its image."""
-    # Extract building information
-    name = building.get('name', 'unknown')
-    building_type = building.get('type', name)
+    """Process a single building to generate and upload its image."""
+    name = building.get('name', 'unknown_building')
+    safe_name = name.lower().replace(' ', '_').replace("'", "").replace('"', '') # Simplified safe name
     
-    # Create a safe filename from the building name
-    safe_name = name.lower().replace(' ', '_').replace("'s", "s_").replace("'", '').replace('"', '')
-    
-    # Create a safe filename from the building type as fallback
-    safe_type = building_type.lower().replace(' ', '_').replace("'s", "s_").replace("'", '').replace('"', '')
-    
-    # Use the building ID if available, otherwise use the safe name
-    building_id = building.get('id', safe_name) # This is a filename stem
-    
-    # Check if image already exists (with common extensions)
-    if not force_regenerate:
-        possible_extensions = [".png", ".jpg", ".jpeg"]
-        existing_image_path = None
-        for ext in possible_extensions:
-            potential_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{safe_name}{ext}")
-            if os.path.exists(potential_path):
-                existing_image_path = potential_path
-                break
-        
-        log.info(f"Checking if image exists for base name '{safe_name}': Path found: {existing_image_path}")
-        
-        if existing_image_path:
-            log.info(f"Image {existing_image_path} already exists for {name}, skipping. Use --force to regenerate.")
-            return True
-            
-    # Create the prompt
-    prompt = create_image_prompt(building)
-    
-    # Generate the image, getting the full path of the saved image
-    saved_image_full_path = generate_image(prompt, safe_name, BUILDINGS_IMAGE_DIR)
-    
-    if not saved_image_full_path:
-        log.error(f"Failed to generate image for {name} (base: {safe_name})")
-        return False
+    # This script doesn't store the URL back into a data file.
+    # It relies on the frontend constructing the URL based on convention.
+    # So, we just need to ensure the image is uploaded.
+    # The `force_regenerate` logic might need to check if the image exists on the *server*,
+    # which is harder. For now, if `force_regenerate` is true, it will always try.
+    # If not forcing, and we had a way to check server existence, we could skip.
+    # Let's assume for now that if not `force_regenerate`, we might skip based on local progress or a marker.
+    # However, the original script checked local existence. Since we're uploading, this check is less relevant.
+    # We'll rely on a progress tracking mechanism if skipping is desired without `force_regenerate`.
+    # For simplicity now, let's assume it tries to generate if not explicitly told to skip by other means (e.g. limit).
 
-    # Extract the extension from the actually saved file
-    _, saved_extension = os.path.splitext(saved_image_full_path)
+    prompt = create_image_prompt(building)
+    public_image_url = generate_and_upload_image(prompt, safe_name)
     
-    # Also save a copy with the building ID if available and different from safe_name
-    if building_id and building_id != safe_name:
-        id_output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{building_id}{saved_extension}")
-        if saved_image_full_path != id_output_path: # Avoid copying to itself
-            try:
-                with open(saved_image_full_path, 'rb') as src, open(id_output_path, 'wb') as dst:
-                    dst.write(src.read())
-                log.info(f"Created ID-based copy at {id_output_path}")
-            except Exception as e:
-                log.error(f"Error creating ID-based copy for {building_id}: {e}")
+    if not public_image_url:
+        log.error(f"Failed to generate and upload image for {name} (base: {safe_name})")
+        return False
     
-    # Also save a copy with the building type if different from name
-    if safe_type != safe_name:
-        type_output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{safe_type}{saved_extension}")
-        if saved_image_full_path != type_output_path: # Avoid copying to itself
-            try:
-                with open(saved_image_full_path, 'rb') as src, open(type_output_path, 'wb') as dst:
-                    dst.write(src.read())
-                log.info(f"Created type-based copy at {type_output_path}")
-            except Exception as e:
-                log.error(f"Error creating type-based copy for {safe_type}: {e}")
+    # If building ID or type are different, we might want to create aliases or symlinks on the server.
+    # The current upload API doesn't support this directly.
+    # For now, we'll just upload using `safe_name`.
+    # The frontend will need to consistently use this `safe_name` based URL.
     
     return True
 
-def main():
+def main(cli_args): # Renamed args to cli_args to avoid conflict
     """Main function to generate building images."""
-    parser = argparse.ArgumentParser(description="Generate images for buildings")
-    parser.add_argument("--limit", type=int, default=0, help="Maximum number of images to generate (0 for unlimited)")
-    parser.add_argument("--force", action="store_true", help="Force regeneration of existing images")
-    parser.add_argument("--building", help="Only process a specific building by name or type")
-    
-    args = parser.parse_args()
-    
-    # Ensure the base output directory exists
-    os.makedirs(BUILDINGS_IMAGE_DIR, exist_ok=True)
+    global BACKEND_API_URL_GLOBAL, UPLOAD_API_KEY_GLOBAL
+    BACKEND_API_URL_GLOBAL = cli_args.api_url
+    UPLOAD_API_KEY_GLOBAL = cli_args.api_key
+
+    if not UPLOAD_API_KEY_GLOBAL:
+        log.error("Upload API key is required. Set UPLOAD_API_KEY or use --api_key.")
+        sys.exit(1)
+    if not BACKEND_API_URL_GLOBAL:
+        log.error("FastAPI backend URL is required. Set FASTAPI_BACKEND_URL or use --api_url.")
+        sys.exit(1)
+
+    # Ensure the base output directory for logs/progress exists if needed
+    # os.makedirs(BUILDINGS_IMAGE_DIR, exist_ok=True) # Not creating local image dir
     
     # Scan for building files
     buildings = scan_building_files()
@@ -439,12 +459,12 @@ def main():
         return
     
     # Filter buildings based on command-line arguments
-    if args.building:
-        building_name_lower = args.building.lower()
+    if cli_args.building:
+        building_name_lower = cli_args.building.lower()
         buildings = [b for b in buildings if 
                     b.get('name', '').lower() == building_name_lower or
                     b.get('type', '').lower() == building_name_lower]
-        log.info(f"Filtered to {len(buildings)} buildings with name or type '{args.building}'")
+        log.info(f"Filtered to {len(buildings)} buildings with name or type '{cli_args.building}'")
     
     if not buildings:
         log.error("No buildings match the specified filters. Exiting.")
@@ -454,17 +474,17 @@ def main():
     processed_count = 0
     success_count = 0
     
-    for building in buildings:
+    for building_data in buildings: # Renamed building to building_data to avoid conflict
         # Check if we've reached the limit
-        if args.limit > 0 and processed_count >= args.limit:
-            log.info(f"Reached limit of {args.limit} images. Stopping.")
+        if cli_args.limit > 0 and processed_count >= cli_args.limit:
+            log.info(f"Reached limit of {cli_args.limit} images. Stopping.")
             break
         
-        name = building.get('name', f"Building {processed_count+1}")
+        name = building_data.get('name', f"Building {processed_count+1}")
         log.info(f"Processing building {processed_count+1}/{len(buildings)}: {name}")
         
         # Process the building
-        success = process_building(building, args.force)
+        success = process_building(building_data, cli_args.force)
         
         if success:
             success_count += 1
@@ -472,10 +492,32 @@ def main():
         processed_count += 1
         
         # Add a delay to avoid rate limiting
-        if processed_count < len(buildings) and processed_count < args.limit:
-            time.sleep(3)
+        if processed_count < len(buildings) and (cli_args.limit == 0 or processed_count < cli_args.limit) :
+            time.sleep(cli_args.delay_seconds) # Use configurable delay
     
-    log.info(f"Generated {success_count} images out of {processed_count} processed buildings")
+    log.info(f"Attempted to generate and upload {success_count} images out of {processed_count} processed buildings")
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Generate images for buildings and upload them.")
+    parser.add_argument("--limit", type=int, default=0, help="Maximum number of images to generate (0 for unlimited)")
+    parser.add_argument("--force", action="store_true", help="Force regeneration (currently ignored as server-side check is complex)")
+    parser.add_argument("--building", help="Only process a specific building by name or type")
+    parser.add_argument(
+        "--api_url",
+        default=os.getenv("FASTAPI_BACKEND_URL", DEFAULT_FASTAPI_URL),
+        help="FastAPI backend URL for uploading assets."
+    )
+    parser.add_argument(
+        "--api_key",
+        default=os.getenv("UPLOAD_API_KEY"),
+        help="API key for the backend upload endpoint."
+    )
+    parser.add_argument(
+        "--delay_seconds",
+        type=int,
+        default=10, # Increased default delay
+        help="Delay in seconds between processing each building image."
+    )
+    
+    args_parsed = parser.parse_args()
+    main(args_parsed)

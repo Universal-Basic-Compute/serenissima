@@ -265,13 +265,14 @@ async def generate_image(node, prompt):
         log_error(node_id, 'ideogram_api', error)
         return None
 
-# Download image from URL
-async def download_image(node, image_url):
+# Download image from URL, upload it
+async def download_and_upload_tech_image(node, image_url: str, backend_api_url: str, backend_api_key: str) -> Optional[str]:
     node_id = node['id']
-    image_path = IMAGES_DIR / f"{node_id}.jpg"
+    # We expect .jpg for tech tree images based on existing paths
+    filename_on_server = f"{node_id}.jpg" 
     
     try:
-        print(f"Downloading image for {node_id} to {image_path}")
+        print(f"Downloading image for tech node {node_id} from {image_url}")
         
         async with aiohttp.ClientSession() as session:
             async with session.get(image_url) as response:
@@ -280,31 +281,55 @@ async def download_image(node, image_url):
                     log_error(node_id, 'image_download', f"HTTP {response.status}")
                     return None
                 
-                # Save the image
-                with open(image_path, 'wb') as f:
-                    f.write(await response.read())
+                image_content = await response.read()
+
+        # Save to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
+            tmp_file.write(image_content)
+            tmp_file_path = tmp_file.name
         
-        print(f"Successfully downloaded image for {node_id}")
-        return str(image_path)
+        print(f"Successfully downloaded image for {node_id} to temporary file {tmp_file_path}")
+
+        # Upload the temporary file to the backend
+        # The destination folder on the server will be "images/tech-tree"
+        public_url = upload_file_to_backend(
+            local_file_path=tmp_file_path,
+            filename_on_server=filename_on_server,
+            destination_folder_on_server="images/tech-tree", # Standardized path
+            api_url=backend_api_url,
+            api_key=backend_api_key
+        )
+        
+        # Clean up the temporary file
+        try:
+            os.remove(tmp_file_path)
+            print(f"Removed temporary file: {tmp_file_path}")
+        except OSError as e:
+            print(f"Error removing temporary file {tmp_file_path}: {e}")
+
+        if public_url:
+            print(f"Image for {node_id} uploaded. Public URL: {public_url}")
+            # This script doesn't update a data file, so we just return the URL for logging/confirmation
+            return public_url 
+        else:
+            log_error(node_id, 'image_upload', "Failed to upload image to backend.")
+            return None
+
     except Exception as error:
-        print(f"Error downloading image for {node_id}: {error}")
-        log_error(node_id, 'image_download', error)
+        print(f"Error downloading/uploading image for {node_id}: {error}")
+        log_error(node_id, 'image_download_upload', error)
         return None
 
 # Process a batch of nodes
-async def process_node_batch(nodes):
-    processed_ids = []
+async def process_node_batch(nodes, backend_api_url: str, backend_api_key: str):
+    processed_ids_in_batch = []
     
     for node in nodes:
         node_id = node['id']
         print(f"\n=== Processing node: {node_id} ===")
         
-        # Check if image already exists
-        image_path = IMAGES_DIR / f"{node_id}.jpg"
-        if image_path.exists():
-            print(f"Image already exists for {node_id}, skipping...")
-            processed_ids.append(node_id)
-            continue
+        # We rely on the progress file to skip already processed nodes.
+        # The check for image_path.exists() is removed.
         
         # Generate prompt
         prompt = await generate_image_prompt(node)
@@ -312,32 +337,32 @@ async def process_node_batch(nodes):
             print(f"Failed to generate prompt for {node_id}, skipping...")
             continue
         
-        # Generate image
-        image_url = await generate_image(node, prompt)
-        if not image_url:
-            print(f"Failed to generate image for {node_id}, skipping...")
+        # Generate image URL from Ideogram
+        ideogram_image_url = await generate_image(node, prompt)
+        if not ideogram_image_url:
+            print(f"Failed to generate image URL for {node_id}, skipping...")
             continue
         
-        # Download image
-        downloaded_path = await download_image(node, image_url)
-        if not downloaded_path:
-            print(f"Failed to download image for {node_id}, skipping...")
+        # Download image from Ideogram, upload to backend
+        public_image_url = await download_and_upload_tech_image(node, ideogram_image_url, backend_api_url, backend_api_key)
+        if not public_image_url:
+            print(f"Failed to download/upload image for {node_id}, skipping...")
             continue
         
-        print(f"=== Completed processing for {node_id} ===\n")
-        processed_ids.append(node_id)
+        print(f"=== Completed processing for {node_id} (URL: {public_image_url}) ===\n")
+        processed_ids_in_batch.append(node_id)
         
         # Add a small delay between nodes to avoid rate limiting
-        await asyncio.sleep(2)
+        await asyncio.sleep(5) # Increased delay
     
-    return processed_ids
+    return processed_ids_in_batch
 
 # Main function
-async def main():
+async def main(args): # Added args parameter
     try:
         print("Starting tech tree image generation...")
         
-        # Ensure directories exist
+        # Ensure directories exist (for logs)
         ensure_directories_exist()
         
         # Extract tech tree nodes
@@ -346,31 +371,34 @@ async def main():
         # Load progress
         processed_node_ids = load_progress()
         
-        # Filter nodes that don't have images yet and weren't processed before
+        # Filter nodes that haven't been processed yet
         nodes_to_process = [
             node for node in all_nodes
-            if not (IMAGES_DIR / f"{node['id']}.jpg").exists()
-            and node['id'] not in processed_node_ids
+            if node['id'] not in processed_node_ids
         ]
         
-        print(f"Found {len(nodes_to_process)} nodes that need images")
+        print(f"Found {len(nodes_to_process)} nodes that need images (based on progress file).")
+
+        if not nodes_to_process:
+            print("No new tech tree nodes to process.")
+            return
         
-        # Process nodes in batches of 3
-        batch_size = 3
+        # Process nodes in batches
+        batch_size = args.batch_size
         for i in range(0, len(nodes_to_process), batch_size):
             batch = nodes_to_process[i:i+batch_size]
             print(f"\n=== Processing batch {i//batch_size + 1}/{(len(nodes_to_process) + batch_size - 1)//batch_size} ===\n")
             
-            processed_batch = await process_node_batch(batch)
+            successfully_processed_in_batch = await process_node_batch(batch, args.api_url, args.api_key)
             
             # Save progress after each batch
-            processed_node_ids.extend(processed_batch)
+            processed_node_ids.extend(successfully_processed_in_batch)
             save_progress(processed_node_ids)
             
             # Add a delay between batches to avoid overwhelming the API
             if i + batch_size < len(nodes_to_process):
-                print("Waiting 30 seconds before processing next batch...")
-                await asyncio.sleep(30)
+                print(f"Waiting {args.batch_delay} seconds before processing next batch...")
+                await asyncio.sleep(args.batch_delay)
         
         print("\n=== Tech tree image generation completed ===")
         
@@ -381,4 +409,36 @@ async def main():
 
 # Run the main function
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description="Generate images for tech tree nodes and upload them.")
+    parser.add_argument(
+        "--api_url",
+        default=os.getenv("FASTAPI_BACKEND_URL", DEFAULT_FASTAPI_URL),
+        help="FastAPI backend URL for uploading assets."
+    )
+    parser.add_argument(
+        "--api_key",
+        default=os.getenv("UPLOAD_API_KEY"),
+        help="API key for the backend upload endpoint."
+    )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=2, # Reduced default batch size
+        help="Number of tech tree nodes to process in each batch."
+    )
+    parser.add_argument(
+        "--batch_delay",
+        type=int,
+        default=60, # Increased default delay
+        help="Delay in seconds between processing batches."
+    )
+    args = parser.parse_args()
+
+    if not args.api_key:
+        print("Error: Upload API key is required. Set UPLOAD_API_KEY environment variable or use --api_key.")
+        sys.exit(1)
+    if not args.api_url:
+        print("Error: FastAPI backend URL is required. Set FASTAPI_BACKEND_URL environment variable or use --api_url.")
+        sys.exit(1)
+        
+    asyncio.run(main(args))

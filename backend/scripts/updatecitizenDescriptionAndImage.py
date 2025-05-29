@@ -32,6 +32,71 @@ import requests
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
+import tempfile # Added
+
+# --- BEGIN COPIED HELPER FUNCTION ---
+# (The upload_file_to_backend function defined above will be inserted here)
+# Default API URL, can be overridden by env var or arg
+DEFAULT_FASTAPI_URL = "http://localhost:8000" 
+
+def upload_file_to_backend(
+    local_file_path: str,
+    filename_on_server: str, # Explicit filename for the server
+    destination_folder_on_server: str, # e.g., "images/resources" or "coat-of-arms"
+    api_url: str,
+    api_key: str
+) -> Optional[str]:
+    """
+    Uploads a file to the backend /api/upload-asset endpoint.
+
+    Args:
+        local_file_path (str): The path to the local file to upload.
+        filename_on_server (str): The desired filename for the asset on the server.
+        destination_folder_on_server (str): The relative path of the folder on the server 
+                                            within the persistent assets dir.
+        api_url (str): The base URL of the FastAPI backend.
+        api_key (str): The API key for the upload endpoint.
+
+    Returns:
+        Optional[str]: The full public URL of the uploaded asset from the backend,
+                       or None if upload failed.
+    """
+    upload_endpoint = f"{api_url.rstrip('/')}/api/upload-asset"
+    
+    try:
+        with open(local_file_path, 'rb') as f:
+            # The 'file' field in files should contain the desired filename on the server
+            files = {'file': (filename_on_server, f)}
+            data = {'destination_path': destination_folder_on_server} 
+            headers = {'X-Upload-Api-Key': api_key}
+            
+            print(f"Uploading '{local_file_path}' as '{filename_on_server}' to backend folder '{destination_folder_on_server}' via {upload_endpoint}...")
+            response = requests.post(upload_endpoint, files=files, data=data, headers=headers, timeout=180) # Increased timeout
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                if response_data.get("success") and response_data.get("relative_path"):
+                    relative_backend_path = response_data["relative_path"]
+                    # Construct the full public URL
+                    full_public_url = f"{api_url.rstrip('/')}/public_assets/{relative_backend_path.lstrip('/')}"
+                    print(f"Success: '{local_file_path}' uploaded. Public URL: '{full_public_url}'")
+                    return full_public_url
+                else:
+                    print(f"Upload successful but response format unexpected: {response_data}")
+                    return None
+            else:
+                print(f"Upload failed for {local_file_path}. Status: {response.status_code}, Response: {response.text}")
+                return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error during upload of {local_file_path}: {e}")
+        return None
+    except IOError as e:
+        print(f"IO error reading {local_file_path}: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error during upload of {local_file_path}: {e}")
+        return None
+# --- END COPIED HELPER FUNCTION ---
 
 # Set up logging
 logging.basicConfig(
@@ -43,11 +108,14 @@ log = logging.getLogger("update_citizen_description_image")
 # Load environment variables
 load_dotenv()
 
-# Constants
-CITIZENS_IMAGE_DIR = os.path.join(os.getcwd(), 'public', 'images', 'citizens')
+# Constants for local paths are no longer needed for final storage.
+# CITIZENS_IMAGE_DIR = os.path.join(os.getcwd(), 'public', 'images', 'citizens')
+# os.makedirs(CITIZENS_IMAGE_DIR, exist_ok=True) # Not creating local public dirs
 
-# Ensure the images directory exists
-os.makedirs(CITIZENS_IMAGE_DIR, exist_ok=True)
+# Global vars for backend URL and API key, to be set in main()
+BACKEND_API_URL_GLOBAL = DEFAULT_FASTAPI_URL
+UPLOAD_API_KEY_GLOBAL = None
+
 
 def initialize_airtable():
     """Initialize Airtable connection."""
@@ -434,135 +502,129 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         log.error(f"Error generating description and image prompt: {e}")
         return None
 
-def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
-    """Generate image using Ideogram API."""
-    log.info(f"Sending prompt to Ideogram API: {prompt[:100]}...")
+def generate_and_upload_citizen_image(prompt: str, citizen_id_as_username: str) -> Optional[str]:
+    """Generate citizen image using Ideogram, download to temp, upload to backend, return public URL."""
+    global BACKEND_API_URL_GLOBAL, UPLOAD_API_KEY_GLOBAL
+    log.info(f"Generating portrait for {citizen_id_as_username}: {prompt[:100]}...")
     
-    # Get Ideogram API key from environment
     ideogram_api_key = os.environ.get('IDEOGRAM_API_KEY')
     if not ideogram_api_key:
         log.error("IDEOGRAM_API_KEY environment variable is not set")
         return None
-    
-    try:
-        # Enhance the prompt with additional styling guidance
-        enhanced_prompt = f"{prompt} Renaissance portrait style with realistic details. 3/4 view portrait composition with dramatic lighting. Historically accurate Venetian setting and clothing details. Photorealistic quality, high detail."
+    if not UPLOAD_API_KEY_GLOBAL:
+        log.error("UPLOAD_API_KEY_GLOBAL not set. Cannot upload image.")
+        return None
         
-        # Call the Ideogram API
+    try:
+        enhanced_prompt = f"{prompt} Renaissance portrait style with realistic details. 3/4 view portrait composition with dramatic lighting. Historically accurate Venetian setting and clothing details. Photorealistic quality, high detail."
         response = requests.post(
             "https://api.ideogram.ai/v1/ideogram-v3/generate",
-            headers={
-                "Api-Key": ideogram_api_key,
-                "Content-Type": "application/json"
-            },
-            json={
-                "prompt": enhanced_prompt,
-                "style_type": "REALISTIC",
-                "rendering_speed": "DEFAULT",
-                "model":"V_3"
-            }
+            headers={"Api-Key": ideogram_api_key, "Content-Type": "application/json"},
+            json={"prompt": enhanced_prompt, "style_type": "REALISTIC", "rendering_speed": "DEFAULT", "model":"V_3"}
         )
         
         if response.status_code != 200:
-            log.error(f"Error from Ideogram API: {response.status_code} {response.text}")
+            log.error(f"Error from Ideogram API (citizen portrait): {response.status_code} {response.text}")
             return None
         
-        # Extract image URL from response
         result = response.json()
-        image_url = result.get("data", [{}])[0].get("url", "")
-        
-        if not image_url:
-            log.error("No image URL in response")
+        image_url_from_ideogram = result.get("data", [{}])[0].get("url")
+        if not image_url_from_ideogram:
+            log.error("No image URL in Ideogram response for citizen portrait")
             return None
         
-        # Download the image
-        image_response = requests.get(image_url, stream=True)
+        image_response = requests.get(image_url_from_ideogram, stream=True)
         if not image_response.ok:
-            log.error(f"Failed to download image: {image_response.status_code} {image_response.reason}")
+            log.error(f"Failed to download citizen portrait: {image_response.status_code}")
             return None
         
-        # Save the image to the public folder using the username directly
-        # No need to look up the username - citizen_id is already the username
-        image_path = os.path.join(CITIZENS_IMAGE_DIR, f"{citizen_id}.jpg")
-        with open(image_path, 'wb') as f:
+        # Save to a temporary file (assuming .jpg is appropriate for portraits)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
             for chunk in image_response.iter_content(chunk_size=8192):
-                f.write(chunk)
+                tmp_file.write(chunk)
+            tmp_file_path = tmp_file.name
         
-        log.info(f"Generated and saved image for citizen {citizen_id}")
+        log.info(f"Citizen portrait downloaded to temporary file: {tmp_file_path}")
+
+        public_url = upload_file_to_backend(
+            local_file_path=tmp_file_path,
+            filename_on_server=f"{citizen_id_as_username}.jpg", # Use username as filename
+            destination_folder_on_server="images/citizens",
+            api_url=BACKEND_API_URL_GLOBAL,
+            api_key=UPLOAD_API_KEY_GLOBAL
+        )
         
-        # Create the public URL path
-        public_image_url = f"/images/citizens/{citizen_id}.jpg"
-        
-        return public_image_url
+        try:
+            os.remove(tmp_file_path)
+        except OSError as e:
+            log.error(f"Error removing temporary citizen portrait file {tmp_file_path}: {e}")
+
+        return public_url
     except Exception as e:
-        log.error(f"Error generating image for citizen {citizen_id}: {e}")
+        log.error(f"Error generating/uploading citizen portrait for {citizen_id_as_username}: {e}")
         return None
 
-def generate_coat_of_arms_image(prompt: str, username: str) -> Optional[str]:
-    """Generate coat of arms image using Ideogram API."""
+def generate_and_upload_coat_of_arms_image(prompt: str, username: str) -> Optional[str]:
+    """Generate CoA image, download to temp, upload to backend, return public URL."""
+    global BACKEND_API_URL_GLOBAL, UPLOAD_API_KEY_GLOBAL
     log.info(f"Generating coat of arms for {username}: {prompt[:100]}...")
     
-    # Get Ideogram API key from environment
     ideogram_api_key = os.environ.get('IDEOGRAM_API_KEY')
     if not ideogram_api_key:
         log.error("IDEOGRAM_API_KEY environment variable is not set")
         return None
-    
-    # Enhance the prompt for better coat of arms generation
+    if not UPLOAD_API_KEY_GLOBAL:
+        log.error("UPLOAD_API_KEY_GLOBAL not set. Cannot upload image.")
+        return None
+
     enhanced_prompt = f"A heraldic coat of arms shield with the following description: {prompt}. Renaissance Venetian style, detailed, ornate, historically accurate, centered composition, on a transparent background."
     
     try:
-        # Call the Ideogram API
         response = requests.post(
             "https://api.ideogram.ai/v1/ideogram-v3/generate",
-            headers={
-                "Api-Key": ideogram_api_key,
-                "Content-Type": "application/json"
-            },
-            json={
-                "prompt": enhanced_prompt,
-                "style_type": "REALISTIC",
-                "rendering_speed": "DEFAULT",
-                "model":"V_3"
-            }
+            headers={"Api-Key": ideogram_api_key, "Content-Type": "application/json"},
+            json={"prompt": enhanced_prompt, "style_type": "REALISTIC", "rendering_speed": "DEFAULT", "model":"V_3"}
         )
         
         if response.status_code != 200:
             log.error(f"Error from Ideogram API for coat of arms: {response.status_code} {response.text}")
             return None
         
-        # Extract image URL from response
         result = response.json()
-        image_url = result.get("data", [{}])[0].get("url", "")
-        
-        if not image_url:
-            log.error("No coat of arms image URL in response")
+        image_url_from_ideogram = result.get("data", [{}])[0].get("url")
+        if not image_url_from_ideogram:
+            log.error("No coat of arms image URL in Ideogram response")
             return None
         
-        # Download the image
-        image_response = requests.get(image_url, stream=True)
+        image_response = requests.get(image_url_from_ideogram, stream=True)
         if not image_response.ok:
-            log.error(f"Failed to download coat of arms image: {image_response.status_code} {image_response.reason}")
+            log.error(f"Failed to download coat of arms image: {image_response.status_code}")
             return None
         
-        # Ensure the coat of arms directory exists
-        coat_of_arms_dir = os.path.join(os.getcwd(), 'public', 'coat-of-arms')
-        os.makedirs(coat_of_arms_dir, exist_ok=True)
-        
-        # Save the image to the coat of arms folder using the username
-        image_path = os.path.join(coat_of_arms_dir, f"{username}.png")
-        with open(image_path, 'wb') as f:
+        # Save to a temporary file (assuming .png for transparency)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
             for chunk in image_response.iter_content(chunk_size=8192):
-                f.write(chunk)
+                tmp_file.write(chunk)
+            tmp_file_path = tmp_file.name
+
+        log.info(f"Coat of arms image downloaded to temporary file: {tmp_file_path}")
+
+        public_url = upload_file_to_backend(
+            local_file_path=tmp_file_path,
+            filename_on_server=f"{username}.png", # Use username as filename
+            destination_folder_on_server="coat-of-arms", # Server folder for CoAs
+            api_url=BACKEND_API_URL_GLOBAL,
+            api_key=UPLOAD_API_KEY_GLOBAL
+        )
         
-        log.info(f"Generated and saved coat of arms for {username}")
-        
-        # Create the public URL path
-        public_image_url = f"/coat-of-arms/{username}.png"
-        
-        return public_image_url
+        try:
+            os.remove(tmp_file_path)
+        except OSError as e:
+            log.error(f"Error removing temporary CoA file {tmp_file_path}: {e}")
+            
+        return public_url
     except Exception as e:
-        log.error(f"Error generating coat of arms for {username}: {e}")
+        log.error(f"Error generating/uploading coat of arms for {username}: {e}")
         return None
 
 def update_citizen_record(tables, username: str, personality_text: str, core_personality_array: list, family_motto: str, coat_of_arms: str, image_prompt: str, image_url: str, coat_of_arms_url: str = None) -> bool:
@@ -657,7 +719,7 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
     tables = initialize_airtable()
     
     # Get comprehensive information about the citizen
-    citizen_info = get_citizen_info(tables, username)
+    citizen_info = get_citizen_info(tables, username) # type: ignore
     if not citizen_info:
         log.error(f"Failed to get information for citizen {username}")
         return False
@@ -683,32 +745,40 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
         log.info(f"[DRY RUN] New image prompt: {new_image_prompt}")
         return True
     
-    # Generate new image - use username directly for the image file
-    image_url = generate_image(new_image_prompt, username)
-    if not image_url:
-        log.error(f"Failed to generate image for citizen {username}")
-        # Continue anyway, as we can still update the description
+    # Generate new citizen portrait and upload it
+    # The username is used as citizen_id for image naming.
+    uploaded_citizen_image_url = generate_and_upload_citizen_image(new_image_prompt, username)
+    if not uploaded_citizen_image_url:
+        log.error(f"Failed to generate and upload citizen portrait for {username}")
+        # Continue anyway, as we can still update the description and other fields
     
-    # Generate coat of arms image if we have a description and the citizen doesn't already have one
-    coat_of_arms_url = None
-    if new_coat_of_arms and not citizen_info["citizen"]['fields'].get('CoatOfArmsImageUrl'):
-        coat_of_arms_url = generate_coat_of_arms_image(new_coat_of_arms, username)
-        if not coat_of_arms_url:
-            log.warning(f"Failed to generate coat of arms image for citizen {username}")
-            # Continue anyway, as we can still update the other fields
+    # Generate coat of arms image and upload it, if needed
+    uploaded_coat_of_arms_url = None
+    # Check if a new CoA description was generated AND if the citizen doesn't already have a CoA image URL
+    current_coa_image_url = citizen_info["citizen"]['fields'].get('CoatOfArmsImageUrl')
+    if new_coat_of_arms and not current_coa_image_url:
+        log.info(f"Attempting to generate and upload new Coat of Arms for {username} as current one is missing.")
+        uploaded_coat_of_arms_url = generate_and_upload_coat_of_arms_image(new_coat_of_arms, username)
+        if not uploaded_coat_of_arms_url:
+            log.warning(f"Failed to generate and upload coat of arms image for citizen {username}")
+            # Continue anyway
+    elif new_coat_of_arms and current_coa_image_url:
+        log.info(f"Citizen {username} already has a CoatOfArmsImageUrl. New CoA description was generated but image won't be updated by this script if URL exists.")
+        # If you want to re-generate even if URL exists, remove `and not current_coa_image_url`
     
-    # Update citizen record
-    old_personality_text = citizen_info["citizen"]['fields'].get('Description', '') # Old "Description" is old "Personality"
+    # Update citizen record with new text and potentially new image URLs
+    old_personality_text = citizen_info["citizen"]['fields'].get('Description', '')
     success = update_citizen_record(
-        tables, 
+        tables, # type: ignore
         username, 
         new_personality_text, 
         new_core_personality_array, 
         new_family_motto, 
-        new_coat_of_arms, 
+        new_coat_of_arms, # This is the textual description of CoA
         new_image_prompt, 
-        image_url or "", 
-        coat_of_arms_url
+        uploaded_citizen_image_url or citizen_info["citizen"]['fields'].get('ImageUrl', ''), # Use new if available, else old
+        uploaded_coat_of_arms_url # This will be None if not generated/uploaded, or if citizen already had one
+                                  # The update_citizen_record logic handles conditional update of CoatOfArmsImageUrl
     )
     if not success:
         log.error(f"Failed to update citizen record for {username}")
@@ -725,10 +795,32 @@ if __name__ == "__main__":
     parser.add_argument("username", help="Username of the citizen to update")
     parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument(
+        "--api_url",
+        default=os.getenv("FASTAPI_BACKEND_URL", DEFAULT_FASTAPI_URL),
+        help="FastAPI backend URL for uploading assets."
+    )
+    parser.add_argument(
+        "--api_key",
+        default=os.getenv("UPLOAD_API_KEY"),
+        help="API key for the backend upload endpoint."
+    )
     
     args = parser.parse_args()
+
+    # Set global vars for API URL and Key
+    BACKEND_API_URL_GLOBAL = args.api_url
+    UPLOAD_API_KEY_GLOBAL = args.api_key
+
+    if not UPLOAD_API_KEY_GLOBAL:
+        log.error("Upload API key is required. Set UPLOAD_API_KEY environment variable or use --api_key.")
+        sys.exit(1)
+    if not BACKEND_API_URL_GLOBAL:
+        log.error("FastAPI backend URL is required. Set FASTAPI_BACKEND_URL environment variable or use --api_url.")
+        sys.exit(1)
     
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+        log.setLevel(logging.DEBUG) # Ensure this script's logger is also verbose
     
     update_citizen_description_and_image(args.username, args.dry_run)

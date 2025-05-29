@@ -8,6 +8,72 @@ import aiohttp
 import anthropic
 from dotenv import load_dotenv
 from pathlib import Path
+import argparse # Added for command-line arguments
+import tempfile # For temporary file handling
+
+# --- BEGIN COPIED HELPER FUNCTION ---
+# (The upload_file_to_backend function defined above will be inserted here)
+# Default API URL, can be overridden by env var or arg
+DEFAULT_FASTAPI_URL = "http://localhost:8000" 
+
+def upload_file_to_backend(
+    local_file_path: str,
+    filename_on_server: str, # Explicit filename for the server
+    destination_folder_on_server: str, # e.g., "images/resources" or "coat-of-arms"
+    api_url: str,
+    api_key: str
+) -> Optional[str]:
+    """
+    Uploads a file to the backend /api/upload-asset endpoint.
+
+    Args:
+        local_file_path (str): The path to the local file to upload.
+        filename_on_server (str): The desired filename for the asset on the server.
+        destination_folder_on_server (str): The relative path of the folder on the server 
+                                            within the persistent assets dir.
+        api_url (str): The base URL of the FastAPI backend.
+        api_key (str): The API key for the upload endpoint.
+
+    Returns:
+        Optional[str]: The full public URL of the uploaded asset from the backend,
+                       or None if upload failed.
+    """
+    upload_endpoint = f"{api_url.rstrip('/')}/api/upload-asset"
+    
+    try:
+        with open(local_file_path, 'rb') as f:
+            # The 'file' field in files should contain the desired filename on the server
+            files = {'file': (filename_on_server, f)}
+            data = {'destination_path': destination_folder_on_server} 
+            headers = {'X-Upload-Api-Key': api_key}
+            
+            print(f"Uploading '{local_file_path}' as '{filename_on_server}' to backend folder '{destination_folder_on_server}' via {upload_endpoint}...")
+            response = requests.post(upload_endpoint, files=files, data=data, headers=headers, timeout=180) # Increased timeout
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                if response_data.get("success") and response_data.get("relative_path"):
+                    relative_backend_path = response_data["relative_path"]
+                    # Construct the full public URL
+                    full_public_url = f"{api_url.rstrip('/')}/public_assets/{relative_backend_path.lstrip('/')}"
+                    print(f"Success: '{local_file_path}' uploaded. Public URL: '{full_public_url}'")
+                    return full_public_url
+                else:
+                    print(f"Upload successful but response format unexpected: {response_data}")
+                    return None
+            else:
+                print(f"Upload failed for {local_file_path}. Status: {response.status_code}, Response: {response.text}")
+                return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error during upload of {local_file_path}: {e}")
+        return None
+    except IOError as e:
+        print(f"IO error reading {local_file_path}: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error during upload of {local_file_path}: {e}")
+        return None
+# --- END COPIED HELPER FUNCTION ---
 
 # Load environment variables
 load_dotenv()
@@ -15,6 +81,7 @@ load_dotenv()
 # Get API keys
 CLAUDE_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 IDEOGRAM_API_KEY = os.getenv("IDEOGRAM_API_KEY")
+# Args for backend URL and upload API key will be parsed in main()
 
 if not CLAUDE_API_KEY:
     print("Error: ANTHROPIC_API_KEY not set in environment variables")
@@ -29,17 +96,16 @@ claude = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 
 # Directory paths
 RESOURCES_DIR = Path("data/resources")
-ICONS_DIR = Path("public/images/resources")
-PROGRESS_FILE = Path("data/resource_icon_generation_progress.json")
-ERROR_LOG = Path("data/resource_icon_generation_errors.json")
+# ICONS_DIR is no longer needed for final storage, but ensure its parent exists for progress/error logs
+DATA_DIR_FOR_LOGS = Path("data") # Parent for progress and error files
+PROGRESS_FILE = DATA_DIR_FOR_LOGS / "resource_icon_generation_progress.json"
+ERROR_LOG = DATA_DIR_FOR_LOGS / "resource_icon_generation_errors.json"
 
 # Ensure directories exist
 def ensure_directories_exist():
-    ICONS_DIR.mkdir(parents=True, exist_ok=True)
+    # ICONS_DIR.mkdir(parents=True, exist_ok=True) # No longer creating public/images/resources
     RESOURCES_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # Create parent directory for progress and error files
-    PROGRESS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    DATA_DIR_FOR_LOGS.mkdir(parents=True, exist_ok=True) # Ensure 'data' dir exists
 
 # Function to save progress
 def save_progress(processed_resources):
@@ -230,13 +296,12 @@ async def generate_icon(resource, prompt):
         log_error(resource_id, 'ideogram_api', error)
         return None
 
-# Download icon from URL
-async def download_icon(resource, image_url):
+# Download icon from URL, upload it, and return the public URL
+async def download_and_upload_icon(resource, image_url, backend_api_url: str, backend_api_key: str) -> Optional[str]:
     resource_id = resource.get('id', 'unknown')
-    icon_path = ICONS_DIR / f"{resource_id}.png"
     
     try:
-        print(f"Downloading icon for {resource_id} to {icon_path}")
+        print(f"Downloading icon for {resource_id} from {image_url}")
         
         async with aiohttp.ClientSession() as session:
             async with session.get(image_url) as response:
@@ -245,41 +310,74 @@ async def download_icon(resource, image_url):
                     log_error(resource_id, 'icon_download', f"HTTP {response.status}")
                     return None
                 
-                # Save the image
-                with open(icon_path, 'wb') as f:
-                    f.write(await response.read())
+                image_content = await response.read()
+
+        # Save to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+            tmp_file.write(image_content)
+            tmp_file_path = tmp_file.name
         
-        print(f"Successfully downloaded icon for {resource_id}")
-        return str(icon_path)
+        print(f"Successfully downloaded icon for {resource_id} to temporary file {tmp_file_path}")
+
+        # Upload the temporary file to the backend
+        # The filename on the server will be {resource_id}.png
+        # The destination folder on the server will be "images/resources"
+        public_url = upload_file_to_backend(
+            local_file_path=tmp_file_path,
+            filename_on_server=f"{resource_id}.png",
+            destination_folder_on_server="images/resources",
+            api_url=backend_api_url,
+            api_key=backend_api_key
+        )
+        
+        # Clean up the temporary file
+        try:
+            os.remove(tmp_file_path)
+            print(f"Removed temporary file: {tmp_file_path}")
+        except OSError as e:
+            print(f"Error removing temporary file {tmp_file_path}: {e}")
+
+        if public_url:
+            print(f"Icon for {resource_id} uploaded. Public URL: {public_url}")
+            return public_url
+        else:
+            log_error(resource_id, 'icon_upload', "Failed to upload icon to backend.")
+            return None
+
     except Exception as error:
-        print(f"Error downloading icon for {resource_id}: {error}")
-        log_error(resource_id, 'icon_download', error)
+        print(f"Error downloading/uploading icon for {resource_id}: {error}")
+        log_error(resource_id, 'icon_download_upload', error)
         return None
 
-# Update resource file with icon path
-def update_resource_file(resource, icon_path):
+# Update resource file with icon URL
+def update_resource_file_with_url(resource, icon_url: str):
     resource_id = resource.get('id', 'unknown')
-    file_path = resource.get('file_path')
+    file_path_str = resource.get('file_path')
     
-    if not file_path:
+    if not file_path_str:
         print(f"No file path for resource {resource_id}")
         log_error(resource_id, 'update_file', "No file path")
         return False
     
+    file_path = Path(file_path_str)
+    if not file_path.exists():
+        print(f"Resource file not found at {file_path} for resource {resource_id}")
+        log_error(resource_id, 'update_file', f"File not found: {file_path}")
+        return False
+
     try:
         # Read the current file
         with open(file_path, 'r') as f:
             resource_data = json.load(f)
         
-        # Update the icon path - use the new path format
-        relative_path = f"/images/resources/{resource_id}.png"
-        resource_data['icon'] = relative_path
+        # Update the icon path with the full public URL
+        resource_data['icon'] = icon_url 
         
         # Write back to the file
         with open(file_path, 'w') as f:
             json.dump(resource_data, f, indent=2)
         
-        print(f"Updated resource file for {resource_id} with icon path: {relative_path}")
+        print(f"Updated resource file for {resource_id} with icon URL: {icon_url}")
         return True
     except Exception as error:
         print(f"Error updating resource file for {resource_id}: {error}")
@@ -287,18 +385,17 @@ def update_resource_file(resource, icon_path):
         return False
 
 # Process a batch of resources
-async def process_resource_batch(resources):
-    tasks = []
+async def process_resource_batch(resources, backend_api_url: str, backend_api_key: str):
+    processed_ids_in_batch = [] # Track successfully processed IDs in this batch
     
     for resource in resources:
         resource_id = resource.get('id', 'unknown')
         print(f"\n=== Processing resource: {resource_id} ===")
         
-        # Check if icon already exists
-        icon_path = ICONS_DIR / f"{resource_id}.png"
-        if icon_path.exists():
-            print(f"Icon already exists for {resource_id}, skipping...")
-            continue
+        # Check if icon already exists by checking the 'icon' field in the JSON file
+        # This assumes that if 'icon' field has a URL, it's already processed.
+        # A more robust check would be to see if the URL is valid or if a marker exists.
+        # For now, we'll rely on the progress file.
         
         # Generate prompt
         prompt = await generate_icon_prompt(resource)
@@ -306,36 +403,38 @@ async def process_resource_batch(resources):
             print(f"Failed to generate prompt for {resource_id}, skipping...")
             continue
         
-        # Generate icon
-        image_url = await generate_icon(resource, prompt)
-        if not image_url:
-            print(f"Failed to generate icon for {resource_id}, skipping...")
+        # Generate icon URL from Ideogram
+        ideogram_image_url = await generate_icon(resource, prompt)
+        if not ideogram_image_url:
+            print(f"Failed to generate icon URL for {resource_id}, skipping...")
             continue
         
-        # Download icon
-        downloaded_path = await download_icon(resource, image_url)
-        if not downloaded_path:
-            print(f"Failed to download icon for {resource_id}, skipping...")
+        # Download icon from Ideogram, upload to backend, get public URL
+        public_icon_url = await download_and_upload_icon(resource, ideogram_image_url, backend_api_url, backend_api_key)
+        if not public_icon_url:
+            print(f"Failed to download/upload icon for {resource_id}, skipping...")
             continue
         
-        # Update resource file
-        update_success = update_resource_file(resource, downloaded_path)
+        # Update resource file with the new public URL
+        update_success = update_resource_file_with_url(resource, public_icon_url)
         if not update_success:
             print(f"Failed to update resource file for {resource_id}")
+            # Continue to next resource, error already logged by update_resource_file_with_url
         
         print(f"=== Completed processing for {resource_id} ===\n")
+        processed_ids_in_batch.append(resource_id) # Add to list of processed in this batch
         
         # Add a small delay between resources to avoid rate limiting
-        await asyncio.sleep(2)
+        await asyncio.sleep(5) # Increased delay
     
-    return [resource.get('id', 'unknown') for resource in resources]
+    return processed_ids_in_batch
 
 # Main function
-async def main():
+async def main(args): # Added args parameter
     try:
         print("Starting resource icon generation...")
         
-        # Ensure directories exist
+        # Ensure directories exist (for logs)
         ensure_directories_exist()
         
         # Load all resources
@@ -344,31 +443,37 @@ async def main():
         # Load progress
         processed_resource_ids = load_progress()
         
-        # Filter resources that don't have icons yet and weren't processed before
+        # Filter resources that haven't been processed yet
+        # The check for existing icon file is removed as we now rely on the progress file
+        # and the 'icon' field in the JSON.
         resources_to_process = [
             resource for resource in all_resources
-            if not (ICONS_DIR / f"{resource.get('id', 'unknown')}.png").exists()
-            and resource.get('id', 'unknown') not in processed_resource_ids
+            if resource.get('id', 'unknown') not in processed_resource_ids
         ]
         
-        print(f"Found {len(resources_to_process)} resources that need icons")
+        print(f"Found {len(resources_to_process)} resources that need icons (based on progress file).")
         
+        if not resources_to_process:
+            print("No new resources to process.")
+            return
+
         # Process resources in batches of 4
-        batch_size = 4
+        batch_size = args.batch_size
         for i in range(0, len(resources_to_process), batch_size):
             batch = resources_to_process[i:i+batch_size]
             print(f"\n=== Processing batch {i//batch_size + 1}/{(len(resources_to_process) + batch_size - 1)//batch_size} ===\n")
             
-            processed_batch = await process_resource_batch(batch)
+            # Pass backend_api_url and backend_api_key to batch processing
+            successfully_processed_in_batch = await process_resource_batch(batch, args.api_url, args.api_key)
             
             # Save progress after each batch
-            processed_resource_ids.extend(processed_batch)
-            save_progress(processed_resource_ids)
+            processed_resource_ids.extend(successfully_processed_in_batch)
+            save_progress(processed_resource_ids) # Save all accumulated processed IDs
             
             # Add a delay between batches to avoid overwhelming the API
             if i + batch_size < len(resources_to_process):
-                print("Waiting 30 seconds before processing next batch...")
-                await asyncio.sleep(30)
+                print(f"Waiting {args.batch_delay} seconds before processing next batch...")
+                await asyncio.sleep(args.batch_delay)
         
         print("\n=== Resource icon generation completed ===")
         
@@ -379,4 +484,36 @@ async def main():
 
 # Run the main function
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description="Generate icons for resources and upload them.")
+    parser.add_argument(
+        "--api_url", 
+        default=os.getenv("FASTAPI_BACKEND_URL", DEFAULT_FASTAPI_URL),
+        help="FastAPI backend URL for uploading assets."
+    )
+    parser.add_argument(
+        "--api_key", 
+        default=os.getenv("UPLOAD_API_KEY"),
+        help="API key for the backend upload endpoint."
+    )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=2, # Reduced default batch size due to API rate limits
+        help="Number of resources to process in each batch."
+    )
+    parser.add_argument(
+        "--batch_delay",
+        type=int,
+        default=60, # Increased default delay
+        help="Delay in seconds between processing batches."
+    )
+    args = parser.parse_args()
+
+    if not args.api_key:
+        print("Error: Upload API key is required. Set UPLOAD_API_KEY environment variable or use --api_key.")
+        sys.exit(1)
+    if not args.api_url:
+        print("Error: FastAPI backend URL is required. Set FASTAPI_BACKEND_URL environment variable or use --api_url.")
+        sys.exit(1)
+
+    asyncio.run(main(args))
