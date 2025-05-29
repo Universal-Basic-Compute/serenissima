@@ -1633,7 +1633,7 @@ Your response:`;
                   
                     {/* Messages area */}
                     <div 
-                      className="flex-1 overflow-y-auto p-3 bg-amber-50 bg-opacity-80"
+                      className="flex-1 overflow-y-auto p-3 bg-stone-50 bg-opacity-80" // Changed bg-amber-50 to bg-stone-50
                       style={{
                         backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
                         backgroundRepeat: 'repeat'
@@ -1688,7 +1688,7 @@ Your response:`;
                                         : 'bg-gray-200 text-gray-800 assistant-bubble rounded-bl-none'
                                     }`}
                                   >
-                                    <div style={{ position: 'relative', zIndex: 10 }} className="markdown-content">
+                                    <div style={{ position: 'relative', zIndex: 10 }} className="markdown-content text-sm"> {/* Added text-sm */}
                                       {message.type === 'guild_application' ? (
                                         <div className="guild-application">
                                           <div className="font-bold text-amber-800 mb-2">📜 Guild Application</div>
