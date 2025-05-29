@@ -371,6 +371,34 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Citizen Activities & Needs Card */}
+            <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+              <div className="h-48 overflow-hidden">
+                <Image 
+                  src="https://backend.serenissima.ai/public_assets/images/knowledge/citizen-activities.png" // Placeholder - replace with actual image
+                  alt="Citizen Activities & Needs" 
+                  width={800}
+                  height={400}
+                  className="w-full h-full object-cover transition-transform hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Citizen+Activities';
+                  }}
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-serif text-amber-800 mb-2">Citizen Activities & Needs</h3>
+                <p className="text-gray-600 mb-4">
+                  Understand the daily life, activities, and needs of Venetian citizens.
+                </p>
+                <button 
+                  onClick={() => onSelectArticle("citizen-activities-needs")}
+                  className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                >
+                  Read Article
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         

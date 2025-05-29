@@ -32,7 +32,8 @@ import {
   HistoricalAccuracyArticle,
   VenetianGuildsArticle,
   GuildLeadershipArticle,
-  UnifiedCitizenModelArticle
+  UnifiedCitizenModelArticle,
+  CitizenActivitiesAndNeedsArticle // Import the new article
 } from '@/components/Articles';
 
 // Import the 2D viewer component with no SSR
@@ -1219,6 +1220,7 @@ export default function TwoDPage() {
               {selectedArticle === 'venetian-guilds' && <VenetianGuildsArticle onClose={handleCloseArticle} />}
               {selectedArticle === 'guild-leadership' && <GuildLeadershipArticle onClose={handleCloseArticle} />}
               {selectedArticle === 'unified-citizen-model' && <UnifiedCitizenModelArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'citizen-activities-needs' && <CitizenActivitiesAndNeedsArticle onClose={handleCloseArticle} />}
             </div>
           </div>
         </div>
