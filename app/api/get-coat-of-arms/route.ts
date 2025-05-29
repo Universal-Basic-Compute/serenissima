@@ -45,7 +45,7 @@ export async function GET() {
       if (usernameString) {
         // Construct the URL based on the username and the desired production path
         // This ensures consistency and avoids issues with how paths might be stored in Airtable
-        const desiredImageUrl = `https://backend.serenissima.ai/public_assets/images/coat_of_arms/${usernameString}.png`;
+        const desiredImageUrl = `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${usernameString}.png`;
         coatOfArms[usernameString] = desiredImageUrl;
       }
     });

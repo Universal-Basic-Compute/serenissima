@@ -1236,8 +1236,8 @@ number => {
                     // The URL from the API (/api/get-coat-of-arms) is now the primary and correctly formatted one.
                     // The second URL is a fallback to a default image on the correct domain.
                     const urlsToTry = [
-                      url as string, // This will be https://backend.serenissima.ai/public_assets/images/coat_of_arms/OwnerName.png
-                      `https://backend.serenissima.ai/public_assets/images/coat_of_arms/default.png` // Corrected path
+                      url as string, // This will be https://backend.serenissima.ai/public_assets/images/coat-of-arms/OwnerName.png
+                      `https://backend.serenissima.ai/public_assets/images/coat-of-arms/default.png` // Corrected path
                     ];
                     
                     let imageLoadedSuccessfully = false;

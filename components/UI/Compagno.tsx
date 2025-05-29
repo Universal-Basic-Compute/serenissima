@@ -1315,7 +1315,7 @@ Your response:`;
             <div className="flex items-center">
               <div className="w-8 h-8 mr-2 flex items-center justify-center">
                 <img 
-                  src={username === DEFAULT_CITIZENNAME ? "/images/venetian-mask.png" : `https://backend.serenissima.ai/public_assets/images/coat_of_arms/${username}.png`}
+                  src={username === DEFAULT_CITIZENNAME ? "/images/venetian-mask.png" : `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${username}.png`}
                   alt={username === DEFAULT_CITIZENNAME ? "Default Mask" : `${username}'s Coat of Arms`}
                   className="w-6 h-6 rounded-full object-cover"
                   onError={(e) => {
@@ -1533,7 +1533,7 @@ Your response:`;
                           >
                             <div className="w-8 h-8 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800 relative overflow-hidden">
                               <img 
-                                src={`https://backend.serenissima.ai/public_assets/images/coat_of_arms/${citizen.username}.png`}
+                                src={`https://backend.serenissima.ai/public_assets/images/coat-of-arms/${citizen.username}.png`}
                                 alt={`${citizen.firstName} ${citizen.lastName} Coat of Arms`}
                                 className="w-full h-full rounded-full object-cover absolute top-0 left-0"
                                 onError={(e) => {
@@ -1592,7 +1592,7 @@ Your response:`;
                           <>
                             <div className="w-6 h-6 mr-2 relative rounded-full overflow-hidden">
                               <img 
-                                src={username === DEFAULT_CITIZENNAME ? "/images/venetian-mask.png" : `https://backend.serenissima.ai/public_assets/images/coat_of_arms/${username}.png`}
+                                src={username === DEFAULT_CITIZENNAME ? "/images/venetian-mask.png" : `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${username}.png`}
                                 alt={username === DEFAULT_CITIZENNAME ? "Default Mask" : `${username}'s Coat of Arms`}
                                 className="w-full h-full rounded-full object-cover absolute top-0 left-0"
                                 onError={(e) => { if (e.target) { (e.target as HTMLImageElement).src = "/images/venetian-mask.png";}}}
@@ -1604,7 +1604,7 @@ Your response:`;
                           <>
                             <div className="w-6 h-6 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800 text-xs relative overflow-hidden">
                               <img 
-                                src={`https://backend.serenissima.ai/public_assets/images/coat_of_arms/${selectedCitizen}.png`}
+                                src={`https://backend.serenissima.ai/public_assets/images/coat-of-arms/${selectedCitizen}.png`}
                                 alt={`${citizens.find(u => u.username === selectedCitizen)?.firstName || selectedCitizen} Coat of Arms`}
                                 className="w-full h-full rounded-full object-cover absolute top-0 left-0"
                                 onError={(e) => {
