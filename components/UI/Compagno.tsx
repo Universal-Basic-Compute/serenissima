@@ -615,10 +615,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
           try {
             const aiKinUsername = selectedCitizen; // The AI kin we are talking to (can be self)
-            const channelUsername = username;    // The channel is always associated with the human user
+            // const channelUsername = username;    // OLD: The channel is always associated with the human user
+            const channelUsername = actualSenderUsername; // NEW: Use the reliably fetched sender username
 
             const aiDisplayName = contextualDataForChat?.targetProfile?.firstName || aiKinUsername;
-            const senderDisplayName = contextualDataForChat?.senderProfile?.firstName || channelUsername;
+            const senderDisplayName = contextualDataForChat?.senderProfile?.firstName || channelUsername; // channelUsername here is now actualSenderUsername
             
             let kinosPromptContent = '';
             if (isSelfChat) {
@@ -698,7 +699,7 @@ Your response:`;
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                       sender: aiKinUsername, // AI is the sender
-                      receiver: username,    // User is the receiver
+                      receiver: actualSenderUsername,    // User is the receiver, use actualSenderUsername
                       content: kinosData.content,
                       type: 'message_ai_augmented'
                     }),

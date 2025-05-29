@@ -1156,6 +1156,38 @@ export default function BuildingDetailsPanel({
     setChatInput('');
     setIsAiResponding(true); // Indicates context fetching + AI response
 
+    // Determine the actual current username reliably
+    let actualCurrentUsername = null;
+    const savedProfileForCurrent = localStorage.getItem('citizenProfile');
+    if (savedProfileForCurrent) {
+        try {
+            const profile = JSON.parse(savedProfileForCurrent);
+            if (profile.username) {
+                actualCurrentUsername = profile.username;
+            }
+        } catch (e) {
+            console.error("Error parsing citizenProfile for current username in BuildingDetailsPanel", e);
+        }
+    }
+    // Fallback to component state if localStorage didn't yield a username but state is valid
+    if (!actualCurrentUsername && currentUsername) { // currentUsername is the state variable
+        actualCurrentUsername = currentUsername;
+    }
+    
+    if (!actualCurrentUsername) {
+        console.error("BuildingDetailsPanel: Could not determine current user for chat. Aborting Kinos call.");
+        setIsAiResponding(false);
+        // Optionally, add an error message to chatMessages
+        setChatMessages(prev => [...prev, {
+            id: `error-user-${Date.now()}`,
+            sender: 'System',
+            role: 'assistant',
+            text: "Error: Could not identify the current user to send the message.",
+            time: new Date().toLocaleTimeString(),
+        }]);
+        return;
+    }
+
     // Call Kinos AI
     const targetCitizenUsername = activeProfileToDisplay.username;
 
@@ -1164,15 +1196,15 @@ export default function BuildingDetailsPanel({
     try {
       // senderProfile (current user)
       let senderProfileObj = null;
-      const savedProfile = localStorage.getItem('citizenProfile');
-      if (savedProfile) try { senderProfileObj = JSON.parse(savedProfile); } catch(e) { console.error(e); }
+      // const savedProfile = localStorage.getItem('citizenProfile'); // Already fetched as savedProfileForCurrent
+      if (savedProfileForCurrent) try { senderProfileObj = JSON.parse(savedProfileForCurrent); } catch(e) { console.error(e); }
 
       // targetProfile is 'activeProfileToDisplay'
 
       // Fetch relationship
       let relationshipWithTarget = null;
-      if (currentUsername !== targetCitizenUsername) {
-        const relRes = await fetch(`/api/relationships?citizen1=${currentUsername}&citizen2=${targetCitizenUsername}`);
+      if (actualCurrentUsername !== targetCitizenUsername) { // Use actualCurrentUsername
+        const relRes = await fetch(`/api/relationships?citizen1=${actualCurrentUsername}&citizen2=${targetCitizenUsername}`);
         const relData = relRes.ok ? await relRes.json() : null;
         relationshipWithTarget = relData?.success ? relData.relationship : null;
       } else {
@@ -1189,7 +1221,7 @@ export default function BuildingDetailsPanel({
       const targetNotifications = notifData?.success ? notifData.notifications : [];
 
       // Fetch relevancies (target is relevantTo, sender is targetCitizen)
-      const relevanciesRes = await fetch(`/api/relevancies?relevantToCitizen=${targetCitizenUsername}&targetCitizen=${currentUsername}&limit=10`);
+      const relevanciesRes = await fetch(`/api/relevancies?relevantToCitizen=${targetCitizenUsername}&targetCitizen=${actualCurrentUsername}&limit=10`); // Use actualCurrentUsername
       const relevanciesData = relevanciesRes.ok ? await relevanciesRes.json() : null;
       const relevanciesForTarget = relevanciesData?.success ? relevanciesData.relevancies : [];
       
@@ -1200,8 +1232,8 @@ export default function BuildingDetailsPanel({
       if (problemsTargetData?.success && problemsTargetData.problems) {
         allProblems.push(...problemsTargetData.problems);
       }
-      if (currentUsername !== targetCitizenUsername) {
-        const problemsSenderRes = await fetch(`/api/problems?citizen=${currentUsername}&status=active&limit=5`);
+      if (actualCurrentUsername !== targetCitizenUsername) { // Use actualCurrentUsername
+        const problemsSenderRes = await fetch(`/api/problems?citizen=${actualCurrentUsername}&status=active&limit=5`); // Use actualCurrentUsername
         const problemsSenderData = problemsSenderRes.ok ? await problemsSenderRes.json() : null;
         if (problemsSenderData?.success && problemsSenderData.problems) {
           problemsSenderData.problems.forEach(p => {
@@ -1227,7 +1259,7 @@ export default function BuildingDetailsPanel({
     }
 
     const aiDisplayName = activeProfileToDisplay?.firstName || targetCitizenUsername || 'Citizen';
-    const senderDisplayName = senderProfileObj?.firstName || currentUsername || 'User';
+    const senderDisplayName = senderProfileObj?.firstName || actualCurrentUsername || 'User'; // Use actualCurrentUsername
 
     const kinosPromptContent = 
 `You are ${aiDisplayName}, an AI citizen of Venice. You are responding to a message from ${senderDisplayName}.
@@ -1259,7 +1291,7 @@ Your response:`;
     }
 
     fetch(
-      `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${targetCitizenUsername}/channels/${currentUsername}/messages`,
+      `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${targetCitizenUsername}/channels/${actualCurrentUsername}/messages`, // Use actualCurrentUsername
       {
         method: 'POST',
         headers: {
@@ -1292,7 +1324,7 @@ Your response:`;
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sender: targetCitizenUsername, // AI is the sender
-              receiver: currentUsername,    // User is the receiver
+              receiver: actualCurrentUsername,    // User is the receiver, use actualCurrentUsername
               content: kinosData.content,
               type: 'message_ai_augmented'
             }),
