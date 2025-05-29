@@ -1233,65 +1233,55 @@ number => {
                 if (url) {
                   try {
                     // Create an array of URLs to try in order
+                    // The URL from the API (/api/get-coat-of-arms) is now the primary and correctly formatted one.
+                    // The second URL is a fallback to a default image on the correct domain.
                     const urlsToTry = [
-                      // 1. Use the URL from the API directly
-                      url as string,
-                      
-                      // 2. Try with serenissima.ai domain
-                      `https://serenissima.aihttps://backend.serenissima.ai/public/assets/images/coat-of-arms/${owner}.png`,
-                      
-                      // 3. Try with current origin as fallback
-                      `${window.location.origin}https://backend.serenissima.ai/public/assets/images/coat-of-arms/${owner}.png`,
-                      
-                      // 4. Default fallback
-                      `${window.location.origin}https://backend.serenissima.ai/public/assets/images/coat-of-arms/default.png`
+                      url as string, // This will be https://backend.serenissima.ai/public_assets/images/coat_of_arms/OwnerName.png
+                      `https://backend.serenissima.ai/public_assets/images/coat_of_arms/default.png` // Corrected path
                     ];
                     
-                    // Try each URL in sequence
-                    let imageLoaded = false;
-                    for (const currentUrl of urlsToTry) {
-                      if (imageLoaded) break;
+                    let imageLoadedSuccessfully = false;
+                    for (const currentUrlToTry of urlsToTry) {
+                      if (imageLoadedSuccessfully) break;
                       
                       try {
                         const img = new Image();
                         img.crossOrigin = "anonymous"; // Important for CORS
                         
-                        // Create a promise for this specific URL
                         await new Promise<void>((resolve, reject) => {
                           const timeoutId = setTimeout(() => {
-                            reject(new Error(`Timeout loading image from ${currentUrl}`));
+                            reject(new Error(`Timeout loading image from ${currentUrlToTry}`));
                           }, 5000); // 5 second timeout
                           
                           img.onload = () => {
                             clearTimeout(timeoutId);
-                            // Resize the image using canvas before storing
                             const resizedImg = resizeImageToCanvas(img, 100);
                             updatedImages[owner] = resizedImg;
                             hasNewImages = true;
-                            imageLoaded = true;
+                            imageLoadedSuccessfully = true;
                             resolve();
                           };
-                          img.onerror = () => {
+                          img.onerror = (err) => { // Add error object to log
                             clearTimeout(timeoutId);
-                            reject(new Error(`Failed to load image from ${currentUrl}`));
+                            console.warn(`Failed to load image from ${currentUrlToTry} for owner ${owner}:`, err);
+                            reject(new Error(`Failed to load image from ${currentUrlToTry}`));
                           };
-                          img.src = currentUrl;
+                          img.src = currentUrlToTry;
                         });
                       } catch (error) {
-                        // Continue to next URL on error
-                        console.warn(`Error loading coat of arms from ${currentUrl} for ${owner}:`, error);
+                        // Log error and continue to the next URL (e.g., the default.png)
+                        console.warn(`Error processing URL ${currentUrlToTry} for ${owner}:`, error);
                       }
                     }
                     
-                    // If all URLs failed, create a default avatar
-                    if (!imageLoaded) {
-                      console.warn(`All image URLs failed for ${owner}, using generated avatar`);
-                      // Utiliser la nouvelle fonction pour générer l'avatar par défaut mis en cache
+                    // If all URLs failed (including default.png), create a generative avatar
+                    if (!imageLoadedSuccessfully) {
+                      console.warn(`All image URLs failed for ${owner} (including default.png), using generated avatar.`);
                       updatedImages[owner] = createDefaultCircularAvatarForCache(owner, 100);
-                      hasNewImages = true; // Indentation corrigée
+                      hasNewImages = true;
                     }
                   } catch (error) {
-                    console.error(`Error processing coat of arms for ${owner}:`, error);
+                    console.error(`Error processing coat of arms entry for ${owner}:`, error);
                   }
                 }
               }
