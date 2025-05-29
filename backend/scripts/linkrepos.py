@@ -28,7 +28,7 @@ citizens_table = base.table(AIRTABLE_TABLE_NAME_CITIZENS)
 
 
 # Kinos Engine Configuration
-KINOS_ENGINE_API_KEY = os.getenv("KINOS_ENGINE_API_KEY")
+KINOS_API_KEY = os.getenv("KINOS_API_KEY")
 KINOS_API_BASE_URL = "https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins"
 GITHUB_REPO_URL = "https://github.com/Universal-Basic-Compute/serenissima"
 
@@ -49,7 +49,7 @@ def link_repo_for_citizen(username):
         "branchName": username  # Using username as branch name
     }
     headers = {
-        "Authorization": f"Bearer {KINOS_ENGINE_API_KEY}",
+        "Authorization": f"Bearer {KINOS_API_KEY}",
         "Content-Type": "application/json"
     }
 
@@ -84,8 +84,8 @@ def main():
     if not AIRTABLE_API_KEY_ENV or not AIRTABLE_BASE_ID_ENV:
         print("Error: Airtable credentials (AIRTABLE_API_KEY, AIRTABLE_BASE_ID) not properly set.")
         return
-    if not KINOS_ENGINE_API_KEY:
-        print("Error: KINOS_ENGINE_API_KEY not found in environment variables.")
+    if not KINOS_API_KEY:
+        print("Error: KINOS_API_KEY not found in environment variables.")
         return
 
     successful_links = 0
