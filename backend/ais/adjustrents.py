@@ -430,7 +430,7 @@ def create_admin_notification(tables, ai_rent_adjustments: Dict[str, List[Dict]]
         message = "📊 **AI Rent Adjustment Summary**:\n\n"
         
         for ai_name, adjustments in ai_rent_adjustments.items():
-            message += f"- 🤖 AI: **{ai_name}** made {len(adjustments)} rent adjustments:\n"
+            message += f"- 👤 AI Owner: **{ai_name}** made {len(adjustments)} rent adjustments:\n"
             for adj in adjustments:
                 building_display_admin = adj.get('building_name', adj['building_id'])
                 message += f"  - 🏠 Building: **{building_display_admin}**: {adj['old_rent']} ⚜️ → **{adj['new_rent']} ⚜️**\n"

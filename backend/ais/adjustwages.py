@@ -593,7 +593,7 @@ def create_admin_notification(tables, ai_wage_adjustments: Dict[str, List[Dict]]
         message = "📊 **AI Wage Adjustment Summary**:\n\n"
         
         for ai_name, adjustments in ai_wage_adjustments.items():
-            message += f"- 🤖 AI: **{ai_name}** made {len(adjustments)} wage adjustments:\n"
+            message += f"- 👤 AI Owner: **{ai_name}** made {len(adjustments)} wage adjustments:\n"
             for adj in adjustments:
                 building_display_admin = adj.get('building_name', adj['business_id'])
                 message += f"  - 🏢 Business: **{building_display_admin}**: {adj['old_wage']} ⚜️ → **{adj['new_wage']} ⚜️**\n"

@@ -331,7 +331,7 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
     summary_message = f"📊 **Automated Wage Adjustments Summary** ({datetime.now(VENICE_TIMEZONE).strftime('%Y-%m-%d %H:%M')}):\n"
     for res in results:
         building_display_admin = res.get('building_name', res['building_id']) # Use name if available for admin
-        summary_message += (f"- 🤖 AI Operator: **{res['ai_operator']}**, 🏢 Business: **{building_display_admin}** (Type: {res['building_type']}), "
+        summary_message += (f"- 👤 AI Operator: **{res['ai_operator']}**, 🏢 Business: **{building_display_admin}** (Type: {res['building_type']}), "
                             f"Old Wage: {res['old_wage']:.0f} ⚜️, New Wage: **{res['new_wage']:.0f} ⚜️**, Strategy: {res['strategy']}\n")
     
     try:
