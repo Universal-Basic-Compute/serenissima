@@ -295,7 +295,7 @@ def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: s
         log.error(f"{LogColors.FAIL}Error in generate_ai_thought for {ai_username}: {e}{LogColors.ENDC}")
         return None
 
-def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: str, context_data: Dict, use_local_model: bool = False) -> Optional[str]:
+def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: str, context_data: Dict, kinos_model_override: Optional[str] = None) -> Optional[str]:
     """Generates an AI thought using the Kinos Engine API."""
     try:
         add_system_json = json.dumps(context_data)
@@ -325,9 +325,9 @@ def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: s
         headers = {"Authorization": f"Bearer {kinos_api_key}", "Content-Type": "application/json"}
         payload = {"message": kinos_prompt, "addSystem": add_system_json}
 
-        if use_local_model:
-            payload["model"] = "local"
-            log.info(f"{LogColors.OKBLUE}Using local model for Kinos request for {ai_username}.{LogColors.ENDC}")
+        if kinos_model_override:
+            payload["model"] = kinos_model_override
+            log.info(f"{LogColors.OKBLUE}Using Kinos model override '{kinos_model_override}' for {ai_username}.{LogColors.ENDC}")
 
         log.info(f"{LogColors.OKBLUE}Sending thought generation request to Kinos for {ai_username}...{LogColors.ENDC}")
         response = requests.post(url, headers=headers, json=payload, timeout=90) # Increased timeout
@@ -509,7 +509,7 @@ def process_ai_thoughts(
     specific_citizen_username: Optional[str] = None,
     only_ais: bool = False,
     only_humans: bool = False,
-    use_local_model: bool = False
+    kinos_model_override: Optional[str] = None
 ):
     """Main function to process AI thought generation."""
     filter_desc = "all eligible"
@@ -520,8 +520,8 @@ def process_ai_thoughts(
     elif only_humans:
         filter_desc = "only active humans"
     
-    local_model_status = "enabled" if use_local_model else "disabled"
-    log.info(f"{LogColors.HEADER}Starting Citizen Thought Generation Process (dry_run={dry_run}, filter={filter_desc}, local_model={local_model_status})...{LogColors.ENDC}")
+    model_status = f"override: {kinos_model_override}" if kinos_model_override else "default"
+    log.info(f"{LogColors.HEADER}Starting Citizen Thought Generation Process (dry_run={dry_run}, filter={filter_desc}, kinos_model={model_status})...{LogColors.ENDC}")
 
     tables = initialize_airtable()
     kinos_api_key = get_kinos_api_key()
@@ -631,7 +631,7 @@ Custom emoji entities can only be used by bots that purchased additional usernam
             continue
 
         # Use citizen_username for the Kinos kin parameter
-        kinos_response_content = generate_ai_thought(kinos_api_key, citizen_username, citizen_display_name, context_data, use_local_model)
+        kinos_response_content = generate_ai_thought(kinos_api_key, citizen_username, citizen_display_name, context_data, kinos_model_override)
         
         if kinos_response_content:
             log.info(f"{LogColors.OKGREEN}Generated full thought process for {citizen_username}. Length: {len(kinos_response_content)}{LogColors.ENDC}")
@@ -693,9 +693,9 @@ if __name__ == "__main__":
         help="Simulate the process without making Kinos API calls or writing to Airtable."
     )
     parser.add_argument(
-        "--local",
-        action="store_true",
-        help="Use local model for Kinos API requests."
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
     )
     args = parser.parse_args()
 
@@ -704,5 +704,5 @@ if __name__ == "__main__":
         specific_citizen_username=args.citizen,
         only_ais=args.ais,
         only_humans=args.humans,
-        use_local_model=args.local
+        kinos_model_override=args.model
     )

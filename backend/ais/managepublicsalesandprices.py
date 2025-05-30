@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import traceback
+import argparse # Added argparse
 from collections import defaultdict # Added from setprices.py
 from datetime import datetime, timedelta
 import pytz # Added for Venice timezone
@@ -478,7 +479,7 @@ def prepare_sales_and_price_strategy_data(
     }
     return data_package
 
-def send_sales_and_price_strategy_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+def send_sales_and_price_strategy_request(ai_username: str, data_package: Dict, kinos_model_override: Optional[str] = None) -> Optional[Dict]:
     """Send the combined sales and price strategy request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
@@ -568,6 +569,10 @@ If you decide not to make any changes, return empty arrays for both lists.
             "max_files": 15, # Adjusted
             "max_tokens": 30000 # Increased token limit for potentially complex data
         }
+
+        if kinos_model_override:
+            payload["model"] = kinos_model_override
+            print(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (sales & pricing).")
 
         print(f"Making API request to Kinos for {ai_username} (Sales & Pricing)...")
         response = requests.post(url, headers=headers, json=payload)
@@ -975,5 +980,142 @@ def process_ai_sales_and_price_strategies(dry_run: bool = False):
     print(f"{script_name} process completed.")
 
 if __name__ == "__main__":
-    dry_run = "--dry-run" in sys.argv
-    process_ai_sales_and_price_strategies(dry_run)
+    parser = argparse.ArgumentParser(description="Manage public sales and prices for AI citizens using Kinos AI.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run the script without making actual changes to Airtable or Kinos."
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+    )
+    args = parser.parse_args()
+    process_ai_sales_and_price_strategies(dry_run=args.dry_run, kinos_model_override_arg=args.model)
+
+# Update process_ai_sales_and_price_strategies definition
+def process_ai_sales_and_price_strategies(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
+    """Main function to process AI public sales and pricing strategies."""
+    script_name = "AI Public Sales & Pricing Strategy"
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    print(f"Starting {script_name} process (dry_run={dry_run}, kinos_model={model_status})")
+    
+    tables = initialize_airtable()
+    building_definitions = get_building_types_from_api() # Renamed for clarity from building_types
+    if not building_definitions:
+        print("Failed to get building definitions, exiting.")
+        return
+    
+    resource_types_definitions = get_resource_types_from_api() # Renamed for clarity
+    if not resource_types_definitions:
+        print("Failed to get resource type definitions, exiting.")
+        return
+
+    all_buildings_records = get_all_buildings(tables) # For LandId mapping
+    if not all_buildings_records:
+        print("No buildings found for LandId mapping, exiting.")
+        return
+
+    all_market_contracts = get_all_active_public_sell_contracts(tables) # For market analysis
+
+    ai_citizens_records = get_ai_citizens(tables)
+    if not ai_citizens_records:
+        print("No AI citizens found, exiting.")
+        return
+    
+    # Filter AI citizens (similar to existing logic, ensuring they can sell)
+    # This filtering can be refined within the loop or beforehand if performance is an issue.
+    # For now, let's assume the prepare_..._data function handles non-sellable scenarios gracefully.
+
+    ai_strategy_results = {} # To store results for admin notification
+    total_ai_for_sales = len(ai_citizens_records)
+    print(f"Processing {total_ai_for_sales} AI citizens for sales & pricing strategies.")
+
+    for i, ai_citizen_record in enumerate(ai_citizens_records):
+        ai_username = ai_citizen_record["fields"].get("Username")
+        ai_social_class = ai_citizen_record["fields"].get("SocialClass")
+
+        if not ai_username:
+            # print(f"Skipping AI citizen at index {i} due to missing Username.")
+            continue
+
+        if ai_social_class == 'Nobili':
+            print(f"Skipping AI citizen {ai_username} (Nobili) for Kinos-driven sales & pricing strategy for businesses they might RunBy.")
+            continue
+        
+        # print(f"Processing AI citizen {i+1}/{total_ai_for_sales}: {ai_username} for sales & pricing strategy.")
+        ai_strategy_results[ai_username] = {
+            "created_updated": 0,
+            "ended": 0,
+            "created_updated_contracts": [],
+            "ended_contracts": []
+        }
+        
+        citizen_buildings_records = get_citizen_buildings(tables, ai_username) # Buildings AI runs
+        citizen_resources_records = get_citizen_resources(tables, ai_username) # Resources AI owns
+        citizen_active_contracts_records = get_citizen_active_contracts(tables, ai_username) # AI's active sell contracts
+
+        data_package = prepare_sales_and_price_strategy_data(
+            tables,
+            ai_citizen_record,
+            citizen_buildings_records,
+            citizen_resources_records,
+            citizen_active_contracts_records,
+            all_market_contracts,
+            all_buildings_records,
+            building_definitions,
+            resource_types_definitions
+        )
+        
+        if not data_package["sellable_buildings_with_market_data"]:
+            print(f"AI citizen {ai_username} has no buildings that can currently sell resources, skipping Kinos call.")
+            continue
+        
+        # log_data(f"Data package prepared for {ai_username}", data_package) # Log the prepared data package
+
+        if dry_run:
+            print(f"[DRY RUN] Would send sales & pricing strategy request to AI citizen {ai_username}.")
+            print(f"[DRY RUN] Data package summary for {ai_username}:")
+            print(f"  - Sellable buildings with market data: {len(data_package['sellable_buildings_with_market_data'])}")
+            print(f"  - Existing public sell contracts: {len(data_package['existing_ai_public_sell_contracts'])}")
+            continue
+
+        decisions = send_sales_and_price_strategy_request(ai_username, data_package, kinos_model_override_arg)
+        
+        if decisions:
+            # Process contracts to create or update
+            if "contracts_to_create_or_update" in decisions:
+                for decision_item in decisions["contracts_to_create_or_update"]:
+                    if validate_create_or_update_contract_decision(decision_item, data_package["sellable_buildings_with_market_data"], resource_types_definitions):
+                        success = create_or_update_public_sell_contract_from_decision(
+                            tables,
+                            ai_username,
+                            decision_item,
+                            resource_types_definitions
+                        )
+                        if success:
+                            ai_strategy_results[ai_username]["created_updated"] += 1
+                            ai_strategy_results[ai_username]["created_updated_contracts"].append(decision_item)
+            
+            # Process contracts to end
+            if "contracts_to_end" in decisions:
+                for decision_item in decisions["contracts_to_end"]:
+                    if validate_end_contract_decision(decision_item, data_package["existing_ai_public_sell_contracts"]):
+                        success = end_public_sell_contract(
+                            tables,
+                            decision_item["contract_id"],
+                            decision_item.get("reason", "AI decision to end contract.")
+                        )
+                        if success:
+                            ai_strategy_results[ai_username]["ended"] += 1
+                            ai_strategy_results[ai_username]["ended_contracts"].append(decision_item)
+        else:
+            print(f"No valid sales & pricing decisions received for {ai_username}.")
+            
+    if not dry_run and any(results["created_updated"] > 0 or results["ended"] > 0 for results in ai_strategy_results.values()):
+        create_admin_notification(tables, ai_strategy_results)
+    elif dry_run:
+        print(f"[DRY RUN] Would create admin notification with sales & pricing results if any actions were taken.")
+    
+    print(f"{script_name} process completed.")

@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import traceback
+import argparse # Added argparse
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 import requests
@@ -176,7 +177,7 @@ def prepare_lease_analysis_data(ai_citizen: Dict, citizen_lands: List[Dict], cit
     
     return data_package
 
-def send_lease_adjustment_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+def send_lease_adjustment_request(ai_username: str, data_package: Dict, kinos_model_override: Optional[str] = None) -> Optional[Dict]:
     """Send the lease adjustment request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
@@ -269,6 +270,10 @@ If you decide not to adjust any leases at this time, return an empty array.
             "min_files": 5,
             "max_files": 15
         }
+
+        if kinos_model_override:
+            payload["model"] = kinos_model_override
+            print(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (lease adjustment).")
         
         # Make the API request
         print(f"Making API request to Kinos for {ai_username}...")
@@ -658,8 +663,103 @@ def process_ai_lease_adjustments(dry_run: bool = False):
     print("AI lease adjustment process completed")
 
 if __name__ == "__main__":
-    # Check if this is a dry run
-    dry_run = "--dry-run" in sys.argv
+    parser = argparse.ArgumentParser(description="Adjust lease prices for AI-owned lands using Kinos AI.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run the script without making actual changes to Airtable or Kinos."
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+    )
+    args = parser.parse_args()
     
     # Run the process
-    process_ai_lease_adjustments(dry_run)
+    process_ai_lease_adjustments(dry_run=args.dry_run, kinos_model_override_arg=args.model)
+
+# Add kinos_model_override_arg to process_ai_lease_adjustments definition
+def process_ai_lease_adjustments(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
+    """Main function to process AI lease adjustments."""
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    print(f"Starting AI lease adjustment process (dry_run={dry_run}, kinos_model={model_status})")
+    
+    # Initialize Airtable connection
+    tables = initialize_airtable()
+    
+    # Get AI citizens
+    ai_citizens = get_ai_citizens(tables)
+    if not ai_citizens:
+        print("No AI citizens found, exiting")
+        return
+    
+    # Filter AI citizens to only those whose lands have buildings owned by others
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_username = ai_citizen["fields"].get("Username")
+        if not ai_username:
+            continue
+            
+        # Get lands owned by this AI
+        citizen_lands = get_citizen_lands(tables, ai_username)
+        
+        # Get land IDs
+        land_ids = [land["fields"].get("LandId") for land in citizen_lands if land["fields"].get("LandId")]
+        
+        # Get buildings on these lands
+        buildings_on_lands = get_all_buildings_on_lands(tables, land_ids)
+        
+        # Check if any buildings on these lands are owned by others
+        has_others_buildings = False
+        for building in buildings_on_lands:
+            building_owner = building["fields"].get("Owner", "")
+            if building_owner and building_owner != ai_username:
+                has_others_buildings = True
+                break
+                
+        if has_others_buildings:
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_username} has lands with buildings owned by others, including in processing")
+        else:
+            print(f"AI citizen {ai_username} has no lands with buildings owned by others, skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with lands that have buildings owned by others")
+    
+    if not ai_citizens:
+        print("No AI citizens with lands that have buildings owned by others, exiting")
+        return
+    
+    # Track lease adjustments for each AI
+    ai_lease_adjustments = {}
+    
+    # Process each AI citizen
+    for ai_citizen in ai_citizens:
+        ai_username = ai_citizen["fields"].get("Username")
+        if not ai_username:
+            continue
+        
+        print(f"Processing AI citizen: {ai_username}")
+        ai_lease_adjustments[ai_username] = []
+        
+        # Get lands owned by this AI
+        citizen_lands = get_citizen_lands(tables, ai_username)
+        
+        # Get buildings owned by this AI
+        citizen_buildings = get_citizen_buildings(tables, ai_username)
+        
+        # Get all buildings on lands owned by this AI
+        land_ids = [land["fields"].get("LandId") for land in citizen_lands if land["fields"].get("LandId")]
+        buildings_on_lands = get_all_buildings_on_lands(tables, land_ids)
+        
+        # Prepare the data package for the AI
+        data_package = prepare_lease_analysis_data(ai_citizen, citizen_lands, citizen_buildings, buildings_on_lands)
+        
+        # Send the lease adjustment request to the AI
+        if not dry_run:
+            decisions = send_lease_adjustment_request(ai_username, data_package, kinos_model_override_arg)
+            
+            if decisions and "lease_adjustments" in decisions:
+                lease_adjustments = decisions["lease_adjustments"]

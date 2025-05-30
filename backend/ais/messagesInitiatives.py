@@ -317,6 +317,10 @@ def generate_ai_initiative_message(tables: Dict[str, Table], ai_username: str, t
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         payload = {"message": kinos_prompt, "addSystem": add_system_json}
 
+        if kinos_model_override:
+            payload["model"] = kinos_model_override
+            print(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (message initiative).")
+
         response = requests.post(url, headers=headers, json=payload, timeout=90) # Augmentation du timeout à 90s
         
         if response.status_code == 200 or response.status_code == 201:
@@ -550,9 +554,167 @@ if __name__ == "__main__":
     parser.add_argument("--dry-run", action="store_true", help="Exécute le script sans effectuer de modifications réelles.")
     parser.add_argument("--citizen1", type=str, help="Le Username du citoyen IA qui initie le message (mode ciblé).")
     parser.add_argument("--citizen2", type=str, help="Le Username du citoyen destinataire (mode ciblé).")
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+    )
     args = parser.parse_args()
 
     if (args.citizen1 and not args.citizen2) or (not args.citizen1 and args.citizen2):
         parser.error("--citizen1 et --citizen2 doivent être utilisés ensemble.")
 
-    process_ai_message_initiatives(dry_run=args.dry_run, citizen1_arg=args.citizen1, citizen2_arg=args.citizen2)
+    process_ai_message_initiatives(dry_run=args.dry_run, citizen1_arg=args.citizen1, citizen2_arg=args.citizen2, kinos_model_override_arg=args.model)
+
+# Update process_ai_message_initiatives definition
+def process_ai_message_initiatives(dry_run: bool = False, citizen1_arg: Optional[str] = None, citizen2_arg: Optional[str] = None, kinos_model_override_arg: Optional[str] = None):
+    """Fonction principale pour traiter les initiatives de messages IA."""
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    if citizen1_arg and citizen2_arg:
+        print(f"Démarrage du processus d'initiative de message IA CIBLÉ de {citizen1_arg} à {citizen2_arg} (dry_run={dry_run}, kinos_model={model_status})")
+    else:
+        print(f"Démarrage du processus d'initiatives de messages IA (dry_run={dry_run}, kinos_model={model_status})")
+    
+    tables = initialize_airtable()
+    if not tables:
+        return
+
+    initiatives_summary = {
+        "processed_ai_count": 0,
+        "total_messages_sent": 0,
+        "details": {} 
+    }
+
+    if citizen1_arg and citizen2_arg:
+        # Mode ciblé
+        ai_username = citizen1_arg
+        target_username = citizen2_arg
+        print(f"Mode ciblé : {ai_username} va tenter d'envoyer un message à {target_username}.")
+
+        # Vérifier si citizen1 est une IA (optionnel, mais bon à savoir)
+        # citizen1_data = _get_citizen_data(tables, ai_username)
+        # if not (citizen1_data and citizen1_data.get('fields', {}).get('IsAI')):
+        #     print(f"Attention : {ai_username} n'est pas marqué comme IA, mais on continue quand même.")
+
+        initiatives_summary["processed_ai_count"] = 1
+        initiatives_summary["details"][ai_username] = {"messages_sent_count": 0, "targets": []}
+
+        if not dry_run:
+            message_content = generate_ai_initiative_message(tables, ai_username, target_username, kinos_model_override_arg)
+            if message_content:
+                success = create_response_message_api(
+                    sender_username=ai_username,
+                    receiver_username=target_username,
+                    content=message_content
+                )
+                if success:
+                    initiatives_summary["total_messages_sent"] += 1
+                    initiatives_summary["details"][ai_username]["messages_sent_count"] += 1
+                    initiatives_summary["details"][ai_username]["targets"].append(target_username)
+            else:
+                print(f"    Échec de la génération du contenu du message de {ai_username} à {target_username}.")
+        else:
+            print(f"    [DRY RUN] {ai_username} aurait initié un message à {target_username}.")
+            initiatives_summary["total_messages_sent"] += 1
+            initiatives_summary["details"][ai_username]["messages_sent_count"] += 1
+            initiatives_summary["details"][ai_username]["targets"].append(target_username)
+    else:
+        # Mode normal (probabiliste)
+        ai_citizens = get_ai_citizens(tables)
+        if not ai_citizens:
+            print("Aucun citoyen IA trouvé, fin du processus.")
+            return
+
+        for ai_citizen_record in ai_citizens:
+            ai_username = ai_citizen_record.get("fields", {}).get("Username")
+            if not ai_username:
+                print(f"Ignorer l'enregistrement citoyen IA {ai_citizen_record.get('id')} car Username est manquant.")
+                continue
+
+            initiatives_summary["processed_ai_count"] += 1
+            initiatives_summary["details"][ai_username] = {"messages_sent_count": 0, "targets": []}
+            
+            print(f"\nTraitement des initiatives pour l'IA : {ai_username}")
+            top_relationships = get_top_relationships_for_ai(tables, ai_username, limit=10)
+
+            if not top_relationships:
+                print(f"Aucune relation trouvée pour {ai_username}.")
+                continue
+
+            max_combined_score = top_relationships[0]["combined_score"]
+            if max_combined_score <= 0:
+                print(f"Le score combiné maximal pour {ai_username} est {max_combined_score}. Aucune initiative basée sur le score.")
+                continue
+                
+            print(f"Score combiné maximal pour {ai_username} : {max_combined_score}")
+
+            for relationship in top_relationships:
+                target_username = relationship["other_citizen_username"]
+                current_score = relationship["combined_score"]
+
+                if current_score <= 0:
+                    probability = 0.0
+                elif max_combined_score <= 0: # Devrait être déjà géré par le continue plus haut, mais par sécurité
+                    probability = 0.0
+                else:
+                    # Calcul logarithmique de la probabilité
+                    # Ajout de 1 pour éviter log(0) et pour que log(1) soit 0 si score est 0
+                    log_current_score = math.log(current_score + 1)
+                    log_max_score = math.log(max_combined_score + 1)
+                    
+                    if log_max_score > 0: # Éviter la division par zéro si max_combined_score était 0 (donc log_max_score serait log(1)=0)
+                        probability = (log_current_score / log_max_score) * 0.25
+                    else: # Si max_combined_score est 0, log_max_score est 0.
+                        probability = 0.0 # current_score doit aussi être 0 dans ce cas.
+                
+                target_citizen_data = _get_citizen_data(tables, target_username)
+                target_is_ai = False
+                if target_citizen_data and target_citizen_data.get('fields', {}).get('IsAI', False):
+                    target_is_ai = True
+                    probability /= 10
+                    print(f"    -> Cible {target_username} est une IA. Probabilité de base ajustée à: {probability:.2%}")
+                
+                # Vérifier les messages existants
+                if not _check_existing_messages(tables, ai_username, target_username):
+                    probability *= 2
+                    print(f"    -> Aucun message existant. Probabilité doublée à: {probability:.2%}")
+
+                # Plafonner la probabilité (par exemple à 0.95)
+                probability = min(probability, 0.95)
+                print(f"  Relation avec {target_username} (Score: {current_score}). Probabilité d'initiative finale plafonnée: {probability:.2%}")
+
+                if random.random() < probability:
+                    print(f"    -> {ai_username} initie un message à {target_username}!")
+                    
+                    if not dry_run:
+                        message_content = generate_ai_initiative_message(tables, ai_username, target_username, kinos_model_override_arg)
+                        if message_content:
+                            success = create_response_message_api(
+                                sender_username=ai_username,
+                                receiver_username=target_username,
+                                content=message_content
+                            )
+                            if success:
+                                initiatives_summary["total_messages_sent"] += 1
+                                initiatives_summary["details"][ai_username]["messages_sent_count"] += 1
+                                initiatives_summary["details"][ai_username]["targets"].append(target_username)
+                        else:
+                            print(f"    Échec de la génération du contenu du message de {ai_username} à {target_username}.")
+                    else:
+                        print(f"    [DRY RUN] {ai_username} aurait initié un message à {target_username}.")
+                        initiatives_summary["total_messages_sent"] += 1
+                        initiatives_summary["details"][ai_username]["messages_sent_count"] += 1
+                        initiatives_summary["details"][ai_username]["targets"].append(target_username)
+                    
+                    # time.sleep(0.2) # Délai déjà présent
+                
+                time.sleep(0.2) 
+            time.sleep(0.5)
+
+    print("\nRésumé final des initiatives :")
+    print(json.dumps(initiatives_summary, indent=2))
+    
+    if not dry_run or initiatives_summary["total_messages_sent"] > 0 :
+        create_admin_notification(tables, initiatives_summary)
+
+    print("Processus d'initiatives de messages IA terminé.")

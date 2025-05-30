@@ -637,7 +637,7 @@ def prepare_ai_building_strategy(tables: Dict[str, Table], ai_citizen: Dict, cit
         
     return data_package
 
-def send_building_strategy_request(ai_username: str, data_package: Dict, target_land_id: Optional[str] = None, additional_message: Optional[str] = None) -> Optional[Dict]:
+def send_building_strategy_request(ai_username: str, data_package: Dict, target_land_id: Optional[str] = None, additional_message: Optional[str] = None, kinos_model_override: Optional[str] = None) -> Optional[Dict]:
     """Send the building strategy request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
@@ -748,6 +748,10 @@ If you decide not to build anything at this time, return an empty JSON object.
             "min_files": 4,
             "max_files": 8
         }
+
+        if kinos_model_override:
+            payload["model"] = kinos_model_override
+            log_info(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (building strategy).")
         
         # Make the API request
         log_info(f"Making API request to Kinos for {ai_username}...")
@@ -1304,6 +1308,10 @@ Your response must be a JSON object with:
             "min_files": 5,
             "max_files": 15
         }
+
+        if kinos_model_override:
+            payload["model"] = kinos_model_override
+            log_info(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (building placement).")
         
         # Make the API request
         log_info(f"Making building placement API request to Kinos for {ai_username}...")
@@ -1962,12 +1970,277 @@ if __name__ == "__main__":
     parser.add_argument("--citizen", type=str, help="Run the script for a specific citizen username.")
     parser.add_argument("--landId", type=str, help="Run the script for a specific land ID, skipping AI land selection.")
     parser.add_argument("--addMessage", type=str, help="A message that will be added at the end of both prompts of the calls to KinOS.")
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+    )
     args = parser.parse_args()
 
     dry_run_arg = args.dry_run
     citizen_username_arg = args.citizen
     target_land_id_arg = args.landId
     additional_message_arg = args.addMessage
+    kinos_model_override_arg = args.model
     
     # Run the process
-    process_ai_building_strategies(dry_run_arg, citizen_username_arg, target_land_id_arg, additional_message_arg)
+    process_ai_building_strategies(dry_run_arg, citizen_username_arg, target_land_id_arg, additional_message_arg, kinos_model_override_arg)
+
+# Update process_ai_building_strategies definition
+def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: Optional[str] = None, target_land_id_arg: Optional[str] = None, additional_message_arg: Optional[str] = None, kinos_model_override_arg: Optional[str] = None):
+    """Main function to process AI building strategies."""
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    log_header(f"AI Building Strategy Process (dry_run={dry_run}, citizen={citizen_username_arg or 'all'}, landId={target_land_id_arg or 'AI choice'}, addMessage='{additional_message_arg or ''}', kinos_model={model_status})")
+    
+    # Import traceback for detailed error logging
+    import traceback
+    
+    # Initialize Airtable connection
+    try:
+        tables = initialize_airtable()
+        log_success("Successfully initialized Airtable connection")
+    except Exception as e:
+        log_error(f"Failed to initialize Airtable: {str(e)}")
+        log_error(f"Exception traceback: {traceback.format_exc()}")
+        return
+
+    # Get AI citizens, potentially filtered by citizen_username_arg
+    try:
+        ai_citizens = get_ai_citizens(tables, citizen_username_arg)
+        if not ai_citizens:
+            # Message already logged by get_ai_citizens if no citizens found
+            return
+        # Further filtering by ducats is already handled in get_ai_citizens
+    except Exception as e:
+        log_error(f"Failed to get AI citizens: {str(e)}")
+        log_error(f"Exception traceback: {traceback.format_exc()}")
+        return
+    
+    # Get all buildings for reference (used to find existing buildings on lands)
+    try:
+        all_buildings = get_all_buildings(tables) # This fetches all buildings in the system
+        log_success(f"Successfully retrieved {len(all_buildings)} total buildings for context.")
+    except Exception as e:
+        log_error(f"Failed to get all buildings: {str(e)}")
+        log_error(f"Exception traceback: {traceback.format_exc()}")
+        return
+    
+    # Track results for each AI
+    ai_strategy_results = {}
+    
+    # Process each AI citizen
+    for ai_citizen in ai_citizens:
+        ai_username = ai_citizen["fields"].get("Username")
+        if not ai_username:
+            print("Skipping AI citizen with no username")
+            continue
+        
+        log_header(f"Processing AI citizen: {ai_username}")
+        
+        try:
+            # Get lands for the AI to consider (specific land or all lands)
+            # The username parameter for get_citizen_lands is for logging context.
+            citizen_lands = get_citizen_lands(tables, ai_username, target_land_id_arg)
+            
+            if not citizen_lands:
+                if target_land_id_arg:
+                    log_warning(f"Target land {target_land_id_arg} not found for AI citizen {ai_username}, skipping.")
+                else:
+                    log_warning(f"AI citizen {ai_username} has no lands to consider (or all lands query returned empty), skipping.")
+                ai_strategy_results[ai_username] = False
+                continue
+            
+            # Get buildings owned by this AI (for context in data_package)
+            citizen_buildings_owned = get_citizen_buildings(tables, ai_username)
+            # log_info(f"Retrieved {len(citizen_buildings_owned)} buildings owned by {ai_username} for context.")
+
+            # Get polygon data for the land(s) being considered.
+            # get_polygon_data_for_citizen works fine if citizen_lands contains one or more lands.
+            polygon_data = get_polygon_data_for_citizen(ai_username, citizen_lands)
+            if not polygon_data:
+                log_warning(f"No polygon data found for the lands being considered by {ai_username}, skipping.")
+                ai_strategy_results[ai_username] = False
+                continue
+            log_info(f"Retrieved polygon data for {len(polygon_data)} land(s) being considered.")
+
+            # Determine existing buildings on the specific land(s) being considered for point availability.
+            considered_land_ids = [land["fields"].get("LandId") for land in citizen_lands if land["fields"].get("LandId")]
+            buildings_on_considered_lands = [
+                b for b in all_buildings if b["fields"].get("LandId") in considered_land_ids
+            ]
+            # log_info(f"Found {len(buildings_on_considered_lands)} existing buildings on the {len(considered_land_ids)} land(s) under consideration.")
+
+            # Get available building points on the considered land(s)
+            available_points = get_available_building_points(polygon_data, buildings_on_considered_lands)
+        
+            total_points = sum(len(points_list) for points_list in available_points.values())
+            # log_info(f"Found {total_points} total available building points for {ai_username}")
+        
+            if total_points == 0:
+                log_warning(f"No available building points for AI citizen {ai_username}, skipping")
+                ai_strategy_results[ai_username] = False
+                continue
+            
+            # Prepare the data package for the AI.
+            # citizen_buildings_owned is for AI's general context.
+            # all_buildings is for context of what's on all lands (filtered by prepare_ai_building_strategy for relevant lands).
+            data_package = prepare_ai_building_strategy(tables, ai_citizen, citizen_lands, citizen_buildings_owned, all_buildings)
+            
+            # Fetch and add building ownership relevancies (if any)
+            # This part can remain as is, as it's contextual information for the AI.
+            building_ownership_relevancies = []
+            try:
+                api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+                building_ownership_response = requests.get(
+                    f"{api_base_url}/api/relevancies/building-ownership?username={ai_username}"
+                )
+                if building_ownership_response.ok:
+                    building_ownership_data = building_ownership_response.json()
+                    if building_ownership_data.get("success"):
+                        # detailedRelevancy is expected to be an array of relevancy items
+                        detailed_relevancy_list = building_ownership_data.get("detailedRelevancy", [])
+                        if isinstance(detailed_relevancy_list, list):
+                            for relevancy_item in detailed_relevancy_list:
+                                if isinstance(relevancy_item, dict): # Ensure item is a dictionary
+                                    building_ownership_relevancies.append({
+                                        "asset": relevancy_item.get("asset", ""), "asset_type": relevancy_item.get("assetType", ""),
+                                        "category": relevancy_item.get("category", ""), "type": relevancy_item.get("type", ""),
+                                        "target_citizen": relevancy_item.get("targetCitizen", ""), "score": relevancy_item.get("score", 0),
+                                        "time_horizon": relevancy_item.get("timeHorizon", ""), "title": relevancy_item.get("title", ""),
+                                        "description": relevancy_item.get("description", ""), "status": relevancy_item.get("status", "")
+                                    })
+                                else:
+                                    log_warning(f"Skipping non-dictionary item in detailedRelevancy list: {relevancy_item}")
+                        else:
+                            log_warning(f"detailedRelevancy field is not a list: {detailed_relevancy_list}")
+                    log_info(f"Retrieved {len(building_ownership_relevancies)} building ownership relevancies for {ai_username}")
+                else:
+                    log_warning(f"Failed to fetch building ownership relevancies: {building_ownership_response.status_code}")
+            except Exception as e_relevancy: # Renamed e to e_relevancy
+                log_warning(f"Error fetching building ownership relevancies: {str(e_relevancy)}")
+            data_package["building_ownership_relevancies"] = building_ownership_relevancies
+        
+            # log_success(f"Prepared data package for {ai_username}")
+        
+            if not dry_run:
+                log_section(f"STEP 1: Get building decision for {ai_username}")
+                decision = send_building_strategy_request(ai_username, data_package, target_land_id=target_land_id_arg, additional_message=additional_message_arg, kinos_model_override=kinos_model_override_arg)
+                
+                if decision and decision.get("building_type") and decision.get("land_id"):
+                    building_type_chosen = decision["building_type"]
+                    building_types_api = get_building_types_from_api() # This fetches all buildable types by the AI
+
+                    # Get construction cost
+                    chosen_building_info = building_types_api.get(building_type_chosen)
+                    if not chosen_building_info:
+                        log_error(f"Building type '{building_type_chosen}' chosen by AI {ai_username} not found in API definitions. Skipping placement.")
+                        ai_strategy_results[ai_username] = False
+                        continue
+                    
+                    construction_cost = chosen_building_info.get("constructionCost", float('inf'))
+                    citizen_ducats = data_package.get("citizen", {}).get("ducats", 0)
+
+                    if citizen_ducats < construction_cost:
+                        log_error(f"AI citizen {ai_username} does not have enough ducats ({citizen_ducats}) to build {building_type_chosen} (cost: {construction_cost}). Skipping placement.")
+                        ai_strategy_results[ai_username] = False
+                        continue
+                
+                    # log_success(f"AI citizen {ai_username} has enough ducats ({citizen_ducats}) to build {building_type_chosen} (cost: {construction_cost}). Proceeding to placement.")
+                    log_section(f"STEP 2: Get placement decision for {ai_username}")
+                
+                    # Ensure polygon_data and available_points are for the specific land chosen by AI or CLI
+                    final_land_id = decision["land_id"]
+                    final_polygon_data = [p for p in polygon_data if p.get("id") == final_land_id]
+                    
+                    if not final_polygon_data:
+                        log_error(f"Polygon data for chosen/specified land {final_land_id} not found. Skipping placement.")
+                        ai_strategy_results[ai_username] = False
+                        continue
+
+                    buildings_on_final_land = [b for b in all_buildings if b["fields"].get("LandId") == final_land_id]
+                    final_available_points = get_available_building_points(final_polygon_data, buildings_on_final_land)
+
+                    placement_success = send_building_placement_request(
+                        ai_username,
+                        ai_citizen, # Pass the full AI citizen record
+                        decision,
+                        final_polygon_data, # Use polygon data for the specific chosen land
+                        final_available_points, # Use available points for the specific chosen land
+                        building_types_api,
+                        tables,
+                        get_citizen_relevancies(ai_username), # Contextual relevancies
+                        target_land_id_arg=final_land_id, # Pass the land_id for context in placement
+                        additional_message=additional_message_arg,
+                        kinos_model_override=kinos_model_override_arg
+                    )
+                    ai_strategy_results[ai_username] = placement_success
+                    # log_success(f"Building strategy for {ai_username} completed with success: {placement_success}")
+                elif decision is None or not decision.get("building_type"): # AI decided not to build or error
+                    log_warning(f"AI {ai_username} decided not to build or an error occurred in decision making.")
+                    ai_strategy_results[ai_username] = False # Mark as false if no decision to build
+            else: # Dry run
+                log_info(f"[DRY RUN] Would send building strategy request to AI citizen {ai_username}")
+                # log_data("Data package summary", {
+                #     "Citizen": data_package['citizen']['username'],
+                #     "Lands": len(data_package['lands']),
+                #     "Buildings": len(data_package['buildings']),
+                #     "Net Income": data_package['citizen']['financial']['net_income'],
+                #     "Available building points": total_points
+                # })
+                ai_strategy_results[ai_username] = True
+        except Exception as e:
+            print(f"Error processing AI citizen {ai_username}: {str(e)}")
+            print(f"Exception traceback: {traceback.format_exc()}")
+            ai_strategy_results[ai_username] = False
+        else:
+            # In dry run mode, just log what would happen
+            print(f"[DRY RUN] Would send building strategy request to AI citizen {ai_username}")
+            print(f"[DRY RUN] Data package summary:")
+            print(f"  - Citizen: {data_package['citizen']['username']}")
+            print(f"  - Lands: {len(data_package['lands'])}")
+            print(f"  - Buildings: {len(data_package['buildings'])}")
+            print(f"  - Net Income: {data_package['citizen']['financial']['net_income']}")
+            print(f"  - Available building points: {total_points}")
+            ai_strategy_results[ai_username] = True
+    
+    # Create admin notification with summary
+    if not dry_run and ai_strategy_results:
+        try:
+            create_admin_notification(tables, ai_strategy_results)
+            print("Created admin notification with AI building strategy results")
+        except Exception as e:
+            print(f"Error creating admin notification: {str(e)}")
+            print(f"Exception traceback: {traceback.format_exc()}")
+    else:
+        log_info(f"[DRY RUN] Would create admin notification with strategy results")
+        log_data("Strategy results", ai_strategy_results)
+    
+    # Print final summary
+    log_section("AI Building Strategy Results Summary")
+    headers = ["AI Citizen", "Status"]
+    rows = [[ai_name, "SUCCESS" if success else "FAILED"] for ai_name, success in ai_strategy_results.items()]
+    log_table(headers, rows)
+    
+    log_success("AI building strategy process completed")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="AI Building Strategy Script")
+    parser.add_argument("--dry-run", action="store_true", help="Run the script without making actual changes.")
+    parser.add_argument("--citizen", type=str, help="Run the script for a specific citizen username.")
+    parser.add_argument("--landId", type=str, help="Run the script for a specific land ID, skipping AI land selection.")
+    parser.add_argument("--addMessage", type=str, help="A message that will be added at the end of both prompts of the calls to KinOS.")
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+    )
+    args = parser.parse_args()
+
+    dry_run_arg = args.dry_run
+    citizen_username_arg = args.citizen
+    target_land_id_arg = args.landId
+    additional_message_arg = args.addMessage
+    kinos_model_override_arg = args.model
+    
+    # Run the process
+    process_ai_building_strategies(dry_run_arg, citizen_username_arg, target_land_id_arg, additional_message_arg, kinos_model_override_arg)

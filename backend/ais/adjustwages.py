@@ -697,7 +697,7 @@ def process_ai_wage_adjustments(dry_run: bool = False):
         
         # Send the wage adjustment request to the AI
         if not dry_run:
-            decisions = send_wage_adjustment_request(ai_username, data_package)
+            decisions = send_wage_adjustment_request(ai_username, data_package, kinos_model_override_arg)
             
             if decisions and "wage_adjustments" in decisions:
                 wage_adjustments = decisions["wage_adjustments"]

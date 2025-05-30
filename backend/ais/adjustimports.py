@@ -3,6 +3,7 @@ import sys
 import json
 import traceback
 import logging
+import argparse # Added argparse
 from datetime import datetime, timedelta
 import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Tuple, Any
@@ -398,7 +399,7 @@ def prepare_import_strategy_data(
     
     return data_package
 
-def send_import_strategy_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+def send_import_strategy_request(ai_username: str, data_package: Dict, kinos_model_override: Optional[str] = None) -> Optional[Dict]:
     """Send the import strategy request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
@@ -513,6 +514,10 @@ Make sure the building type can store the resource.
             "min_files": 5,
             "max_files": 15
         }
+
+        if kinos_model_override:
+            payload["model"] = kinos_model_override
+            print(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (import strategy).")
         
         # Make the API request
         print(f"Making API request to Kinos for {ai_username}...")
@@ -1022,8 +1027,137 @@ def process_ai_import_strategies(dry_run: bool = False):
     print("AI import strategy process completed")
 
 if __name__ == "__main__":
-    # Check if this is a dry run
-    dry_run = "--dry-run" in sys.argv
+    parser = argparse.ArgumentParser(description="Adjust import strategies for AI citizens using Kinos AI.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run the script without making actual changes to Airtable or Kinos."
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+    )
+    args = parser.parse_args()
     
     # Run the process
-    process_ai_import_strategies(dry_run)
+    process_ai_import_strategies(dry_run=args.dry_run, kinos_model_override_arg=args.model)
+
+# Add kinos_model_override_arg to process_ai_import_strategies definition
+def process_ai_import_strategies(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
+    """Main function to process AI import strategies."""
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    print(f"Starting AI import strategy process (dry_run={dry_run}, kinos_model={model_status})")
+    
+    # Initialize Airtable connection
+    tables = initialize_airtable()
+    
+    # Get building types information
+    building_types = get_building_types_from_api()
+    if not building_types:
+        print("Failed to get building types, exiting")
+        return
+    
+    # Get resource types information
+    resource_types = get_resource_types_from_api()
+    if not resource_types:
+        print("Failed to get resource types, exiting")
+        return
+    
+    # Get AI citizens
+    ai_citizens = get_ai_citizens(tables)
+    if not ai_citizens:
+        print("No AI citizens found, exiting")
+        return
+    
+    # Filter AI citizens to only those who own buildings that can import resources
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_username = ai_citizen["fields"].get("Username")
+        if not ai_username:
+            continue
+            
+        # Get buildings owned by this AI
+        citizen_buildings = get_citizen_buildings(tables, ai_username)
+        
+        # Check if any building can import resources
+        has_importable_building = False
+        for building in citizen_buildings:
+            building_type = building["fields"].get("Type", "")
+            building_def = building_types.get(building_type, {})
+            can_import = building_def.get("canImport", False)
+            
+            if can_import:
+                has_importable_building = True
+                break
+                
+        # Also check if the citizen has enough ducats (minimum 10,000)
+        ducats = ai_citizen["fields"].get("Ducats", 0)
+        has_enough_ducats = ducats >= 10000
+        
+        if has_importable_building and has_enough_ducats:
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_username} has buildings that can import resources and {ducats} ducats, including in processing")
+        else:
+            if not has_importable_building:
+                print(f"AI citizen {ai_username} has no buildings that can import resources, skipping")
+            if not has_enough_ducats:
+                print(f"AI citizen {ai_username} has insufficient ducats ({ducats}), skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with buildings that can import resources and sufficient ducats")
+    
+    if not ai_citizens:
+        print("No AI citizens with buildings that can import resources and sufficient ducats, exiting")
+        return
+    
+    # Track import results for each AI
+    ai_import_results = {}
+    
+    # Process each AI citizen
+    for ai_citizen in ai_citizens:
+        ai_username = ai_citizen["fields"].get("Username")
+        if not ai_username:
+            continue
+        
+        # print(f"Processing AI citizen: {ai_username}")
+        ai_import_results[ai_username] = {
+            "success": 0,
+            "failure": 0,
+            "imports": []
+        }
+        
+        # Get buildings owned by this AI
+        citizen_buildings = get_citizen_buildings(tables, ai_username)
+        
+        # Get resources owned by this AI
+        citizen_resources = get_citizen_resources(tables, ai_username)
+        
+        # Get existing contracts where this AI is the buyer
+        citizen_contracts = get_citizen_contracts(tables, ai_username)
+        
+        # Prepare the data package for the AI
+        data_package = prepare_import_strategy_data(
+            tables, # Pass tables object
+            ai_citizen, 
+            citizen_buildings, 
+            citizen_resources,
+            citizen_contracts,
+            building_types, 
+            resource_types
+        )
+        
+        # Find buildings that can import resources
+        importable_buildings = data_package["importable_buildings"]
+        
+        if not importable_buildings:
+            print(f"AI citizen {ai_username} has no buildings that can import resources, skipping")
+            continue
+        
+        # Send the import strategy request to the AI
+        if not dry_run:
+            decisions = send_import_strategy_request(ai_username, data_package, kinos_model_override_arg)
+            
+            if decisions and "import_decisions" in decisions:
+                import_decisions = decisions["import_decisions"]
