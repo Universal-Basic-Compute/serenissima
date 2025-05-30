@@ -1333,6 +1333,22 @@ Here are relevancies where you are the target:
 {json.dumps(target_relevancies, indent=2)}
 """
 
+    # Fetch and add general notifications and problems for the AI for placement decision
+    recent_notifications_for_placement = _get_notifications_data_api(ai_username) # Helper needs to be defined/imported
+    if recent_notifications_for_placement:
+        system_instructions += f"""
+Here are your recent notifications:
+{json.dumps(recent_notifications_for_placement, indent=2)}
+"""
+
+    # Problems are fetched based on citizen username, so it's specific to the AI
+    recent_problems_for_placement = _get_problems_data_api(ai_username) # Helper needs to be defined/imported
+    if recent_problems_for_placement:
+        system_instructions += f"""
+Here are your recent problems:
+{json.dumps(recent_problems_for_placement, indent=2)}
+"""
+
         system_instructions += f"""
 There are {len(candidate_points_on_land)} available points of type '{required_point_type_from_def}'. Choose the best location for your {building_type_info['name']} by selecting the index of one of these points (0 to {len(candidate_points_on_land)-1}).
 
