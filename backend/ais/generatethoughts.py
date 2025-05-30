@@ -187,7 +187,8 @@ def get_citizens_for_thought_generation(
         else: # Default case: AIs (excluding Facchini and Popolani) OR Humans (active in last 7 days, including Facchini and Popolani)
             seven_days_ago_venice = (get_venice_time_now() - timedelta(days=7)).isoformat()
             ai_condition = "AND({IsAI}=TRUE(), {SocialClass}!='Facchini', {SocialClass}!='Popolani')"
-            human_condition_template = "AND(OR({IsAI}=FALSE(), {IsAI}=BLANK()), IS_AFTER({{LastActiveAt}}, DATETIME_PARSE('{}')))"
+            # Utilisation de NOT({IsAI}=TRUE()) pour la condition humaine
+            human_condition_template = "AND(NOT({IsAI}=TRUE()), IS_AFTER({{LastActiveAt}}, DATETIME_PARSE('{}')))"
             human_condition = human_condition_template.format(seven_days_ago_venice)
             
             formula_parts.append(f"OR({ai_condition}, {human_condition})")
@@ -209,72 +210,8 @@ def get_citizens_for_thought_generation(
         log.error(f"{LogColors.FAIL}Error fetching citizens for thought generation: {e}{LogColors.ENDC}")
         return []
 
-def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: str, context_data: Dict) -> Optional[str]:
-    """Generates an AI thought using the Kinos Engine API."""
-    try:
-        add_system_json = json.dumps(context_data)
-        
-        kinos_prompt = (
-            f"You are {ai_display_name}, an AI citizen of Venice. You are currently reflecting on your goals, your economic situation, your relationships, and any pressing needs or problems you face.\n"
-            "Your task is to:\n"
-            "1. First, write a paragraph outlining various strategic thoughts. These thoughts should be based on the detailed context provided in 'addSystem'. For example, consider:\n"
-            "    - Strategic and Goal-Oriented Thoughts: What are your long-term objectives? What steps can you take?\n"
-            "    - Economic Evaluation / Decision-Making Cues: How is your financial situation? What economic opportunities or threats do you see?\n"
-            "    - Relationship-Driven Economic Thoughts: How do your relationships influence your economic decisions or offer opportunities?\n"
-            "    - Needs-Driven Economic Actions (linked to Problems): What problems are you facing (e.g., lack of resources, housing issues) and what economic actions could solve them?\n"
-            "    - Activity-Related Intentions: What activities are you considering undertaking?\n"
-            "   Feel free to deviate from this template and think about things relevant to YOUR specific situation. Ensure that the thought are grounded in the data given, related to the gameplay, and your position as an economic agent in the city. They should be interesting, and help you improve your position.\n\n"
-            "Your task is to:\n"
-            "Write a FULL PARAGRAPH outlining various strategic thoughts based on the detailed context provided in 'addSystem'. This paragraph should be a comprehensive reflection of your current strategic thinking. The entire paragraph you generate will be recorded.\n\n"
-            "IMPORTANT: Ensure your response is a well-reasoned paragraph of thoughts. No specific formatting (like bolding) is required for extraction, as the whole paragraph is the output.\n\n"
-            "--- Context ('addSystem' details) ---\n"
-            "- 'ai_citizen_profile': Your detailed profile.\n"
-            "- 'recent_notifications_for_ai': News/events relevant to you.\n"
-            "- 'recent_relevancies_for_ai': Specific items of relevance to you.\n"
-            "- 'recent_problems_for_ai': Your current problems.\n\n"
-            "--- Your Response ---\n"
-        )
-
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{KINOS_BLUEPRINT_ID}/kins/{ai_username}/channels/{KINOS_CHANNEL_THOUGHTS}/messages"
-        headers = {"Authorization": f"Bearer {kinos_api_key}", "Content-Type": "application/json"}
-        payload = {"message": kinos_prompt, "addSystem": add_system_json}
-
-        log.info(f"{LogColors.OKBLUE}Sending thought generation request to Kinos for {ai_username}...{LogColors.ENDC}")
-        response = requests.post(url, headers=headers, json=payload, timeout=90) # Increased timeout
-
-        if response.status_code not in [200, 201]:
-            log.error(f"{LogColors.FAIL}Kinos API error for {ai_username} (POST): {response.status_code} - {response.text[:500]}{LogColors.ENDC}")
-            return None
-
-        # Fetch the conversation history to get the assistant's reply
-        history_response = requests.get(url, headers=headers, timeout=30)
-        if history_response.status_code != 200:
-            log.error(f"{LogColors.FAIL}Kinos API error for {ai_username} (GET history): {history_response.status_code} - {history_response.text[:500]}{LogColors.ENDC}")
-            return None
-            
-        messages_data = history_response.json()
-        assistant_messages = [msg for msg in messages_data.get("messages", []) if msg.get("role") == "assistant"]
-        if not assistant_messages:
-            log.warning(f"{LogColors.WARNING}No assistant messages found in Kinos history for {ai_username}.{LogColors.ENDC}")
-            return None
-        
-        assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
-        latest_ai_response_content = assistant_messages[0].get("content")
-        
-        if not latest_ai_response_content:
-            log.warning(f"{LogColors.WARNING}Latest assistant message for {ai_username} has no content.{LogColors.ENDC}")
-            return None
-            
-        log.info(f"{LogColors.OKGREEN}Received Kinos response for {ai_username}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
-        # log.debug(f"Kinos raw response for {ai_username}: {latest_ai_response_content[:1000]}...") # Log snippet
-        return latest_ai_response_content
-
-    except requests.exceptions.RequestException as e:
-        log.error(f"{LogColors.FAIL}Kinos API request error for {ai_username}: {e}{LogColors.ENDC}")
-        return None
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error in generate_ai_thought for {ai_username}: {e}{LogColors.ENDC}")
-        return None
+# La définition précédente de generate_ai_thought (sans kinos_model_override) a été supprimée car elle était dupliquée.
+# La version correcte avec kinos_model_override est conservée ci-dessous.
 
 def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: str, context_data: Dict, kinos_model_override: Optional[str] = None) -> Optional[str]:
     """Generates an AI thought using the Kinos Engine API."""
