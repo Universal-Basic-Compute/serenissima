@@ -339,16 +339,57 @@ def is_rest_time_for_class(social_class: str, current_venice_time: datetime.date
         return is_nighttime(current_venice_time) # Fallback to general night
     return _is_time_in_ranges(current_venice_time.hour, schedule.get("rest", []))
 
-def is_work_time_for_class(social_class: str, current_venice_time: datetime.datetime) -> bool:
-    """Checks if it's work time for the given social class."""
-    schedule = SOCIAL_CLASS_SCHEDULES.get(social_class)
-    if not schedule:
+# BUILDING_TYPE_WORK_SCHEDULES defines specific work periods for certain building types.
+# Structure: {"building_type": {"work": [(start, end), ...]}}
+# These override social class work hours if a citizen works at such a building.
+BUILDING_TYPE_WORK_SCHEDULES = {
+    "inn": { # Auberge
+        "work": [(18, 24), (0, 2)]  # 18h - 02h
+    },
+    "bakery": { # Boulangerie
+        "work": [(3, 11)] # 03h - 11h
+    },
+    "tavern": { # Taverne (peut avoir des horaires similaires à l'auberge ou différents)
+        "work": [(17, 24), (0, 1)] # 17h - 01h
+    },
+    # Ajoutez d'autres types de bâtiments avec horaires spécifiques ici
+    # Exemple:
+    # "shipyard": { # Chantier naval
+    #     "work": [(7, 12), (13, 18)]
+    # },
+}
+
+def is_work_time(
+    social_class: str, 
+    current_venice_time: datetime.datetime, 
+    workplace_type: Optional[str] = None
+) -> bool:
+    """
+    Checks if it's work time, considering building-specific schedules first,
+    then falling back to social class schedules.
+    """
+    # Check for building-specific work hours first
+    if workplace_type:
+        building_schedule = BUILDING_TYPE_WORK_SCHEDULES.get(workplace_type)
+        if building_schedule and "work" in building_schedule:
+            # log.debug(f"Using specific work hours for building type: {workplace_type}")
+            return _is_time_in_ranges(current_venice_time.hour, building_schedule["work"])
+
+    # Fallback to social class work hours
+    # log.debug(f"No specific schedule for workplace type '{workplace_type}' or type not provided. Using social class '{social_class}' schedule.")
+    class_schedule = SOCIAL_CLASS_SCHEDULES.get(social_class)
+    if not class_schedule:
         log.warning(f"No schedule found for social class: {social_class}. Defaulting to false (no work time).")
         return False
-    # Nobili have no specific work blocks; their "work" is part of leisure.
+    
+    # Nobili have no specific work blocks from their class schedule; their "work" is part of leisure.
+    # This check remains to prevent Nobili from "working" based on their class schedule.
+    # If a Nobili were to be an "employee" at a building with specific hours, 
+    # the building_schedule check above would apply.
     if social_class == "Nobili":
-        return False
-    return _is_time_in_ranges(current_venice_time.hour, schedule.get("work", []))
+        return False # Nobili do not follow class-based work schedules.
+        
+    return _is_time_in_ranges(current_venice_time.hour, class_schedule.get("work", []))
 
 def is_leisure_time_for_class(social_class: str, current_venice_time: datetime.datetime) -> bool:
     """Checks if it's leisure/consumption time for the given social class."""

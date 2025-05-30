@@ -21,9 +21,10 @@ from backend.engine.utils.activity_helpers import (
     _calculate_distance_meters,
     is_nighttime as is_nighttime_helper, # General nighttime, less used now
     is_rest_time_for_class,
-    is_work_time_for_class,
+    is_work_time, # Updated from is_work_time_for_class
     is_leisure_time_for_class,
     SOCIAL_CLASS_SCHEDULES, # Import the schedule dictionary
+    BUILDING_TYPE_WORK_SCHEDULES, # Import building specific schedules
     get_path_between_points,
     get_citizen_current_load,
     get_citizen_effective_carry_capacity,
@@ -467,8 +468,11 @@ def _handle_deposit_inventory_at_work(
     citizen_social_class: str # Added social_class
 ) -> bool:
     """Prio 10: Handles depositing full inventory at work if it's work time or just before/after."""
+    workplace_record_for_deposit = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
+    workplace_type_for_deposit = workplace_record_for_deposit['fields'].get('Type') if workplace_record_for_deposit else None
+
     # Allow depositing even slightly outside work hours if inventory is full.
-    if not (is_work_time_for_class(citizen_social_class, now_venice_dt) or \
+    if not (is_work_time(citizen_social_class, now_venice_dt, workplace_type=workplace_type_for_deposit) or \
             is_leisure_time_for_class(citizen_social_class, now_venice_dt)): # Allow during leisure too if near work
         # More precise: check if current time is "close" to work time.
         # For now, allowing during leisure is a simple proxy.
@@ -524,7 +528,12 @@ def _handle_check_business_status(
     citizen_social_class: str # Added social_class
 ) -> bool:
     """Prio 12: Handles checking business status if manager and not checked recently, during work/leisure time."""
-    if not (is_work_time_for_class(citizen_social_class, now_venice_dt) or \
+    # For checking business status, the "workplace_type" isn't directly the one the citizen is *at* for work,
+    # but rather the type of business they are managing. We assume class leisure hours are sufficient for this.
+    # Or, if they are at a specific business they manage, its hours could be relevant.
+    # For simplicity, we'll use class work/leisure for now.
+    # If a more specific check is needed, the business_type would be passed to is_work_time.
+    if not (is_work_time(citizen_social_class, now_venice_dt) or \
             is_leisure_time_for_class(citizen_social_class, now_venice_dt)):
         return False # Only check during active hours
 
@@ -943,7 +952,8 @@ def _handle_fishing(
     """Prio 32: Handles regular fishing if citizen is Facchini, it's work time, and they are a fisherman."""
     if citizen_social_class != "Facchini":
         return False
-    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
+    # Fishing is a generic Facchini task, not tied to a specific building type's hours, so use class schedule.
+    if not is_work_time(citizen_social_class, now_venice_dt): # Pass no workplace_type
         return False
         
     home_record = get_citizen_home(tables, citizen_username) # Fishermen live in fisherman's cottages
@@ -986,11 +996,12 @@ def _handle_construction_tasks(
     citizen_social_class: str # Added social_class
 ) -> bool:
     """Prio 30: Handles construction related tasks if it's work time."""
-    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
-        return False
-
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
     if not workplace_record or workplace_record['fields'].get('SubCategory') != 'construction':
+        return False
+    
+    workplace_type = workplace_record['fields'].get('Type') # e.g., "construction_workshop"
+    if not is_work_time(citizen_social_class, now_venice_dt, workplace_type=workplace_type):
         return False
 
     workplace_pos = _get_building_position_coords(workplace_record)
@@ -1018,15 +1029,25 @@ def _handle_production_and_general_work_tasks(
     citizen_social_class: str # Added social_class
 ) -> bool:
     """Prio 31: Handles production, restocking for general workplaces if it's work time."""
-    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
-        return False
-    # Nobili do not "work" in this sense, their activities are handled by leisure.
-    if citizen_social_class == "Nobili":
-        return False
-
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
     if not workplace_record:
         return False
+
+    workplace_type = workplace_record['fields'].get('Type')
+    if not is_work_time(citizen_social_class, now_venice_dt, workplace_type=workplace_type):
+        return False
+        
+    # Nobili do not "work" in this sense, their activities are handled by leisure.
+    # The is_work_time function already handles Nobili for class-based schedules.
+    # If a Nobili were to work at a building with specific hours (e.g. as an employee), 
+    # is_work_time would use those building hours.
+    # However, the general assumption is Nobili don't take up "jobs" like this.
+    # If social_class is Nobili AND it fell back to class schedule, is_work_time returns False.
+    # If it used building schedule, it could be True. We might need an explicit Nobili check here
+    # if we want to prevent them from doing production even if a building they own has hours.
+    # For now, relying on is_work_time's Nobili logic for class schedules.
+    if citizen_social_class == "Nobili" and not BUILDING_TYPE_WORK_SCHEDULES.get(workplace_type):
+         return False # Explicitly prevent Nobili if falling back to class schedule (which is_work_time handles)
 
     workplace_category = workplace_record['fields'].get('Category', '').lower()
     workplace_subcategory = workplace_record['fields'].get('SubCategory', '').lower()
@@ -1272,8 +1293,11 @@ def _handle_forestieri_daytime_tasks(
     """Prio 40: Handles Forestieri specific activities (work/leisure) based on their schedule."""
     if citizen_social_class != "Forestieri":
         return False
+    
+    workplace_record_forestieri = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
+    workplace_type_forestieri = workplace_record_forestieri['fields'].get('Type') if workplace_record_forestieri else None
 
-    if is_work_time_for_class(citizen_social_class, now_venice_dt):
+    if is_work_time(citizen_social_class, now_venice_dt, workplace_type=workplace_type_forestieri):
         # Forestieri "work" could be specific tasks or managing their affairs.
         # For now, let's assume if they have a workplace, they go there.
         # Otherwise, they might engage in trade-related leisure or specific Forestieri tasks.
@@ -1399,12 +1423,33 @@ def _handle_porter_tasks(
     citizen_social_class: str # Added social_class
 ) -> bool:
     """Prio 60: Handles Porter tasks if it's work time and they are at Guild Hall."""
-    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
-        return False
-    # Assuming Porters are a specific type of Popolani or Facchini, or have their own "Porter" class.
-    # For now, let's assume their work time is covered by their general class schedule.
+    # Porters work at a 'porter_guild_hall'. Check work time for this specific building type.
+    # We need to know if the citizen *is* a porter at a guild hall first.
+    # This handler is called if the citizen is at their guild_hall.
+    # So, we can assume workplace_type is 'porter_guild_hall' if this handler is reached appropriately.
+    # The check for being at the guild hall is done before calling process_porter_activity.
+    # For the time check here, we need the workplace_type if they have one.
+    
+    workplace_record_porter = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
+    workplace_type_porter = None
+    is_porter_at_guild_hall = False
 
-    porter_guild_hall_operated = None
+    if workplace_record_porter and workplace_record_porter['fields'].get('Type') == 'porter_guild_hall':
+        workplace_type_porter = 'porter_guild_hall'
+        # Check if citizen is physically at the guild hall
+        guild_hall_pos = _get_building_position_coords(workplace_record_porter)
+        if citizen_position and guild_hall_pos and _calculate_distance_meters(citizen_position, guild_hall_pos) < 20:
+            is_porter_at_guild_hall = True
+
+    if not is_work_time(citizen_social_class, now_venice_dt, workplace_type=workplace_type_porter):
+        return False
+    
+    if not is_porter_at_guild_hall: # If not at guild hall, this handler shouldn't proceed.
+        return False
+
+    # The original logic for getting porter_guild_hall_operated can remain,
+    # as process_porter_activity uses it.
+    porter_guild_hall_operated = workplace_record_porter # Since we've established they work at one.
     try:
         # Assuming RunBy is the correct field for operator
         buildings_run_by_citizen = tables['buildings'].all(formula=f"AND({{RunBy}}='{_escape_airtable_value(citizen_username)}', {{Type}}='porter_guild_hall')")
@@ -1436,13 +1481,18 @@ def _handle_general_goto_work(
     citizen_social_class: str # Added social_class
 ) -> bool:
     """Prio 70: Handles general goto_work if it's work time, citizen has a workplace and is not there."""
-    if not is_work_time_for_class(citizen_social_class, now_venice_dt):
-        return False
-    if citizen_social_class == "Nobili": # Nobili don't "goto_work" in this manner
-        return False
-
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
-    if not workplace_record: return False
+    if not workplace_record: return False # No workplace, so no goto_work
+
+    workplace_type = workplace_record['fields'].get('Type')
+    if not is_work_time(citizen_social_class, now_venice_dt, workplace_type=workplace_type):
+        return False # Not work time for this specific workplace or class
+
+    # Nobili check is handled by is_work_time if it falls back to class schedule.
+    # If a Nobili is an "employee" at a building with specific hours, is_work_time would use building hours.
+    # To be absolutely sure Nobili don't get a goto_work from this general handler:
+    if citizen_social_class == "Nobili" and not BUILDING_TYPE_WORK_SCHEDULES.get(workplace_type):
+        return False
 
     if not citizen_position: return False
     workplace_pos = _get_building_position_coords(workplace_record)
