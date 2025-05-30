@@ -24,7 +24,7 @@ from backend.engine.utils.activity_helpers import (
     get_path_between_points # Added import
 )
 # Import relationship helper
-from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM
 
 log = logging.getLogger(__name__)
 
@@ -475,7 +475,7 @@ def process(
             _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
             # Trust impact: Payer failed to pay Seller
             if payer_username and seller_username:
-                update_trust_score_for_activity(tables, payer_username, seller_username, TRUST_SCORE_FAILURE_SIMPLE, "payment", False, "insufficient_funds")
+                update_trust_score_for_activity(tables, payer_username, seller_username, TRUST_SCORE_FAILURE_MEDIUM, "payment", False, "insufficient_funds")
             return False
 
         # Calculate shares
@@ -536,10 +536,10 @@ def process(
 
         # Trust impact: Successful payment from Payer to Seller
         if payer_username and seller_username:
-            update_trust_score_for_activity(tables, payer_username, seller_username, TRUST_SCORE_SUCCESS_SIMPLE, "payment", True, "import_final")
+            update_trust_score_for_activity(tables, payer_username, seller_username, TRUST_SCORE_SUCCESS_MEDIUM, "payment", True, "import_final")
         # Trust impact: Successful delivery by delivery_person to target_owner
         if delivery_person_username and target_owner_username: # target_owner_username determined earlier
-            update_trust_score_for_activity(tables, delivery_person_username, target_owner_username, TRUST_SCORE_SUCCESS_SIMPLE, "delivery_goods", True)
+            update_trust_score_for_activity(tables, delivery_person_username, target_owner_username, TRUST_SCORE_SUCCESS_SIMPLE, "delivery_goods", True) # Delivery itself is simple success
 
     except Exception as e_finance:
         err_msg = f"Error processing financial split for contract {original_contract_custom_id} (Payer RunBy: {payer_username}): {e_finance}"
@@ -547,7 +547,7 @@ def process(
         _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
         # Trust impact: Financial processing error could affect Payer <-> Seller
         if payer_username and seller_username:
-            update_trust_score_for_activity(tables, payer_username, seller_username, TRUST_SCORE_FAILURE_SIMPLE, "payment_processing", False, "system_error")
+            update_trust_score_for_activity(tables, payer_username, seller_username, TRUST_SCORE_FAILURE_MEDIUM, "payment_processing", False, "system_error")
         return False 
     
     # Building UpdatedAt is handled by Airtable

@@ -41,6 +41,7 @@ from backend.engine.utils.activity_helpers import VENICE_TIMEZONE # Import VENIC
 PAYMENT_INTERVAL_HOURS = 23 # Process contracts not paid in the last 23 hours
 
 from backend.engine.utils.activity_helpers import LogColors, _escape_airtable_value # Import _escape_airtable_value
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM # Import relationship helper
 
 # --- Helper Functions ---
 
@@ -239,6 +240,10 @@ def process_storage_payments(dry_run: bool = False):
                 content_seller = (f"⚠️ The daily payment of **{daily_payment_amount:.2f} ⚜️ Ducats** from **{buyer_username}** for storage contract **{contract_custom_id}** "
                                   f"(Resource: **{resource_type}**, Capacity: {target_amount}) could not be processed due to their **insufficient funds**.")
                 create_notification(tables, seller_username, title_seller, content_seller, {"contractId": contract_custom_id, "amountDue": daily_payment_amount, "buyer": buyer_username})
+            
+            # Trust impact: Buyer failed to pay Seller for storage
+            if buyer_username and seller_username:
+                update_trust_score_for_activity(tables, buyer_username, seller_username, TRUST_SCORE_FAILURE_MEDIUM, "storage_payment", False, "buyer_insufficient_funds")
             # Do not update LastExecutedAt, so it will be retried.
             continue 
 
@@ -272,11 +277,17 @@ def process_storage_payments(dry_run: bool = False):
                 tables["contracts"].update(contract_airtable_id, {"LastExecutedAt": datetime.now(VENICE_TIMEZONE).isoformat()})
                 log.info(f"  Updated LastExecutedAt for contract {contract_custom_id}.")
                 payments_processed += 1
+                # Trust impact: Successful storage payment
+                if buyer_username and seller_username:
+                    update_trust_score_for_activity(tables, buyer_username, seller_username, TRUST_SCORE_SUCCESS_MEDIUM, "storage_payment", True)
             except Exception as e_update_contract:
                 log.error(f"  {LogColors.FAIL}Error updating LastExecutedAt for contract {contract_custom_id}: {e_update_contract}. Payment was made but contract may be re-processed.{LogColors.ENDC}")
                 # This is a partial failure state. Ducats transferred, transaction logged, but contract might be paid again.
         else:
             log.error(f"  {LogColors.FAIL}Ducat transfer failed for contract {contract_custom_id}. No transaction or LastExecutedAt update.{LogColors.ENDC}")
+            # Trust impact: Ducat transfer failure (system error, not insufficient funds which is handled above)
+            if buyer_username and seller_username:
+                update_trust_score_for_activity(tables, buyer_username, seller_username, TRUST_SCORE_FAILURE_MEDIUM, "storage_payment_processing", False, "system_error")
             # No specific count for this, as it's a failure within the attempt.
             # The insufficient funds counter is for pre-check failures.
 

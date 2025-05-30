@@ -23,7 +23,7 @@ from backend.engine.utils.activity_helpers import (
     VENICE_TIMEZONE # Assuming VENICE_TIMEZONE might be used
 )
 # Import relationship helper
-from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM
 
 log = logging.getLogger(__name__)
 
@@ -383,19 +383,19 @@ def process(
 
         # Trust impact: Successful fetch and payment
         if carrier_username and effective_buyer_username: # Carrier succeeded for buyer
-            update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_pickup", True)
+            update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_pickup", True) # Pickup is simple success
         if effective_buyer_username and effective_seller_username: # Buyer successfully paid seller
-            update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_purchase", True)
+            update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_SUCCESS_MEDIUM, "fetch_purchase", True) # Payment is medium
 
     except Exception as e_process:
         log.error(f"Error during transaction processing for activity {activity_guid}: {e_process}")
         import traceback
         log.error(traceback.format_exc())
         # Trust impact: Transaction processing error
-        if carrier_username and effective_buyer_username:
-            update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_processing", False, "system_error")
-        if effective_buyer_username and effective_seller_username:
-            update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_processing", False, "system_error")
+        if carrier_username and effective_buyer_username: # Carrier part
+            update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_processing", False, "system_error_carrier")
+        if effective_buyer_username and effective_seller_username: # Payment part
+            update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_FAILURE_MEDIUM, "fetch_processing", False, "system_error_payment")
         return False
 
     # Update activity notes if amount fetched is different from desired

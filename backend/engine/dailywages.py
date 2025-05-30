@@ -42,6 +42,7 @@ load_dotenv()
 
 # Import helper functions
 from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors # Import LogColors
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM
 
 def initialize_airtable():
     """Initialize Airtable connection."""
@@ -348,6 +349,9 @@ def process_wage_payment(tables, citizen: Dict, dry_run: bool = False) -> tuple[
     employer_balance = employer_record['fields'].get('Ducats', 0)
     if employer_balance < wages:
         log.warning(f"Employer {employer_username} has insufficient funds: {employer_balance} < {wages} for {citizen_name} at {business_name}")
+        # Trust impact: Employer failed to pay Employee
+        if employer_username and citizen_username:
+            update_trust_score_for_activity(tables, employer_username, citizen_username, TRUST_SCORE_FAILURE_MEDIUM, "wage_payment", False, "employer_insufficient_funds")
         return False, 0
 
     # If the employer (RunBy) is the same as the employee (Occupant), no actual transaction or balance change is needed.
@@ -366,6 +370,10 @@ def process_wage_payment(tables, citizen: Dict, dry_run: bool = False) -> tuple[
     
     # 3. Create transaction record
     create_transaction_record(tables, employer_username, citizen_username, wages, business_custom_id)
+
+    # Trust impact: Successful wage payment
+    if employer_username and citizen_username:
+        update_trust_score_for_activity(tables, employer_username, citizen_username, TRUST_SCORE_SUCCESS_MEDIUM, "wage_payment", True)
     
     log.info(f"{LogColors.OKGREEN}Successfully processed wage payment: {wages} from {employer_username} to {citizen_name}{LogColors.ENDC}")
     return True, wages

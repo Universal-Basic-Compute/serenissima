@@ -18,7 +18,7 @@ from backend.engine.utils.activity_helpers import (
     LogColors # Assuming LogColors might be useful here too
 )
 # Import relationship helper
-from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM
 
 log = logging.getLogger(__name__)
 
@@ -354,7 +354,7 @@ def process_eat_at_tavern(
         # Trust: Citizen failed to pay Tavern Operator
         tavern_operator_for_trust = tavern_record['fields'].get('RunBy') or tavern_record['fields'].get('Owner')
         if citizen_username and tavern_operator_for_trust:
-            update_trust_score_for_activity(tables, citizen_username, tavern_operator_for_trust, TRUST_SCORE_FAILURE_SIMPLE, "eat_at_tavern_payment", False, "insufficient_funds")
+            update_trust_score_for_activity(tables, citizen_username, tavern_operator_for_trust, TRUST_SCORE_FAILURE_MEDIUM, "eat_at_tavern_payment", False, "insufficient_funds")
         return False
     
     try:
@@ -419,7 +419,7 @@ def process_eat_at_tavern(
         if _update_citizen_ate_at(tables, citizen_record['id'], now_iso):
             # Trust: Successful meal purchase
             if citizen_username and tavern_operator: # tavern_operator defined earlier
-                update_trust_score_for_activity(tables, citizen_username, tavern_operator, TRUST_SCORE_SUCCESS_SIMPLE, "eat_at_tavern_payment", True)
+                update_trust_score_for_activity(tables, citizen_username, tavern_operator, TRUST_SCORE_SUCCESS_MEDIUM, "eat_at_tavern_payment", True)
             return True
         return False # Failed to update AteAt
         
@@ -428,7 +428,7 @@ def process_eat_at_tavern(
         # Trust: System error during payment/processing
         tavern_operator_for_trust_error = tavern_record['fields'].get('RunBy') or tavern_record['fields'].get('Owner')
         if citizen_username and tavern_operator_for_trust_error:
-            update_trust_score_for_activity(tables, citizen_username, tavern_operator_for_trust_error, TRUST_SCORE_FAILURE_SIMPLE, "eat_at_tavern_processing", False, "system_error")
+            update_trust_score_for_activity(tables, citizen_username, tavern_operator_for_trust_error, TRUST_SCORE_FAILURE_MEDIUM, "eat_at_tavern_processing", False, "system_error")
         return False
 
 # Main dispatcher for eat activities (if needed, or call specific processors directly)

@@ -24,7 +24,7 @@ from backend.engine.utils.activity_helpers import (
     extract_details_from_notes # Import the helper
 )
 # Import relationship helper
-from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE, TRUST_SCORE_MINOR_POSITIVE
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE, TRUST_SCORE_MINOR_POSITIVE, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM
 
 log = logging.getLogger(__name__)
 
@@ -140,7 +140,7 @@ def process(
         _update_activity_notes_with_failure_reason(tables, activity_id_airtable, f"Client {ultimate_buyer_username} has insufficient funds ({client_ducats:.2f}) for goods ({cost_of_goods:.2f}).", "PICKUP_FUNDS")
         # Trust: Client failed to pay Seller of Goods
         if ultimate_buyer_username and seller_of_goods_username:
-            update_trust_score_for_activity(tables, ultimate_buyer_username, seller_of_goods_username, TRUST_SCORE_FAILURE_SIMPLE, "logistics_goods_payment", False, "insufficient_funds")
+            update_trust_score_for_activity(tables, ultimate_buyer_username, seller_of_goods_username, TRUST_SCORE_FAILURE_MEDIUM, "logistics_goods_payment", False, "insufficient_funds")
         return False
 
     seller_of_goods_record = get_citizen_record(tables, seller_of_goods_username)
@@ -156,7 +156,7 @@ def process(
     log.info(f"💰 Client **{ultimate_buyer_username}** paid **{cost_of_goods:.2f} ⚜️** to Seller **{seller_of_goods_username}** for **{amount_to_pickup_stage1:.2f}** of **{resource_id_to_fetch}**.")
     # Trust: Client successfully paid Seller of Goods
     if ultimate_buyer_username and seller_of_goods_username:
-        update_trust_score_for_activity(tables, ultimate_buyer_username, seller_of_goods_username, TRUST_SCORE_SUCCESS_SIMPLE, "logistics_goods_payment", True)
+        update_trust_score_for_activity(tables, ultimate_buyer_username, seller_of_goods_username, TRUST_SCORE_SUCCESS_MEDIUM, "logistics_goods_payment", True)
 
     # Update source stock
     new_source_stock_count = actual_amount_at_source - amount_to_pickup_stage1
@@ -247,7 +247,7 @@ def process(
             # Goods delivered, but fee not paid. This is a problem. For now, activity fails.
             # Trust: Client failed to pay Porter Guild Operator
             if ultimate_buyer_username and porter_guild_operator_username: # porter_guild_operator_username defined below
-                 update_trust_score_for_activity(tables, ultimate_buyer_username, porter_guild_operator_username, TRUST_SCORE_FAILURE_SIMPLE, "logistics_service_payment", False, "insufficient_funds")
+                 update_trust_score_for_activity(tables, ultimate_buyer_username, porter_guild_operator_username, TRUST_SCORE_FAILURE_MEDIUM, "logistics_service_payment", False, "insufficient_funds")
             return False
 
         porter_guild_operator_username = None 
@@ -271,7 +271,7 @@ def process(
         log.info(f"💰 Client **{ultimate_buyer_username}** paid service fee **{total_service_fee:.2f} ⚜️** to Porter Guild Operator **{porter_guild_operator_username}**.")
         # Trust: Client successfully paid Porter Guild Operator
         if ultimate_buyer_username and porter_guild_operator_username:
-            update_trust_score_for_activity(tables, ultimate_buyer_username, porter_guild_operator_username, TRUST_SCORE_SUCCESS_SIMPLE, "logistics_service_payment", True)
+            update_trust_score_for_activity(tables, ultimate_buyer_username, porter_guild_operator_username, TRUST_SCORE_SUCCESS_MEDIUM, "logistics_service_payment", True)
 
         # Create transaction record for service fee
         transaction_payload_service_fee = {

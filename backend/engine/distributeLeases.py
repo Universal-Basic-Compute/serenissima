@@ -43,6 +43,8 @@ log = logging.getLogger("distribute_leases")
 # Load environment variables
 load_dotenv()
 
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM # Import relationship helper
+
 def initialize_airtable():
     """Initialize Airtable connection."""
     api_key = os.environ.get('AIRTABLE_API_KEY')
@@ -405,6 +407,9 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
                 "error_type": "insufficient_funds"
             }
         )
+        # Trust impact: Building Owner failed to pay Land Owner
+        if building_owner and land_owner: # land_owner is defined earlier in the function
+            update_trust_score_for_activity(tables, building_owner, land_owner, TRUST_SCORE_FAILURE_MEDIUM, "lease_payment", False, "building_owner_insufficient_funds")
         
         return False, 0, 0
     
@@ -423,6 +428,10 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
     
     # 5. Create transaction record for tax payment
     create_tax_transaction_record(tables, building_owner, "ConsiglioDeiDieci", tax_amount, land_id, building_id, tax_rate)
+
+    # Trust impact: Successful lease payment from Building Owner to Land Owner
+    if building_owner and land_owner:
+        update_trust_score_for_activity(tables, building_owner, land_owner, TRUST_SCORE_SUCCESS_MEDIUM, "lease_payment", True)
     
     log.info(f"Successfully processed lease payment: {net_amount} to {land_owner}, {tax_amount} tax to ConsiglioDeiDieci")
     

@@ -36,6 +36,8 @@ log = logging.getLogger("daily_rent_payments")
 # Load environment variables
 load_dotenv()
 
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM # Import relationship helper
+
 def initialize_airtable():
     """Initialize Airtable connection."""
     api_key = os.environ.get('AIRTABLE_API_KEY')
@@ -273,6 +275,9 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
                 "error_type": "insufficient_funds"
             }
         )
+        # Trust impact: Occupant failed to pay Building Owner
+        if occupant_username and building_owner:
+            update_trust_score_for_activity(tables, occupant_username, building_owner, TRUST_SCORE_FAILURE_MEDIUM, "housing_rent_payment", False, "occupant_insufficient_funds")
         
         return False, 0
     
@@ -312,6 +317,10 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
             "event_type": "rent_payment_made"
         }
     )
+
+    # Trust impact: Successful rent payment
+    if occupant_username and building_owner:
+        update_trust_score_for_activity(tables, occupant_username, building_owner, TRUST_SCORE_SUCCESS_MEDIUM, "housing_rent_payment", True)
     
     log.info(f"Successfully processed housing rent payment: {rent_price} from {citizen_name} to {building_owner}")
     # Return more details for aggregated landlord notification
