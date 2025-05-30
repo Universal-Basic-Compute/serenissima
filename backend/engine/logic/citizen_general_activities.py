@@ -23,6 +23,7 @@ from backend.engine.utils.activity_helpers import (
     is_rest_time_for_class,
     is_work_time_for_class,
     is_leisure_time_for_class,
+    SOCIAL_CLASS_SCHEDULES, # Import the schedule dictionary
     get_path_between_points,
     get_citizen_current_load,
     get_citizen_effective_carry_capacity,
