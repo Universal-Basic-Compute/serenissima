@@ -1353,11 +1353,12 @@ def _handle_shopping_tasks(
     
     home_record = get_citizen_home(tables, citizen_username)
     # Forestieri might shop even without a permanent "home" record in Venice, goods go to inventory.
-    if not home_record and citizen_social_class != "Forestieri":
-         log.info(f"{LogColors.OKBLUE}[Shopping] Citoyen {citizen_name} ({citizen_social_class}): Pas de domicile, ne peut pas faire d'achats (sauf Forestieri).{LogColors.ENDC}")
-         return False
+    # Homeless citizens can also shop, goods go to their inventory.
+    # if not home_record and citizen_social_class != "Forestieri":
+    #      log.info(f"{LogColors.OKBLUE}[Shopping] Citoyen {citizen_name} ({citizen_social_class}): Pas de domicile, ne peut pas faire d'achats (sauf Forestieri).{LogColors.ENDC}")
+    #      return False
 
-    log.info(f"{LogColors.OKCYAN}[Shopping] Citoyen {citizen_name} ({citizen_social_class}): Période de loisirs, évaluation shopping.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}[Achat Nourriture] Citoyen {citizen_name}: Affamé et a des Ducats. Recherche de magasins d'alimentation. Domicile: {'Oui' if home_record else 'Non'}.{LogColors.ENDC}")
     
     # citizen_social_class is now a parameter
     citizen_max_tier_access = SOCIAL_CLASS_VALUE.get(citizen_social_class, 1)
