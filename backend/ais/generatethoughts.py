@@ -167,8 +167,33 @@ def _get_problems_data_api(username: str, limit: int = 20) -> List[Dict]:
 
 # --- Citizen and Thought Generation ---
 
-def get_citizens_for_thought_generation(
-
+def get_citizens_for_thought_generation(tables: Dict[str, Table], specific_username: Optional[str] = None) -> List[Dict]:
+    """
+    Fetches citizens for thought generation.
+    If specific_username is provided, fetches only that citizen.
+    Otherwise, fetches all citizens currently in Venice.
+    """
+    try:
+        if specific_username:
+            formula = f"AND({{Username}}='{_escape_airtable_value(specific_username)}', {{InVenice}}=1)"
+            log.info(f"Fetching specific citizen for thought generation: {specific_username}")
+        else:
+            # Fetch all citizens in Venice (both AI and human)
+            formula = "{{InVenice}}=1"
+            log.info("Fetching all citizens in Venice for thought generation.")
+            
+        citizens = tables["citizens"].all(formula=formula)
+        
+        if specific_username and not citizens:
+            log.warning(f"{LogColors.WARNING}Specific citizen {specific_username} not found or not in Venice.{LogColors.ENDC}")
+        elif not citizens:
+            log.info("No citizens found in Venice for thought generation.")
+            
+        log.info(f"Found {len(citizens)} citizen(s) for thought generation based on criteria.")
+        return citizens
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error fetching citizens for thought generation: {e}{LogColors.ENDC}")
+        return []
 
 def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: str, context_data: Dict, kinos_model_override: Optional[str] = None) -> Optional[str]:
     """Generates an AI thought using the Kinos Engine API."""
