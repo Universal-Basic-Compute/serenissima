@@ -225,7 +225,8 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </React.Fragment>
   );
 }
 
@@ -288,9 +289,10 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
     }
   }, []);
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      {/* Header with banner image */}
-      <div 
+    <React.Fragment>
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        {/* Header with banner image */}
+        <div 
         className="h-48 bg-cover bg-center relative"
         style={{ 
           backgroundColor: guild.color || '#8B4513',
