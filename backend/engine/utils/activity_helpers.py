@@ -352,6 +352,21 @@ BUILDING_TYPE_WORK_SCHEDULES = {
     "tavern": { # Taverne (peut avoir des horaires similaires à l'auberge ou différents)
         "work": [(17, 24), (0, 1)] # 17h - 01h
     },
+    "smugglers_den": { # Repaire de contrebandiers
+        "work": [(22, 24), (0, 6)]  # 22h - 06h (travail de nuit)
+    },
+    "cargo_landing": { # Zone de déchargement de marchandises (peut-être plus actif le soir/nuit)
+        "work": [(18, 24), (0, 4)]  # 18h - 04h
+    },
+    "theater": { # Théâtre (principalement en soirée)
+        "work": [(17, 23)] # 17h - 23h
+    },
+    "hidden_workshop": { # Atelier clandestin (horaires inhabituels pour éviter la détection)
+        "work": [(1, 7), (20, 24)] # 01h - 07h et 20h - 00h
+    },
+    "spy_safehouse": { # Planque d'espion (activité nocturne)
+        "work": [(23, 24), (0, 5)] # 23h - 05h
+    }
     # Ajoutez d'autres types de bâtiments avec horaires spécifiques ici
     # Exemple:
     # "shipyard": { # Chantier naval
