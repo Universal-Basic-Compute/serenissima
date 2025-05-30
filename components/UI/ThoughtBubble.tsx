@@ -126,7 +126,7 @@ const ThoughtBubble: React.FC<ThoughtBubbleProps> = ({
 
   return (
     <div
-      className={`absolute z-[19] p-4 border-2 rounded-3xl shadow-xl text-sm ${showOriginal ? 'max-w-xl' : 'max-w-xs'} transition-all duration-700 ease-in-out`} // Changed z-40 to z-[19]
+      className={`absolute z-[45] p-4 border-2 rounded-3xl shadow-xl text-sm ${showOriginal ? 'max-w-xl' : 'max-w-xs'} transition-all duration-700 ease-in-out`} // Changed z-[19] to z-[45]
       style={bubbleStyle}
       onMouseEnter={() => { setShowOriginal(true); onBubbleMouseEnter(); }}
       onMouseLeave={() => { setShowOriginal(false); onBubbleMouseLeave(); }}
