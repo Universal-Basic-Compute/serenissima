@@ -163,45 +163,45 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                 # createimportactivities.py runs twice daily: early morning and early afternoon.
                 7: [("engine/createimportactivities.py", "Process resource imports (Morning)", 0), # 7:00 VT
                     ("engine/pay_building_maintenance.py", "Building maintenance collection", 0), # 7:00 VT
-                    ("ais/generatethoughts.py", "AI Thought Generation", 0)], # 7:00 VT
+                    ("ais/generatethoughts.py --model local", "AI Thought Generation", 0)], # 7:00 VT
                 13: [("engine/createimportactivities.py", "Process resource imports (Afternoon)", 0), # 13:00 VT
                      ("engine/decrees/affectpublicbuildingstolandowners.py", "Public buildings assignment", 0), # 13:00 VT
                      ("engine/updateSocialClass.py", "Social class updates", 0)], # 13:00 VT
                 # Other tasks scheduled at their specific hours (Venice Time)
                 5: [("ais/automated_adjustimports.py", "Automated AI Import Contract Creation", 0), # 5:00 VT
                     ("ais/automated_adjustmarkupbuys.py", "Automated Markup Buys", 0)], # 5:00 VT
-                6: [("ais/answertomessages.py", "AI message responses", 0)], # 6:00 VT
+                6: [("ais/answertomessages.py --model local", "AI message responses", 0)], # 6:00 VT
                 8: [("engine/treasuryRedistribution.py", "Treasury redistribution", 0), # 8:00 VT
-                    ("ais/answertomessages.py", "AI message responses", 0)], # 8:00 VT
+                    ("ais/answertomessages.py --model local", "AI message responses", 0)], # 8:00 VT
                 9: [("engine/distributeLeases.py", "Lease distribution", 0), # 9:00 VT
                     ("engine/dailyUpdate.py", "Daily Update Generation", 30)], # 9:30 VT
                 10: [("engine/citizensgetjobs.py", "Citizen job assignment", 0), # 10:00 VT
-                     ("ais/answertomessages.py", "AI message responses", 0)], # 10:00 VT
+                     ("ais/answertomessages.py --model local", "AI message responses", 0)], # 10:00 VT
                 11: [("engine/immigration.py", "Immigration", 0)], # 11:00 VT
                 12: [("engine/househomelesscitizens.py", "Housing homeless citizens", 0), # 12:00 VT
-                     ("ais/answertomessages.py", "AI message responses", 0)], # 12:00 VT
+                     ("ais/answertomessages.py --model local", "AI message responses", 0)], # 12:00 VT
                 14: [("engine/citizenhousingmobility.py", "Citizen housing mobility", 0), # 14:00 VT
-                     ("ais/answertomessages.py", "AI message responses", 0)], # 14:00 VT
+                     ("ais/answertomessages.py --model local", "AI message responses", 0)], # 14:00 VT
                 15: [("engine/dailyloanpayments.py", "Daily loan payments", 0)], # 15:00 VT
                 16: [("engine/citizenworkmobility.py", "Citizen work mobility", 0), # 16:00 VT
-                     ("ais/answertomessages.py", "AI message responses", 0)], # 16:00 VT
+                     ("ais/answertomessages.py --model local", "AI message responses", 0)], # 16:00 VT
                 17: [("engine/dailywages.py", "Daily wage payments", 0)], # 17:00 VT
                 18: [("engine/dailyrentpayments.py", "Daily rent payments", 0)], # 18:00 VT
                 19: [("engine/calculateIncomeAndTurnover.py", "Citizen Income and Turnover Calculation", 0)], # 19:00 VT
                 20: [("ais/bidonlands.py", "AI land bidding", 0), # 20:00 VT
                      ("ais/delegateBusinesses.py", "AI Business Delegation", 0)], # 20:00 VT
-                21: [("ais/buildbuildings.py", "AI building construction", 0), # 21:00 VT
+                21: [("ais/buildbuildings.py --model local", "AI building construction", 0), # 21:00 VT
                      ("ais/automated_adjustleases.py --strategy standard", "Automated AI Lease Price Adjustment (Standard)", 30)], # 21:30 VT
-                22: [("ais/adjustleases.py", "AI lease adjustments", 0), # 22:00 VT (Kinos-driven, can run after rule-based)
+                22: [("ais/adjustleases.py --model local", "AI lease adjustments", 0), # 22:00 VT (Kinos-driven, can run after rule-based)
                      ("ais/automated_adjustrents.py --strategy standard", "Automated AI Rent Adjustment (Standard)", 0)], # 22:00 VT
                 23: [("ais/automated_adjustpublicstoragecontracts.py", "Automated Public Storage Offers", 0)], # 23:00 VT
                 0: [("ais/automated_adjustwages.py --strategy standard", "Automated AI Wage Adjustment (Standard)", 0), # 00:00 VT (Midnight)
                     ("ais/automated_adjuststoragequeriescontracts.py", "Automated Storage Queries", 0)], # 00:00 VT
-                1: [("ais/processnotifications.py", "AI notification processing", 0), # 1:00 VT
+                1: [("ais/processnotifications.py", "AI notification processing", 0), # 1:00 VT  (processnotifications.py does not take --model)
                     ("engine/paystoragecontracts.py", "Process Storage Contract Payments", 0)], # 1:00 VT
-                2: [("ais/answertomessages.py", "AI message responses", 0)], # 2:00 VT
+                2: [("ais/answertomessages.py --model local", "AI message responses", 0)], # 2:00 VT
                 3: [("engine/cleanTables.py", "Clean Old Table Records", 0)], # 3:00 VT
-                4: [("ais/answertomessages.py", "AI message responses", 0), # 4:00 VT
+                4: [("ais/answertomessages.py --model local", "AI message responses", 0), # 4:00 VT
                     ("ais/automated_managepublicsalesandprices.py --strategy standard", "Automated AI Public Sales & Pricing (Standard)", 0)], # 4:00 VT
             }
             
