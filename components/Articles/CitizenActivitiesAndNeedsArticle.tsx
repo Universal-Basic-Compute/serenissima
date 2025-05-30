@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { FaTimes, FaBed, FaBriefcase, FaUtensils, FaHome, FaRoute, FaCog, FaExclamationTriangle, FaShip } from 'react-icons/fa';
+import { FaTimes, FaBed, FaBriefcase, FaUtensils, FaHome, FaRoute, FaCog, FaExclamationTriangle, FaShip, FaLandmark } from 'react-icons/fa';
 
 interface CitizenActivitiesAndNeedsArticleProps {
   onClose?: () => void;
