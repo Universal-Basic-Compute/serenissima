@@ -473,6 +473,9 @@ def process(
             err_msg = f"Payer (RunBy: {payer_username}) has insufficient funds ({payer_ducats:.2f}) for import payment ({total_cost_for_this_delivery:.2f}) for contract {original_contract_custom_id}."
             log.error(err_msg)
             _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
+            # Trust impact: Payer failed to pay Seller
+            if payer_username and seller_username:
+                update_trust_score_for_activity(tables, payer_username, seller_username, TRUST_SCORE_FAILURE_SIMPLE, "payment", False, "insufficient_funds")
             return False
 
         # Calculate shares
