@@ -43,24 +43,48 @@ export async function GET() {
     const records = await base('GUILDS').select().all();
     
     // Transform Airtable records to our Guild interface format
-    const guilds: Guild[] = records.map(record => ({
-      guildId: String(record.get('GuildId')), // Cast to string
-      guildName: record.get('GuildName') as string,
-      createdAt: record.get('CreatedAt') as string,
-      primaryLocation: record.get('PrimaryLocation') as string,
-      description: record.get('Description') as string,
-      shortDescription: record.get('ShortDescription') as string,
-      patronSaint: record.get('PatronSaint') as string,
-      guildTier: record.get('GuildTier') as string,
-      leadershipStructure: record.get('LeadershipStructure') as string,
-      entryFee: record.get('EntryFee') as number,
-      votingSystem: record.get('VotingSystem') as string,
-      meetingFrequency: record.get('MeetingFrequency') as string,
-      guildHallId: record.get('GuildHallId') as string,
-      guildEmblem: record.get('GuildEmblem') as string,
-      guildBanner: record.get('GuildBanner') as string,
-      color: record.get('Color') as string,
-    }));
+    const guilds: Guild[] = records.map(record => {
+      let emblemPath = record.get('GuildEmblem') as string | undefined;
+      let bannerPath = record.get('GuildBanner') as string | undefined;
+      const backendBaseUrl = 'https://backend.serenissima.ai/public_assets';
+
+      if (emblemPath) {
+        if (emblemPath.startsWith('images/guilds/')) {
+          emblemPath = emblemPath.replace('images/guilds/', 'guild/');
+        }
+        if (!emblemPath.startsWith('http')) { // Ensure it's not already a full URL
+           emblemPath = `${backendBaseUrl}/${emblemPath.startsWith('/') ? emblemPath.substring(1) : emblemPath}`;
+        }
+      }
+
+      if (bannerPath) {
+        if (bannerPath.startsWith('images/guilds/')) {
+          bannerPath = bannerPath.replace('images/guilds/', 'guild/');
+        }
+        if (!bannerPath.startsWith('http')) { // Ensure it's not already a full URL
+          bannerPath = `${backendBaseUrl}/${bannerPath.startsWith('/') ? bannerPath.substring(1) : bannerPath}`;
+        }
+      }
+      
+      return {
+        guildId: String(record.get('GuildId')), // Cast to string
+        guildName: record.get('GuildName') as string,
+        createdAt: record.get('CreatedAt') as string,
+        primaryLocation: record.get('PrimaryLocation') as string,
+        description: record.get('Description') as string,
+        shortDescription: record.get('ShortDescription') as string,
+        patronSaint: record.get('PatronSaint') as string,
+        guildTier: record.get('GuildTier') as string,
+        leadershipStructure: record.get('LeadershipStructure') as string,
+        entryFee: record.get('EntryFee') as number,
+        votingSystem: record.get('VotingSystem') as string,
+        meetingFrequency: record.get('MeetingFrequency') as string,
+        guildHallId: record.get('GuildHallId') as string,
+        guildEmblem: emblemPath || undefined, // Use the transformed path
+        guildBanner: bannerPath || undefined, // Use the transformed path
+        color: record.get('Color') as string,
+      };
+    });
 
     // Return the guilds data
     return NextResponse.json({ guilds });
