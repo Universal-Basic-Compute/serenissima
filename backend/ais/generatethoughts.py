@@ -169,16 +169,12 @@ def _get_problems_data_api(username: str, limit: int = 20) -> List[Dict]:
 
 def get_citizens_for_thought_generation(
     tables: Dict[str, Table],
-    specific_username: Optional[str] = None,
-    only_ais: bool = False,
-    only_humans: bool = False
+    specific_username: Optional[str] = None
 ) -> List[Dict]:
     """
     Fetches citizens from Airtable for thought generation.
-    - Optionally filtered by a specific username (includes Facchini if that user is Facchini).
-    - If only_ais: fetches AIs, EXCLUDING Facchini.
-    - If only_humans: fetches Humans active in the last 7 days, INCLUDING Facchini.
-    - If no specific filter (default): fetches AIs (EXCLUDING Facchini) AND Humans (active in last 7 days, INCLUDING Facchini).
+    - Optionally filtered by a specific username.
+    - Default: fetches AIs (EXCLUDING Facchini and Popolani) AND Humans (active in last 7 days, INCLUDING Facchini and Popolani).
     """
     try:
         formula_parts = ["{InVenice}=1"]
@@ -188,27 +184,12 @@ def get_citizens_for_thought_generation(
             escaped_username = _escape_airtable_value(specific_username)
             formula_parts.append(f"{{Username}}='{escaped_username}'")
             description_string += f", username is {escaped_username}"
-            # Facchini included if they are the specific user
-        elif only_ais:
-            formula_parts.append("{IsAI}=TRUE()")
-            formula_parts.append("{SocialClass}!='Facchini'") # Exclude Facchini for AIs
-            formula_parts.append("{SocialClass}!='Popolani'") # Exclude Popolani for AIs
-            description_string += ", are AIs (excluding Facchini and Popolani)"
-        elif only_humans:
-            formula_parts.append("(OR({IsAI}=FALSE(), {IsAI}=BLANK()))") # Using FALSE()
-            seven_days_ago_venice = (get_venice_time_now() - timedelta(days=7)).isoformat()
-            formula_parts.append(f"IS_AFTER({{LastActiveAt}}, DATETIME_PARSE('{seven_days_ago_venice}'))")
-            description_string += ", are humans active in the last 7 days (including Facchini)"
-            # Facchini included for humans
         else: # Default case: AIs (excluding Facchini and Popolani) OR Humans (active in last 7 days, including Facchini and Popolani)
             seven_days_ago_venice = (get_venice_time_now() - timedelta(days=7)).isoformat()
             ai_condition = "AND({IsAI}=TRUE(), {SocialClass}!='Facchini', {SocialClass}!='Popolani')"
-            # Use .format() to avoid f-string parsing issues with literal braces
-            human_condition_template = "AND(OR({IsAI}=FALSE(), {IsAI}=BLANK()), IS_AFTER({{LastActiveAt}}, DATETIME_PARSE('{}')))" # Using FALSE()
+            human_condition_template = "AND(OR({IsAI}=FALSE(), {IsAI}=BLANK()), IS_AFTER({{LastActiveAt}}, DATETIME_PARSE('{}')))"
             human_condition = human_condition_template.format(seven_days_ago_venice)
             
-            # Combined condition: OR(ai_condition, human_condition)
-            # This will be ANDed with the initial {InVenice}=1
             formula_parts.append(f"OR({ai_condition}, {human_condition})")
             description_string += ", AIs (excluding Facchini and Popolani) OR active Humans (including Facchini and Popolani, last 7 days)"
 
@@ -507,18 +488,10 @@ def create_admin_notification(tables: Dict[str, Table], thoughts_summary: Dict[s
 def process_ai_thoughts(
     dry_run: bool = False,
     specific_citizen_username: Optional[str] = None,
-    only_ais: bool = False,
-    only_humans: bool = False,
     kinos_model_override: Optional[str] = None
 ):
     """Main function to process AI thought generation."""
-    filter_desc = "all eligible"
-    if specific_citizen_username:
-        filter_desc = f"citizen={specific_citizen_username}"
-    elif only_ais:
-        filter_desc = "only AIs"
-    elif only_humans:
-        filter_desc = "only active humans"
+    filter_desc = f"citizen={specific_citizen_username}" if specific_citizen_username else "all eligible"
     
     model_status = f"override: {kinos_model_override}" if kinos_model_override else "default"
     log.info(f"{LogColors.HEADER}Starting Citizen Thought Generation Process (dry_run={dry_run}, filter={filter_desc}, kinos_model={model_status})...{LogColors.ENDC}")
@@ -532,9 +505,7 @@ def process_ai_thoughts(
 
     citizens_to_process = get_citizens_for_thought_generation(
         tables,
-        specific_username=specific_citizen_username,
-        only_ais=only_ais,
-        only_humans=only_humans
+        specific_username=specific_citizen_username
     )
     if not citizens_to_process:
         log.info(f"{LogColors.OKBLUE}No citizens found to process for thought generation with the current filters.{LogColors.ENDC}")
@@ -671,21 +642,10 @@ Custom emoji entities can only be used by bots that purchased additional usernam
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate strategic thoughts for citizens.")
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
+    parser.add_argument(
         "--citizen",
         type=str,
         help="Process thoughts for a specific citizen by username."
-    )
-    group.add_argument(
-        "--ais",
-        action="store_true",
-        help="Process thoughts only for AI citizens."
-    )
-    group.add_argument(
-        "--humans",
-        action="store_true",
-        help="Process thoughts only for human citizens active in the last 7 days (excluding Facchini)."
     )
     parser.add_argument(
         "--dry-run",
@@ -702,7 +662,5 @@ if __name__ == "__main__":
     process_ai_thoughts(
         dry_run=args.dry_run,
         specific_citizen_username=args.citizen,
-        only_ais=args.ais,
-        only_humans=args.humans,
         kinos_model_override=args.model
     )
