@@ -295,6 +295,77 @@ def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: s
         log.error(f"{LogColors.FAIL}Error in generate_ai_thought for {ai_username}: {e}{LogColors.ENDC}")
         return None
 
+def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: str, context_data: Dict, use_local_model: bool = False) -> Optional[str]:
+    """Generates an AI thought using the Kinos Engine API."""
+    try:
+        add_system_json = json.dumps(context_data)
+        
+        kinos_prompt = (
+            f"You are {ai_display_name}, an AI citizen of Venice. You are currently reflecting on your goals, your economic situation, your relationships, and any pressing needs or problems you face.\n"
+            "Your task is to:\n"
+            "1. First, write a paragraph outlining various strategic thoughts. These thoughts should be based on the detailed context provided in 'addSystem'. For example, consider:\n"
+            "    - Strategic and Goal-Oriented Thoughts: What are your long-term objectives? What steps can you take?\n"
+            "    - Economic Evaluation / Decision-Making Cues: How is your financial situation? What economic opportunities or threats do you see?\n"
+            "    - Relationship-Driven Economic Thoughts: How do your relationships influence your economic decisions or offer opportunities?\n"
+            "    - Needs-Driven Economic Actions (linked to Problems): What problems are you facing (e.g., lack of resources, housing issues) and what economic actions could solve them?\n"
+            "    - Activity-Related Intentions: What activities are you considering undertaking?\n"
+            "   Feel free to deviate from this template and think about things relevant to YOUR specific situation. Ensure that the thought are grounded in the data given, related to the gameplay, and your position as an economic agent in the city. They should be interesting, and help you improve your position.\n\n"
+            "Your task is to:\n"
+            "Write a FULL PARAGRAPH outlining various strategic thoughts based on the detailed context provided in 'addSystem'. This paragraph should be a comprehensive reflection of your current strategic thinking. The entire paragraph you generate will be recorded.\n\n"
+            "IMPORTANT: Ensure your response is a well-reasoned paragraph of thoughts. No specific formatting (like bolding) is required for extraction, as the whole paragraph is the output.\n\n"
+            "--- Context ('addSystem' details) ---\n"
+            "- 'ai_citizen_profile': Your detailed profile.\n"
+            "- 'recent_notifications_for_ai': News/events relevant to you.\n"
+            "- 'recent_relevancies_for_ai': Specific items of relevance to you.\n"
+            "- 'recent_problems_for_ai': Your current problems.\n\n"
+            "--- Your Response ---\n"
+        )
+
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{KINOS_BLUEPRINT_ID}/kins/{ai_username}/channels/{KINOS_CHANNEL_THOUGHTS}/messages"
+        headers = {"Authorization": f"Bearer {kinos_api_key}", "Content-Type": "application/json"}
+        payload = {"message": kinos_prompt, "addSystem": add_system_json}
+
+        if use_local_model:
+            payload["model"] = "local"
+            log.info(f"{LogColors.OKBLUE}Using local model for Kinos request for {ai_username}.{LogColors.ENDC}")
+
+        log.info(f"{LogColors.OKBLUE}Sending thought generation request to Kinos for {ai_username}...{LogColors.ENDC}")
+        response = requests.post(url, headers=headers, json=payload, timeout=90) # Increased timeout
+
+        if response.status_code not in [200, 201]:
+            log.error(f"{LogColors.FAIL}Kinos API error for {ai_username} (POST): {response.status_code} - {response.text[:500]}{LogColors.ENDC}")
+            return None
+
+        # Fetch the conversation history to get the assistant's reply
+        history_response = requests.get(url, headers=headers, timeout=30)
+        if history_response.status_code != 200:
+            log.error(f"{LogColors.FAIL}Kinos API error for {ai_username} (GET history): {history_response.status_code} - {history_response.text[:500]}{LogColors.ENDC}")
+            return None
+            
+        messages_data = history_response.json()
+        assistant_messages = [msg for msg in messages_data.get("messages", []) if msg.get("role") == "assistant"]
+        if not assistant_messages:
+            log.warning(f"{LogColors.WARNING}No assistant messages found in Kinos history for {ai_username}.{LogColors.ENDC}")
+            return None
+        
+        assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+        latest_ai_response_content = assistant_messages[0].get("content")
+        
+        if not latest_ai_response_content:
+            log.warning(f"{LogColors.WARNING}Latest assistant message for {ai_username} has no content.{LogColors.ENDC}")
+            return None
+            
+        log.info(f"{LogColors.OKGREEN}Received Kinos response for {ai_username}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
+        # log.debug(f"Kinos raw response for {ai_username}: {latest_ai_response_content[:1000]}...") # Log snippet
+        return latest_ai_response_content
+
+    except requests.exceptions.RequestException as e:
+        log.error(f"{LogColors.FAIL}Kinos API request error for {ai_username}: {e}{LogColors.ENDC}")
+        return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error in generate_ai_thought for {ai_username}: {e}{LogColors.ENDC}")
+        return None
+
 # Removed extract_bold_thought_from_response function
 
 # --- Thought Cleaning and Message Creation ---
@@ -437,7 +508,8 @@ def process_ai_thoughts(
     dry_run: bool = False,
     specific_citizen_username: Optional[str] = None,
     only_ais: bool = False,
-    only_humans: bool = False
+    only_humans: bool = False,
+    use_local_model: bool = False
 ):
     """Main function to process AI thought generation."""
     filter_desc = "all eligible"
@@ -447,8 +519,9 @@ def process_ai_thoughts(
         filter_desc = "only AIs"
     elif only_humans:
         filter_desc = "only active humans"
-
-    log.info(f"{LogColors.HEADER}Starting Citizen Thought Generation Process (dry_run={dry_run}, filter={filter_desc})...{LogColors.ENDC}")
+    
+    local_model_status = "enabled" if use_local_model else "disabled"
+    log.info(f"{LogColors.HEADER}Starting Citizen Thought Generation Process (dry_run={dry_run}, filter={filter_desc}, local_model={local_model_status})...{LogColors.ENDC}")
 
     tables = initialize_airtable()
     kinos_api_key = get_kinos_api_key()
@@ -558,7 +631,7 @@ Custom emoji entities can only be used by bots that purchased additional usernam
             continue
 
         # Use citizen_username for the Kinos kin parameter
-        kinos_response_content = generate_ai_thought(kinos_api_key, citizen_username, citizen_display_name, context_data)
+        kinos_response_content = generate_ai_thought(kinos_api_key, citizen_username, citizen_display_name, context_data, use_local_model)
         
         if kinos_response_content:
             log.info(f"{LogColors.OKGREEN}Generated full thought process for {citizen_username}. Length: {len(kinos_response_content)}{LogColors.ENDC}")
@@ -619,11 +692,17 @@ if __name__ == "__main__":
         action="store_true",
         help="Simulate the process without making Kinos API calls or writing to Airtable."
     )
+    parser.add_argument(
+        "--local",
+        action="store_true",
+        help="Use local model for Kinos API requests."
+    )
     args = parser.parse_args()
 
     process_ai_thoughts(
         dry_run=args.dry_run,
         specific_citizen_username=args.citizen,
         only_ais=args.ais,
-        only_humans=args.humans
+        only_humans=args.humans,
+        use_local_model=args.local
     )
