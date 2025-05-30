@@ -108,6 +108,7 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
   const [showProblemDetailsPanel, setShowProblemDetailsPanel] = useState<boolean>(false);
   const [currentHoverState, setCurrentHoverState] = useState<HoverState>(hoverStateService.getState());
+  const [isNight, setIsNight] = useState(false);
   
   // State for BuildingCreationPanel
   const [showBuildingCreationPanel, setShowBuildingCreationPanel] = useState<boolean>(false);
@@ -1742,6 +1743,38 @@ number => {
       console.log(`Pre-calculated positions for ${Object.keys(newPositionsCache).length} buildings`);
     }
   }, [buildings, initialPositionCalculated]);
+
+  // Helper function to get current hour in Venice (approximated by Rome timezone)
+  const getVeniceHour = () => {
+    const options: Intl.DateTimeFormatOptions = { timeZone: 'Europe/Rome', hour: 'numeric', hour12: false };
+    const formatter = new Intl.DateTimeFormat([], options);
+    try {
+      const parts = formatter.formatToParts(new Date());
+      const hourPart = parts.find(part => part.type === 'hour');
+      return hourPart ? parseInt(hourPart.value, 10) : new Date().getHours(); // Fallback to local hour
+    } catch (e) {
+      console.error("Error getting Venice time:", e);
+      return new Date().getHours(); // Fallback to local hour on error
+    }
+  };
+
+  // Effect to update isNight state based on Venice time
+  useEffect(() => {
+    const updateNightState = () => {
+      const currentHour = getVeniceHour();
+      // Consider night from 8 PM (20) to 6 AM (6)
+      const nightTime = currentHour >= 20 || currentHour < 6;
+      if (nightTime !== isNight) {
+        setIsNight(nightTime);
+        console.log(`Venice time update: It is now ${nightTime ? 'night' : 'day'}. Hour: ${currentHour}`);
+      }
+    };
+
+    updateNightState(); // Initial check
+    const intervalId = setInterval(updateNightState, 5 * 60 * 1000); // Check every 5 minutes
+
+    return () => clearInterval(intervalId);
+  }, [isNight]); // Re-run if isNight changes (e.g. manual toggle in future)
   
   // Handle the ensureBuildingsVisible event
   useEffect(() => {
@@ -2517,6 +2550,60 @@ number => {
     return (-y) * currentScale * 1.4 + currentCanvasHeight / 2 + currentOffset.y; // Multiply by 1.4 to stretch vertically
   };
 
+// Helper function to darken a color string (hex, rgb, rgba, hsl, hsla)
+const darkenColor = (colorStr: string, percent: number): string => {
+  let r = 0, g = 0, b = 0, h = 0, s = 0, l = 0, a = 1;
+  const p = Math.max(0, Math.min(1, 1 - percent)); // Ensure p is between 0 and 1
+
+  if (colorStr.startsWith('#')) {
+    const hex = colorStr.replace('#', '');
+    if (hex.length === 3) {
+      r = parseInt(hex[0] + hex[0], 16);
+      g = parseInt(hex[1] + hex[1], 16);
+      b = parseInt(hex[2] + hex[2], 16);
+    } else if (hex.length === 6) {
+      r = parseInt(hex.substring(0, 2), 16);
+      g = parseInt(hex.substring(2, 4), 16);
+      b = parseInt(hex.substring(4, 6), 16);
+    } else { return colorStr; }
+
+    r = Math.round(r * p);
+    g = Math.round(g * p);
+    b = Math.round(b * p);
+
+    return `#${(r < 0 ? 0 : r > 255 ? 255 : r).toString(16).padStart(2, '0')}${(g < 0 ? 0 : g > 255 ? 255 : g).toString(16).padStart(2, '0')}${(b < 0 ? 0 : b > 255 ? 255 : b).toString(16).padStart(2, '0')}`;
+  } else if (colorStr.startsWith('rgb')) {
+    const match = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+    if (!match) return colorStr;
+    r = parseInt(match[1]);
+    g = parseInt(match[2]);
+    b = parseInt(match[3]);
+    a = match[4] !== undefined ? parseFloat(match[4]) : 1;
+
+    r = Math.round(r * p);
+    g = Math.round(g * p);
+    b = Math.round(b * p);
+    
+    r = Math.max(0, Math.min(255, r));
+    g = Math.max(0, Math.min(255, g));
+    b = Math.max(0, Math.min(255, b));
+
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  } else if (colorStr.startsWith('hsl')) {
+    const match = colorStr.match(/hsla?\((\d+),\s*([\d.]+)%,\s*([\d.]+)%(?:,\s*([\d.]+))?\)/);
+    if (!match) return colorStr;
+    h = parseInt(match[1]);
+    s = parseFloat(match[2]);
+    l = parseFloat(match[3]);
+    a = match[4] !== undefined ? parseFloat(match[4]) : 1;
+
+    l = Math.max(0, Math.min(100, l * p));
+
+    return `hsla(${h}, ${s}%, ${l}%, ${a})`;
+  }
+  return colorStr;
+};
+
   // Helper function to convert lat/lng to screen coordinates, now uses canvasDims state
   const latLngToScreen = useCallback((lat: number, lng: number) => {
     const world = {
@@ -2549,25 +2636,26 @@ number => {
       
       if (activeView === 'land') {
         if (incomeDataLoaded && polygon.id && incomeData[polygon.id] !== undefined) {
-          // Use income-based color in land view ONLY if income data is loaded
           fillColor = getIncomeColor(incomeData[polygon.id]);
         } else if (polygon.id && landOwners[polygon.id]) {
-          // Use owner color in land view
           const owner = landOwners[polygon.id];
           const citizen = citizens[owner];
           if (citizen && citizen.color) {
             fillColor = citizen.color;
           }
         }
-      } 
-      // Add land group coloring for transport view
-      else if (activeView === 'transport' && polygon.id && landGroups[polygon.id]) {
+      } else if (activeView === 'transport' && polygon.id && landGroups[polygon.id]) {
         const groupId = landGroups[polygon.id];
         if (landGroupColors[groupId]) {
           fillColor = landGroupColors[groupId];
         }
       }
-      // For other views, keep the default yellow color
+      // For other views, keep the default sand color, which will be darkened if it's night
+
+      // Apply night effect to land polygons, except for income view
+      if (isNight && !(activeView === 'land' && incomeDataLoaded)) {
+        fillColor = darkenColor(fillColor, 0.3); // Darken by 30%
+      }
     
       // Create local shorthand functions that use the current state values
       // Pass canvasDims from state to ensure calculations use the correct, most up-to-date dimensions
@@ -2624,7 +2712,7 @@ number => {
         hasPublicDock        // Add this flag to identify polygons with public docks
       };
     }).filter(Boolean);
-  }, [polygons, landOwners, citizens, activeView, scale, offset, incomeData, incomeDataLoaded, landGroups, landGroupColors, canvasDims.width, canvasDims.height, getIncomeColor]); // Added canvasDims and getIncomeColor
+  }, [polygons, landOwners, citizens, activeView, scale, offset, incomeData, incomeDataLoaded, landGroups, landGroupColors, canvasDims.width, canvasDims.height, getIncomeColor, isNight]); // Added isNight
 
   // Update polygonsToRender when the dependencies of calculatePolygonsToRender change
   useEffect(() => {
@@ -2656,7 +2744,7 @@ number => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Draw water background
-    ctx.fillStyle = '#87CEEB';
+    ctx.fillStyle = isNight ? '#001f3f' : '#87CEEB'; // Dark blue for night, sky blue for day
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   
     // Draw water route in all views, but only if there's a path to show
@@ -3355,7 +3443,8 @@ number => {
     interactionMode, 
     waterRoutePath, transportPath, currentHoverState, 
     buildingPositionsCache, canvasDims, // Added canvasDims to ensure re-draw if it changes
-    occupantLine, latLngToScreen // Added occupantLine and latLngToScreen
+    occupantLine, latLngToScreen, // Added occupantLine and latLngToScreen
+    isNight // Added isNight
   ]);
   
 
