@@ -21,6 +21,8 @@ from backend.engine.utils.activity_helpers import (
     VENICE_TIMEZONE, LogColors,
     extract_details_from_notes # Import the helper
 )
+# Import relationship helper
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE
 
 log = logging.getLogger(__name__)
 
@@ -207,6 +209,9 @@ def process(
                    f"Capacity: {storage_capacity}, Used: {current_total_stored_volume_in_facility}, To Deposit: {total_amount_overall_this_delivery}")
         log.warning(f"{err_msg} Activity: {activity_guid}")
         _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
+        # Trust: Delivery person failed to deliver to owner of deposited resources due to facility capacity
+        if delivery_person_username and owner_of_deposited_resources:
+            update_trust_score_for_activity(tables, delivery_person_username, owner_of_deposited_resources, TRUST_SCORE_FAILURE_SIMPLE, "delivery_to_storage", False, "facility_full")
         return False
 
     # Process resource transfer
@@ -318,7 +323,14 @@ def process(
             except Exception as e_revert:
                 log.error(f"Failed to revert pickup for {resource_type_id} from {source_description}: {e_revert}")
             _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
+            # Trust: Delivery person failed to deposit for owner of deposited resources (system error during deposit)
+            if delivery_person_username and owner_of_deposited_resources:
+                update_trust_score_for_activity(tables, delivery_person_username, owner_of_deposited_resources, TRUST_SCORE_FAILURE_SIMPLE, "delivery_to_storage_processing", False, "system_error_deposit")
             return False
+
+    # Trust: Successful delivery to storage
+    if delivery_person_username and owner_of_deposited_resources:
+        update_trust_score_for_activity(tables, delivery_person_username, owner_of_deposited_resources, TRUST_SCORE_SUCCESS_SIMPLE, "delivery_to_storage", True)
 
     log.info(f"{LogColors.OKGREEN}Successfully processed 'deliver_to_storage' activity {activity_guid}.{LogColors.ENDC}")
     return True

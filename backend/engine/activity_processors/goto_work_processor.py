@@ -20,6 +20,8 @@ from backend.engine.utils.activity_helpers import (
     VENICE_TIMEZONE, # Assuming VENICE_TIMEZONE might be used
     LogColors      # Assuming LogColors might be used
 )
+# Import relationship helper
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE, TRUST_SCORE_MINOR_POSITIVE
 
 log = logging.getLogger(__name__)
 
@@ -141,10 +143,13 @@ def process(
                     f"Capacity: {storage_capacity}, Used: {current_stored_volume_at_workplace}, To Deposit: {total_volume_to_deposit}")
         # Optionally, create a problem record here or notify the operator.
         # Deposit cannot happen, so the action related to this part of the activity fails.
+        # Trust: Employee failed to deposit operator's resources due to workplace capacity
+        if citizen_username and workplace_operator_username:
+            update_trust_score_for_activity(tables, citizen_username, workplace_operator_username, TRUST_SCORE_FAILURE_SIMPLE, "work_deposit", False, "workplace_full")
         return False # Cannot deposit if not enough space.
 
     all_resources_transferred = True
-    VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+    # VENICE_TIMEZONE is imported from activity_helpers
     now_venice = datetime.now(VENICE_TIMEZONE)
     now_iso = now_venice.isoformat()
 
@@ -202,7 +207,17 @@ def process(
     if not all_resources_transferred:
         log.error(f"Resource deposit failed for citizen {citizen_username} at workplace {workplace_building_custom_id} during 'goto_work' activity {activity_guid}.")
         # Potentially revert changes or handle partial success if necessary
+        # Trust: System error during deposit by employee
+        if citizen_username and workplace_operator_username:
+            update_trust_score_for_activity(tables, citizen_username, workplace_operator_username, TRUST_SCORE_FAILURE_SIMPLE, "work_deposit_processing", False, "system_error")
         return False # Indicate failure to deposit
+
+    # Trust: Successful deposit of operator's resources by employee
+    # This is only if resources_to_consider_for_deposit was not empty and all_resources_transferred is true.
+    if citizen_carried_resources and all_resources_transferred: # citizen_carried_resources was populated earlier
+        if citizen_username and workplace_operator_username:
+            # Using MINOR_POSITIVE as this is a routine part of work, not a major transaction.
+            update_trust_score_for_activity(tables, citizen_username, workplace_operator_username, TRUST_SCORE_MINOR_POSITIVE, "work_deposit", True)
 
     log.info(f"{LogColors.OKGREEN}Successfully processed 'goto_work' activity {activity_guid} for {citizen_username}. Resources deposited as applicable.{LogColors.ENDC}")
     

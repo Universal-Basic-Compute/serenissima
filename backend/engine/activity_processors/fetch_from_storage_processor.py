@@ -19,6 +19,8 @@ from backend.engine.utils.activity_helpers import (
     CITIZEN_CARRY_CAPACITY, # Assuming this is defined in utils or passed
     get_citizen_current_load
 )
+# Import relationship helper
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE
 
 log = logging.getLogger(__name__)
 
@@ -163,6 +165,9 @@ def process(
                           f"in storage {from_building_custom_id} (Owner: {sq_buyer_username}) to fetch {amount_requested}."
                 log.error(f"{err_msg} Activity: {activity_guid}")
                 _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
+                # Trust: Fetch person failed to get goods for sq_buyer from storage
+                if fetch_person_username and sq_buyer_username:
+                    update_trust_score_for_activity(tables, fetch_person_username, sq_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_from_storage_pickup", False, "storage_stock_insufficient")
                 return False 
 
             storage_res_record = storage_res_records[0]
@@ -226,6 +231,9 @@ def process(
         # Resources are now stuck with the citizen. This is a problem.
         # For now, fail the activity. A more robust solution might create a "return_to_storage" or "drop_items" activity.
         _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
+        # Trust: Fetch person failed to deliver to destination operator due to capacity
+        if fetch_person_username and destination_operator_username:
+            update_trust_score_for_activity(tables, fetch_person_username, destination_operator_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_from_storage_delivery", False, "destination_full")
         return False
 
 
@@ -295,7 +303,16 @@ def process(
             # Attempt to revert citizen inventory decrement
             # ... (complex, for now, mark as fail)
             _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
+            # Trust: System error during deposit phase
+            if fetch_person_username and destination_operator_username:
+                update_trust_score_for_activity(tables, fetch_person_username, destination_operator_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_from_storage_delivery_processing", False, "system_error_deposit")
             return False
+
+    # Trust: Successful fetch and delivery
+    if fetch_person_username and sq_buyer_username: # Successful pickup for owner
+        update_trust_score_for_activity(tables, fetch_person_username, sq_buyer_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_from_storage_pickup", True)
+    if fetch_person_username and destination_operator_username: # Successful delivery to destination operator
+        update_trust_score_for_activity(tables, fetch_person_username, destination_operator_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_from_storage_delivery", True)
 
     log.info(f"{LogColors.OKGREEN}Successfully processed 'fetch_from_storage' activity {activity_guid}.{LogColors.ENDC}")
     return True
