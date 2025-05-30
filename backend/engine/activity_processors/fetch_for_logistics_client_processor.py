@@ -23,6 +23,8 @@ from backend.engine.utils.activity_helpers import (
     get_building_current_storage,
     extract_details_from_notes # Import the helper
 )
+# Import relationship helper
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE, TRUST_SCORE_MINOR_POSITIVE
 
 log = logging.getLogger(__name__)
 
@@ -136,11 +138,15 @@ def process(
     client_ducats = float(client_record['fields'].get('Ducats', 0))
     if client_ducats < cost_of_goods:
         _update_activity_notes_with_failure_reason(tables, activity_id_airtable, f"Client {ultimate_buyer_username} has insufficient funds ({client_ducats:.2f}) for goods ({cost_of_goods:.2f}).", "PICKUP_FUNDS")
+        # Trust: Client failed to pay Seller of Goods
+        if ultimate_buyer_username and seller_of_goods_username:
+            update_trust_score_for_activity(tables, ultimate_buyer_username, seller_of_goods_username, TRUST_SCORE_FAILURE_SIMPLE, "logistics_goods_payment", False, "insufficient_funds")
         return False
 
     seller_of_goods_record = get_citizen_record(tables, seller_of_goods_username)
     if not seller_of_goods_record:
         _update_activity_notes_with_failure_reason(tables, activity_id_airtable, f"Seller of goods citizen record {seller_of_goods_username} not found.", "PICKUP_SELLER_REC")
+        # This is more of a system data issue, less direct trust impact unless it implies seller vanished.
         return False
 
     # Perform financial transaction: Client to Seller of Goods
@@ -148,6 +154,9 @@ def process(
     seller_current_ducats = float(seller_of_goods_record['fields'].get('Ducats', 0))
     tables['citizens'].update(seller_of_goods_record['id'], {'Ducats': seller_current_ducats + cost_of_goods})
     log.info(f"💰 Client **{ultimate_buyer_username}** paid **{cost_of_goods:.2f} ⚜️** to Seller **{seller_of_goods_username}** for **{amount_to_pickup_stage1:.2f}** of **{resource_id_to_fetch}**.")
+    # Trust: Client successfully paid Seller of Goods
+    if ultimate_buyer_username and seller_of_goods_username:
+        update_trust_score_for_activity(tables, ultimate_buyer_username, seller_of_goods_username, TRUST_SCORE_SUCCESS_SIMPLE, "logistics_goods_payment", True)
 
     # Update source stock
     new_source_stock_count = actual_amount_at_source - amount_to_pickup_stage1
@@ -236,9 +245,12 @@ def process(
         if client_ducats_for_fee < total_service_fee:
             _update_activity_notes_with_failure_reason(tables, activity_id_airtable, f"Client {ultimate_buyer_username} has insufficient funds ({client_ducats_for_fee:.2f}) for service fee ({total_service_fee:.2f}).", "DELIVERY_FEE_FUNDS")
             # Goods delivered, but fee not paid. This is a problem. For now, activity fails.
+            # Trust: Client failed to pay Porter Guild Operator
+            if ultimate_buyer_username and porter_guild_operator_username: # porter_guild_operator_username defined below
+                 update_trust_score_for_activity(tables, ultimate_buyer_username, porter_guild_operator_username, TRUST_SCORE_FAILURE_SIMPLE, "logistics_service_payment", False, "insufficient_funds")
             return False
 
-        porter_guild_operator_username = None # Need to get this from the logistics contract or Porter's workplace
+        porter_guild_operator_username = None 
         logistics_contract_record = get_contract_record(tables, logistics_contract_id_custom)
         if logistics_contract_record:
             porter_guild_operator_username = logistics_contract_record['fields'].get('Seller')
@@ -257,6 +269,9 @@ def process(
         operator_current_ducats = float(porter_guild_operator_record['fields'].get('Ducats', 0))
         tables['citizens'].update(porter_guild_operator_record['id'], {'Ducats': operator_current_ducats + total_service_fee})
         log.info(f"💰 Client **{ultimate_buyer_username}** paid service fee **{total_service_fee:.2f} ⚜️** to Porter Guild Operator **{porter_guild_operator_username}**.")
+        # Trust: Client successfully paid Porter Guild Operator
+        if ultimate_buyer_username and porter_guild_operator_username:
+            update_trust_score_for_activity(tables, ultimate_buyer_username, porter_guild_operator_username, TRUST_SCORE_SUCCESS_SIMPLE, "logistics_service_payment", True)
 
         # Create transaction record for service fee
         transaction_payload_service_fee = {
@@ -269,6 +284,10 @@ def process(
         }
         tables['transactions'].create(transaction_payload_service_fee)
         log.info(f"Created transaction for logistics service fee: {total_service_fee:.2f}.")
+    
+    # Overall success of the porter's task
+    if porter_username and ultimate_buyer_username:
+        update_trust_score_for_activity(tables, porter_username, ultimate_buyer_username, TRUST_SCORE_MINOR_POSITIVE, "logistics_task_completion", True)
 
     log.info(f"{LogColors.OKGREEN}Successfully processed 'fetch_for_logistics_client' activity {activity_guid}.{LogColors.ENDC}")
     return True

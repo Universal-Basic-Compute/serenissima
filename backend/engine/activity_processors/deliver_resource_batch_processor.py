@@ -23,6 +23,8 @@ from backend.engine.utils.activity_helpers import (
     _get_building_position_coords, # Added import
     get_path_between_points # Added import
 )
+# Import relationship helper
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE
 
 log = logging.getLogger(__name__)
 
@@ -154,6 +156,14 @@ def process(
         log.warning(f"{err_msg} Activity: {activity_guid}")
         
         # --- Attempt to divert to alternative storage ---
+        # Before diversion logic, if the primary delivery fails due to storage, penalize trust
+        # This requires knowing who the intended recipient/payer was for this specific delivery leg.
+        # The target_owner_username is the recipient of goods.
+        # The payer_username (RunBy of BuyerBuilding) is involved with the seller_username (merchant).
+        # For a simple storage failure at destination, the delivery_person failed to deliver to target_owner.
+        if target_owner_username and delivery_person_username:
+             update_trust_score_for_activity(tables, delivery_person_username, target_owner_username, TRUST_SCORE_FAILURE_SIMPLE, "delivery_storage", False, "destination_full")
+        
         log.info(f"Attempting to divert resources for activity {activity_guid} due to full destination {to_building_id}.")
         
         # delivery_person_citizen_record is the citizen performing the delivery
@@ -521,10 +531,20 @@ def process(
         tables['transactions'].create(transaction_payload_merchant_to_italia)
         log.info(f"{LogColors.OKGREEN}Created transaction: Merchant {seller_username} to Italia for {italia_share:.2f} (Contract: {original_contract_custom_id}).{LogColors.ENDC}")
 
+        # Trust impact: Successful payment from Payer to Seller
+        if payer_username and seller_username:
+            update_trust_score_for_activity(tables, payer_username, seller_username, TRUST_SCORE_SUCCESS_SIMPLE, "payment", True, "import_final")
+        # Trust impact: Successful delivery by delivery_person to target_owner
+        if delivery_person_username and target_owner_username: # target_owner_username determined earlier
+            update_trust_score_for_activity(tables, delivery_person_username, target_owner_username, TRUST_SCORE_SUCCESS_SIMPLE, "delivery_goods", True)
+
     except Exception as e_finance:
         err_msg = f"Error processing financial split for contract {original_contract_custom_id} (Payer RunBy: {payer_username}): {e_finance}"
         log.error(err_msg)
         _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
+        # Trust impact: Financial processing error could affect Payer <-> Seller
+        if payer_username and seller_username:
+            update_trust_score_for_activity(tables, payer_username, seller_username, TRUST_SCORE_FAILURE_SIMPLE, "payment_processing", False, "system_error")
         return False 
     
     # Building UpdatedAt is handled by Airtable

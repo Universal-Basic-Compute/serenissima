@@ -11,6 +11,8 @@ log = logging.getLogger(__name__)
 
 # Import necessary helpers
 from backend.engine.utils.activity_helpers import get_building_record, get_citizen_record, get_contract_record, _escape_airtable_value, LogColors
+# Import relationship helper
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_PROGRESS
 
 def process(
     tables: Dict[str, Any],
@@ -214,4 +216,17 @@ def process(
 
     # 6. Citizen's position is updated by the main processActivities loop to ToBuilding.
 
-    return all_transfers_successful # Returns True if all specified resources were transferred, False otherwise
+    # Trust score updates
+    if contract_buyer_username and citizen_username: # citizen_username is the deliverer (workshop operator)
+        if all_transfers_successful and materials_actually_delivered_summary: # Some materials delivered successfully
+            # If status became 'materials_delivered', it's a bigger success
+            if contract_update_payload.get('Status') == 'materials_delivered':
+                 update_trust_score_for_activity(tables, citizen_username, contract_buyer_username, TRUST_SCORE_SUCCESS_MEDIUM, "construction_material_delivery", True, "all_materials_on_site")
+            else: # Partial but successful delivery
+                 update_trust_score_for_activity(tables, citizen_username, contract_buyer_username, TRUST_SCORE_SUCCESS_SIMPLE, "construction_material_delivery", True, "partial_delivery")
+        elif not all_transfers_successful and materials_actually_delivered_summary: # Some delivered, some failed
+            update_trust_score_for_activity(tables, citizen_username, contract_buyer_username, TRUST_SCORE_PROGRESS, "construction_material_delivery", False, "partial_failure_some_delivered")
+        elif not all_transfers_successful and not materials_actually_delivered_summary: # Complete failure to deliver anything requested
+            update_trust_score_for_activity(tables, citizen_username, contract_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "construction_material_delivery", False, "complete_failure")
+
+    return all_transfers_successful

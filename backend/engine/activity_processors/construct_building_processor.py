@@ -10,7 +10,9 @@ from typing import Dict, Any
 log = logging.getLogger(__name__)
 
 # Import necessary helpers
-from backend.engine.utils.activity_helpers import get_building_record, LogColors, VENICE_TIMEZONE
+from backend.engine.utils.activity_helpers import get_building_record, LogColors, VENICE_TIMEZONE, get_contract_record
+# Import relationship helper
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_HIGH, TRUST_SCORE_FAILURE_MEDIUM, TRUST_SCORE_PROGRESS
 
 def process(
     tables: Dict[str, Any],
@@ -71,10 +73,31 @@ def process(
         # Citizen's position is updated by the main processActivities loop to ToBuilding,
         # which is the construction site for this activity type.
 
+        # Trust score updates
+        # contract_airtable_id is the Airtable Record ID. We need the contract to get the Buyer.
+        # The processor already fetches contract_record if construction is completed.
+        # Let's fetch it regardless to get the buyer for trust score.
+        contract_record_for_trust = tables['contracts'].get(contract_airtable_id)
+        if contract_record_for_trust:
+            contract_buyer_username = contract_record_for_trust['fields'].get('Buyer')
+            if contract_buyer_username and citizen_username_log:
+                if new_minutes_remaining <= 0: # Construction completed
+                    update_trust_score_for_activity(tables, citizen_username_log, contract_buyer_username, TRUST_SCORE_SUCCESS_HIGH, "construction_completion", True)
+                else: # Progress made
+                    update_trust_score_for_activity(tables, citizen_username_log, contract_buyer_username, TRUST_SCORE_PROGRESS, "construction_progress", True)
+        else:
+            log.warning(f"{LogColors.WARNING}Could not fetch contract {contract_airtable_id} for trust score update in construct_building.{LogColors.ENDC}")
+        
         return True
 
     except Exception as e:
         log.error(f"{LogColors.FAIL}Error processing 'construct_building' activity {activity_guid}: {e}{LogColors.ENDC}")
         import traceback
         log.error(traceback.format_exc())
+        # Attempt to update trust score for failure if possible
+        contract_record_for_trust_fail = tables['contracts'].get(contract_airtable_id)
+        if contract_record_for_trust_fail:
+            contract_buyer_username_fail = contract_record_for_trust_fail['fields'].get('Buyer')
+            if contract_buyer_username_fail and citizen_username_log:
+                 update_trust_score_for_activity(tables, citizen_username_log, contract_buyer_username_fail, TRUST_SCORE_FAILURE_MEDIUM, "construction_processing", False, "system_error")
         return False

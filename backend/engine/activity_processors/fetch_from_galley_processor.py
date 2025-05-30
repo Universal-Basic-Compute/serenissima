@@ -23,6 +23,8 @@ from backend.engine.utils.activity_helpers import (
     VENICE_TIMEZONE,      # Assuming VENICE_TIMEZONE might be used
     LogColors             # Assuming LogColors might be used
 )
+# Import relationship helper
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE
 
 log = logging.getLogger(__name__)
 
@@ -216,17 +218,28 @@ def process(
             log.info(f"[fetch_from_galley_proc] Updated carrier {carrier_username} position to galley {galley_custom_id} ({galley_position_str}).")
         except Exception as e_pos_update:
             reason = f"Erreur lors de la mise à jour de la position du transporteur {carrier_username}: {e_pos_update}"
+            # Trust: Carrier failed to arrive for ultimate_buyer
+            if carrier_username and ultimate_buyer_username:
+                update_trust_score_for_activity(tables, carrier_username, ultimate_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_galley_arrival", False, "position_update_failed")
             return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
-        # If nothing to pick up, activity is still "successful" in terms of arrival.
-        # Notes can be updated to reflect "Arrived, but nothing to pick up."
+        
+        # If nothing to pick up due to stock/capacity, it's a failure.
+        if amount_to_fetch_from_contract > 0: # Only if they intended to pick something up
+            # Trust: Carrier failed to get goods for ultimate_buyer
+            if carrier_username and ultimate_buyer_username:
+                update_trust_score_for_activity(tables, carrier_username, ultimate_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_galley_pickup", False, "nothing_to_pickup")
+            # Trust: Galley owner didn't have goods for ultimate_buyer
+            if ultimate_buyer_username and galley_owner_username:
+                update_trust_score_for_activity(tables, ultimate_buyer_username, galley_owner_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_galley_stock", False, "galley_empty")
+        
         success_note = f"Arrivé à la galère {galley_custom_id}, mais rien à ramasser (quantité calculée: {actual_amount_to_pickup})."
         try:
             tables['activities'].update(activity_id_airtable, {'Notes': f"{activity_fields.get('Notes', '')}\nINFO: {success_note}"})
-        except Exception: pass # Best effort to update notes
+        except Exception: pass
         return True 
 
     # 4. Perform Resource Transfers
-    VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+    # VENICE_TIMEZONE is imported from activity_helpers
     now_venice = datetime.now(VENICE_TIMEZONE)
     now_iso = now_venice.isoformat()
     try:
@@ -283,8 +296,19 @@ def process(
         else:
             log.warning(f"[fetch_from_galley_proc] Original contract record for {original_contract_custom_id} not available to update LastExecutedAt.")
 
+        # Trust impact: Successful fetch
+        if carrier_username and ultimate_buyer_username:
+            update_trust_score_for_activity(tables, carrier_username, ultimate_buyer_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_galley_pickup", True)
+        if ultimate_buyer_username and galley_owner_username:
+            update_trust_score_for_activity(tables, ultimate_buyer_username, galley_owner_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_galley_stock", True)
+
     except Exception as e_process:
         reason = f"Erreur lors du traitement des transactions pour l'activité {activity_guid}: {e_process}"
+        # Trust impact: Processing error
+        if carrier_username and ultimate_buyer_username:
+            update_trust_score_for_activity(tables, carrier_username, ultimate_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_galley_processing", False, "system_error")
+        if ultimate_buyer_username and galley_owner_username:
+            update_trust_score_for_activity(tables, ultimate_buyer_username, galley_owner_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_galley_processing", False, "system_error")
         return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
             
     log.info(f"{LogColors.OKGREEN}Successfully processed 'fetch_from_galley' activity {activity_guid}. Picked up {actual_amount_to_pickup} of {resource_id_to_fetch}.{LogColors.ENDC}")

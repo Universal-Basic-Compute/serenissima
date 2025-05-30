@@ -22,6 +22,8 @@ from backend.engine.utils.activity_helpers import (
     DEFAULT_CITIZEN_CARRY_CAPACITY, # Fallback if needed, though helper is preferred
     VENICE_TIMEZONE # Assuming VENICE_TIMEZONE might be used
 )
+# Import relationship helper
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE
 
 log = logging.getLogger(__name__)
 
@@ -271,18 +273,30 @@ def process(
         try:
             tables['citizens'].update(carrier_airtable_id, {
                 'Position': from_building_position_str,
-                # 'UpdatedAt' is automatically handled by Airtable on record update.
-                # If manual update is desired:
-                # 'UpdatedAt': datetime.now(VENICE_TIMEZONE).isoformat() 
             })
             log.info(f"Updated carrier {carrier_username} position to {from_building_custom_id} ({from_building_position_str}) as part of fetch (no items).")
         except Exception as e_pos_update:
             log.error(f"Error updating carrier {carrier_username} position: {e_pos_update}")
+            # Trust impact: If carrier fails to arrive (position update fails), it's a failure for the buyer.
+            if carrier_username and effective_buyer_username:
+                 update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_arrival", False, "position_update_failed")
             return False # Position update is critical for flow
+        
+        # If nothing to purchase due to stock, capacity, or affordability, it's a failure for the involved parties.
+        # This needs careful attribution.
+        # If due to stock: effective_buyer vs effective_seller
+        # If due to carrier capacity: carrier vs effective_buyer
+        # If due to buyer funds: effective_buyer vs effective_seller
+        # For simplicity now, if amount_to_purchase is 0 due to any of these, let's consider it a general fetch failure.
+        if desired_amount_to_fetch > 0: # Only penalize if they actually wanted something
+            if carrier_username and effective_buyer_username: # Carrier failed the buyer
+                update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_pickup", False, "nothing_to_pickup")
+            if effective_buyer_username and effective_seller_username: # Buyer couldn't get from seller
+                update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_purchase", False, "nothing_to_pickup")
         return True
 
     # 4. Perform Transactions
-    VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+    # VENICE_TIMEZONE is imported from activity_helpers
     now_venice = datetime.now(VENICE_TIMEZONE)
     now_iso = now_venice.isoformat()
     total_cost = amount_to_purchase * price_per_resource
@@ -367,10 +381,21 @@ def process(
         })
         log.info(f"{LogColors.OKGREEN}Updated carrier {carrier_username} position to {from_building_custom_id} ({from_building_position_str}).{LogColors.ENDC}")
 
+        # Trust impact: Successful fetch and payment
+        if carrier_username and effective_buyer_username: # Carrier succeeded for buyer
+            update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_pickup", True)
+        if effective_buyer_username and effective_seller_username: # Buyer successfully paid seller
+            update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_purchase", True)
+
     except Exception as e_process:
         log.error(f"Error during transaction processing for activity {activity_guid}: {e_process}")
         import traceback
         log.error(traceback.format_exc())
+        # Trust impact: Transaction processing error
+        if carrier_username and effective_buyer_username:
+            update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_processing", False, "system_error")
+        if effective_buyer_username and effective_seller_username:
+            update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_processing", False, "system_error")
         return False
 
     # Update activity notes if amount fetched is different from desired
