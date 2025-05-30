@@ -55,16 +55,29 @@ export async function GET(request: NextRequest) {
       filterByFormula: `{GuildId} = '${actualGuildId}'`
     }).all();
 
-    const members: GuildMember[] = records.map(record => ({
-      citizenId: record.get('CitizenId') as string,
-      // Use Username, fallback to CitizenId if Username is not available
-      username: (record.get('Username') as string) || (record.get('CitizenId') as string),
-      firstName: record.get('FirstName') as string,
-      lastName: record.get('LastName') as string,
-      // familyMotto and imageUrl are not part of the GuildMember interface, so they are removed here.
-      coatOfArmsImageUrl: record.get('CoatOfArmsImageUrl') as string || null,
-      color: record.get('Color') as string || null,
-    }));
+    const members: GuildMember[] = records.map(record => {
+      const username = (record.get('Username') as string) || (record.get('CitizenId') as string);
+      let coatOfArmsImageUrl = record.get('CoatOfArmsImageUrl') as string | null;
+
+      // If coatOfArmsImageUrl is not a full URL and username exists, construct the production URL
+      if (username && coatOfArmsImageUrl && !coatOfArmsImageUrl.startsWith('http')) {
+        // Assuming coatOfArmsImageUrl might be a relative path or just a filename
+        // We'll construct the full URL based on the username for consistency
+        coatOfArmsImageUrl = `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${username}.png`;
+      } else if (username && !coatOfArmsImageUrl) {
+        // If no URL is provided but we have a username, construct the default path
+        coatOfArmsImageUrl = `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${username}.png`;
+      }
+
+      return {
+        citizenId: record.get('CitizenId') as string,
+        username: username,
+        firstName: record.get('FirstName') as string,
+        lastName: record.get('LastName') as string,
+        coatOfArmsImageUrl: coatOfArmsImageUrl,
+        color: record.get('Color') as string || null,
+      };
+    });
 
     return NextResponse.json({ members });
   } catch (error) {
