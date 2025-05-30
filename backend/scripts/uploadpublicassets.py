@@ -3,6 +3,7 @@ import requests
 import argparse
 from dotenv import load_dotenv
 import mimetypes # Pour déterminer le type MIME si nécessaire, bien que requests le fasse souvent.
+import posixpath # Pour la jonction correcte des segments de chemin d'URL
 
 # Default API URL, can be overridden by env var or arg
 DEFAULT_FASTAPI_URL = "https://backend.serenissima.ai/"
@@ -22,10 +23,55 @@ def upload_file(api_url: str, api_key: str, file_path: str, destination_path: st
         bool: True si le téléversement a réussi, False sinon.
     """
     upload_endpoint = f"{api_url.rstrip('/')}/api/upload-asset"
-    
+    filename = os.path.basename(file_path)
+
+    # Construire le chemin relatif de l'asset sur le serveur
+    # destination_path utilise déjà '/' comme séparateur grâce au traitement dans main()
+    if destination_path:
+        asset_server_path = posixpath.join(destination_path, filename)
+    else:
+        asset_server_path = filename
+
+    # Construire l'URL publique pour la vérification
+    # Supposant que les assets publics sont servis depuis /public_assets/ par rapport à api_url
+    public_asset_base_url = f"{api_url.rstrip('/')}/public_assets"
+    check_url = f"{public_asset_base_url}/{asset_server_path.lstrip('/')}"
+
+    try:
+        print(f"Vérification de l'existence de '{check_url}'...")
+        head_response = requests.head(check_url, timeout=10)
+        
+        if head_response.status_code == 200:
+            remote_size_str = head_response.headers.get('Content-Length')
+            if remote_size_str:
+                try:
+                    remote_size = int(remote_size_str)
+                    local_size = os.path.getsize(file_path)
+                    if remote_size == local_size:
+                        print(f"Fichier '{file_path}' existe déjà sur le serveur avec la même taille ({local_size} octets). Saut.")
+                        return True  # Succès, car le fichier est déjà là et identique
+                    else:
+                        print(f"Fichier '{file_path}' existe sur le serveur mais la taille diffère (local: {local_size}, distant: {remote_size}). Remplacement.")
+                except ValueError:
+                    print(f"Taille distante invalide ('{remote_size_str}') pour '{check_url}'. Remplacement par précaution.")
+            else:
+                print(f"Fichier '{file_path}' existe sur le serveur mais la taille distante est inconnue. Remplacement par précaution.")
+        elif head_response.status_code == 404:
+            print(f"Fichier '{check_url}' non trouvé. Téléversement.")
+        else:
+            print(f"Vérification de '{check_url}' a retourné le statut {head_response.status_code}. Tentative de téléversement.")
+
+    except requests.exceptions.Timeout:
+        print(f"Timeout lors de la vérification de '{check_url}'. Tentative de téléversement.")
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur lors de la vérification de '{check_url}': {e}. Tentative de téléversement.")
+    except Exception as e: # Attraper d'autres erreurs potentielles comme os.path.getsize
+        print(f"Erreur inattendue lors de la pré-vérification de {file_path}: {e}. Tentative de téléversement.")
+
+    # Logique de téléversement originale
     try:
         with open(file_path, 'rb') as f:
-            files = {'file': (os.path.basename(file_path), f)}
+            files = {'file': (filename, f)} # Utiliser filename déjà défini
             data = {'destination_path': destination_path}
             headers = {'X-Upload-Api-Key': api_key}
             
