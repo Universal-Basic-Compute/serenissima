@@ -3973,21 +3973,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     return formatted;
   }
 
-  // Helper function to darken a color
-  function darkenColor(color: string, percent: number): string {
-    const num = parseInt(color.replace('#', ''), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = (num >> 16) - amt;
-    const G = (num >> 8 & 0x00FF) - amt;
-    const B = (num & 0x0000FF) - amt;
-    
-    return '#' + (
-      0x1000000 +
-      (R > 0 ? (R < 255 ? R : 255) : 0) * 0x10000 +
-      (G > 0 ? (G < 255 ? G : 255) : 0) * 0x100 +
-      (B > 0 ? (B < 255 ? B : 255) : 0)
-    ).toString(16).slice(1);
-  }
+  // Helper function to darken a color (This is the duplicate, it will be removed)
 
   return (
     <div className="w-screen h-screen">
