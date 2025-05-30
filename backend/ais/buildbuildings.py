@@ -174,6 +174,44 @@ def initialize_airtable():
 
 from backend.engine.utils.activity_helpers import _escape_airtable_value, VENICE_TIMEZONE # Import _escape_airtable_value and VENICE_TIMEZONE
 
+def _get_notifications_data_api(username: str, limit: int = 20) -> List[Dict]:
+    """Fetches recent notifications for a citizen via the Next.js API."""
+    try:
+        url = f"{BASE_URL}/api/notifications"
+        payload = {"citizen": username, "limit": limit}
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, json=payload, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "notifications" in data:
+            return data["notifications"]
+        log_warning(f"Failed to get notifications for {username} from API: {data.get('error')}")
+        return []
+    except requests.exceptions.RequestException as e:
+        log_error(f"API request error fetching notifications for {username}: {e}")
+        return []
+    except json.JSONDecodeError:
+        log_error(f"JSON decode error fetching notifications for {username}. Response: {response.text[:200]}")
+        return []
+
+def _get_problems_data_api(username: str, limit: int = 20) -> List[Dict]:
+    """Fetches active problems for a citizen via the Next.js API."""
+    try:
+        url = f"{BASE_URL}/api/problems?citizen={username}&status=active&limit={limit}"
+        response = requests.get(url, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "problems" in data:
+            return data["problems"]
+        log_warning(f"Failed to get problems for {username} from API: {data.get('error')}")
+        return []
+    except requests.exceptions.RequestException as e:
+        log_error(f"API request error fetching problems for {username}: {e}")
+        return []
+    except json.JSONDecodeError:
+        log_error(f"JSON decode error fetching problems for {username}. Response: {response.text[:200]}")
+        return []
+
 def _get_citizen_problems(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
     """Get latest 50 PROBLEMS where Citizen=Username."""
     try:
