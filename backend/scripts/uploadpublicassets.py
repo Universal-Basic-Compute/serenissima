@@ -141,7 +141,12 @@ def main():
     load_dotenv(dotenv_path=dotenv_path)
 
     parser = argparse.ArgumentParser(description="Téléverser des assets publics vers le serveur.")
-    parser.add_argument("source_directory", help="Le dossier local contenant les assets à téléverser.")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--source_directory", help="Le dossier local contenant les assets à téléverser.")
+    group.add_argument("--image", help="Le chemin complet vers un fichier image unique à téléverser.")
+    
+    parser.add_argument("--destination_path_on_server", default="",
+                        help="Le chemin de destination relatif sur le serveur pour un fichier unique (ex: images/avatars). Si non fourni pour une image unique, elle sera placée à la racine des assets publics du type d'image (ex: images/nom_fichier.png).")
     parser.add_argument("--api_url", default=os.getenv("FASTAPI_BACKEND_URL", DEFAULT_FASTAPI_URL),
                         help="L'URL de base de l'API FastAPI (par défaut: https://backend.serenissima.ai/ ou FASTAPI_BACKEND_URL de .env).")
     parser.add_argument("--api_key", default=os.getenv("UPLOAD_API_KEY"),
@@ -153,33 +158,61 @@ def main():
         print("Erreur: La clé API de téléversement est requise. Fournissez-la via --api_key ou la variable d'environnement UPLOAD_API_KEY.")
         return
 
-    source_dir = os.path.abspath(args.source_directory)
-    if not os.path.isdir(source_dir):
-        print(f"Erreur: Le dossier source '{source_dir}' n'existe pas ou n'est pas un dossier.")
-        return
-
-    print(f"Dossier source : {source_dir}")
     print(f"URL de l'API   : {args.api_url}")
     print(f"Clé API        : {'*' * (len(args.api_key) - 3) + args.api_key[-3:] if len(args.api_key) > 3 else '***'}")
 
     successful_uploads = 0
     failed_uploads = 0
 
-    for root, _, files in os.walk(source_dir):
-        for filename in files:
-            local_file_path = os.path.join(root, filename)
-            
-            # Calculer le chemin de destination relatif par rapport au dossier source
-            relative_path_to_file = os.path.relpath(local_file_path, source_dir)
-            # Le chemin de destination pour l'API est le dossier parent du fichier relatif
-            destination_on_server = os.path.dirname(relative_path_to_file)
-            # Remplacer les séparateurs de chemin Windows par des slashes pour l'URL/API
-            destination_on_server = destination_on_server.replace(os.path.sep, '/')
+    if args.image:
+        image_path = os.path.abspath(args.image)
+        if not os.path.isfile(image_path):
+            print(f"Erreur: Le fichier image '{image_path}' n'existe pas ou n'est pas un fichier.")
+            return
+        
+        print(f"Fichier image source : {image_path}")
+        
+        destination_on_server = args.destination_path_on_server.replace(os.path.sep, '/')
+        if not destination_on_server:
+            # Si aucune destination n'est fournie, essayons de deviner un chemin de base
+            # Par exemple, si le fichier est dans un dossier 'images/buildings', utiliser 'images/buildings'
+            # Sinon, le placer à la racine du type d'asset (ex: 'images/')
+            # Pour une image unique, il est souvent préférable de spécifier la destination.
+            # Ici, on va juste utiliser le nom du fichier à la racine si non spécifié.
+            # Ou, si on veut être plus intelligent, on pourrait essayer de déduire à partir du chemin local.
+            # Pour l'instant, si vide, on le met à la racine du bucket d'upload (qui est géré par l'API /api/upload-asset)
+            # L'API /api/upload-asset s'attend à un 'destination_path' qui est le dossier.
+            # Si args.destination_path_on_server est vide, cela signifie la racine du bucket.
+            print(f"Chemin de destination sur le serveur : '{destination_on_server}' (racine du bucket d'upload ou chemin spécifié par l'API si vide ici)")
 
-            if upload_file(args.api_url, args.api_key, local_file_path, destination_on_server):
-                successful_uploads += 1
-            else:
-                failed_uploads += 1
+        if upload_file(args.api_url, args.api_key, image_path, destination_on_server):
+            successful_uploads += 1
+        else:
+            failed_uploads += 1
+
+    elif args.source_directory:
+        source_dir = os.path.abspath(args.source_directory)
+        if not os.path.isdir(source_dir):
+            print(f"Erreur: Le dossier source '{source_dir}' n'existe pas ou n'est pas un dossier.")
+            return
+
+        print(f"Dossier source : {source_dir}")
+
+        for root, _, files in os.walk(source_dir):
+            for filename in files:
+                local_file_path = os.path.join(root, filename)
+                
+                # Calculer le chemin de destination relatif par rapport au dossier source
+                relative_path_to_file = os.path.relpath(local_file_path, source_dir)
+                # Le chemin de destination pour l'API est le dossier parent du fichier relatif
+                destination_on_server = os.path.dirname(relative_path_to_file)
+                # Remplacer les séparateurs de chemin Windows par des slashes pour l'URL/API
+                destination_on_server = destination_on_server.replace(os.path.sep, '/')
+
+                if upload_file(args.api_url, args.api_key, local_file_path, destination_on_server):
+                    successful_uploads += 1
+                else:
+                    failed_uploads += 1
     
     print("\nRésumé du téléversement:")
     print(f"  Fichiers téléversés avec succès : {successful_uploads}")
