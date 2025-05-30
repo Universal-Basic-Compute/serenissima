@@ -39,32 +39,73 @@ def upload_file(api_url: str, api_key: str, file_path: str, destination_path: st
 
     try:
         print(f"Vérification de l'existence de '{check_url}'...")
-        head_response = requests.head(check_url, timeout=10)
-        
-        if head_response.status_code == 200:
-            remote_size_str = head_response.headers.get('Content-Length')
-            if remote_size_str:
-                try:
-                    remote_size = int(remote_size_str)
-                    local_size = os.path.getsize(file_path)
-                    if remote_size == local_size:
-                        print(f"Fichier '{file_path}' existe déjà sur le serveur avec la même taille ({local_size} octets). Saut.")
-                        return True  # Succès, car le fichier est déjà là et identique
+        # Attempt HEAD request
+        try:
+            head_response = requests.head(check_url, timeout=5, allow_redirects=True)
+            if head_response.status_code == 200:
+                content_type = head_response.headers.get('Content-Type', '').lower()
+                if not content_type.startswith('image/'): # Vérifier si c'est une image
+                    print(f"URL '{check_url}' (HEAD) a retourné Content-Type '{content_type}', pas le type attendu. Remplacement.")
+                else:
+                    remote_size_str = head_response.headers.get('Content-Length')
+                    if remote_size_str:
+                        try:
+                            remote_size = int(remote_size_str)
+                            local_size = os.path.getsize(file_path)
+                            if remote_size == local_size:
+                                print(f"Fichier '{file_path}' (type: {content_type}) existe déjà sur le serveur avec la même taille ({local_size} octets). Saut.")
+                                return True
+                            else:
+                                print(f"Fichier '{file_path}' (type: {content_type}) existe sur le serveur mais la taille diffère (local: {local_size}, distant: {remote_size}). Remplacement.")
+                        except ValueError:
+                            print(f"Taille distante invalide ('{remote_size_str}') pour '{check_url}' (type: {content_type}). Remplacement par précaution.")
                     else:
-                        print(f"Fichier '{file_path}' existe sur le serveur mais la taille diffère (local: {local_size}, distant: {remote_size}). Remplacement.")
-                except ValueError:
-                    print(f"Taille distante invalide ('{remote_size_str}') pour '{check_url}'. Remplacement par précaution.")
+                        print(f"Fichier '{file_path}' (type: {content_type}) existe sur le serveur mais la taille distante est inconnue (HEAD). Remplacement par précaution.")
+            elif head_response.status_code == 404:
+                print(f"Fichier '{check_url}' non trouvé (HEAD 404). Téléversement.")
             else:
-                print(f"Fichier '{file_path}' existe sur le serveur mais la taille distante est inconnue. Remplacement par précaution.")
-        elif head_response.status_code == 404:
-            print(f"Fichier '{check_url}' non trouvé. Téléversement.")
-        else:
-            print(f"Vérification de '{check_url}' a retourné le statut {head_response.status_code}. Tentative de téléversement.")
+                # HEAD a échoué avec un statut non-404 (ex: 405, 403). Essayer GET.
+                print(f"HEAD request pour '{check_url}' a retourné {head_response.status_code}. Essai avec GET stream.")
+                raise requests.exceptions.RequestException("FallbackToGET") # Déclencher le bloc except pour essayer GET
 
-    except requests.exceptions.Timeout:
-        print(f"Timeout lors de la vérification de '{check_url}'. Tentative de téléversement.")
-    except requests.exceptions.RequestException as e:
-        print(f"Erreur lors de la vérification de '{check_url}': {e}. Tentative de téléversement.")
+        except (requests.exceptions.Timeout, requests.exceptions.RequestException):
+            # Ce bloc attrape les timeouts de HEAD, les erreurs de connexion, ou le "FallbackToGET"
+            print(f"HEAD request pour '{check_url}' a échoué ou nécessite un fallback. Essai avec GET stream.")
+            try:
+                with requests.get(check_url, stream=True, timeout=10, allow_redirects=True) as get_response:
+                    get_response.raise_for_status() # Lève HTTPError pour les mauvaises réponses (4xx ou 5xx)
+                    
+                    content_type = get_response.headers.get('Content-Type', '').lower()
+                    if not content_type.startswith('image/'): # Vérifier si c'est une image
+                        print(f"URL '{check_url}' (GET) a retourné Content-Type '{content_type}', pas le type attendu. Remplacement.")
+                    else:
+                        remote_size_str = get_response.headers.get('Content-Length')
+                        if remote_size_str:
+                            try:
+                                remote_size = int(remote_size_str)
+                                local_size = os.path.getsize(file_path)
+                                if remote_size == local_size:
+                                    print(f"Fichier '{file_path}' (type: {content_type}) existe déjà sur le serveur avec la même taille ({local_size} octets) (vérifié via GET). Saut.")
+                                    return True
+                                else:
+                                    print(f"Fichier '{file_path}' (type: {content_type}) existe sur le serveur (vérifié via GET) mais la taille diffère (local: {local_size}, distant: {remote_size}). Remplacement.")
+                            except ValueError:
+                                print(f"Taille distante invalide ('{remote_size_str}') pour '{check_url}' (type: {content_type}, via GET). Remplacement par précaution.")
+                        else:
+                            print(f"Fichier '{file_path}' (type: {content_type}) existe sur le serveur (vérifié via GET) mais la taille distante est inconnue. Remplacement par précaution.")
+            
+            except requests.exceptions.HTTPError as e_http:
+                if e_http.response.status_code == 404:
+                    print(f"Fichier '{check_url}' non trouvé (GET stream 404). Téléversement.")
+                else:
+                    print(f"GET stream pour '{check_url}' a retourné une erreur HTTP {e_http.response.status_code}. Tentative de téléversement.")
+            except (requests.exceptions.Timeout, requests.exceptions.RequestException) as e_get:
+                print(f"GET stream pour '{check_url}' a aussi échoué ({e_get}). Tentative de téléversement.")
+    
+    except Exception as e: # Attraper d'autres erreurs potentielles comme os.path.getsize
+        print(f"Erreur inattendue lors de la pré-vérification de {file_path}: {e}. Tentative de téléversement.")
+
+    # Logique de téléversement originale
     except Exception as e: # Attraper d'autres erreurs potentielles comme os.path.getsize
         print(f"Erreur inattendue lors de la pré-vérification de {file_path}: {e}. Tentative de téléversement.")
 
