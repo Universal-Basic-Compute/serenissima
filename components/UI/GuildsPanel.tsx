@@ -119,7 +119,7 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
   };
 
   return (
-    <React.Fragment>
+    <>
       <div className={`${standalone ? 'p-8' : 'absolute top-20 left-20 right-4 bottom-4 bg-black/30 z-[55] rounded-lg p-4 overflow-auto'}`}> {/* Changed z-40 to z-[55] */}
         <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-6">
@@ -227,7 +227,7 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
         )}
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -290,7 +290,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
     }
   }, []);
   return (
-    <React.Fragment>
+    <>
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Header with banner image */}
         <div 
