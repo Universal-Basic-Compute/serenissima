@@ -119,127 +119,123 @@ const CitizenActivitiesAndNeedsArticle: React.FC<CitizenActivitiesAndNeedsArticl
             ))}
           </div>
 
-          {/* Nouvelle section : Calendrier Quotidien par Classe Sociale */}
-          <h3 className="text-2xl font-serif text-amber-700 mt-8 mb-6">Calendrier Quotidien Typique par Classe Sociale (XVe siècle, Venise)</h3>
+          {/* New Section: Daily Schedule by Social Class */}
+          <h3 className="text-2xl font-serif text-amber-700 mt-8 mb-6">Typical Daily Schedule by Social Class (15th Century Venice)</h3>
           <p className="mb-6 text-sm italic">
-            Ces emplois du temps sont une représentation généralisée et peuvent varier en fonction des jours spécifiques, des saisons, des obligations religieuses et des événements personnels. Ils visent à donner un aperçu du rythme de vie de chaque classe.
+            These schedules are generalized representations and can vary based on specific days, seasons, religious obligations, and personal events. They aim to provide an overview of the rhythm of life for each class.
           </p>
           
           {(() => {
             const socialClassSchedules = [
               {
-                name: "Facchini (Journaliers)",
+                name: "Facchini (Day Laborers)",
                 icon: <FaBriefcase className="mr-2 text-amber-700" />,
                 schedule: [
-                  { type: "Repos", start: 21, end: 5, color: "bg-sky-600", label: "R" },
-                  { type: "Travail", start: 5, end: 12, color: "bg-orange-500", label: "T" },
-                  { type: "Consommation/Activités", start: 12, end: 13, color: "bg-emerald-500", label: "A" },
-                  { type: "Travail", start: 13, end: 19, color: "bg-orange-500", label: "T" },
-                  { type: "Consommation/Activités", start: 19, end: 21, color: "bg-emerald-500", label: "A" },
+                  { type: "Rest", start: 21, end: 5, color: "bg-sky-600", label: "R" },
+                  { type: "Work", start: 5, end: 12, color: "bg-orange-500", label: "W" },
+                  { type: "Consumption/Activities", start: 12, end: 13, color: "bg-emerald-500", label: "A" },
+                  { type: "Work", start: 13, end: 19, color: "bg-orange-500", label: "W" },
+                  { type: "Consumption/Activities", start: 19, end: 21, color: "bg-emerald-500", label: "A" },
                 ],
                 totals: { rest: 8, work: 13, activities: 3 },
-                detailsTitle: "Activités typiques et particularités:",
+                detailsTitle: "Typical Activities & Particularities:",
                 details: [
-                  "Repas rapides et frugaux (ex: pain, oignons, vin dilué).",
-                  "Fréquentation de tavernes modestes le soir pour socialiser.",
-                  "Participation obligatoire à la messe dominicale et aux principales fêtes religieuses.",
-                  "Travail physiquement exigeant, souvent dépendant des arrivages au port ou des besoins des marchands.",
+                  "Quick and frugal meals (e.g., bread, onions, diluted wine).",
+                  "Frequent modest taverns in the evening to socialize.",
+                  "Mandatory attendance at Sunday Mass and major religious festivals.",
+                  "Physically demanding work, often dependent on port arrivals or merchant needs.",
                 ],
               },
               {
-                name: "Popolani (Artisans, Petits Commerçants)",
+                name: "Popolani (Artisans, Small Shopkeepers)",
                 icon: <FaCog className="mr-2 text-amber-700" />,
                 schedule: [
-                  { type: "Repos", start: 22, end: 6, color: "bg-sky-600", label: "R" },
-                  { type: "Travail", start: 6, end: 12, color: "bg-orange-500", label: "T" },
-                  { type: "Consommation/Activités", start: 12, end: 14, color: "bg-emerald-500", label: "A" },
-                  { type: "Travail", start: 14, end: 18, color: "bg-orange-500", label: "T" },
-                  { type: "Consommation/Activités", start: 18, end: 22, color: "bg-emerald-500", label: "A" },
+                  { type: "Rest", start: 22, end: 6, color: "bg-sky-600", label: "R" },
+                  { type: "Work", start: 6, end: 12, color: "bg-orange-500", label: "W" },
+                  { type: "Consumption/Activities", start: 12, end: 14, color: "bg-emerald-500", label: "A" },
+                  { type: "Work", start: 14, end: 18, color: "bg-orange-500", label: "W" },
+                  { type: "Consumption/Activities", start: 18, end: 22, color: "bg-emerald-500", label: "A" },
                 ],
                 totals: { rest: 8, work: 10, activities: 6 },
-                detailsTitle: "Activités typiques et particularités:",
+                detailsTitle: "Typical Activities & Particularities:",
                 details: [
-                  "Repas pris en famille, souvent à l'atelier ou au domicile.",
-                  "Visites au marché (ex: Rialto) pour les provisions, notamment le samedi.",
-                  "Participation aux fêtes de quartier (sestiere) et processions religieuses.",
-                  "Engagement dans les activités de leur guilde (Scuola); réunions, devoirs religieux et sociaux.",
+                  "Meals taken with family, often in the workshop or home.",
+                  "Visits to the market (e.g., Rialto) for provisions, especially on Saturdays.",
+                  "Participation in neighborhood (sestiere) festivals and religious processions.",
+                  "Engagement in their guild (Scuola) activities; meetings, religious and social duties.",
                 ],
               },
               {
-                name: "Cittadini (Bourgeoisie, Marchands, Fonctionnaires)",
+                name: "Cittadini (Bourgeoisie, Merchants, Officials)",
                 icon: <FaShip className="mr-2 text-amber-700" />,
                 schedule: [
-                  { type: "Repos", start: 23, end: 6, color: "bg-sky-600", label: "R" },
-                  { type: "Consommation/Activités", start: 6, end: 7, color: "bg-emerald-500", label: "A" }, // Préparation, petit-déjeuner
-                  { type: "Travail", start: 7, end: 12, color: "bg-orange-500", label: "T" }, // Bureau, commerce
-                  { type: "Consommation/Activités", start: 12, end: 14, color: "bg-emerald-500", label: "A" }, // Déjeuner, affaires
-                  { type: "Travail", start: 14, end: 17, color: "bg-orange-500", label: "T" }, // Suite affaires
-                  { type: "Consommation/Activités", start: 17, end: 23, color: "bg-emerald-500", label: "A" }, // Social, dîner, loisirs
+                  { type: "Rest", start: 23, end: 6, color: "bg-sky-600", label: "R" },
+                  { type: "Consumption/Activities", start: 6, end: 7, color: "bg-emerald-500", label: "A" }, // Preparation, breakfast
+                  { type: "Work", start: 7, end: 12, color: "bg-orange-500", label: "W" }, // Office, trade
+                  { type: "Consumption/Activities", start: 12, end: 14, color: "bg-emerald-500", label: "A" }, // Lunch, business
+                  { type: "Work", start: 14, end: 17, color: "bg-orange-500", label: "W" }, // Continued business
+                  { type: "Consumption/Activities", start: 17, end: 23, color: "bg-emerald-500", label: "A" }, // Social, dinner, leisure
                 ],
                 totals: { rest: 7, work: 8, activities: 9 },
-                detailsTitle: "Activités typiques et particularités:",
+                detailsTitle: "Typical Activities & Particularities:",
                 details: [
-                  "Petit-déjeuner souvent léger, parfois combiné à des discussions d'affaires.",
-                  "Déjeuner plus formel, pouvant s'étendre pour des négociations.",
-                  "Réceptions, banquets, et visites sociales en soirée.",
-                  "Fréquentation de spectacles (théâtre, musique) si disponibles.",
-                  "Participation active aux réunions des Scuole Grandi ou des guildes marchandes.",
-                  "Gestion de la correspondance commerciale, tenue des livres de comptes.",
+                  "Often light breakfast, sometimes combined with business discussions.",
+                  "More formal lunch, which could extend for negotiations.",
+                  "Receptions, banquets, and social visits in the evening.",
+                  "Attendance at performances (theatre, music) if available.",
+                  "Active participation in meetings of the Scuole Grandi or merchant guilds.",
+                  "Management of commercial correspondence, bookkeeping.",
                 ],
               },
               {
-                name: "Nobili (Noblesse Patricienne)",
-                icon: <FaLandmark className="mr-2 text-amber-700" />, // Using FaLandmark as an example
+                name: "Nobili (Patrician Nobility)",
+                icon: <FaLandmark className="mr-2 text-amber-700" />,
                 schedule: [
-                  { type: "Repos", start: 0, end: 8, color: "bg-sky-600", label: "R" },
-                  { type: "Consommation/Activités", start: 8, end: 9, color: "bg-emerald-500", label: "A" }, // Toilette, prière, petit-déjeuner
-                  { type: "Travail", start: 9, end: 12, color: "bg-orange-500", label: "T" }, // Conseils, affaires d'État
-                  { type: "Consommation/Activités", start: 12, end: 15, color: "bg-emerald-500", label: "A" }, // Déjeuner, socialisation
-                  { type: "Travail", start: 15, end: 17, color: "bg-orange-500", label: "T" }, // Affaires personnelles, gestion des biens
-                  { type: "Consommation/Activités", start: 17, end: 0, color: "bg-emerald-500", label: "A" }, // Visites, réceptions, loisirs, politique informelle
+                  { type: "Rest", start: 0, end: 8, color: "bg-sky-600", label: "R" },
+                  { type: "Consumption/Activities", start: 8, end: 0, color: "bg-emerald-500", label: "A" }, // Covers 8 AM to midnight
                 ],
-                totals: { rest: 8, work: 5, activities: 11 },
-                detailsTitle: "Activités typiques et particularités:",
+                totals: { rest: 8, work: 0, activities: 16 }, // Work is 0, Activities is 11 + 5 = 16
+                detailsTitle: "Typical Activities & Particularities:",
                 details: [
-                  "Matinée consacrée à la toilette (souvent longue et élaborée), prières, et gestion des affaires domestiques.",
-                  "Participation aux conseils gouvernementaux (Grand Conseil, Sénat, Conseil des Dix) selon leur rôle.",
-                  "Longs repas sociaux, souvent utilisés pour des discussions politiques ou d'affaires.",
-                  "Après-midi et soirées dédiées aux visites, réceptions, jeux (cartes, échecs), musique, danse, et parfois théâtre ou opéra.",
-                  "Engagement dans la politique informelle, maintien des réseaux d'influence.",
+                  "Mornings dedicated to elaborate grooming, prayers, and managing household affairs.",
+                  "Participation in state councils (Great Council, Senate, Council of Ten) as a social and political obligation, part of their societal role and power maintenance.",
+                  "Extended social meals, often used for political discussions and networking.",
+                  "Afternoons and evenings dedicated to social visits, receptions, games (cards, chess), music, dance, and occasionally theatre or opera.",
+                  "Engagement in informal politics and maintaining networks of influence.",
                 ],
               },
               {
-                name: "Forestieri (Marchands Étrangers)",
+                name: "Forestieri (Foreign Merchants)",
                 icon: <FaShip className="mr-2 text-amber-700" />,
                 schedule: [
-                  { type: "Consommation/Activités", start: 5, end: 6, color: "bg-emerald-500", label: "A" }, // Préparation
-                  { type: "Travail", start: 6, end: 12, color: "bg-orange-500", label: "T" }, // Affaires matinales
-                  { type: "Consommation/Activités", start: 12, end: 13, color: "bg-emerald-500", label: "A" }, // Repas d'affaires
-                  { type: "Travail", start: 13, end: 20, color: "bg-orange-500", label: "T" }, // Affaires après-midi/soir
-                  { type: "Consommation/Activités", start: 20, end: 23, color: "bg-emerald-500", label: "A" }, // Dîners stratégiques
-                  { type: "Repos", start: 23, end: 5, color: "bg-sky-600", label: "R" },
+                  { type: "Consumption/Activities", start: 5, end: 6, color: "bg-emerald-500", label: "A" }, // Preparation
+                  { type: "Work", start: 6, end: 12, color: "bg-orange-500", label: "W" }, // Morning business
+                  { type: "Consumption/Activities", start: 12, end: 13, color: "bg-emerald-500", label: "A" }, // Business lunch
+                  { type: "Work", start: 13, end: 20, color: "bg-orange-500", label: "W" }, // Afternoon/evening business
+                  { type: "Consumption/Activities", start: 20, end: 23, color: "bg-emerald-500", label: "A" }, // Strategic dinners
+                  { type: "Rest", start: 23, end: 5, color: "bg-sky-600", label: "R" },
                 ],
-                totals: { rest: 6, work: 13, activities: 5 }, // Adjusted total activities
-                detailsTitle: "Détail des Activités (journée type pendant le séjour):",
+                totals: { rest: 6, work: 13, activities: 5 },
+                detailsTitle: "Activity Details (typical day during stay):",
                 activityDetails: {
                   work: [
-                    "6h-8h: Fondaco/douanes, formalités administratives, organisation de la journée.",
-                    "8h-12h: Rialto - négociations intensives, ventes, achats, recherche d'informations.",
-                    "13h-16h: Visites aux ateliers des fournisseurs, vérification de la qualité des marchandises commandées.",
-                    "16h-18h: Rencontres avec les banquiers, gestion des lettres de change, contrats notariés.",
-                    "18h-20h: Préparation du chargement pour le retour, inventaires, dernières instructions aux agents locaux.",
+                    "6h-8h: Fondaco/customs, administrative formalities, day planning.",
+                    "8h-12h: Rialto - intensive negotiations, sales, purchases, information gathering.",
+                    "13h-16h: Visits to suppliers' workshops, checking the quality of ordered goods.",
+                    "16h-18h: Meetings with bankers, managing bills of exchange, notarized contracts.",
+                    "18h-20h: Preparing return cargo, inventories, final instructions to local agents.",
                   ],
                   consumption: [
-                    "5h-6h: Préparation rapide, petit-déjeuner simple à l'auberge ou au Fondaco.",
-                    "12h-13h: Repas d'affaires rapide mais crucial avec des partenaires locaux ou d'autres marchands étrangers.",
-                    "20h-23h: Dîners stratégiques pour établir des contacts, négocier des accords futurs, ou obtenir des informations privilégiées.",
+                    "5h-6h: Quick preparation, simple breakfast at the inn or Fondaco.",
+                    "12h-13h: Quick but crucial business lunch with local partners or other foreign merchants.",
+                    "20h-23h: Strategic dinners to establish contacts, negotiate future deals, or obtain privileged information.",
                   ],
                   particularities: [
-                    "Logement principal au Fondaco dei Tedeschi (pour les Allemands), Fondaco dei Turchi, ou dans des auberges près du Rialto.",
-                    "Temps à Venise généralement limité (ex: 2-4 semaines), donc journées de travail maximisées.",
-                    "Peu de temps pour les loisirs personnels; les activités sociales sont souvent orientées affaires.",
-                    "Dimanche peut être un jour légèrement plus léger, utilisé pour des visites culturelles (églises, reliques) ou pour du repos relatif, mais toujours avec un œil sur les affaires.",
-                    "Souvent accompagnés d'interprètes ou de courtiers locaux (sensali) pour naviguer le marché vénitien.",
+                    "Main lodging at Fondaco dei Tedeschi (for Germans), Fondaco dei Turchi, or inns near Rialto.",
+                    "Time in Venice generally limited (e.g., 2-4 weeks), so workdays are maximized.",
+                    "Little time for personal leisure; social activities are often business-oriented.",
+                    "Sunday may be a slightly lighter day, used for cultural visits (churches, relics) or relative rest, but always with an eye on business.",
+                    "Often accompanied by interpreters or local brokers (sensali) to navigate the Venetian market.",
                   ],
                 },
               },
@@ -295,9 +291,9 @@ const CitizenActivitiesAndNeedsArticle: React.FC<CitizenActivitiesAndNeedsArticl
                     </h4>
                     <HourBar schedule={sc.schedule} />
                     <p className="text-xs text-amber-700 mb-2">
-                      <span className="inline-block w-3 h-3 bg-sky-600 mr-1 rounded-sm"></span> Repos: {sc.totals.rest}h |
-                      <span className="inline-block w-3 h-3 bg-orange-500 ml-2 mr-1 rounded-sm"></span> Travail: {sc.totals.work}h |
-                      <span className="inline-block w-3 h-3 bg-emerald-500 ml-2 mr-1 rounded-sm"></span> Consommation/Activités: {sc.totals.activities}h
+                      <span className="inline-block w-3 h-3 bg-sky-600 mr-1 rounded-sm"></span> Rest: {sc.totals.rest}h |
+                      <span className="inline-block w-3 h-3 bg-orange-500 ml-2 mr-1 rounded-sm"></span> Work: {sc.totals.work}h |
+                      <span className="inline-block w-3 h-3 bg-emerald-500 ml-2 mr-1 rounded-sm"></span> Consumption/Activities: {sc.totals.activities}h
                     </p>
                     <h5 className="font-semibold text-amber-700 mt-3 mb-1 text-sm">{sc.detailsTitle}</h5>
                     <ul className="list-disc list-inside text-sm space-y-1 pl-1">
@@ -307,7 +303,7 @@ const CitizenActivitiesAndNeedsArticle: React.FC<CitizenActivitiesAndNeedsArticl
                       <>
                         {sc.activityDetails.work && (
                           <>
-                            <h6 className="font-semibold text-amber-600 mt-2 mb-0.5 text-xs">Détail Travail:</h6>
+                            <h6 className="font-semibold text-amber-600 mt-2 mb-0.5 text-xs">Work Details:</h6>
                             <ul className="list-disc list-inside text-xs space-y-0.5 pl-2">
                               {sc.activityDetails.work.map((item, idx) => <li key={`work-${idx}`}>{item}</li>)}
                             </ul>
@@ -315,7 +311,7 @@ const CitizenActivitiesAndNeedsArticle: React.FC<CitizenActivitiesAndNeedsArticl
                         )}
                         {sc.activityDetails.consumption && (
                           <>
-                            <h6 className="font-semibold text-amber-600 mt-2 mb-0.5 text-xs">Détail Consommation/Activités:</h6>
+                            <h6 className="font-semibold text-amber-600 mt-2 mb-0.5 text-xs">Consumption/Activities Details:</h6>
                             <ul className="list-disc list-inside text-xs space-y-0.5 pl-2">
                               {sc.activityDetails.consumption.map((item, idx) => <li key={`cons-${idx}`}>{item}</li>)}
                             </ul>
@@ -323,7 +319,7 @@ const CitizenActivitiesAndNeedsArticle: React.FC<CitizenActivitiesAndNeedsArticl
                         )}
                         {sc.activityDetails.particularities && (
                            <>
-                            <h6 className="font-semibold text-amber-600 mt-2 mb-0.5 text-xs">Particularités:</h6>
+                            <h6 className="font-semibold text-amber-600 mt-2 mb-0.5 text-xs">Particularities:</h6>
                             <ul className="list-disc list-inside text-xs space-y-0.5 pl-2">
                               {sc.activityDetails.particularities.map((item, idx) => <li key={`part-${idx}`}>{item}</li>)}
                             </ul>
@@ -336,7 +332,7 @@ const CitizenActivitiesAndNeedsArticle: React.FC<CitizenActivitiesAndNeedsArticl
               </div>
             );
           })()}
-          {/* Fin de la nouvelle section */}
+          {/* End of new section */}
 
           <h3 className="text-2xl font-serif text-amber-700 mt-8 mb-4">Observing and Interacting</h3>
           <p className="mb-4">
