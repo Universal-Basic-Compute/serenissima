@@ -14,12 +14,20 @@ import colorama # Added for colored logs
 from colorama import Fore, Style # Added for colored logs
 from pprint import pformat # Added for pretty printing data
 import textwrap # Added for text wrapping in logs
+import logging # Added to define log
 
 # Initialize colorama
 colorama.init(autoreset=True)
 
-# Configuration for API calls (ensure BASE_URL is defined if not already)
-# BASE_URL is already defined in this script.
+# Setup logging
+log = logging.getLogger(__name__)
+logging.basicConfig(level=os.getenv('LOG_LEVEL', 'INFO').upper(), 
+                    format='%(asctime)s - %(levelname)s - %(module)s - %(message)s',
+                    stream=sys.stdout)
+
+
+# Configuration for API calls
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
 # log is already defined in this script.
 
 def _get_notifications_data_api(username: str, limit: int = 20) -> List[Dict]:
