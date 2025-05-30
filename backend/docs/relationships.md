@@ -58,12 +58,21 @@ The `_calculate_trust_score_contributions_from_interactions` function aggregates
 *   **Active Loans**:
     *   Adds **`PrincipalAmount / 100,000`** to `TrustScore` for each loan between them where `LOANS.Status` is "active".
     *   Logged in `Notes` as: `loans_interaction`.
-*   **Active Contracts**:
+*   **Active Contracts (General)**:
     *   Adds **`(PricePerResource * TargetAmount) / 100`** to `TrustScore` for each contract where the two citizens are `Buyer` and `Seller` (or vice-versa) and `CONTRACTS.EndAt` is in the future.
     *   Logged in `Notes` as: `contracts_interaction`.
-*   **Recent Transactions**:
+*   **Recent Transactions (General)**:
     *   Adds **`Price / 10,000`** to `TrustScore` for each transaction between them in the last 24 hours (based on `TRANSACTIONS.ExecutedAt`).
     *   Logged in `Notes` as: `transactions_interaction`.
+*   **Activity-Based Interactions (New)**:
+    *   Specific activities now directly influence `TrustScore` upon their successful completion or failure. The magnitude of change depends on the activity's nature and outcome.
+    *   Examples:
+        *   `deliver_resource_batch`: Successful delivery & payment increases trust between deliverer/recipient and payer/seller. Failures decrease it.
+        *   `fetch_resource`: Successful fetch & payment increases trust between fetcher/buyer and buyer/seller. Failures decrease it.
+        *   `fetch_for_logistics_client`: Successful service increases trust between porter/client and client/goods_seller & client/porter_guild. Failures decrease it.
+        *   `construct_building`: Project completion significantly increases trust between worker/client. Progress offers minor increases.
+        *   `eat_at_tavern`: Successful purchase increases trust between citizen/tavern_operator. Insufficient funds decrease it.
+    *   Logged in `Notes` with specific tags like: `activity_delivery_success`, `activity_fetch_failure`, `activity_construction_milestone`, etc.
 *   **Employee Fed (Employee to Employer)**:
     *   If Citizen A is an employee of Citizen B (Citizen B is the employer):
         *   Checks `CITIZENS.AteAt` for Citizen A (the employee).
