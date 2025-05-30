@@ -27,7 +27,7 @@ def try_create(
     citizen_username: str,    # Username
     contract_custom_id: Optional[str],# Custom ContractId string of the contract
     from_building_custom_id: Optional[str], # Custom BuildingId of the source building
-    to_building_custom_id: str,   # Custom BuildingId of the destination building
+    to_building_custom_id: Optional[str],   # Custom BuildingId of the destination building, now optional
     resource_type_id: str, # Renamed for clarity
     amount: float,
     path_data: Optional[Dict], # Path data from transport API
@@ -105,8 +105,10 @@ def try_create(
         # This means original was None, and dynamic determination failed (no nearby, no stock, etc.)
         log.warning(f"Could not determine a valid source building for {citizen_username} to fetch {resource_type_id}. Aborting fetch_resource creation.")
         return None
-
-    log.info(f"Attempting to create resource fetching activity for {citizen_username} from {final_from_building_custom_id or 'unknown source'} to {to_building_custom_id}")
+    
+    # If to_building_custom_id is None, it implies the citizen is fetching for their own inventory (e.g., homeless)
+    destination_log_name = to_building_custom_id if to_building_custom_id else "inventaire personnel"
+    log.info(f"Attempting to create resource fetching activity for {citizen_username} from {final_from_building_custom_id or 'unknown source'} to {destination_log_name}")
 
     try:
         # VENICE_TIMEZONE is imported at the top of the file now, but current_time_utc is preferred for timestamps
@@ -135,7 +137,9 @@ def try_create(
         activity_id_str = f"fetch_{citizen_custom_id}_{uuid.uuid4()}"
         
         from_building_name = final_from_building_custom_id if final_from_building_custom_id else "an unknown location"
-        to_building_name = to_building_custom_id # Assuming to_building_custom_id is always provided
+        # to_building_name = to_building_custom_id # Assuming to_building_custom_id is always provided
+        to_building_name_for_log = to_building_custom_id if to_building_custom_id else "inventaire personnel"
+
 
         activity_payload = {
             "ActivityId": activity_id_str,
@@ -155,11 +159,14 @@ def try_create(
         resource_name_display = resource_defs.get(resource_type_id, {}).get('name', resource_type_id)
         from_bldg_rec = get_building_record(tables, final_from_building_custom_id) if final_from_building_custom_id else None
         from_bldg_name_display = from_bldg_rec['fields'].get('Name', from_bldg_rec['fields'].get('Type', final_from_building_custom_id)) if from_bldg_rec else (from_building_name if from_building_name != "unknown source" else "an unknown location")
-        to_bldg_rec = get_building_record(tables, to_building_custom_id)
-        to_bldg_name_display = to_bldg_rec['fields'].get('Name', to_bldg_rec['fields'].get('Type', to_building_custom_id)) if to_bldg_rec else to_building_name
-
+        
+        to_bldg_name_display = "inventaire personnel"
+        if to_building_custom_id:
+            to_bldg_rec = get_building_record(tables, to_building_custom_id)
+            to_bldg_name_display = to_bldg_rec['fields'].get('Name', to_bldg_rec['fields'].get('Type', to_building_custom_id)) if to_bldg_rec else to_building_custom_id
+        
         activity_payload["Notes"] = f"🚚 Fetching **{amount:,.0f}** units of **{resource_name_display}** from **{from_bldg_name_display}** to **{to_bldg_name_display}**"
-        activity_payload["Description"] = f"Fetching {amount:,.0f} {resource_name_display} from {from_bldg_name_display}"
+        activity_payload["Description"] = f"Fetching {amount:,.0f} {resource_name_display} from {from_bldg_name_display} to {to_bldg_name_display}"
         activity_payload["Status"] = "created"
 
         if contract_custom_id: # Changed from contract_airtable_id

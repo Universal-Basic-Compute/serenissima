@@ -1402,12 +1402,16 @@ def _handle_shopping_tasks(
                     if path_to_seller and path_to_seller.get('success'):
                         home_custom_id_for_delivery = home_record['fields'].get('BuildingId')
                         contract_custom_id_for_sell = contract_rec['fields'].get('ContractId', contract_rec['id'])
+                        # If homeless, home_custom_id_for_delivery will be None.
+                        # The fetch_resource activity will handle this by putting items in inventory,
+                        # and the processor will correctly assign ownership to the citizen.
                         if try_create_resource_fetching_activity(
                             tables, citizen_airtable_id, citizen_custom_id, citizen_username,
-                            contract_custom_id_for_sell, seller_building_id, home_custom_id_for_delivery,
+                            contract_custom_id_for_sell, seller_building_id, 
+                            home_custom_id_for_delivery, # This can be None for homeless
                             res_id_to_buy, amount_to_buy, path_to_seller, now_utc_dt, resource_defs
                         ):
-                            log.info(f"{LogColors.OKGREEN}[Shopping] Citoyen {citizen_name}: Activité d'achat créée pour {res_id_to_buy}.{LogColors.ENDC}")
+                            log.info(f"{LogColors.OKGREEN}[Shopping] Citoyen {citizen_name}: Activité d'achat créée pour {res_id_to_buy}. Destination: {home_custom_id_for_delivery or 'Inventaire'}.{LogColors.ENDC}")
                             return True
             # If no suitable contract found for this resource_type, loop to next resource_type
         except Exception as e_shop:

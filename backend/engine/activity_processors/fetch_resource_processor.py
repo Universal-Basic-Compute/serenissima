@@ -149,9 +149,10 @@ def process(
 
     # contract_record is already fetched using contract_custom_id_from_activity if it was present.
     # If contract_custom_id_from_activity was None, contract_record will be None.
+    # destination_building_for_fetch_activity_custom_id is the ToBuilding from the activity, can be None.
     
     buyer_username_from_contract = None
-    seller_username_from_contract = None
+    seller_username_from_contract = None # Seller from the contract (if direct contract)
     price_per_resource = 0.0
 
     if contract_record: # contract_record is guaranteed to be valid here due to earlier checks if it's not None
@@ -163,58 +164,48 @@ def process(
     effective_buyer_username = None
     destination_building_for_fetch_activity_custom_id = activity_fields.get('ToBuilding')
 
-    # Determine effective_buyer_username based on contract type (public or direct)
-    # contract_record is guaranteed to be valid here due to earlier checks.
-    if buyer_username_from_contract and buyer_username_from_contract.lower() == 'public':
-        # Public sell: buyer is operator of the destination building of this fetch activity
-        if not destination_building_for_fetch_activity_custom_id:
-            log.error(f"Public sell contract for activity {activity_guid} but ToBuilding is missing in activity. Cannot determine effective buyer.")
-            return False
-        destination_building_record = get_building_record(tables, destination_building_for_fetch_activity_custom_id)
-        if not destination_building_record:
-            log.error(f"ToBuilding {destination_building_for_fetch_activity_custom_id} from activity {activity_guid} not found. Cannot determine effective buyer for public_sell.")
-            return False
-        effective_buyer_username = destination_building_record['fields'].get('RunBy') or destination_building_record['fields'].get('Owner')
-        log.info(f"Public sell contract for activity {activity_guid}. Effective buyer is operator of ToBuilding ({destination_building_for_fetch_activity_custom_id}): {effective_buyer_username}")
-    else:
-        # Regular contract: buyer is from the contract
-        effective_buyer_username = buyer_username_from_contract
-    
-    # The case for 'else: # No contract specified' (if contract_record was None) is handled by the initial check for contract_airtable_id and successful fetch.
+    # Determine effective_buyer_username
+    if contract_record:
+        buyer_username_from_contract = contract_fields.get('Buyer')
+        seller_username_from_contract = contract_fields.get('Seller') # Seller from the contract
+        price_per_resource = float(contract_fields.get('PricePerResource', 0))
 
-    if not effective_buyer_username: 
-        log.error(f"Could not determine effective buyer for activity {activity_guid}. Contract Buyer: {buyer_username_from_contract}.")
-        return False
-
-    if contract_record: # A contract exists
         if buyer_username_from_contract and buyer_username_from_contract.lower() == 'public':
-            # Public sell: buyer is operator of the destination building of this fetch activity
-            if not destination_building_for_fetch_activity_custom_id:
-                log.error(f"Public sell contract for activity {activity_guid} but ToBuilding is missing in activity. Cannot determine effective buyer.")
-                return False
+            # Public sell contract
+            if destination_building_for_fetch_activity_custom_id:
+                # Citizen is fetching for a specific building
+                destination_building_record = get_building_record(tables, destination_building_for_fetch_activity_custom_id)
+                if not destination_building_record:
+                    log.error(f"ToBuilding {destination_building_for_fetch_activity_custom_id} from activity {activity_guid} not found. Cannot determine effective buyer for public_sell.")
+                    return False
+                effective_buyer_username = destination_building_record['fields'].get('RunBy') or destination_building_record['fields'].get('Owner')
+                log.info(f"Public sell contract. Effective buyer is operator of ToBuilding ({destination_building_for_fetch_activity_custom_id}): {effective_buyer_username}")
+            else:
+                # Citizen is fetching for themselves (e.g., homeless person buying food)
+                effective_buyer_username = carrier_username
+                log.info(f"Public sell contract with no ToBuilding. Effective buyer is the carrier: {carrier_username}")
+        else:
+            # Direct contract: buyer is from the contract
+            effective_buyer_username = buyer_username_from_contract
+            log.info(f"Direct contract. Effective buyer is from contract: {effective_buyer_username}")
+    else:
+        # No contract specified (e.g., internal workshop fetch, or citizen fetching for self without a formal contract in activity)
+        price_per_resource = 0.0 # No contract, so price is effectively 0 for this transaction logic, or handled by other means
+        if destination_building_for_fetch_activity_custom_id:
+            # Fetching for a specific building (e.g., workshop restocking from a public source without a direct contract in activity)
             destination_building_record = get_building_record(tables, destination_building_for_fetch_activity_custom_id)
             if not destination_building_record:
-                log.error(f"ToBuilding {destination_building_for_fetch_activity_custom_id} from activity {activity_guid} not found. Cannot determine effective buyer for public_sell.")
+                log.error(f"ToBuilding {destination_building_for_fetch_activity_custom_id} from activity {activity_guid} not found. Cannot determine effective buyer for non-contract fetch.")
                 return False
             effective_buyer_username = destination_building_record['fields'].get('RunBy') or destination_building_record['fields'].get('Owner')
-            log.info(f"Public sell contract for activity {activity_guid}. Effective buyer is operator of ToBuilding ({destination_building_for_fetch_activity_custom_id}): {effective_buyer_username}")
+            log.info(f"No contract. Effective buyer is operator of ToBuilding ({destination_building_for_fetch_activity_custom_id}): {effective_buyer_username}")
         else:
-            # Regular contract: buyer is from the contract
-            effective_buyer_username = buyer_username_from_contract
-    else: # No contract specified (e.g., internal workshop fetch)
-        # Owner of resources should be the operator of the destination building of this fetch activity
-        if not destination_building_for_fetch_activity_custom_id:
-            log.error(f"No contract for activity {activity_guid} and ToBuilding is also missing. Cannot determine effective buyer.")
-            return False
-        destination_building_record = get_building_record(tables, destination_building_for_fetch_activity_custom_id)
-        if not destination_building_record:
-            log.error(f"ToBuilding {destination_building_for_fetch_activity_custom_id} from activity {activity_guid} not found. Cannot determine effective buyer for non-contract fetch.")
-            return False
-        effective_buyer_username = destination_building_record['fields'].get('RunBy') or destination_building_record['fields'].get('Owner')
-        log.info(f"No contract specified for fetch activity {activity_guid}. Effective buyer set to operator of ToBuilding ({destination_building_for_fetch_activity_custom_id}): {effective_buyer_username}")
+            # Fetching for self, no contract, no specific ToBuilding (e.g. homeless buying food and it goes to inventory)
+            effective_buyer_username = carrier_username
+            log.info(f"No contract and no ToBuilding. Effective buyer is the carrier: {carrier_username}")
 
-    if not effective_buyer_username: 
-        log.error(f"Could not determine effective buyer for activity {activity_guid}. Contract Buyer: {buyer_username_from_contract if contract_record else 'N/A'}.")
+    if not effective_buyer_username:
+        log.error(f"Could not determine effective buyer for activity {activity_guid}. Fallback.")
         return False
 
     # Fetch source building record using its custom BuildingId from the activity
@@ -305,10 +296,10 @@ def process(
         transaction_payload = {
             "Type": "resource_purchase_on_fetch",
             "AssetType": "contract" if contract_record else "internal_transfer",
-            "Asset": contract_custom_id_from_activity if contract_record else f"internal_{from_building_custom_id}_to_{destination_building_for_fetch_activity_custom_id}",
+            "Asset": contract_custom_id_from_activity if contract_record else f"internal_{from_building_custom_id}_to_{destination_building_for_fetch_activity_custom_id or 'inventory'}",
             "Seller": effective_seller_username,
-            "Buyer": effective_buyer_username, 
-            "Price": total_cost, # Will be 0 if no contract
+            "Buyer": effective_buyer_username,
+            "Price": total_cost, # Will be 0 if no contract or price is 0
             "Notes": json.dumps({
                 "resource_type": resource_id_to_fetch,
                 "amount": amount_to_purchase,
