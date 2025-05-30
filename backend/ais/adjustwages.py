@@ -621,9 +621,10 @@ def create_admin_notification(tables, ai_wage_adjustments: Dict[str, List[Dict]]
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 
-def process_ai_wage_adjustments(dry_run: bool = False):
+def process_ai_wage_adjustments(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
     """Main function to process AI wage adjustments."""
-    print(f"Starting AI wage adjustment process (dry_run={dry_run})")
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    print(f"Starting AI wage adjustment process (dry_run={dry_run}, kinos_model={model_status})")
     
     # Initialize Airtable connection
     tables = initialize_airtable()
@@ -819,11 +820,3 @@ if __name__ == "__main__":
     
     # Run the process
     process_ai_wage_adjustments(dry_run=args.dry_run, kinos_model_override_arg=args.model)
-
-# Add kinos_model_override_arg to process_ai_wage_adjustments definition
-def process_ai_wage_adjustments(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None): # Corrected definition
-    """Main function to process AI wage adjustments."""
-    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
-    print(f"Starting AI wage adjustment process (dry_run={dry_run}, kinos_model={model_status})")
-    
-    # Initialize Airtable connection
