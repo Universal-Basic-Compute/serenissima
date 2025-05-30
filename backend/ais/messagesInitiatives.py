@@ -501,8 +501,22 @@ def process_ai_message_initiatives(dry_run: bool = False, citizen1_arg: Optional
                 target_is_ai = False
                 if target_citizen_data and target_citizen_data.get('fields', {}).get('IsAI', False):
                     target_is_ai = True
-                    probability /= 10
-                    print(f"    -> Cible {target_username} est une IA. Probabilité de base ajustée à: {probability:.2%}")
+
+                if kinos_model_override_arg == "local":
+                    if target_is_ai:
+                        # Pour le modèle local, augmenter la probabilité IA-IA
+                        probability *= 2.0 
+                        print(f"    -> Modèle local & Cible {target_username} est une IA. Probabilité boostée à: {probability:.2%}")
+                    else: # Cible est Humain, modèle est local
+                        # Pour le modèle local, diminuer la probabilité IA-Humain
+                        probability /= 2.0
+                        print(f"    -> Modèle local & Cible {target_username} est HUMAIN. Probabilité pénalisée à: {probability:.2%}")
+                else: # Modèle n'est pas local (cloud)
+                    if target_is_ai:
+                        # Conserver la pénalité originale pour IA-IA avec les modèles cloud
+                        probability /= 10
+                        print(f"    -> Modèle Cloud & Cible {target_username} est une IA. Probabilité pénalisée (original) à: {probability:.2%}")
+                    # else: Pas d'ajustement spécifique pour IA-Humain avec modèle cloud dans le code original.
                 
                 # Vérifier les messages existants
                 if not _check_existing_messages(tables, ai_username, target_username):
