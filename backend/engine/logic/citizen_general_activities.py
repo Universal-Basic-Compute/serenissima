@@ -1630,15 +1630,32 @@ def process_citizen_activity(
             log.error(traceback.format_exc())
             # Continue to next handler if one fails, to not block all activity creation
 
-    # Fallback: If no activity was created by any handler
-    # Create idle if it's not rest time. If it is rest time, they should have gotten a rest activity.
-    if not is_rest_time_for_class(citizen_social_class, now_venice_dt):
-        log.info(f"{LogColors.OKBLUE}Citizen {citizen_name} ({citizen_social_class}): No specific activity created. Creating 'idle' activity.{LogColors.ENDC}")
+    # Fallback logic if no activity was created by primary handlers
+    log.info(f"{LogColors.OKBLUE}Citizen {citizen_name} ({citizen_social_class}): No specific activity from primary handlers. Evaluating fallback.{LogColors.ENDC}")
+
+    workplace_record_fb = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
+    workplace_type_fb = workplace_record_fb['fields'].get('Type') if workplace_record_fb else None
+
+    if is_work_time(citizen_social_class, now_venice_dt, workplace_type=workplace_type_fb):
+        log.info(f"{LogColors.OKBLUE}Fallback for {citizen_name}: Is work time, but no work task. Creating 'idle'.{LogColors.ENDC}")
+    elif is_leisure_time_for_class(citizen_social_class, now_venice_dt):
+        log.info(f"{LogColors.OKBLUE}Fallback for {citizen_name}: Is leisure time, but no leisure task. Creating 'idle'.{LogColors.ENDC}")
+    else: # Not work time AND not leisure time. "Consider it rest".
+        log.info(f"{LogColors.OKBLUE}Fallback for {citizen_name}: Not work or leisure. Attempting 'rest' via _handle_night_shelter.{LogColors.ENDC}")
+        # _handle_night_shelter itself checks is_rest_time_for_class.
+        # If it's not scheduled rest time, it will return False.
+        if _handle_night_shelter(*handler_args): # Pass the same handler_args
+            log.info(f"{LogColors.OKGREEN}Fallback for {citizen_name}: 'rest' activity successfully created by _handle_night_shelter.{LogColors.ENDC}")
+            return True # Activity created by the fallback rest attempt
+        else:
+            log.info(f"{LogColors.OKBLUE}Fallback for {citizen_name}: _handle_night_shelter did not create a rest activity. Creating 'idle'.{LogColors.ENDC}")
+    
+    # If we reach here, it means we decided to create 'idle' or the fallback rest attempt failed.
     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
     try_create_idle_activity(
         tables, citizen_custom_id, citizen_username, citizen_airtable_id,
         end_date_iso=idle_end_time_iso,
-        reason_message="No specific tasks available after evaluating all priorities.",
+        reason_message="No specific tasks available after evaluating all priorities, or fallback rest attempt failed.",
         current_time_utc=now_utc_dt
     )
     return True
