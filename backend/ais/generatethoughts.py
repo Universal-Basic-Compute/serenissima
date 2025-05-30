@@ -174,7 +174,7 @@ def get_citizens_for_thought_generation(tables: Dict[str, Table], specific_usern
     Otherwise, fetches all citizens currently in Venice.
     """
     try:
-        base_formula_parts = ["{{InVenice}}=1", "NOT(OR({{SocialClass}}='Facchini', {{SocialClass}}='Popolani'))"]
+        base_formula_parts = ["{InVenice}=1", "NOT(OR({SocialClass}='Facchini', {SocialClass}='Popolani'))"]
         
         if specific_username:
             base_formula_parts.append(f"{{Username}}='{_escape_airtable_value(specific_username)}'")
