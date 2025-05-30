@@ -200,17 +200,15 @@ def get_citizens_for_thought_generation(
             formula_parts.append(f"IS_AFTER({{LastActiveAt}}, DATETIME_PARSE('{seven_days_ago_venice}'))")
             description_string += ", are humans active in the last 7 days (including Facchini)"
             # Facchini included for humans
-        else: # Default case: AIs (excluding Facchini and Popolani) OR Humans (active in last 7 days, including Facchini and Popolani)
-            seven_days_ago_venice = (get_venice_time_now() - timedelta(days=7)).isoformat()
+        else: # Default case: AIs (excluding Facchini and Popolani) OR all Humans (including Facchini and Popolani)
             ai_condition = "AND({IsAI}=1, {SocialClass}!='Facchini', {SocialClass}!='Popolani')"
-            # Use .format() to avoid f-string parsing issues with literal braces
-            human_condition_template = "AND(OR({IsAI}=0, {IsAI}=BLANK()), IS_AFTER({LastActiveAt}, DATETIME_PARSE('{}')))"
-            human_condition = human_condition_template.format(seven_days_ago_venice)
+            # Human condition now includes all humans, not just recently active ones
+            human_condition = "(OR({IsAI}=0, {IsAI}=BLANK()))"
             
             # Combined condition: OR(ai_condition, human_condition)
             # This will be ANDed with the initial {InVenice}=1
             formula_parts.append(f"OR({ai_condition}, {human_condition})")
-            description_string += ", AIs (excluding Facchini and Popolani) OR active Humans (including Facchini and Popolani, last 7 days)"
+            description_string += ", AIs (excluding Facchini and Popolani) OR all Humans (including Facchini and Popolani)"
 
         final_formula = "AND(" + ", ".join(formula_parts) + ")"
         log.info(f"{LogColors.OKBLUE}Fetching citizens for thought generation ({description_string}) with formula: {final_formula}{LogColors.ENDC}")
