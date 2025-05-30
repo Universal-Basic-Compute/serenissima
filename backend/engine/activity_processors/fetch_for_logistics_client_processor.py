@@ -242,6 +242,38 @@ def process(
         client_record_after_goods_payment = get_citizen_record(tables, ultimate_buyer_username) # Refresh
         client_ducats_for_fee = float(client_record_after_goods_payment['fields'].get('Ducats', 0))
 
+        # Determine Porter Guild Operator first
+        porter_guild_operator_username = None 
+        logistics_contract_record = get_contract_record(tables, logistics_contract_id_custom)
+        if logistics_contract_record:
+            # The Seller of the logistics_service_request contract is the Porter Guild Operator
+            porter_guild_operator_username = logistics_contract_record['fields'].get('Seller') 
+        
+        if not porter_guild_operator_username:
+            # Fallback: Try to get from Porter's workplace if not in contract
+            porter_workplace_id_link = porter_record['fields'].get('Work') # This is Airtable Record ID (potentially a list)
+            if porter_workplace_id_link:
+                porter_workplace_airtable_id = None
+                if isinstance(porter_workplace_id_link, list):
+                    porter_workplace_airtable_id = porter_workplace_id_link[0] if porter_workplace_id_link else None
+                elif isinstance(porter_workplace_id_link, str): # Should be recXXXX
+                    porter_workplace_airtable_id = porter_workplace_id_link
+                
+                if porter_workplace_airtable_id:
+                    porter_workplace_record = tables['buildings'].get(porter_workplace_airtable_id) # Fetch by Airtable ID
+                    if porter_workplace_record:
+                        # Ensure the workplace is a porter_guild_hall
+                        if porter_workplace_record['fields'].get('Type') == 'porter_guild_hall':
+                            porter_guild_operator_username = porter_workplace_record['fields'].get('RunBy') or porter_workplace_record['fields'].get('Owner')
+                            log.info(f"Determined Porter Guild Operator '{porter_guild_operator_username}' from Porter's workplace {porter_workplace_record['fields'].get('BuildingId')}.")
+                        else:
+                            log.warning(f"Porter {porter_username}'s workplace {porter_workplace_record['fields'].get('BuildingId')} is not a 'porter_guild_hall'. Cannot determine operator from here.")
+                else:
+                    log.warning(f"Porter {porter_username} has no Work link or it's invalid. Cannot determine operator from workplace.")
+            else:
+                log.warning(f"Porter {porter_username} has no Work field. Cannot determine operator from workplace.")
+        
+        # Now check for funds
         if client_ducats_for_fee < total_service_fee:
             _update_activity_notes_with_failure_reason(tables, activity_id_airtable, f"Client {ultimate_buyer_username} has insufficient funds ({client_ducats_for_fee:.2f}) for service fee ({total_service_fee:.2f}).", "DELIVERY_FEE_FUNDS")
             # Goods delivered, but fee not paid. This is a problem. For now, activity fails.
