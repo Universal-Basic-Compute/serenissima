@@ -12,6 +12,85 @@ from pyairtable import Api, Table
 # Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.citizen_utils import find_citizen_by_identifier
+import logging # Added logging
+
+# Configuration for API calls
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
+log = logging.getLogger(__name__) # Ensure log is defined for helpers
+
+def _get_citizen_data_api(username: str) -> Optional[Dict]:
+    """Fetches citizen data via the Next.js API."""
+    try:
+        url = f"{BASE_URL}/api/citizens/{username}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and data.get("citizen"):
+            return data["citizen"]
+        log.warning(f"Failed to get citizen data for {username} from API: {data.get('error')}")
+        return None
+    except requests.exceptions.RequestException as e:
+        log.error(f"API request error fetching citizen data for {username}: {e}")
+        return None
+    except json.JSONDecodeError:
+        log.error(f"JSON decode error fetching citizen data for {username}. Response: {response.text[:200]}")
+        return None
+
+def _get_notifications_data_api(username: str, limit: int = 20) -> List[Dict]:
+    """Fetches recent notifications for a citizen via the Next.js API."""
+    try:
+        url = f"{BASE_URL}/api/notifications"
+        payload = {"citizen": username, "limit": limit}
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, json=payload, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "notifications" in data:
+            return data["notifications"]
+        log.warning(f"Failed to get notifications for {username} from API: {data.get('error')}")
+        return []
+    except requests.exceptions.RequestException as e:
+        log.error(f"API request error fetching notifications for {username}: {e}")
+        return []
+    except json.JSONDecodeError:
+        log.error(f"JSON decode error fetching notifications for {username}. Response: {response.text[:200]}")
+        return []
+
+def _get_relevancies_data_api(username: str, limit: int = 20) -> List[Dict]:
+    """Fetches recent relevancies for a citizen via the Next.js API (where AI is relevantToCitizen)."""
+    try:
+        url = f"{BASE_URL}/api/relevancies?relevantToCitizen={username}&limit={limit}&excludeAll=true"
+        response = requests.get(url, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "relevancies" in data:
+            return data["relevancies"]
+        log.warning(f"Failed to get relevancies for {username} from API: {data.get('error')}")
+        return []
+    except requests.exceptions.RequestException as e:
+        log.error(f"API request error fetching relevancies for {username}: {e}")
+        return []
+    except json.JSONDecodeError:
+        log.error(f"JSON decode error fetching relevancies for {username}. Response: {response.text[:200]}")
+        return []
+
+def _get_problems_data_api(username: str, limit: int = 20) -> List[Dict]:
+    """Fetches active problems for a citizen via the Next.js API."""
+    try:
+        url = f"{BASE_URL}/api/problems?citizen={username}&status=active&limit={limit}"
+        response = requests.get(url, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "problems" in data:
+            return data["problems"]
+        log.warning(f"Failed to get problems for {username} from API: {data.get('error')}")
+        return []
+    except requests.exceptions.RequestException as e:
+        log.error(f"API request error fetching problems for {username}: {e}")
+        return []
+    except json.JSONDecodeError:
+        log.error(f"JSON decode error fetching problems for {username}. Response: {response.text[:200]}")
+        return []
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -153,12 +232,19 @@ def prepare_lease_analysis_data(ai_citizen: Dict, citizen_lands: List[Dict], cit
     total_lease_received = sum(building["fields"].get("LeasePrice", 0) for building in buildings_on_lands 
                               if building["fields"].get("Owner", "") != username)
     net_income = total_income - total_maintenance - total_lease_paid + total_lease_received
+
+    # Fetch additional context data
+    ai_citizen_profile_api = _get_citizen_data_api(username) # Full profile from API
+    recent_notifications_for_ai = _get_notifications_data_api(username)
+    recent_relevancies_for_ai = _get_relevancies_data_api(username)
+    recent_problems_for_ai = _get_problems_data_api(username)
     
     # Prepare the complete data package
     data_package = {
-        "citizen": {
-            "username": username,
-            "ducats": ducats,
+        "ai_citizen_profile": ai_citizen_profile_api or {"username": username, "ducats": ducats}, # Fallback if API fails
+        "citizen_financial_summary": { # Keep existing financial summary separate for clarity
+            "username": username, # Redundant but keeps structure
+            "ducats": ducats, # Redundant
             "total_lands": len(lands_data),
             "total_buildings": len(buildings_data),
             "financial": {
@@ -170,8 +256,11 @@ def prepare_lease_analysis_data(ai_citizen: Dict, citizen_lands: List[Dict], cit
             }
         },
         "lands": lands_data,
-        "buildings": buildings_data,
-        "buildings_on_lands": buildings_on_ai_lands,
+        "buildings_owned_by_ai": buildings_data, # Renamed for clarity
+        "buildings_on_ai_lands_potentially_others": buildings_on_ai_lands, # Renamed for clarity
+        "recent_notifications_for_ai": recent_notifications_for_ai,
+        "recent_relevancies_for_ai": recent_relevancies_for_ai,
+        "recent_problems_for_ai": recent_problems_for_ai,
         "timestamp": datetime.now().isoformat()
     }
     

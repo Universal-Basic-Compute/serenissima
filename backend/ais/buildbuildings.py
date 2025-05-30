@@ -17,6 +17,9 @@ import random
 # Initialize colorama
 colorama.init(autoreset=True)
 
+# Configuration for API calls
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
+
 # Add project root to sys.path to allow imports like backend.engine.utils
 PROJECT_ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if PROJECT_ROOT_PATH not in sys.path:
@@ -370,7 +373,9 @@ def get_building_tier(building_type: str, building_types_data: Dict) -> int: # R
     # Defaulting to a high tier (e.g., 5) makes it unbuildable by most if data is missing.
     # Defaulting to a low tier (e.g., 1) might be too permissive.
     # For now, let's keep the original fallback mapping if API data is incomplete.
-    tier_mapping = {
+    # This fallback tier_mapping is less critical if API is source of truth for buildTier.
+    # Consider removing or simplifying if API data is reliable.
+    fallback_tier_mapping = { # Renamed to avoid confusion with API's 'tier'
         # Tier 5 (Nobili only)
         "doge_palace": 5, "basilica": 5, "arsenal_gate": 5, "grand_canal_palace": 5,
         "procuratie": 5, "ducal_chapel": 5, "state_archives": 5, "senate_hall": 5,
@@ -396,9 +401,9 @@ def get_building_tier(building_type: str, building_types_data: Dict) -> int: # R
         "small_shop": 1, "fishmonger": 1, "butcher": 1, "cobbler": 1, "tailor": 1,
         "barber": 1, "inn": 1, "laundry": 1, "water_well": 1, "vegetable_garden": 1
     }
-    if building_type.lower() in tier_mapping:
-        log_warning(f"Building type '{building_type}' buildTier/tier not found in API data, using fallback mapping. Tier: {tier_mapping[building_type.lower()]}")
-        return tier_mapping[building_type.lower()]
+    if building_type.lower() in fallback_tier_mapping:
+        log_warning(f"Building type '{building_type}' buildTier/tier not found in API data, using fallback mapping. Tier: {fallback_tier_mapping[building_type.lower()]}")
+        return fallback_tier_mapping[building_type.lower()]
 
     log_warning(f"Building type '{building_type}' buildTier/tier not found in API or fallback mapping, defaulting to tier 1 (permissive).")
     return 1
@@ -581,7 +586,9 @@ def prepare_ai_building_strategy(tables: Dict[str, Table], ai_citizen: Dict, cit
     building_types = filter_building_types_by_social_class(all_building_types, allowed_tiers)
 
     # Get latest problems for the citizen
-    latest_citizen_problems = _get_citizen_problems(tables, username)
+    latest_citizen_problems = _get_citizen_problems(tables, username) # This is direct Airtable
+    # Fetch general notifications for the AI (API-based)
+    recent_notifications_for_ai = _get_notifications_data_api(username) # New helper needed
     
     log_info(f"Filtered building types for {username} ({social_class}): {len(building_types)} of {len(all_building_types)} types available")
     
@@ -631,6 +638,7 @@ def prepare_ai_building_strategy(tables: Dict[str, Table], ai_citizen: Dict, cit
         "relevancies": relevancies_data,  # Add the relevancies data
         "target_relevancies": target_relevancies_data,  # Add the target relevancies data
         "latest_citizen_problems": latest_citizen_problems, # Add latest problems for the citizen
+        "recent_notifications_for_ai": recent_notifications_for_ai, # Added notifications
         "building_types": building_types,  # Now contains only the filtered building types
         "timestamp": datetime.now(VENICE_TIMEZONE).isoformat() # Use VENICE_TIMEZONE
     }

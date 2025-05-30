@@ -17,6 +17,47 @@ from app.citizen_utils import find_citizen_by_identifier
 
 log = logging.getLogger(__name__) # Initialize logger
 
+# Configuration for API calls (ensure BASE_URL is defined if not already)
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
+
+def _get_notifications_data_api(username: str, limit: int = 20) -> List[Dict]:
+    """Fetches recent notifications for a citizen via the Next.js API."""
+    try:
+        url = f"{BASE_URL}/api/notifications"
+        payload = {"citizen": username, "limit": limit}
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, json=payload, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "notifications" in data:
+            return data["notifications"]
+        log.warning(f"Failed to get notifications for {username} from API: {data.get('error')}")
+        return []
+    except requests.exceptions.RequestException as e:
+        log.error(f"API request error fetching notifications for {username}: {e}")
+        return []
+    except json.JSONDecodeError:
+        log.error(f"JSON decode error fetching notifications for {username}. Response: {response.text[:200]}")
+        return []
+
+def _get_relevancies_data_api(username: str, limit: int = 20) -> List[Dict]:
+    """Fetches recent relevancies for a citizen via the Next.js API (where AI is relevantToCitizen)."""
+    try:
+        url = f"{BASE_URL}/api/relevancies?relevantToCitizen={username}&limit={limit}&excludeAll=true"
+        response = requests.get(url, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "relevancies" in data:
+            return data["relevancies"]
+        log.warning(f"Failed to get relevancies for {username} from API: {data.get('error')}")
+        return []
+    except requests.exceptions.RequestException as e:
+        log.error(f"API request error fetching relevancies for {username}: {e}")
+        return []
+    except json.JSONDecodeError:
+        log.error(f"JSON decode error fetching relevancies for {username}. Response: {response.text[:200]}")
+        return []
+
 def initialize_airtable():
     """Initialize connection to Airtable."""
     load_dotenv()
@@ -379,6 +420,9 @@ def prepare_import_strategy_data(
     citizen_building_problems = _get_citizen_building_problems(tables, username)
     # Fetch general building problems
     general_building_problems = _get_general_building_problems(tables)
+    # Fetch general notifications and relevancies for the AI
+    recent_notifications_for_ai = _get_notifications_data_api(username)
+    recent_relevancies_for_ai = _get_relevancies_data_api(username)
 
     # Prepare the complete data package
     data_package = {
@@ -394,6 +438,8 @@ def prepare_import_strategy_data(
         "existing_contracts": existing_contracts,
         "latest_citizen_building_problems": citizen_building_problems,
         "latest_general_building_problems": general_building_problems,
+        "recent_notifications_for_ai": recent_notifications_for_ai,
+        "recent_relevancies_for_ai": recent_relevancies_for_ai,
         "timestamp": datetime.now(pytz.timezone('Europe/Rome')).isoformat()
     }
     

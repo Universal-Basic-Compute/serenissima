@@ -18,6 +18,30 @@ import textwrap # Added for text wrapping in logs
 # Initialize colorama
 colorama.init(autoreset=True)
 
+# Configuration for API calls (ensure BASE_URL is defined if not already)
+# BASE_URL is already defined in this script.
+# log is already defined in this script.
+
+def _get_notifications_data_api(username: str, limit: int = 20) -> List[Dict]:
+    """Fetches recent notifications for a citizen via the Next.js API."""
+    try:
+        url = f"{BASE_URL}/api/notifications" # BASE_URL is defined in the script
+        payload = {"citizen": username, "limit": limit}
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, json=payload, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "notifications" in data:
+            return data["notifications"]
+        log.warning(f"Failed to get notifications for {username} from API: {data.get('error')}") # Uses script's log
+        return []
+    except requests.exceptions.RequestException as e:
+        log.error(f"API request error fetching notifications for {username}: {e}") # Uses script's log
+        return []
+    except json.JSONDecodeError:
+        log.error(f"JSON decode error fetching notifications for {username}. Response: {response.text[:200]}") # Uses script's log
+        return []
+
 # Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.citizen_utils import find_citizen_by_identifier
@@ -361,6 +385,8 @@ def prepare_sales_and_price_strategy_data(
     # Fetch latest relevancies and problems for the citizen
     latest_relevancies = get_citizen_relevancies_from_api(username)
     latest_problems = get_citizen_problems_from_api(username)
+    # Fetch general notifications for the AI
+    recent_notifications_for_ai = _get_notifications_data_api(username)
 
     # Process buildings data for the AI citizen
     sellable_buildings_data = []
@@ -473,6 +499,7 @@ def prepare_sales_and_price_strategy_data(
         "sellable_buildings_with_market_data": sellable_buildings_data,
         "citizen_owned_resources_summary": dict(citizen_owned_resources_summary),
         "existing_ai_public_sell_contracts": existing_ai_public_sell_contracts,
+        "recent_notifications_for_ai": recent_notifications_for_ai,
         "latest_relevancies": latest_relevancies[:10], # Limit for brevity
         "latest_problems": latest_problems[:10],     # Limit for brevity
         "timestamp": datetime.now(pytz.timezone('Europe/Rome')).isoformat()
