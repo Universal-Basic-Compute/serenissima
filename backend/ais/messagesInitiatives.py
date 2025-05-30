@@ -398,23 +398,6 @@ def create_admin_notification(tables: Dict[str, Table], initiatives_summary: Dic
         print(f"Erreur lors de la création de la notification d'administration : {e}")
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Gère les initiatives de messages des citoyens IA.")
-    parser.add_argument("--dry-run", action="store_true", help="Exécute le script sans effectuer de modifications réelles.")
-    parser.add_argument("--citizen1", type=str, help="Le Username du citoyen IA qui initie le message (mode ciblé).")
-    parser.add_argument("--citizen2", type=str, help="Le Username du citoyen destinataire (mode ciblé).")
-    parser.add_argument(
-        "--model",
-        type=str,
-        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
-    )
-    args = parser.parse_args()
-
-    if (args.citizen1 and not args.citizen2) or (not args.citizen1 and args.citizen2):
-        parser.error("--citizen1 et --citizen2 doivent être utilisés ensemble.")
-
-    process_ai_message_initiatives(dry_run=args.dry_run, citizen1_arg=args.citizen1, citizen2_arg=args.citizen2, kinos_model_override_arg=args.model)
-
 # Update process_ai_message_initiatives definition
 def process_ai_message_initiatives(dry_run: bool = False, citizen1_arg: Optional[str] = None, citizen2_arg: Optional[str] = None, kinos_model_override_arg: Optional[str] = None):
     """Fonction principale pour traiter les initiatives de messages IA."""
@@ -567,3 +550,20 @@ def process_ai_message_initiatives(dry_run: bool = False, citizen1_arg: Optional
         create_admin_notification(tables, initiatives_summary)
 
     print("Processus d'initiatives de messages IA terminé.")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Gère les initiatives de messages des citoyens IA.")
+    parser.add_argument("--dry-run", action="store_true", help="Exécute le script sans effectuer de modifications réelles.")
+    parser.add_argument("--citizen1", type=str, help="Le Username du citoyen IA qui initie le message (mode ciblé).")
+    parser.add_argument("--citizen2", type=str, help="Le Username du citoyen destinataire (mode ciblé).")
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+    )
+    args = parser.parse_args()
+
+    if (args.citizen1 and not args.citizen2) or (not args.citizen1 and args.citizen2):
+        parser.error("--citizen1 et --citizen2 doivent être utilisés ensemble.")
+
+    process_ai_message_initiatives(dry_run=args.dry_run, citizen1_arg=args.citizen1, citizen2_arg=args.citizen2, kinos_model_override_arg=args.model)
