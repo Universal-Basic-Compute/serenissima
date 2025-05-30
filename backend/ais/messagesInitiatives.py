@@ -266,7 +266,7 @@ def _check_existing_messages(tables: Dict[str, Table], username1: str, username2
 
 # --- Fonctions Kinos et création de message ---
 
-def generate_ai_initiative_message(tables: Dict[str, Table], ai_username: str, target_username: str) -> Optional[str]:
+def generate_ai_initiative_message(tables: Dict[str, Table], ai_username: str, target_username: str, kinos_model_override: Optional[str] = None) -> Optional[str]:
     """Génère un message d'initiative IA en utilisant Kinos Engine avec un contexte enrichi."""
     try:
         api_key = get_kinos_api_key()

@@ -1105,7 +1105,7 @@ def get_available_building_points(polygons: List[Dict], existing_buildings: List
 
 def send_building_placement_request(ai_username: str, ai_citizen_record: Dict, decision: Dict, polygon_data: List[Dict],
                                    available_points: Dict[str, List[Dict]], building_types: Dict,
-                                   tables=None, citizen_relevancies=None, target_land_id_arg: Optional[str] = None, additional_message: Optional[str] = None) -> bool:
+                                   tables=None, citizen_relevancies=None, target_land_id_arg: Optional[str] = None, additional_message: Optional[str] = None, kinos_model_override: Optional[str] = None) -> bool:
     """Send a second request to the AI to choose a specific point for building placement."""
     try:
         if not decision or not decision.get("building_type") or not decision.get("land_id"):

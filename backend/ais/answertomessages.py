@@ -237,7 +237,7 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_username: str, message_content: str) -> Optional[str]:
+def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_username: str, message_content: str, kinos_model_override: Optional[str] = None) -> Optional[str]:
     """Generate an AI response using the Kinos Engine API with enhanced context."""
     try:
         api_key = get_kinos_api_key()

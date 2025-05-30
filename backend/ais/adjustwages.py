@@ -244,7 +244,7 @@ def prepare_wage_analysis_data(tables: Dict[str, Table], ai_citizen: Dict, citiz
     
     return data_package
 
-def send_wage_adjustment_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+def send_wage_adjustment_request(ai_username: str, data_package: Dict, kinos_model_override: Optional[str] = None) -> Optional[Dict]:
     """Send the wage adjustment request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
@@ -349,6 +349,10 @@ If you decide not to adjust any wages at this time, return an empty array.
             "min_files": 4,
             "max_files": 8
         }
+
+        if kinos_model_override:
+            payload["model"] = kinos_model_override
+            print(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (wage adjustment).")
         
         # Make the API request
         print(f"Making API request to Kinos for {ai_username}...")
@@ -799,8 +803,26 @@ def process_ai_wage_adjustments(dry_run: bool = False):
     print("AI wage adjustment process completed")
 
 if __name__ == "__main__":
-    # Check if this is a dry run
-    dry_run = "--dry-run" in sys.argv
+    parser = argparse.ArgumentParser(description="Adjust wages for AI-run businesses using Kinos AI.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run the script without making actual changes to Airtable or Kinos."
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+    )
+    args = parser.parse_args()
     
     # Run the process
-    process_ai_wage_adjustments(dry_run)
+    process_ai_wage_adjustments(dry_run=args.dry_run, kinos_model_override_arg=args.model)
+
+# Add kinos_model_override_arg to process_ai_wage_adjustments definition
+def process_ai_wage_adjustments(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
+    """Main function to process AI wage adjustments."""
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    print(f"Starting AI wage adjustment process (dry_run={dry_run}, kinos_model={model_status})")
+    
+    # Initialize Airtable connection
