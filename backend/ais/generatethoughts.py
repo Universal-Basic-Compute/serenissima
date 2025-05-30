@@ -174,13 +174,17 @@ def get_citizens_for_thought_generation(tables: Dict[str, Table], specific_usern
     Otherwise, fetches all citizens currently in Venice.
     """
     try:
+        base_formula_parts = ["{{InVenice}}=1", "NOT(OR({{SocialClass}}='Facchini', {{SocialClass}}='Popolani'))"]
+        
         if specific_username:
-            formula = f"AND({{Username}}='{_escape_airtable_value(specific_username)}', {{InVenice}}=1)"
-            log.info(f"Fetching specific citizen for thought generation: {specific_username}")
+            base_formula_parts.append(f"{{Username}}='{_escape_airtable_value(specific_username)}'")
+            log.info(f"Fetching specific citizen for thought generation (excluding Facchini/Popolani): {specific_username}")
         else:
-            # Fetch all citizens in Venice (both AI and human)
-            formula = "{{InVenice}}=1"
-            log.info("Fetching all citizens in Venice for thought generation.")
+            # Fetch all citizens in Venice (both AI and human), excluding Facchini and Popolani
+            log.info("Fetching all citizens in Venice for thought generation (excluding Facchini/Popolani).")
+        
+        formula = "AND(" + ", ".join(base_formula_parts) + ")"
+        log.debug(f"Using formula: {formula}")
             
         citizens = tables["citizens"].all(formula=formula)
         
