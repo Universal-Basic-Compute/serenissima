@@ -295,6 +295,9 @@ def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: s
         log.error(f"{LogColors.FAIL}Error in generate_ai_thought for {ai_username}: {e}{LogColors.ENDC}")
         return None
 
+# La définition précédente de generate_ai_thought (sans kinos_model_override) a été supprimée car elle était dupliquée.
+# La version correcte avec kinos_model_override est conservée ci-dessous.
+
 def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: str, context_data: Dict, kinos_model_override: Optional[str] = None) -> Optional[str]:
     """Generates an AI thought using the Kinos Engine API."""
     try:
