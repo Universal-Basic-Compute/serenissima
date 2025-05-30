@@ -119,10 +119,9 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
   };
 
   return (
-    <>
-      <div className={`${standalone ? 'p-8' : 'absolute top-20 left-20 right-4 bottom-4 bg-black/30 z-[55] rounded-lg p-4 overflow-auto'}`}> {/* Changed z-40 to z-[55] */}
-        <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
+    <div className={`${standalone ? 'p-8' : 'absolute top-20 left-20 right-4 bottom-4 bg-black/30 z-40 rounded-lg p-4 overflow-auto'}`}>
+      <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-serif text-amber-800">
             Guilds of Venice
           </h2>
@@ -225,9 +224,8 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
             )}
           </div>
         )}
-        </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -246,7 +244,6 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
   const [applicationText, setApplicationText] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [citizenGuildId, setCitizenGuildId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'presentation' | 'discussion'>('presentation');
 
   // Fetch guild members when the component mounts
   useEffect(() => {
@@ -290,10 +287,9 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
     }
   }, []);
   return (
-    <>
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        {/* Header with banner image */}
-        <div 
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      {/* Header with banner image */}
+      <div 
         className="h-48 bg-cover bg-center relative"
         style={{ 
           backgroundColor: guild.color || '#8B4513',
@@ -331,38 +327,10 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
       </div>
       
       {/* Guild details */}
-      {/* Tab Navigation */}
-      <div className="border-b border-amber-300">
-        <nav className="-mb-px flex space-x-4 px-6" aria-label="Tabs">
-          <button
-            onClick={() => setActiveTab('presentation')}
-            className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm
-              ${activeTab === 'presentation'
-                ? 'border-amber-600 text-amber-700'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            Presentation
-          </button>
-          <button
-            onClick={() => setActiveTab('discussion')}
-            className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm
-              ${activeTab === 'discussion'
-                ? 'border-amber-600 text-amber-700'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            Public Discussion
-          </button>
-        </nav>
-      </div>
-
-      {/* Tab Content */}
       <div className="p-6">
-        {activeTab === 'presentation' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-xl font-serif text-amber-800 mb-4">About the Guild</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="text-xl font-serif text-amber-800 mb-4">About the Guild</h3>
             {/* Use ReactMarkdown for the description */}
             <div className="text-gray-700 mb-4 prose prose-amber max-w-none">
               <ReactMarkdown>
@@ -653,35 +621,6 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
             and represents its members' interests before the Venetian government.
           </p>
         </div>
-          </div>
-        )}
-        {activeTab === 'discussion' && (
-          <div>
-            <h3 className="text-xl font-serif text-amber-800 mb-4">Public Discussion</h3>
-            <div className="bg-amber-100 p-4 rounded-lg border border-amber-200 min-h-[300px] flex items-center justify-center">
-              <p className="text-amber-700 italic">
-                Public discussion forum for {guild.guildName} coming soon.
-                <br />
-                This space will allow members and interested parties to discuss guild matters, trade, and events.
-              </p>
-            </div>
-            {/* Placeholder for chat input */}
-            <div className="mt-4">
-              <textarea
-                className="w-full p-2 border border-amber-300 rounded-md"
-                rows={3}
-                placeholder="Type your message for the guild discussion..."
-                disabled
-              ></textarea>
-              <button
-                className="mt-2 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors disabled:bg-gray-400"
-                disabled
-              >
-                Send Message (Coming Soon)
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
