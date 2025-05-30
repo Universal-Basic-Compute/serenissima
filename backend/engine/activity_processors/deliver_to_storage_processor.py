@@ -255,6 +255,9 @@ def process(
                           f"in {source_description} to transfer {amount_to_transfer}."
                 log.error(f"{err_msg} Activity: {activity_guid}")
                 _update_activity_notes_with_failure_reason(tables, activity_id_airtable, err_msg)
+                # Trust: Delivery person failed to pick up from source for owner of deposited resources
+                if delivery_person_username and owner_of_deposited_resources:
+                    update_trust_score_for_activity(tables, delivery_person_username, owner_of_deposited_resources, TRUST_SCORE_FAILURE_SIMPLE, "pickup_for_storage", False, "source_stock_insufficient")
                 return False
 
             source_res_record = source_res_records[0]
