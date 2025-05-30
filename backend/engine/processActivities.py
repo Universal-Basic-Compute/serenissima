@@ -121,6 +121,15 @@ from backend.engine.activity_processors import (
 # Load environment variables
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
+# --- Temporary Debug Prints for Telegram Env Vars ---
+TELEGRAM_BOT_TOKEN_DEBUG = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID_DEBUG = os.getenv("TELEGRAM_CHAT_ID")
+log.info(f"[DEBUG TELEGRAM] TELEGRAM_BOT_TOKEN: {'Loaded' if TELEGRAM_BOT_TOKEN_DEBUG else 'NOT LOADED'}")
+log.info(f"[DEBUG TELEGRAM] TELEGRAM_CHAT_ID: {'Loaded' if TELEGRAM_CHAT_ID_DEBUG else 'NOT LOADED'}")
+# You might want to print the first few characters of the token for verification, e.g.:
+# if TELEGRAM_BOT_TOKEN_DEBUG: log.info(f"[DEBUG TELEGRAM] Token starts with: {TELEGRAM_BOT_TOKEN_DEBUG[:5]}")
+# --- End Temporary Debug Prints ---
+
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
