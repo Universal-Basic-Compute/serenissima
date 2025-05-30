@@ -168,50 +168,7 @@ def _get_problems_data_api(username: str, limit: int = 20) -> List[Dict]:
 # --- Citizen and Thought Generation ---
 
 def get_citizens_for_thought_generation(
-    tables: Dict[str, Table],
-    specific_username: Optional[str] = None
-) -> List[Dict]:
-    """
-    Fetches citizens from Airtable for thought generation.
-    - Optionally filtered by a specific username.
-    - Default: fetches AIs (EXCLUDING Facchini and Popolani) AND Humans (active in last 7 days, INCLUDING Facchini and Popolani).
-    """
-    try:
-        formula_parts = ["{InVenice}=1"]
-        description_string = "in Venice"
 
-        if specific_username:
-            escaped_username = _escape_airtable_value(specific_username)
-            formula_parts.append(f"{{Username}}='{escaped_username}'")
-            description_string += f", username is {escaped_username}"
-        else: # Default case: AIs (excluding Facchini and Popolani) OR Humans (active in last 7 days, including Facchini and Popolani)
-            seven_days_ago_venice = (get_venice_time_now() - timedelta(days=7)).isoformat()
-            ai_condition = "AND({IsAI}=TRUE(), {SocialClass}!='Facchini', {SocialClass}!='Popolani')"
-            # Utilisation de NOT({IsAI}=TRUE()) pour la condition humaine
-            human_condition_template = "AND(NOT({IsAI}=TRUE()), IS_AFTER({{LastActiveAt}}, DATETIME_PARSE('{}')))"
-            human_condition = human_condition_template.format(seven_days_ago_venice)
-            
-            formula_parts.append(f"OR({ai_condition}, {human_condition})")
-            description_string += ", AIs (excluding Facchini and Popolani) OR active Humans (including Facchini and Popolani, last 7 days)"
-
-        final_formula = "AND(" + ", ".join(formula_parts) + ")"
-        log.info(f"{LogColors.OKBLUE}Fetching citizens for thought generation ({description_string}) with formula: {final_formula}{LogColors.ENDC}")
-
-        # Fetch necessary fields for context and identification
-        fields = [
-            "Username", "FirstName", "LastName", "SocialClass", "Ducats",
-            "Description", "CorePersonality", "IsAI", "LastActiveAt"
-        ]
-        citizens_for_thoughts = tables["citizens"].all(formula=final_formula, fields=fields)
-
-        log.info(f"{LogColors.OKGREEN}Found {len(citizens_for_thoughts)} citizens matching criteria.{LogColors.ENDC}")
-        return citizens_for_thoughts
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error fetching citizens for thought generation: {e}{LogColors.ENDC}")
-        return []
-
-# La définition précédente de generate_ai_thought (sans kinos_model_override) a été supprimée car elle était dupliquée.
-# La version correcte avec kinos_model_override est conservée ci-dessous.
 
 def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: str, context_data: Dict, kinos_model_override: Optional[str] = None) -> Optional[str]:
     """Generates an AI thought using the Kinos Engine API."""
