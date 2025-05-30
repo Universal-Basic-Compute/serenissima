@@ -147,14 +147,18 @@ def _get_citizen_details(tables: Dict[str, Any], username: str) -> Optional[Dict
         log.error(f"{LogColors.FAIL}Erreur lors de la récupération des détails du citoyen {username}: {e}{LogColors.ENDC}")
         return None
 
-def _generate_kinos_message_content(kin_username: str, channel_username: str, prompt: str, kinos_api_key: str) -> Optional[str]:
+def _generate_kinos_message_content(kin_username: str, channel_username: str, prompt: str, kinos_api_key: str, kinos_model_override: Optional[str] = None) -> Optional[str]:
     """Appelle Kinos pour générer le contenu d'un message."""
     try:
         url = f"{KINOS_API_URL_BASE}/{kin_username}/channels/{channel_username}/messages"
         headers = {"Authorization": f"Bearer {kinos_api_key}", "Content-Type": "application/json"}
         payload = {"message": prompt} # addSystem peut être ajouté ici si plus de contexte est nécessaire
 
-        log.debug(f"Appel Kinos : URL={url}, Kin={kin_username}, Channel={channel_username}")
+        if kinos_model_override:
+            payload["model"] = kinos_model_override
+            log.info(f"Utilisation du modèle Kinos '{kinos_model_override}' pour {kin_username} -> {channel_username}.")
+
+        log.debug(f"Appel Kinos : URL={url}, Kin={kin_username}, Channel={channel_username}, PayloadKeys={list(payload.keys())}")
         response = requests.post(url, headers=headers, json=payload, timeout=45)
 
         if response.status_code not in [200, 201]:
@@ -278,7 +282,8 @@ def _initiate_reaction_dialogue_if_both_ai(
         kin_username=receiver_of_action_username,
         channel_username=actor_username,
         prompt=prompt_for_receiver,
-        kinos_api_key=kinos_api_key
+        kinos_api_key=kinos_api_key,
+        kinos_model_override="local"  # Utiliser le modèle local
     )
 
     if receiver_reaction_content:
@@ -300,7 +305,8 @@ def _initiate_reaction_dialogue_if_both_ai(
             kin_username=actor_username,
             channel_username=receiver_of_action_username,
             prompt=prompt_for_actor_reply,
-            kinos_api_key=kinos_api_key
+            kinos_api_key=kinos_api_key,
+            kinos_model_override="local"  # Utiliser le modèle local
         )
 
         if actor_reply_content:
