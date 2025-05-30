@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import traceback
+import argparse # Added argparse
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 import requests
@@ -820,7 +821,7 @@ if __name__ == "__main__":
     process_ai_wage_adjustments(dry_run=args.dry_run, kinos_model_override_arg=args.model)
 
 # Add kinos_model_override_arg to process_ai_wage_adjustments definition
-def process_ai_wage_adjustments(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
+def process_ai_wage_adjustments(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None): # Corrected definition
     """Main function to process AI wage adjustments."""
     model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
     print(f"Starting AI wage adjustment process (dry_run={dry_run}, kinos_model={model_status})")
