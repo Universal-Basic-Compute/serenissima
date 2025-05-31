@@ -441,11 +441,6 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                     </button>
                   </div>
                   
-                  <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 mb-4 rounded">
-                    <p className="font-medium">Settings are temporarily disabled</p>
-                    <p className="text-sm">Only cache management is available at this time. Other settings will be enabled in a future update.</p>
-                  </div>
-                  
                   <div className="flex items-center">
                     <input
                       type="checkbox"
