@@ -207,9 +207,10 @@ def create_admin_notification(tables, ai_notification_counts: Dict[str, int]) ->
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 
-def process_ai_notifications(dry_run: bool = False):
+def process_ai_notifications(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
     """Main function to process AI notifications."""
-    print(f"Starting AI notification processing (dry_run={dry_run})")
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "class-based"
+    print(f"Starting AI notification processing (dry_run={dry_run}, kinos_model_selection={model_status})")
     
     # Initialize Airtable connection
     tables = initialize_airtable()
