@@ -860,15 +860,26 @@ if __name__ == "__main__":
         help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
     )
     parser.add_argument(
+        "--local",
+        action="store_true",
+        help="Shortcut for --model local."
+    )
+    parser.add_argument(
         "--unguided",
         action="store_true",
         help="Run in unguided mode, where the AI makes a series of API calls in a loop."
     )
     args = parser.parse_args()
 
+    kinos_model_to_use = args.model
+    if args.local:
+        if kinos_model_to_use and kinos_model_to_use.lower() != 'local':
+            log.warning(f"{LogColors.WARNING}Both --local and --model {kinos_model_to_use} were specified. --local takes precedence, using 'local' model.{LogColors.ENDC}")
+        kinos_model_to_use = 'local'
+    
     process_all_ai_autonomously(
         dry_run=args.dry_run,
         specific_citizen_username=args.citizen,
-        kinos_model_override=args.model,
+        kinos_model_override=kinos_model_to_use,
         unguided_mode=args.unguided # Pass the new mode
     )
