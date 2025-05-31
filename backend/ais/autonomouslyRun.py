@@ -456,7 +456,7 @@ API_DOCUMENTATION_SUMMARY = {
         "3.  **Airtable Schema**: Refer to `backend/docs/airtable_schema.md` for exact Airtable table and field names (they are PascalCase).\n"
         "4.  **Specific Endpoints**: Some endpoints have fixed parameters or unique behaviors (e.g., /api/resources/counts, /api/thoughts, /api/messages?type=...). If dynamic filtering doesn't yield expected results, consult their specific documentation or use their defined parameters.\n"
         "5.  **Focus**: Your goal is to make informed decisions. Choose API calls that provide the most relevant data for your current objectives.\n"
-        "6.  **Airtable Schema**: A summary of the Airtable schema (field names, types) is available in `addSystem.airtable_schema_summary` to help you understand data structures and construct precise filters for GET requests."
+        "6.  **Airtable Schema**: A summary of the Airtable schema (field names, types) may be available in `addSystem.airtable_schema_summary` (typically for non-local models) to help you understand data structures and construct precise filters for GET requests."
     ),
     "example_get_endpoints": [
         "/api/citizens/{username}", # Specific citizen by username
@@ -499,9 +499,15 @@ def autonomously_run_ai_citizen(
 
     # Step 1: Gather Data
     log.info(f"{LogColors.OKCYAN}--- Step 1: Gather Data for {ai_username} ---{LogColors.ENDC}")
+    prompt_step1_context_mention = "Review your own citizen data in `addSystem.citizen_data` and the API documentation summary in `addSystem.api_docs`."
+    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
+        prompt_step1_context_mention += " Also review the Airtable schema in `addSystem.airtable_schema_summary`."
+    else:
+        prompt_step1_context_mention += " (Airtable schema summary is omitted for local models to save tokens)."
+
     prompt_step1_base = (
         f"You are {ai_display_name}, an AI citizen in La Serenissima. Your current goal is to understand your situation and identify opportunities. "
-        f"The base API URL is {API_BASE_URL}. Review your own citizen data in `addSystem.citizen_data`, the API documentation summary in `addSystem.api_docs`, and the Airtable schema in `addSystem.airtable_schema_summary`. "
+        f"The base API URL is {API_BASE_URL}. {prompt_step1_context_mention} "
     )
     if user_message:
         prompt_step1_base += f"An additional message has been provided for your consideration: '{user_message}'. "
@@ -516,8 +522,9 @@ def autonomously_run_ai_citizen(
         "api_docs": API_DOCUMENTATION_SUMMARY, 
         "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
         "citizen_data": ai_citizen_record["fields"],
-        "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT
     }
+    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
+        add_system_step1["airtable_schema_summary"] = AIRTABLE_SCHEMA_CONTENT
     if user_message:
         add_system_step1["user_provided_message"] = user_message
     
@@ -558,10 +565,16 @@ def autonomously_run_ai_citizen(
 
     # Step 2: Elaborate Strategy & Define Actions
     log.info(f"{LogColors.OKCYAN}--- Step 2: Elaborate Strategy & Define Actions for {ai_username} ---{LogColors.ENDC}")
+    prompt_step2_context_mention = "Based on this data, your citizen data, your overall goals, and the API documentation in `addSystem.api_docs`"
+    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
+        prompt_step2_context_mention += ", and the Airtable schema in `addSystem.airtable_schema_summary`,"
+    else:
+        prompt_step2_context_mention += ","
+        
     prompt_step2 = (
         f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. You previously requested data via GET API. "
         f"The response was (or simulated/error response if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
-        "Based on this data, your citizen data, your overall goals, the API documentation in `addSystem.api_docs`, and the Airtable schema in `addSystem.airtable_schema_summary`, define your strategy and the next actions. "
+        f"{prompt_step2_context_mention} define your strategy and the next actions. "
         "When specifying the `body` for POST requests, you can use camelCase for keys (e.g., `sender`, `resourceType`, `targetAmount`). The server will map them to the correct Airtable fields. "
         "Respond with a JSON object: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {\"fieldName\": \"value\"}}, ...]}`. "
         "If no actions are needed now, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`."
@@ -570,8 +583,9 @@ def autonomously_run_ai_citizen(
         "api_docs": API_DOCUMENTATION_SUMMARY, 
         "previous_get_response": api_get_response_data,
         "citizen_data": ai_citizen_record["fields"],
-        "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT # Add schema content
     }
+    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
+        add_system_step2["airtable_schema_summary"] = AIRTABLE_SCHEMA_CONTENT
 
     kinos_response_step2 = None
     if not dry_run:
@@ -630,18 +644,25 @@ def autonomously_run_ai_citizen(
 
     # Step 3: Note Results & Plan Next Steps
     log.info(f"{LogColors.OKCYAN}--- Step 3: Note Results & Plan Next Steps for {ai_username} ---{LogColors.ENDC}")
+    prompt_step3_context_mention = "Reflect on these outcomes, considering your citizen data, API docs"
+    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
+        prompt_step3_context_mention += ", and Airtable schema (all in `addSystem`)"
+    else:
+        prompt_step3_context_mention += " (all in `addSystem`)"
+
     prompt_step3 = (
         f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. Your strategy was: '{strategy_summary}'. "
         f"Your POST actions resulted in (or simulated results if dry_run/failed): \n```json\n{json.dumps(api_post_responses_summary, indent=2)}\n```\n"
-        "Reflect on these outcomes, considering your citizen data, API docs, and Airtable schema (all in `addSystem`). What did you learn? What are your key observations or plans for your next autonomous run? "
+        f"{prompt_step3_context_mention}. What did you learn? What are your key observations or plans for your next autonomous run? "
         "Respond with a concise text summary (max 3-4 sentences)."
     )
     add_system_step3 = {
         "api_docs": API_DOCUMENTATION_SUMMARY, 
         "post_actions_summary": api_post_responses_summary,
         "citizen_data": ai_citizen_record["fields"],
-        "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT # Add schema content
     }
+    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
+        add_system_step3["airtable_schema_summary"] = AIRTABLE_SCHEMA_CONTENT
 
     kinos_response_step3 = None
     if not dry_run:
@@ -707,10 +728,16 @@ def autonomously_run_ai_citizen_unguided(
         log.info(f"{LogColors.OKCYAN}--- Unguided Iteration {iteration_count} for {ai_username} ---{LogColors.ENDC}")
 
         prompt_intro = f"You are {ai_display_name}, an AI citizen in La Serenissima. Your goal is to act autonomously and strategically. "
-        prompt_context_review = "Review your current context in `addSystem` (citizen data, API docs, Airtable schema, previous API results if any"
+        
+        prompt_context_elements = ["citizen data", "API docs summary (`api_docs_summary`)", "full API Reference (`api_reference_full`)"]
+        if not (kinos_model_override and kinos_model_override.lower() == 'local'):
+            prompt_context_elements.append("Airtable schema (`airtable_schema_summary`)")
+        if previous_api_results:
+            prompt_context_elements.append("previous API results (`previous_api_results`)")
         if user_message and iteration_count == 1:
-            prompt_context_review += ", and the user_provided_message"
-        prompt_context_review += "). "
+            prompt_context_elements.append("the user_provided_message")
+            
+        prompt_context_review = f"Review your current context in `addSystem` ({', '.join(prompt_context_elements)}). "
 
         prompt_action_guidance = (
             "Decide on a sequence of actions. Actions can be:\n"
@@ -725,19 +752,20 @@ def autonomously_run_ai_citizen_unguided(
         )
         
         current_prompt = prompt_intro + prompt_context_review
-        if previous_api_results:
-             current_prompt += f"The results of your previous API calls are in `addSystem.previous_api_results`. Based on this, what do you want to do next? "
+        if previous_api_results: # This condition is now part of prompt_context_elements
+             current_prompt += f"Based on the previous results and your overall context, what do you want to do next? "
         current_prompt += prompt_action_guidance
 
 
         add_system_data = {
             "api_docs_summary": API_DOCUMENTATION_SUMMARY,
             "api_reference_full": API_REFERENCE_CONTENT, 
-            "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT, 
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
             "citizen_data": ai_citizen_record["fields"],
             "previous_api_results": previous_api_results
         }
+        if not (kinos_model_override and kinos_model_override.lower() == 'local'):
+            add_system_data["airtable_schema_summary"] = AIRTABLE_SCHEMA_CONTENT
         if user_message and iteration_count == 1:
             add_system_data["user_provided_message"] = user_message
 
