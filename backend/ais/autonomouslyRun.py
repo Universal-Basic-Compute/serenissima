@@ -254,7 +254,11 @@ def make_kinos_call(
     kinos_url = f"https://api.kinos-engine.ai/v2/blueprints/{KINOS_BLUEPRINT_ID}/kins/{ai_username}/channels/{KINOS_CHANNEL_AUTONOMOUS_RUN}/messages"
     headers = {"Authorization": f"Bearer {kinos_api_key}", "Content-Type": "application/json"}
     
-    payload: Dict[str, Any] = {"message": prompt}
+    payload: Dict[str, Any] = {
+        "message": prompt,
+        "min_files": 2, # Add min_files
+        "max_files": 5  # Add max_files
+    }
     if add_system_data:
         try:
             payload["addSystem"] = json.dumps(add_system_data)
