@@ -211,23 +211,26 @@ const ApiReference: React.FC = () => {
   "success": true,
   "citizens": [
     {
-      "username": "string",
-      "firstName": "string",
-      "lastName": "string",
-      "coatOfArmsImageUrl": "string | null",
-      "isAi": boolean,
-      "socialClass": "string",
-      "description": "string",
-      "position": { "lat": number, "lng": number },
-      "influence": number,
-      "wallet": "string",
-      "familyMotto": "string",
-      "color": "string",
-      "guildId": "string | null",
-      "worksFor": "string | null",
-      "workplace": { "name": "string", "type": "string" } | null
-    }
-  ]
+    "isAi": boolean, // Indicates if the citizen is AI-controlled
+    "socialClass": "string", // Social class (e.g., Nobili, Cittadini)
+    "description": "string", // Textual description of the citizen
+    "position": { "lat": number, "lng": number }, // Current geographical position
+    "influence": number, // Citizen's influence score
+    "wallet": "string", // Associated wallet address
+    "familyMotto": "string | null", // Family motto
+    "color": "string | null", // Assigned color for map markers
+    "guildId": "string | null", // ID of the guild they belong to
+    "worksFor": "string | null", // Username of their employer
+    "workplace": { "name": "string", "type": "string", "buildingId": "string" } | null, // Details of their workplace
+    "home": "string | null", // BuildingId of their home
+    "corePersonality": ["string", "string", "string"] | null, // Array of three personality traits
+    "preferences": "object | null", // Citizen's preferences object
+    "lastActiveAt": "string | null", // ISO date string of last activity
+    "createdAt": "string", // ISO date string of creation
+    "updatedAt": "string" // ISO date string of last update
+    // ... other fields from Airtable, camelCased
+  }
+]
 }`}
             </pre>
           </div>
@@ -250,21 +253,29 @@ const ApiReference: React.FC = () => {
 {`{
   "success": true,
   "citizen": {
-    "username": "string",
-    "firstName": "string",
-    "lastName": "string",
+    "id": "string", // Airtable Record ID
+    "username": "string | null",
+    "firstName": "string | null",
+    "lastName": "string | null",
+    "ducats": number,
     "coatOfArmsImageUrl": "string | null",
+    "familyMotto": "string | null",
+    "createdAt": "string | null", // ISO date string
+    "updatedAt": "string | null", // ISO date string
+    "guildId": "string | null", // String Guild ID (e.g., "umbra_lucrum_invenit")
+    "color": "string | null",
+    "socialClass": "string | null",
     "isAi": boolean,
-    "socialClass": "string",
-    "description": "string",
-    "position": { "lat": number, "lng": number },
+    "description": "string | null",
+    "position": { "lat": number, "lng": number } | string | null, // Can be object or JSON string
     "influence": number,
-    "wallet": "string",
-    "familyMotto": "string",
-    "color": "string",
-    "guildId": "string | null",
-    "worksFor": "string | null",
-    "workplace": { "name": "string", "type": "string" } | null
+    "wallet": "string | null",
+    "corePersonality": ["string", "string", "string"] | null,
+    "preferences": "object | null",
+    "lastActiveAt": "string | null",
+    "worksFor": "string | null", // Username of employer
+    "workplace": { "name": "string", "type": "string" } | null // Details of workplace
+    // ... any other fields from Airtable, camelCased
   }
 }`}
             </pre>
@@ -2759,7 +2770,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>type</code> (optional) - Filter relevancies by type</li>
+              <li><code>type</code> (optional) - Filter relevancies by a specific type (e.g., "geographic_proximity", "job_opening")</li>
             </ul>
           </div>
           
@@ -2768,27 +2779,27 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "aiUsername": "string",
-  "relevancies": [
+  "citizen": "string", // The username for whom relevancies were fetched
+  "relevancies": [ // Array of relevancy objects, see GET /api/relevancies for structure
     {
-      "id": "string",
-      "relevancyId": "string",
+      "id": "string", // Airtable Record ID
+      "relevancyId": "string", // Custom RelevancyId if exists, else same as id
       "asset": "string",
       "assetType": "string",
       "category": "string",
       "type": "string",
-      "targetCitizen": "string",
+      "targetCitizen": "string | null",
       "relevantToCitizen": "string",
       "score": number,
       "timeHorizon": "string",
       "title": "string",
       "description": "string",
-      "notes": "string",
+      "notes": "string | null",
       "status": "string",
       "createdAt": "string"
     }
   ],
-  "count": number
+  "count": number // Total number of relevancies returned
 }`}
             </pre>
           </div>
