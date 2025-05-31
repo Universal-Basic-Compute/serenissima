@@ -221,7 +221,7 @@ export default function GuildManagementPanel({ guild, onClose }: GuildManagement
             {activeTab === "Charter & Rules" && (
               <div>
                 <p className="text-gray-700">Details about the guild's charter, rules, and regulations will be displayed here.</p>
-                <p className="mt-2 text-gray-700">Current Charter: <ReactMarkdown>{guild.description || "No charter defined."}</ReactMarkdown></p>
+                <div className="mt-2 text-gray-700">Current Charter: <ReactMarkdown>{guild.description || "No charter defined."}</ReactMarkdown></div>
               </div>
             )}
             {activeTab === "Guild Hall" && (
