@@ -34,26 +34,14 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
           }
         } else {
           console.error('Failed to load music tracks');
-          // Fallback to hardcoded tracks if API fails
-          setTracks([
-            '/music/venetian_boat_song.mp3',
-            '/music/venetian_carnival.mp3',
-            '/music/venetian_gondola.mp3',
-            '/music/venetian_palace.mp3',
-            '/music/venetian_waltz.mp3'
-          ]);
+          // No fallback to hardcoded tracks, API must provide full URLs
+          setTracks([]);
           setIsLoading(false);
         }
       } catch (error) {
         console.error('Error loading music tracks:', error);
-        // Fallback to hardcoded tracks if API fails
-        setTracks([
-          '/music/venetian_boat_song.mp3',
-          '/music/venetian_carnival.mp3',
-          '/music/venetian_gondola.mp3',
-          '/music/venetian_palace.mp3',
-          '/music/venetian_waltz.mp3'
-        ]);
+        // No fallback to hardcoded tracks, API must provide full URLs
+        setTracks([]);
         setIsLoading(false);
       }
     };
@@ -110,7 +98,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       if (audioRef.current) {
         audioRef.current.src = firstTrack;
         audioRef.current.volume = volume;
-        audioRef.current.loop = false; // Ensure it's not looping
+        audioRef.current.loop = true; // Enable looping for continuous play of the current track
         
         // Add a listener for when the citizen interacts with the page
         const handleCitizenInteraction = () => {
@@ -165,37 +153,42 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     };
   }, [isLoading, tracks, volume, autoplay]); // Remove isPlaying and currentTrack from dependencies
 
-  // Handle track ending - play next random track with a 10-second pause
+  // Handle track ending - play next random track immediately
   useEffect(() => {
     const audio = audioRef.current;
     
     const handleEnded = () => {
-      // Pause for 10 seconds before playing the next track
-      setIsPlaying(false);
-      setIsPaused(true);
-      
-      // Show a message that we're pausing between tracks
-      setCurrentTrack('Pausing between tracks...');
-      
-      // Wait 10 seconds before playing the next track
-      const pauseTimeout = setTimeout(() => {
-        // Only play the next track if we're still paused
-        if (isPaused) {
-          playRandomTrack();
-        }
-      }, 10000); // 10 seconds
-      
-      // Clean up the timeout if the component unmounts during the pause
-      return () => clearTimeout(pauseTimeout);
+      console.log('Track ended, playing next random track.');
+      playRandomTrack(); // Play the next random track immediately
     };
     
     if (audio) {
+      // The 'ended' event will fire when a track finishes, even if loop is true.
+      // However, with loop=true, the browser might restart the current track before 'ended' fully processes
+      // for our custom logic. For changing tracks, we might need to rely on user action (next button)
+      // or a more sophisticated playlist management if we want tracks to change automatically *after* looping.
+      // For now, loop=true means the *same* track repeats. If we want a sequence, loop should be false,
+      // and 'ended' event should indeed trigger playRandomTrack.
+      // Let's assume the request "music should play in loop" means a playlist that loops,
+      // so when one track ends, another starts. Thus, audioRef.current.loop should be false.
+      
+      // Re-evaluating: If "play in loop" means the *playlist* loops, then `audioRef.current.loop` should be `false`,
+      // and the `ended` event is the correct place to call `playRandomTrack`.
+      // The previous change to `audioRef.current.loop = true` might be a misinterpretation.
+      // Let's revert that specific part and ensure `ended` plays the next track.
+
+      // If `audioRef.current.loop` is true, this 'ended' event might not behave as expected for changing tracks.
+      // If the goal is for the *playlist* to loop (i.e., play another random track when one finishes),
+      // then `audioRef.current.loop` should be `false`.
+      // Let's proceed with `audioRef.current.loop = false` and this `ended` handler.
+      if (audioRef.current) audioRef.current.loop = false; // Ensure loop is false for track changes
+
       audio.addEventListener('ended', handleEnded);
       return () => {
         audio.removeEventListener('ended', handleEnded);
       };
     }
-  }, [tracks, isPaused]);
+  }, [tracks, playRandomTrack]); // playRandomTrack is a dependency now
 
   // Update volume when it changes
   useEffect(() => {

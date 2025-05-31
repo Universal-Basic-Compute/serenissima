@@ -17,7 +17,7 @@ export async function GET() {
     // Get all MP3 files
     const files = fs.readdirSync(musicDir)
       .filter(file => file.toLowerCase().endsWith('.mp3'))
-      .map(file => `/music/${file}`);
+      .map(file => `https://backend.serenissima.ai/public_assets/music/${file}`); // Prepend the full URL
     
     return NextResponse.json({ success: true, tracks: files });
   } catch (error) {
