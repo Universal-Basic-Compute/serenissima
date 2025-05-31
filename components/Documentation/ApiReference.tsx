@@ -3360,14 +3360,15 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div id="messages-post-compagno" className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/compagno</h3>
-          <p className="mb-2">Retrieves messages by type. Can fetch the latest or all messages of a given type.</p>
+        <div id="messages-get-type" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/messages?type=:type</h3>
+          <p className="mb-2">Retrieves messages by type. Can fetch the latest or all messages of a given type, optionally filtered by receiver.</p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>type</code> (required) - The type of message to retrieve (e.g., "daily_update", "admin_report").</li>
-              <li><code>latest</code> (optional, boolean) - If "true", returns only the most recent message of that type. Otherwise, returns all messages of that type.</li>
+              <li><code>type</code> (required) - The type of message to retrieve (e.g., "daily_update", "admin_report", "guild_application").</li>
+              <li><code>receiver</code> (optional) - Filter messages by the receiver's username.</li>
+              <li><code>latest</code> (optional, boolean) - If "true", returns only the most recent message matching the criteria. Otherwise, returns all matching messages.</li>
             </ul>
           </div>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
@@ -3393,18 +3394,16 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
 {`{
   "success": true,
   "message": [ // Array of message objects
-    { /* Message object structure as above */ }
+    { 
+      "messageId": "string",
+      "sender": "string",
+      "receiver": "string",
+      "content": "string",
+      "type": "string",
+      "createdAt": "string",
+      "readAt": "string | null"
+    }
   ]
-}`}
-            </pre>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
-            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
-{`{
-  "success": true,
-  "response": "string"
 }`}
             </pre>
           </div>
