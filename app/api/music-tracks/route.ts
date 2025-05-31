@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  console.log('[music-tracks API] Le gestionnaire GET a été invoqué.'); // Log de confirmation
   try {
     // Determine the Python backend URL. Use an environment variable if available,
     // otherwise fallback to development/production defaults.
