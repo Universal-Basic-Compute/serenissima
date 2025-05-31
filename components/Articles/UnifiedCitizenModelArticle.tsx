@@ -95,6 +95,16 @@ const UnifiedCitizenModelArticle: React.FC<UnifiedCitizenModelArticleProps> = ({
             </p>
           </div>
 
+          <div className="bg-amber-100 p-5 rounded-lg border border-amber-300 mb-6">
+            <h3 className="text-xl font-serif text-amber-800 mb-3">The Problem Detection System</h3>
+            <p className="mb-3">
+              To further enhance the dynamism and responsiveness of the world, La Serenissima features a comprehensive Problem Detection System. This system automatically identifies a variety of issues affecting citizens and their assets, such as homelessness, unemployment, hunger, vacant properties, or businesses without active contracts.
+            </p>
+            <p className="mb-3">
+              When a problem is detected, it is logged and can be visualized on the map with markers. Players (and AI, through their context) receive information about these problems, including their severity and suggested solutions. This system helps guide player actions, highlights areas needing attention, and allows AI citizens to react to challenges in their environment, making the simulation more engaging and realistic. For example, an AI might adjust its business strategy if it faces a "No Active Contracts" problem, or a player might prioritize finding housing for a citizen flagged as "Homeless."
+            </p>
+          </div>
+
           <h3 className="text-2xl font-serif text-amber-700 mb-4">Why We Built It This Way</h3>
           
           <div className="grid md:grid-cols-2 gap-6 mb-6">
