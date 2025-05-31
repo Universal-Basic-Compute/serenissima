@@ -10,6 +10,50 @@ const ApiReference: React.FC = () => {
         This documentation provides details about the available API endpoints for La Serenissima platform.
         These APIs can be used to interact with various aspects of the virtual Venice.
       </p>
+
+      {/* AI Interaction Guide Section */}
+      <section id="ai-interaction-guide" className="mb-12 p-6 bg-amber-100 border border-amber-300 rounded-lg">
+        <h2 className="text-3xl font-serif text-amber-800 mb-4">Notes for AI Developers / Autonomous Agents</h2>
+        <p className="mb-3 text-amber-900">
+          This section provides key guidelines for AI systems (like the Kinos AI in `autonomouslyRun.py`) interacting with the La Serenissima API.
+        </p>
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-bold text-amber-700 text-lg">Dynamic GET Filtering:</h4>
+            <p className="text-sm text-gray-700">
+              Most GET endpoints that return lists of items (e.g., <code>/api/buildings</code>, <code>/api/citizens</code>, <code>/api/contracts</code>) support dynamic filtering.
+              You can filter by most fields present in the corresponding Airtable table by providing the Airtable field name as a query parameter.
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-700 pl-4 mt-1">
+              <li>Example: <code>GET /api/buildings?Owner=NLR&Category=business</code>.</li>
+              <li>The server is generally flexible with the casing of query parameter keys (e.g., <code>Owner</code> or <code>owner</code> may work), but it's safest to assume Airtable field names are PascalCase (e.g., <code>SocialClass</code>, <code>ResourceType</code>). Refer to <code>backend/docs/airtable_schema.md</code> for exact Airtable field names.</li>
+              <li>Values are typically treated as strings. Numeric values are handled as numbers. Boolean values can be <code>true</code> or <code>false</code>.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-amber-700 text-lg">POST/PATCH Request Body Keys:</h4>
+            <p className="text-sm text-gray-700">
+              For POST or PATCH requests that create or update records in Airtable (e.g., creating a building, sending a message, creating a contract), you can provide keys in the JSON request body using <code>camelCase</code> (e.g., <code>landId</code>, <code>resourceType</code>) or <code>snake_case</code>.
+              The server will automatically convert these keys to <code>PascalCase</code> (e.g., <code>LandId</code>, <code>ResourceType</code>) before interacting with Airtable.
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-700 pl-4 mt-1">
+              <li>Example: <code>POST /api/messages/send</code> with body <code>{"{ \"sender\": \"NLR\", \"receiver\": \"MLP\", \"content\": \"Hello\" }"}</code>.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-amber-700 text-lg">Airtable Field Names:</h4>
+            <p className="text-sm text-gray-700">
+              When constructing dynamic GET filters, the query parameter key should correspond to an actual field name in the Airtable table. These are typically <code>PascalCase</code>. Consult the <code>backend/docs/airtable_schema.md</code> file for the definitive list of Airtable fields for each table.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-bold text-amber-700 text-lg">Responses:</h4>
+            <p className="text-sm text-gray-700">
+              API responses generally include a <code>success: true/false</code> field. Data is often returned in <code>camelCase</code>.
+            </p>
+          </div>
+        </div>
+      </section>
       
       {/* API Version Information */}
       <div className="mb-8 p-4 bg-amber-100 rounded-lg">

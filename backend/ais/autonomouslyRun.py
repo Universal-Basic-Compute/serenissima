@@ -302,20 +302,24 @@ def make_kinos_call(
 API_DOCUMENTATION_SUMMARY = {
     "base_url": API_BASE_URL,
     "notes": (
-        "Refer to the full API documentation for comprehensive details. Key points for AI interaction:\n"
-        "- **Dynamic GET Filtering**: Most GET endpoints returning lists (e.g., /api/buildings, /api/citizens, /api/contracts, /api/resources, /api/lands, /api/problems, /api/relevancies, /api/loans, /api/guilds, /api/decrees, /api/activities, /api/transactions/history) support dynamic filtering. You can use Airtable field names (e.g., Owner, Category, Status, Type, ResourceType, Severity, IsAI, SocialClass) as query parameters. The server handles case sensitivity for these filter keys (e.g., `?Owner=NLR` or `?owner=NLR`).\n"
-        "- **POST Request Body Keys**: For POST requests that create or update Airtable records (e.g., /api/buildings, /api/resources, /api/contracts, /api/messages/send, /api/loans/apply), you can use camelCase (e.g., `landId`, `resourceType`) or snake_case for keys in the JSON body. The server will automatically convert them to PascalCase (e.g., `LandId`, `ResourceType`) for Airtable.\n"
-        "- **Specific Endpoints**: Some endpoints have fixed parameters or specific behaviors (e.g., /api/resources/counts, /api/thoughts, /api/messages?type=...). Consult their specific documentation if dynamic filtering doesn't apply."
+        "You are an AI citizen interacting with the La Serenissima API. Key guidelines:\n"
+        "1.  **Dynamic GET Filtering**: For most GET endpoints that return lists (e.g., /api/buildings, /api/citizens, /api/contracts, /api/resources, /api/lands, /api/problems, /api/relevancies, /api/loans, /api/guilds, /api/decrees, /api/activities, /api/transactions/history), you can filter results by providing Airtable field names as query parameters. For example, to get buildings owned by 'NLR' of category 'business', use: `/api/buildings?Owner=NLR&Category=business`. The server is flexible with query key casing (e.g., `Owner` or `owner`), but Airtable fields are PascalCase (see `backend/docs/airtable_schema.md`).\n"
+        "2.  **POST/PATCH Request Body Keys**: When sending JSON data in POST or PATCH requests (e.g., creating a building, sending a message), use `camelCase` for keys in the request body (e.g., `{\"landId\": \"polygon-123\", \"buildingType\": \"house\"}`). The server will convert these to `PascalCase` for Airtable.\n"
+        "3.  **Airtable Schema**: Refer to `backend/docs/airtable_schema.md` for exact Airtable table and field names (they are PascalCase).\n"
+        "4.  **Specific Endpoints**: Some endpoints have fixed parameters or unique behaviors (e.g., /api/resources/counts, /api/thoughts, /api/messages?type=...). If dynamic filtering doesn't yield expected results, consult their specific documentation or use their defined parameters.\n"
+        "5.  **Focus**: Your goal is to make informed decisions. Choose API calls that provide the most relevant data for your current objectives."
     ),
     "example_get_endpoints": [
-        "/api/citizens/{username}", # Specific citizen
-        "/api/citizens?SocialClass=Nobili&IsAI=true", # Filtered list
-        "/api/buildings?Owner={username}&Category=business", 
-        "/api/lands?Owner={username}&District=San Polo",
-        "/api/resources/counts?owner={username}", # This one is specific, not general dynamic
-        "/api/contracts?Seller={username}&Type=public_sell&Status=active",
-        "/api/problems?Citizen={username}&Status=active&Severity=critical",
-        "/api/relevancies?RelevantToCitizen={username}&Category=opportunity&Score=>50" # Example with operator
+        "/api/citizens/{username}", # Specific citizen by username
+        "/api/citizens?SocialClass=Popolani&IsAI=true", # Filtered list of AI Popolani citizens
+        "/api/buildings?Owner={YourUsername}&Category=business", # Your business buildings
+        "/api/buildings?Type=market_stall&IsConstructed=true", # All constructed market stalls
+        "/api/lands?Owner={YourUsername}&District=San Polo", # Your lands in San Polo
+        "/api/resources/counts?owner={YourUsername}", # Your resource counts (specific endpoint)
+        "/api/contracts?Seller={YourUsername}&Type=public_sell&Status=active", # Your active public sell contracts
+        "/api/contracts?ResourceType=wood&Type=public_sell&Status=active", # Active public sell contracts for wood
+        "/api/problems?Citizen={YourUsername}&Status=active", # Your active problems
+        "/api/relevancies?RelevantToCitizen={YourUsername}&Category=opportunity&Score=>50" # High-score opportunities for you
     ],
     "example_post_endpoints": [
         "/api/actions/construct-building", # Body keys can be camelCase, server will adapt.
