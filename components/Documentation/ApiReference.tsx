@@ -319,7 +319,7 @@ const ApiReference: React.FC = () => {
   "lastName": "string", // Optional: new last name
   "familyMotto": "string", // Optional: new family motto
   "coatOfArmsImageUrl": "string", // Optional: new CoA image URL
-  "telegramUserId": "string" // Optional: Telegram User ID
+  "telegramUserId": "string | number" // Optional: Telegram User ID (can be string or number from Airtable)
 }`}
             </pre>
           </div>
@@ -330,15 +330,15 @@ const ApiReference: React.FC = () => {
 {`{
   "success": true,
   "message": "Citizen profile updated successfully",
-  "citizen": {
+  "citizen": { // Contains all fields from the updated Airtable record, camelCased
     "id": "string", // Airtable Record ID
     "username": "string | null",
     "firstName": "string | null",
     "lastName": "string | null",
     "familyMotto": "string | null",
     "coatOfArmsImageUrl": "string | null",
-    "telegramUserId": "string | null"
-    // ... any other fields that were updated, in camelCase
+    "telegramUserId": "string | number | null"
+    // ... any other fields that were updated or present on the record, in camelCase
   }
 }`}
             </pre>
@@ -366,9 +366,9 @@ const ApiReference: React.FC = () => {
 {`{
   "success": true,
   "citizen": {
-    "username": "string",
-    "guildId": "string",
-    "guildStatus": "string"
+    "username": "string", // Username of the citizen
+    "guildId": "string", // ID of the guild (e.g., "umbra_lucrum_invenit")
+    "guildStatus": "string" // Status from the request, e.g., "pending"
   }
 }`}
             </pre>
@@ -396,15 +396,15 @@ const ApiReference: React.FC = () => {
   "citizen": {
     "id": "string",
     "walletAddress": "string",
-    "username": "string | null",
-    "firstName": "string | null",
-    "lastName": "string | null",
-    "ducats": number,
-    "coatOfArmsImageUrl": "string | null",
-    "familyMotto": "string | null",
-    "createdAt": "string"
+    "username": "string | null", // Will be null for new registrations
+    "firstName": "string | null", // Will be null for new registrations
+    "lastName": "string | null", // Will be null for new registrations
+    "ducats": number, // Starting Ducats (e.g., 100)
+    "coatOfArmsImageUrl": "string | null", // Will be null for new registrations
+    "familyMotto": "string | null", // Will be null for new registrations
+    "createdAt": "string" // ISO date string of when the record was created
   },
-  "message": "Citizen registered successfully"
+  "message": "Citizen registered successfully" // Or "Citizen already exists"
 }`}
             </pre>
           </div>
@@ -465,17 +465,18 @@ const ApiReference: React.FC = () => {
   "lands": [
     {
       "id": "string", // Airtable Record ID
-      "landId": "string", // Polygon-style ID (e.g., polygon-123)
+      "landId": "string", // Polygon-style ID (e.g., polygon-123), derived from LandId field or record.id
       "polygonId": "string", // Alias for landId
-      "owner": "string | null",
-      "buildingPointsCount": number,
-      "historicalName": "string | null",
-      "englishName": "string | null",
-      "center": { "lat": number, "lng": number } | null, // Centroid or calculated center
-      "coordinates": [{ "lat": number, "lng": number }],
-      "buildingPoints": [{ "lat": number, "lng": number }], // Points on land for buildings
-      "bridgePoints": [], // Points on polygon edges for bridges
-      "canalPoints": [] // Points on polygon edges for canals/docks
+      "owner": "string | null", // Username of the owner
+      "buildingPointsCount": number, // Count of building points on the land
+      "historicalName": "string | null", // Historical name, merged from Airtable and polygon data
+      "englishName": "string | null", // English name, merged from Airtable and polygon data
+      "center": { "lat": number, "lng": number } | null, // Centroid from Airtable or polygon data
+      "coordinates": [{ "lat": number, "lng": number }], // Coordinates from polygon data
+      "buildingPoints": [{ "id": "string", "lat": number, "lng": number }], // Points on land for buildings, from polygon data
+      "bridgePoints": [{ "id": "string", "edge": { "lat": number, "lng": number }, /* ... */ }], // Points for bridges, from polygon data
+      "canalPoints": [{ "id": "string", "edge": { "lat": number, "lng": number } }] // Points for canals/docks, from polygon data
+      // ... other fields from Airtable LANDS table, camelCased
     }
   ]
 }`}
@@ -520,21 +521,21 @@ const ApiReference: React.FC = () => {
   "success": true,
   "landRents": [
     {
-      "id": "string", // Polygon ID
-      "centroid": { "lat": number, "lng": number },
-      "areaInSquareMeters": number,
-      "distanceFromCenter": number,
-      "locationMultiplier": number,
-      "dailyRent": number,
-      "estimatedLandValue": number, // Estimated value based on rent
-      "historicalName": "string | null" // Historical name of the land parcel
+      "id": "string", // Polygon ID (same as LandId from Airtable)
+      "centroid": { "lat": number, "lng": number }, // Centroid of the land parcel
+      "areaInSquareMeters": number, // Area of the land parcel
+      "distanceFromCenter": number, // Distance from a central point in Venice
+      "locationMultiplier": number, // Multiplier based on location
+      "dailyRent": number // Calculated daily rent for the land parcel
+      // Note: estimatedLandValue and historicalName are NOT returned by this specific endpoint.
+      // They are returned by /api/calculate-land-rent
     }
   ],
   "metadata": {
-    "totalLands": number,
-    "averageRent": number,
-    "minRent": number,
-    "maxRent": number
+    "totalLands": number, // Total number of land parcels with rent data
+    "averageRent": number, // Average daily rent across all parcels
+    "minRent": number, // Minimum daily rent
+    "maxRent": number // Maximum daily rent
   }
 }`}
             </pre>
@@ -726,40 +727,40 @@ const ApiReference: React.FC = () => {
   "polygons": [
     {
       "id": "string", // Polygon ID (e.g., polygon-12345)
-      "coordinates": [{ "lat": number, "lng": number }],
-      "centroid": { "lat": number, "lng": number },
-      "center": { "lat": number, "lng": number },
-      "bridgePoints": [
+      "coordinates": [{ "lat": number, "lng": number }], // Array of lat/lng for polygon shape
+      "centroid": { "lat": number, "lng": number }, // Calculated centroid
+      "center": { "lat": number, "lng": number }, // Original center from data, if available
+      "bridgePoints": [ // Points on polygon edges for bridges
         {
-          "id": "string",
-          "edge": { "lat": number, "lng": number },
-          "connection": {
-            "targetPolygonId": "string",
-            "distance": number,
-            "historicalName": "string",
-            "englishName": "string",
-            "historicalDescription": "string"
+          "id": "string", // Unique ID for the bridge point
+          "edge": { "lat": number, "lng": number }, // Position of the bridge point on the polygon edge
+          "connection": { // Information about the potential connection
+            "targetPolygonId": "string", // ID of the polygon it could connect to
+            "distance": number, // Distance to the target connection point
+            "historicalName": "string", // Historical name of the connection/bridge
+            "englishName": "string", // English name of the connection/bridge
+            "historicalDescription": "string" // Historical description
           }
         }
       ],
-      "canalPoints": [
+      "canalPoints": [ // Points on polygon edges for canals/docks
         {
-          "id": "string",
-          "edge": { "lat": number, "lng": number }
+          "id": "string", // Unique ID for the canal point
+          "edge": { "lat": number, "lng": number } // Position of the canal point on the polygon edge
         }
       ],
-      "buildingPoints": [
+      "buildingPoints": [ // Points within the polygon where buildings can be placed
         {
-          "id": "string",
+          "id": "string", // Unique ID for the building point
           "lat": number,
           "lng": number
         }
       ],
-      "historicalName": "string",
-      "englishName": "string",
-      "historicalDescription": "string",
-      "nameConfidence": "string",
-      "areaInSquareMeters": number
+      "historicalName": "string | null", // Historical name of the land parcel
+      "englishName": "string | null", // English name of the land parcel
+      "historicalDescription": "string | null", // Historical description
+      "nameConfidence": "string | null", // Confidence level of the historical name
+      "areaInSquareMeters": number | null // Area of the polygon
     }
   ]
 }`}
@@ -866,20 +867,24 @@ const ApiReference: React.FC = () => {
       "id": "string", // BuildingId (custom ID or Airtable record ID)
       "type": "string", // e.g., "market-stall", "house"
       "landId": "string", // ID of the land parcel it's on
-      "variant": "string", // Model variant
-      "position": { "lat": number, "lng": number }, // Resolved position
-      "point": "string | string[] | null", // Original point ID(s) from Airtable
-      "size": number, // Number of points the building occupies (e.g., 1 for single, 2-4 for multi-point)
-      "rotation": number, // Rotation in degrees or radians
       "owner": "string | null", // Username of the owner
-      "runBy": "string | null", // Username of the operator
-      "category": "string | null", // e.g., "home", "business", "public_service"
-      "name": "string", // Formatted building name
-      "createdAt": "string", // ISO date string
-      "leasePrice": number,
-      "rentPrice": number,
       "occupant": "string | null", // Username of the occupant
-      "isConstructed": boolean // True if construction is complete
+      "category": "string | null", // e.g., "home", "business", "public_service"
+      "runBy": "string | null", // Username of the operator
+      "position": { "lat": number, "lng": number } | null, // Resolved position
+      "point": "string | string[] | null", // Original point ID(s) from Airtable or generated
+      "size": number, // Number of points the building occupies (e.g., 1 for single, 2-4 for multi-point)
+      "name": "string", // Formatted building name (from Airtable 'Name' or generated from 'Type')
+      "rentPrice": number | null,
+      "leasePrice": number | null,
+      "variant": "string | null", // Model variant
+      "rotation": number | null, // Rotation in degrees or radians
+      "createdAt": "string", // ISO date string
+      "isConstructed": boolean, // True if construction is complete
+      "wages": number | null, // Wages offered if it's a business
+      "constructionMinutesRemaining": number | null,
+      "updatedAt": "string | null" // ISO date string
+      // ... other fields from Airtable, camelCased
     }
   ]
 }`}
@@ -925,27 +930,27 @@ const ApiReference: React.FC = () => {
 {`{
   "building": {
     "buildingId": "string", // Custom BuildingId or Airtable record ID
-    "type": "string",
-    "landId": "string",
-    "variant": "string",
-    "position": { "lat": number, "lng": number }, // Resolved position
-    "point": "string | string[] | null", // Original point ID(s) from Airtable
-    "size": number, // Number of points the building occupies
-    "rotation": number,
-    "owner": "string | null",
-    "runBy": "string | null",
-    "category": "string | null",
-    "subCategory": "string | null",
+    "type": "string", // Building type identifier
+    "landId": "string", // Land parcel ID
+    "variant": "string | null", // Model variant
+    "position": { "lat": number, "lng": number } | null, // Resolved position (may be centroid for multi-point)
+    "point": "string | string[] | null", // Original point ID(s) from Airtable or generated
+    "size": number, // Number of points the building occupies (1 for single, 2-4 for multi-point)
+    "rotation": number | null, // Rotation in degrees or radians
+    "owner": "string | null", // Username of the owner
+    "runBy": "string | null", // Username of the operator
+    "category": "string | null", // e.g., "home", "business", "public_service"
+    "subCategory": "string | null", // e.g., "market", "workshop"
     "createdAt": "string", // ISO date string
-    "updatedAt": "string", // ISO date string
-    "constructionMinutesRemaining": number,
-    "leasePrice": number,
-    "rentPrice": number,
-    "occupant": "string | null",
-    "isConstructed": boolean,
-    "historicalName": "string | undefined",
-    "englishName": "string | undefined",
-    "historicalDescription": "string | undefined"
+    "updatedAt": "string | null", // ISO date string of last update
+    "constructionMinutesRemaining": number | null, // Remaining construction time in minutes
+    "leasePrice": number | null, // Lease price if applicable
+    "rentPrice": number | null, // Rent price if applicable
+    "occupant": "string | null", // Username of the occupant
+    "isConstructed": boolean, // True if construction is complete
+    "historicalName": "string | null", // Enriched historical name if available
+    "englishName": "string | null", // Enriched English name if available
+    "historicalDescription": "string | null" // Enriched historical description if available
   }
 }`}
             </pre>
@@ -960,18 +965,18 @@ const ApiReference: React.FC = () => {
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "id": "string", // Optional: custom BuildingId, otherwise one is generated
-  "type": "string", // Building type identifier
-  "landId": "string", // Land parcel ID (e.g. polygon-123)
+  "id": "string", // Optional: custom BuildingId, otherwise one is generated (e.g., building-timestamp-random)
+  "type": "string", // Building type identifier (will be normalized: lowercase, spaces/apostrophes to hyphens)
+  "landId": "string", // Land parcel ID (e.g., polygon-123)
   "variant": "string", // Optional: model variant, defaults to "model"
-  "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number }, // Required if pointId is not provided
+  "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number } | string, // Required if pointId is not provided. Can be object or JSON string.
   "rotation": number, // Optional: rotation, defaults to 0
-  "owner": "string", // Optional: owner username, defaults to "system"
-  "pointId": "string", // Optional: ID of the specific point on the land (e.g. building_45.437100_12.335800_0)
+  "owner": "string", // Optional: owner username (or createdBy), defaults to "system"
+  "pointId": "string | string[]", // Optional: ID(s) of the specific point(s) on the land. If array, position might be calculated as centroid.
   "createdAt": "string", // Optional: ISO date string, defaults to now
   "leasePrice": number, // Optional: defaults to 0
   "rentPrice": number, // Optional: defaults to 0
-  "occupant": "string" // Optional: defaults to empty
+  "occupant": "string" // Optional: defaults to empty string
 }`}
             </pre>
           </div>
@@ -983,16 +988,16 @@ const ApiReference: React.FC = () => {
   "success": true,
   "building": {
     "id": "string", // BuildingId (custom or generated)
-    "type": "string",
+    "type": "string", // Normalized building type
     "landId": "string", // Land parcel ID
-    "variant": "string",
-    "position": { "lat": number, "lng": number } | null, // Resolved position
-    "pointId": "string | string[] | null", // Original point ID(s) from Airtable or generated
+    "variant": "string", // Model variant
+    "position": { "lat": number, "lng": number } | null, // Resolved position (from 'Position' or centroid of 'Point')
+    "pointId": "string | string[] | null", // Original point ID(s) from Airtable 'Point' field or generated
     "rotation": number,
-    "owner": "string",
+    "owner": "string", // Owner username
     "createdAt": "string", // ISO date string
-    "leasePrice": number,
-    "rentPrice": number,
+    "leasePrice": number | null,
+    "rentPrice": number | null,
     "occupant": "string | null"
   },
   "message": "Building created successfully"
@@ -1068,12 +1073,12 @@ const ApiReference: React.FC = () => {
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "type": "string", // Building type identifier
-  "land_id": "string", // Land parcel ID
-  "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number }, // Position of the building
+  "land_id": "string", // Land parcel ID (Airtable field name is LandId or Land)
+  "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number } | string, // Position of the building (can be object or JSON string)
   "walletAddress": "string", // Wallet address of the citizen creating the building
   "variant": "string", // Optional: model variant, defaults to "model"
   "rotation": number, // Optional: rotation, defaults to 0
-  "cost": number, // Optional: cost in Ducats, defaults to 0
+  "cost": number, // Optional: cost in Ducats, defaults to 0. This is the plot cost, not material cost.
   "created_at": "string" // Optional: ISO date string, defaults to now
 }`}
             </pre>
@@ -1085,17 +1090,17 @@ const ApiReference: React.FC = () => {
 {`{
   "success": true,
   "building": {
-    "id": "string", // BuildingId (custom or generated)
-    "type": "string",
-    "land_id": "string",
-    "variant": "string",
-    "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number },
-    "rotation": number,
-    "owner": "string", // Wallet address of the owner
-    "isConstructed": boolean,
-    "constructionMinutesRemaining": number,
+    "id": "string", // BuildingId (generated, e.g., building-timestamp-random)
+    "type": "string", // Building type
+    "land_id": "string", // Land parcel ID (from Airtable 'LandId' field)
+    "variant": "string", // Model variant
+    "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number }, // Parsed position
+    "rotation": number, // Rotation
+    "owner": "string", // Wallet address of the owner (from request)
+    "isConstructed": boolean, // False initially
+    "constructionMinutesRemaining": number, // Based on building type definition
     "created_at": "string", // ISO date string
-    "cost": number
+    "cost": number // Cost of placing the plot (from request or default)
   },
   "message": "Building created successfully, construction project initiated."
 }`}
@@ -1136,33 +1141,34 @@ const ApiReference: React.FC = () => {
   "success": true,
   "buildingTypes": [
     {
-      "type": "string", // Unique identifier for the building type
-      "name": "string", // Display name
+      "type": "string", // Unique identifier for the building type (e.g., "market_stall")
+      "name": "string", // Display name (e.g., "Market Stall")
       "category": "string", // e.g., "residential", "commercial", "industrial"
-      "subCategory": "string", // e.g., "market", "workshop"
-      "buildTier": number, // Minimum citizen tier required to build
-      "pointType": "string | null", // Type of point it can be built on ('land', 'canal', 'bridge', 'building')
+      "subCategory": "string | null", // e.g., "market", "workshop"
+      "buildTier": number, // Minimum citizen tier required to build (default 5 if not specified in JSON)
+      "pointType": "string | null", // Type of point it can be built on ('land', 'canal', 'bridge', 'building', default 'building')
       "size": number, // Number of points the building occupies (default 1)
       "constructionCosts": { // Resources and ducats needed for construction
         "ducats": number,
-        "resource_id": number 
+        "resource_id": number // Example: "wood": 10
+        // ... other resource costs
       } | null,
-      "maintenanceCost": number, // Daily maintenance cost in Ducats
-      "shortDescription": "string",
+      "maintenanceCost": number, // Daily maintenance cost in Ducats (default 0)
+      "shortDescription": "string", // Default empty string
       "productionInformation": { // Details about production, storage, sales
-        "storageCapacity": number,
-        "stores": ["string"], // Array of resource IDs it can store
-        "sells": ["string"], // Array of resource IDs it can sell
-        "inputResources": { "resource_id": number }, // Resources needed for production
-        "outputResources": { "resource_id": number } // Resources produced
+        "storageCapacity": number | null, // Max storage capacity
+        "stores": ["string"] | { [resourceId: string]: number } | null, // Array of resource IDs it can store, or object with capacities
+        "sells": ["string"] | { [resourceId: string]: number } | null, // Array of resource IDs it can sell, or object with initial stock/price
+        "inputResources": { "resource_id": number } | null, // Resources needed for production (resourceId: amount)
+        "outputResources": { "resource_id": number } | null // Resources produced (resourceId: amount)
       } | null,
-      "canImport": boolean, // If the building can import resources
-      "commercialStorage": boolean, // If the building offers commercial storage services
-      "constructionMinutes": number // Time in minutes to construct
+      "canImport": boolean, // If the building can import resources (default false)
+      "commercialStorage": boolean, // If the building offers commercial storage services (default false)
+      "constructionMinutes": number // Time in minutes to construct (default 0)
     }
   ],
   "filters": {
-    "pointType": "string | null" // The pointType filter that was applied
+    "pointType": "string | null" // The pointType filter that was applied, if any
   }
 }`}
             </pre>
@@ -1573,16 +1579,16 @@ const ApiReference: React.FC = () => {
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "id": "string", // ResourceId (custom ID for the resource stack)
+  "id": "string", // ResourceId (custom ID for the resource stack, e.g., "wood_pile_123")
   "type": "string", // Resource type identifier (e.g., "wood")
-  "name": "string", // Optional: Display name, defaults to type
-  "category": "string", // Optional: defaults to 'unknown' or derived from type
-  "subCategory": "string", // Optional
-  "tier": number, // Optional
-  "description": "string", // Optional
-  "position": { "lat": number, "lng": number }, // Required: Position of the resource itself
+  "name": "string", // Optional: Display name, defaults to type or enriched from resource type definition
+  // Category, SubCategory, Tier are not directly part of the POST request body for /api/resources.
+  // They are typically derived from the 'type' via resource type definitions.
+  // The 'Position' field in Airtable is for the resource's own location, not derived from Asset.
+  // "description": "string", // Optional, will be enriched if not provided
+  "position": { "lat": number, "lng": number } | string, // Required: Position of the resource itself (object or JSON string)
   "count": number, // Optional: defaults to 1
-  "asset": "string", // Optional: BuildingId, Citizen Username, or LandId
+  "asset": "string", // Optional: BuildingId, Citizen Username, or LandId where resource is located/associated
   "assetType": "string", // Optional: "building", "citizen", "land"; defaults to 'unknown'
   "owner": "string", // Optional: Username of the owner, defaults to "system"
   "createdAt": "string" // Optional: ISO date string, defaults to now
@@ -1595,24 +1601,25 @@ const ApiReference: React.FC = () => {
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "resource": {
-    "id": "string", // ResourceId (custom)
+  "resource": { // Contains all fields from the created Airtable record, camelCased and enriched
+    "id": "string", // ResourceId (custom ID from request)
     "type": "string",
-    "name": "string",
-    "category": "string",
-    "subCategory": "string | null",
-    "tier": number | null,
-    "description": "string",
-    "icon": "string | null",
-    "position": { "lat": number, "lng": number }, // Position of the resource itself
+    "name": "string", // Enriched name
+    "category": "string", // Enriched category
+    "subCategory": "string | null", // Enriched subCategory
+    "tier": number | null, // Enriched tier
+    "description": "string", // Enriched description
+    "icon": "string | null", // Enriched icon
+    "position": { "lat": number, "lng": number }, // Parsed position of the resource itself
     "count": number,
-    "asset": "string | null",
-    "assetType": "string | null",
-    "owner": "string | null",
-    "importPrice": number | null,
-    "lifetimeHours": number | null,
-    "consumptionHours": number | null,
-    "createdAt": "string"
+    "asset": "string | null", // Associated asset
+    "assetType": "string | null", // Type of associated asset
+    "owner": "string | null", // Owner username
+    "importPrice": number | null, // Enriched import price
+    "lifetimeHours": number | null, // Enriched lifetime hours
+    "consumptionHours": number | null, // Enriched consumption hours
+    "createdAt": "string" // ISO date string
+    // ... other fields from Airtable, camelCased
   },
   "message": "Resource created successfully"
 }`}
@@ -1639,24 +1646,24 @@ const ApiReference: React.FC = () => {
   "success": true,
   "globalResourceCounts": [
     {
-      "id": "string", // ResourceId from Airtable or record ID
+      "id": "string", // ResourceId from Airtable (usually the 'Type' field for aggregation)
       "name": "string", // Display name of the resource type
       "category": "string", // e.g., "raw_materials", "food"
-      "subCategory": "string",
+      "subCategory": "string | null",
       "icon": "string", // Filename of the icon (e.g., "wood.png")
       "count": number, // Total count of this resource type
       "rarity": "string", // e.g., "common", "rare"
       "description": "string",
-      "buildingId": "string | undefined", // BuildingId if resource is in a building
-      "location": { "lat": number, "lng": number } | null // Location if applicable
+      "buildingId": "string | undefined", // BuildingId if resource is in a building (this seems to be from the individual resource record, not the aggregated type)
+      "location": { "lat": number, "lng": number } | null // Location if applicable (also from individual record)
     }
   ],
   "playerResourceCounts": [ // Same structure as globalResourceCounts, but filtered for the player
     {
-      "id": "string",
+      "id": "string", // ResourceId from Airtable (usually the 'Type' field for aggregation)
       "name": "string",
       "category": "string",
-      "subCategory": "string",
+      "subCategory": "string | null",
       "icon": "string",
       "count": number,
       "rarity": "string",
@@ -1720,31 +1727,24 @@ fetch('/api/resources/counts?buildingId=building-123456789')
     {
       "id": "string", // Unique identifier for the resource type (e.g., "wood", "iron_ore")
       "name": "string", // Display name
-      "icon": "string | null", // Filename of the icon (e.g., "wood.png")
-      "category": "string", // e.g., "raw_materials", "food"
-      "subCategory": "string | null",
-      "tier": number | null, // Tier of the resource
-      "description": "string",
-      "importPrice": number | null, // Cost to import one unit
-      "lifetimeHours": number | null, // How long the resource lasts if applicable
-      "consumptionHours": number | null // How long it takes to consume one unit if applicable
+      "icon": "string | null", // Filename of the icon (e.g., "wood.png"), derived from JSON or default
+      "category": "string", // e.g., "raw_materials", "food", derived from JSON or path
+      "subCategory": "string | null", // Derived from JSON or path
+      "tier": number | null, // Tier of the resource (default null)
+      "description": "string", // Description (default empty string)
+      "importPrice": number | null, // Cost to import one unit (default 0 or null)
+      "lifetimeHours": number | null, // How long the resource lasts if applicable (default null)
+      "consumptionHours": number | null // How long it takes to consume one unit if applicable (default null)
     }
   ],
   "categories": [ // Resources grouped by category
     {
       "name": "string", // Category name
-      "resources": [ // Array of resource type objects belonging to this category
+      "resources": [ // Array of resource type objects belonging to this category (same structure as above)
         {
-          "id": "string",
-          "name": "string",
-          "icon": "string | null",
-          "category": "string",
-          "subCategory": "string | null",
-          "tier": number | null,
-          "description": "string",
-          "importPrice": number | null,
-          "lifetimeHours": number | null,
-          "consumptionHours": number | null
+          "id": "string", "name": "string", "icon": "string | null", "category": "string", 
+          "subCategory": "string | null", "tier": number | null, "description": "string",
+          "importPrice": number | null, "lifetimeHours": number | null, "consumptionHours": number | null
         }
       ]
     }
@@ -2204,13 +2204,13 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "Type": "string", // Required: e.g., "public_sell", "import", "building_bid", "construction_project"
   "PricePerResource": number, // Required: Price per unit, or total bid/project cost
   "Status": "string", // Required: e.g., "active", "pending_materials"
-  "ResourceType": "string", // Required for non-bids: ID of the resource
-  "Seller": "string", // Required for non-bids: Username of the seller
-  "SellerBuilding": "string", // Required for non-bids: BuildingId of the seller's building
-  "TargetAmount": number, // Required for non-bids: Amount of resource
-  "Buyer": "string", // Required for bids/projects: Username of the buyer
-  "Asset": "string", // Required for bids/projects: BuildingId being bid on or constructed
-  "AssetType": "string", // Required for bids/projects: "building" or "building_project"
+  "ResourceType": "string", // Conditionally required: ID of the resource (not for all types, e.g. some bids)
+  "Seller": "string", // Conditionally required: Username of the seller
+  "SellerBuilding": "string", // Conditionally required: BuildingId of the seller's building
+  "TargetAmount": number, // Conditionally required: Amount of resource
+  "Buyer": "string", // Conditionally required: Username of the buyer
+  "Asset": "string", // Conditionally required: BuildingId being bid on or constructed
+  "AssetType": "string", // Conditionally required: "building" or "building_project"
   "Notes": "string", // Optional
   "EndAt": "string", // Optional: ISO date string for contract expiry
   "Title": "string", // Optional: For display purposes
@@ -2223,11 +2223,28 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "contract": { // The created or updated contract object, structure same as GET /api/contracts
+  "contract": { // The created or updated contract object, structure similar to GET /api/contracts, enriched
       "id": "string", // Airtable record ID
       "contractId": "string",
-      // ... other contract fields ...
-      "location": { "lat": number, "lng": number } | null
+      "type": "string",
+      "buyer": "string | null",
+      "seller": "string | null",
+      "resourceType": "string | null",
+      "resourceName": "string | null", // Enriched
+      "resourceCategory": "string | null", // Enriched
+      // ... other enriched resource fields ...
+      "imageUrl": "string | null", // Enriched
+      "sellerBuilding": "string | null",
+      "price": number, // PricePerResource
+      "amount": number | null, // TargetAmount
+      "asset": "string | null",
+      "assetType": "string | null",
+      "createdAt": "string",
+      "endAt": "string | null",
+      "status": "string",
+      "notes": "string | null",
+      "location": { "lat": number, "lng": number } | null // Enriched location
+      // ... other fields from Airtable, camelCased
   },
   "message": "Contract created/updated successfully"
 }`}
@@ -2255,31 +2272,32 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "contracts": [
     {
       "id": "string", // Airtable record ID
-      "contractId": "string", // Custom ContractId
-      "type": "string", // e.g., "public_sell", "import", "building_bid"
+      "contractId": "string", // Custom ContractId from Airtable
+      "type": "string", // e.g., "public_sell", "import", "building_bid", "construction_project"
       "buyer": "string | null", // Username of the buyer
       "seller": "string | null", // Username of the seller
-      "resourceType": "string", // ID of the resource or building type for bids
-      "resourceName": "string", // Display name of the resource/building type
-      "resourceCategory": "string",
-      "resourceSubCategory": "string | null",
-      "resourceTier": number | null,
-      "resourceDescription": "string",
-      "resourceImportPrice": number | null,
-      "resourceLifetimeHours": number | null,
-      "resourceConsumptionHours": number | null,
-      "imageUrl": "string", // Path to resource/building type icon
+      "resourceType": "string | null", // ID of the resource or building type (for bids)
+      "resourceName": "string | null", // Enriched display name of the resource/building type
+      "resourceCategory": "string | null", // Enriched category
+      "resourceSubCategory": "string | null", // Enriched subCategory
+      "resourceTier": number | null, // Enriched tier
+      "resourceDescription": "string | null", // Enriched description
+      "resourceImportPrice": number | null, // Enriched import price
+      "resourceLifetimeHours": number | null, // Enriched lifetime hours
+      "resourceConsumptionHours": number | null, // Enriched consumption hours
+      "imageUrl": "string | null", // Path to resource/building type icon (e.g., /resources/wood.png)
       "buyerBuilding": "string | null", // BuildingId of the buyer's building
       "sellerBuilding": "string | null", // BuildingId of the seller's building
-      "price": number, // PricePerResource (for bids, this is the bid amount)
-      "amount": number, // TargetAmount (for bids, typically 1 for the building)
-      "asset": "string | null", // For bids, the BuildingId being bid on
-      "assetType": "string | null", // For bids, "building"
+      "price": number | null, // PricePerResource (for bids, this is the bid amount)
+      "amount": number | null, // TargetAmount (for bids, typically 1 for the building)
+      "asset": "string | null", // For bids/projects, the BuildingId being bid on/constructed
+      "assetType": "string | null", // For bids/projects, "building" or "building_project"
       "createdAt": "string", // ISO date string
-      "endAt": "string | null", // ISO date string
+      "endAt": "string | null", // ISO date string for contract expiry
       "status": "string", // e.g., "active", "pending_materials", "completed", "expired"
-      "notes": "string | null", // Additional notes, e.g., for bids
+      "notes": "string | null", // Additional notes (e.g., for bids, construction costs snapshot for projects)
       "location": { "lat": number, "lng": number } | null // Location of the seller's building if applicable
+      // ... other fields from Airtable, camelCased
     }
   ]
 }`}
@@ -2707,19 +2725,19 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "relevancies": [
     {
       "relevancyId": "string", // Airtable Record ID
-      "asset": "string",
-      "assetType": "string",
-      "category": "string",
-      "type": "string",
-      "targetCitizen": "string",
-      "relevantToCitizen": "string", // Can be a username, "all", or a JSON string array of usernames
-      "score": number,
-      "timeHorizon": "string",
-      "title": "string",
-      "description": "string", // Markdown supported
-      "notes": "string", // Markdown supported
-      "createdAt": "string", // ISO date string
-      "status": "string"
+      "asset": "string", // ID of the asset (e.g., landId, buildingId, citizenUsername)
+      "assetType": "string", // Type of the asset (e.g., "land", "building", "citizen")
+      "category": "string", // Broad category of relevancy (e.g., "proximity", "domination", "opportunity")
+      "type": "string", // Specific type of relevancy (e.g., "geographic_proximity", "land_owner_rivalry", "job_opening")
+      "targetCitizen": "string | null", // Username of the citizen the relevancy is about (if applicable)
+      "relevantToCitizen": "string", // Username this relevancy is for, "all", or JSON string array of usernames
+      "score": number, // Calculated relevancy score
+      "timeHorizon": "string", // e.g., "short-term", "medium-term", "long-term"
+      "title": "string", // Concise title for the relevancy
+      "description": "string", // Detailed description, supports Markdown
+      "notes": "string | null", // Additional notes, supports Markdown
+      "createdAt": "string", // ISO date string of when the relevancy was created/calculated
+      "status": "string" // e.g., "active", "archived"
     }
   ]
 }`}
@@ -2778,13 +2796,18 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="relevancies-get-proximity-username" className="mb-8"> {/* Assuming this is the GET for a specific user */}
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/proximity/:aiUsername</h3>
-          <p className="mb-2">Calculates proximity relevancies for an AI.</p>
+          <p className="mb-2">Retrieves calculated proximity relevancies for a specific AI citizen regarding other land parcels.</p>
           
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Path Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>aiUsername</code> - The username of the AI citizen.</li>
+            </ul>
+          </div>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>ai</code> - The username of the AI</li>
-              <li><code>type</code> (optional) - Filter by relevancy type ('connected' or 'geographic')</li>
+              <li><code>type</code> (optional) - Filter by relevancy type: 'connected' (bridge connectivity) or 'geographic' (pure distance). If omitted, both are considered.</li>
             </ul>
           </div>
           
@@ -2793,23 +2816,23 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "ai": "string",
-  "ownedLandCount": number,
-  "relevancyScores": {
-    "landId": number
+  "ai": "string", // The aiUsername for whom relevancies were calculated
+  "ownedLandCount": number, // Number of lands owned by this AI
+  "relevancyScores": { // Simplified scores: landId -> score
+    "polygon-123": 75.5
   },
-  "detailedRelevancy": {
-    "landId": {
-      "score": number,
-      "distance": number,
-      "isConnected": boolean,
-      "closestLandId": "string",
-      "category": "string",
-      "type": "string",
-      "assetType": "string",
-      "timeHorizon": "string",
-      "title": "string",
-      "description": "string"
+  "detailedRelevancy": { // Detailed relevancy objects: landId -> RelevancyScore object
+    "polygon-123": {
+      "score": 75.5, // Calculated relevancy score
+      "distance": 150.2, // Distance in meters to this land parcel
+      "isConnected": true, // Whether this land is connected by bridges to AI's owned lands
+      "closestLandId": "polygon-abc", // ID of the AI's owned land closest to this parcel
+      "category": "proximity",
+      "type": "geographic_proximity" | "connected_proximity", // Specific type of proximity
+      "assetType": "land",
+      "timeHorizon": "medium-term",
+      "title": "Nearby Land: Isola di San Giorgio Maggiore",
+      "description": "Isola di San Giorgio Maggiore is 150.2m away and connected by bridges."
     }
   }
 }`}
@@ -2820,7 +2843,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <h4 className="font-bold mb-2">Example Request</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`// Get proximity relevancies for an AI with type filter
-fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
+fetch('/api/relevancies/proximity/marco_polo?type=connected')
   .then(response => response.json())
   .then(data => console.log(data))
   .catch(error => console.error('Error:', error));`}
@@ -2836,8 +2859,8 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "Citizen": "string", // Username of the citizen
-  "typeFilter": "string" // Optional: 'connected' or 'geographic'
+  "Citizen": "string", // Username of the citizen for whom to calculate and save relevancies
+  "typeFilter": "string" // Optional: 'connected' or 'geographic'. If omitted, both are calculated.
 }`}
             </pre>
           </div>
@@ -2847,101 +2870,58 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "ai": "string",
-  "ownedLandCount": number,
-  "relevancyScores": {
-    "landId": number
+  "username": "string", // The username for whom relevancies were processed
+  "ownedLandCount": number, // Number of lands owned by this citizen
+  "relevancyScores": { // Simplified scores of relevancies that were considered for saving (score > 50)
+    "polygon-123": 75.5 
   },
-  "detailedRelevancy": {
-    "landId": {
-      "score": number,
-      "distance": number,
-      "isConnected": boolean,
-      "closestLandId": "string",
-      "category": "string",
-      "type": "string",
-      "assetType": "string",
-      "timeHorizon": "string",
-      "title": "string",
-      "description": "string"
-    }
+  "detailedRelevancy": { // Detailed relevancy objects that were considered for saving
+    "polygon-123": { /* Structure as in GET /api/relevancies/proximity/:aiUsername */ }
   },
-  "saved": boolean
+  "saved": boolean, // True if saving to Airtable was successful or if no relevancies met criteria
+  "relevanciesSavedCount": number // Number of relevancy records actually saved/updated in Airtable
 }`}
             </pre>
           </div>
         </div>
         
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/proximity/:aiUsername</h3>
-          <p className="mb-2">Retrieves proximity relevancies for a specific AI.</p>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Parameters</h4>
-            <ul className="list-disc pl-6">
-              <li><code>aiUsername</code> - The username of the AI</li>
-            </ul>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Query Parameters</h4>
-            <ul className="list-disc pl-6">
-              <li><code>type</code> (optional) - Filter by relevancy type ('connected' or 'geographic')</li>
-            </ul>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
-            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
-{`{
-  "success": true,
-  "ai": "string",
-  "ownedLandCount": number,
-  "relevancyScores": {
-    "landId": number
-  },
-  "detailedRelevancy": {
-    "landId": {
-      "score": number,
-      "distance": number,
-      "isConnected": boolean,
-      "closestLandId": "string",
-      "category": "string",
-      "type": "string",
-      "assetType": "string",
-      "timeHorizon": "string",
-      "title": "string",
-      "description": "string"
-    }
-  }
-}`}
-            </pre>
-          </div>
-        </div>
+        {/* This GET /api/relevancies/proximity/:aiUsername is already documented above. Removing duplicate. */}
         
-        <div id="relevancies-get-domination-username" className="mb-8">  {/* Assuming this is GET for specific user */}
+        <div id="relevancies-get-domination-username" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/domination/:aiUsername</h3>
-          <p className="mb-2">Calculates land domination relevancies.</p>
-          
+          <p className="mb-2">Retrieves "domination" category relevancies for a specific AI citizen.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Path Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>aiUsername</code> - The username of the AI citizen.</li>
+            </ul>
+          </div>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "relevancyScores": {
-    "citizenId": number
-  },
-  "detailedRelevancy": {
-    "citizenId": {
+  "aiUsername": "string", // The username for whom relevancies were fetched
+  "relevancies": [ // Array of relevancy objects, see GET /api/relevancies for structure
+    {
+      "id": "string", // Airtable Record ID
+      "relevancyId": "string",
+      "asset": "string", // Typically another citizen's username
+      "assetType": "citizen",
+      "category": "domination",
+      "type": "string", // e.g., "land_owner_rivalry", "land_owner_ally"
+      "targetCitizen": "string", // The citizen being evaluated in relation to aiUsername
+      "relevantToCitizen": "string", // Should be aiUsername
       "score": number,
-      "category": "string",
-      "type": "string",
-      "assetType": "string",
       "timeHorizon": "string",
       "title": "string",
-      "description": "string"
+      "description": "string",
+      "notes": "string | null",
+      "status": "string",
+      "createdAt": "string"
     }
-  }
+  ],
+  "count": number // Total number of domination relevancies returned
 }`}
             </pre>
           </div>
@@ -2955,7 +2935,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "Citizen": "string" // Username of the citizen
+  "Citizen": "string" // Username of the citizen for whom to calculate, or "all" for global calculation.
 }`}
             </pre>
           </div>
@@ -2965,35 +2945,66 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "ai": "string",
-  "relevancyScores": {
-    "citizenId": number
+  "username": "string", // The username processed ("all" if global)
+  "relevancyScores": { // Simplified scores: citizenUsername -> score (for all landowners)
+    "some_landowner": 60.0
   },
-  "detailedRelevancy": {
-    "citizenId": {
-      "score": number,
-      "category": "string",
-      "type": "string",
-      "assetType": "string",
-      "timeHorizon": "string",
-      "title": "string",
-      "description": "string"
+  "detailedRelevancy": { // Detailed relevancy objects: citizenUsername -> RelevancyScore object (for all landowners)
+    "some_landowner": {
+      "score": 60.0,
+      "category": "domination",
+      "type": "land_owner_profile", // Or similar, indicating overall land ownership strength
+      "assetType": "citizen",
+      "timeHorizon": "long-term",
+      "title": "Land Domination: Some Landowner",
+      "description": "Details about Some Landowner's land holdings and domination score."
+      // ... other fields from RelevancyScore object
     }
   },
-  "saved": boolean
+  "saved": boolean, // True if saving to Airtable was successful
+  "relevanciesSavedCount": number // Number of relevancy records actually saved/updated
 }`}
             </pre>
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="relevancies-get-domination" className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/domination</h3>
+          <p className="mb-2">Calculates and returns land domination relevancies for all citizens based on their land ownership. Does not save to database.</p>
+          {/* Note: This GET endpoint is distinct from GET /api/relevancies/domination/:aiUsername which fetches saved records. */}
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "relevancyScores": { // Simplified scores: citizenUsername -> score
+    "some_landowner": 60.0
+  },
+  "detailedRelevancy": { // Detailed relevancy objects: citizenUsername -> RelevancyScore object
+    "some_landowner": {
+      "score": 60.0,
+      "category": "domination",
+      "type": "land_owner_profile",
+      "assetType": "citizen",
+      "timeHorizon": "long-term",
+      "title": "Land Domination: Some Landowner",
+      "description": "Details about Some Landowner's land holdings and domination score."
+      // ... other fields from RelevancyScore object
+    }
+  }
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="relevancies-get-domination-username-duplicate" className="mb-8"> {/* ID adjusted for clarity */}
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/domination/:aiUsername</h3>
-          <p className="mb-2">Retrieves land domination relevancies for a specific AI.</p>
+          <p className="mb-2">Retrieves saved "domination" category relevancies for a specific AI citizen.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Parameters</h4>
+            <h4 className="font-bold mb-2">Path Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>aiUsername</code> - The username of the AI</li>
+              <li><code>aiUsername</code> - The username of the AI citizen.</li>
             </ul>
           </div>
           
@@ -3002,27 +3013,27 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "aiUsername": "string",
-  "relevancies": [
+  "aiUsername": "string", // The username for whom relevancies were fetched
+  "relevancies": [ // Array of relevancy objects, see GET /api/relevancies for structure
     {
-      "id": "string",
+      "id": "string", // Airtable Record ID
       "relevancyId": "string",
-      "asset": "string",
-      "assetType": "string",
-      "category": "string",
-      "type": "string",
-      "targetCitizen": "string",
-      "relevantToCitizen": "string",
+      "asset": "string", // Typically another citizen's username
+      "assetType": "citizen",
+      "category": "domination",
+      "type": "string", // e.g., "land_owner_rivalry", "land_owner_ally"
+      "targetCitizen": "string", // The citizen being evaluated in relation to aiUsername
+      "relevantToCitizen": "string", // Should be aiUsername
       "score": number,
       "timeHorizon": "string",
       "title": "string",
       "description": "string",
-      "notes": "string",
+      "notes": "string | null",
       "status": "string",
       "createdAt": "string"
     }
   ],
-  "count": number
+  "count": number // Total number of domination relevancies returned
 }`}
             </pre>
           </div>
@@ -3042,7 +3053,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>ai</code> (optional) - Filter by AI username</li>
+              <li><code>username</code> (optional) - Filter relevancies for a specific citizen username. Also accepts `ai` for backward compatibility.</li>
             </ul>
           </div>
           
@@ -3051,27 +3062,27 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "type": "string",
-  "relevancies": [
+  "type": "string", // The requested relevancy type
+  "relevancies": [ // Array of relevancy objects, see GET /api/relevancies for structure
     {
-      "id": "string",
-      "relevancyId": "string",
+      "id": "string", // Airtable Record ID
+      "relevancyId": "string", // Custom RelevancyId if exists
       "asset": "string",
       "assetType": "string",
       "category": "string",
-      "type": "string",
-      "targetCitizen": "string",
+      "type": "string", // Should match the path parameter
+      "targetCitizen": "string | null",
       "relevantToCitizen": "string",
       "score": number,
       "timeHorizon": "string",
       "title": "string",
       "description": "string",
-      "notes": "string",
+      "notes": "string | null",
       "status": "string",
       "createdAt": "string"
     }
   ],
-  "count": number
+  "count": number // Total number of relevancies returned
 }`}
             </pre>
           </div>
@@ -3087,23 +3098,39 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             
             <h5 className="font-bold mt-4 mb-2">Query Parameters</h5>
             <ul className="list-disc pl-6">
-              <li><code>ai</code> (optional) - Calculate for a specific AI username</li>
-              <li><code>calculateAll</code> (optional) - Set to 'true' to calculate for all AIs</li>
-              <li><code>type</code> (optional) - Filter by relevancy type ('proximity', 'connected', 'geographic', 'domination')</li>
+              <li><code>username</code> (optional) - Calculate for a specific citizen username (also accepts `ai`).</li>
+              <li><code>calculateAll</code> (optional) - Set to 'true' to calculate for all citizens who own lands.
+              <li><code>type</code> (optional) - Filter by relevancy type (e.g., 'proximity', 'connected', 'geographic', 'domination'). This influences which calculation logic is run.</li>
             </ul>
             
-            <h5 className="font-bold mt-4 mb-2">Response</h5>
+            <h5 className="font-bold mt-4 mb-2">Response (if 'calculateAll=true')</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "aiCount": number,
-  "totalRelevanciesCreated": number,
-  "results": {
-    "aiUsername": {
+  "citizenCount": number, // Number of citizens processed
+  "totalRelevanciesCreated": number, // Total relevancies saved to Airtable after filtering
+  "homelessnessBySocialClass": { // Breakdown of homelessness
+    "SocialClassName": { "total": number, "homeless": number }
+  },
+  "results": { // Per-citizen summary of what was saved
+    "citizen_username": {
       "ownedLandCount": number,
-      "relevanciesCreated": number
+      "relevanciesCreated": number // Number of relevancies saved for this citizen
     }
+    // ...
   }
+}`}
+            </pre>
+            <h5 className="font-bold mt-4 mb-2">Response (if specific 'username' provided)</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "username": "string", // The username for whom relevancies were calculated
+  "ownedLandCount": number,
+  "relevancyScores": { /* landId: score */ }, // Proximity scores
+  "detailedRelevancy": { /* landId: RelevancyScore object */ } // Detailed proximity relevancies
+  // Note: This response structure is for GET requests for a specific user and does not reflect saving.
+  // The POST request saves and has a different response structure.
 }`}
             </pre>
           </div>
@@ -3115,8 +3142,8 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <h5 className="font-bold mt-4 mb-2">Request Body</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "aiUsername": "string",
-  "typeFilter": "string" // Optional - 'proximity', 'connected', 'geographic', 'domination'
+  "Citizen": "string", // Username of the citizen for whom to calculate and save relevancies
+  "typeFilter": "string" // Optional: 'proximity', 'connected', 'geographic', 'domination'. Influences calculation.
 }`}
             </pre>
             
@@ -3124,26 +3151,16 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "ai": "string",
-  "ownedLandCount": number,
-  "relevancyScores": {
-    "id": number
+  "citizen": "string", // The username for whom relevancies were processed
+  "ownedLandCount": number, // Number of lands owned by this citizen
+  "relevancyScores": { // Simplified scores of relevancies that were saved (e.g., proximity > 50, all domination)
+    "asset_id_or_citizen_id": 75.5 
   },
-  "detailedRelevancy": {
-    "id": {
-      "score": number,
-      "category": "string",
-      "type": "string",
-      "assetType": "string",
-      "timeHorizon": "string",
-      "title": "string",
-      "description": "string",
-      "distance": number,        // For proximity relevancies
-      "isConnected": boolean,    // For proximity relevancies
-      "closestLandId": "string"  // For proximity relevancies
-    }
+  "detailedRelevancy": { // Detailed relevancy objects that were saved
+    "asset_id_or_citizen_id": { /* Structure varies by relevancy type, see RelevancyScore object */ }
   },
-  "saved": boolean
+  "saved": boolean, // True if saving to Airtable was successful
+  "relevanciesSavedCount": number // Number of relevancy records actually saved/updated in Airtable
 }`}
             </pre>
           </div>
@@ -3161,9 +3178,20 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Related Endpoints</h4>
             <ul className="list-disc pl-6">
-              <li><a href="#relevancies-proximity" className="text-amber-700 hover:underline">GET /api/relevancies/proximity/:aiUsername</a> - Get proximity relevancies for an AI</li>
-              <li><a href="#relevancies-domination" className="text-amber-700 hover:underline">GET /api/relevancies/domination/:aiUsername</a> - Get domination relevancies for an AI</li>
-              <li><a href="#relevancies-types" className="text-amber-700 hover:underline">GET /api/relevancies/types/:type</a> - Get relevancies of a specific type</li>
+              <li><a href="#relevancies-get-proximity-username" className="text-amber-700 hover:underline">GET /api/relevancies/proximity/:aiUsername</a> - Get proximity relevancies for an AI</li>
+              <li><a href="#relevancies-get-domination-username" className="text-amber-700 hover:underline">GET /api/relevancies/domination/:aiUsername</a> - Get domination relevancies for an AI</li>
+              <li><a href="#relevancies-get-domination" className="text-amber-700 hover:underline">GET /api/relevancies/domination</a> - Calculate all land domination relevancies (does not save)</li>
+              <li><a href="#relevancies-get-types-type" className="text-amber-700 hover:underline">GET /api/relevancies/types/:type</a> - Get relevancies of a specific type</li>
+              <li><a href="#relevancies-get-for-asset" className="text-amber-700 hover:underline">GET /api/relevancies/for-asset</a> - Get relevancies for a specific asset relevant to a citizen.</li>
+              <li><a href="#relevancies-post-guild-member" className="text-amber-700 hover:underline">POST /api/relevancies/guild-member</a> - Calculate and save guild member relevancies.</li>
+              <li><a href="#relevancies-post-same-land-neighbor" className="text-amber-700 hover:underline">POST /api/relevancies/same-land-neighbor</a> - Calculate and save same land neighbor relevancies.</li>
+              <li><a href="#relevancies-post-building-operator" className="text-amber-700 hover:underline">POST /api/relevancies/building-operator</a> - Calculate and save building operator relevancies.</li>
+              <li><a href="#relevancies-post-building-occupant" className="text-amber-700 hover:underline">POST /api/relevancies/building-occupant</a> - Calculate and save building occupant relevancies.</li>
+              <li><a href="#relevancies-post-building-ownership" className="text-amber-700 hover:underline">POST /api/relevancies/building-ownership</a> - Calculate and save building-land ownership relevancies.</li>
+              <li><a href="#relevancies-get-housing" className="text-amber-700 hover:underline">GET /api/relevancies/housing</a> - Get city-wide housing situation relevancy.</li>
+              <li><a href="#relevancies-post-housing" className="text-amber-700 hover:underline">POST /api/relevancies/housing</a> - Calculate and save city-wide housing relevancy.</li>
+              <li><a href="#relevancies-get-jobs" className="text-amber-700 hover:underline">GET /api/relevancies/jobs</a> - Get city-wide job market relevancy.</li>
+              <li><a href="#relevancies-post-jobs" className="text-amber-700 hover:underline">POST /api/relevancies/jobs</a> - Calculate and save city-wide job market relevancy.</li>
             </ul>
           </div>
         </div>
@@ -3181,8 +3209,8 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "citizen": "string",
-  "since": "string" | number // Optional, defaults to 1 week ago
+  "citizen": "string", // Username of the citizen
+  "since": "string | number" // Optional: ISO date string or timestamp (milliseconds). Defaults to 1 week ago.
 }`}
             </pre>
           </div>
@@ -3194,15 +3222,16 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
   "success": true,
   "notifications": [
     {
-      "notificationId": "string",
-      "type": "string",
-      "citizen": "string",
-      "content": "string",
-      "details": {},
-      "createdAt": "string",
-      "readAt": "string | null"
+      "notificationId": "string", // Airtable Record ID
+      "type": "string", // Type of notification
+      "citizen": "string", // Username of the recipient
+      "content": "string", // Main content of the notification
+      "details": "object | undefined", // Parsed JSON details, or undefined if parsing failed/no details
+      "createdAt": "string", // ISO date string
+      "readAt": "string | null" // ISO date string if read, otherwise null
     }
   ]
+  // On error, 'notifications' will be an empty array and 'error'/'details' fields might be present.
 }`}
             </pre>
           </div>
@@ -3216,8 +3245,8 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "citizen": "string",
-  "notificationIds": ["string"]
+  "citizen": "string", // Username of the citizen
+  "notificationIds": ["string"] // Array of Airtable Record IDs of notifications to mark as read
 }`}
             </pre>
           </div>
@@ -3241,7 +3270,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "citizen": "string"
+  "citizen": "string" // Username of the citizen
 }`}
             </pre>
           </div>
