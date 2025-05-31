@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
 
+// Helper to escape single quotes for Airtable formulas
+function escapeAirtableValue(value: string): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  return value.replace(/'/g, "\\'");
+}
+
 export async function GET(request: Request) {
   try {
     // Get Airtable credentials from environment variables
@@ -34,82 +42,84 @@ export async function GET(request: Request) {
     }
     
     // Prepare filter formula based on parameters
-    let filterFormula = '';
     const filterFormulaParts: string[] = [];
+    const loggableFilters: Record<string, string> = {};
+    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection', 'calculateAll', 'relevantToCitizen', 'assetType', 'targetCitizen', 'excludeAll'];
 
     // Helper function to escape single quotes in usernames for Airtable formulas
-    const escapeAirtableString = (str: string) => str.replace(/'/g, "\\'");
+    // const escapeAirtableString = (str: string) => str.replace(/'/g, "\\'"); // Already defined as escapeAirtableValue
 
     if (targetCitizen) {
       const targetUsernames = targetCitizen.split(',')
         .map(username => username.trim())
         .filter(username => username.length > 0);
-
       if (targetUsernames.length > 0) {
         const targetOrConditions: string[] = targetUsernames.flatMap(username => {
-          const safeUsername = escapeAirtableString(username);
-          // For each username, check for exact match OR if found within a JSON string array
+          const safeUsername = escapeAirtableValue(username);
           return [
             `{TargetCitizen} = '${safeUsername}'`,
             `FIND('"${safeUsername}"', {TargetCitizen}) > 0`
           ];
         });
         filterFormulaParts.push(`OR(${targetOrConditions.join(', ')})`);
+        loggableFilters['TargetCitizen'] = targetCitizen;
       }
     }
 
     if (relevantToCitizen) {
       const relevantToUsernames = relevantToCitizen.split(',')
         .map(username => username.trim())
-        .filter(username => username.length > 0); // Filter out empty strings after trimming
-
+        .filter(username => username.length > 0);
       if (relevantToUsernames.length > 0) {
         const relevantToOrConditions: string[] = relevantToUsernames.flatMap(username => {
-          const safeUsername = escapeAirtableString(username);
+          const safeUsername = escapeAirtableValue(username);
           return [
             `{RelevantToCitizen} = '${safeUsername}'`, 
             `FIND('"${safeUsername}"', {RelevantToCitizen}) > 0` 
           ];
         });
-        // Do NOT add '{RelevantToCitizen} = 'all'' here if specific citizens are requested
         filterFormulaParts.push(`OR(${relevantToOrConditions.join(', ')})`);
+        loggableFilters['RelevantToCitizen'] = relevantToCitizen;
       }
-      // If relevantToUsernames is empty (e.g., relevantToCitizen=" , "), no OR condition for RelevantToCitizen is added.
     }
 
     if (assetType) {
-      // Only add assetType filter if there are other citizen-based filters,
-      // or adjust if assetType can be a standalone filter.
-      // Current logic implies assetType is an additional filter to citizen filters.
-      if (relevantToCitizen || targetCitizen) { // Add assetType if we have citizen filters
-        filterFormulaParts.push(`{AssetType} = '${escapeAirtableString(assetType)}'`);
-      } else {
-        // If only assetType is provided, you might want a different logic or ensure this case is handled.
-        // For now, sticking to original behavior where assetType is usually combined.
-        // If you want to filter by assetType alone:
-        // filterFormulaParts.push(`{AssetType} = '${escapeAirtableString(assetType)}'`);
-      }
+      filterFormulaParts.push(`{AssetType} = '${escapeAirtableValue(assetType)}'`);
+      loggableFilters['AssetType'] = assetType;
     }
 
     if (excludeAll) {
       filterFormulaParts.push(`NOT({RelevantToCitizen} = 'all')`);
+      loggableFilters['excludeAll'] = 'true';
     }
-    
-    if (filterFormulaParts.length > 0) {
-      if (filterFormulaParts.length === 1) {
-        filterFormula = filterFormulaParts[0]; // Avoid AND() for a single condition
-      } else {
-        filterFormula = `AND(${filterFormulaParts.join(', ')})`;
+
+    // Add dynamic filters from other query parameters
+    for (const [key, value] of searchParams.entries()) {
+      if (reservedParams.includes(key.toLowerCase())) {
+        continue;
       }
-    } else {
-      // No specific filters provided by URL parameters, fetch all (will be limited by maxRecords)
-      // Or, if you prefer to return nothing if no relevantToCitizen is specified:
-      // filterFormula = "FALSE()"; // This would return no records
-      // Keeping original behavior: empty filter means fetch recent (sorted, limited)
-      filterFormula = ''; 
+      const airtableField = key; // Assuming query param key IS the Airtable field name
+      loggableFilters[airtableField] = value;
+
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
+        filterFormulaParts.push(`{${airtableField}} = ${value}`);
+      } else if (value.toLowerCase() === 'true') {
+        filterFormulaParts.push(`{${airtableField}} = TRUE()`);
+      } else if (value.toLowerCase() === 'false') {
+        filterFormulaParts.push(`{${airtableField}} = FALSE()`);
+      } else {
+        filterFormulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
+      }
     }
     
-    console.log(`Fetching relevancies with filter: ${filterFormula}`);
+    const filterByFormula = filterFormulaParts.length > 0 ? `AND(${filterFormulaParts.join(', ')})` : '';
+    
+    console.log('%c GET /api/relevancies request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    console.log('Query parameters (filters):', loggableFilters);
+    if (filterByFormula) {
+      console.log('Applying Airtable filter formula:', filterByFormula);
+    }
     
     // Fetch relevancies from Airtable with the constructed filter
     const relevanciesRecords = await base(AIRTABLE_RELEVANCIES_TABLE)

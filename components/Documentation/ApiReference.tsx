@@ -2549,7 +2549,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="economy-get-transactions-available" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/transactions/available</h3>
-          <p className="mb-2">Retrieves available transactions.</p>
+          <p className="mb-2">Retrieves available transactions (e.g., land sales where buyer is null). This endpoint fetches from a backend API or local data, not directly from Airtable with dynamic filtering.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>
@@ -2966,16 +2966,26 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="relevancies-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies</h3>
-          <p className="mb-2">Retrieves relevancy records. Can be filtered by citizen, asset type, or target.</p>
+          <p className="mb-2">Retrieves relevancy records. Supports dynamic filtering in addition to specific parameters.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              Specific parameters are processed first. Then, any other query parameters are treated as dynamic filters on Airtable fields (case-sensitive, e.g., <code>Score</code>, <code>Status</code>).
+            </p>
             <ul className="list-disc pl-6">
               <li><code>calculateAll</code> (optional) - If 'true', redirects to calculate all relevancies for all citizens.</li>
-              <li><code>relevantToCitizen</code> (optional) - Filter relevancies for a specific citizen username (or comma-separated list).</li>
+              <li><code>relevantToCitizen</code> (optional) - Filter relevancies for a specific citizen username (or comma-separated list). Checks exact match or if username is in a JSON array in the `RelevantToCitizen` field.</li>
               <li><code>assetType</code> (optional) - Filter relevancies by asset type (e.g., "land", "building", "citizen").</li>
-              <li><code>targetCitizen</code> (optional) - Filter relevancies by target citizen username (or comma-separated list).</li>
+              <li><code>targetCitizen</code> (optional) - Filter relevancies by target citizen username (or comma-separated list). Checks exact match or if username is in a JSON array in the `TargetCitizen` field.</li>
               <li><code>excludeAll</code> (optional, boolean) - If 'true', excludes relevancies where `RelevantToCitizen` is 'all'.</li>
+              <li><code>limit</code> (optional) - Limit the number of records (default 100).</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Category=opportunity&Score=75</code> - Filters for opportunity relevancies with a score of 75.</li>
+                  <li>Example: <code>?Status=active</code> - Filters for active relevancies.</li>
+                </ul>
+              </li>
             </ul>
           </div>
           
@@ -3563,7 +3573,7 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
       <section id="messages" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Messaging & Thoughts</h2>
         
-        <div id="messages-post-get" className="mb-8">
+        <div id="messages-post-get" className="mb-8"> {/* This is for POST /api/messages, GET /api/relationships is below */}
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/messages</h3>
           <p className="mb-2">Retrieves messages between two citizens.</p>
           
@@ -3671,6 +3681,62 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
           </div>
         </div>
         
+        {/* Placeholder for GET /api/relationships - to be added or ensure it's correctly placed if it exists elsewhere */}
+        <div id="relationships-get" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relationships</h3>
+          <p className="mb-2">
+            Retrieves relationship details. If <code>citizen1</code> and <code>citizen2</code> are provided, fetches their specific relationship.
+            Otherwise, retrieves a general list of relationships (top 100 strongest by default), which can be dynamically filtered.
+          </p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>citizen1</code> (optional) - Username of the first citizen. If provided, <code>citizen2</code> is also required.</li>
+              <li><code>citizen2</code> (optional) - Username of the second citizen. If provided, <code>citizen1</code> is also required.</li>
+              <li><em>Dynamic Filters (only if <code>citizen1</code> and <code>citizen2</code> are NOT provided):</em>
+                <p className="text-sm my-1">
+                  Filter the general list of relationships by any field in the 'RELATIONSHIPS' table (e.g., <code>Title</code>, <code>Status</code>, <code>Tier</code>).
+                </p>
+                <ul className="list-circle pl-5 mt-1">
+                    <li>Example: <code>?Title=Friend&Status=active</code> - Filters for active friendships.</li>
+                    <li>Example: <code>?Tier=3</code> - Filters for relationships of Tier 3.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response (Specific Relationship)</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "relationship": { // Single relationship object or null
+    "id": "string", // Airtable Record ID
+    "citizen1": "string",
+    "citizen2": "string",
+    "strengthScore": number,
+    "title": "string", // e.g., "Friend", "BusinessPartner"
+    "description": "string",
+    "tier": number,
+    "trustScore": number,
+    "status": "string", // e.g., "active", "strained"
+    "lastInteraction": "string", // ISO date string
+    "notes": "string | null",
+    "createdAt": "string" // ISO date string
+  }
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response (General List)</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "relationships": [ /* Array of relationship objects, same structure as above */ ]
+}`}
+            </pre>
+          </div>
+        </div>
+
         <div id="messages-get-type" className="mb-8 scroll-mt-20">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/messages?type=:type</h3>
           <p className="mb-2">Retrieves messages by type. Can fetch the latest or all messages of a given type, optionally filtered by receiver.</p>
@@ -3771,13 +3837,25 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
 
         <div id="problems-get-all" className="mb-8 scroll-mt-20">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/problems</h3>
-          <p className="mb-2">Retrieves a list of problems, filterable by citizen, asset type, and status.</p>
+          <p className="mb-2">Retrieves a list of problems. Supports dynamic filtering in addition to specific parameters.</p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              Specific parameters (<code>citizen</code>, <code>assetType</code>, <code>status</code>) are processed first.
+              Then, any other query parameters are treated as dynamic filters on Airtable fields (case-sensitive, e.g., <code>Severity</code>, <code>Type</code>).
+            </p>
             <ul className="list-disc pl-6">
               <li><code>citizen</code> (optional) - Filter problems by citizen username.</li>
               <li><code>assetType</code> (optional) - Filter problems by asset type (e.g., "land", "building").</li>
               <li><code>status</code> (optional) - Filter problems by status (default: "active").</li>
+              <li><code>limit</code> (optional) - Limit the number of records.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Severity=critical&Type=homeless_citizen</code> - Filters for critical homeless citizen problems.</li>
+                  <li>Example: <code>?Asset=building-xyz</code> - Filters for problems related to building-xyz.</li>
+                </ul>
+              </li>
             </ul>
           </div>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
