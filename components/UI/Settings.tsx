@@ -52,6 +52,14 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
     
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    // This effect runs when audio-related states change,
+    // ensuring that the audio settings are applied (e.g., events dispatched)
+    // This provides real-time feedback.
+    // applyAudioSettings is defined below and is stable in terms of its own dependencies.
+    applyAudioSettings(masterVolume, musicVolume, effectsVolume, isMuted);
+  }, [masterVolume, musicVolume, effectsVolume, isMuted]);
   
   // Apply audio settings to the game
   const applyAudioSettings = (master: number, music: number, effects: number, muted: boolean) => {
@@ -379,8 +387,8 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                       max="100"
                       value={musicVolume}
                       onChange={(e) => setMusicVolume(parseInt(e.target.value))}
-                      className={`w-full h-2 bg-amber-200 rounded-lg appearance-none ${settingsDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                      disabled={settingsDisabled}
+                      className={`w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer`}
+                      disabled={false}
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">{musicVolume}%</div>
                   </div>

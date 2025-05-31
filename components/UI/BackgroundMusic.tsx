@@ -8,11 +8,34 @@ interface BackgroundMusicProps {
 }
 
 const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ 
-  initialVolume = 0.24, // Reduced from 0.3 to 0.24 (20% quieter)
+  initialVolume = 0.24, // Default prop volume, will be overridden by localStorage if available
   autoplay = true 
 }) => {
   const [isPlaying, setIsPlaying] = useState(autoplay);
-  const [volume, setVolume] = useState(initialVolume);
+  const [volume, setVolume] = useState(() => {
+    let vol = initialVolume; // Default to prop
+    if (typeof window !== 'undefined') {
+      const savedSettings = localStorage.getItem('citizenSettings');
+      if (savedSettings) {
+        try {
+          const settings = JSON.parse(savedSettings);
+          const lsMusicVolume = settings.musicVolume; // 0-100
+          const lsMasterVolume = settings.masterVolume; // 0-100
+          const lsIsMuted = settings.isMuted; // boolean
+
+          if (lsMusicVolume !== undefined && lsMasterVolume !== undefined && lsIsMuted !== undefined) {
+            vol = lsIsMuted ? 0 : (lsMusicVolume / 100) * (lsMasterVolume / 100);
+          } else if (lsMusicVolume !== undefined) { 
+            // Fallback if only music volume is present (e.g. master/mute not saved yet)
+            // Assume master 100% and not muted for this specific music volume setting
+            vol = (lsMusicVolume / 100); 
+          }
+          // If settings exist but not these specific ones, it will use the prop initialVolume from the outer scope
+        } catch (e) { console.error("Error parsing citizenSettings for initial music volume", e); }
+      }
+    }
+    return vol;
+  });
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const [tracks, setTracks] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -180,6 +203,33 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   useEffect(() => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
+
+  // Listen for global audio settings changes
+  useEffect(() => {
+    const handleAudioSettingsChanged = (event: CustomEvent) => {
+      const { musicVolume: newMusicVolumeSetting, masterVolume: newMasterVolumeSetting, isMuted: newIsMutedSetting } = event.detail;
+
+      let calculatedVolume = volume; // Default to current volume
+
+      if (newMusicVolumeSetting !== undefined && newMasterVolumeSetting !== undefined && newIsMutedSetting !== undefined) {
+        calculatedVolume = newIsMutedSetting ? 0 : (newMusicVolumeSetting / 100) * (newMasterVolumeSetting / 100);
+      } else if (newMusicVolumeSetting !== undefined) {
+        // If only music volume is dispatched, assume master is 100% and not muted for this update
+        // This case might be less common if settings always dispatches all three.
+        calculatedVolume = (newMusicVolumeSetting / 100);
+      }
+      
+      // Ensure calculatedVolume is within 0-1 range
+      calculatedVolume = Math.max(0, Math.min(1, calculatedVolume));
+
+      setVolume(calculatedVolume);
+    };
+
+    window.addEventListener('audioSettingsChanged', handleAudioSettingsChanged as EventListener);
+    return () => {
+      window.removeEventListener('audioSettingsChanged', handleAudioSettingsChanged as EventListener);
+    };
+  }, [volume, setVolume]); // Added volume to dependencies to ensure calculatedVolume defaults correctly if needed
 
   // Handle track ending - play next random track with a 10-second pause
   useEffect(() => {
