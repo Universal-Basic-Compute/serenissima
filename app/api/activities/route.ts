@@ -56,7 +56,7 @@ export async function GET(request: Request) {
     
     // Handle specific hasPath filter
     if (hasPath) {
-      filterByFormulaParts.push(`AND(NOT({Path} = ''), NOT({Path} = BLANK()))`);
+      filterByFormulaParts.push(`LEN({Path}) > 0`);
       loggableFilters['hasPath'] = 'true';
     }
 
@@ -68,7 +68,7 @@ export async function GET(request: Request) {
       console.log('Applying 24-hour time range filter (no timezone).');
     } else if (ongoing) {
       // Broad Airtable filter for ongoing, precise JS filter applied later
-      const ongoingAirtableFilter = `NOT(OR({Status} = 'processed', {Status} = 'failed'))`;
+      const ongoingAirtableFilter = `AND({Status} != 'processed', {Status} != 'failed')`;
       filterByFormulaParts.push(ongoingAirtableFilter);
       loggableFilters['ongoing'] = 'true';
       console.log('Applying broad Airtable status filter for ongoing activities. JS will handle time logic.');
