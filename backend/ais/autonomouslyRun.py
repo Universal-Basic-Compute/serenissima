@@ -301,22 +301,21 @@ def make_kinos_call(
 # For now, we'll pass the base URL and rely on the AI's knowledge or a very specific prompt.
 API_DOCUMENTATION_SUMMARY = {
     "base_url": API_BASE_URL,
-    "notes": "Refer to the full API documentation for details on endpoints, parameters, and request/response formats. When constructing requests, use PascalCase for field names that map to Airtable fields (e.g., Owner, ResourceType, IsAI).",
+    "notes": "Refer to the full API documentation for details on endpoints, parameters, and request/response formats. The server will attempt to map provided keys (e.g., camelCase, snake_case) to the required Airtable field format (PascalCase).",
     "example_get_endpoints": [
-        "/api/citizens/{Username}", # Parameter in path, usually lowercase by convention, but if it's a direct field lookup, could be Username
-        "/api/buildings?Owner={Username}", # Example: ?Owner=NLR
-        "/api/lands?Owner={Username}",
-        "/api/resources/counts?Owner={Username}",
-        "/api/contracts?Username={Username}&Scope=userNonPublic", # Assuming Username is the filter key for citizen, Scope for scope
-        "/api/contracts?ResourceType={ResourceId}&Type=public_sell", # ResourceType and Type are Airtable fields
-        "/api/problems?Citizen={Username}&Status=active", # Citizen and Status are Airtable fields
-        "/api/relevancies?RelevantToCitizen={Username}" # RelevantToCitizen is an Airtable field
+        "/api/citizens/{username}",
+        "/api/buildings?owner={username}", # e.g., ?owner=NLR or ?Owner=NLR (server handles dynamic filtering key case)
+        "/api/lands?owner={username}",
+        "/api/resources/counts?owner={username}",
+        "/api/contracts?username={username}&scope=userNonPublic",
+        "/api/contracts?resourceType={resourceId}&type=public_sell",
+        "/api/problems?citizen={username}&status=active",
+        "/api/relevancies?relevantToCitizen={username}"
     ],
     "example_post_endpoints": [
-        "/api/actions/construct-building", # This endpoint has a specific complex body schema, likely camelCase.
-        "/api/contracts", # For creating/updating contracts. Body should use PascalCase keys like {"ContractId": "...", "Type": "..."}.
-        "/api/messages/send" # Body should use PascalCase keys like {"Sender": "...", "Receiver": "...", "Content": "..."}.
-        # Add more relevant POST endpoints AI might use, ensuring examples use PascalCase for Airtable fields.
+        "/api/actions/construct-building", # Body keys can be camelCase, server will adapt.
+        "/api/contracts", # Body keys like {"contractId": "...", "type": "..."}
+        "/api/messages/send" # Body keys like {"sender": "...", "receiver": "...", "content": "..."}
     ]
 }
 
@@ -344,8 +343,8 @@ def autonomously_run_ai_citizen(
         f"You are {ai_display_name}, an AI citizen in La Serenissima. Your current goal is to understand your situation and identify opportunities. "
         f"The base API URL is {API_BASE_URL}. Review your own citizen data in `addSystem.citizen_data` and the API documentation summary provided in `addSystem.api_docs`. "
         "Decide which single GET API endpoint you want to call to gather initial data relevant to your goals (e.g., your assets, market conditions, problems). "
-        "When specifying query parameters, use PascalCase for keys that correspond to Airtable field names (e.g., `Owner`, `ResourceType`). "
-        "Respond with a JSON object like: `{\"endpoint\": \"/api/your/choice\", \"params\": {\"ParamName\": \"value\"}}` or `{\"endpoint\": \"/api/your/choice\"}` if no params. "
+        "For query parameters, you can use camelCase (e.g., `owner`, `resourceType`). "
+        "Respond with a JSON object like: `{\"endpoint\": \"/api/your/choice\", \"params\": {\"paramName\": \"value\"}}` or `{\"endpoint\": \"/api/your/choice\"}` if no params. "
         "Choose an endpoint that provides a good overview or addresses a potential immediate concern."
     )
     add_system_step1 = {
@@ -395,8 +394,8 @@ def autonomously_run_ai_citizen(
         f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. You previously requested data via GET API. "
         f"The response was (or simulated/error response if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
         "Based on this data, your citizen data, your overall goals, and the API documentation in `addSystem.api_docs`, define your strategy and the next actions. "
-        "When specifying the `body` for POST requests, use PascalCase for keys that correspond to Airtable field names (e.g., `Sender`, `ResourceType`, `TargetAmount`). "
-        "Respond with a JSON object: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {\"FieldName\": \"value\"}}, ...]}`. "
+        "When specifying the `body` for POST requests, you can use camelCase for keys (e.g., `sender`, `resourceType`, `targetAmount`). The server will map them to the correct Airtable fields. "
+        "Respond with a JSON object: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {\"fieldName\": \"value\"}}, ...]}`. "
         "If no actions are needed now, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`."
     )
     add_system_step2 = {

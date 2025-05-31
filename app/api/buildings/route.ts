@@ -10,6 +10,25 @@ function escapeAirtableValue(value: string): string {
   return value.replace(/'/g, "\\'");
 }
 
+// Helper to convert a string to PascalCase
+// Handles snake_case, camelCase, and kebab-case
+const stringToPascalCase = (str: string): string => {
+  if (!str) return '';
+  return str
+    .replace(/([-_][a-z])/ig, ($1) => $1.toUpperCase().replace('-', '').replace('_', ''))
+    .replace(/^(.)/, ($1) => $1.toUpperCase());
+};
+
+// Helper function to convert all keys of an object to PascalCase (shallow)
+const keysToPascalCase = (obj: Record<string, any>): Record<string, any> => {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [stringToPascalCase(key), value])
+  );
+};
+
 // Utility function to convert field names to camelCase
 function toCamelCase(obj: Record<string, any>): Record<string, any> {
   const result: Record<string, any> = {};
@@ -47,28 +66,30 @@ const base = new Airtable({ apiKey }).base(baseId);
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const rawData = await request.json();
+    const pascalData = keysToPascalCase(rawData); // Convert incoming keys to PascalCase
     
     // Enhanced validation with more detailed error messages
-    if (!data.type) {
+    // Use rawData for type normalization as it's expected to be lowercase
+    if (!rawData.type) {
       return NextResponse.json(
         { success: false, error: 'Building type is required' },
         { status: 400 }
       );
     }
     
-    if (!data.landId) { // Changed from land_id
+    if (!pascalData.LandId) {
       return NextResponse.json(
-        { success: false, error: 'Land ID is required' },
+        { success: false, error: 'Land ID (landId) is required' },
         { status: 400 }
       );
     }
     
-    // Check if pointId is provided
-    const pointId = data.pointId; // Changed from point_id
+    // Check if pointId is provided (original key: pointId, now pascalData.PointId)
+    const pointId = pascalData.PointId;
     
-    // Ensure position is properly formatted if provided
-    let position = data.position;
+    // Ensure position is properly formatted if provided (original key: position, now pascalData.Position)
+    let position = pascalData.Position;
     
     // If neither position nor point_id is provided, return an error
     if (!position && !pointId) {
@@ -100,32 +121,32 @@ export async function POST(request: Request) {
       );
     }
     
-    // Log the received data for debugging
-    console.log('Creating building with data:', JSON.stringify({
-      ...data,
-      position: position
+    // Log the received data for debugging (using pascalData to show what's being processed)
+    console.log('Creating building with processed (PascalCase keys) data:', JSON.stringify({
+      ...pascalData, // Spread pascalData
+      Position: position // Use the potentially parsed position
     }, null, 2));
     
-    // Normalize the building type
-    const normalizedType = data.type.toLowerCase()
+    // Normalize the building type from rawData.type
+    const normalizedType = rawData.type.toLowerCase()
       .replace(/'/g, '-') // Replace apostrophes with hyphens
       .replace(/\s+/g, '-'); // Replace spaces with hyphens
     
-    // Create a record in Airtable
+    // Create a record in Airtable using keys from pascalData
     const buildingData: any = {
-      BuildingId: data.id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-      Type: normalizedType,
-      LandId: data.landId, // Changed from data.land_id
-      Variant: data.variant || 'model',
-      Rotation: data.rotation || 0,
-      Owner: data.owner || data.createdBy || 'system', // Changed from data.created_by
-      CreatedAt: data.createdAt || new Date().toISOString(), // Changed from data.created_at
-      LeasePrice: data.leasePrice || 0, // Changed from data.lease_price
-      RentPrice: data.rentPrice || 0, // Changed from data.rent_price
-      Occupant: data.occupant || ''
+      BuildingId: pascalData.Id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`, // from data.id
+      Type: normalizedType, // from rawData.type
+      LandId: pascalData.LandId, // from data.landId
+      Variant: pascalData.Variant || 'model', // from data.variant
+      Rotation: pascalData.Rotation || 0, // from data.rotation
+      Owner: pascalData.Owner || pascalData.CreatedBy || 'system', // from data.owner or data.createdBy
+      CreatedAt: pascalData.CreatedAt || new Date().toISOString(), // from data.createdAt
+      LeasePrice: pascalData.LeasePrice || 0, // from data.leasePrice
+      RentPrice: pascalData.RentPrice || 0, // from data.rentPrice
+      Occupant: pascalData.Occupant || '' // from data.occupant
     };
     
-    // If point_id is provided, store it in the Point field
+    // If pointId (derived from pascalData.PointId) is provided, store it in the Point field
     if (pointId) {
       buildingData.Point = pointId;
     }

@@ -1089,6 +1089,11 @@ const ApiReference: React.FC = () => {
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
+            <p className="text-xs mb-2 text-gray-600">
+              Field names can be provided in camelCase (e.g., <code>landId</code>) or snake_case (e.g., <code>land_id</code>).
+              The server will automatically convert them to PascalCase (e.g., <code>LandId</code>) for Airtable.
+              The examples below use camelCase.
+            </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "id": "string", // Optional: custom BuildingId, otherwise one is generated (e.g., building-timestamp-random)
@@ -3475,6 +3480,11 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
+            <p className="text-xs mb-2 text-gray-600">
+              Field names can be provided in camelCase (e.g., <code>sender</code>) or snake_case.
+              The server will automatically convert them to PascalCase (e.g., <code>Sender</code>) for Airtable.
+              The example below uses PascalCase as per Airtable schema.
+            </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "Sender": "string", // Username of the sender
