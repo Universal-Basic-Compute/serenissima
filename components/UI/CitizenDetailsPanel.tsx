@@ -507,27 +507,37 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
           try {
             // targetProfile is 'citizen' prop
-            // relationship is 'relationship' state
+            // relationship is 'relationship' state (already fetched for the UI)
+
+            const determinedKinosModelForContext = getKinosModelForSocialClass(citizen?.socialClass);
+            const isLocalModelForContext = determinedKinosModelForContext === 'local';
+            const notificationLimit = isLocalModelForContext ? Math.ceil(10 / 4) : 10;
+            const relevancyLimit = isLocalModelForContext ? Math.ceil(10 / 4) : 10;
+            const problemLimit = isLocalModelForContext ? Math.ceil(5 / 4) : 5;
             
-            // Fetch target notifications
+            // Fetch target notifications for AI (citizen)
             const notifRes = await fetch(`/api/notifications`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ citizen: citizen.username, limit: 10 }),
+              body: JSON.stringify({ citizen: citizen.username, limit: notificationLimit }),
             });
             const notifData = notifRes.ok ? await notifRes.json() : null;
             const targetNotifications = notifData?.success ? notifData.notifications : [];
 
-            // Relevancies: 'relevancies' state is already relevantToCitizen=currentUsername, targetCitizen=citizen.username
-            // We need relevantToCitizen=citizen.username, targetCitizen=currentUsername
-            // The existing 'relevancies' state is for "Opportunities FOR current user WITH target citizen"
-            // The Kinos context needs "Opportunities FOR target citizen WITH current user"
-            // So we use the `relevancies` state which is already fetched with targetCitizen=citizen.username and relevantToCitizen=currentUsername
-            // This matches the python script's `_get_relevancies_data(tables, ai_username, sender_username)`
-
-            // Problems: 'problems' state is for target citizen. Need for sender too.
-            let allProblems = [...problems]; // problems state is for targetCitizen
-            const problemsSenderRes = await fetch(`/api/problems?citizen=${currentUsername}&status=active&limit=5`);
+            // Fetch relevancies for AI (citizen) relevant to Sender (currentUsername)
+            const relevanciesForKinosRes = await fetch(`/api/relevancies?relevantToCitizen=${citizen.username}&targetCitizen=${currentUsername}&limit=${relevancyLimit}`);
+            const relevanciesForKinosData = relevanciesForKinosRes.ok ? await relevanciesForKinosRes.json() : null;
+            const relevanciesForContext = relevanciesForKinosData?.success ? relevanciesForKinosData.relevancies : [];
+            
+            // Fetch problems involving AI (citizen) or Sender (currentUsername)
+            let allProblems = [];
+            const problemsTargetRes = await fetch(`/api/problems?citizen=${citizen.username}&status=active&limit=${problemLimit}`);
+            const problemsTargetData = problemsTargetRes.ok ? await problemsTargetRes.json() : null;
+            if (problemsTargetData?.success && problemsTargetData.problems) {
+              allProblems.push(...problemsTargetData.problems);
+            }
+            // Fetch problems for the sender (currentUsername)
+            const problemsSenderRes = await fetch(`/api/problems?citizen=${currentUsername}&status=active&limit=${problemLimit}`);
             const problemsSenderData = problemsSenderRes.ok ? await problemsSenderRes.json() : null;
             if (problemsSenderData?.success && problemsSenderData.problems) {
               problemsSenderData.problems.forEach(p => {
@@ -538,12 +548,12 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             }
 
             const systemContext = {
-              ai_citizen_profile: citizen, // citizen prop is the target
+              ai_citizen_profile: citizen, 
               sender_citizen_profile: senderProfileObj,
-              relationship_with_sender: relationship, // relationship state
-              recent_notifications_for_ai: targetNotifications,
-              recent_relevancies_ai_to_sender: relevancies, // relevancies state
-              recent_problems_involving_ai_or_sender: allProblems 
+              relationship_with_sender: relationship, 
+              recent_notifications_for_ai: targetNotifications, // Fetched with dynamic limit
+              recent_relevancies_ai_to_sender: relevanciesForContext, // Fetched with dynamic limit
+              recent_problems_involving_ai_or_sender: allProblems // Fetched with dynamic limit
             };
             addSystemPayload = JSON.stringify(systemContext);
 

@@ -1065,9 +1065,9 @@ Your response:`;
         const determinedKinosModel = getKinosModelForSocialClass(targetSocialClass);
         const isLocalModel = determinedKinosModel === 'local';
 
-        const notificationLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
-        const relevancyLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
-        const problemLimit = isLocalModel ? Math.ceil(5 / 4) : 5;
+        const notificationLimit = isLocalModel ? Math.ceil(10 / 4) : 10; // Default 10, local 3
+        const relevancyLimit = isLocalModel ? Math.ceil(10 / 4) : 10;    // Default 10, local 3
+        const problemLimit = isLocalModel ? Math.ceil(5 / 4) : 5;        // Default 5,  local 2
 
         // Fetch target notifications
         const notifRes = await fetch(`/api/notifications`, {
