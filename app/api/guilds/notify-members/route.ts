@@ -12,9 +12,19 @@ const KINOS_API_BASE_URL = process.env.KINOS_API_BASE_URL; // e.g., https://api.
 const KINOS_BLUEPRINT_ID = process.env.KINOS_BLUEPRINT_ID;
 const KINOS_API_KEY = process.env.KINOS_API_KEY; // Secret API Key for KinOS
 
-interface GuildMember {
+// Define a more detailed GuildMember interface for addSystem prompt
+interface DetailedGuildMember {
   username: string;
-  // Add other fields if needed, but username is key for kin_id
+  firstName?: string;
+  lastName?: string;
+  // Add any other relevant fields you want to pass to the Gastaldo's AI
+}
+
+interface GuildDetails {
+  guildId: string;
+  guildName: string;
+  gastaldo?: string; // Guild Master's username
+  // other guild fields if needed
 }
 
 const initAirtable = () => {
@@ -134,22 +144,276 @@ export async function POST(request: NextRequest) {
       });
     });
 
-    // We don't wait for all promises for the client response, but good to log results
+    // We don't wait for all promises for the client response regarding initial notification
     Promise.allSettled(kinOsPromises).then(results => {
       results.forEach(result => {
-        if (result.status === 'fulfilled') {
-          // console.log(`KinOS notification result:`, result.value);
-        } else {
-          console.error(`KinOS notification promise rejected:`, result.reason);
+        if (result.status === 'fulfilled' && result.value.status !== 'skipped_sender') {
+          // console.log(`KinOS initial notification result:`, result.value);
+        } else if (result.status === 'rejected') {
+          console.error(`KinOS initial notification promise rejected:`, result.reason);
         }
       });
     });
 
-    return NextResponse.json({ success: true, message: 'KinOS notification process initiated for guild members.' });
+    // New logic for dynamic discussion
+    if (Math.random() < 0.8) { // 80% chance
+      console.log(`[Dynamic Discussion] Triggered for guild ${guildId}, channel ${kinOsChannelId}`);
+      // This part will run asynchronously and not block the main response
+      initiateDynamicDiscussion(guildId, kinOsChannelId, messageContent, originalSenderUsername, base)
+        .catch(discussionError => {
+          console.error(`[Dynamic Discussion] Error for ${guildId}#${kinOsChannelId}:`, discussionError);
+        });
+    } else {
+      console.log(`[Dynamic Discussion] Skipped by chance for guild ${guildId}, channel ${kinOsChannelId}`);
+    }
+
+    return NextResponse.json({ success: true, message: 'KinOS notification process initiated for guild members. Dynamic discussion may follow.' });
 
   } catch (error) {
-    console.error('Error in notify-members endpoint:', error);
+    console.error('Error in POST /api/guilds/notify-members:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown server error';
     return NextResponse.json({ success: false, error: 'Failed to process KinOS notifications.', details: errorMessage }, { status: 500 });
+  }
+}
+
+
+// Helper function to fetch details for a single guild
+async function fetchGuildDetails(guildId: string, airtableBase: Airtable.Base): Promise<GuildDetails | null> {
+  try {
+    const records = await airtableBase(AIRTABLE_GUILDS_TABLE)
+      .select({
+        filterByFormula: `{GuildId} = '${guildId}'`,
+        fields: ['GuildId', 'GuildName', 'Gastaldo'], // Ensure 'Gastaldo' is the correct Airtable field name
+        maxRecords: 1,
+      })
+      .firstPage();
+
+    if (records.length > 0) {
+      const record = records[0];
+      return {
+        guildId: record.get('GuildId') as string,
+        guildName: record.get('GuildName') as string,
+        gastaldo: record.get('Gastaldo') as string | undefined,
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error fetching details for guild ${guildId}:`, error);
+    return null;
+  }
+}
+
+// Helper function to fetch guild members with details
+async function fetchGuildMemberDetails(guildId: string, airtableBase: Airtable.Base): Promise<DetailedGuildMember[]> {
+  try {
+    // This logic is similar to app/api/guild-members/[guildId]/route.ts
+    // For simplicity, directly querying here. Consider abstracting if used in many places.
+    const citizenRecords = await airtableBase(AIRTABLE_CITIZENS_TABLE).select({
+      filterByFormula: `{GuildId} = '${guildId}'`,
+      fields: ['Username', 'FirstName', 'LastName'] // Add other fields as needed for the prompt
+    }).all();
+
+    return citizenRecords.map(record => ({
+      username: record.get('Username') as string,
+      firstName: record.get('FirstName') as string | undefined,
+      lastName: record.get('LastName') as string | undefined,
+    })).filter(member => member.username);
+  } catch (error) {
+    console.error(`Error fetching member details for guild ${guildId}:`, error);
+    return [];
+  }
+}
+
+
+// Assumed KinOS interaction function that gets an AI response
+async function askKinOsForJsonDecision(
+  kinUsername: string,
+  channelId: string,
+  promptMessage: string,
+  systemContext: string // For "addSystem"
+): Promise<any> {
+  // CRITICAL ASSUMPTION: This endpoint structure and its ability to return a direct AI response.
+  // The user mentioned "/kins/<MasterUsername>/channels/guildId_channel_name/messages"
+  // and also the "/v2/blueprints/{blueprint}/kins/{kin_id}/channels/{channel_id}/add-message"
+  // The latter does NOT return AI response. The former might, or it might be a typo for the general Kin message endpoint.
+  // Using the general Kin message endpoint structure which typically returns responses.
+  const kinOsUrl = `${KINOS_API_BASE_URL}/v2/blueprints/${KINOS_BLUEPRINT_ID}/kins/${kinUsername}/messages`;
+
+  const payload: any = {
+    message: promptMessage,
+    role: "user", // System-initiated prompts often go as 'user' to the AI
+    channel_id: channelId, // Assuming the general message endpoint can target a channel_id in payload
+    // For "addSystem", the exact mechanism depends on KinOS API.
+    // It could be a specific field, or part of metadata, or prepended to `promptMessage`.
+    // Using a hypothetical 'system_prompt' field or similar in metadata.
+    metadata: {
+      system_prompt_override: systemContext // Placeholder for how addSystem is implemented
+    }
+    // Or, if "addSystem" is a top-level field:
+    // addSystem: systemContext,
+  };
+  
+  console.log(`[KinOS Ask] Sending to ${kinUsername} in channel ${channelId}. Payload:`, JSON.stringify(payload));
+
+
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (KINOS_API_KEY) {
+    headers['Authorization'] = `Bearer ${KINOS_API_KEY}`;
+  }
+
+  const response = await fetch(kinOsUrl, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error(`[KinOS Ask] API error for ${kinUsername} (${response.status}): ${errorBody}`);
+    throw new Error(`KinOS API error: ${response.statusText} - ${errorBody}`);
+  }
+  
+  const responseData = await response.json();
+  console.log(`[KinOS Ask] Response from ${kinUsername}:`, responseData);
+
+  // KinOS responses often have the AI's message in a specific field, e.g., responseData.message.content or responseData.choices[0].message.content
+  // For now, assuming the AI's direct reply (the JSON string) is in responseData.message or responseData.text
+  // This needs to be adjusted based on the actual KinOS API response structure.
+  let aiResponseMessage = responseData.message || responseData.text || (responseData.messages && responseData.messages[0]?.content);
+
+  if (typeof aiResponseMessage === 'object' && aiResponseMessage.content) {
+    aiResponseMessage = aiResponseMessage.content;
+  }
+  
+  if (!aiResponseMessage || typeof aiResponseMessage !== 'string') {
+    console.error("[KinOS Ask] AI response format not as expected or missing. Response:", responseData);
+    throw new Error("AI response format not as expected or missing.");
+  }
+
+  try {
+    // The AI is expected to return a JSON string.
+    return JSON.parse(aiResponseMessage);
+  } catch (e) {
+    console.error(`[KinOS Ask] Failed to parse JSON response from ${kinUsername}: ${aiResponseMessage}`, e);
+    throw new Error(`Failed to parse JSON from AI: ${aiResponseMessage}`);
+  }
+}
+
+// Fire-and-forget message to a Kin's channel (similar to original relay, but for system directives)
+async function sendSystemDirectiveToKinOsChannel(
+  kinUsername: string,
+  channelId: string,
+  directiveMessage: string,
+  originalSender: string, // For metadata
+  guildId: string // For metadata
+): Promise<void> {
+  const kinOsUrl = `${KINOS_API_BASE_URL}/v2/blueprints/${KINOS_BLUEPRINT_ID}/kins/${kinUsername}/channels/${channelId}/add-message`;
+  const payload = {
+    message: directiveMessage, // This is the [SYSTEM]...[/SYSTEM] message
+    role: "system", // Or "user" if KinOS expects directives as user messages
+    metadata: {
+      source: "guild_discussion_director",
+      original_sender_of_chat_message: originalSender,
+      guild_id: guildId,
+      guild_tab_channel_id: channelId,
+      directed_to_kin: kinUsername
+    }
+  };
+
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (KINOS_API_KEY) {
+    headers['Authorization'] = `Bearer ${KINOS_API_KEY}`;
+  }
+
+  try {
+    const res = await fetch(kinOsUrl, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const errorBody = await res.text();
+      console.error(`[KinOS Directive] API error for ${kinUsername} (${res.status}): ${errorBody}`);
+    } else {
+      console.log(`[KinOS Directive] Successfully sent to ${kinUsername} in channel ${channelId}`);
+    }
+  } catch (error) {
+    console.error(`[KinOS Directive] Failed to send to ${kinUsername}:`, error);
+  }
+}
+
+
+async function initiateDynamicDiscussion(
+  guildId: string,
+  kinOsChannelId: string, // e.g. guildId_Charter_and_Rules
+  originalMessageContent: string,
+  originalSenderUsername: string,
+  airtableBase: Airtable.Base
+) {
+  // 1. Fetch Guild Master's username
+  const guildDetails = await fetchGuildDetails(guildId, airtableBase);
+  if (!guildDetails || !guildDetails.gastaldo) {
+    console.log(`[Dynamic Discussion] Guild ${guildId} not found or Gastaldo not set. Aborting.`);
+    return;
+  }
+  const gastaldoUsername = guildDetails.gastaldo;
+
+  // 2. Fetch Guild Members' details for the system prompt
+  const members = await fetchGuildMemberDetails(guildId, airtableBase);
+  if (members.length === 0) {
+    console.log(`[Dynamic Discussion] No members found for guild ${guildId}. Aborting.`);
+    return;
+  }
+  const memberInfoForPrompt = members
+    .map(m => `${m.username} (${m.firstName || ''} ${m.lastName || ''})`.trim())
+    .join(', ');
+
+  // 3. Construct prompt for Guild Master
+  const tabName = kinOsChannelId.substring(guildId.length + 1).replace(/_/g, ' ');
+  const masterPromptMessage = `[SYSTEM]A new message has been posted by ${originalSenderUsername} in the guild chat for channel "${tabName}" (Guild: ${guildDetails.guildName}). The message is: "${originalMessageContent}". Review the context and decide which guild member should respond to continue the discussion, or if no response is needed. Reply ONLY with a JSON object like: {"Username": "selected_username_here"} or {"Username": ""} if no one should respond or the topic is concluded.[/SYSTEM]`;
+  const masterSystemContext = `You are the Gastaldo (Guild Master) for ${guildDetails.guildName}. Your task is to facilitate productive discussions in the guild chat. A new message has arrived. Your members are: ${memberInfoForPrompt}. The original sender ${originalSenderUsername} should not be selected to respond to their own message. Consider who is best suited or if the conversation should end.`;
+
+  console.log(`[Dynamic Discussion] Asking Gastaldo ${gastaldoUsername} for guild ${guildId}, channel ${kinOsChannelId}`);
+
+  try {
+    const decisionResponse = await askKinOsForJsonDecision(
+      gastaldoUsername,
+      kinOsChannelId, // Master receives this in the same guild-tab channel
+      masterPromptMessage,
+      masterSystemContext
+    );
+
+    // decisionResponse is already parsed JSON from askKinOsForJsonDecision
+    const selectedUsername = decisionResponse.Username;
+
+    if (selectedUsername && typeof selectedUsername === 'string' && selectedUsername.trim() !== "") {
+      if (selectedUsername === originalSenderUsername) {
+        console.log(`[Dynamic Discussion] Gastaldo selected the original sender ${selectedUsername}. Ignoring to prevent self-reply loop.`);
+        return;
+      }
+      if (!members.find(m => m.username === selectedUsername)) {
+        console.log(`[Dynamic Discussion] Gastaldo selected ${selectedUsername}, who is not a current member of guild ${guildId}. Aborting directive.`);
+        return;
+      }
+
+      console.log(`[Dynamic Discussion] Gastaldo ${gastaldoUsername} selected ${selectedUsername} to respond.`);
+
+      // 4. Send directive to the selected user
+      const userDirective = `[SYSTEM]The Guild Master, ${gastaldoUsername}, has selected you to contribute to the discussion in the guild chat for channel "${tabName}" (Guild: ${guildDetails.guildName}). The last message was from ${originalSenderUsername}: "${originalMessageContent}". Please review the conversation and share your point of view in the channel.[/SYSTEM]`;
+      
+      await sendSystemDirectiveToKinOsChannel(
+        selectedUsername,
+        kinOsChannelId, // Selected user also gets this in the same guild-tab channel
+        userDirective,
+        originalSenderUsername,
+        guildId
+      );
+      console.log(`[Dynamic Discussion] Directive sent to ${selectedUsername} for guild ${guildId}, channel ${kinOsChannelId}.`);
+
+    } else {
+      console.log(`[Dynamic Discussion] Gastaldo ${gastaldoUsername} decided no further response is needed or provided an empty selection.`);
+    }
+  } catch (error) {
+    console.error(`[Dynamic Discussion] Error during interaction with Gastaldo ${gastaldoUsername} or selected user:`, error);
   }
 }

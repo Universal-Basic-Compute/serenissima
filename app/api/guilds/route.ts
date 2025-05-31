@@ -23,6 +23,7 @@ interface Guild {
   guildEmblem?: string;
   guildBanner?: string;
   color?: string;
+  gastaldo?: string; // Added for Guild Master username
 }
 
 export async function GET() {
@@ -83,6 +84,7 @@ export async function GET() {
         guildEmblem: emblemPath || undefined, // Use the transformed path
         guildBanner: bannerPath || undefined, // Use the transformed path
         color: record.get('Color') as string,
+        gastaldo: record.get('Gastaldo') as string || undefined, // Fetch Gastaldo username
       };
     });
 
