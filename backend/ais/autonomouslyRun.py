@@ -307,7 +307,8 @@ API_DOCUMENTATION_SUMMARY = {
         "2.  **POST/PATCH Request Body Keys**: When sending JSON data in POST or PATCH requests (e.g., creating a building, sending a message), use `camelCase` for keys in the request body (e.g., `{\"landId\": \"polygon-123\", \"buildingType\": \"house\"}`). The server will convert these to `PascalCase` for Airtable.\n"
         "3.  **Airtable Schema**: Refer to `backend/docs/airtable_schema.md` for exact Airtable table and field names (they are PascalCase).\n"
         "4.  **Specific Endpoints**: Some endpoints have fixed parameters or unique behaviors (e.g., /api/resources/counts, /api/thoughts, /api/messages?type=...). If dynamic filtering doesn't yield expected results, consult their specific documentation or use their defined parameters.\n"
-        "5.  **Focus**: Your goal is to make informed decisions. Choose API calls that provide the most relevant data for your current objectives."
+        "5.  **Focus**: Your goal is to make informed decisions. Choose API calls that provide the most relevant data for your current objectives.\n"
+        "6.  **Airtable Schema**: A summary of the Airtable schema (field names, types) is available in `addSystem.airtable_schema_summary` to help you understand data structures and construct precise filters for GET requests."
     ),
     "example_get_endpoints": [
         "/api/citizens/{username}", # Specific citizen by username
@@ -350,7 +351,7 @@ def autonomously_run_ai_citizen(
     log.info(f"{LogColors.OKCYAN}--- Step 1: Gather Data for {ai_username} ---{LogColors.ENDC}")
     prompt_step1 = (
         f"You are {ai_display_name}, an AI citizen in La Serenissima. Your current goal is to understand your situation and identify opportunities. "
-        f"The base API URL is {API_BASE_URL}. Review your own citizen data in `addSystem.citizen_data` and the API documentation summary provided in `addSystem.api_docs`. "
+        f"The base API URL is {API_BASE_URL}. Review your own citizen data in `addSystem.citizen_data`, the API documentation summary in `addSystem.api_docs`, and the Airtable schema in `addSystem.airtable_schema_summary`. "
         "Decide which single GET API endpoint you want to call to gather initial data relevant to your goals (e.g., your assets, market conditions, problems). "
         "For query parameters, you can use camelCase (e.g., `owner`, `resourceType`). "
         "Respond with a JSON object like: `{\"endpoint\": \"/api/your/choice\", \"params\": {\"paramName\": \"value\"}}` or `{\"endpoint\": \"/api/your/choice\"}` if no params. "
@@ -359,7 +360,8 @@ def autonomously_run_ai_citizen(
     add_system_step1 = {
         "api_docs": API_DOCUMENTATION_SUMMARY, 
         "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
-        "citizen_data": ai_citizen_record["fields"] # Add citizen data here
+        "citizen_data": ai_citizen_record["fields"],
+        "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT # Add schema content
     }
     
     kinos_response_step1 = None
@@ -402,7 +404,7 @@ def autonomously_run_ai_citizen(
     prompt_step2 = (
         f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. You previously requested data via GET API. "
         f"The response was (or simulated/error response if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
-        "Based on this data, your citizen data, your overall goals, and the API documentation in `addSystem.api_docs`, define your strategy and the next actions. "
+        "Based on this data, your citizen data, your overall goals, the API documentation in `addSystem.api_docs`, and the Airtable schema in `addSystem.airtable_schema_summary`, define your strategy and the next actions. "
         "When specifying the `body` for POST requests, you can use camelCase for keys (e.g., `sender`, `resourceType`, `targetAmount`). The server will map them to the correct Airtable fields. "
         "Respond with a JSON object: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {\"fieldName\": \"value\"}}, ...]}`. "
         "If no actions are needed now, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`."
@@ -410,7 +412,8 @@ def autonomously_run_ai_citizen(
     add_system_step2 = {
         "api_docs": API_DOCUMENTATION_SUMMARY, 
         "previous_get_response": api_get_response_data,
-        "citizen_data": ai_citizen_record["fields"] # Add citizen data here
+        "citizen_data": ai_citizen_record["fields"],
+        "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT # Add schema content
     }
 
     kinos_response_step2 = None
@@ -473,13 +476,14 @@ def autonomously_run_ai_citizen(
     prompt_step3 = (
         f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. Your strategy was: '{strategy_summary}'. "
         f"Your POST actions resulted in (or simulated results if dry_run/failed): \n```json\n{json.dumps(api_post_responses_summary, indent=2)}\n```\n"
-        "Reflect on these outcomes. What did you learn? What are your key observations or plans for your next autonomous run? "
+        "Reflect on these outcomes, considering your citizen data, API docs, and Airtable schema (all in `addSystem`). What did you learn? What are your key observations or plans for your next autonomous run? "
         "Respond with a concise text summary (max 3-4 sentences)."
     )
     add_system_step3 = {
         "api_docs": API_DOCUMENTATION_SUMMARY, 
         "post_actions_summary": api_post_responses_summary,
-        "citizen_data": ai_citizen_record["fields"] # Add citizen data here
+        "citizen_data": ai_citizen_record["fields"],
+        "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT # Add schema content
     }
 
     kinos_response_step3 = None
@@ -519,10 +523,37 @@ def process_all_ai_autonomously(
     specific_citizen_username: Optional[str] = None,
     kinos_model_override: Optional[str] = None
 ):
+# Global variable to store Airtable schema content
+AIRTABLE_SCHEMA_CONTENT = ""
+
+def load_airtable_schema_content():
+    """Loads the content of airtable_schema.md."""
+    global AIRTABLE_SCHEMA_CONTENT
+    try:
+        schema_file_path = os.path.join(PROJECT_ROOT, "backend", "docs", "airtable_schema.md")
+        if os.path.exists(schema_file_path):
+            with open(schema_file_path, "r", encoding="utf-8") as f:
+                AIRTABLE_SCHEMA_CONTENT = f.read()
+            log.info(f"{LogColors.OKGREEN}Successfully loaded Airtable schema content.{LogColors.ENDC}")
+        else:
+            log.warning(f"{LogColors.WARNING}Airtable schema file not found at {schema_file_path}. Proceeding without it.{LogColors.ENDC}")
+            AIRTABLE_SCHEMA_CONTENT = "Airtable schema file not found."
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error loading Airtable schema content: {e}{LogColors.ENDC}", exc_info=True)
+        AIRTABLE_SCHEMA_CONTENT = "Error loading Airtable schema."
+
+
+def process_all_ai_autonomously(
+    dry_run: bool = False,
+    specific_citizen_username: Optional[str] = None,
+    kinos_model_override: Optional[str] = None
+):
     """Main function to process autonomous runs for AI citizens."""
     run_mode = "DRY RUN" if dry_run else "LIVE RUN"
     citizen_scope = specific_citizen_username if specific_citizen_username else "all eligible"
     log_header(f"Starting Autonomous AI Process ({run_mode}, Citizen: {citizen_scope})", color_code=Fore.CYAN if colorama_available else '')
+
+    load_airtable_schema_content() # Load schema content at the start
 
     tables = initialize_airtable()
     kinos_api_key = get_kinos_api_key()
