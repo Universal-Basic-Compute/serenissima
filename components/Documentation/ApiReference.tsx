@@ -464,16 +464,18 @@ const ApiReference: React.FC = () => {
   "success": true,
   "lands": [
     {
-      "id": "string",
+      "id": "string", // Airtable Record ID
+      "landId": "string", // Polygon-style ID (e.g., polygon-123)
+      "polygonId": "string", // Alias for landId
       "owner": "string | null",
       "buildingPointsCount": number,
       "historicalName": "string | null",
-      "position": { "lat": number, "lng": number } | null,
-      "center": { "lat": number, "lng": number } | null,
+      "englishName": "string | null",
+      "center": { "lat": number, "lng": number } | null, // Centroid or calculated center
       "coordinates": [{ "lat": number, "lng": number }],
-      "buildingPoints": [{ "lat": number, "lng": number }],
-      "bridgePoints": [],
-      "canalPoints": []
+      "buildingPoints": [{ "lat": number, "lng": number }], // Points on land for buildings
+      "bridgePoints": [], // Points on polygon edges for bridges
+      "canalPoints": [] // Points on polygon edges for canals/docks
     }
   ]
 }`}
@@ -518,12 +520,14 @@ const ApiReference: React.FC = () => {
   "success": true,
   "landRents": [
     {
-      "id": "string",
+      "id": "string", // Polygon ID
       "centroid": { "lat": number, "lng": number },
       "areaInSquareMeters": number,
       "distanceFromCenter": number,
       "locationMultiplier": number,
-      "dailyRent": number
+      "dailyRent": number,
+      "estimatedLandValue": number, // Estimated value based on rent
+      "historicalName": "string | null" // Historical name of the land parcel
     }
   ],
   "metadata": {
@@ -997,6 +1001,64 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
+        <div id="buildings-post-construct-building" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/actions/construct-building</h3>
+          <p className="mb-2">Initiates construction of a building by a citizen, potentially using a public builder contract. Handles ducat transfers and creates necessary records.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "buildingTypeDefinition": { // Full definition of the building type to construct
+    "type": "string",
+    "name": "string",
+    "buildTier": number,
+    "pointType": "string | null", // 'land', 'canal', 'bridge'
+    "constructionCosts": { "ducats": number, /* other resource costs */ },
+    "category": "string",
+    "subCategory": "string",
+    "size": number, // e.g., 1 for single point, 2-4 for multi-point
+    "constructionMinutes": number
+  },
+  "pointDetails": { // Details of the selected construction point
+    "lat": number,
+    "lng": number,
+    "polygonId": "string", // LandId where the point is located
+    "pointType": "land" | "canal" | "bridge" // Actual type of the selected point
+  },
+  "citizenUsername": "string", // Username of the citizen initiating construction
+  "builderContractDetails": { // Optional: If using a public builder contract
+    "sellerUsername": "string", // Builder's username
+    "sellerBuildingId": "string", // Builder's workshop BuildingId
+    "rate": number, // Multiplier for base construction cost (e.g., 1.2 for 20% markup)
+    "publicContractId": "string" // ID of the public_construction contract
+  }
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "message": "Building construction initiated successfully and construction project created.",
+  "buildingId": "string", // Airtable Record ID of the new building
+  "customBuildingId": "string" // Game-specific BuildingId (e.g., point_lat_lng or first point of multi-point)
+}`}
+            </pre>
+          </div>
+           <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Notes</h4>
+            <ul className="list-disc pl-6">
+              <li>Verifies citizen's ducats, tier, and point compatibility.</li>
+              <li>If `builderContractDetails` are provided, calculates total cost including builder's rate, transfers ducats to builder and a 10% fee to ConsiglioDeiDieci. Creates payment transaction records.</li>
+              <li>If no `builderContractDetails`, it's a direct build. Cost is transferred to a randomly selected construction workshop. Creates payment transaction record.</li>
+              <li>Creates a new building record in Airtable with `IsConstructed: false`.</li>
+              <li>Creates a `construction_project` contract assigned to the builder/workshop.</li>
+              <li>Handles multi-point building placement by finding adjacent available points if `buildingTypeDefinition.size > 1`.</li>
+            </ul>
+          </div>
+        </div>
+
         <div id="buildings-post-create-at-point" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/create-building-at-point</h3>
           <p className="mb-2">Creates a building at a specific point with cost deduction from the citizen's Ducats balance.</p>
@@ -1126,11 +1188,29 @@ const ApiReference: React.FC = () => {
   "name": "string",
   "category": "string",
   "subCategory": "string",
-  "tier": number,
-  "constructionCosts": {},
+  "type": "string", // Unique identifier for the building type
+  "name": "string", // Display name
+  "category": "string",
+  "subCategory": "string",
+  "buildTier": number, // Minimum citizen tier required to build
+  "pointType": "string | null", // Type of point it can be built on
+  "size": number, // Number of points the building occupies
+  "constructionCosts": {
+    "ducats": number,
+    "resource_id": number // Example resource cost
+  } | null,
   "maintenanceCost": number,
   "shortDescription": "string",
-  "productionInformation": {}
+  "productionInformation": {
+    "storageCapacity": number,
+    "stores": ["string"], // Array of resource IDs it can store
+    "sells": ["string"], // Array of resource IDs it can sell
+    "inputResources": { "resource_id": number },
+    "outputResources": { "resource_id": number }
+  } | null,
+  "canImport": boolean,
+  "commercialStorage": boolean,
+  "constructionMinutes": number
 }`}
             </pre>
           </div>
@@ -1315,6 +1395,48 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
+        <div id="buildings-patch-bridge-orient" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">PATCH /api/bridges/:buildingId/orient</h3>
+          <p className="mb-2">Updates the orientation (rotation) of a specific bridge.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Path Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>buildingId</code> - The BuildingId of the bridge to update.</li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "orientation": number // New orientation value in radians or degrees (server expects radians for 'Rotation' field)
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "bridge": { // Updated bridge object, similar to GET /api/buildings/:buildingId
+    "id": "string", // BuildingId
+    "type": "string",
+    "landId": "string | null",
+    "variant": "string",
+    "position": { "lat": number, "lng": number } | null,
+    "pointId": "string | null",
+    "rotation": number, // Updated rotation
+    "orientation": number, // Alias for rotation
+    "owner": "string | null",
+    "createdAt": "string",
+    "leasePrice": number,
+    "rentPrice": number,
+    "occupant": "string | null"
+  }
+}`}
+            </pre>
+          </div>
+        </div>
+        
         <div id="buildings-get-building-points" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/building-points</h3>
           <p className="mb-2">Retrieves all building, canal, and bridge points.</p>
@@ -1421,19 +1543,23 @@ const ApiReference: React.FC = () => {
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`[
   {
-    "id": "string",
-    "type": "string",
-    "name": "string",
+    "id": "string", // ResourceId (custom) or Airtable Record ID
+    "type": "string", // Resource type identifier (e.g., "wood")
+    "name": "string", // Display name
     "category": "string",
-    "subCategory": "string",
-    "position": { "lat": number, "lng": number },
-    "count": number,
-    "landId": "string",
-    "owner": "string",
-    "createdAt": "string",
-    "icon": "string",
+    "subCategory": "string | null",
+    "tier": number | null,
     "description": "string",
-    "rarity": "string"
+    "icon": "string | null", // Filename of the icon
+    "count": number, // Quantity of this resource instance
+    "asset": "string | null", // BuildingId, Citizen Username, or LandId where resource is located
+    "assetType": "string | null", // "building", "citizen", or "land"
+    "owner": "string | null", // Username of the owner
+    "location": { "lat": number, "lng": number } | null, // Derived location
+    "importPrice": number | null,
+    "lifetimeHours": number | null,
+    "consumptionHours": number | null,
+    "createdAt": "string" // ISO date string
   }
 ]`}
             </pre>
@@ -1448,14 +1574,19 @@ const ApiReference: React.FC = () => {
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "id": "string",
-  "type": "string",
-  "name": "string",
-  "category": "string",
-  "position": { "lat": number, "lng": number },
-  "count": number,
-  "landId": "string",
-  "owner": "string"
+  "id": "string", // ResourceId (custom ID for the resource stack)
+  "type": "string", // Resource type identifier (e.g., "wood")
+  "name": "string", // Optional: Display name, defaults to type
+  "category": "string", // Optional: defaults to 'unknown' or derived from type
+  "subCategory": "string", // Optional
+  "tier": number, // Optional
+  "description": "string", // Optional
+  "position": { "lat": number, "lng": number }, // Required: Position of the resource itself
+  "count": number, // Optional: defaults to 1
+  "asset": "string", // Optional: BuildingId, Citizen Username, or LandId
+  "assetType": "string", // Optional: "building", "citizen", "land"; defaults to 'unknown'
+  "owner": "string", // Optional: Username of the owner, defaults to "system"
+  "createdAt": "string" // Optional: ISO date string, defaults to now
 }`}
             </pre>
           </div>
@@ -1466,14 +1597,22 @@ const ApiReference: React.FC = () => {
 {`{
   "success": true,
   "resource": {
-    "id": "string",
+    "id": "string", // ResourceId (custom)
     "type": "string",
     "name": "string",
     "category": "string",
-    "position": { "lat": number, "lng": number },
+    "subCategory": "string | null",
+    "tier": number | null,
+    "description": "string",
+    "icon": "string | null",
+    "position": { "lat": number, "lng": number }, // Position of the resource itself
     "count": number,
-    "landId": "string",
-    "owner": "string",
+    "asset": "string | null",
+    "assetType": "string | null",
+    "owner": "string | null",
+    "importPrice": number | null,
+    "lifetimeHours": number | null,
+    "consumptionHours": number | null,
     "createdAt": "string"
   },
   "message": "Resource created successfully"
@@ -1646,7 +1785,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
 {`{
   "success": true,
   "path": [
-    { "lat": number, "lng": number, "type": "string", "nodeId": "string", "polygonId": "string" }
+    { "lat": number, "lng": number, "type": "string", "nodeId": "string", "polygonId": "string", "transportMode": "gondola" | "walk" | null }
   ],
   "timing": {
     "startDate": "string",
@@ -1660,7 +1799,8 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       "id": "string",
       "position": { "lat": number, "lng": number }
     }
-  ]
+  ],
+  "transporter": "string | null" // Username of the gondolier if applicable
 }`}
             </pre>
           </div>
@@ -1684,7 +1824,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
 {`{
   "success": true,
   "path": [
-    { "lat": number, "lng": number, "type": "string", "nodeId": "string", "polygonId": "string" }
+    { "lat": number, "lng": number, "type": "string", "nodeId": "string", "polygonId": "string", "transportMode": "gondola" | "walk" | null }
   ],
   "timing": {
     "startDate": "string",
@@ -1698,7 +1838,8 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       "id": "string",
       "position": { "lat": number, "lng": number }
     }
-  ]
+  ],
+  "transporter": "string | null" // Username of the gondolier if applicable
 }`}
             </pre>
             
@@ -1891,9 +2032,14 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "success": true,
   "waterPoints": [
     {
-      "id": "string",
+      "id": "string", // Unique ID of the water point
       "position": { "lat": number, "lng": number },
-      "connections": []
+      "connections": [ // Array of connected water point IDs and distances
+        { 
+          "id": "string", // ID of the connected water point
+          "distance": number // Distance in meters
+        }
+      ]
     }
   ]
 }`}
@@ -1940,6 +2086,37 @@ fetch('/api/resources/counts?buildingId=building-123456789')
               <li>Connections represent navigable paths between water points</li>
               <li>This endpoint is primarily used by system administrators to define the canal network</li>
             </ul>
+          </div>
+        </div>
+
+        <div id="transport-get-water-graph" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-water-graph</h3>
+          <p className="mb-2">Retrieves the complete water graph data, including points and edges.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "waterGraph": {
+    "waterPoints": [ // Array of water point objects
+      {
+        "id": "string", // Unique ID of the water point
+        "position": { "lat": number, "lng": number },
+        "connections": [ { "id": "string", "distance": number } ] // Simplified connections
+      }
+    ],
+    "waterEdges": [ // Array of water edge objects
+      {
+        "from": "string", // ID of the starting water point
+        "to": "string", // ID of the ending water point
+        "distance": number, // Distance in meters
+        "type": "canal" | "open_water" // Type of water segment
+      }
+    ]
+    // Potentially other graph metadata
+  }
+}`}
+            </pre>
           </div>
         </div>
         
@@ -2012,6 +2189,48 @@ fetch('/api/resources/counts?buildingId=building-123456789')
     "loanCount": number,
     "lastUpdated": "string"
   }
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="economy-post-contracts" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/contracts</h3>
+          <p className="mb-2">Creates a new contract or updates an existing one based on `ContractId`.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "ContractId": "string", // Required: Unique ID for the contract (used for upsert)
+  "Type": "string", // Required: e.g., "public_sell", "import", "building_bid", "construction_project"
+  "PricePerResource": number, // Required: Price per unit, or total bid/project cost
+  "Status": "string", // Required: e.g., "active", "pending_materials"
+  "ResourceType": "string", // Required for non-bids: ID of the resource
+  "Seller": "string", // Required for non-bids: Username of the seller
+  "SellerBuilding": "string", // Required for non-bids: BuildingId of the seller's building
+  "TargetAmount": number, // Required for non-bids: Amount of resource
+  "Buyer": "string", // Required for bids/projects: Username of the buyer
+  "Asset": "string", // Required for bids/projects: BuildingId being bid on or constructed
+  "AssetType": "string", // Required for bids/projects: "building" or "building_project"
+  "Notes": "string", // Optional
+  "EndAt": "string", // Optional: ISO date string for contract expiry
+  "Title": "string", // Optional: For display purposes
+  "Description": "string" // Optional: For display purposes
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "contract": { // The created or updated contract object, structure same as GET /api/contracts
+      "id": "string", // Airtable record ID
+      "contractId": "string",
+      // ... other contract fields ...
+      "location": { "lat": number, "lng": number } | null
+  },
+  "message": "Contract created/updated successfully"
 }`}
             </pre>
           </div>
@@ -2107,6 +2326,64 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   }
 ]`}
             </pre>
+          </div>
+        </div>
+
+        <div id="economy-get-transaction-land-id" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/transaction/land/:landId</h3>
+          <p className="mb-2">Retrieves the latest 'land_sale' contract details for a specific land parcel, prioritizing 'available' status.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Path Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>landId</code> - The ID of the land parcel (e.g., "polygon-123" or "123").</li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "id": "string", // Airtable Record ID of the contract
+  "type": "land_sale",
+  "asset": "string", // LandId (ResourceType from contract)
+  "seller": "string | null",
+  "buyer": "string | null",
+  "price": number,
+  "historical_name": "string | null", // From contract Notes
+  "english_name": "string | null", // From contract Notes
+  "description": "string | null", // From contract Notes
+  "created_at": "string", // ISO date string
+  "updated_at": "string", // ISO date string
+  "executed_at": "string | null", // ISO date string
+  "status": "string" // e.g., "available", "pending_execution", "completed"
+}`}
+            </pre>
+            <p className="mt-1 text-sm text-gray-600">If no contract is found, returns 404.</p>
+          </div>
+        </div>
+
+        <div id="economy-get-transaction-land-offers" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/transactions/land-offers/:landId</h3>
+          <p className="mb-2">Retrieves all 'available' or 'pending_execution' land sale offers (contracts) for a specific land parcel.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Path Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>landId</code> - The ID of the land parcel.</li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`[ // Array of land offer objects, structure same as GET /api/transaction/land/:landId
+  {
+    "id": "string",
+    "type": "land_sale",
+    "asset": "string",
+    // ... other fields ...
+    "status": "available" | "pending_execution"
+  }
+]`}
+            </pre>
+            <p className="mt-1 text-sm text-gray-600">Returns an empty array if no offers are found.</p>
           </div>
         </div>
         
@@ -2248,7 +2525,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   }
 }`}
             </pre>
-            <p className="mt-2">Returns an empty array if no offers are found.</p>
+            {/* <p className="mt-2">Returns an empty array if no offers are found.</p> */} {/* Commented out as it's for a single loan application */}
           </div>
         </div>
       </section>
