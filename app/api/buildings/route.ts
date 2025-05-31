@@ -62,7 +62,7 @@ const apiKey = process.env.AIRTABLE_API_KEY;
 const baseId = process.env.AIRTABLE_BASE_ID;
 
 // Initialize Airtable base
-const base = new Airtable({ apiKey }).base(baseId);
+const base = new Airtable({ apiKey, requestTimeout: 30000 }).base(baseId);
 
 export async function POST(request: Request) {
   try {

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     }
     
     // Initialize Airtable
-    const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+    const base = new Airtable({ apiKey: AIRTABLE_API_KEY, requestTimeout: 30000 }).base(AIRTABLE_BASE_ID);
     
     // Query buildings with dock types
     const dockTypes = ['public_dock', 'private_dock'];
