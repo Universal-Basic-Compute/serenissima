@@ -393,20 +393,47 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
   
   // Check if the current citizen is already in a guild
   useEffect(() => {
-    // Get the current citizen's profile from localStorage
-    const savedProfile = localStorage.getItem('citizenProfile');
-    if (savedProfile) {
-      try {
-        const profile = JSON.parse(savedProfile);
-        // If the profile has a guildId, store it
-        if (profile.guildId) {
-          setCitizenGuildId(profile.guildId);
+    const updateCitizenGuild = () => {
+      const savedProfile = localStorage.getItem('citizenProfile');
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile);
+          if (profile.guildId) {
+            setCitizenGuildId(profile.guildId);
+            // console.log(`[GuildDetails] Citizen's Guild ID from localStorage: ${profile.guildId} (for viewed guild: ${guild.guildId})`);
+          } else {
+            setCitizenGuildId(null); // Explicitly set to null if not found in profile
+            // console.log(`[GuildDetails] No guildId in citizenProfile (for viewed guild: ${guild.guildId})`);
+          }
+        } catch (error) {
+          console.error('[GuildDetails] Error parsing citizen profile:', error);
+          setCitizenGuildId(null); // Set to null on error
         }
-      } catch (error) {
-        console.error('Error parsing citizen profile:', error);
+      } else {
+        setCitizenGuildId(null); // No profile in localStorage
+        // console.log(`[GuildDetails] No citizenProfile in localStorage (for viewed guild: ${guild.guildId})`);
       }
-    }
-  }, []);
+    };
+
+    updateCitizenGuild(); // Initial check when guild.guildId changes or component mounts
+
+    // Listen for profile updates from other parts of the app
+    const handleProfileUpdate = () => {
+      // console.log('[GuildDetails] citizenProfileUpdated event received. Re-checking guild membership.');
+      updateCitizenGuild();
+    };
+
+    window.addEventListener('citizenProfileUpdated', handleProfileUpdate);
+
+    // Cleanup listener when component unmounts or guild.guildId changes (before effect re-runs)
+    return () => {
+      window.removeEventListener('citizenProfileUpdated', handleProfileUpdate);
+    };
+  }, [guild.guildId]); // Re-run when the viewed guild changes
+
+  // Debugging logs (optional, can be removed after verification)
+  // console.log(`[GuildDetails Render] Current citizenGuildId: '${citizenGuildId}', Viewed guild.guildId: '${guild.guildId}', Is member? ${citizenGuildId === guild.guildId}`);
+
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header with banner image */}
