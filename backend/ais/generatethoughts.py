@@ -234,14 +234,14 @@ def generate_ai_thought(kinos_api_key: str, ai_username: str, ai_display_name: s
             log.info(f"{LogColors.OKBLUE}Using Kinos model override '{kinos_model_override}' for {ai_username}.{LogColors.ENDC}")
 
         log.info(f"{LogColors.OKBLUE}Sending thought generation request to Kinos for {ai_username}...{LogColors.ENDC}")
-        response = requests.post(url, headers=headers, json=payload, timeout=90) # Increased timeout
+        response = requests.post(url, headers=headers, json=payload, timeout=600) # Timeout set to 10 minutes (600 seconds)
 
         if response.status_code not in [200, 201]:
             log.error(f"{LogColors.FAIL}Kinos API error for {ai_username} (POST): {response.status_code} - {response.text[:500]}{LogColors.ENDC}")
             return None
 
         # Fetch the conversation history to get the assistant's reply
-        history_response = requests.get(url, headers=headers, timeout=30)
+        history_response = requests.get(url, headers=headers, timeout=60) # Increased history timeout to 60 seconds
         if history_response.status_code != 200:
             log.error(f"{LogColors.FAIL}Kinos API error for {ai_username} (GET history): {history_response.status_code} - {history_response.text[:500]}{LogColors.ENDC}")
             return None
