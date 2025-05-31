@@ -142,13 +142,15 @@ def get_kinos_api_key() -> Optional[str]:
 def get_ai_citizens_for_autonomous_run(tables: Dict[str, Table], specific_username: Optional[str] = None) -> List[Dict]:
     """Fetches AI citizens eligible for autonomous run."""
     try:
-        # Example: Fetch AI citizens who are in Venice and not Nobili (as Nobili might have different Kinos logic)
-        base_formula_parts = ["{IsAI}=1", "{InVenice}=1", "NOT({SocialClass}='Nobili')"]
+        base_formula_parts = ["{IsAI}=1", "{InVenice}=1"]
         if specific_username:
             base_formula_parts.append(f"{{Username}}='{_escape_airtable_value(specific_username)}'")
             log.info(f"{LogColors.OKBLUE}Fetching specific AI citizen for autonomous run: {specific_username}{LogColors.ENDC}")
         else:
-            log.info(f"{LogColors.OKBLUE}Fetching all eligible AI citizens for autonomous run.{LogColors.ENDC}")
+            # Default to Nobili, Cittadini, Forestieri if no specific citizen is requested
+            social_class_filter = "OR({SocialClass}='Nobili', {SocialClass}='Cittadini', {SocialClass}='Forestieri')"
+            base_formula_parts.append(social_class_filter)
+            log.info(f"{LogColors.OKBLUE}Fetching all eligible AI citizens (Nobili, Cittadini, Forestieri) for autonomous run.{LogColors.ENDC}")
         
         formula = "AND(" + ", ".join(base_formula_parts) + ")"
         citizens = tables["citizens"].all(formula=formula)
@@ -697,7 +699,7 @@ def autonomously_run_ai_citizen_unguided(
 
     previous_api_results: List[Dict] = []
     iteration_count = 0
-    max_iterations = 10 # Safety break for the loop
+    max_iterations = 5 # Max 5 API calls per citizen per unguided run cycle
 
     while iteration_count < max_iterations:
         iteration_count += 1
@@ -826,19 +828,19 @@ def process_all_ai_autonomously(
     dry_run: bool = False,
     specific_citizen_username: Optional[str] = None,
     kinos_model_override: Optional[str] = None,
-    unguided_mode: bool = False, # New parameter for mode
-    user_message: Optional[str] = None # New parameter
+    unguided_mode: bool = False, 
+    user_message: Optional[str] = None
 ):
     """Main function to process autonomous runs for AI citizens."""
     run_mode = "DRY RUN" if dry_run else "LIVE RUN"
     if unguided_mode:
         run_mode += " (Unguided)"
-    citizen_scope = specific_citizen_username if specific_citizen_username else "all eligible"
-    log_header(f"Starting Autonomous AI Process ({run_mode}, Citizen: {citizen_scope})", color_code=Fore.CYAN if colorama_available else '')
+    
+    log_header(f"Initializing Autonomous AI Process ({run_mode})", color_code=Fore.CYAN if colorama_available else '')
 
-    load_airtable_schema_content() # Load schema content at the start
+    load_airtable_schema_content()
     if unguided_mode:
-        load_api_reference_content() # Load API reference for unguided mode
+        load_api_reference_content()
 
     tables = initialize_airtable()
     kinos_api_key = get_kinos_api_key()
@@ -847,34 +849,96 @@ def process_all_ai_autonomously(
         log.error(f"{LogColors.FAIL}Exiting due to missing Airtable connection or Kinos API key.{LogColors.ENDC}")
         return
 
-    ai_citizens_to_process = get_ai_citizens_for_autonomous_run(tables, specific_citizen_username)
-    if not ai_citizens_to_process:
-        log.warning(f"{LogColors.WARNING}No AI citizens to process. Exiting.{LogColors.ENDC}")
-        return
-
-    processed_count = 0
-    start_time_total = time.time()
-    for ai_citizen_record in ai_citizens_to_process:
+    if specific_citizen_username:
+        # Process only the specified citizen
+        log_header(f"Processing specific citizen: {specific_citizen_username}", color_code=Fore.CYAN if colorama_available else '')
+        ai_citizens_to_process = get_ai_citizens_for_autonomous_run(tables, specific_citizen_username)
+        if not ai_citizens_to_process:
+            log.warning(f"{LogColors.WARNING}Specific citizen {specific_citizen_username} not found or not eligible. Exiting.{LogColors.ENDC}")
+            return
+        
+        ai_citizen_record = ai_citizens_to_process[0]
         start_time_citizen = time.time()
         if unguided_mode:
             autonomously_run_ai_citizen_unguided(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message)
         else:
-            autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message) # Original guided function
+            autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message)
         end_time_citizen = time.time()
         log.info(f"{LogColors.OKBLUE}Time taken for {ai_citizen_record['fields'].get('Username', 'Unknown AI')}: {end_time_citizen - start_time_citizen:.2f} seconds.{LogColors.ENDC}")
-        processed_count += 1
-        if specific_citizen_username: # If processing a specific citizen, break after one.
-            break
-        if len(ai_citizens_to_process) > 1 and processed_count < len(ai_citizens_to_process) : # Avoid sleep if only one or last one
-            log.info(f"{LogColors.OKBLUE}Pausing for 2 seconds before next AI...{LogColors.ENDC}")
-            time.sleep(2) 
+        log_header(f"Autonomous AI Process Finished for {specific_citizen_username}.", color_code=Fore.CYAN if colorama_available else '')
+        # Admin notification for single run
+        if not dry_run:
+            try:
+                admin_summary = f"Autonomous AI Run process completed for specific citizen: {specific_citizen_username}."
+                tables["notifications"].create({
+                    "Citizen": "ConsiglioDeiDieci", "Type": "admin_report_autonomous_run",
+                    "Content": admin_summary, "Status": "unread",
+                    "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat()
+                })
+                log.info(f"{LogColors.OKGREEN}Admin summary notification created.{LogColors.ENDC}")
+            except Exception as e_admin_notif:
+                log.error(f"{LogColors.FAIL}Failed to create admin summary notification: {e_admin_notif}{LogColors.ENDC}", exc_info=True)
+        return # End after processing specific citizen
 
-    end_time_total = time.time()
-    total_duration = end_time_total - start_time_total
-    log_header(f"Autonomous AI Process Finished. Processed {processed_count} AI citizen(s) in {total_duration:.2f} seconds.", color_code=Fore.CYAN if colorama_available else '')
+    # Infinite loop for processing all eligible citizens
+    log_header("Starting INFINITE LOOP for Autonomous AI Processing (Nobili, Cittadini, Forestieri)", color_code=Fore.MAGENTA if colorama_available else '')
+    main_loop_count = 0
+    while True:
+        main_loop_count += 1
+        log_header(f"Main Loop Iteration: {main_loop_count}", color_code=Fore.CYAN if colorama_available else '')
+        
+        ai_citizens_to_process = get_ai_citizens_for_autonomous_run(tables, None) # Gets Nobili, Cittadini, Forestieri
+        if not ai_citizens_to_process:
+            log.warning(f"{LogColors.WARNING}No eligible AI citizens found in this iteration. Waiting before retry.{LogColors.ENDC}")
+            time.sleep(60) # Wait a minute if no one is found
+            continue
+
+        random.shuffle(ai_citizens_to_process) # Randomize order of processing
+        log.info(f"Processing {len(ai_citizens_to_process)} AI citizens in random order for this iteration.")
+
+        processed_in_this_loop = 0
+        loop_start_time = time.time()
+
+        for ai_citizen_record in ai_citizens_to_process:
+            start_time_citizen = time.time()
+            if unguided_mode:
+                autonomously_run_ai_citizen_unguided(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message)
+            else: # Should ideally not be reached in infinite loop mode without unguided, but for safety:
+                autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message)
+            
+            end_time_citizen = time.time()
+            log.info(f"{LogColors.OKBLUE}Time taken for {ai_citizen_record['fields'].get('Username', 'Unknown AI')}: {end_time_citizen - start_time_citizen:.2f} seconds.{LogColors.ENDC}")
+            processed_in_this_loop += 1
+            
+            # Small delay between citizens within the same loop iteration
+            if processed_in_this_loop < len(ai_citizens_to_process):
+                log.info(f"{LogColors.OKBLUE}Pausing for 2 seconds before next AI...{LogColors.ENDC}")
+                time.sleep(2)
+        
+        loop_end_time = time.time()
+        loop_duration = loop_end_time - loop_start_time
+        log_header(f"Main Loop Iteration {main_loop_count} Finished. Processed {processed_in_this_loop} AI citizen(s) in {loop_duration:.2f} seconds.", color_code=Fore.CYAN if colorama_available else '')
+
+        # Admin Notification for the loop iteration
+        if not dry_run and processed_in_this_loop > 0:
+            try:
+                admin_summary_loop = f"Autonomous AI Run Loop Iteration {main_loop_count} completed. Processed {processed_in_this_loop} AI citizen(s)."
+                tables["notifications"].create({
+                    "Citizen": "ConsiglioDeiDieci", "Type": "admin_report_autonomous_run_loop",
+                    "Content": admin_summary_loop, "Status": "unread",
+                    "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat()
+                })
+                log.info(f"{LogColors.OKGREEN}Admin summary notification for loop iteration created.{LogColors.ENDC}")
+            except Exception as e_admin_notif_loop:
+                log.error(f"{LogColors.FAIL}Failed to create admin summary notification for loop: {e_admin_notif_loop}{LogColors.ENDC}", exc_info=True)
+
+        log.info(f"{LogColors.OKBLUE}Waiting for 60 seconds before starting next main loop iteration...{LogColors.ENDC}")
+        time.sleep(60) # Wait before starting the next full loop
     
-    # Admin Notification
-    if not dry_run and tables and processed_count > 0:
+    # This part is now unreachable due to the infinite loop if no specific citizen is provided.
+    # Kept for logical completeness if the loop were to be broken.
+    # Admin Notification (Original, for single pass if not in loop)
+    # if not dry_run and tables and processed_count > 0 and specific_citizen_username: # Only if it was a single pass
         try:
             admin_summary = f"Autonomous AI Run process completed. Processed {processed_count} AI citizen(s)."
             if specific_citizen_username:
@@ -907,7 +971,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+        default="local", # Default to local model
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo'). Default: local."
     )
     parser.add_argument(
         "--local",
