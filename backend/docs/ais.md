@@ -717,7 +717,7 @@ The AI system is implemented as a series of Python scripts that run on scheduled
 4. Updates the database with new transactions, bids, or other changes
 5. Creates notifications to inform administrators and affected players
 
-The scripts use the same underlying APIs and database access methods as the rest of the game engine, ensuring consistency in how economic activities are processed.
+The scripts use the same underlying APIs and database access methods as the rest of the game engine, ensuring consistency in how economic activities are processed. AI agents can leverage the enhanced flexibility of these APIs, such as dynamic filtering on GET requests and flexible key casing on POST requests, to make more informed and precise decisions.
 
 ## Future AI Behaviors
 

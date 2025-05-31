@@ -3862,23 +3862,23 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
 
         <div id="problems-get-all" className="mb-8 scroll-mt-20">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/problems</h3>
-          <p className="mb-2">Retrieves a list of problems. Supports dynamic filtering in addition to specific parameters.</p>
+          <p className="mb-2">Retrieves a list of problems. Supports dynamic filtering by any field in the 'PROBLEMS' table.</p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              Specific parameters (<code>citizen</code>, <code>assetType</code>, <code>status</code>) are processed first.
-              Then, any other query parameters are treated as dynamic filters on Airtable fields (case-sensitive, e.g., <code>Severity</code>, <code>Type</code>).
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'PROBLEMS' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Citizen</code>, <code>AssetType</code>, <code>Status</code>, <code>Severity</code>, <code>Type</code>)
+              and the value is what you want to filter by. The <code>status</code> parameter defaults to "active" if not provided.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>citizen</code> (optional) - Filter problems by citizen username.</li>
-              <li><code>assetType</code> (optional) - Filter problems by asset type (e.g., "land", "building").</li>
-              <li><code>status</code> (optional) - Filter problems by status (default: "active").</li>
               <li><code>limit</code> (optional) - Limit the number of records.</li>
               <li><code>offset</code> (optional) - Offset for pagination.</li>
               <li><em>Dynamic Filters:</em>
                 <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Citizen=NLR&Status=active</code> - Filters for active problems related to citizen NLR.</li>
                   <li>Example: <code>?Severity=critical&Type=homeless_citizen</code> - Filters for critical homeless citizen problems.</li>
                   <li>Example: <code>?Asset=building-xyz</code> - Filters for problems related to building-xyz.</li>
+                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
                 </ul>
               </li>
             </ul>

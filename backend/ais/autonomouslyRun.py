@@ -301,16 +301,21 @@ def make_kinos_call(
 # For now, we'll pass the base URL and rely on the AI's knowledge or a very specific prompt.
 API_DOCUMENTATION_SUMMARY = {
     "base_url": API_BASE_URL,
-    "notes": "Refer to the full API documentation for details on endpoints, parameters, and request/response formats. For GET requests that return lists (e.g., /api/buildings, /api/citizens, /api/contracts, /api/resources, /api/lands, /api/problems, /api/relevancies, /api/loans, /api/guilds, /api/decrees, /api/activities), you can generally filter by any Airtable field name by providing it as a query parameter (e.g., ?Owner=NLR&Category=business). The server handles case sensitivity for these dynamic filter keys. For POST requests, the server will attempt to map provided body keys (e.g., camelCase, snake_case) to the required Airtable field format (PascalCase).",
+    "notes": (
+        "Refer to the full API documentation for comprehensive details. Key points for AI interaction:\n"
+        "- **Dynamic GET Filtering**: Most GET endpoints returning lists (e.g., /api/buildings, /api/citizens, /api/contracts, /api/resources, /api/lands, /api/problems, /api/relevancies, /api/loans, /api/guilds, /api/decrees, /api/activities, /api/transactions/history) support dynamic filtering. You can use Airtable field names (e.g., Owner, Category, Status, Type, ResourceType, Severity, IsAI, SocialClass) as query parameters. The server handles case sensitivity for these filter keys (e.g., `?Owner=NLR` or `?owner=NLR`).\n"
+        "- **POST Request Body Keys**: For POST requests that create or update Airtable records (e.g., /api/buildings, /api/resources, /api/contracts, /api/messages/send, /api/loans/apply), you can use camelCase (e.g., `landId`, `resourceType`) or snake_case for keys in the JSON body. The server will automatically convert them to PascalCase (e.g., `LandId`, `ResourceType`) for Airtable.\n"
+        "- **Specific Endpoints**: Some endpoints have fixed parameters or specific behaviors (e.g., /api/resources/counts, /api/thoughts, /api/messages?type=...). Consult their specific documentation if dynamic filtering doesn't apply."
+    ),
     "example_get_endpoints": [
         "/api/citizens/{username}", # Specific citizen
         "/api/citizens?SocialClass=Nobili&IsAI=true", # Filtered list
         "/api/buildings?Owner={username}&Category=business", 
-        "/api/lands?Owner={username}",
+        "/api/lands?Owner={username}&District=San Polo",
         "/api/resources/counts?owner={username}", # This one is specific, not general dynamic
         "/api/contracts?Seller={username}&Type=public_sell&Status=active",
         "/api/problems?Citizen={username}&Status=active&Severity=critical",
-        "/api/relevancies?RelevantToCitizen={username}&Category=opportunity"
+        "/api/relevancies?RelevantToCitizen={username}&Category=opportunity&Score=>50" # Example with operator
     ],
     "example_post_endpoints": [
         "/api/actions/construct-building", # Body keys can be camelCase, server will adapt.
