@@ -134,6 +134,7 @@ export default function BuildingDetailsPanel({
   const [chatMessages, setChatMessages] = useState<{ id: string, sender: string, role: 'user' | 'assistant', text: string, time: string }[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isAiResponding, setIsAiResponding] = useState<boolean>(false); // Will double as context loading
+  const [kinosModel, setKinosModel] = useState<'gemini' | 'local'>('gemini'); // Added kinosModel state
     
   // State for citizen profiles
   const [ownerProfile, setOwnerProfile] = useState<any>(null);
@@ -1211,29 +1212,35 @@ export default function BuildingDetailsPanel({
         relationshipWithTarget = { strengthScore: 100, type: "Self" };
       }
       
+      // Determine context limit based on kinosModel
+      const isLocalModel = kinosModel === 'local';
+      const notificationLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
+      const relevancyLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
+      const problemLimit = isLocalModel ? Math.ceil(5 / 4) : 5;
+
       // Fetch target notifications
       const notifRes = await fetch(`/api/notifications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ citizen: targetCitizenUsername, limit: 10 }),
+        body: JSON.stringify({ citizen: targetCitizenUsername, limit: notificationLimit }),
       });
       const notifData = notifRes.ok ? await notifRes.json() : null;
       const targetNotifications = notifData?.success ? notifData.notifications : [];
 
       // Fetch relevancies (target is relevantTo, sender is targetCitizen)
-      const relevanciesRes = await fetch(`/api/relevancies?relevantToCitizen=${targetCitizenUsername}&targetCitizen=${actualCurrentUsername}&limit=10`); // Use actualCurrentUsername
+      const relevanciesRes = await fetch(`/api/relevancies?relevantToCitizen=${targetCitizenUsername}&targetCitizen=${actualCurrentUsername}&limit=${relevancyLimit}`); // Use actualCurrentUsername
       const relevanciesData = relevanciesRes.ok ? await relevanciesRes.json() : null;
       const relevanciesForTarget = relevanciesData?.success ? relevanciesData.relevancies : [];
       
       // Fetch problems for target and sender
       let allProblems = [];
-      const problemsTargetRes = await fetch(`/api/problems?citizen=${targetCitizenUsername}&status=active&limit=5`);
+      const problemsTargetRes = await fetch(`/api/problems?citizen=${targetCitizenUsername}&status=active&limit=${problemLimit}`);
       const problemsTargetData = problemsTargetRes.ok ? await problemsTargetRes.json() : null;
       if (problemsTargetData?.success && problemsTargetData.problems) {
         allProblems.push(...problemsTargetData.problems);
       }
       if (actualCurrentUsername !== targetCitizenUsername) { // Use actualCurrentUsername
-        const problemsSenderRes = await fetch(`/api/problems?citizen=${actualCurrentUsername}&status=active&limit=5`); // Use actualCurrentUsername
+        const problemsSenderRes = await fetch(`/api/problems?citizen=${actualCurrentUsername}&status=active&limit=${problemLimit}`); // Use actualCurrentUsername
         const problemsSenderData = problemsSenderRes.ok ? await problemsSenderRes.json() : null;
         if (problemsSenderData?.success && problemsSenderData.problems) {
           problemsSenderData.problems.forEach(p => {
@@ -1285,7 +1292,7 @@ ${userMessageContent}
 Remember: Your reply should be human-like, conversational, RELEVANT to ${senderDisplayName} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
 Your response:`;
 
-    const kinosBody: any = { content: kinosPromptContent };
+    const kinosBody: any = { content: kinosPromptContent, model: kinosModel }; // Added model to kinosBody
     if (addSystemPayload) {
       kinosBody.addSystem = addSystemPayload;
     }

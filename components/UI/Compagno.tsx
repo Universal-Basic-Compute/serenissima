@@ -1040,29 +1040,35 @@ Your response:`;
           relationship = { strengthScore: 100, type: "Self" };
         }
 
+        // Determine context limit based on kinosModel
+        const isLocalModel = kinosModel === 'local';
+        const notificationLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
+        const relevancyLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
+        const problemLimit = isLocalModel ? Math.ceil(5 / 4) : 5;
+
         // Fetch target notifications
         const notifRes = await fetch(`/api/notifications`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ citizen: targetUsername, limit: 10 }), // Limit notifications for context
+          body: JSON.stringify({ citizen: targetUsername, limit: notificationLimit }), 
         });
         const notifData = notifRes.ok ? await notifRes.json() : null;
         const targetNotifications = notifData?.success ? notifData.notifications : [];
         
         // Fetch relevancies (target is relevantTo, sender is targetCitizen)
-        const relevanciesRes = await fetch(`/api/relevancies?relevantToCitizen=${targetUsername}&targetCitizen=${currentUsername}&limit=10`);
+        const relevanciesRes = await fetch(`/api/relevancies?relevantToCitizen=${targetUsername}&targetCitizen=${currentUsername}&limit=${relevancyLimit}`);
         const relevanciesData = relevanciesRes.ok ? await relevanciesRes.json() : null;
         const relevancies = relevanciesData?.success ? relevanciesData.relevancies : [];
 
         // Fetch problems for target and sender
         let problems = [];
-        const problemsTargetRes = await fetch(`/api/problems?citizen=${targetUsername}&status=active&limit=5`);
+        const problemsTargetRes = await fetch(`/api/problems?citizen=${targetUsername}&status=active&limit=${problemLimit}`);
         const problemsTargetData = problemsTargetRes.ok ? await problemsTargetRes.json() : null;
         if (problemsTargetData?.success && problemsTargetData.problems) {
           problems.push(...problemsTargetData.problems);
         }
         if (currentUsername !== targetUsername) {
-          const problemsSenderRes = await fetch(`/api/problems?citizen=${currentUsername}&status=active&limit=5`);
+          const problemsSenderRes = await fetch(`/api/problems?citizen=${currentUsername}&status=active&limit=${problemLimit}`);
           const problemsSenderData = problemsSenderRes.ok ? await problemsSenderRes.json() : null;
           if (problemsSenderData?.success && problemsSenderData.problems) {
             // Avoid duplicates
