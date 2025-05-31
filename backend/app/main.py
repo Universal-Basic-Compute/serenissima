@@ -2834,35 +2834,35 @@ async def inject_compute_complete(data: dict):
         raise HTTPException(status_code=500, detail=error_msg)
 
 # The scheduler is now started via the lifespan event manager above.
-# The direct call to start_scheduler() is remov    # The direct call to start_scheduler() is removed.
+# The direct call to start_scheduler() is removed.
 
-# The direct call to start_scheduler() is remov@app.get("/api/list-music-files")
-# The direct call to start_scheduler() is removasync def list_music_files_endpoint():
-# The direct call to start_scheduler() is remov    """
-# The direct call to start_scheduler() is remov    Lists all MP3 files in the configured music directory on the backend.
-# The direct call to start_scheduler() is remov    The music directory is determined by PERSISTENT_ASSETS_PATH_ENV + '/music'.
-# The direct call to start_scheduler() is remov    """
-# The direct call to start_scheduler() is remov    if not PERSISTENT_ASSETS_PATH_ENV:
-# The direct call to start_scheduler() is remov        print("CRITICAL ERROR: PERSISTENT_ASSETS_PATH environment variable is not set for the backend.")
-# The direct call to start_scheduler() is remov        # Log to console, but also return a clear error to the caller
-# The direct call to start_scheduler() is remov        raise HTTPException(status_code=500, detail="Server configuration error: Asset path not set.")
+@app.get("/api/list-music-files")
+async def list_music_files_endpoint():
+    """
+    Lists all MP3 files in the configured music directory on the backend.
+    The music directory is determined by PERSISTENT_ASSETS_PATH_ENV + '/music'.
+    """
+    if not PERSISTENT_ASSETS_PATH_ENV:
+        print("CRITICAL ERROR: PERSISTENT_ASSETS_PATH environment variable is not set for the backend.")
+        # Log to console, but also return a clear error to the caller
+        raise HTTPException(status_code=500, detail="Server configuration error: Asset path not set.")
 
-# The direct call to start_scheduler() is remov    music_dir_on_backend = pathlib.Path(PERSISTENT_ASSETS_PATH_ENV).joinpath("music")
+    music_dir_on_backend = pathlib.Path(PERSISTENT_ASSETS_PATH_ENV).joinpath("music")
     
-# The direct call to start_scheduler() is remov    if not music_dir_on_backend.exists() or not music_dir_on_backend.is_dir():
-# The direct call to start_scheduler() is remov        print(f"Music directory not found on backend: {music_dir_on_backend}")
-# The direct call to start_scheduler() is remov        # If the directory is expected but not found, this could be an error.
-# The direct call to start_scheduler() is remov        # For robustness, let's return success with an empty list if it's just empty or missing.
-# The direct call to start_scheduler() is remov        return JSONResponse(content={"success": True, "files": []})
+    if not music_dir_on_backend.exists() or not music_dir_on_backend.is_dir():
+        print(f"Music directory not found on backend: {music_dir_on_backend}")
+        # If the directory is expected but not found, this could be an error.
+        # For robustness, let's return success with an empty list if it's just empty or missing.
+        return JSONResponse(content={"success": True, "files": []})
 
-# The direct call to start_scheduler() is remov    try:
-# The direct call to start_scheduler() is remov        files: List[str] = [
-# The direct call to start_scheduler() is remov            f.name for f in music_dir_on_backend.iterdir() 
-# The direct call to start_scheduler() is remov            if f.is_file() and f.name.lower().endswith('.mp3')
-# The direct call to start_scheduler() is remov        ]
-# The direct call to start_scheduler() is remov        print(f"Found {len(files)} music files in {music_dir_on_backend}: {files}")
-# The direct call to start_scheduler() is remov        return JSONResponse(content={"success": True, "files": files})
-# The direct call to start_scheduler() is remov    except Exception as e:
-# The direct call to start_scheduler() is remov        print(f"Error listing music files on backend from {music_dir_on_backend}: {e}")
-# The direct call to start_scheduler() is remov        traceback.print_exc(file=sys.stdout) # Log full traceback for backend debugging
-# The direct call to start_scheduler() is remov        raise HTTPException(status_code=500, detail=f"Failed to list music files: {str(e)}")
+    try:
+        files: List[str] = [
+            f.name for f in music_dir_on_backend.iterdir() 
+            if f.is_file() and f.name.lower().endswith('.mp3')
+        ]
+        print(f"Found {len(files)} music files in {music_dir_on_backend}: {files}")
+        return JSONResponse(content={"success": True, "files": files})
+    except Exception as e:
+        print(f"Error listing music files on backend from {music_dir_on_backend}: {e}")
+        traceback.print_exc(file=sys.stdout) # Log full traceback for backend debugging
+        raise HTTPException(status_code=500, detail=f"Failed to list music files: {str(e)}")
