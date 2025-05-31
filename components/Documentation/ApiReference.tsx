@@ -1689,16 +1689,13 @@ export default function ApiReference() {
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'BUILDINGS' table, applied in conjunction with the base filter <code>OR({"{{Type}}"} = 'bridge', {"{{Type}}"} = 'rialto_bridge')</code>.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Owner</code>, <code>IsConstructed</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
+              A base filter <code>OR({"{{Type}}"} = 'bridge', {"{{Type}}"} = 'rialto_bridge')</code> is always applied.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of bridges returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Owner=ConsiglioDeiDieci&IsConstructed=true</code> - Filters for constructed bridges owned by ConsiglioDeiDieci.</li>
+                  <li><code>?Owner=ConsiglioDeiDieci&IsConstructed=true</code> - Filters for constructed bridges owned by ConsiglioDeiDieci.</li>
                 </ul>
               </li>
             </ul>
@@ -1740,16 +1737,13 @@ export default function ApiReference() {
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'BUILDINGS' table, applied in conjunction with the base filter <code>{"{{Type}}"} = 'dock'</code>.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Owner</code>, <code>IsPublic</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
+              A base filter <code>{"{{Type}}"} = 'dock'</code> is always applied.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of docks returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Owner=NLR&IsPublic=true</code> - Filters for public docks owned by NLR.</li>
+                  <li><code>?Owner=NLR&IsPublic=true</code> - Filters for public docks owned by NLR.</li>
                 </ul>
               </li>
             </ul>
@@ -1790,18 +1784,13 @@ export default function ApiReference() {
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'RESOURCES' table.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Owner</code>, <code>Type</code>, <code>AssetType</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of resources returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Owner=NLR&Type=wood</code> - Filters for wood resources owned by 'NLR'.</li>
-                  <li>Example: <code>?AssetType=building&Asset=building-123</code> - Filters for resources associated with building-123.</li>
-                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                  <li><code>?Owner=NLR&Type=wood</code> - Filters for wood resources owned by 'NLR'.</li>
+                  <li><code>?AssetType=building&Asset=building-123</code> - Filters for resources associated with building-123.</li>
                 </ul>
               </li>
             </ul>
@@ -1842,9 +1831,7 @@ export default function ApiReference() {
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
             <p className="text-xs mb-2 text-gray-600">
-              Field names can be provided in camelCase (e.g., <code>resourceId</code>) or snake_case.
-              The server will automatically convert them to PascalCase (e.g., <code>ResourceId</code>) for Airtable.
-              The example below uses camelCase.
+              The server automatically converts camelCase or snake_case keys in the request body to PascalCase for Airtable. See "Notes for AI Developers" for details. The example below uses camelCase.
             </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
@@ -2396,22 +2383,18 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'ACTIVITIES' table,
-              in addition to the specific parameters listed below.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Type</code>, <code>Status</code>, <code>FromBuilding</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
+              Specific parameters below are also available.
             </p>
             <ul className="list-disc pl-6">
               <li><code>citizenId</code> (optional) - Filter activities by citizen username (maps to `Citizen` field, can be repeated).</li>
-              <li><code>limit</code> (optional) - Limit the number of activities returned (default: 100).</li>
               <li><code>hasPath</code> (optional, boolean) - Filter activities that have a non-empty `Path`.</li>
               <li><code>ongoing</code> (optional, boolean) - Filter for activities that are currently ongoing (start date is past, end date is in future or null). This is applied after Airtable fetching.</li>
               <li><code>timeRange</code> (optional, string) - e.g., "24h" to filter activities created in the last 24 hours (based on `CreatedAt`). Overrides `ongoing` if both are present.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Type=production&Status=processed</code> - Filters for processed production activities.</li>
-                  <li>Example: <code>?FromBuilding=workshop-xyz</code> - Filters for activities originating from workshop-xyz.</li>
-                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                  <li><code>?Type=production&Status=processed</code> - Filters for processed production activities.</li>
+                  <li><code>?FromBuilding=workshop-xyz</code> - Filters for activities originating from workshop-xyz.</li>
                 </ul>
               </li>
             </ul>
@@ -2456,7 +2439,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
             <p className="text-xs mb-2 text-gray-600">
-              Field names in the main payload should be camelCase. The server converts them to PascalCase for Airtable.
+              The server automatically converts camelCase or snake_case keys in the request body to PascalCase for Airtable. See "Notes for AI Developers" for details.
               The structure of <code>activityDetails</code> varies significantly based on <code>activityType</code>.
             </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
@@ -2752,9 +2735,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
             <p className="text-xs mb-2 text-gray-600">
-              Field names can be provided in camelCase (e.g., <code>contractId</code>) or snake_case.
-              The server will automatically convert them to PascalCase (e.g., <code>ContractId</code>) for Airtable.
-              The example below uses camelCase.
+              The server automatically converts camelCase or snake_case keys in the request body to PascalCase for Airtable. See "Notes for AI Developers" for details. The example below uses camelCase.
             </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
@@ -2823,18 +2804,13 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'CONTRACTS' table.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Type</code>, <code>Seller</code>, <code>ResourceType</code>, <code>Status</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of contracts returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Type=public_sell&ResourceType=wood</code> - Filters for public sell contracts for wood.</li>
-                  <li>Example: <code>?Seller=marco_polo&Status=active</code> - Filters for active contracts where marco_polo is the seller.</li>
-                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                  <li><code>?Type=public_sell&ResourceType=wood</code> - Filters for public sell contracts for wood.</li>
+                  <li><code>?Seller=marco_polo&Status=active</code> - Filters for active contracts where marco_polo is the seller.</li>
                 </ul>
               </li>
             </ul>
@@ -2987,17 +2963,13 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'TRANSACTIONS' table.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Type</code>, <code>Seller</code>, <code>Buyer</code>, <code>Asset</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of transactions returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Type=land_sale&Seller=NLR</code> - Filters for land sales where NLR is the seller.</li>
-                  <li>Example: <code>?Asset=resource-wood-123</code> - Filters for transactions involving a specific resource.</li>
+                  <li><code>?Type=land_sale&Seller=NLR</code> - Filters for land sales where NLR is the seller.</li>
+                  <li><code>?Asset=resource-wood-123</code> - Filters for transactions involving a specific resource.</li>
                 </ul>
               </li>
             </ul>
@@ -3067,17 +3039,13 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'LOANS' table.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Borrower</code>, <code>Lender</code>, <code>Status</code>, <code>Type</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of loans returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Borrower=NLR&Status=active</code> - Filters for active loans where NLR is the borrower.</li>
-                  <li>Example: <code>?Type=business&InterestRate=0.05</code> - Filters for business loans with a 5% interest rate.</li>
+                  <li><code>?Borrower=NLR&Status=active</code> - Filters for active loans where NLR is the borrower.</li>
+                  <li><code>?Type=business&InterestRate=0.05</code> - Filters for business loans with a 5% interest rate.</li>
                 </ul>
               </li>
             </ul>
@@ -3163,17 +3131,13 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'DECREES' table.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Type</code>, <code>Status</code>, <code>Category</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of decrees returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Status=active&Category=economic</code> - Filters for active economic decrees.</li>
-                  <li>Example: <code>?Type=tax_change</code> - Filters for decrees of type 'tax_change'.</li>
+                  <li><code>?Status=active&Category=economic</code> - Filters for active economic decrees.</li>
+                  <li><code>?Type=tax_change</code> - Filters for decrees of type 'tax_change'.</li>
                 </ul>
               </li>
             </ul>
@@ -3217,17 +3181,13 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'GUILDS' table.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>GuildName</code>, <code>GuildTier</code>, <code>Color</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of guilds returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?GuildTier=3&Color=Red</code> - Filters for Tier 3 guilds with the color Red.</li>
-                  <li>Example: <code>?PatronSaint=St.%20Mark</code> - Filters for guilds with St. Mark as patron saint.</li>
+                  <li><code>?GuildTier=3&Color=Red</code> - Filters for Tier 3 guilds with the color Red.</li>
+                  <li><code>?PatronSaint=St.%20Mark</code> - Filters for guilds with St. Mark as patron saint.</li>
                 </ul>
               </li>
             </ul>
@@ -3352,7 +3312,8 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              Specific parameters are processed first. Then, any other query parameters are treated as dynamic filters on Airtable fields (case-sensitive, e.g., <code>Score</code>, <code>Status</code>).
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
+              Specific parameters below are also available and processed first.
             </p>
             <ul className="list-disc pl-6">
               <li><code>calculateAll</code> (optional) - If 'true', redirects to calculate all relevancies for all citizens.</li>
@@ -3360,11 +3321,10 @@ fetch('/api/resources/counts?buildingId=building-123456789')
               <li><code>assetType</code> (optional) - Filter relevancies by asset type (e.g., "land", "building", "citizen").</li>
               <li><code>targetCitizen</code> (optional) - Filter relevancies by target citizen username (or comma-separated list). Checks exact match or if username is in a JSON array in the `TargetCitizen` field.</li>
               <li><code>excludeAll</code> (optional, boolean) - If 'true', excludes relevancies where `RelevantToCitizen` is 'all'.</li>
-              <li><code>limit</code> (optional) - Limit the number of records (default 100).</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Category=opportunity&Score=75</code> - Filters for opportunity relevancies with a score of 75.</li>
-                  <li>Example: <code>?Status=active</code> - Filters for active relevancies.</li>
+                  <li><code>?Category=opportunity&Score=75</code> - Filters for opportunity relevancies with a score of 75.</li>
+                  <li><code>?Status=active</code> - Filters for active relevancies.</li>
                 </ul>
               </li>
             </ul>
@@ -3863,9 +3823,7 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
             <p className="text-xs mb-2 text-gray-600">
-              Field names can be provided in camelCase (e.g., <code>citizen</code>) or snake_case.
-              The server will automatically convert them to PascalCase (e.g., <code>Citizen</code>) for processing.
-              The example below uses camelCase.
+              The server automatically converts camelCase or snake_case keys in the request body to PascalCase for processing. See "Notes for AI Developers" for details. The example below uses camelCase.
             </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
@@ -3961,9 +3919,7 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
             <p className="text-xs mb-2 text-gray-600">
-              Field names can be provided in camelCase (e.g., <code>currentCitizen</code>) or snake_case.
-              The server will automatically convert them to PascalCase (e.g., <code>CurrentCitizen</code>) for processing.
-              The example below uses camelCase.
+              The server automatically converts camelCase or snake_case keys in the request body to PascalCase for processing. See "Notes for AI Developers" for details. The example below uses camelCase.
             </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
@@ -4228,19 +4184,15 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'PROBLEMS' table.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Citizen</code>, <code>AssetType</code>, <code>Status</code>, <code>Severity</code>, <code>Type</code>)
-              and the value is what you want to filter by. The <code>status</code> parameter defaults to "active" if not provided.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
+              The <code>Status</code> parameter defaults to "active" if not provided.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of records.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Citizen=NLR&Status=active</code> - Filters for active problems related to citizen NLR.</li>
-                  <li>Example: <code>?Severity=critical&Type=homeless_citizen</code> - Filters for critical homeless citizen problems.</li>
-                  <li>Example: <code>?Asset=building-xyz</code> - Filters for problems related to building-xyz.</li>
-                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                  <li><code>?Citizen=NLR&Status=active</code> - Filters for active problems related to citizen NLR.</li>
+                  <li><code>?Severity=critical&Type=homeless_citizen</code> - Filters for critical homeless citizen problems.</li>
+                  <li><code>?Asset=building-xyz</code> - Filters for problems related to building-xyz.</li>
                 </ul>
               </li>
             </ul>
