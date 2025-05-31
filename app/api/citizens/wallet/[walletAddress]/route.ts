@@ -8,6 +8,7 @@ const base = new Airtable({
 }).base(process.env.AIRTABLE_BASE_ID || '');
 
 const CITIZENS_TABLE = 'CITIZENS';
+const AIRTABLE_GUILDS_TABLE = process.env.AIRTABLE_GUILDS_TABLE || 'GUILDS'; // Ajout de la table GUILDS
 
 // Helper function to extract wallet address from the request
 function extractWalletAddressFromRequest(request: NextRequest): string | null {
@@ -41,20 +42,41 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    const citizen = citizens[0];
+    const citizenRecord = citizens[0];
+    const citizenFields = citizenRecord.fields;
+
+    let resolvedGuildId: string | null = null;
+    const linkedGuildAirtableIds = citizenFields.Guild as string[] | undefined;
+
+    if (linkedGuildAirtableIds && Array.isArray(linkedGuildAirtableIds) && linkedGuildAirtableIds.length > 0) {
+      const guildAirtableRecordId = linkedGuildAirtableIds[0];
+      try {
+        const guildRecord = await base(AIRTABLE_GUILDS_TABLE).find(guildAirtableRecordId);
+        if (guildRecord && guildRecord.fields.GuildId) {
+          resolvedGuildId = guildRecord.fields.GuildId as string;
+        } else {
+          console.warn(`Citizen via wallet ${walletAddress}: Guild record ${guildAirtableRecordId} found, but no GuildId field.`);
+        }
+      } catch (guildError) {
+        console.error(`Citizen via wallet ${walletAddress}: Error fetching guild details for guild record ID ${guildAirtableRecordId}:`, guildError);
+      }
+    }
     
     return NextResponse.json({
       success: true,
       citizen: {
-        id: citizen.id,
-        walletAddress: citizen.fields.Wallet,
-        username: citizen.fields.Username || null,
-        firstName: citizen.fields.FirstName || null,
-        lastName: citizen.fields.LastName || null,
-        ducats: citizen.fields.Ducats || 0,
-        coatOfArmsImageUrl: citizen.fields.CoatOfArmsImageUrl || null,
-        familyMotto: citizen.fields.FamilyMotto || null,
-        createdAt: citizen.fields.CreatedAt || null
+        id: citizenRecord.id,
+        // walletAddress: citizenFields.Wallet, // Not strictly needed in response as it was the query param
+        username: citizenFields.Username || null,
+        firstName: citizenFields.FirstName || null,
+        lastName: citizenFields.LastName || null,
+        ducats: citizenFields.Ducats || 0,
+        coatOfArmsImageUrl: citizenFields.CoatOfArmsImageUrl || null,
+        familyMotto: citizenFields.FamilyMotto || null,
+        createdAt: citizenFields.CreatedAt || null,
+        guildId: resolvedGuildId, // Ajout du guildId résolu
+        color: citizenFields.Color || null // Ajout de la couleur
+        // Ajoutez d'autres champs nécessaires pour CitizenProfile ici, ex: socialClass
       }
     });
   } catch (error) {

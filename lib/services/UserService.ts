@@ -466,49 +466,35 @@ export class CitizenService {
       }
       
       const data = await response.json();
-      log.debug('Parsed citizen profile data from API response');
+      log.debug('Parsed citizen profile data from API response', data);
       
-      if (data.citizen_name) {
-        log.info(`Found citizen profile for wallet: ${maskedAddress}, username: ${data.citizen_name}`);
-        log.debug('Citizen profile details', {
-          username: data.citizen_name,
-          hasFirstName: !!data.first_name,
-          hasLastName: !!data.last_name,
-          hasCoatOfArms: !!data.coat_of_arms_image,
-          hasMotto: !!data.family_motto,
-          hasDucats: typeof data.ducats === 'number',
-          Ducats: data.ducats
-        });
+      if (data.success && data.citizen && data.citizen.username) {
+        const citizenData = data.citizen;
+        log.info(`Found citizen profile for wallet: ${maskedAddress}, username: ${citizenData.username}`);
+        log.debug('Citizen profile details from API', citizenData);
         
         // Create citizen profile
         this.currentCitizen = {
-          username: data.citizen_name,
-          firstName: data.first_name || data.citizen_name.split(' ')[0] || '',
-          lastName: data.last_name || data.citizen_name.split(' ').slice(1).join(' ') || '',
-          coatOfArmsImageUrl: data.coat_of_arms_image,
-          familyMotto: data.family_motto,
-          coatOfArms: data.family_coat_of_arms,
-          Ducats: data.ducats,
-          color: data.color || '#8B4513',
-          walletAddress: address
+          username: citizenData.username,
+          firstName: citizenData.firstName || citizenData.username.split(' ')[0] || '',
+          lastName: citizenData.lastName || citizenData.username.split(' ').slice(1).join(' ') || '',
+          coatOfArmsImageUrl: citizenData.coatOfArmsImageUrl || null,
+          familyMotto: citizenData.familyMotto || undefined,
+          // coatOfArms: citizenData.coatOfArms, // This field is not standard in CitizenProfile, ensure API provides if needed
+          Ducats: citizenData.ducats || 0,
+          color: citizenData.color || '#8B4513', // Default color if not provided
+          walletAddress: address,
+          guildId: citizenData.guildId || null // Include guildId
         };
         
         // Update cache
         this.setCacheEntry(this.citizenByWalletCache, address, this.currentCitizen);
         log.debug(`Updated cache for wallet: ${maskedAddress}`);
         
-        // Also cache by username
-        this.setCacheEntry(this.citizenByUsernameCache, this.currentCitizen.username, {
-          citizen_name: this.currentCitizen.username,
-          first_name: this.currentCitizen.firstName,
-          last_name: this.currentCitizen.lastName,
-          coat_of_arms_image: this.currentCitizen.coatOfArmsImageUrl,
-          family_motto: this.currentCitizen.familyMotto,
-          family_coat_of_arms: this.currentCitizen.coatOfArms,
-          ducats: this.currentCitizen.Ducats,
-          color: this.currentCitizen.color,
-          wallet_address: address
-        });
+        // Also cache by username (using the structure expected by getCitizenByUsername if different)
+        // For simplicity, let's assume getCitizenByUsername can handle CitizenProfile structure or adapt it.
+        // If getCitizenByUsername expects a different structure, this part needs adjustment.
+        this.setCacheEntry(this.citizenByUsernameCache, this.currentCitizen.username, this.currentCitizen);
         log.debug(`Also cached citizen by username: ${this.currentCitizen.username}`);
         
         // Store in localStorage
@@ -525,7 +511,7 @@ export class CitizenService {
         return this.currentCitizen;
       }
       
-      log.info(`No username found for wallet: ${maskedAddress}`);
+      log.info(`No citizen data or username found for wallet: ${maskedAddress}`);
       
       // Cache the null result
       this.setCacheEntry(this.citizenByWalletCache, address, null);
