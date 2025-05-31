@@ -261,18 +261,25 @@ export default function GuildManagementPanel({ guild, onClose }: GuildManagement
               <div ref={messagesEndRef} />
             </div>
             <div className="p-3 border-t border-amber-200 bg-amber-100">
-              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center space-x-2">
-                <input
-                  type="text"
+              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-start space-x-2"> {/* items-start for better alignment with textarea */}
+                <textarea
+                  rows={3}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder={currentCitizenUsername ? "Type your message..." : "Loading user..."}
-                  className="flex-grow p-2 border border-amber-300 rounded-md focus:ring-amber-500 focus:border-amber-500 text-sm"
+                  className="flex-grow p-2 border border-amber-300 rounded-md focus:ring-amber-500 focus:border-amber-500 text-sm resize-none" // resize-none to prevent manual resizing
                   disabled={!currentCitizenUsername || isSendingMessage || isLoadingMessages}
+                  onKeyDown={(e) => {
+                    // Optional: Submit on Enter, new line on Shift+Enter
+                    // if (e.key === 'Enter' && !e.shiftKey) {
+                    //   e.preventDefault();
+                    //   handleSendMessage();
+                    // }
+                  }}
                 />
                 <button
                   type="submit"
-                  className="p-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 disabled:bg-amber-400"
+                  className="p-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 disabled:bg-amber-400 self-end" // self-end to align button with bottom of textarea if it grows
                   disabled={!currentCitizenUsername || !newMessage.trim() || isSendingMessage || isLoadingMessages}
                 >
                   <FaPaperPlane />
