@@ -6,6 +6,7 @@ const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_CITIZENS_TABLE = 'CITIZENS';
 const AIRTABLE_BUILDINGS_TABLE = 'BUILDINGS';
+const AIRTABLE_GUILDS_TABLE = 'GUILDS'; // Added GUILDS table
 
 // Utility function to convert field names to camelCase
 function toCamelCase(obj: Record<string, any>): Record<string, any> {
@@ -41,12 +42,26 @@ export async function GET(request: Request) {
     const base = initAirtable();
     
     // Fetch citizens from Airtable - without specifying fields to get all of them
-    const records = await base(AIRTABLE_CITIZENS_TABLE)
+    const citizenRecords = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
         filterByFormula: '{inVenice} = TRUE()',  // Only fetch citizens who are in Venice
         sort: [{ field: 'LastActiveAt', direction: 'desc' }]
       })
       .all();
+
+    // Fetch all guilds to create a map from Airtable Record ID to string GuildId
+    const guildRecords = await base(AIRTABLE_GUILDS_TABLE)
+      .select({ fields: ['GuildId'] }) // Only need GuildId and Airtable Record ID
+      .all();
+    
+    const guildIdMap: Record<string, string> = {}; // Map: AirtableRecordID -> StringGuildID
+    guildRecords.forEach(guildRecord => {
+      const airtableRecordId = guildRecord.id;
+      const stringGuildId = guildRecord.fields.GuildId as string;
+      if (airtableRecordId && stringGuildId) {
+        guildIdMap[airtableRecordId] = stringGuildId;
+      }
+    });
     
     // Fetch all buildings to determine employment and housing relationships
     const allBuildings = await base(AIRTABLE_BUILDINGS_TABLE)
@@ -84,20 +99,34 @@ export async function GET(request: Request) {
     });
     
     // Transform Airtable records to our citizen format
-    const citizens = records.map(record => {
+    const citizens = citizenRecords.map(record => {
       // Get all fields from Airtable (PascalCase) and convert their keys to camelCase
       const camelCaseFields = toCamelCase(record.fields);
 
+      // Resolve GuildId using the guildIdMap
+      // Assumes 'Guild' is the linked record field name in CITIZENS table.
+      const linkedGuildAirtableIds = record.fields.Guild as string[] | undefined;
+      if (linkedGuildAirtableIds && Array.isArray(linkedGuildAirtableIds) && linkedGuildAirtableIds.length > 0) {
+        const guildAirtableRecordId = linkedGuildAirtableIds[0];
+        if (guildIdMap[guildAirtableRecordId]) {
+          camelCaseFields.guildId = guildIdMap[guildAirtableRecordId];
+        } else {
+          console.warn(`Citizen ${camelCaseFields.username || record.id} linked to Guild Record ID ${guildAirtableRecordId}, but no string GuildId found in map.`);
+          camelCaseFields.guildId = null;
+        }
+      } else {
+        if ('guild' in camelCaseFields) { // If original field was 'Guild'
+          delete camelCaseFields.guild;
+        }
+        camelCaseFields.guildId = null;
+      }
+
       // Ensure 'username' is present from the primary 'Username' Airtable field
-      // This handles if 'Username' was not in record.fields or toCamelCase missed it.
-      // However, toCamelCase should handle 'Username' -> 'username'.
-      // More robustly, ensure the primary identifier is correctly cased.
       if (record.fields.Username && !camelCaseFields.username) {
         camelCaseFields.username = record.fields.Username as string;
       }
       
       // Parse position if it's a string
-      // Assuming the JSON string itself uses camelCase keys e.g., {"lat": ..., "lng": ...}
       if (typeof camelCaseFields.position === 'string' && 
           (camelCaseFields.position.startsWith('{') || camelCaseFields.position.startsWith('['))) {
         try {

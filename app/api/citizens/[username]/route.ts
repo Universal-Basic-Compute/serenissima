@@ -6,6 +6,7 @@ const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS';
 const AIRTABLE_BUILDINGS_TABLE = process.env.AIRTABLE_BUILDINGS_TABLE || 'BUILDINGS';
+const AIRTABLE_GUILDS_TABLE = process.env.AIRTABLE_GUILDS_TABLE || 'GUILDS'; // Added GUILDS table
 
 // Cache for citizen data to reduce Airtable API calls
 const citizenCache = new Map<string, { data: any, timestamp: number }>();
@@ -84,6 +85,34 @@ export async function GET(
       
       // Get all fields from the record and convert keys to camelCase
       const camelCaseFields = toCamelCase(record.fields);
+
+      // Resolve GuildId
+      // Assumes 'Guild' is the linked record field name in CITIZENS table.
+      // It would contain an array of Airtable Record IDs from the GUILDS table.
+      const linkedGuildAirtableIds = record.fields.Guild as string[] | undefined;
+
+      if (linkedGuildAirtableIds && Array.isArray(linkedGuildAirtableIds) && linkedGuildAirtableIds.length > 0) {
+        const guildAirtableRecordId = linkedGuildAirtableIds[0];
+        try {
+          const guildRecord = await base(AIRTABLE_GUILDS_TABLE).find(guildAirtableRecordId);
+          if (guildRecord && guildRecord.fields.GuildId) {
+            camelCaseFields.guildId = guildRecord.fields.GuildId as string; // This is the string ID like "umbra_lucrum_invenit"
+          } else {
+            console.warn(`Guild record ${guildAirtableRecordId} found, but no GuildId field for citizen ${username}.`);
+            camelCaseFields.guildId = null;
+          }
+        } catch (guildError) {
+          console.error(`Error fetching guild details for citizen ${username}, guild record ID ${guildAirtableRecordId}:`, guildError);
+          camelCaseFields.guildId = null;
+        }
+      } else {
+        // If 'Guild' (linked field) was part of record.fields, toCamelCase would create 'guild'.
+        // We want to ensure the final field is 'guildId' (string) or null.
+        if ('guild' in camelCaseFields) {
+          delete camelCaseFields.guild; // Remove the original linked record ID array if it was named 'Guild'
+        }
+        camelCaseFields.guildId = null;
+      }
       
       // Ensure 'username' is present from the primary 'Username' Airtable field
       if (record.fields.Username && !camelCaseFields.username) {
