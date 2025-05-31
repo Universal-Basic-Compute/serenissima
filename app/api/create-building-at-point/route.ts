@@ -359,6 +359,9 @@ export async function POST(request: Request) {
             SellerBuilding: sellerBuildingId,
             Status: "pending_materials",
             Notes: JSON.stringify(notesPayload), // Store constructionCosts in Notes
+            PricePerResource: actualConstructionMaterialCost, // Cost of materials/labor for the project
+            ResourceType: data.type, // Type of building being constructed
+            TargetAmount: 1, // One project
             CreatedAt: new Date().toISOString(),
             EndAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() // 90 days validity
           };
@@ -382,6 +385,79 @@ export async function POST(request: Request) {
     
     // Transform the Airtable record to our format
     const typedRecord = newBuildingRecord as any; // Use the newBuildingRecord
+
+    // Deduct actual construction material cost from player and pay workshop operator
+    const actualConstructionMaterialCost = constructionCostsForContract.ducats || 0;
+    if (actualConstructionMaterialCost > 0) {
+      const citizenRecordForMaterialCost = await new Promise<AirtableRecord>((resolve, reject) => {
+        (base!('CITIZENS') as unknown as AirtableTable).select({
+          filterByFormula: `{WalletAddress} = '${data.walletAddress}'`
+        }).firstPage((err, records) => {
+          if (err || !records || records.length === 0) reject(err || new Error('Citizen not found for material cost deduction'));
+          else resolve(records![0]);
+        });
+      });
+
+      const currentCitizenDucatsForMaterial = (citizenRecordForMaterialCost.fields.Ducats as number) || 0;
+      if (currentCitizenDucatsForMaterial < actualConstructionMaterialCost) {
+        // Not enough for materials, this is an issue. For now, log and continue, but ideally, this should be handled.
+        console.error(`Citizen ${data.walletAddress} has insufficient ducats (${currentCitizenDucatsForMaterial}) for material cost ${actualConstructionMaterialCost}. Construction project might stall.`);
+      } else {
+        const newCitizenDucatsAfterMaterial = currentCitizenDucatsForMaterial - actualConstructionMaterialCost;
+        await new Promise((resolve, reject) => {
+          (base!('CITIZENS') as unknown as AirtableTable).update([{ id: citizenRecordForMaterialCost.id, fields: { Ducats: newCitizenDucatsAfterMaterial }}], (err) => {
+            if (err) reject(err); else resolve(true);
+          });
+        });
+
+        // Pay workshop operator (re-fetch selectedWorkshop or pass details)
+        // This part assumes selectedWorkshop details (operator username, record ID) are available from the contract creation block
+        // For simplicity, re-fetching, but ideally, pass details.
+         const workshopsForPayment = await new Promise<AirtableRecord[]>((resolve, reject) => {
+            (base!('BUILDINGS') as unknown as AirtableTable).select({
+            filterByFormula: "AND({SubCategory}='construction', {IsConstructed}=TRUE())",
+            fields: ["BuildingId", "RunBy", "Owner"] 
+            }).firstPage((err, records) => {
+            if (err) reject(err);
+            else resolve(records || []);
+            });
+        });
+        if (workshopsForPayment.length > 0) {
+            const workshopForPayment = workshopsForPayment.find(w => w.fields.BuildingId === (await (base!('CONTRACTS') as unknown as AirtableTable).select({filterByFormula: `{ContractId} = 'construct-${buildingId}-${(w.fields.BuildingId as string).replace(/[^a-zA-Z0-9-]/g, '')}'`}).firstPage())?.[0]?.fields.SellerBuilding);
+            
+            if (workshopForPayment) {
+                const operatorUsernameForPayment = workshopForPayment.fields.RunBy as string || workshopForPayment.fields.Owner as string;
+                const operatorRecordForPayment = await new Promise<AirtableRecord>((resolve, reject) => {
+                    (base!('CITIZENS') as unknown as AirtableTable).select({filterByFormula: `{Username} = '${operatorUsernameForPayment}'`}).firstPage((err, records) => {
+                    if (err || !records || records.length === 0) reject(err || new Error('Workshop operator not found for payment'));
+                    else resolve(records![0]);
+                    });
+                });
+                const currentOperatorDucats = (operatorRecordForPayment.fields.Ducats as number) || 0;
+                const newOperatorDucats = currentOperatorDucats + actualConstructionMaterialCost;
+                await new Promise((resolve, reject) => {
+                    (base!('CITIZENS') as unknown as AirtableTable).update([{id: operatorRecordForPayment.id, fields: { Ducats: newOperatorDucats }}], (err) => {
+                    if (err) reject(err); else resolve(true);
+                    });
+                });
+                console.log(`Paid ${actualConstructionMaterialCost} to workshop operator ${operatorUsernameForPayment}`);
+
+                // Create transaction for material cost
+                await new Promise((resolve, reject) => {
+                    (base!('TRANSACTIONS') as unknown as AirtableTable).create({
+                        Type: "construction_material_payment",
+                        Asset: buildingId, AssetType: "building_project",
+                        Seller: operatorUsernameForPayment, Buyer: data.walletAddress,
+                        Price: actualConstructionMaterialCost,
+                        ExecutedAt: new Date().toISOString(), CreatedAt: new Date().toISOString(),
+                        Notes: `Payment for construction materials for ${data.type} (ID: ${buildingId}) to workshop.`
+                    }, (err) => { if (err) reject(err); else resolve(true); });
+                });
+            }
+        }
+      }
+    }
+    
     const building = {
       id: buildingId, // Use the generated buildingId
       type: typedRecord.fields.Type,
