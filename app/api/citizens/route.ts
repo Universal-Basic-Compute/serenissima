@@ -4,6 +4,14 @@ import Airtable from 'airtable';
 // Configure Airtable
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+
+// Helper to escape single quotes for Airtable formulas
+function escapeAirtableValue(value: string): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  return value.replace(/'/g, "\\'");
+}
 const AIRTABLE_CITIZENS_TABLE = 'CITIZENS';
 const AIRTABLE_BUILDINGS_TABLE = 'BUILDINGS';
 const AIRTABLE_GUILDS_TABLE = 'GUILDS'; // Added GUILDS table
@@ -40,12 +48,44 @@ export async function GET(request: Request) {
   try {
     // Initialize Airtable
     const base = initAirtable();
+    const url = new URL(request.url);
+
+    const formulaParts: string[] = ["{inVenice} = TRUE()"]; // Base filter
+    const loggableFilters: Record<string, string> = { inVenice: "TRUE()" };
+    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection']; // Parameters handled by pagination/sorting logic
+
+    for (const [key, value] of url.searchParams.entries()) {
+      if (reservedParams.includes(key.toLowerCase())) {
+        continue;
+      }
+      const airtableField = key; // Assuming query param key IS the Airtable field name
+      loggableFilters[airtableField] = value;
+
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
+        formulaParts.push(`{${airtableField}} = ${value}`);
+      } else if (value.toLowerCase() === 'true') {
+        formulaParts.push(`{${airtableField}} = TRUE()`);
+      } else if (value.toLowerCase() === 'false') {
+        formulaParts.push(`{${airtableField}} = FALSE()`);
+      } else {
+        formulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
+      }
+    }
     
-    // Fetch citizens from Airtable - without specifying fields to get all of them
+    const filterByFormula = formulaParts.length > 0 ? `AND(${formulaParts.join(', ')})` : '';
+    console.log('%c GET /api/citizens request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    console.log('Query parameters (filters):', loggableFilters);
+    if (filterByFormula) {
+      console.log('Applying Airtable filter formula:', filterByFormula);
+    }
+
+    // Fetch citizens from Airtable
     const citizenRecords = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        filterByFormula: '{inVenice} = TRUE()',  // Only fetch citizens who are in Venice
+        filterByFormula: filterByFormula,
         sort: [{ field: 'LastActiveAt', direction: 'desc' }]
+        // Consider adding limit/offset for pagination if not handled by .all() and subsequent slicing
       })
       .all();
 

@@ -202,8 +202,28 @@ const ApiReference: React.FC = () => {
         
         <div id="citizens-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/citizens</h3>
-          <p className="mb-2">Retrieves a list of all citizens in Venice.</p>
+          <p className="mb-2">Retrieves a list of all citizens in Venice. Supports dynamic filtering.</p>
           
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'CITIZENS' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>SocialClass</code>, <code>IsAI</code>, <code>HomeCity</code>)
+              and the value is what you want to filter by. The base filter <code>{"{inVenice} = TRUE()"}</code> is always applied.
+            </p>
+            <ul className="list-disc pl-6">
+              <li><code>limit</code> (optional) - Limit the number of citizens returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?SocialClass=Nobili&IsAI=true</code> - Filters for AI citizens of Nobili class.</li>
+                  <li>Example: <code>?HomeCity=Florence</code> - Filters for citizens whose home city is Florence.</li>
+                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
@@ -561,12 +581,24 @@ const ApiReference: React.FC = () => {
         
         <div id="lands-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/lands</h3>
-          <p className="mb-2">Retrieves a list of all land parcels.</p>
+          <p className="mb-2">Retrieves a list of all land parcels. Supports dynamic filtering.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'LANDS' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Owner</code>, <code>District</code>, <code>BuildingPointsCount</code>)
+              and the value is what you want to filter by.
+            </p>
             <ul className="list-disc pl-6">
-              <li><code>owner</code> (optional) - Filter lands by owner username</li>
+              <li><code>limit</code> (optional) - Limit the number of lands returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Owner=NLR&District=San%20Marco</code> - Filters for lands owned by 'NLR' in San Marco.</li>
+                  <li>Example: <code>?BuildingPointsCount=0</code> - Filters for lands with no building points.</li>
+                </ul>
+              </li>
             </ul>
           </div>
           
@@ -2407,13 +2439,25 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="economy-get-contracts" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/contracts</h3>
-          <p className="mb-2">Retrieves resource contracts.</p>
+          <p className="mb-2">Retrieves resource contracts. Supports dynamic filtering.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'CONTRACTS' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Type</code>, <code>Seller</code>, <code>ResourceType</code>, <code>Status</code>)
+              and the value is what you want to filter by.
+            </p>
             <ul className="list-disc pl-6">
-              <li><code>username</code> (optional) - Filter contracts by username</li>
-              <li><code>sellerBuilding</code> (optional) - Filter contracts by seller building</li>
+              <li><code>limit</code> (optional) - Limit the number of contracts returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Type=public_sell&ResourceType=wood</code> - Filters for public sell contracts for wood.</li>
+                  <li>Example: <code>?Seller=marco_polo&Status=active</code> - Filters for active contracts where marco_polo is the seller.</li>
+                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                </ul>
+              </li>
             </ul>
           </div>
           
@@ -2706,7 +2750,26 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="governance-get-decrees" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/decrees</h3>
-          <p className="mb-2">Retrieves all decrees.</p>
+          <p className="mb-2">Retrieves all decrees. Supports dynamic filtering.</p>
+
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'DECREES' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Type</code>, <code>Status</code>, <code>Category</code>)
+              and the value is what you want to filter by.
+            </p>
+            <ul className="list-disc pl-6">
+              <li><code>limit</code> (optional) - Limit the number of decrees returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Status=active&Category=economic</code> - Filters for active economic decrees.</li>
+                  <li>Example: <code>?Type=tax_change</code> - Filters for decrees of type 'tax_change'.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>
@@ -2741,7 +2804,26 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="guilds-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/guilds</h3>
-          <p className="mb-2">Retrieves all guilds.</p>
+          <p className="mb-2">Retrieves all guilds. Supports dynamic filtering.</p>
+
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'GUILDS' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>GuildName</code>, <code>GuildTier</code>, <code>Color</code>)
+              and the value is what you want to filter by.
+            </p>
+            <ul className="list-disc pl-6">
+              <li><code>limit</code> (optional) - Limit the number of guilds returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?GuildTier=3&Color=Red</code> - Filters for Tier 3 guilds with the color Red.</li>
+                  <li>Example: <code>?PatronSaint=St.%20Mark</code> - Filters for guilds with St. Mark as patron saint.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>

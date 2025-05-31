@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
 
+// Helper to escape single quotes for Airtable formulas
+function escapeAirtableValue(value: string): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  return value.replace(/'/g, "\\'");
+}
+
 // Helper function to parse building coordinates from building ID
 const parseBuildingCoordinates = (buildingId: string): {lat: number, lng: number} | null => {
   if (!buildingId) return null;
@@ -21,12 +29,7 @@ const parseBuildingCoordinates = (buildingId: string): {lat: number, lng: number
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const username = searchParams.get('username');
-    const sellerBuilding = searchParams.get('sellerBuilding');
-    const scope = searchParams.get('scope'); // New parameter for contract scope
-    const typeFilter = searchParams.get('type'); // Filter by contract Type
-    const assetId = searchParams.get('assetId'); // New parameter for asset ID (e.g., BuildingId for bids)
+    const url = new URL(request.url);
     
     // Initialize Airtable
     const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -63,77 +66,44 @@ export async function GET(request: Request) {
     }
     
     // Build the filter formula based on parameters
-    let formulaConditions: string[] = [];
+    const formulaParts: string[] = [];
+    const loggableFilters: Record<string, string> = {};
+    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection']; // Parameters handled by pagination/sorting logic
 
-    if (typeFilter) {
-      formulaConditions.push(`{Type}='${typeFilter}'`);
-    }
-
-    if (assetId && typeFilter === 'building_bid') {
-      // Special handling for fetching building bids for a specific asset
-      formulaConditions.push(`{Asset}='${assetId}'`);
-      formulaConditions.push(`{AssetType}='building'`);
-      // No status filter here, client can filter active/pending/etc.
-      console.log(`Contracts API: Fetching building_bid for Asset='${assetId}'`);
-    } else if (sellerBuilding) {
-      formulaConditions.push(`{SellerBuilding}='${sellerBuilding}'`);
-    } else if (username) {
-      // This block is entered if sellerBuilding/assetId is NOT specified, but username IS.
-      // typeFilter might or might not be specified.
-      if (scope === 'userNonPublic') {
-        let userNonPublicCondition = `OR({Buyer}='${username}', {Seller}='${username}')`;
-        // Only add {Type}!='public_sell' if typeFilter is not 'public_sell' (or not specified)
-        // If typeFilter IS 'public_sell', this effectively means "user's public_sell contracts"
-        if (!typeFilter || typeFilter.toLowerCase() !== 'public_sell') {
-          userNonPublicCondition = `AND(${userNonPublicCondition}, {Type}!='public_sell')`;
-        }
-        formulaConditions.push(userNonPublicCondition);
-        console.log(`Contracts API: Fetching userNonPublic for ${username}${typeFilter ? ` (filtered by Type='${typeFilter}')` : ''}`);
-      } else { // No specific scope, or scope is not 'userNonPublic'
-        if (typeFilter) {
-          // If a specific type is requested, filter by user for that type
-          formulaConditions.push(`OR({Buyer}='${username}', {Seller}='${username}')`);
-          console.log(`Contracts API: Fetching Type='${typeFilter}' for ${username}`);
-        } else {
-          // Original behavior: user's contracts OR all public_sell contracts
-          formulaConditions.push(`OR({Type}='public_sell', {Buyer}='${username}', {Seller}='${username}')`);
-          console.log(`Contracts API: Fetching all relevant for ${username} (includes public_sell)`);
-        }
+    for (const [key, value] of url.searchParams.entries()) {
+      if (reservedParams.includes(key.toLowerCase())) {
+        continue;
       }
-    } else if (!typeFilter && !sellerBuilding && !username && !assetId) {
-      // Default to public_sell if no other primary filters are set
-      formulaConditions.push(`{Type}='public_sell'`);
-      console.log(`Contracts API: Fetching all public_sell (default)`);
-    }
-    // If only typeFilter was provided (and not assetId for building_bid), formulaConditions will contain just that.
-    // If typeFilter and username (but not sellerBuilding/assetId) were provided, they'll be ANDed.
+      const airtableField = key; // Assuming query param key IS the Airtable field name
+      loggableFilters[airtableField] = value;
 
-    let formula = "";
-    if (formulaConditions.length > 0) {
-      if (formulaConditions.length === 1) {
-        formula = formulaConditions[0];
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
+        formulaParts.push(`{${airtableField}} = ${value}`);
+      } else if (value.toLowerCase() === 'true') {
+        formulaParts.push(`{${airtableField}} = TRUE()`);
+      } else if (value.toLowerCase() === 'false') {
+        formulaParts.push(`{${airtableField}} = FALSE()`);
       } else {
-        // All conditions are ANDed together
-        formula = `AND(${formulaConditions.join(', ')})`;
+        formulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
       }
-    } else {
-      // This case should ideally not be reached if there's always a default or some filter.
-      // If it is reached, fetching all records might be undesirable.
-      // For now, an empty formula fetches all. Consider adding a default if this path is possible.
-      console.log(`Contracts API: No specific filters applied, fetching all contracts (or based on Airtable view default).`);
     }
     
-    console.log(`Contracts API: Final Airtable formula: ${formula}`);
+    const filterByFormula = formulaParts.length > 0 ? `AND(${formulaParts.join(', ')})` : '';
+    console.log('%c GET /api/contracts request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    console.log('Query parameters (filters):', loggableFilters);
+    if (filterByFormula) {
+      console.log('Applying Airtable filter formula:', filterByFormula);
+    }
+    
     // Query Airtable
     const records = await new Promise((resolve, reject) => {
       const allRecords: any[] = [];
       
       contractsTable
         .select({
-          filterByFormula: formula,
-          sort: typeFilter === 'building_bid' && assetId 
-                ? [{ field: 'PricePerResource', direction: 'desc' }, { field: 'CreatedAt', direction: 'desc' }] 
-                : [{ field: 'CreatedAt', direction: 'desc' }]
+          filterByFormula: filterByFormula,
+          sort: [{ field: 'CreatedAt', direction: 'desc' }] // Default sort, can be overridden by query params later
         })
         .eachPage(
           (records, fetchNextPage) => {

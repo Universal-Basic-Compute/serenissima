@@ -5,7 +5,15 @@ import Airtable from 'airtable';
 const airtableApiKey = process.env.AIRTABLE_API_KEY;
 const airtableBaseId = process.env.AIRTABLE_BASE_ID;
 
-export async function GET() {
+// Helper to escape single quotes for Airtable formulas
+function escapeAirtableValue(value: string): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  return value.replace(/'/g, "\\'");
+}
+
+export async function GET(request: Request) {
   try {
     // Check if Airtable credentials are configured
     if (!airtableApiKey || !airtableBaseId) {
@@ -14,10 +22,41 @@ export async function GET() {
 
     // Initialize Airtable
     const base = new Airtable({ apiKey: airtableApiKey }).base(airtableBaseId);
+    const url = new URL(request.url);
+
+    const formulaParts: string[] = [];
+    const loggableFilters: Record<string, string> = {};
+    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection'];
+
+    for (const [key, value] of url.searchParams.entries()) {
+      if (reservedParams.includes(key.toLowerCase())) {
+        continue;
+      }
+      const airtableField = key;
+      loggableFilters[airtableField] = value;
+
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
+        formulaParts.push(`{${airtableField}} = ${value}`);
+      } else if (value.toLowerCase() === 'true') {
+        formulaParts.push(`{${airtableField}} = TRUE()`);
+      } else if (value.toLowerCase() === 'false') {
+        formulaParts.push(`{${airtableField}} = FALSE()`);
+      } else {
+        formulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
+      }
+    }
+
+    const filterByFormula = formulaParts.length > 0 ? `AND(${formulaParts.join(', ')})` : '';
+    console.log('%c GET /api/decrees request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    console.log('Query parameters (filters):', loggableFilters);
+    if (filterByFormula) {
+      console.log('Applying Airtable filter formula:', filterByFormula);
+    }
     
     // Fetch decrees from the DECREES table
     const records = await base('DECREES').select({
-      // Sort by CreatedAt in descending order
+      filterByFormula: filterByFormula,
       sort: [{ field: 'CreatedAt', direction: 'desc' }]
     }).all();
     
