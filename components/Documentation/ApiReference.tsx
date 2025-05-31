@@ -3477,10 +3477,10 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "sender": "string",
-  "receiver": "string",
-  "content": "string",
-  "type": "string" // Optional, defaults to "message"
+  "Sender": "string", // Username of the sender
+  "Receiver": "string", // Username of the receiver
+  "Content": "string", // Message content
+  "Type": "string" // Optional: Type of message (e.g., "personal", "business_inquiry"), defaults to "message"
 }`}
             </pre>
           </div>
