@@ -484,7 +484,9 @@ def get_building_types_from_api() -> Dict:
                             "type": building_type,
                             "name": building["name"],
                             "shortDescription": building.get("shortDescription", ""),
-                            "constructionCost": ducats_cost,
+                            "constructionCost": ducats_cost, # This is constructionCosts.ducats
+                            "constructionCosts": construction_costs, # Full constructionCosts object
+                            "constructionMinutes": building.get("constructionMinutes"), # Added constructionMinutes
                             "buildTier": building.get("buildTier"), # Prefer buildTier
                             "tier": building.get("tier"), # Keep tier for other potential uses or fallback
                             "category": building.get("category", "business"),  # Include the category field
