@@ -426,27 +426,14 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
                 </div>
               )}
               
-              {/* Apply for Membership button or Enter Guild button */}
+              {/* Visit Guild button - always visible */}
               <div className="mt-4">
-                {citizenGuildId === guild.guildId ? (
-                  <button
-                    className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                    onClick={() => setShowGuildManagementPanel(true)}
-                  >
-                    Visit
-                  </button>
-                ) : citizenGuildId ? (
-                  <div className="text-amber-700 text-sm italic text-center p-2 bg-amber-100 rounded">
-                    You are already a member of another guild. You must leave your current guild before joining a new one.
-                  </div>
-                ) : (
-                  <button
-                    className="w-full px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                    onClick={() => setShowApplicationModal(true)}
-                  >
-                    Apply for Membership
-                  </button>
-                )}
+                <button
+                  className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                  onClick={() => setShowGuildManagementPanel(true)}
+                >
+                  Visit
+                </button>
               </div>
 
               {/* Guild Management Panel Modal */}
