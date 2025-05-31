@@ -342,12 +342,16 @@ def autonomously_run_ai_citizen(
     log.info(f"{LogColors.OKCYAN}--- Step 1: Gather Data for {ai_username} ---{LogColors.ENDC}")
     prompt_step1 = (
         f"You are {ai_display_name}, an AI citizen in La Serenissima. Your current goal is to understand your situation and identify opportunities. "
-        f"The base API URL is {API_BASE_URL}. Review the API documentation summary provided in `addSystem.api_docs`. "
+        f"The base API URL is {API_BASE_URL}. Review your own citizen data in `addSystem.citizen_data` and the API documentation summary provided in `addSystem.api_docs`. "
         "Decide which single GET API endpoint you want to call to gather initial data relevant to your goals (e.g., your assets, market conditions, problems). "
         "Respond with a JSON object like: `{\"endpoint\": \"/api/your/choice\", \"params\": {\"key\": \"value\"}}` or `{\"endpoint\": \"/api/your/choice\"}` if no params. "
         "Choose an endpoint that provides a good overview or addresses a potential immediate concern."
     )
-    add_system_step1 = {"api_docs": API_DOCUMENTATION_SUMMARY, "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat()}
+    add_system_step1 = {
+        "api_docs": API_DOCUMENTATION_SUMMARY, 
+        "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
+        "citizen_data": ai_citizen_record["fields"] # Add citizen data here
+    }
     
     kinos_response_step1 = None
     if not dry_run:
@@ -387,13 +391,17 @@ def autonomously_run_ai_citizen(
     # Step 2: Elaborate Strategy & Define Actions
     log.info(f"{LogColors.OKCYAN}--- Step 2: Elaborate Strategy & Define Actions for {ai_username} ---{LogColors.ENDC}")
     prompt_step2 = (
-        f"You are {ai_display_name}. You previously requested data via GET API. "
+        f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. You previously requested data via GET API. "
         f"The response was (or simulated/error response if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
-        "Based on this data, your overall goals, and the API documentation in `addSystem.api_docs`, define your strategy and the next actions. "
+        "Based on this data, your citizen data, your overall goals, and the API documentation in `addSystem.api_docs`, define your strategy and the next actions. "
         "Respond with a JSON object: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {...}}, ...]}`. "
         "If no actions are needed now, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`."
     )
-    add_system_step2 = {"api_docs": API_DOCUMENTATION_SUMMARY, "previous_get_response": api_get_response_data}
+    add_system_step2 = {
+        "api_docs": API_DOCUMENTATION_SUMMARY, 
+        "previous_get_response": api_get_response_data,
+        "citizen_data": ai_citizen_record["fields"] # Add citizen data here
+    }
 
     kinos_response_step2 = None
     if not dry_run:
@@ -453,12 +461,16 @@ def autonomously_run_ai_citizen(
     # Step 3: Note Results & Plan Next Steps
     log.info(f"{LogColors.OKCYAN}--- Step 3: Note Results & Plan Next Steps for {ai_username} ---{LogColors.ENDC}")
     prompt_step3 = (
-        f"You are {ai_display_name}. Your strategy was: '{strategy_summary}'. "
+        f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. Your strategy was: '{strategy_summary}'. "
         f"Your POST actions resulted in (or simulated results if dry_run/failed): \n```json\n{json.dumps(api_post_responses_summary, indent=2)}\n```\n"
         "Reflect on these outcomes. What did you learn? What are your key observations or plans for your next autonomous run? "
         "Respond with a concise text summary (max 3-4 sentences)."
     )
-    add_system_step3 = {"api_docs": API_DOCUMENTATION_SUMMARY, "post_actions_summary": api_post_responses_summary}
+    add_system_step3 = {
+        "api_docs": API_DOCUMENTATION_SUMMARY, 
+        "post_actions_summary": api_post_responses_summary,
+        "citizen_data": ai_citizen_record["fields"] # Add citizen data here
+    }
 
     kinos_response_step3 = None
     if not dry_run:
