@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const ApiReference: React.FC = () => {
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 bg-amber-50 min-h-screen">
+    <div className="max-w-6xl mx-auto px-4 py-8 bg-amber-50 h-screen overflow-y-auto">
       <h1 className="text-4xl font-serif text-amber-800 mb-6">La Serenissima API Reference</h1>
       
       <p className="mb-8 text-lg">
