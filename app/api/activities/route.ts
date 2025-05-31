@@ -68,10 +68,11 @@ export async function GET(request: Request) {
       console.log('Applying 24-hour time range filter (no timezone).');
     } else if (ongoing) {
       // Broad Airtable filter for ongoing, precise JS filter applied later
-      const ongoingAirtableFilter = `AND({Status} != 'processed', {Status} != 'failed')`;
-      filterByFormulaParts.push(ongoingAirtableFilter);
+      // Add status conditions separately to simplify the final AND formula
+      filterByFormulaParts.push(`{Status} != 'processed'`);
+      filterByFormulaParts.push(`{Status} != 'failed'`);
       loggableFilters['ongoing'] = 'true';
-      console.log('Applying broad Airtable status filter for ongoing activities. JS will handle time logic.');
+      console.log('Applying broad Airtable status filter for ongoing activities (Status != processed AND Status != failed). JS will handle time logic.');
     }
 
     // Add dynamic filters from other query parameters
