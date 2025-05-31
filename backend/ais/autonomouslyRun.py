@@ -296,6 +296,77 @@ def make_kinos_call(
         log.error(f"{LogColors.FAIL}Error in make_kinos_call for {ai_username}: {e}{LogColors.ENDC}", exc_info=True)
         return None
 
+# --- Thought Cleaning Function (adapted from generatethoughts.py) ---
+
+def clean_thought_content(tables: Dict[str, Table], thought_content: str) -> str:
+    """Cleans thought content by replacing custom IDs with readable names."""
+    if not thought_content or not tables: # Added check for tables
+        return thought_content if thought_content else ""
+
+    cleaned_content = thought_content
+    id_cache = {} # Cache for looked-up names
+
+    # Regex to find patterns like building_id, land_id, polygon-id etc.
+    id_pattern = re.compile(r'\b(building|land|citizen|resource|contract)_([a-zA-Z0-9_.\-]+)\b|\b(polygon-([0-9]+))\b')
+
+    for match in id_pattern.finditer(thought_content):
+        if match.group(1): # Matches building_, land_, citizen_, resource_, contract_
+            full_id = match.group(0)
+            id_type = match.group(1).lower()
+            specific_id_part = match.group(2)
+        elif match.group(3): # Matches polygon-
+            full_id = match.group(3) 
+            id_type = "polygon"
+            specific_id_part = match.group(4) 
+        else:
+            continue
+
+        if full_id in id_cache:
+            readable_name = id_cache[full_id]
+            if readable_name: 
+                cleaned_content = cleaned_content.replace(full_id, readable_name)
+            continue
+
+        readable_name = None
+        try:
+            if id_type == "building":
+                record = tables.get("buildings", {}).first(formula=f"{{BuildingId}}='{_escape_airtable_value(full_id)}'")
+                if record and record.get("fields", {}).get("Name"):
+                    readable_name = record["fields"]["Name"]
+            elif id_type == "land": 
+                record = tables.get("lands", {}).first(formula=f"{{LandId}}='{_escape_airtable_value(full_id)}'")
+                if record:
+                    readable_name = record.get("fields", {}).get("HistoricalName") or record.get("fields", {}).get("EnglishName")
+            elif id_type == "polygon": 
+                record = tables.get("lands", {}).first(formula=f"{{LandId}}='{_escape_airtable_value(full_id)}'")
+                if record:
+                    readable_name = record.get("fields", {}).get("HistoricalName") or record.get("fields", {}).get("EnglishName")
+            elif id_type == "citizen": 
+                record = tables.get("citizens", {}).first(formula=f"{{Username}}='{_escape_airtable_value(specific_id_part)}'")
+                if record:
+                    fname = record.get("fields", {}).get("FirstName", "")
+                    lname = record.get("fields", {}).get("LastName", "")
+                    readable_name = f"{fname} {lname}".strip() if fname or lname else specific_id_part
+            elif id_type == "resource": 
+                record = tables.get("resources", {}).first(formula=f"{{ResourceId}}='{_escape_airtable_value(full_id)}'")
+                if record:
+                    readable_name = record.get("fields", {}).get("Name") or record.get("fields", {}).get("Type")
+            elif id_type == "contract":
+                record = tables.get("contracts", {}).first(formula=f"{{ContractId}}='{_escape_airtable_value(full_id)}'")
+                if record:
+                    readable_name = record.get("fields", {}).get("Title") or f"Contract ({specific_id_part[:10]}...)"
+
+            if readable_name:
+                log.debug(f"Replacing ID '{full_id}' with '{readable_name}' in reflection.")
+                cleaned_content = cleaned_content.replace(full_id, f"'{readable_name}'") 
+                id_cache[full_id] = f"'{readable_name}'"
+            else:
+                id_cache[full_id] = None 
+        except Exception as e:
+            log.error(f"Error looking up ID {full_id} for reflection cleaning: {e}")
+            id_cache[full_id] = None
+    return cleaned_content
+
 # Global variable to store Airtable schema content
 AIRTABLE_SCHEMA_CONTENT = ""
 
@@ -534,19 +605,25 @@ def autonomously_run_ai_citizen(
     ai_reflection = "No reflection generated."
     if kinos_response_step3 and isinstance(kinos_response_step3, dict) and "reflection_text" in kinos_response_step3:
         ai_reflection = kinos_response_step3["reflection_text"]
-        log.info(f"{LogColors.OKGREEN}AI {ai_username} reflection: {LogColors.BOLD}{ai_reflection}{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}AI {ai_username} raw reflection: {LogColors.BOLD}{ai_reflection}{LogColors.ENDC}")
+        
+        cleaned_reflection = ai_reflection # Default to raw if cleaning fails or no tables
+        if tables: # Ensure tables object is available
+            cleaned_reflection = clean_thought_content(tables, ai_reflection)
+            log.info(f"{LogColors.OKBLUE}AI {ai_username} cleaned reflection: {LogColors.BOLD}{cleaned_reflection}{LogColors.ENDC}")
+
         # Store reflection as a message to self
         if not dry_run and tables:
             try:
                 tables["messages"].create({
                     "Sender": ai_username,
                     "Receiver": ai_username,
-                    "Content": f"Autonomous Run Reflection:\nStrategy: {strategy_summary}\nReflection: {ai_reflection}",
+                    "Content": f"Autonomous Run Reflection:\nStrategy: {strategy_summary}\nReflection: {cleaned_reflection}",
                     "Type": "autonomous_run_log",
                     "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
                     "ReadAt": datetime.now(VENICE_TIMEZONE).isoformat() # Mark as read for self-log
                 })
-                log.info(f"{LogColors.OKGREEN}Stored reflection for {ai_username}.{LogColors.ENDC}")
+                log.info(f"{LogColors.OKGREEN}Stored cleaned reflection for {ai_username}.{LogColors.ENDC}")
             except Exception as e_msg:
                 log.error(f"{LogColors.FAIL}Failed to store reflection message for {ai_username}: {e_msg}{LogColors.ENDC}", exc_info=True)
     elif dry_run:
@@ -626,12 +703,18 @@ def autonomously_run_ai_citizen_unguided(
             break
 
         ai_reflection = kinos_response.get("reflection", "No reflection provided.")
-        log.info(f"{LogColors.OKGREEN}AI {ai_username} (Unguided Iteration {iteration_count}) Reflection: {LogColors.BOLD}{ai_reflection}{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}AI {ai_username} (Unguided Iteration {iteration_count}) Raw Reflection: {LogColors.BOLD}{ai_reflection}{LogColors.ENDC}")
+        
+        cleaned_reflection_unguided = ai_reflection # Default to raw
+        if tables: # Ensure tables object is available
+            cleaned_reflection_unguided = clean_thought_content(tables, ai_reflection)
+            log.info(f"{LogColors.OKBLUE}AI {ai_username} (Unguided Iteration {iteration_count}) Cleaned Reflection: {LogColors.BOLD}{cleaned_reflection_unguided}{LogColors.ENDC}")
+
         if not dry_run and tables:
              try:
                 tables["messages"].create({
                     "Sender": ai_username, "Receiver": ai_username,
-                    "Content": ai_reflection, # Store only the reflection text
+                    "Content": cleaned_reflection_unguided, # Store cleaned reflection text
                     "Type": "unguided_run_log", "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
                     "ReadAt": datetime.now(VENICE_TIMEZONE).isoformat()
                 })
