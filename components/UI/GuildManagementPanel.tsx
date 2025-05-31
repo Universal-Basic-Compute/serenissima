@@ -121,8 +121,10 @@ export default function GuildManagementPanel({ guild, onClose }: GuildManagement
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !currentCitizenUsername || !chatReceiverId) return;
     setIsSendingMessage(true);
+    const messageToSend = newMessage; // Capture message before clearing
     try {
-      const response = await fetch('/api/messages/send', {
+      // Step 1: Send message to Airtable (central log)
+      const airtableResponse = await fetch('/api/messages/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -132,13 +134,40 @@ export default function GuildManagementPanel({ guild, onClose }: GuildManagement
           type: 'guild'
         }),
       });
-      const data = await response.json();
-      if (data.success && data.message) {
-        setChatMessages(prevMessages => [...prevMessages, data.message]);
-        setNewMessage("");
+      const airtableData = await airtableResponse.json();
+      if (airtableData.success && airtableData.message) {
+        setChatMessages(prevMessages => [...prevMessages, airtableData.message]);
+        setNewMessage(""); // Clear input after successful Airtable send
+
+        // Step 2: Notify guild members via KinOS through our new backend route
+        // This is a fire-and-forget from the client's perspective for UI responsiveness
+        fetch('/api/guilds/notify-members', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            guildId: guild.guildId,
+            kinOsChannelId: chatReceiverId, // This is guild.guildId + "_" + formattedTabName
+            messageContent: messageToSend, // Use captured message
+            originalSenderUsername: currentCitizenUsername,
+          }),
+        })
+        .then(async (notifyResponse) => {
+          if (!notifyResponse.ok) {
+            const notifyErrorData = await notifyResponse.json();
+            console.error("Failed to initiate KinOS notifications:", notifyErrorData.error, notifyErrorData.details);
+            // Non-critical for UI, but log it. Could show a subtle error to user if important.
+          } else {
+            const notifySuccessData = await notifyResponse.json();
+            console.log("KinOS notification process initiated:", notifySuccessData.message);
+          }
+        })
+        .catch(notifyError => {
+          console.error("Error calling /api/guilds/notify-members:", notifyError);
+        });
+
       } else {
-        console.error("Failed to send message:", data.error);
-        alert(`Error sending message: ${data.error || 'Unknown error'}`);
+        console.error("Failed to send message to Airtable:", airtableData.error);
+        alert(`Error sending message: ${airtableData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error sending message:", error);
