@@ -463,9 +463,14 @@ def autonomously_run_ai_citizen(
 
     # Step 1: Gather Data
     log.info(f"{LogColors.OKCYAN}--- Step 1: Gather Data for {ai_username} ---{LogColors.ENDC}")
-    prompt_step1 = (
+    prompt_step1_base = (
         f"You are {ai_display_name}, an AI citizen in La Serenissima. Your current goal is to understand your situation and identify opportunities. "
         f"The base API URL is {API_BASE_URL}. Review your own citizen data in `addSystem.citizen_data`, the API documentation summary in `addSystem.api_docs`, and the Airtable schema in `addSystem.airtable_schema_summary`. "
+    )
+    if user_message:
+        prompt_step1_base += f"An additional message has been provided for your consideration: '{user_message}'. "
+    
+    prompt_step1 = prompt_step1_base + (
         "Decide which single GET API endpoint you want to call to gather initial data relevant to your goals (e.g., your assets, market conditions, problems). "
         "For query parameters, you can use camelCase (e.g., `owner`, `resourceType`). "
         "Respond with a JSON object like: `{\"endpoint\": \"/api/your/choice\", \"params\": {\"paramName\": \"value\"}}` or `{\"endpoint\": \"/api/your/choice\"}` if no params. "
@@ -475,8 +480,10 @@ def autonomously_run_ai_citizen(
         "api_docs": API_DOCUMENTATION_SUMMARY, 
         "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
         "citizen_data": ai_citizen_record["fields"],
-        "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT # Add schema content
+        "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT
     }
+    if user_message:
+        add_system_step1["user_provided_message"] = user_message
     
     kinos_response_step1 = None
     if not dry_run:
@@ -643,7 +650,8 @@ def autonomously_run_ai_citizen_unguided(
     kinos_api_key: str,
     ai_citizen_record: Dict,
     dry_run: bool = False,
-    kinos_model_override: Optional[str] = None
+    kinos_model_override: Optional[str] = None,
+    user_message: Optional[str] = None # New parameter
 ):
     """Manages the unguided autonomous run for a single AI citizen."""
     ai_username = ai_citizen_record["fields"].get("Username")
@@ -662,9 +670,13 @@ def autonomously_run_ai_citizen_unguided(
         iteration_count += 1
         log.info(f"{LogColors.OKCYAN}--- Unguided Iteration {iteration_count} for {ai_username} ---{LogColors.ENDC}")
 
-        current_prompt = (
-            f"You are {ai_display_name}, an AI citizen in La Serenissima. Your goal is to act autonomously and strategically. "
-            "Review your current context in `addSystem` (citizen data, API docs, Airtable schema, previous API results if any). "
+        prompt_intro = f"You are {ai_display_name}, an AI citizen in La Serenissima. Your goal is to act autonomously and strategically. "
+        prompt_context_review = "Review your current context in `addSystem` (citizen data, API docs, Airtable schema, previous API results if any"
+        if user_message and iteration_count == 1:
+            prompt_context_review += ", and the user_provided_message"
+        prompt_context_review += "). "
+
+        prompt_action_guidance = (
             "Decide on a sequence of actions. Actions can be:\n"
             "1. Generic GET requests to any API endpoint to gather information.\n"
             "2. Generic POST requests to any API endpoint to perform general actions.\n"
@@ -675,26 +687,23 @@ def autonomously_run_ai_citizen_unguided(
             "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your overall thoughts on this iteration...\"}`\n"
             "For `/api/actions/create-activity`, the 'body' of your action should be the payload for that endpoint, including `citizenUsername`, `activityType`, `title`, `description`, `thought` (first-person narrative for the activity), and `activityDetails` (without `pathData` for travel). The 'reflection' field in the main Kinos response is for your overall iteration reflection, while the 'thought' field within the create-activity body is specific to that activity."
         )
+        
+        current_prompt = prompt_intro + prompt_context_review
         if previous_api_results:
-             current_prompt = (
-                f"You are {ai_display_name}. The results of your previous API calls are in `addSystem.previous_api_results`. "
-                "Based on this and your overall context (see `addSystem`), what do you want to do next? "
-                "Actions can be GET, POST, or a specific POST to `/api/actions/create-activity`. For travel activities via `create-activity`, provide building IDs; server handles pathfinding. "
-                "If no further actions, respond with an empty 'actions' list. "
-                "Provide your overall reasoning or reflection on this iteration in the 'reflection' field. "
-                "Respond with a JSON object: "
-                "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your overall thoughts on this iteration...\"}`\n"
-                "For `/api/actions/create-activity`, the 'body' of your action should include `title`, `description`, `thought` (first-person narrative for the activity), and `activityDetails`."
-            )
+             current_prompt += f"The results of your previous API calls are in `addSystem.previous_api_results`. Based on this, what do you want to do next? "
+        current_prompt += prompt_action_guidance
+
 
         add_system_data = {
             "api_docs_summary": API_DOCUMENTATION_SUMMARY,
-            "api_reference_full": API_REFERENCE_CONTENT, # Full API reference
-            "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT, # Airtable schema
+            "api_reference_full": API_REFERENCE_CONTENT, 
+            "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT, 
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
             "citizen_data": ai_citizen_record["fields"],
             "previous_api_results": previous_api_results
         }
+        if user_message and iteration_count == 1:
+            add_system_data["user_provided_message"] = user_message
 
         kinos_response = None
         if not dry_run:
@@ -784,7 +793,8 @@ def process_all_ai_autonomously(
     dry_run: bool = False,
     specific_citizen_username: Optional[str] = None,
     kinos_model_override: Optional[str] = None,
-    unguided_mode: bool = False # New parameter for mode
+    unguided_mode: bool = False, # New parameter for mode
+    user_message: Optional[str] = None # New parameter
 ):
     """Main function to process autonomous runs for AI citizens."""
     run_mode = "DRY RUN" if dry_run else "LIVE RUN"
@@ -814,9 +824,9 @@ def process_all_ai_autonomously(
     for ai_citizen_record in ai_citizens_to_process:
         start_time_citizen = time.time()
         if unguided_mode:
-            autonomously_run_ai_citizen_unguided(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override)
+            autonomously_run_ai_citizen_unguided(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message)
         else:
-            autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override) # Original guided function
+            autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message) # Original guided function
         end_time_citizen = time.time()
         log.info(f"{LogColors.OKBLUE}Time taken for {ai_citizen_record['fields'].get('Username', 'Unknown AI')}: {end_time_citizen - start_time_citizen:.2f} seconds.{LogColors.ENDC}")
         processed_count += 1
@@ -876,6 +886,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Run in unguided mode, where the AI makes a series of API calls in a loop."
     )
+    parser.add_argument(
+        "--addMessage",
+        type=str,
+        help="An additional message to include in the context for the AI's first Kinos call."
+    )
     args = parser.parse_args()
 
     kinos_model_to_use = args.model
@@ -888,5 +903,6 @@ if __name__ == "__main__":
         dry_run=args.dry_run,
         specific_citizen_username=args.citizen,
         kinos_model_override=kinos_model_to_use,
-        unguided_mode=args.unguided # Pass the new mode
+        unguided_mode=args.unguided,
+        user_message=args.addMessage # Pass the new message
     )
