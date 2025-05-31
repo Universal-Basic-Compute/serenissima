@@ -644,7 +644,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               kinosPromptContent = 
 `You are the AI representation of ${aiDisplayName}. The user, who is also ${aiDisplayName}, is interacting with you, their own digital persona.
 Reflect on your current status, thoughts, and goals based on the provided context.
-Respond naturally as if you are ${aiDisplayName} thinking aloud or conversing with yourself.
+Respond naturally as you are ${aiDisplayName} thinking aloud or conversing with yourself.
 
 CRITICAL: Use the structured context provided in the 'addSystem' field.
 This context includes your own profile, recent notifications, relevancies, and problems.
@@ -653,7 +653,7 @@ This context includes your own profile, recent notifications, relevancies, and p
 ${content}
 --- END OF USER'S MESSAGE ---
 
-Your response should be introspective or a direct continuation of the user's thought. It should be human-like and conversational. NO FLUFF.`;
+Your response should be a continuation of the user's thought, or a discussion with yourself. It should be human-like and conversational. NO FLUFF.`;
             } else {
               kinosPromptContent = 
 `You are ${aiDisplayName}, an AI citizen of Venice. You are responding to a message from ${senderDisplayName}.
@@ -662,7 +662,7 @@ DO NOT use overly formal language or write excessively long paragraphs unless th
 Aim for natural, pertinent, and engaging dialogue.
 
 CRITICAL: Use the structured context provided in the 'addSystem' field (detailed below) to make your response RELEVANT to ${senderDisplayName} and FOCUSED ON GAMEPLAY.
-Your message should reflect your understanding of your relationship, recent events, and potential gameplay interactions with ${senderDisplayName}.
+Reflect your understanding of your relationship, recent events, and potential gameplay interactions with ${senderDisplayName}.
 
 Guide to 'addSystem' content (use this to make your message relevant and gameplay-focused):
 - 'ai_citizen_profile': Your own detailed profile (status, wealth, etc.).
@@ -683,6 +683,7 @@ Your response:`;
             const kinosBody: any = { content: kinosPromptContent };
             if (addSystemPayload) {
               kinosBody.addSystem = addSystemPayload;
+              kinosBody.model = "local";
             }
 
             const kinosResponse = await fetch(
