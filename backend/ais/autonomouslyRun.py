@@ -314,12 +314,12 @@ def make_kinos_call(
         if add_system_data:
             log.debug(f"{LogColors.LIGHTBLUE}Kinos addSystem keys for {ai_username}: {list(add_system_data.keys())}{LogColors.ENDC}")
 
-
-        response = requests.post(kinos_url, headers=headers, json=payload, timeout=120) # Increased timeout
+        # Increased timeout to 10 minutes (600 seconds)
+        response = requests.post(kinos_url, headers=headers, json=payload, timeout=600) 
         response.raise_for_status()
 
         # Fetch the latest assistant message from history
-        history_response = requests.get(kinos_url, headers=headers, timeout=30)
+        history_response = requests.get(kinos_url, headers=headers, timeout=60) # Increased history timeout as well
         history_response.raise_for_status()
         messages_data = history_response.json()
         
