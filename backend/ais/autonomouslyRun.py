@@ -450,7 +450,8 @@ def autonomously_run_ai_citizen(
     kinos_api_key: str,
     ai_citizen_record: Dict,
     dry_run: bool = False,
-    kinos_model_override: Optional[str] = None
+    kinos_model_override: Optional[str] = None,
+    user_message: Optional[str] = None # New parameter
 ):
     """Manages the 3-step autonomous run for a single AI citizen."""
     ai_username = ai_citizen_record["fields"].get("Username")
