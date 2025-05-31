@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
 
+// Helper to escape single quotes for Airtable formulas
+function escapeAirtableValue(value: string): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  return value.replace(/'/g, "\\'");
+}
+
 // Airtable configuration
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
@@ -49,22 +57,45 @@ export async function GET(request: Request) {
     
     // Initialize Airtable
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+    const url = new URL(request.url);
+
+    const formulaParts: string[] = [];
+    const loggableFilters: Record<string, string> = {};
+    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection'];
+
+    for (const [key, value] of url.searchParams.entries()) {
+      if (reservedParams.includes(key.toLowerCase())) {
+        continue;
+      }
+      const airtableField = key; // Assuming query param key IS the Airtable field name
+      loggableFilters[airtableField] = value;
+
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
+        formulaParts.push(`{${airtableField}} = ${value}`);
+      } else if (value.toLowerCase() === 'true') {
+        formulaParts.push(`{${airtableField}} = TRUE()`);
+      } else if (value.toLowerCase() === 'false') {
+        formulaParts.push(`{${airtableField}} = FALSE()`);
+      } else {
+        formulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
+      }
+    }
     
-    // Get URL parameters
-    const { searchParams } = new URL(request.url);
-    const owner = searchParams.get('owner');
-    
-    // Prepare filter formula
-    let filterFormula = '';
-    if (owner) {
-      filterFormula = `{Owner} = '${owner}'`;
+    const filterByFormula = formulaParts.length > 0 ? `AND(${formulaParts.join(', ')})` : '';
+    console.log('%c GET /api/lands request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    console.log('Query parameters (filters):', loggableFilters);
+    if (filterByFormula) {
+      console.log('Applying Airtable filter formula:', filterByFormula);
     }
     
     // Fetch lands from Airtable
     console.log('Fetching lands from Airtable...');
     const landsRecords = await base(AIRTABLE_LANDS_TABLE)
       .select({
-        filterByFormula: filterFormula || ''
+        filterByFormula: filterByFormula
+        // Add default sort if needed, e.g., by LandId
+        // sort: [{ field: 'LandId', direction: 'asc' }]
       })
       .all();
     

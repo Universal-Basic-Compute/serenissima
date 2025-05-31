@@ -597,6 +597,7 @@ const ApiReference: React.FC = () => {
                 <ul className="list-circle pl-5 mt-1">
                   <li>Example: <code>?Owner=NLR&District=San%20Marco</code> - Filters for lands owned by 'NLR' in San Marco.</li>
                   <li>Example: <code>?BuildingPointsCount=0</code> - Filters for lands with no building points.</li>
+                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
                 </ul>
               </li>
             </ul>
@@ -1702,12 +1703,25 @@ const ApiReference: React.FC = () => {
         
         <div id="resources-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/resources</h3>
-          <p className="mb-2">Retrieves a list of all resources.</p>
+          <p className="mb-2">Retrieves a list of all resources. Supports dynamic filtering.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'RESOURCES' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Owner</code>, <code>Type</code>, <code>AssetType</code>)
+              and the value is what you want to filter by.
+            </p>
             <ul className="list-disc pl-6">
-              <li><code>owner</code> (optional) - Filter resources by owner</li>
+              <li><code>limit</code> (optional) - Limit the number of resources returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Owner=NLR&Type=wood</code> - Filters for wood resources owned by 'NLR'.</li>
+                  <li>Example: <code>?AssetType=building&Asset=building-123</code> - Filters for resources associated with building-123.</li>
+                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                </ul>
+              </li>
             </ul>
           </div>
           
@@ -2295,16 +2309,29 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="transport-get-activities" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/activities</h3>
-          <p className="mb-2">Retrieves citizen activities, including transport paths.</p>
+          <p className="mb-2">Retrieves citizen activities, including transport paths. Supports dynamic filtering.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'ACTIVITIES' table,
+              in addition to the specific parameters listed below.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Type</code>, <code>Status</code>, <code>FromBuilding</code>)
+              and the value is what you want to filter by.
+            </p>
             <ul className="list-disc pl-6">
-              <li><code>citizenId</code> (optional) - Filter activities by citizen username (can be repeated for multiple citizens).</li>
+              <li><code>citizenId</code> (optional) - Filter activities by citizen username (maps to `Citizen` field, can be repeated).</li>
               <li><code>limit</code> (optional) - Limit the number of activities returned (default: 100).</li>
-              <li><code>hasPath</code> (optional, boolean) - Filter activities that have a path.</li>
-              <li><code>ongoing</code> (optional, boolean) - Filter for activities that are currently ongoing (start date is past, end date is in future or null).</li>
-              <li><code>timeRange</code> (optional, string) - e.g., "24h" to filter activities created in the last 24 hours. Overrides `ongoing` if both are present.</li>
+              <li><code>hasPath</code> (optional, boolean) - Filter activities that have a non-empty `Path`.</li>
+              <li><code>ongoing</code> (optional, boolean) - Filter for activities that are currently ongoing (start date is past, end date is in future or null). This is applied after Airtable fetching.</li>
+              <li><code>timeRange</code> (optional, string) - e.g., "24h" to filter activities created in the last 24 hours (based on `CreatedAt`). Overrides `ongoing` if both are present.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Type=production&Status=processed</code> - Filters for processed production activities.</li>
+                  <li>Example: <code>?FromBuilding=workshop-xyz</code> - Filters for activities originating from workshop-xyz.</li>
+                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                </ul>
+              </li>
             </ul>
           </div>
           

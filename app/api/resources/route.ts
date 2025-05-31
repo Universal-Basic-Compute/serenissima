@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 // import { loadAllResources } from '@/lib/utils/serverResourceUtils'; // Not used
 import Airtable from 'airtable';
 
+// Helper to escape single quotes for Airtable formulas
+function escapeAirtableValue(value: string): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  return value.replace(/'/g, "\\'");
+}
+
 // Helper to convert a string to PascalCase
 // Handles snake_case, camelCase, and kebab-case
 const stringToPascalCase = (str: string): string => {
@@ -46,11 +54,8 @@ const base = new Airtable({ apiKey }).base(baseId);
 export async function GET(request: Request) {
   try {
     // Get URL parameters
-    const { searchParams } = new URL(request.url);
-    const owner = searchParams.get('owner');
+    const url = new URL(request.url);
     
-    console.log(`Loading resources${owner ? ` for owner: ${owner}` : ' (all)'}`);
-
     // Fetch all resource type definitions for enrichment
     let resourceTypeDefinitions: Map<string, ResourceTypeDefinition> = new Map();
     try {
@@ -71,12 +76,34 @@ export async function GET(request: Request) {
     }
     
     // Build filter formula for Airtable query
-    let filterFormula = '';
-    if (owner) {
-      // Ensure owner value is properly escaped for Airtable formula
-      const escapedOwner = owner.replace(/'/g, "\\'");
-      filterFormula = `{Owner} = '${escapedOwner}'`;
-      console.log(`Filtering resources by owner: ${escapedOwner}`);
+    const formulaParts: string[] = [];
+    const loggableFilters: Record<string, string> = {};
+    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection'];
+
+    for (const [key, value] of url.searchParams.entries()) {
+      if (reservedParams.includes(key.toLowerCase())) {
+        continue;
+      }
+      const airtableField = key; // Assuming query param key IS the Airtable field name
+      loggableFilters[airtableField] = value;
+
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
+        formulaParts.push(`{${airtableField}} = ${value}`);
+      } else if (value.toLowerCase() === 'true') {
+        formulaParts.push(`{${airtableField}} = TRUE()`);
+      } else if (value.toLowerCase() === 'false') {
+        formulaParts.push(`{${airtableField}} = FALSE()`);
+      } else {
+        formulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
+      }
+    }
+    
+    const filterByFormula = formulaParts.length > 0 ? `AND(${formulaParts.join(', ')})` : '';
+    console.log('%c GET /api/resources request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    console.log('Query parameters (filters):', loggableFilters);
+    if (filterByFormula) {
+      console.log('Applying Airtable filter formula:', filterByFormula);
     }
     
     // Query Airtable directly
@@ -85,8 +112,10 @@ export async function GET(request: Request) {
       
       base('RESOURCES')
         .select({
-          filterByFormula: filterFormula, // Apply filter if owner is specified
-          view: 'Grid view' // Ensure all necessary fields like AssetType, Asset are in this view
+          filterByFormula: filterByFormula,
+          view: 'Grid view', // Ensure all necessary fields like AssetType, Asset are in this view
+          // Add default sort if needed, e.g., by CreatedAt or Name
+          sort: [{ field: 'CreatedAt', direction: 'desc' }]
         })
         .eachPage(
           function page(records, fetchNextPage) {

@@ -1,11 +1,21 @@
 import { NextResponse } from 'next/server';
 
+// Helper to escape single quotes for Airtable formulas
+function escapeAirtableValue(value: string): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  return value.replace(/'/g, "\\'");
+}
+
 export async function GET(request: Request) {
   try {
     // Get URL parameters
-    const { searchParams } = new URL(request.url);
-    const citizenIds = searchParams.getAll('citizenId');
-    const limit = parseInt(searchParams.get('limit') || '100', 100);
+    const urlObject = new URL(request.url); // Use a different name to avoid conflict with 'url' module
+    const searchParams = urlObject.searchParams;
+    
+    const citizenIds = searchParams.getAll('citizenId'); // Keep this specific handling
+    const limit = parseInt(searchParams.get('limit') || '100', 10); // Ensure radix 10
     const hasPath = searchParams.get('hasPath') === 'true';
     const ongoing = searchParams.get('ongoing') === 'true';
     const timeRange = searchParams.get('timeRange'); // New 'timeRange' parameter
@@ -29,39 +39,68 @@ export async function GET(request: Request) {
     
     // Create the filter formula based on parameters
     let filterByFormulaParts: string[] = [];
+    const loggableFilters: Record<string, string> = {};
+    // Reserved parameters are those handled by specific logic or Airtable's select options directly
+    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection', 'citizenId', 'hasPath', 'ongoing', 'timeRange'];
     
+    // Handle specific citizenId filter
     if (citizenIds.length > 0) {
-      // Filter by specific citizens
       if (citizenIds.length === 1) {
-        filterByFormulaParts.push(`{Citizen}='${citizenIds[0]}'`); // Changed CitizenId to Citizen
+        filterByFormulaParts.push(`{Citizen} = '${escapeAirtableValue(citizenIds[0])}'`);
       } else {
-        filterByFormulaParts.push(`OR(${citizenIds.map(id => `{Citizen}='${id}'`).join(',')})`); // Changed CitizenId to Citizen
+        const citizenFilters = citizenIds.map(id => `{Citizen} = '${escapeAirtableValue(id)}'`);
+        filterByFormulaParts.push(`OR(${citizenFilters.join(', ')})`);
       }
+      loggableFilters['Citizen'] = citizenIds.join(',');
     }
     
-    // Add path filter if requested
+    // Handle specific hasPath filter
     if (hasPath) {
       filterByFormulaParts.push(`AND(NOT({Path} = ''), NOT({Path} = BLANK()))`);
+      loggableFilters['hasPath'] = 'true';
     }
 
-    // Add timeRange filter or ongoing filter
+    // Handle specific timeRange or ongoing filters
     if (timeRange === '24h') {
-      // Filter for activities created in the last 24 hours, without SET_TIMEZONE
       const twentyFourHourFilter = `IS_AFTER({CreatedAt}, DATEADD(NOW(), -24, 'hours'))`;
       filterByFormulaParts.push(twentyFourHourFilter);
+      loggableFilters['timeRange'] = '24h';
       console.log('Applying 24-hour time range filter (no timezone).');
     } else if (ongoing) {
-      // Airtable filter for ongoing activities:
-      // For ongoing activities, broadly filter by status in Airtable.
-      // Precise time-based filtering will be done in JavaScript.
+      // Broad Airtable filter for ongoing, precise JS filter applied later
       const ongoingAirtableFilter = `NOT(OR({Status} = 'processed', {Status} = 'failed'))`;
       filterByFormulaParts.push(ongoingAirtableFilter);
+      loggableFilters['ongoing'] = 'true';
       console.log('Applying broad Airtable status filter for ongoing activities. JS will handle time logic.');
+    }
+
+    // Add dynamic filters from other query parameters
+    for (const [key, value] of searchParams.entries()) {
+      if (reservedParams.includes(key.toLowerCase())) {
+        continue;
+      }
+      const airtableField = key; // Assuming query param key IS the Airtable field name
+      loggableFilters[airtableField] = value;
+
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
+        filterByFormulaParts.push(`{${airtableField}} = ${value}`);
+      } else if (value.toLowerCase() === 'true') {
+        filterByFormulaParts.push(`{${airtableField}} = TRUE()`);
+      } else if (value.toLowerCase() === 'false') {
+        filterByFormulaParts.push(`{${airtableField}} = FALSE()`);
+      } else {
+        filterByFormulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
+      }
     }
     
     const filterByFormula = filterByFormulaParts.length > 0 ? `AND(${filterByFormulaParts.join(', ')})` : '';
     
-    console.log(`Constructed Airtable filterByFormula: ${filterByFormula}`);
+    console.log('%c GET /api/activities request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    console.log('Query parameters (filters):', loggableFilters);
+    if (filterByFormula) {
+      console.log('Applying Airtable filter formula:', filterByFormula);
+    }
     
     // Prepare the request parameters
     let requestUrl = `${url}?sort%5B0%5D%5Bfield%5D=EndDate&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=${limit}`;
