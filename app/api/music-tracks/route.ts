@@ -3,12 +3,8 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   console.log('[music-tracks API] Le gestionnaire GET a été invoqué.'); // Log de confirmation
   try {
-    // Determine the Python backend URL. Use an environment variable if available,
-    // otherwise fallback to development/production defaults.
-    const pythonBackendUrl = process.env.PYTHON_BACKEND_URL || 
-                             (process.env.NODE_ENV === 'production' 
-                               ? 'https://backend.serenissima.ai' 
-                               : 'http://localhost:10000');
+    // Always use the production backend to list music files.
+    const pythonBackendUrl = 'https://backend.serenissima.ai';
 
     const listFilesUrl = `${pythonBackendUrl}/api/list-music-files`;
     
