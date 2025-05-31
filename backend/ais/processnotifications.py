@@ -78,9 +78,29 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def send_notifications_to_ai(ai_username: str, notifications: List[Dict]) -> bool:
+def _get_kinos_model_for_citizen(social_class: Optional[str]) -> str:
+    """Determines the Kinos model based on social class."""
+    if not social_class:
+        return "local" # Default model if social class is unknown
+    
+    s_class_lower = social_class.lower()
+    if s_class_lower == "nobili":
+        return "gemini-2.5-pro-preview-05-06"
+    elif s_class_lower in ["cittadini", "forestieri"]:
+        return "gemini-2.5-flash-preview-05-20"
+    elif s_class_lower in ["popolani", "facchini"]:
+        return "local"
+    else: # Default for any other unlisted social class
+        return "local"
+
+def send_notifications_to_ai(ai_citizen_record: Dict, notifications: List[Dict], kinos_model_override: Optional[str] = None) -> bool:
     """Send notifications to an AI citizen using the Kinos Engine API."""
     try:
+        ai_username = ai_citizen_record["fields"].get("Username")
+        if not ai_username:
+            print("Error: AI citizen record missing Username in send_notifications_to_ai.")
+            return False
+
         if not notifications:
             print(f"No notifications to send to AI citizen {ai_username}")
             return True
@@ -124,6 +144,18 @@ def send_notifications_to_ai(ai_username: str, notifications: List[Dict]) -> boo
             "min_files": 5,
             "max_files": 15
         }
+
+        actual_model_to_use = kinos_model_override
+        if not actual_model_to_use:
+            ai_social_class = ai_citizen_record["fields"].get("SocialClass")
+            actual_model_to_use = _get_kinos_model_for_citizen(ai_social_class)
+        
+        if actual_model_to_use:
+            payload["model"] = actual_model_to_use
+            print(f"Using Kinos model '{actual_model_to_use}' for {ai_username} (notification processing).")
+        else:
+            # This case should ideally not be reached if _get_kinos_model_for_citizen has a fallback
+            print(f"Warning: No Kinos model override and could not determine model from social class for {ai_username}. Using Kinos default for /build endpoint.")
         
         # Make the API request
         response = requests.post(url, headers=headers, json=payload)
@@ -235,8 +267,8 @@ def process_ai_notifications(dry_run: bool = False):
         
         # Process notifications
         if not dry_run:
-            # Send notifications to AI
-            success = send_notifications_to_ai(ai_username, unread_notifications)
+            # Send notifications to AI, passing the full citizen record and model override
+            success = send_notifications_to_ai(ai_citizen, unread_notifications, kinos_model_override_arg)
             
             if success:
                 # Mark notifications as read
@@ -256,8 +288,18 @@ def process_ai_notifications(dry_run: bool = False):
     print("AI notification processing completed")
 
 if __name__ == "__main__":
-    # Check if this is a dry run
-    dry_run = "--dry-run" in sys.argv
+    parser = argparse.ArgumentParser(description="Process unread notifications for AI citizens using Kinos AI.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run the script without making actual changes to Airtable or Kinos."
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gemini-2.5-pro-preview-05-06')."
+    )
+    args = parser.parse_args()
     
     # Run the process
-    process_ai_notifications(dry_run)
+    process_ai_notifications(dry_run=args.dry_run, kinos_model_override_arg=args.model)
