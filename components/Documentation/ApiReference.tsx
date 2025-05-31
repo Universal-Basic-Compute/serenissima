@@ -1582,7 +1582,7 @@ const ApiReference: React.FC = () => {
         
         <div id="buildings-get-bridges" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/bridges</h3>
-          <p className="mb-2">Retrieves all bridges.</p>
+          <p className="mb-2">Retrieves all buildings of type 'bridge' or 'rialto_bridge' from Airtable, enhanced with polygon link information.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>
@@ -1591,21 +1591,21 @@ const ApiReference: React.FC = () => {
   "success": true,
   "bridges": [
     {
-      "id": "string", // Airtable record ID
-      "buildingId": "string", // Custom BuildingId
+      "id": "string", // Airtable record ID of the building
+      "buildingId": "string", // Custom BuildingId field from Airtable or record.id
       "type": "string", // e.g., "bridge", "rialto_bridge"
-      "name": "string", // Display name
-      "position": { "lat": number, "lng": number },
+      "name": "string", // Display name from Airtable or default
+      "position": { "lat": number, "lng": number } | null, // Parsed position
       "owner": "string", // Username of the owner
       "isConstructed": boolean,
       "constructionDate": "string | null", // ISO date string
-      "landId": "string | null", // ID of the land polygon this bridge point is associated with
-      "links": ["string"], // Array of connected polygon IDs
-      "historicalName": "string | null",
-      "englishName": "string | null",
-      "historicalDescription": "string | null",
-      "orientation": number, // Orientation in radians
-      "distance": number | null // Length of the bridge if applicable
+      "landId": "string | null", // ID of the land polygon this bridge point is associated with (from Airtable)
+      "links": ["string"], // Array of connected polygon IDs (derived from polygon data)
+      "historicalName": "string | null", // Enriched from polygon data
+      "englishName": "string | null", // Enriched from polygon data
+      "historicalDescription": "string | null", // Enriched from polygon data
+      "orientation": number, // Orientation in radians (calculated)
+      "distance": number | null // Length of the bridge if applicable (from polygon data)
     }
   ]
 }`}
@@ -3350,12 +3350,13 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
       "type": "string", // Type of notification
       "citizen": "string", // Username of the recipient
       "content": "string", // Main content of the notification
-      "details": "object | undefined", // Parsed JSON details, or undefined if parsing failed/no details
+      "details": "object | undefined", // Parsed JSON details from 'Details' field, or undefined if parsing failed/no details
       "createdAt": "string", // ISO date string
       "readAt": "string | null" // ISO date string if read, otherwise null
     }
   ]
   // On error, 'notifications' will be an empty array and 'error'/'details' fields might be present.
+  // If Airtable fetch fails, a fallback response with success:false and error details is returned.
 }`}
             </pre>
           </div>
