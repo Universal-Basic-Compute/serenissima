@@ -19,8 +19,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     //console.log(`Fetching polygon with ID: ${polygonId}`);
 
     // ✅ Vérifier dans le cache
-    if (Object.keys(polygonsCache).length > 0 && polygonsCache[polygonId]) {
-      console.log(`Returning polygon ${polygonId} from cache`);
+    if (polygonsCache[polygonId]) {
+      console.log(`Returning polygon ${polygonId} from cache.`);
       return NextResponse.json(polygonsCache[polygonId]);
     }
 
@@ -30,81 +30,84 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // ✅ Charger fichier spécifique
     if (fs.existsSync(specificPolygonPath)) {
       try {
-        const polygonData = JSON.parse(fs.readFileSync(specificPolygonPath, 'utf8'));
-        polygonsCache[polygonId] = polygonData;
+        const fileContent = fs.readFileSync(specificPolygonPath, 'utf8');
+        const polygonData = JSON.parse(fileContent);
+        polygonsCache[polygonId] = polygonData; // Cache it
+        console.log(`Found and cached polygon ${polygonId} from specific file.`);
         return NextResponse.json(polygonData);
-      } catch (error) {
-        console.error(`Error reading polygon file ${specificPolygonPath}:`, error);
+      } catch (parseError) {
+        console.error(`Error parsing specific polygon file ${specificPolygonPath}:`, parseError);
+        // Potentially fall through to other methods or return error, for now, fall through
       }
     }
 
-    // ✅ Sinon charger fichier global
-    console.log(`Polygon file not found, searching in all polygons...`);
+    // ✅ Sinon charger fichier global (polygons.json)
     const allPolygonsPath = path.join(dataDir, 'polygons.json');
-
     if (fs.existsSync(allPolygonsPath)) {
+      console.log(`Specific file for ${polygonId} not found or failed to parse. Trying ${allPolygonsPath}...`);
       try {
-        const allPolygons = JSON.parse(fs.readFileSync(allPolygonsPath, 'utf8'));
+        const fileContent = fs.readFileSync(allPolygonsPath, 'utf8');
+        const allPolygonsData = JSON.parse(fileContent);
+        const polygonsArray = Array.isArray(allPolygonsData) ? allPolygonsData : (allPolygonsData.polygons && Array.isArray(allPolygonsData.polygons) ? allPolygonsData.polygons : null);
 
-        if (Array.isArray(allPolygons)) {
-          const polygon = allPolygons.find(p => p.id === polygonId);
-          if (polygon) {
-            allPolygons.forEach(p => { if (p.id) polygonsCache[p.id] = p; });
-            return NextResponse.json(polygon);
+        if (polygonsArray) {
+          // Populate cache with all polygons from this file for future requests
+          polygonsArray.forEach(p => { if (p && p.id) polygonsCache[p.id] = p; });
+          
+          const foundPolygon = polygonsArray.find(p => p && p.id === polygonId);
+          if (foundPolygon) {
+            console.log(`Found polygon ${polygonId} in ${allPolygonsPath} and cached all its polygons.`);
+            return NextResponse.json(foundPolygon);
           }
-        } else if (allPolygons.polygons && Array.isArray(allPolygons.polygons)) {
-          const polygon = allPolygons.polygons.find(p => p.id === polygonId);
-          if (polygon) {
-            allPolygons.polygons.forEach(p => { if (p.id) polygonsCache[p.id] = p; });
-            return NextResponse.json(polygon);
-          }
+        } else {
+          console.warn(`${allPolygonsPath} does not contain a recognized array of polygons.`);
         }
-      } catch (error) {
-        console.error(`Error reading all polygons file:`, error);
+      } catch (parseError) {
+        console.error(`Error parsing ${allPolygonsPath}:`, parseError);
       }
     }
 
-    // ✅ Si toujours pas trouvé, scanner tous les fichiers .json
-    console.log(`Scanning polygons directory for polygon files...`);
-    const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
+    // ✅ Si toujours pas trouvé, scanner tous les autres fichiers .json dans le répertoire
+    console.log(`Polygon ${polygonId} not found in cache, specific file, or main polygons.json. Scanning directory...`);
+    try {
+      const files = fs.readdirSync(dataDir);
+      for (const file of files) {
+        if (file.endsWith('.json') && file !== `${polygonId}.json` && file !== 'polygons.json') {
+          const filePath = path.join(dataDir, file);
+          try {
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            const data = JSON.parse(fileContent);
+            const polygonsInFile = Array.isArray(data) ? data : (data.polygons && Array.isArray(data.polygons) ? data.polygons : null);
 
-    for (const file of files) {
-      try {
-        const filePath = path.join(dataDir, file);
-        const fileContent = fs.readFileSync(filePath, 'utf8');
-        const data = JSON.parse(fileContent);
-
-        if (data.id === polygonId) {
-          polygonsCache[polygonId] = data;
-          return NextResponse.json(data);
-        }
-
-        if (Array.isArray(data)) {
-          const polygon = data.find(p => p.id === polygonId);
-          if (polygon) {
-            data.forEach(p => { if (p.id) polygonsCache[p.id] = p; });
-            return NextResponse.json(polygon);
+            if (polygonsInFile) {
+              const foundPolygon = polygonsInFile.find(p => p && p.id === polygonId);
+              if (foundPolygon) {
+                // Cache all polygons from this file as well
+                polygonsInFile.forEach(p => { if (p && p.id && !polygonsCache[p.id]) polygonsCache[p.id] = p; });
+                console.log(`Found polygon ${polygonId} in ${file}. Cached its contents.`);
+                return NextResponse.json(foundPolygon);
+              }
+            }
+          } catch (scanParseError) {
+            console.error(`Error parsing file ${filePath} during directory scan:`, scanParseError);
+            // Continue to next file
           }
         }
-
-        if (data.polygons && Array.isArray(data.polygons)) {
-          const polygon = data.polygons.find(p => p.id === polygonId);
-          if (polygon) {
-            data.polygons.forEach(p => { if (p.id) polygonsCache[p.id] = p; });
-            return NextResponse.json(polygon);
-          }
-        }
-      } catch (error) {
-        console.error(`Error processing file ${file}:`, error);
       }
+    } catch (dirReadError) {
+        console.error(`Error reading polygons directory ${dataDir}:`, dirReadError);
+        // If directory cannot be read, we cannot proceed with scanning.
+        // Fall through to the "not found" error, or could return a 500 here.
     }
+    
 
     // ❌ Si toujours rien trouvé
-    console.log(`Polygon ${polygonId} not found`);
+    console.log(`Polygon ${polygonId} not found after all checks.`);
     return NextResponse.json({ error: `Polygon ${polygonId} not found` }, { status: 404 });
 
   } catch (error) {
-    console.error('Error fetching polygon:', error);
+    // This outer catch is for unexpected errors not caught by inner handlers
+    console.error(`Critical error fetching polygon ${request.nextUrl.pathname}:`, error);
     return NextResponse.json({ error: 'Failed to fetch polygon' }, { status: 500 });
   }
 }
