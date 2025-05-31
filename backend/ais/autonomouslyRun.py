@@ -12,6 +12,7 @@ process using the Kinos Engine:
 import os
 import sys
 import json
+import re # Import the re module
 import traceback
 import argparse
 import logging
