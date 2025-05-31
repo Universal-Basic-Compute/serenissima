@@ -183,7 +183,7 @@ async function fetchGuildDetails(guildId: string, airtableBase: Airtable.Base): 
     const records = await airtableBase(AIRTABLE_GUILDS_TABLE)
       .select({
         filterByFormula: `{GuildId} = '${guildId}'`,
-        fields: ['GuildId', 'GuildName', 'Gastaldo'], // Ensure 'Gastaldo' is the correct Airtable field name
+        fields: ['GuildId', 'GuildName', 'Master'], // Changed 'Gastaldo' to 'Master'
         maxRecords: 1,
       })
       .firstPage();
@@ -193,7 +193,7 @@ async function fetchGuildDetails(guildId: string, airtableBase: Airtable.Base): 
       return {
         guildId: record.get('GuildId') as string,
         guildName: record.get('GuildName') as string,
-        gastaldo: record.get('Gastaldo') as string | undefined,
+        gastaldo: record.get('Master') as string | undefined, // Changed 'Gastaldo' to 'Master'
       };
     }
     return null;
@@ -240,17 +240,10 @@ async function askKinOsForJsonDecision(
   const kinOsUrl = `${KINOS_API_BASE_URL}/v2/blueprints/${KINOS_BLUEPRINT_ID}/kins/${kinUsername}/messages`;
 
   const payload: any = {
-    message: promptMessage,
+    content: promptMessage, // Changed from 'message' to 'content'
     role: "user", // System-initiated prompts often go as 'user' to the AI
-    channel_id: channelId, // Assuming the general message endpoint can target a channel_id in payload
-    // For "addSystem", the exact mechanism depends on KinOS API.
-    // It could be a specific field, or part of metadata, or prepended to `promptMessage`.
-    // Using a hypothetical 'system_prompt' field or similar in metadata.
-    metadata: {
-      system_prompt_override: systemContext // Placeholder for how addSystem is implemented
-    }
-    // Or, if "addSystem" is a top-level field:
-    // addSystem: systemContext,
+    channel_id: channelId, // Target the specific guild-tab channel
+    addSystem: systemContext // Use 'addSystem' as per KinOS docs
   };
   
   console.log(`[KinOS Ask] Sending to ${kinUsername} in channel ${channelId}. Payload:`, JSON.stringify(payload));
@@ -276,18 +269,12 @@ async function askKinOsForJsonDecision(
   const responseData = await response.json();
   console.log(`[KinOS Ask] Response from ${kinUsername}:`, responseData);
 
-  // KinOS responses often have the AI's message in a specific field, e.g., responseData.message.content or responseData.choices[0].message.content
-  // For now, assuming the AI's direct reply (the JSON string) is in responseData.message or responseData.text
-  // This needs to be adjusted based on the actual KinOS API response structure.
-  let aiResponseMessage = responseData.message || responseData.text || (responseData.messages && responseData.messages[0]?.content);
-
-  if (typeof aiResponseMessage === 'object' && aiResponseMessage.content) {
-    aiResponseMessage = aiResponseMessage.content;
-  }
+  // KinOS response has AI's message in 'content' field as per documentation.
+  const aiResponseMessage = responseData.content;
   
-  if (!aiResponseMessage || typeof aiResponseMessage !== 'string') {
-    console.error("[KinOS Ask] AI response format not as expected or missing. Response:", responseData);
-    throw new Error("AI response format not as expected or missing.");
+  if (typeof aiResponseMessage !== 'string') {
+    console.error("[KinOS Ask] AI response content is not a string or is missing. Response:", responseData);
+    throw new Error("AI response content is not a string or is missing.");
   }
 
   try {
