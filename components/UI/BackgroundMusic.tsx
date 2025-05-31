@@ -42,6 +42,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const [isPaused, setIsPaused] = useState(false); // This state indicates if we are in the "pause between tracks"
   const isPausedRef = useRef(isPaused); // Ref to hold the latest value of isPaused for setTimeout
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const previousTrackUrlRef = useRef<string | null>(null); // Ref to store the URL of the previously played track
   const [showControls, setShowControls] = useState(false);
 
   // Load available tracks
@@ -91,32 +92,28 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     }
     
     // Get a random track that's different from the current one
-    let newTrack;
+    let newTrackUrl;
     if (tracks.length === 1) {
-      newTrack = tracks[0];
+      newTrackUrl = tracks[0];
     } else {
-      // Get the current track path without domain/origin
-      const currentTrackPath = currentTrack && !currentTrack.includes('Pausing')
-        ? currentTrack
-        : null;
-
       do {
         const randomIndex = Math.floor(Math.random() * tracks.length);
-        newTrack = tracks[randomIndex];
-        // Make sure we don't play the same track twice in a row
-      } while (newTrack === currentTrackPath && tracks.length > 1);
+        newTrackUrl = tracks[randomIndex];
+      } while (newTrackUrl === previousTrackUrlRef.current && tracks.length > 1);
     }
 
-    console.log(`Playing new track: ${newTrack}`);
-    setCurrentTrack(newTrack);
+    console.log(`[BackgroundMusic] Playing new track: ${newTrackUrl}`);
+    setCurrentTrack(newTrackUrl); // Update state for display
+    previousTrackUrlRef.current = newTrackUrl; // Update ref for next selection
+
     setIsPaused(false); // Ensure isPaused is reset
 
     if (audioRef.current) {
-      console.log(`[BackgroundMusic] playRandomTrack: Setting src to ${newTrack} and playing.`);
-      audioRef.current.src = newTrack;
+      console.log(`[BackgroundMusic] playRandomTrack: Setting src to ${newTrackUrl} and playing.`);
+      audioRef.current.src = newTrackUrl;
       audioRef.current.volume = volume;
       audioRef.current.play().then(() => {
-        console.log(`[BackgroundMusic] playRandomTrack: Audio playback started for ${newTrack}.`);
+        console.log(`[BackgroundMusic] playRandomTrack: Audio playback started for ${newTrackUrl}.`);
         setIsPlaying(true); // Set isPlaying to true only after play() promise resolves
       }).catch(error => {
         console.error('[BackgroundMusic] playRandomTrack: Error playing audio:', error);
@@ -129,20 +126,21 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     }
 
     // setIsPlaying(true); // Moved into the .then() of play()
-  }, [tracks, currentTrack, volume, audioRef, setCurrentTrack, setIsPaused, setIsPlaying]);
+  }, [tracks, volume, audioRef, setCurrentTrack, setIsPaused, setIsPlaying]); // Removed currentTrack from deps
 
   // Initialize audio and play first track
   useEffect(() => {
-    console.log('[BackgroundMusic] Initialize audio effect. isLoading:', isLoading, 'tracks.length:', tracks.length); 
-    if (!isLoading && tracks.length > 0) {
-      console.log('[BackgroundMusic] Conditions met to play first track.'); 
-      // Always set up a track, even if we're not sure we can play it yet
+    console.log('[BackgroundMusic] Initialize audio effect. isLoading:', isLoading, 'tracks.length:', tracks.length, 'audioRef.current:', !!audioRef.current);
+    // This effect should primarily run when tracks are loaded and audio isn't set up yet.
+    if (!isLoading && tracks.length > 0 && !audioRef.current?.src) {
+      console.log('[BackgroundMusic] Initializing first track.');
       const randomIndex = Math.floor(Math.random() * tracks.length);
       const firstTrack = tracks[randomIndex];
       setCurrentTrack(firstTrack);
+      previousTrackUrlRef.current = firstTrack; // Initialize previousTrackUrlRef
       
       if (audioRef.current) {
-        audioRef.current.src = firstTrack;
+        audioRef.current.src = firstTrack; // Set src for the first track
         audioRef.current.volume = volume;
         audioRef.current.loop = false; // Ensure loop is false for playlist behavior
         
@@ -192,12 +190,19 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     }
     
     // Cleanup function to remove event listeners
+    // Cleanup function to remove event listeners for citizen interaction
+    // Ensure the correct (named) function is removed if handleCitizenInteraction was defined outside and passed.
+    // For now, assuming anonymous functions were used and this cleanup is a placeholder.
     return () => {
+      // Example: document.removeEventListener('click', handleCitizenInteraction);
+      // If handleCitizenInteraction was defined inside, its reference is lost here.
+      // This part of cleanup might need adjustment if specific named listeners were added.
+      // For now, the empty functions are harmless but ineffective for specific listener removal.
       document.removeEventListener('click', () => {});
       document.removeEventListener('keydown', () => {});
       document.removeEventListener('touchstart', () => {});
     };
-  }, [isLoading, tracks, volume, autoplay]); // Remove isPlaying and currentTrack from dependencies
+  }, [isLoading, tracks, autoplay, volume, setCurrentTrack]); // volume is needed for initial volume set. setCurrentTrack is stable.
 
   // Update isPausedRef whenever isPaused state changes
   useEffect(() => {
@@ -278,7 +283,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         }
       };
     }
-  }, [tracks, playRandomTrack, setCurrentTrack, setIsPlaying, setIsPaused]); // isPaused is kept as a dependency for the effect to re-run if its state setters are involved.
+  }, [playRandomTrack, setCurrentTrack, setIsPlaying, setIsPaused]); // playRandomTrack is now more stable
 
   // Update volume when it changes
   useEffect(() => {
