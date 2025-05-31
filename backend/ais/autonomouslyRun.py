@@ -296,6 +296,26 @@ def make_kinos_call(
         log.error(f"{LogColors.FAIL}Error in make_kinos_call for {ai_username}: {e}{LogColors.ENDC}", exc_info=True)
         return None
 
+# Global variable to store Airtable schema content
+AIRTABLE_SCHEMA_CONTENT = ""
+
+def load_airtable_schema_content():
+    """Loads the content of airtable_schema.md."""
+    global AIRTABLE_SCHEMA_CONTENT
+    try:
+        schema_file_path = os.path.join(PROJECT_ROOT, "backend", "docs", "airtable_schema.md")
+        if os.path.exists(schema_file_path):
+            with open(schema_file_path, "r", encoding="utf-8") as f:
+                AIRTABLE_SCHEMA_CONTENT = f.read()
+            log.info(f"{LogColors.OKGREEN}Successfully loaded Airtable schema content.{LogColors.ENDC}")
+        else:
+            log.warning(f"{LogColors.WARNING}Airtable schema file not found at {schema_file_path}. Proceeding without it.{LogColors.ENDC}")
+            AIRTABLE_SCHEMA_CONTENT = "Airtable schema file not found."
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error loading Airtable schema content: {e}{LogColors.ENDC}", exc_info=True)
+        AIRTABLE_SCHEMA_CONTENT = "Error loading Airtable schema."
+
+
 # --- API Documentation Summary ---
 # This should be a more structured and concise summary of relevant API endpoints.
 # For now, we'll pass the base URL and rely on the AI's knowledge or a very specific prompt.
@@ -523,27 +543,63 @@ def process_all_ai_autonomously(
     specific_citizen_username: Optional[str] = None,
     kinos_model_override: Optional[str] = None
 ):
-# Global variable to store Airtable schema content
-AIRTABLE_SCHEMA_CONTENT = ""
+    """Main function to process autonomous runs for AI citizens."""
+    run_mode = "DRY RUN" if dry_run else "LIVE RUN"
+    citizen_scope = specific_citizen_username if specific_citizen_username else "all eligible"
+    log_header(f"Starting Autonomous AI Process ({run_mode}, Citizen: {citizen_scope})", color_code=Fore.CYAN if colorama_available else '')
 
-def load_airtable_schema_content():
-    """Loads the content of airtable_schema.md."""
-    global AIRTABLE_SCHEMA_CONTENT
-    try:
-        schema_file_path = os.path.join(PROJECT_ROOT, "backend", "docs", "airtable_schema.md")
-        if os.path.exists(schema_file_path):
-            with open(schema_file_path, "r", encoding="utf-8") as f:
-                AIRTABLE_SCHEMA_CONTENT = f.read()
-            log.info(f"{LogColors.OKGREEN}Successfully loaded Airtable schema content.{LogColors.ENDC}")
-        else:
-            log.warning(f"{LogColors.WARNING}Airtable schema file not found at {schema_file_path}. Proceeding without it.{LogColors.ENDC}")
-            AIRTABLE_SCHEMA_CONTENT = "Airtable schema file not found."
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error loading Airtable schema content: {e}{LogColors.ENDC}", exc_info=True)
-        AIRTABLE_SCHEMA_CONTENT = "Error loading Airtable schema."
+    load_airtable_schema_content() # Load schema content at the start
+
+    tables = initialize_airtable()
+    kinos_api_key = get_kinos_api_key()
+
+    if not tables or not kinos_api_key:
+        log.error(f"{LogColors.FAIL}Exiting due to missing Airtable connection or Kinos API key.{LogColors.ENDC}")
+        return
+
+    ai_citizens_to_process = get_ai_citizens_for_autonomous_run(tables, specific_citizen_username)
+    if not ai_citizens_to_process:
+        log.warning(f"{LogColors.WARNING}No AI citizens to process. Exiting.{LogColors.ENDC}")
+        return
+
+    processed_count = 0
+    start_time_total = time.time()
+    for ai_citizen_record in ai_citizens_to_process:
+        start_time_citizen = time.time()
+        autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override)
+        end_time_citizen = time.time()
+        log.info(f"{LogColors.OKBLUE}Time taken for {ai_citizen_record['fields'].get('Username', 'Unknown AI')}: {end_time_citizen - start_time_citizen:.2f} seconds.{LogColors.ENDC}")
+        processed_count += 1
+        if specific_citizen_username: # If processing a specific citizen, break after one.
+            break
+        if len(ai_citizens_to_process) > 1 and processed_count < len(ai_citizens_to_process) : # Avoid sleep if only one or last one
+            log.info(f"{LogColors.OKBLUE}Pausing for 2 seconds before next AI...{LogColors.ENDC}")
+            time.sleep(2) 
+
+    end_time_total = time.time()
+    total_duration = end_time_total - start_time_total
+    log_header(f"Autonomous AI Process Finished. Processed {processed_count} AI citizen(s) in {total_duration:.2f} seconds.", color_code=Fore.CYAN if colorama_available else '')
+    
+    # Admin Notification
+    if not dry_run and tables and processed_count > 0:
+        try:
+            admin_summary = f"Autonomous AI Run process completed. Processed {processed_count} AI citizen(s)."
+            if specific_citizen_username:
+                admin_summary += f" (Specifically processed: {specific_citizen_username})"
+            
+            tables["notifications"].create({
+                "Citizen": "ConsiglioDeiDieci", # Standard recipient for admin reports
+                "Type": "admin_report_autonomous_run",
+                "Content": admin_summary,
+                "Status": "unread", # Ensure it's marked as unread
+                "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat() # Use timezone-aware ISO format
+            })
+            log.info(f"{LogColors.OKGREEN}Admin summary notification created for Autonomous Run.{LogColors.ENDC}")
+        except Exception as e_admin_notif:
+            log.error(f"{LogColors.FAIL}Failed to create admin summary notification: {e_admin_notif}{LogColors.ENDC}", exc_info=True)
 
 
-def process_all_ai_autonomously(
+if __name__ == "__main__":
     dry_run: bool = False,
     specific_citizen_username: Optional[str] = None,
     kinos_model_override: Optional[str] = None
