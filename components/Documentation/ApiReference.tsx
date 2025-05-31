@@ -2700,8 +2700,27 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="economy-get-loans" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/loans</h3>
-          <p className="mb-2">Retrieves loans information.</p>
+          <p className="mb-2">Retrieves loans information. Supports dynamic filtering.</p>
           
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'LOANS' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Borrower</code>, <code>Lender</code>, <code>Status</code>, <code>Type</code>)
+              and the value is what you want to filter by.
+            </p>
+            <ul className="list-disc pl-6">
+              <li><code>limit</code> (optional) - Limit the number of loans returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Borrower=NLR&Status=active</code> - Filters for active loans where NLR is the borrower.</li>
+                  <li>Example: <code>?Type=business&InterestRate=0.05</code> - Filters for business loans with a 5% interest rate.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
@@ -3739,11 +3758,11 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
 
         <div id="messages-get-type" className="mb-8 scroll-mt-20">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/messages?type=:type</h3>
-          <p className="mb-2">Retrieves messages by type. Can fetch the latest or all messages of a given type, optionally filtered by receiver.</p>
+          <p className="mb-2">Retrieves messages primarily filtered by their <code>Type</code>. Additional specific filters like <code>receiver</code> and <code>latest</code> are supported. This endpoint does not support general dynamic filtering by other arbitrary message fields.</p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>type</code> (required) - The type of message to retrieve (e.g., "daily_update", "admin_report", "guild_application").</li>
+              <li><code>type</code> (required) - The type of message to retrieve (e.g., "daily_update", "admin_report", "guild_application", "thought_log").</li>
               <li><code>receiver</code> (optional) - Filter messages by the receiver's username.</li>
               <li><code>latest</code> (optional, boolean) - If "true", returns only the most recent message matching the criteria. Otherwise, returns all matching messages.</li>
             </ul>
@@ -3788,7 +3807,13 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
 
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/thoughts</h3>
-          <p className="mb-2">Retrieves a randomized list of recent "thought_log" messages from all citizens (last 24 hours).</p>
+          <p className="mb-2">Retrieves a randomized list of recent "thought_log" messages from all citizens (last 24 hours). This endpoint is for a global feed and does not support general dynamic filtering by arbitrary fields.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li>No general dynamic filtering. Use <code>GET /api/thoughts?citizenUsername=:username</code> for specific citizen thoughts.</li>
+            </ul>
+          </div>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">

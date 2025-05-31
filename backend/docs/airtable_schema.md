@@ -7,7 +7,8 @@ Les descriptions de tables ci-dessous représentent le schéma brut dans Airtabl
 -   Fusionner des informations provenant d'autres sources (ex: données géométriques de `/api/get-polygons` pour les terrains, définitions de `/api/building-types` pour les bâtiments, ou `/api/resource-types` pour les ressources et contrats).
 -   Transformer les noms de champs (ex: de PascalCase à camelCase).
 -   Calculer de nouveaux champs qui ne sont pas stockés directement dans Airtable.
-Consultez la documentation ou le code source des points d'accès API spécifiques pour comprendre la structure exacte des données retournées.
+-   **Filtrage Dynamique**: De nombreux points d'accès GET qui retournent des listes (ex: `/api/buildings`, `/api/citizens`, `/api/contracts`, etc.) supportent le filtrage dynamique. Vous pouvez généralement utiliser n'importe quel nom de champ Airtable (sensible à la casse) comme paramètre de requête pour filtrer les résultats (ex: `/api/buildings?Owner=NLR&Category=business`). Le serveur s'occupe de la conversion pour la requête Airtable.
+Consultez la documentation ou le code source des points d'accès API spécifiques pour comprendre la structure exacte des données retournées et les capacités de filtrage.
 
 ## Table: CITIZENS
 

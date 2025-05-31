@@ -301,16 +301,16 @@ def make_kinos_call(
 # For now, we'll pass the base URL and rely on the AI's knowledge or a very specific prompt.
 API_DOCUMENTATION_SUMMARY = {
     "base_url": API_BASE_URL,
-    "notes": "Refer to the full API documentation for details on endpoints, parameters, and request/response formats. The server will attempt to map provided keys (e.g., camelCase, snake_case) to the required Airtable field format (PascalCase).",
+    "notes": "Refer to the full API documentation for details on endpoints, parameters, and request/response formats. For GET requests that return lists (e.g., /api/buildings, /api/citizens, /api/contracts, /api/resources, /api/lands, /api/problems, /api/relevancies, /api/loans, /api/guilds, /api/decrees, /api/activities), you can generally filter by any Airtable field name by providing it as a query parameter (e.g., ?Owner=NLR&Category=business). The server handles case sensitivity for these dynamic filter keys. For POST requests, the server will attempt to map provided body keys (e.g., camelCase, snake_case) to the required Airtable field format (PascalCase).",
     "example_get_endpoints": [
-        "/api/citizens/{username}",
-        "/api/buildings?owner={username}", # e.g., ?owner=NLR or ?Owner=NLR (server handles dynamic filtering key case)
-        "/api/lands?owner={username}",
-        "/api/resources/counts?owner={username}",
-        "/api/contracts?username={username}&scope=userNonPublic",
-        "/api/contracts?resourceType={resourceId}&type=public_sell",
-        "/api/problems?citizen={username}&status=active",
-        "/api/relevancies?relevantToCitizen={username}"
+        "/api/citizens/{username}", # Specific citizen
+        "/api/citizens?SocialClass=Nobili&IsAI=true", # Filtered list
+        "/api/buildings?Owner={username}&Category=business", 
+        "/api/lands?Owner={username}",
+        "/api/resources/counts?owner={username}", # This one is specific, not general dynamic
+        "/api/contracts?Seller={username}&Type=public_sell&Status=active",
+        "/api/problems?Citizen={username}&Status=active&Severity=critical",
+        "/api/relevancies?RelevantToCitizen={username}&Category=opportunity"
     ],
     "example_post_endpoints": [
         "/api/actions/construct-building", # Body keys can be camelCase, server will adapt.
