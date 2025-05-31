@@ -12,6 +12,10 @@ const initAirtable = () => {
     console.error('Airtable credentials not configured');
     throw new Error('Airtable credentials not configured');
   }
+  // Configure un délai d'attente plus long (par exemple, 30 secondes)
+  Airtable.configure({
+    requestTimeout: 30000, // 30 secondes en millisecondes
+  });
   return new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 };
 
