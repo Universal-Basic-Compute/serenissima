@@ -1702,7 +1702,7 @@ const ApiReference: React.FC = () => {
   "name": "string", // Optional: Display name. If not provided, will be enriched from type definition.
   // Category, SubCategory, Tier, Description, Icon, ImportPrice, LifetimeHours, ConsumptionHours are NOT direct inputs.
   // They are enriched based on the 'type' from resource type definitions.
-  "position": { "lat": number, "lng": number } | string, // Required: Position of the resource stack itself (object or JSON string). Intended to be stored in Airtable's 'Position' field.
+  "position": { "lat": number, "lng": number } | string, // Optional: If 'asset' is not provided, this can be used for location context. Not directly stored on the resource record itself. Location is primarily determined by 'asset' and 'assetType'.
   "count": number, // Optional: defaults to 1
   "asset": "string", // Optional: BuildingId, Citizen Username, or LandId where resource is located/associated. Stored in Airtable's 'Asset' field.
   "assetType": "string", // Optional: "building", "citizen", "land". Stored in Airtable's 'AssetType' field.
