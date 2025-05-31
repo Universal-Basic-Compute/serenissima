@@ -164,47 +164,79 @@ def get_ai_citizens_for_autonomous_run(tables: Dict[str, Table], specific_userna
 
 # --- API Interaction Helpers ---
 
+DEFAULT_TIMEOUT_GET = 30  # seconds
+DEFAULT_TIMEOUT_POST = 45 # seconds
+MAX_RETRIES = 1 # Number of retries (so 1 retry means 2 attempts total)
+RETRY_DELAY_SECONDS = 3
+
 def make_api_get_request(endpoint: str, params: Optional[Dict] = None) -> Optional[Dict]:
-    """Makes a GET request to the game API."""
+    """Makes a GET request to the game API with retries."""
     url = f"{API_BASE_URL}{endpoint}"
-    try:
-        log.info(f"{LogColors.OKBLUE}Making API GET request to: {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKBLUE} with params: {params}{LogColors.ENDC}")
-        response = requests.get(url, params=params, timeout=20)
-        response.raise_for_status()
-        response_json = response.json()
-        log.info(f"{LogColors.OKGREEN}API GET request to {url} successful.{LogColors.ENDC}")
-        log.debug(f"{LogColors.PINK}Response from GET {url}: {json.dumps(response_json, indent=2)[:500]}...{LogColors.ENDC}")
-        return response_json
-    except requests.exceptions.RequestException as e:
-        log.error(f"{LogColors.FAIL}API GET request to {url} failed: {e}{LogColors.ENDC}", exc_info=True)
-        return None
-    except json.JSONDecodeError:
-        log.error(f"{LogColors.FAIL}Failed to decode JSON response from GET {url}{LogColors.ENDC}", exc_info=True)
-        return None
+    last_exception = None
+    
+    for attempt in range(MAX_RETRIES + 1):
+        try:
+            log.info(f"{LogColors.OKBLUE}Making API GET request to: {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKBLUE} with params: {params} (Attempt {attempt + 1}/{MAX_RETRIES + 1}){LogColors.ENDC}")
+            response = requests.get(url, params=params, timeout=DEFAULT_TIMEOUT_GET)
+            response.raise_for_status()
+            response_json = response.json()
+            log.info(f"{LogColors.OKGREEN}API GET request to {url} successful.{LogColors.ENDC}")
+            log.debug(f"{LogColors.PINK}Response from GET {url}: {json.dumps(response_json, indent=2)[:500]}...{LogColors.ENDC}")
+            return response_json
+        except requests.exceptions.RequestException as e:
+            last_exception = e
+            log.warning(f"{LogColors.WARNING}API GET request to {url} failed on attempt {attempt + 1}: {e}{LogColors.ENDC}")
+            if attempt < MAX_RETRIES:
+                log.info(f"Retrying in {RETRY_DELAY_SECONDS} seconds...")
+                time.sleep(RETRY_DELAY_SECONDS)
+            else:
+                log.error(f"{LogColors.FAIL}API GET request to {url} failed after {MAX_RETRIES + 1} attempts: {last_exception}{LogColors.ENDC}", exc_info=True)
+        except json.JSONDecodeError as e_json:
+            last_exception = e_json
+            log.error(f"{LogColors.FAIL}Failed to decode JSON response from GET {url} on attempt {attempt + 1}: {e_json}{LogColors.ENDC}", exc_info=True)
+            # Typically, JSON decode errors are not retried unless the server might return transient malformed JSON.
+            # For now, we'll break on JSON decode error.
+            break 
+            
+    return None
 
 def make_api_post_request(endpoint: str, body: Optional[Dict] = None) -> Optional[Dict]:
-    """Makes a POST request to the game API."""
+    """Makes a POST request to the game API with retries."""
     url = f"{API_BASE_URL}{endpoint}"
     log_body_snippet = json.dumps(body, indent=2)[:200] + "..." if body else "None"
-    try:
-        log.info(f"{LogColors.OKBLUE}Making API POST request to: {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKBLUE} with body: {log_body_snippet}{LogColors.ENDC}")
-        response = requests.post(url, json=body, timeout=30)
-        response.raise_for_status()
-        
-        if response.content:
-            response_json = response.json()
-            log.info(f"{LogColors.OKGREEN}API POST request to {url} successful.{LogColors.ENDC}")
-            log.debug(f"{LogColors.PINK}Response from POST {url}: {json.dumps(response_json, indent=2)[:500]}...{LogColors.ENDC}")
-            return response_json
-        
-        log.info(f"{LogColors.OKGREEN}API POST request to {url} successful (Status: {response.status_code}, No content returned).{LogColors.ENDC}")
-        return {"status_code": response.status_code, "success": True, "message": "POST successful, no content returned."}
-    except requests.exceptions.RequestException as e:
-        log.error(f"{LogColors.FAIL}API POST request to {url} failed: {e}{LogColors.ENDC}", exc_info=True)
-        return {"success": False, "error": str(e)}
-    except json.JSONDecodeError:
-        log.error(f"{LogColors.FAIL}Failed to decode JSON response from POST {url}{LogColors.ENDC}", exc_info=True)
-        return {"success": False, "error": "JSONDecodeError"}
+    last_exception = None
+
+    for attempt in range(MAX_RETRIES + 1):
+        try:
+            log.info(f"{LogColors.OKBLUE}Making API POST request to: {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKBLUE} with body: {log_body_snippet} (Attempt {attempt + 1}/{MAX_RETRIES + 1}){LogColors.ENDC}")
+            response = requests.post(url, json=body, timeout=DEFAULT_TIMEOUT_POST)
+            response.raise_for_status()
+            
+            if response.content:
+                response_json = response.json()
+                log.info(f"{LogColors.OKGREEN}API POST request to {url} successful.{LogColors.ENDC}")
+                log.debug(f"{LogColors.PINK}Response from POST {url}: {json.dumps(response_json, indent=2)[:500]}...{LogColors.ENDC}")
+                return response_json
+            
+            log.info(f"{LogColors.OKGREEN}API POST request to {url} successful (Status: {response.status_code}, No content returned).{LogColors.ENDC}")
+            return {"status_code": response.status_code, "success": True, "message": "POST successful, no content returned."}
+        except requests.exceptions.RequestException as e:
+            last_exception = e
+            log.warning(f"{LogColors.WARNING}API POST request to {url} failed on attempt {attempt + 1}: {e}{LogColors.ENDC}")
+            if attempt < MAX_RETRIES:
+                log.info(f"Retrying in {RETRY_DELAY_SECONDS} seconds...")
+                time.sleep(RETRY_DELAY_SECONDS)
+            else:
+                log.error(f"{LogColors.FAIL}API POST request to {url} failed after {MAX_RETRIES + 1} attempts: {last_exception}{LogColors.ENDC}", exc_info=True)
+        except json.JSONDecodeError as e_json:
+            last_exception = e_json
+            log.error(f"{LogColors.FAIL}Failed to decode JSON response from POST {url} on attempt {attempt + 1}: {e_json}{LogColors.ENDC}", exc_info=True)
+            # Break on JSON decode error for POST as well.
+            break
+            
+    # If all retries fail, return an error structure
+    return {"success": False, "error": str(last_exception) if last_exception else "Unknown error after retries"}
+
 
 # --- Kinos Interaction Helper ---
 
