@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import re # Import the re module
+import random # Import the random module
 import traceback
 import argparse
 import logging
@@ -936,24 +937,8 @@ def process_all_ai_autonomously(
         time.sleep(60) # Wait before starting the next full loop
     
     # This part is now unreachable due to the infinite loop if no specific citizen is provided.
-    # Kept for logical completeness if the loop were to be broken.
-    # Admin Notification (Original, for single pass if not in loop)
-    # if not dry_run and tables and processed_count > 0 and specific_citizen_username: # Only if it was a single pass
-        try:
-            admin_summary = f"Autonomous AI Run process completed. Processed {processed_count} AI citizen(s)."
-            if specific_citizen_username:
-                admin_summary += f" (Specifically processed: {specific_citizen_username})"
-            
-            tables["notifications"].create({
-                "Citizen": "ConsiglioDeiDieci", # Standard recipient for admin reports
-                "Type": "admin_report_autonomous_run",
-                "Content": admin_summary,
-                "Status": "unread", # Ensure it's marked as unread
-                "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat() # Use timezone-aware ISO format
-            })
-            log.info(f"{LogColors.OKGREEN}Admin summary notification created for Autonomous Run.{LogColors.ENDC}")
-        except Exception as e_admin_notif:
-            log.error(f"{LogColors.FAIL}Failed to create admin summary notification: {e_admin_notif}{LogColors.ENDC}", exc_info=True)
+    # The admin notification logic has been moved inside the specific citizen processing block
+    # and inside the main loop for iterative processing.
 
 
 if __name__ == "__main__":
