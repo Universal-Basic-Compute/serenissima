@@ -25,19 +25,172 @@ const ApiReference: React.FC = () => {
       <div className="mb-12 p-4 bg-amber-100 rounded-lg">
         <h2 className="text-2xl font-serif text-amber-800 mb-4">Table of Contents</h2>
         <ul className="list-disc pl-6 space-y-2">
-          <li><a href="#citizens" className="text-amber-700 hover:underline">Citizen Management</a></li>
-          <li><a href="#lands" className="text-amber-700 hover:underline">Land Management</a></li>
-          <li><a href="#buildings" className="text-amber-700 hover:underline">Building Management</a></li>
-          <li><a href="#resources" className="text-amber-700 hover:underline">Resource Management</a></li>
-          <li><a href="#transport" className="text-amber-700 hover:underline">Transport & Navigation</a></li>
-          <li><a href="#economy" className="text-amber-700 hover:underline">Economy & Finance</a></li>
-          <li><a href="#governance" className="text-amber-700 hover:underline">Governance</a></li>
-          <li><a href="#guilds" className="text-amber-700 hover:underline">Guilds</a></li>
-          <li><a href="#relevancies" className="text-amber-700 hover:underline">Relevancy System</a></li>
-          <li><a href="#notifications" className="text-amber-700 hover:underline">Notifications</a></li>
-          <li><a href="#messages" className="text-amber-700 hover:underline">Messaging</a></li>
-          <li><a href="#utilities" className="text-amber-700 hover:underline">Utilities</a></li>
-          <li><a href="#data-access" className="text-amber-700 hover:underline">Data Access</a></li>
+          <li><a href="#citizens" className="text-amber-700 hover:underline">Citizen Management</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#citizens-get-all" className="text-amber-600 hover:underline text-sm">GET /api/citizens</a></li>
+              <li><a href="#citizens-get-username" className="text-amber-600 hover:underline text-sm">GET /api/citizens/:username</a></li>
+              <li><a href="#citizens-get-wallet" className="text-amber-600 hover:underline text-sm">GET /api/citizens/wallet/:walletAddress</a></li>
+              <li><a href="#citizens-post-update" className="text-amber-600 hover:underline text-sm">POST /api/citizens/update</a></li>
+              <li><a href="#citizens-post-update-guild" className="text-amber-600 hover:underline text-sm">POST /api/citizens/update-guild</a></li>
+              <li><a href="#citizens-post-register" className="text-amber-600 hover:underline text-sm">POST /api/register</a></li>
+              <li><a href="#citizens-post-settings" className="text-amber-600 hover:underline text-sm">POST /api/citizen/settings</a></li>
+              <li><a href="#citizens-post-update-activity" className="text-amber-600 hover:underline text-sm">POST /api/user/update-activity</a></li>
+              <li><a href="#citizens-get-transports" className="text-amber-600 hover:underline text-sm">GET /api/citizens/:username/transports</a></li>
+              <li><a href="#citizens-post-with-correspondence-stats" className="text-amber-600 hover:underline text-sm">POST /api/citizens/with-correspondence-stats</a></li>
+              <li><a href="#citizens-get-all-users" className="text-amber-600 hover:underline text-sm">GET /api/get-all-users</a></li>
+            </ul>
+          </li>
+          <li><a href="#lands" className="text-amber-700 hover:underline">Land Management</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#lands-get-all" className="text-amber-600 hover:underline text-sm">GET /api/lands</a></li>
+              <li><a href="#lands-get-land-owners" className="text-amber-600 hover:underline text-sm">GET /api/get-land-owners</a></li>
+              <li><a href="#lands-get-land-rents" className="text-amber-600 hover:underline text-sm">GET /api/get-land-rents</a></li>
+              <li><a href="#lands-get-land-groups" className="text-amber-600 hover:underline text-sm">GET /api/land-groups</a></li>
+              <li><a href="#lands-get-income-data" className="text-amber-600 hover:underline text-sm">GET /api/get-income-data</a></li>
+              <li><a href="#lands-calculate-land-rent" className="text-amber-600 hover:underline text-sm">GET /api/calculate-land-rent</a></li>
+              <li><a href="#lands-get-polygons" className="text-amber-600 hover:underline text-sm">GET /api/get-polygons</a></li>
+              <li><a href="#lands-get-polygon-id" className="text-amber-600 hover:underline text-sm">GET /api/polygons/:polygonId</a></li>
+              <li><a href="#lands-post-save-polygon" className="text-amber-600 hover:underline text-sm">POST /api/save-polygon</a></li>
+            </ul>
+          </li>
+          <li><a href="#buildings" className="text-amber-700 hover:underline">Building Management</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#buildings-get-all" className="text-amber-600 hover:underline text-sm">GET /api/buildings</a></li>
+              <li><a href="#buildings-get-building-id" className="text-amber-600 hover:underline text-sm">GET /api/buildings/:buildingId</a></li>
+              <li><a href="#buildings-post-create" className="text-amber-600 hover:underline text-sm">POST /api/buildings</a></li>
+              <li><a href="#buildings-post-create-at-point" className="text-amber-600 hover:underline text-sm">POST /api/create-building-at-point</a></li>
+              <li><a href="#buildings-post-construct-building" className="text-amber-600 hover:underline text-sm">POST /api/actions/construct-building</a></li>
+              <li><a href="#buildings-get-building-types" className="text-amber-600 hover:underline text-sm">GET /api/building-types</a></li>
+              <li><a href="#buildings-get-building-data-type" className="text-amber-600 hover:underline text-sm">GET /api/building-data/:type</a></li>
+              <li><a href="#buildings-get-building-definition" className="text-amber-600 hover:underline text-sm">GET /api/building-definition</a></li>
+              <li><a href="#buildings-get-building-resources" className="text-amber-600 hover:underline text-sm">GET /api/building-resources/:buildingId</a></li>
+              <li><a href="#buildings-get-building-points" className="text-amber-600 hover:underline text-sm">GET /api/building-points</a></li>
+              <li><a href="#buildings-get-bridges" className="text-amber-600 hover:underline text-sm">GET /api/bridges</a></li>
+              <li><a href="#buildings-patch-bridge-orient" className="text-amber-600 hover:underline text-sm">PATCH /api/bridges/:buildingId/orient</a></li>
+              <li><a href="#buildings-get-docks" className="text-amber-600 hover:underline text-sm">GET /api/docks</a></li>
+            </ul>
+          </li>
+          <li><a href="#resources" className="text-amber-700 hover:underline">Resource Management</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#resources-get-all" className="text-amber-600 hover:underline text-sm">GET /api/resources</a></li>
+              <li><a href="#resources-post-create" className="text-amber-600 hover:underline text-sm">POST /api/resources</a></li>
+              <li><a href="#resources-get-counts" className="text-amber-600 hover:underline text-sm">GET /api/resources/counts</a></li>
+              <li><a href="#resources-get-types" className="text-amber-600 hover:underline text-sm">GET /api/resource-types</a></li>
+            </ul>
+          </li>
+          <li><a href="#transport" className="text-amber-700 hover:underline">Transport & Navigation</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#transport-get-path" className="text-amber-600 hover:underline text-sm">GET /api/transport</a></li>
+              <li><a href="#transport-post-path" className="text-amber-600 hover:underline text-sm">POST /api/transport</a></li>
+              <li><a href="#transport-post-water-only" className="text-amber-600 hover:underline text-sm">POST /api/transport/water-only</a></li>
+              <li><a href="#transport-get-debug" className="text-amber-600 hover:underline text-sm">GET /api/transport/debug</a></li>
+              <li><a href="#transport-get-water-points" className="text-amber-600 hover:underline text-sm">GET /api/water-points</a></li>
+              <li><a href="#transport-post-water-points" className="text-amber-600 hover:underline text-sm">POST /api/water-points</a></li>
+              <li><a href="#transport-get-water-graph" className="text-amber-600 hover:underline text-sm">GET /api/get-water-graph</a></li>
+              <li><a href="#transport-get-activities" className="text-amber-600 hover:underline text-sm">GET /api/activities</a></li>
+            </ul>
+          </li>
+          <li><a href="#economy" className="text-amber-700 hover:underline">Economy & Finance</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#economy-get-overview" className="text-amber-600 hover:underline text-sm">GET /api/economy</a></li>
+              <li><a href="#economy-get-contracts" className="text-amber-600 hover:underline text-sm">GET /api/contracts</a></li>
+              <li><a href="#economy-post-contracts" className="text-amber-600 hover:underline text-sm">POST /api/contracts</a></li>
+              <li><a href="#economy-get-contracts-stocked" className="text-amber-600 hover:underline text-sm">GET /api/contracts/stocked-public-sell</a></li>
+              <li><a href="#economy-get-transactions-available" className="text-amber-600 hover:underline text-sm">GET /api/transactions/available</a></li>
+              <li><a href="#economy-get-transactions-history" className="text-amber-600 hover:underline text-sm">GET /api/transactions/history</a></li>
+              <li><a href="#economy-get-transaction-land-id" className="text-amber-600 hover:underline text-sm">GET /api/transaction/land/:landId</a></li>
+              <li><a href="#economy-get-transaction-land-offers" className="text-amber-600 hover:underline text-sm">GET /api/transactions/land-offers/:landId</a></li>
+              <li><a href="#economy-post-withdraw-compute" className="text-amber-600 hover:underline text-sm">POST /api/withdraw-compute</a></li>
+              <li><a href="#economy-get-loans" className="text-amber-600 hover:underline text-sm">GET /api/loans</a></li>
+              <li><a href="#economy-post-loans-apply" className="text-amber-600 hover:underline text-sm">POST /api/loans/apply</a></li>
+            </ul>
+          </li>
+          <li><a href="#governance" className="text-amber-700 hover:underline">Governance</a>
+             <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#governance-get-decrees" className="text-amber-600 hover:underline text-sm">GET /api/decrees</a></li>
+            </ul>
+          </li>
+          <li><a href="#guilds" className="text-amber-700 hover:underline">Guilds</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#guilds-get-all" className="text-amber-600 hover:underline text-sm">GET /api/guilds</a></li>
+              <li><a href="#guilds-get-members" className="text-amber-600 hover:underline text-sm">GET /api/guild-members/:guildId</a></li>
+              <li><a href="#guilds-get-public-builders" className="text-amber-600 hover:underline text-sm">GET /api/get-public-builders</a></li>
+            </ul>
+          </li>
+          <li><a href="#relevancies" className="text-amber-700 hover:underline">Relevancy System</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#relevancies-get-all" className="text-amber-600 hover:underline text-sm">GET /api/relevancies</a></li>
+              <li><a href="#relevancies-get-citizen" className="text-amber-600 hover:underline text-sm">GET /api/relevancies/:citizen</a></li>
+              <li><a href="#relevancies-get-proximity-username" className="text-amber-600 hover:underline text-sm">GET /api/relevancies/proximity/:aiUsername</a></li>
+              <li><a href="#relevancies-post-proximity" className="text-amber-600 hover:underline text-sm">POST /api/relevancies/proximity</a></li>
+              <li><a href="#relevancies-get-domination-username" className="text-amber-600 hover:underline text-sm">GET /api/relevancies/domination/:aiUsername</a></li>
+              <li><a href="#relevancies-post-domination" className="text-amber-600 hover:underline text-sm">POST /api/relevancies/domination</a></li>
+              <li><a href="#relevancies-get-types-type" className="text-amber-600 hover:underline text-sm">GET /api/relevancies/types/:type</a></li>
+              <li><a href="#relevancies-get-calculate" className="text-amber-600 hover:underline text-sm">GET /api/calculateRelevancies</a></li>
+              <li><a href="#relevancies-post-calculate" className="text-amber-600 hover:underline text-sm">POST /api/calculateRelevancies</a></li>
+              <li><a href="#relevancies-post-guild-member" className="text-amber-600 hover:underline text-sm">POST /api/relevancies/guild-member</a></li>
+              <li><a href="#relevancies-get-for-asset" className="text-amber-600 hover:underline text-sm">GET /api/relevancies/for-asset</a></li>
+              <li><a href="#relevancies-post-same-land-neighbor" className="text-amber-600 hover:underline text-sm">POST /api/relevancies/same-land-neighbor</a></li>
+              <li><a href="#relevancies-post-building-operator" className="text-amber-600 hover:underline text-sm">POST /api/relevancies/building-operator</a></li>
+              <li><a href="#relevancies-post-building-occupant" className="text-amber-600 hover:underline text-sm">POST /api/relevancies/building-occupant</a></li>
+              <li><a href="#relevancies-post-building-ownership" className="text-amber-600 hover:underline text-sm">POST /api/relevancies/building-ownership</a></li>
+              <li><a href="#relevancies-get-housing" className="text-amber-600 hover:underline text-sm">GET /api/relevancies/housing</a></li>
+              <li><a href="#relevancies-post-housing" className="text-amber-600 hover:underline text-sm">POST /api/relevancies/housing</a></li>
+              <li><a href="#relevancies-get-jobs" className="text-amber-600 hover:underline text-sm">GET /api/relevancies/jobs</a></li>
+              <li><a href="#relevancies-post-jobs" className="text-amber-600 hover:underline text-sm">POST /api/relevancies/jobs</a></li>
+            </ul>
+          </li>
+          <li><a href="#notifications" className="text-amber-700 hover:underline">Notifications</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#notifications-post-get" className="text-amber-600 hover:underline text-sm">POST /api/notifications</a></li>
+              <li><a href="#notifications-post-mark-read" className="text-amber-600 hover:underline text-sm">POST /api/notifications/mark-read</a></li>
+              <li><a href="#notifications-post-unread-count" className="text-amber-600 hover:underline text-sm">POST /api/notifications/unread-count</a></li>
+            </ul>
+          </li>
+          <li><a href="#messages" className="text-amber-700 hover:underline">Messaging & Thoughts</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#messages-post-get" className="text-amber-600 hover:underline text-sm">POST /api/messages</a></li>
+              <li><a href="#messages-get-type" className="text-amber-600 hover:underline text-sm">GET /api/messages?type=:type</a></li>
+              <li><a href="#messages-post-send" className="text-amber-600 hover:underline text-sm">POST /api/messages/send</a></li>
+              <li><a href="#messages-post-update" className="text-amber-600 hover:underline text-sm">POST /api/messages/update</a></li>
+              <li><a href="#messages-post-compagno" className="text-amber-600 hover:underline text-sm">POST /api/compagno</a></li>
+              <li><a href="#messages-get-thoughts-global" className="text-amber-600 hover:underline text-sm">GET /api/thoughts</a></li>
+              <li><a href="#messages-get-thoughts-specific" className="text-amber-600 hover:underline text-sm">GET /api/thoughts?citizenUsername=:username</a></li>
+            </ul>
+          </li>
+          <li><a href="#problems" className="text-amber-700 hover:underline">Problem System</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#problems-get-all" className="text-amber-600 hover:underline text-sm">GET /api/problems</a></li>
+              <li><a href="#problems-get-problem-id" className="text-amber-600 hover:underline text-sm">GET /api/problems/:problemId</a></li>
+              <li><a href="#problems-post-workless" className="text-amber-600 hover:underline text-sm">POST /api/problems/workless</a></li>
+              <li><a href="#problems-post-homeless" className="text-amber-600 hover:underline text-sm">POST /api/problems/homeless</a></li>
+              <li><a href="#problems-post-zero-rent" className="text-amber-600 hover:underline text-sm">POST /api/problems/zero-rent-amount</a></li>
+              <li><a href="#problems-post-vacant-buildings" className="text-amber-600 hover:underline text-sm">POST /api/problems/vacant-buildings</a></li>
+              <li><a href="#problems-post-hungry" className="text-amber-600 hover:underline text-sm">POST /api/problems/hungry</a></li>
+              <li><a href="#problems-post-no-active-contracts" className="text-amber-600 hover:underline text-sm">POST /api/problems/no-active-contracts</a></li>
+              <li><a href="#problems-post-zero-wages" className="text-amber-600 hover:underline text-sm">POST /api/problems/zero-wages-business</a></li>
+            </ul>
+          </li>
+          <li><a href="#utilities" className="text-amber-700 hover:underline">Utilities</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#utilities-get-check-loading-dir" className="text-amber-600 hover:underline text-sm">GET /api/check-loading-directory</a></li>
+              <li><a href="#utilities-get-list-polygon-files" className="text-amber-600 hover:underline text-sm">GET /api/list-polygon-files</a></li>
+              <li><a href="#utilities-get-coat-of-arms-all" className="text-amber-600 hover:underline text-sm">GET /api/get-coat-of-arms</a></li>
+              <li><a href="#utilities-get-coat-of-arms-path" className="text-amber-600 hover:underline text-sm">GET /api/coat-of-arms/:path</a></li>
+              <li><a href="#utilities-post-fetch-coat-of-arms" className="text-amber-600 hover:underline text-sm">POST /api/fetch-coat-of-arms</a></li>
+              <li><a href="#utilities-post-upload-coat-of-arms" className="text-amber-600 hover:underline text-sm">POST /api/upload-coat-of-arms</a></li>
+              <li><a href="#utilities-post-create-coat-of-arms-dir" className="text-amber-600 hover:underline text-sm">POST /api/create-coat-of-arms-dir</a></li>
+              <li><a href="#utilities-post-tts" className="text-amber-600 hover:underline text-sm">POST /api/tts</a></li>
+              <li><a href="#utilities-get-music-tracks" className="text-amber-600 hover:underline text-sm">GET /api/music-tracks</a></li>
+              <li><a href="#utilities-post-flush-cache" className="text-amber-600 hover:underline text-sm">POST /api/flush-cache</a></li>
+              <li><a href="#utilities-get-flush-cache" className="text-amber-600 hover:underline text-sm">GET /api/flush-cache</a></li>
+            </ul>
+          </li>
+          <li><a href="#data-access" className="text-amber-700 hover:underline">Data Access</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><a href="#data-access-get-path" className="text-amber-600 hover:underline text-sm">GET /api/data/:path</a></li>
+            </ul>
+          </li>
           <li><a href="#error-handling" className="text-amber-700 hover:underline">Error Handling</a></li>
           <li><a href="#pagination" className="text-amber-700 hover:underline">Pagination</a></li>
         </ul>
@@ -2865,6 +3018,294 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
 {`{
   "success": true,
   "thoughts": [ /* Array of thought objects, same structure as above */ ]
+}`}
+            </pre>
+          </div>
+        </div>
+      </section>
+
+      {/* Problems Section */}
+      <section id="problems" className="mb-12">
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Problem System</h2>
+        <p className="mb-4">Endpoints related to the problem detection and management system.</p>
+
+        <div id="problems-get-all" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/problems</h3>
+          <p className="mb-2">Retrieves a list of problems, filterable by citizen, asset type, and status.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>citizen</code> (optional) - Filter problems by citizen username.</li>
+              <li><code>assetType</code> (optional) - Filter problems by asset type (e.g., "land", "building").</li>
+              <li><code>status</code> (optional) - Filter problems by status (default: "active").</li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "problems": [
+    {
+      "id": "string", // Airtable record ID
+      "problemId": "string",
+      "citizen": "string",
+      "assetType": "string",
+      "asset": "string",
+      "severity": "string",
+      "status": "string",
+      "createdAt": "string",
+      "updatedAt": "string",
+      "location": "string", // Textual description of location
+      "position": { "lat": number, "lng": number } | string | null, // Parsed JSON or original string
+      "type": "string", // Problem category/type
+      "title": "string",
+      "description": "string",
+      "solutions": "string",
+      "notes": "string"
+    }
+  ]
+}`}
+            </pre>
+          </div>
+        </div>
+        
+        <div id="problems-get-problem-id" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/problems/:problemId</h3>
+          <p className="mb-2">Retrieves details for a specific problem by its ProblemId.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Path Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>problemId</code> - The unique ID of the problem</li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "problem": {
+    "id": "string", // Airtable record ID
+    "problemId": "string",
+    "citizen": "string",
+    "assetType": "string",
+    "asset": "string",
+    "severity": "string",
+    "status": "string",
+    "position": { "lat": number, "lng": number } | null,
+    "location": "string",
+    "type": "string",
+    "title": "string",
+    "description": "string",
+    "solutions": "string",
+    "createdAt": "string",
+    "updatedAt": "string",
+    "notes": "string"
+  }
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="problems-post-workless" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/problems/workless</h3>
+          <p className="mb-2">Detects and saves "Workless Citizen" problems.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "username": "string" // Optional: specify a citizen username to process, otherwise processes all.
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "processedUser": "string", // 'all' or the specific username processed
+  "problemType": "Workless Citizen",
+  "problemCount": number, // Total problems of this type detected for the scope
+  "problems": { // Object keyed by problemId
+    "problemId_example": {
+      "problemId": "string",
+      "citizen": "string", // Username of the citizen with the problem
+      "assetType": "citizen",
+      "asset": "string", // Username of the citizen
+      "severity": "low" | "medium" | "high" | "critical",
+      "status": "active",
+      "position": { "lat": number, "lng": number }, // Citizen's position
+      "location": "string", // Citizen's name
+      "type": "unemployment",
+      "title": "Workless Citizen",
+      "description": "string", // Detailed description of the problem
+      "solutions": "string"  // Suggested solutions
+    }
+  },
+  "saved": boolean, // Whether saving to Airtable was attempted/successful
+  "savedCount": number // Number of problems actually saved/updated
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="problems-post-homeless" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/problems/homeless</h3>
+          <p className="mb-2">Detects and saves "Homeless Citizen" and related impact problems.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "username": "string" // Optional: specify a citizen username, otherwise processes all.
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "processedUser": "string",
+  "problemType": "Homeless Citizen and Related Impacts",
+  "problemCount": number,
+  "problems": { /* Similar structure to /workless, problems can have different titles like 'Homeless Citizen' or 'Homeless Employee Impact' */ },
+  "saved": boolean,
+  "savedCount": number
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="problems-post-zero-rent" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/problems/zero-rent-amount</h3>
+          <p className="mb-2">Detects and saves "Zero Rent for Home" or "Zero Rent for Leased Business" problems.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "username": "string" // Optional: specify a building owner username, otherwise processes all.
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "processedUser": "string",
+  "problemType": "Zero Rent Amount (Home/Business)",
+  "problemCount": number,
+  "problems": { /* Problems object, titles can be 'Zero Rent for Home' or 'Zero Rent for Leased Business' */ },
+  "saved": boolean,
+  "savedCount": number
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="problems-post-vacant-buildings" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/problems/vacant-buildings</h3>
+          <p className="mb-2">Detects and saves "Vacant Home" or "Vacant Business" problems.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "username": "string" // Optional: specify a building owner username, otherwise processes all.
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "processedUser": "string",
+  "problemType": "Vacant Buildings (Home/Business)",
+  "problemCount": number,
+  "problems": { /* Problems object, titles can be 'Vacant Home' or 'Vacant Business' */ },
+  "saved": boolean,
+  "savedCount": number
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="problems-post-hungry" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/problems/hungry</h3>
+          <p className="mb-2">Detects and saves "Hungry Citizen" and related impact problems.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "username": "string" // Optional: specify a citizen username, otherwise processes all.
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "processedUser": "string",
+  "problemType": "Hungry Citizen and Related Impacts",
+  "problemCount": number,
+  "problems": { /* Problems object, titles can be 'Hungry Citizen' or 'Hungry Employee Impact' */ },
+  "saved": boolean,
+  "savedCount": number
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="problems-post-no-active-contracts" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/problems/no-active-contracts</h3>
+          <p className="mb-2">Detects and saves "No Active Contracts" problems for businesses.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "username": "string" // Optional: specify a business owner username, otherwise processes all.
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "processedUser": "string",
+  "problemType": "No Active Contracts",
+  "problemCount": number,
+  "problems": { /* Problems object with title 'No Active Contracts' */ },
+  "saved": boolean,
+  "savedCount": number
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="problems-post-zero-wages" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/problems/zero-wages-business</h3>
+          <p className="mb-2">Detects and saves "Zero Wages for Business" problems.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "username": "string" // Optional: specify a business operator username, otherwise processes all.
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "processedUser": "string",
+  "problemType": "Zero Wages for Business",
+  "problemCount": number,
+  "problems": { /* Problems object with title 'Zero Wages for Business' */ },
+  "saved": boolean,
+  "savedCount": number
 }`}
             </pre>
           </div>
