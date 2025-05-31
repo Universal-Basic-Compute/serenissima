@@ -35,7 +35,8 @@ def update_trust_score_for_activity(
     trust_change_amount: float,
     activity_type_for_notes: str,
     success: bool,
-    notes_detail: Optional[str] = None
+    notes_detail: Optional[str] = None,
+    activity_record_for_kinos: Optional[Dict[str, Any]] = None
 ) -> None:
     """
     Met à jour le TrustScore entre deux citoyens suite à une activité.
@@ -119,9 +120,7 @@ def update_trust_score_for_activity(
         tables,
         actor_username=citizen1_username, # Celui qui a fait l'action
         receiver_of_action_username=citizen2_username, # Celui qui a "subi" l'action
-        activity_type=activity_type_for_notes,
-        activity_success=success,
-        activity_detail=notes_detail
+        activity_record=activity_record_for_kinos # Passer l'enregistrement d'activité complet
     )
 
 # --- Fonctions d'assistance pour l'interaction Kinos ---
@@ -215,42 +214,42 @@ def _store_message_via_api(sender_username: str, receiver_username: str, content
         log.error(f"{LogColors.FAIL}Erreur lors du stockage du message via API de {sender_username} à {receiver_username}: {e}{LogColors.ENDC}")
         return False
 
-def _construct_activity_description(actor_name: str, receiver_name: str, activity_type: str, success: bool, detail: Optional[str]) -> Tuple[str, str]:
-    """Construit des descriptions d'activité pour les prompts Kinos."""
-    action_verb = ""
-    outcome = "successfully" if success else "unsuccessfully"
-    preposition = "with" if success else "with" # Peut être ajusté
-
-    if activity_type == "delivery":
-        action_verb = f"{outcome} delivered {detail if detail else 'items'}"
-        desc_for_receiver_prompt = f"{actor_name} just {action_verb} to you."
-        desc_for_actor_reply_context = f"your {action_verb} to {receiver_name}."
-    elif activity_type == "payment":
-        action_verb = f"{outcome} attempted to pay {detail if detail else 'an amount'}"
-        desc_for_receiver_prompt = f"{actor_name} just {action_verb} to you."
-        desc_for_actor_reply_context = f"your {action_verb} to {receiver_name}."
-    elif activity_type == "construction_milestone":
-        action_verb = f"reached a milestone ({detail if detail else 'progress'}) on a construction project"
-        desc_for_receiver_prompt = f"{actor_name} just {action_verb} that affects you." # C2 est le client
-        desc_for_actor_reply_context = f"your {action_verb} on the project for {receiver_name}." # C1 est l'ouvrier
-    else: # Cas générique
-        action_verb = f"{outcome} completed an action '{activity_type}'"
-        if detail:
-            action_verb += f" regarding '{detail}'"
-        desc_for_receiver_prompt = f"{actor_name} just {action_verb} that involved you."
-        desc_for_actor_reply_context = f"your {action_verb} involving {receiver_name}."
+def _construct_activity_description(actor_name: str, receiver_name: str, activity_record: Dict[str, Any]) -> Tuple[str, str]:
+    """Construit des descriptions d'activité pour les prompts Kinos en utilisant le JSON de l'activité."""
+    try:
+        # Retirer les champs potentiellement trop volumineux ou non pertinents pour le prompt direct
+        # Par exemple, 'Path' dans les activités de déplacement.
+        # Créer une copie pour ne pas modifier l'original.
+        cleaned_activity_record = activity_record.copy()
+        if "Path" in cleaned_activity_record:
+            cleaned_activity_record["Path"] = "[path data omitted for brevity]"
         
+        activity_json_str = json.dumps(cleaned_activity_record, indent=2, ensure_ascii=False, default=str) # default=str pour les types non sérialisables
+    except Exception as e:
+        log.error(f"Erreur lors de la sérialisation de activity_record en JSON: {e}")
+        activity_json_str = f"{{'error': 'Could not serialize activity details', 'type': '{activity_record.get('Type', 'Unknown')}'}}"
+
+    desc_for_receiver_prompt = (
+        f"{actor_name} just performed an activity that involved or affected you. "
+        f"Here are the details of the activity:\n```json\n{activity_json_str}\n```"
+    )
+    desc_for_actor_reply_context = (
+        f"your recent activity involving {receiver_name}. "
+        f"The details of that activity were:\n```json\n{activity_json_str}\n```"
+    )
     return desc_for_receiver_prompt, desc_for_actor_reply_context
 
 def _initiate_reaction_dialogue_if_both_ai(
     tables: Dict[str, Any],
     actor_username: str,
     receiver_of_action_username: str,
-    activity_type: str,
-    activity_success: bool,
-    activity_detail: Optional[str]
+    activity_record: Optional[Dict[str, Any]] = None
 ):
-    """Déclenche un dialogue de réaction Kinos si les deux citoyens sont des IA."""
+    """Déclenche un dialogue de réaction Kinos si les deux citoyens sont des IA et si activity_record est fourni."""
+    if not activity_record:
+        log.debug("Aucun activity_record fourni à _initiate_reaction_dialogue_if_both_ai. Pas de dialogue Kinos.")
+        return
+
     kinos_api_key = _get_kinos_api_key()
     if not kinos_api_key:
         return
@@ -266,16 +265,16 @@ def _initiate_reaction_dialogue_if_both_ai(
     receiver_display_name = receiver_details.get("FirstName", receiver_of_action_username)
 
     desc_for_receiver_prompt, desc_for_actor_reply_context = _construct_activity_description(
-        actor_display_name, receiver_display_name, activity_type, activity_success, activity_detail
+        actor_display_name, receiver_display_name, activity_record
     )
 
-    log.info(f"Déclenchement du dialogue de réaction Kinos entre {actor_username} (acteur) et {receiver_of_action_username} (receveur).")
+    log.info(f"Déclenchement du dialogue de réaction Kinos entre {actor_username} (acteur) et {receiver_of_action_username} (receveur) concernant l'activité : {activity_record.get('Type', 'Unknown')}.")
 
     # Étape 1: La réaction du receveur (receiver_of_action_username) à l'acteur (actor_username)
     prompt_for_receiver = (
         f"You are {receiver_display_name}. "
-        f"{desc_for_receiver_prompt} "
-        f"What is your immediate, brief, and natural reaction or comment TO {actor_display_name}? Keep it short and conversational."
+        f"{desc_for_receiver_prompt}\n\n" # desc_for_receiver_prompt contient maintenant le JSON
+        f"Based on these details, what is your immediate, brief, and natural reaction or comment TO {actor_display_name}? Keep it short and conversational."
     )
     
     receiver_reaction_content = _generate_kinos_message_content(
@@ -297,8 +296,9 @@ def _initiate_reaction_dialogue_if_both_ai(
         # Étape 2: La réponse de l'acteur (actor_username) à la réaction du receveur
         prompt_for_actor_reply = (
             f"You are {actor_display_name}. "
-            f"Regarding {desc_for_actor_reply_context}, {receiver_display_name} just said to you: '{receiver_reaction_content}' "
-            f"What is your brief, natural reply?"
+            f"Regarding {desc_for_actor_reply_context}\n\n" # desc_for_actor_reply_context contient maintenant le JSON
+            f"{receiver_display_name} just said to you: '{receiver_reaction_content}'\n\n"
+            f"What is your brief, natural reply to their comment?"
         )
 
         actor_reply_content = _generate_kinos_message_content(
@@ -324,8 +324,10 @@ def _initiate_reaction_dialogue_if_both_ai(
 
 # Exemple d'utilisation (sera appelé depuis les processeurs d'activité):
 # update_trust_score_for_activity(
-#     tables, "citizenA", "citizenB", 1.0, "delivery", True, "resource_wood"
+#     tables, "citizenA", "citizenB", 1.0, "delivery", True, "resource_wood", 
+#     activity_record_for_kinos={"Type": "delivery", "FromBuilding": "bldgX", "ToBuilding": "bldgY", "ResourceId": "resource_wood", "Amount": 10}
 # )
 # update_trust_score_for_activity(
-#     tables, "citizenC", "citizenD", -1.0, "payment", False, "insufficient_funds"
+#     tables, "citizenC", "citizenD", -1.0, "payment", False, "insufficient_funds",
+#     activity_record_for_kinos={"Type": "payment", "Amount": 50, "Reason": "insufficient_funds"}
 # )
