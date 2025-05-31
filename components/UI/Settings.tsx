@@ -19,7 +19,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   const [showFps, setShowFps] = useState<boolean>(false);
   const [showDebugInfo, setShowDebugInfo] = useState<boolean>(false);
   const [saveMessage, setSaveMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
-  const [settingsDisabled, setSettingsDisabled] = useState(true); // Set to true to disable settings
+  const [settingsDisabled, setSettingsDisabled] = useState(false); // Set to false to enable settings
 
   // Load settings from localStorage on component mount
   useEffect(() => {
@@ -313,10 +313,6 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
             {activeTab === 'graphics' && (
               <div>
                 <h3 className="text-lg font-medium text-amber-800 mb-4">Graphics Settings</h3>
-                <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 mb-4 rounded">
-                  <p className="font-medium">Settings are temporarily disabled</p>
-                  <p className="text-sm">Only cache management is available at this time. Other settings will be enabled in a future update.</p>
-                </div>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -356,10 +352,6 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
             {activeTab === 'sound' && (
               <div>
                 <h3 className="text-lg font-medium text-amber-800 mb-4">Sound Settings</h3>
-                <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 mb-4 rounded">
-                  <p className="font-medium">Settings are temporarily disabled</p>
-                  <p className="text-sm">Only cache management is available at this time. Other settings will be enabled in a future update.</p>
-                </div>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
