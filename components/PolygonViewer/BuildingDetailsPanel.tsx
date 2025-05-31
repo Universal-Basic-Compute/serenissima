@@ -134,7 +134,7 @@ export default function BuildingDetailsPanel({
   const [chatMessages, setChatMessages] = useState<{ id: string, sender: string, role: 'user' | 'assistant', text: string, time: string }[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isAiResponding, setIsAiResponding] = useState<boolean>(false); // Will double as context loading
-  const [kinosModel, setKinosModel] = useState<'gemini-2.5-pro-preview-05-06' | 'local'>('gemini-2.5-pro-preview-05-06'); // Added kinosModel state
+  // const [kinosModel, setKinosModel] = useState<'gemini-2.5-pro-preview-05-06' | 'local'>('gemini-2.5-pro-preview-05-06'); // Removed: Model is now dynamic
     
   // State for citizen profiles
   const [ownerProfile, setOwnerProfile] = useState<any>(null);
@@ -145,6 +145,23 @@ export default function BuildingDetailsPanel({
 
   const KINOS_API_CHANNEL_BASE_URL = 'https://api.kinos-engine.ai/v2';
   const KINOS_CHANNEL_BLUEPRINT = 'serenissima-ai';
+
+  const getKinosModelForSocialClass = (socialClass?: string): string => {
+    const lowerSocialClass = socialClass?.toLowerCase();
+    switch (lowerSocialClass) {
+      case 'nobili':
+        return 'gemini-2.5-pro-preview-05-06';
+      case 'cittadini':
+      case 'forestieri':
+        return 'gemini-2.5-flash-preview-05-20';
+      case 'popolani':
+      case 'facchini':
+        return 'local';
+      default:
+        console.warn(`BuildingDetailsPanel: Unknown social class '${socialClass}', defaulting to gemini-2.5-flash-preview-05-20.`);
+        return 'gemini-2.5-flash-preview-05-20';
+    }
+  };
 
   const venetianQuotes = [
     "A Ducat in hand is worth two in the canal.",
@@ -1212,8 +1229,11 @@ export default function BuildingDetailsPanel({
         relationshipWithTarget = { strengthScore: 100, type: "Self" };
       }
       
-      // Determine context limit based on kinosModel
-      const isLocalModel = kinosModel === 'local';
+      // Determine context limit based on the target citizen's social class
+      const targetSocialClass = activeProfileToDisplay?.socialClass;
+      const determinedKinosModel = getKinosModelForSocialClass(targetSocialClass);
+      const isLocalModel = determinedKinosModel === 'local';
+
       const notificationLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
       const relevancyLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
       const problemLimit = isLocalModel ? Math.ceil(5 / 4) : 5;
@@ -1292,7 +1312,10 @@ ${userMessageContent}
 Remember: Your reply should be human-like, conversational, RELEVANT to ${senderDisplayName} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
 Your response:`;
 
-    const kinosBody: any = { content: kinosPromptContent, model: kinosModel }; // Added model to kinosBody
+    const targetSocialClass = activeProfileToDisplay?.socialClass;
+    const determinedKinosModel = getKinosModelForSocialClass(targetSocialClass);
+
+    const kinosBody: any = { content: kinosPromptContent, model: determinedKinosModel };
     if (addSystemPayload) {
       kinosBody.addSystem = addSystemPayload;
     }

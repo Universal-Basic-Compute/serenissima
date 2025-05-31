@@ -94,7 +94,24 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     relevancies: any[] | null;
     problems: any[] | null;
   } | null>(null);
-  const [kinosModel, setKinosModel] = useState<'gemini-2.5-pro-preview-05-06' | 'local'>('gemini-2.5-pro-preview-05-06'); // Default to gemini-2.5-pro-preview-05-06
+  // const [kinosModel, setKinosModel] = useState<'gemini-2.5-pro-preview-05-06' | 'local'>('gemini-2.5-pro-preview-05-06'); // Removed: Model is now dynamic
+
+  const getKinosModelForSocialClass = (socialClass?: string): string => {
+    const lowerSocialClass = socialClass?.toLowerCase();
+    switch (lowerSocialClass) {
+      case 'nobili':
+        return 'gemini-2.5-pro-preview-05-06';
+      case 'cittadini':
+      case 'forestieri':
+        return 'gemini-2.5-flash-preview-05-20';
+      case 'popolani':
+      case 'facchini':
+        return 'local';
+      default:
+        console.warn(`Unknown social class '${socialClass}', defaulting to gemini-2.5-flash-preview-05-20.`);
+        return 'gemini-2.5-flash-preview-05-20'; 
+    }
+  };
   
 
   // Fetch unread notification count
@@ -680,8 +697,11 @@ ${content}
 Remember: Your reply should be human-like, conversational, RELEVANT to ${senderDisplayName} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
 Your response:`;
             }
+            
+            const targetSocialClass = contextualDataForChat?.targetProfile?.socialClass;
+            const determinedKinosModel = getKinosModelForSocialClass(targetSocialClass);
 
-            const kinosBody: any = { content: kinosPromptContent, model: kinosModel };
+            const kinosBody: any = { content: kinosPromptContent, model: determinedKinosModel };
             if (addSystemPayload) {
               kinosBody.addSystem = addSystemPayload;
             }
@@ -1040,8 +1060,11 @@ Your response:`;
           relationship = { strengthScore: 100, type: "Self" };
         }
 
-        // Determine context limit based on kinosModel
-        const isLocalModel = kinosModel === 'local';
+        // Determine context limit based on the target citizen's social class
+        const targetSocialClass = targetProfile?.socialClass;
+        const determinedKinosModel = getKinosModelForSocialClass(targetSocialClass);
+        const isLocalModel = determinedKinosModel === 'local';
+
         const notificationLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
         const relevancyLimit = isLocalModel ? Math.ceil(10 / 4) : 10;
         const problemLimit = isLocalModel ? Math.ceil(5 / 4) : 5;
@@ -1818,26 +1841,7 @@ Your response:`;
                         </div>
                       </div>
                     )}
-                  
-                    {/* Model Toggle UI */}
-                    {selectedCitizen && selectedCitizen !== 'compagno' && ( // Show toggle only when a citizen is selected for chat
-                      <div className="my-2 ml-1 flex items-center space-x-2 text-xs text-gray-500 px-2">
-                        <span>AI Model:</span>
-                        <button
-                          onClick={() => setKinosModel('gemini-2.5-pro-preview-05-06')}
-                          className={`px-2 py-0.5 rounded transition-colors ${kinosModel === 'gemini-2.5-pro-preview-05-06' ? 'bg-amber-600 text-white shadow-sm' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                        >
-                          Gemini 2.5 Pro
-                        </button>
-                        <button
-                          onClick={() => setKinosModel('local')}
-                          className={`px-2 py-0.5 rounded transition-colors ${kinosModel === 'local' ? 'bg-amber-600 text-white shadow-sm' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                        >
-                          Local
-                        </button>
-                      </div>
-                    )}
-                    
+                                        
                     {/* Context Data Recap */}
                     {contextualDataForChat && selectedCitizen && selectedCitizen !== 'compagno' && (
                       <details className="mb-2 text-xs text-gray-600 border border-amber-200 rounded-md mx-2"> {/* Added mx-2 for consistency */}

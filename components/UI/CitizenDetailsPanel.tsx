@@ -84,6 +84,24 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [cachedTransports, setCachedTransports] = useState<Record<string, any[]>>({});
   // State for active tab in the first column
   const [activeLeftTab, setActiveLeftTab] = useState<'relations' | 'citizen'>('relations');
+
+  const getKinosModelForSocialClass = (socialClass?: string): string => {
+    const lowerSocialClass = socialClass?.toLowerCase();
+    switch (lowerSocialClass) {
+      case 'nobili':
+        return 'gemini-2.5-pro-preview-05-06';
+      case 'cittadini':
+      case 'forestieri':
+        return 'gemini-2.5-flash-preview-05-20';
+      case 'popolani':
+      case 'facchini':
+        return 'local';
+      default:
+        console.warn(`CitizenDetailsPanel: Unknown social class '${socialClass}', defaulting to gemini-2.5-flash-preview-05-20.`);
+        return 'gemini-2.5-flash-preview-05-20';
+    }
+  };
+
   // Function to check if the current user is ConsiglioDeiDieci
   const isConsiglioDeiDieci = () => {
     try {
@@ -560,8 +578,10 @@ ${content}
 
 Remember: Your reply should be human-like, conversational, RELEVANT to ${senderDisplayName} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
 Your response:`;
+            
+            const determinedKinosModel = getKinosModelForSocialClass(citizen?.socialClass);
 
-            const kinosBody: any = { content: kinosPromptContent };
+            const kinosBody: any = { content: kinosPromptContent, model: determinedKinosModel };
             if (addSystemPayload) {
               kinosBody.addSystem = addSystemPayload;
             }
