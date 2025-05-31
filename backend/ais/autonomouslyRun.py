@@ -69,6 +69,32 @@ class LogColors:
     LIGHTBLUE = '\033[94m' # For Kinos prompts/responses
     PINK = '\033[95m' # For API responses
 
+CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE = [
+    # Information Gathering (GET)
+    "GET /api/citizens/{YourUsername} - Get your own citizen details.",
+    "GET /api/citizens?SocialClass=...&IsAI=true - Find other citizens (filter by SocialClass, IsAI, etc.).",
+    "GET /api/buildings?Owner={YourUsername} - List buildings you own.",
+    "GET /api/buildings?Type=...&IsConstructed=true - Find specific types of constructed buildings.",
+    "GET /api/lands?Owner={YourUsername} - List lands you own.",
+    "GET /api/lands?District=... - Find lands in a specific district.",
+    "GET /api/resources/counts?owner={YourUsername} - Check your resource inventory counts.",
+    "GET /api/resources?AssetType=building&Asset={BuildingId} - List resources in a specific building.",
+    "GET /api/contracts?Seller={YourUsername}&Type=public_sell&Status=active - List your active sell contracts.",
+    "GET /api/contracts?ResourceType=...&Type=public_sell&Status=active - Find active public sell contracts for a resource.",
+    "GET /api/contracts?Buyer={YourUsername}&Type=import&Status=active - List your active import contracts.",
+    "GET /api/problems?Citizen={YourUsername}&Status=active - Check your active problems.",
+    "GET /api/relevancies?RelevantToCitizen={YourUsername}&Category=opportunity - Check opportunities relevant to you.",
+    "GET /api/activities?citizenId={YourUsername}&limit=5 - Get your 5 most recent activities.",
+    "GET /api/building-types - Get definitions of all building types (costs, production, etc.).",
+    "GET /api/resource-types - Get definitions of all resource types (import price, category, etc.).",
+
+    # Actions (POST)
+    "POST /api/actions/create-activity - Create an activity for yourself. Body: {citizenUsername, activityType, title, description, thought, activityDetails}",
+    "POST /api/contracts - Create or update a contract. Body: {contractId, type, resourceType, pricePerResource, targetAmount, seller, sellerBuilding, buyer, buyerBuilding, status, notes, endAt, asset, assetType}",
+    "POST /api/messages/send - Send a message to another citizen. Body: {sender, receiver, content, type}",
+    "POST /api/actions/construct-building - Initiate construction of a building. Body: {buildingTypeDefinition, pointDetails, citizenUsername, builderContractDetails (optional)}",
+]
+
 # Import colorama for log_header
 try:
     from colorama import Fore, Style, init as colorama_init
@@ -608,33 +634,20 @@ def autonomously_run_ai_citizen(
     log.info(f"{LogColors.OKCYAN}--- Step 1: Gather Data for {ai_username} ---{LogColors.ENDC}")
     latest_activity_data = _get_latest_activity_api(ai_username)
 
-    prompt_step1_context_elements = [
+    prompt_step1_context_elements_guided = [
         "your own citizen data (`addSystem.citizen_data`)",
-        "the API documentation summary (`addSystem.api_docs`)",
+        "the list of key API endpoints (`addSystem.concise_api_endpoints`)",
         "your latest activity (`addSystem.latest_activity`)"
     ]
-    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-        prompt_step1_context_elements.append("the Airtable schema (`addSystem.airtable_schema_summary`)")
     if user_message:
-        prompt_step1_context_elements.append(f"an additional message ('{user_message}')")
+        prompt_step1_context_elements_guided.append(f"an additional message ('{user_message}')")
 
-    prompt_step1_context_mention = f"Review {', '.join(prompt_step1_context_elements[:-1])}{' and ' if len(prompt_step1_context_elements) > 1 else ''}{prompt_step1_context_elements[-1]}."
-    if not (kinos_model_override and kinos_model_override.lower() == 'local') and "Airtable schema" not in prompt_step1_context_mention:
-         # This case should not happen if logic is correct, but as a fallback
-        pass # Schema already handled or not included
-    elif (kinos_model_override and kinos_model_override.lower() == 'local') and "Airtable schema" in prompt_step1_context_mention:
-        # This case means schema was mentioned but shouldn't be. This is complex to fix here.
-        # The construction of prompt_step1_context_elements should handle this.
-        # For now, we add a note if schema is omitted.
-        prompt_step1_context_mention += " (Airtable schema summary is omitted for local models to save tokens)."
-
+    prompt_step1_context_mention_guided = f"Review {', '.join(prompt_step1_context_elements_guided[:-1])}{' and ' if len(prompt_step1_context_elements_guided) > 1 else ''}{prompt_step1_context_elements_guided[-1]}."
 
     prompt_step1_base = (
         f"You are {ai_display_name}, an AI citizen in La Serenissima. Your current goal is to understand your situation and identify opportunities. "
-        f"The base API URL is {API_BASE_URL}. {prompt_step1_context_mention} "
+        f"The base API URL is {API_BASE_URL}. {prompt_step1_context_mention_guided} "
     )
-    # if user_message: # User message is now part of prompt_step1_context_elements
-    #     prompt_step1_base += f"An additional message has been provided for your consideration: '{user_message}'. "
     
     prompt_step1 = prompt_step1_base + (
         "Decide which single GET API endpoint you want to call to gather initial data relevant to your goals (e.g., your assets, market conditions, problems). "
@@ -643,13 +656,11 @@ def autonomously_run_ai_citizen(
         "Choose an endpoint that provides a good overview or addresses a potential immediate concern."
     )
     add_system_step1 = {
-        "api_docs": API_DOCUMENTATION_SUMMARY, 
+        "concise_api_endpoints": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
         "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
         "citizen_data": ai_citizen_record["fields"],
-        "latest_activity": latest_activity_data or {} # Add latest activity, empty dict if None
+        "latest_activity": latest_activity_data or {}
     }
-    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-        add_system_step1["airtable_schema_summary"] = AIRTABLE_SCHEMA_CONTENT
     if user_message:
         add_system_step1["user_provided_message"] = user_message
     
@@ -690,27 +701,21 @@ def autonomously_run_ai_citizen(
 
     # Step 2: Elaborate Strategy & Define Actions
     log.info(f"{LogColors.OKCYAN}--- Step 2: Elaborate Strategy & Define Actions for {ai_username} ---{LogColors.ENDC}")
-    prompt_step2_context_mention = "Based on this data, your citizen data, your overall goals, and the API documentation in `addSystem.api_docs`"
-    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-        prompt_step2_context_mention += ", and the Airtable schema in `addSystem.airtable_schema_summary`,"
-    else:
-        prompt_step2_context_mention += ","
+    prompt_step2_context_mention_guided = "Based on this data, your citizen data (`addSystem.citizen_data`), your overall goals, and the list of key API endpoints (`addSystem.concise_api_endpoints`),"
         
     prompt_step2 = (
         f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. You previously requested data via GET API. "
         f"The response was (or simulated/error response if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
-        f"{prompt_step2_context_mention} define your strategy and the next actions. "
+        f"{prompt_step2_context_mention_guided} define your strategy and the next actions. "
         "When specifying the `body` for POST requests, you can use camelCase for keys (e.g., `sender`, `resourceType`, `targetAmount`). The server will map them to the correct Airtable fields. "
         "Respond with a JSON object: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {\"fieldName\": \"value\"}}, ...]}`. "
         "If no actions are needed now, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`."
     )
     add_system_step2 = {
-        "api_docs": API_DOCUMENTATION_SUMMARY, 
+        "concise_api_endpoints": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
         "previous_get_response": api_get_response_data,
         "citizen_data": ai_citizen_record["fields"],
     }
-    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-        add_system_step2["airtable_schema_summary"] = AIRTABLE_SCHEMA_CONTENT
 
     kinos_response_step2 = None
     if not dry_run:
@@ -769,25 +774,19 @@ def autonomously_run_ai_citizen(
 
     # Step 3: Note Results & Plan Next Steps
     log.info(f"{LogColors.OKCYAN}--- Step 3: Note Results & Plan Next Steps for {ai_username} ---{LogColors.ENDC}")
-    prompt_step3_context_mention = "Reflect on these outcomes, considering your citizen data, API docs"
-    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-        prompt_step3_context_mention += ", and Airtable schema (all in `addSystem`)"
-    else:
-        prompt_step3_context_mention += " (all in `addSystem`)"
+    prompt_step3_context_mention_guided = "Reflect on these outcomes, considering your citizen data (`addSystem.citizen_data`) and the list of key API endpoints (`addSystem.concise_api_endpoints`) (all in `addSystem`)"
 
     prompt_step3 = (
         f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. Your strategy was: '{strategy_summary}'. "
         f"Your POST actions resulted in (or simulated results if dry_run/failed): \n```json\n{json.dumps(api_post_responses_summary, indent=2)}\n```\n"
-        f"{prompt_step3_context_mention}. What did you learn? What are your key observations or plans for your next autonomous run? "
+        f"{prompt_step3_context_mention_guided}. What did you learn? What are your key observations or plans for your next autonomous run? "
         "Respond with a concise text summary (max 3-4 sentences)."
     )
     add_system_step3 = {
-        "api_docs": API_DOCUMENTATION_SUMMARY, 
+        "concise_api_endpoints": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
         "post_actions_summary": api_post_responses_summary,
         "citizen_data": ai_citizen_record["fields"],
     }
-    if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-        add_system_step3["airtable_schema_summary"] = AIRTABLE_SCHEMA_CONTENT
 
     kinos_response_step3 = None
     if not dry_run:
