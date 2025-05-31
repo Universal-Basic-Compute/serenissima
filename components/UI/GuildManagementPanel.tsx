@@ -279,7 +279,7 @@ export default function GuildManagementPanel({ guild, onClose }: GuildManagement
                 />
                 <button
                   type="submit"
-                  className="p-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 disabled:bg-amber-400 self-end" // self-end to align button with bottom of textarea if it grows
+                  className="p-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 disabled:bg-amber-400 self-start" // self-start to align button with top
                   disabled={!currentCitizenUsername || !newMessage.trim() || isSendingMessage || isLoadingMessages}
                 >
                   <FaPaperPlane />
