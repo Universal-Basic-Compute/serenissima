@@ -112,7 +112,7 @@ export async function GET() {
         // It's often more reliable to fetch records for the type and then filter date/sender=recipient in code,
         // especially if Sender/Recipient are linked records.
         // However, constructing a robust date filter for Airtable:
-        filterByFormula: `AND({Type} = 'thought_log', IS_AFTER({CreatedAt}, '${twentyFourHoursAgo}'))`,
+        filterByFormula: `AND(OR({Type} = 'thought_log', {Type} = 'unguided_run_log'), IS_AFTER({CreatedAt}, '${twentyFourHoursAgo}'))`,
         fields: ['MessageId', 'Sender', 'Receiver', 'Content', 'Type', 'CreatedAt'], // Changed Recipient to Receiver
         sort: [{ field: 'CreatedAt', direction: 'desc' }],
       })

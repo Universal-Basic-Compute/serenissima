@@ -102,7 +102,7 @@ export async function GET(request: Request) {
 
     const records: Records<FieldSet> = await messagesTable
       .select({
-        filterByFormula: `AND({Type} = 'thought_log', {Sender} = '${citizenUsername}')`,
+        filterByFormula: `AND(OR({Type} = 'thought_log', {Type} = 'unguided_run_log'), {Sender} = '${citizenUsername}')`,
         fields: ['MessageId', 'Sender', 'Receiver', 'Content', 'Type', 'CreatedAt'], // Ensure all needed fields are fetched
         sort: [{ field: 'CreatedAt', direction: 'desc' }],
         maxRecords: limit 
