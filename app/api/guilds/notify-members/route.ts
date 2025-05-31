@@ -8,9 +8,20 @@ const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS
 const AIRTABLE_GUILDS_TABLE = process.env.AIRTABLE_GUILDS_TABLE || 'GUILDS';
 
 // KinOS Configuration
-const KINOS_API_BASE_URL = process.env.KINOS_API_BASE_URL; // e.g., https://api.kinos.ai
-const KINOS_BLUEPRINT_ID = process.env.KINOS_BLUEPRINT_ID;
+const KINOS_API_BASE_URL = process.env.KINOS_API_BASE_URL || 'https://api.kinos-engine.ai/';
+const KINOS_BLUEPRINT_ID = process.env.KINOS_BLUEPRINT_ID || 'serenissima-ai';
 const KINOS_API_KEY = process.env.KINOS_API_KEY; // Secret API Key for KinOS
+
+if (!process.env.KINOS_API_BASE_URL) {
+  console.warn(
+    `KINOS_API_BASE_URL not set in environment, using default fallback: '${KINOS_API_BASE_URL}'. Please set this in your .env.local file.`
+  );
+}
+if (!process.env.KINOS_BLUEPRINT_ID) {
+  console.warn(
+    `KINOS_BLUEPRINT_ID not set in environment, using default fallback: '${KINOS_BLUEPRINT_ID}'. Please set this in your .env.local file.`
+  );
+}
 
 // Define a more detailed GuildMember interface for addSystem prompt
 interface DetailedGuildMember {
