@@ -299,6 +299,27 @@ def make_kinos_call(
 # Global variable to store Airtable schema content
 AIRTABLE_SCHEMA_CONTENT = ""
 
+# Global variable to store API Reference content
+API_REFERENCE_CONTENT = ""
+
+def load_api_reference_content():
+    """Loads the content of ApiReference.tsx."""
+    global API_REFERENCE_CONTENT
+    try:
+        # Assuming ApiReference.tsx is in components/Documentation/ApiReference.tsx
+        # relative to the project root.
+        ref_file_path = os.path.join(PROJECT_ROOT, "components", "Documentation", "ApiReference.tsx")
+        if os.path.exists(ref_file_path):
+            with open(ref_file_path, "r", encoding="utf-8") as f:
+                API_REFERENCE_CONTENT = f.read()
+            log.info(f"{LogColors.OKGREEN}Successfully loaded API Reference content.{LogColors.ENDC}")
+        else:
+            log.warning(f"{LogColors.WARNING}API Reference file not found at {ref_file_path}. Proceeding without it.{LogColors.ENDC}")
+            API_REFERENCE_CONTENT = "API Reference file not found."
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error loading API Reference content: {e}{LogColors.ENDC}", exc_info=True)
+        API_REFERENCE_CONTENT = "Error loading API Reference."
+
 def load_airtable_schema_content():
     """Loads the content of airtable_schema.md."""
     global AIRTABLE_SCHEMA_CONTENT
@@ -538,17 +559,152 @@ def autonomously_run_ai_citizen(
     log_header(f"Autonomous Run for {ai_username} ({ai_display_name}) COMPLETED", color_code=Fore.MAGENTA if colorama_available else '')
 
 
+def autonomously_run_ai_citizen_unguided(
+    tables: Dict[str, Table],
+    kinos_api_key: str,
+    ai_citizen_record: Dict,
+    dry_run: bool = False,
+    kinos_model_override: Optional[str] = None
+):
+    """Manages the unguided autonomous run for a single AI citizen."""
+    ai_username = ai_citizen_record["fields"].get("Username")
+    ai_display_name = ai_citizen_record["fields"].get("FirstName", ai_username)
+    if not ai_username:
+        log.warning(f"{LogColors.WARNING}AI citizen record {ai_citizen_record['id']} missing Username. Skipping.{LogColors.ENDC}")
+        return
+
+    log_header(f"Starting UNGUIDED Autonomous Run for {ai_username} ({ai_display_name})", color_code=Fore.MAGENTA if colorama_available else '')
+
+    previous_api_results: List[Dict] = []
+    iteration_count = 0
+    max_iterations = 10 # Safety break for the loop
+
+    while iteration_count < max_iterations:
+        iteration_count += 1
+        log.info(f"{LogColors.OKCYAN}--- Unguided Iteration {iteration_count} for {ai_username} ---{LogColors.ENDC}")
+
+        current_prompt = (
+            f"You are {ai_display_name}, an AI citizen in La Serenissima. "
+            "Given your current context (see `addSystem`), "
+            "decide on your next API actions (GET or POST). "
+            "If no further actions are needed, respond with an empty 'actions' list. "
+            "Provide your reasoning or reflection in the 'reflection' field. "
+            "Respond with a JSON object: "
+            "`{\"actions\": [{\"method\": \"GET\", \"endpoint\": \"/api/...\", \"params\": {...}}, ...], \"reflection\": \"Your thoughts...\"}`"
+        )
+        if previous_api_results: # Modify prompt slightly if there are previous results
+             current_prompt = (
+                f"You are {ai_display_name}. The results of your previous API calls are in `addSystem.previous_api_results`. "
+                "Based on this and your overall context (see `addSystem`), what do you want to do next? "
+                "If no further actions, respond with an empty 'actions' list. "
+                "Provide your reasoning or reflection in the 'reflection' field. "
+                "Respond with a JSON object: "
+                "`{\"actions\": [{\"method\": \"GET\", \"endpoint\": \"/api/...\", \"params\": {...}}, ...], \"reflection\": \"Your thoughts...\"}`"
+            )
+
+        add_system_data = {
+            "api_docs_summary": API_DOCUMENTATION_SUMMARY,
+            "api_reference_full": API_REFERENCE_CONTENT, # Full API reference
+            "airtable_schema_summary": AIRTABLE_SCHEMA_CONTENT, # Airtable schema
+            "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
+            "citizen_data": ai_citizen_record["fields"],
+            "previous_api_results": previous_api_results
+        }
+
+        kinos_response = None
+        if not dry_run:
+            kinos_response = make_kinos_call(kinos_api_key, ai_username, current_prompt, add_system_data, kinos_model_override)
+        else:
+            log.info(f"{Fore.YELLOW}[DRY RUN] AI {ai_username} (Unguided Iteration {iteration_count}) would be prompted.{Style.RESET_ALL}")
+            if iteration_count == 1:
+                 kinos_response = {"actions": [{"method": "GET", "endpoint": f"/api/citizens/{ai_username}", "params": {}}], "reflection": "[DRY RUN] Initial check of own status."}
+            else:
+                kinos_response = {"actions": [], "reflection": "[DRY RUN] No further actions planned."}
+
+        if not kinos_response or not isinstance(kinos_response, dict):
+            log.warning(f"{LogColors.WARNING}Failed to get a valid response from Kinos for {ai_username} in unguided mode (Iteration {iteration_count}). Ending run.{LogColors.ENDC}")
+            break
+
+        ai_reflection = kinos_response.get("reflection", "No reflection provided.")
+        log.info(f"{LogColors.OKGREEN}AI {ai_username} (Unguided Iteration {iteration_count}) Reflection: {LogColors.BOLD}{ai_reflection}{LogColors.ENDC}")
+        if not dry_run and tables:
+             try:
+                tables["messages"].create({
+                    "Sender": ai_username, "Receiver": ai_username,
+                    "Content": f"Unguided Autonomous Run Iteration {iteration_count} Reflection:\n{ai_reflection}",
+                    "Type": "unguided_run_log", "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
+                    "ReadAt": datetime.now(VENICE_TIMEZONE).isoformat()
+                })
+             except Exception as e_msg:
+                log.error(f"{LogColors.FAIL}Failed to store unguided reflection message for {ai_username}: {e_msg}{LogColors.ENDC}", exc_info=True)
+
+        api_actions = kinos_response.get("actions")
+        if not api_actions or not isinstance(api_actions, list) or len(api_actions) == 0:
+            log.info(f"{LogColors.OKBLUE}AI {ai_username} provided no further actions in Iteration {iteration_count}. Ending unguided run.{LogColors.ENDC}")
+            break
+        
+        log.info(f"{LogColors.OKBLUE}AI {ai_username} decided on {len(api_actions)} actions in Unguided Iteration {iteration_count}.{LogColors.ENDC}")
+
+        current_iteration_results = []
+        for i, action in enumerate(api_actions):
+            action_method = action.get("method", "").upper()
+            action_endpoint = action.get("endpoint")
+            action_params = action.get("params")
+            action_body = action.get("body")
+
+            if not action_endpoint:
+                log.warning(f"{LogColors.WARNING}Invalid action (missing endpoint) from Kinos for {ai_username}: {action}{LogColors.ENDC}")
+                current_iteration_results.append({"action_details": action, "error": "Missing endpoint", "success": False})
+                continue
+
+            log.info(f"{LogColors.OKBLUE}--- Executing Unguided Action {i+1}/{len(api_actions)} for {ai_username}: {action_method} {action_endpoint} ---{LogColors.ENDC}")
+            
+            action_response_data = None
+            if not dry_run:
+                if action_method == "GET":
+                    action_response_data = make_api_get_request(action_endpoint, action_params)
+                elif action_method == "POST":
+                    action_response_data = make_api_post_request(action_endpoint, action_body)
+                else:
+                    log.warning(f"{LogColors.WARNING}Unsupported action method '{action_method}' from Kinos for {ai_username}.{LogColors.ENDC}")
+                    action_response_data = {"error": f"Unsupported method: {action_method}", "success": False}
+            else:
+                log.info(f"{Fore.YELLOW}[DRY RUN] Would make {action_method} request to {action_endpoint} for {ai_username}.{Style.RESET_ALL}")
+                action_response_data = {"dry_run_response": f"Simulated response from {action_method} {action_endpoint}", "success": True}
+            
+            # Store a summary and the full response for the AI's next context
+            current_iteration_results.append({
+                "method": action_method,
+                "endpoint": action_endpoint,
+                "params_sent": action_params, # Store what was sent
+                "body_sent": action_body,     # Store what was sent
+                "response": action_response_data # Store the full response
+            })
+        
+        previous_api_results = current_iteration_results
+
+    if iteration_count >= max_iterations:
+        log.warning(f"{LogColors.WARNING}Unguided run for {ai_username} reached max iterations ({max_iterations}). Ending.{LogColors.ENDC}")
+
+    log_header(f"Unguided Autonomous Run for {ai_username} ({ai_display_name}) COMPLETED", color_code=Fore.MAGENTA if colorama_available else '')
+
+
 def process_all_ai_autonomously(
     dry_run: bool = False,
     specific_citizen_username: Optional[str] = None,
-    kinos_model_override: Optional[str] = None
+    kinos_model_override: Optional[str] = None,
+    unguided_mode: bool = False # New parameter for mode
 ):
     """Main function to process autonomous runs for AI citizens."""
     run_mode = "DRY RUN" if dry_run else "LIVE RUN"
+    if unguided_mode:
+        run_mode += " (Unguided)"
     citizen_scope = specific_citizen_username if specific_citizen_username else "all eligible"
     log_header(f"Starting Autonomous AI Process ({run_mode}, Citizen: {citizen_scope})", color_code=Fore.CYAN if colorama_available else '')
 
     load_airtable_schema_content() # Load schema content at the start
+    if unguided_mode:
+        load_api_reference_content() # Load API reference for unguided mode
 
     tables = initialize_airtable()
     kinos_api_key = get_kinos_api_key()
@@ -566,7 +722,10 @@ def process_all_ai_autonomously(
     start_time_total = time.time()
     for ai_citizen_record in ai_citizens_to_process:
         start_time_citizen = time.time()
-        autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override)
+        if unguided_mode:
+            autonomously_run_ai_citizen_unguided(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override)
+        else:
+            autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override) # Original guided function
         end_time_citizen = time.time()
         log.info(f"{LogColors.OKBLUE}Time taken for {ai_citizen_record['fields'].get('Username', 'Unknown AI')}: {end_time_citizen - start_time_citizen:.2f} seconds.{LogColors.ENDC}")
         processed_count += 1
@@ -616,10 +775,16 @@ if __name__ == "__main__":
         type=str,
         help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
     )
+    parser.add_argument(
+        "--unguided",
+        action="store_true",
+        help="Run in unguided mode, where the AI makes a series of API calls in a loop."
+    )
     args = parser.parse_args()
 
     process_all_ai_autonomously(
         dry_run=args.dry_run,
         specific_citizen_username=args.citizen,
-        kinos_model_override=args.model
+        kinos_model_override=args.model,
+        unguided_mode=args.unguided # Pass the new mode
     )
