@@ -1638,8 +1638,26 @@ const ApiReference: React.FC = () => {
         
         <div id="buildings-get-bridges" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/bridges</h3>
-          <p className="mb-2">Retrieves all buildings of type 'bridge' or 'rialto_bridge' from Airtable, enhanced with polygon link information.</p>
+          <p className="mb-2">Retrieves all buildings of type 'bridge' or 'rialto_bridge' from Airtable, enhanced with polygon link information. Supports dynamic filtering.</p>
           
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'BUILDINGS' table, applied in conjunction with the base filter <code>OR({"{{Type}}"} = 'bridge', {"{{Type}}"} = 'rialto_bridge')</code>.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Owner</code>, <code>IsConstructed</code>)
+              and the value is what you want to filter by.
+            </p>
+            <ul className="list-disc pl-6">
+              <li><code>limit</code> (optional) - Limit the number of bridges returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Owner=ConsiglioDeiDieci&IsConstructed=true</code> - Filters for constructed bridges owned by ConsiglioDeiDieci.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
@@ -1671,8 +1689,26 @@ const ApiReference: React.FC = () => {
         
         <div id="buildings-get-docks" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/docks</h3>
-          <p className="mb-2">Retrieves all docks.</p>
+          <p className="mb-2">Retrieves all docks. Supports dynamic filtering.</p>
           
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'BUILDINGS' table, applied in conjunction with the base filter <code>{"{{Type}}"} = 'dock'</code>.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Owner</code>, <code>IsPublic</code>)
+              and the value is what you want to filter by.
+            </p>
+            <ul className="list-disc pl-6">
+              <li><code>limit</code> (optional) - Limit the number of docks returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Owner=NLR&IsPublic=true</code> - Filters for public docks owned by NLR.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Response</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
@@ -2630,14 +2666,24 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="economy-get-transactions-history" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/transactions/history</h3>
-          <p className="mb-2">Retrieves transaction history.</p>
+          <p className="mb-2">Retrieves transaction history. Supports dynamic filtering.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'TRANSACTIONS' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Type</code>, <code>Seller</code>, <code>Buyer</code>, <code>Asset</code>)
+              and the value is what you want to filter by.
+            </p>
             <ul className="list-disc pl-6">
-              <li><code>citizenId</code> (optional) - Filter transactions by citizen ID</li>
-              <li><code>asset</code> (optional) - Filter transactions by asset ID</li>
-              <li><code>role</code> (optional) - Filter transactions by role ('buyer' or 'seller')</li>
+              <li><code>limit</code> (optional) - Limit the number of transactions returned.</li>
+              <li><code>offset</code> (optional) - Offset for pagination.</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Type=land_sale&Seller=NLR</code> - Filters for land sales where NLR is the seller.</li>
+                  <li>Example: <code>?Asset=resource-wood-123</code> - Filters for transactions involving a specific resource.</li>
+                </ul>
+              </li>
             </ul>
           </div>
           
