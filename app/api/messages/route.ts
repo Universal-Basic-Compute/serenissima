@@ -104,6 +104,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const messageType = searchParams.get('type');
+    const receiverId = searchParams.get('receiver'); // New parameter
     const latest = searchParams.get('latest');
 
     if (!messageType) {
@@ -114,20 +115,30 @@ export async function GET(request: Request) {
     }
 
     const base = initAirtable();
-    let query = base(AIRTABLE_MESSAGES_TABLE).select({
-      filterByFormula: `{Type} = '${messageType}'`,
-      sort: [{ field: 'CreatedAt', direction: 'desc' }],
-    });
+    let filterConditions = [`{Type} = '${messageType}'`];
 
-    if (latest === 'true') {
-      query = base(AIRTABLE_MESSAGES_TABLE).select({
-        filterByFormula: `{Type} = '${messageType}'`,
-        sort: [{ field: 'CreatedAt', direction: 'desc' }],
-        maxRecords: 1,
-      });
+    if (receiverId) {
+      filterConditions.push(`{Receiver} = '${receiverId}'`);
     }
 
-    const records = await query.all();
+    const filterFormula = filterConditions.length > 1 ? `AND(${filterConditions.join(', ')})` : filterConditions[0];
+    
+    console.log(`[API Messages GET] Filter formula: ${filterFormula}`);
+
+    let queryOptions: Airtable.SelectOptions = {
+      filterByFormula: filterFormula,
+      sort: [{ field: 'CreatedAt', direction: 'asc' }], // Changed to asc for chat history
+    };
+
+    if (latest === 'true') {
+      queryOptions.maxRecords = 1;
+      queryOptions.sort = [{ field: 'CreatedAt', direction: 'desc' }]; // For latest, desc is fine
+    } else {
+      // Potentially limit number of messages for a chat history
+      // queryOptions.maxRecords = 100; // Example: Load last 100 messages
+    }
+
+    const records = await base(AIRTABLE_MESSAGES_TABLE).select(queryOptions).all();
 
     if (!records || records.length === 0) {
       return NextResponse.json(

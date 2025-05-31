@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { FaTimes, FaPaperPlane } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 
 // Define the Guild interface (copied from GuildsPanel.tsx)
@@ -22,23 +22,44 @@ interface Guild {
   color?: string;
 }
 
+interface Message {
+  messageId: string;
+  sender: string;
+  receiver: string;
+  content: string;
+  type: string;
+  createdAt: string;
+  readAt?: string | null;
+}
+
 interface GuildManagementPanelProps {
   guild: Guild;
   onClose: () => void;
 }
 
+// Helper function to format tab names for receiver IDs
+const formatTabNameForId = (tabName: string) => {
+  return tabName.replace(/\s+/g, '_').replace(/&/g, 'and');
+};
+
 export default function GuildManagementPanel({ guild, onClose }: GuildManagementPanelProps) {
-  type GuildManagementTab = 
-    | "Charter & Rules" 
-    | "Guild Hall" 
-    | "Market Intelligence" 
-    | "Governance" 
-    | "Treasury & Benefits" 
-    | "Knowledge Vault" 
-    | "Alliances & Rivals" 
+  type GuildManagementTab =
+    | "Charter & Rules"
+    | "Guild Hall"
+    | "Market Intelligence"
+    | "Governance"
+    | "Treasury & Benefits"
+    | "Knowledge Vault"
+    | "Alliances & Rivals"
     | "Members Registry";
 
   const [activeTab, setActiveTab] = useState<GuildManagementTab>("Charter & Rules");
+  const [currentCitizenUsername, setCurrentCitizenUsername] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState<string>("");
+  const [isSendingMessage, setIsSendingMessage] = useState<boolean>(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState<boolean>(false);
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   const tabs: GuildManagementTab[] = [
     "Charter & Rules",
@@ -51,9 +72,87 @@ export default function GuildManagementPanel({ guild, onClose }: GuildManagement
     "Members Registry"
   ];
 
+  const chatReceiverId = `${guild.guildId}_${formatTabNameForId(activeTab)}`;
+
+  useEffect(() => {
+    const profile = localStorage.getItem('citizenProfile');
+    if (profile) {
+      try {
+        const parsedProfile = JSON.parse(profile);
+        setCurrentCitizenUsername(parsedProfile.username);
+      } catch (e) {
+        console.error("Failed to parse citizen profile for chat sender:", e);
+      }
+    }
+  }, []);
+
+  const fetchMessages = async () => {
+    if (!chatReceiverId) return;
+    setIsLoadingMessages(true);
+    try {
+      const response = await fetch(`/api/messages?type=guild&receiver=${encodeURIComponent(chatReceiverId)}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch messages');
+      }
+      const data = await response.json();
+      if (data.success) {
+        setChatMessages(data.messages || []);
+      } else {
+        console.error("Error fetching messages:", data.error);
+        setChatMessages([]);
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      setChatMessages([]);
+    } finally {
+      setIsLoadingMessages(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+  }, [chatReceiverId]); // Refetch when tab changes
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !currentCitizenUsername || !chatReceiverId) return;
+    setIsSendingMessage(true);
+    try {
+      const response = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sender: currentCitizenUsername,
+          receiver: chatReceiverId,
+          content: newMessage,
+          type: 'guild'
+        }),
+      });
+      const data = await response.json();
+      if (data.success && data.message) {
+        setChatMessages(prevMessages => [...prevMessages, data.message]);
+        setNewMessage("");
+      } else {
+        console.error("Failed to send message:", data.error);
+        alert(`Error sending message: ${data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert(`Error sending message: ${error instanceof Error ? error.message : 'Please try again.'}`);
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60] p-4">
-      <div className="bg-amber-50 rounded-lg shadow-xl w-full max-w-5xl h-[90vh] max-h-[800px] border-4 border-amber-700 flex flex-col">
+      <div className="bg-amber-50 rounded-lg shadow-xl w-full max-w-7xl h-[90vh] max-h-[800px] border-4 border-amber-700 flex flex-col">
+        {/* Header */}
         <div className="bg-amber-700 text-white p-4 flex justify-between items-center flex-shrink-0">
           <h3 className="text-2xl font-serif">Managing: {guild.guildName}</h3>
           <button
@@ -65,9 +164,10 @@ export default function GuildManagementPanel({ guild, onClose }: GuildManagement
           </button>
         </div>
 
+        {/* Main content area (Tabs | Content | Chat) */}
         <div className="flex flex-grow overflow-hidden">
-          {/* Sidebar for tabs */}
-          <nav className="w-1/4 bg-amber-100 p-4 overflow-y-auto border-r border-amber-300 flex-shrink-0">
+          {/* Sidebar for tabs (1/5 width) */}
+          <nav className="w-1/5 bg-amber-100 p-4 overflow-y-auto border-r border-amber-300 flex-shrink-0">
             <ul className="space-y-1">
               {tabs.map((tab) => (
                 <li key={tab}>
@@ -86,10 +186,9 @@ export default function GuildManagementPanel({ guild, onClose }: GuildManagement
             </ul>
           </nav>
 
-          {/* Tab content area */}
-          <div className="w-3/4 p-6 overflow-y-auto bg-white">
+          {/* Tab content area (2.5/5 width) */}
+          <div className="w-[50%] p-6 overflow-y-auto bg-white border-r border-amber-300">
             <h4 className="text-xl font-serif text-amber-800 mb-4">{activeTab}</h4>
-            {/* Placeholder content for each tab */}
             {activeTab === "Charter & Rules" && (
               <div>
                 <p className="text-gray-700">Details about the guild's charter, rules, and regulations will be displayed here.</p>
@@ -132,9 +231,54 @@ export default function GuildManagementPanel({ guild, onClose }: GuildManagement
             {activeTab === "Members Registry" && (
               <div>
                 <p className="text-gray-700">A detailed list of all guild members and their roles.</p>
-                {/* You might want to reuse or adapt the member listing logic from GuildDetails here */}
               </div>
             )}
+          </div>
+
+          {/* Chat area (1.5/5 width) */}
+          <div className="w-[30%] bg-amber-50 flex flex-col border-l border-amber-300">
+            <div className="p-4 border-b border-amber-200">
+              <h5 className="text-md font-serif text-amber-800">Guild Chat: {activeTab}</h5>
+            </div>
+            <div className="flex-grow p-4 overflow-y-auto space-y-3">
+              {isLoadingMessages ? (
+                <p className="text-center text-amber-700">Loading messages...</p>
+              ) : chatMessages.length === 0 ? (
+                <p className="text-center text-amber-600 text-sm">No messages in this channel yet.</p>
+              ) : (
+                chatMessages.map((msg) => (
+                  <div key={msg.messageId} className={`flex ${msg.sender === currentCitizenUsername ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[70%] p-2 rounded-lg ${msg.sender === currentCitizenUsername ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                      <p className="text-xs font-semibold">{msg.sender}</p>
+                      <p className="text-sm">{msg.content}</p>
+                      <p className="text-xs text-opacity-75 mt-1">
+                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className="p-3 border-t border-amber-200 bg-amber-100">
+              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder={currentCitizenUsername ? "Type your message..." : "Loading user..."}
+                  className="flex-grow p-2 border border-amber-300 rounded-md focus:ring-amber-500 focus:border-amber-500 text-sm"
+                  disabled={!currentCitizenUsername || isSendingMessage || isLoadingMessages}
+                />
+                <button
+                  type="submit"
+                  className="p-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 disabled:bg-amber-400"
+                  disabled={!currentCitizenUsername || !newMessage.trim() || isSendingMessage || isLoadingMessages}
+                >
+                  <FaPaperPlane />
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
