@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; // Ensure React is in scope for JSX
 import Link from 'next/link';
 
 // Using a standard function declaration for the component
