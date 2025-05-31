@@ -965,9 +965,14 @@ if __name__ == "__main__":
         help="Shortcut for --model local."
     )
     parser.add_argument(
+        "--guided",
+        action="store_true",
+        help="Run in the original 3-step guided mode."
+    )
+    parser.add_argument(
         "--unguided",
         action="store_true",
-        help="Run in unguided mode, where the AI makes a series of API calls in a loop."
+        help="Run in unguided mode (default), where the AI makes a series of API calls in a loop."
     )
     parser.add_argument(
         "--addMessage",
@@ -982,10 +987,19 @@ if __name__ == "__main__":
             log.warning(f"{LogColors.WARNING}Both --local and --model {kinos_model_to_use} were specified. --local takes precedence, using 'local' model.{LogColors.ENDC}")
         kinos_model_to_use = 'local'
     
+    
+    # Determine mode: unguided is default unless --guided is specified.
+    # If both --guided and --unguided are somehow passed, --guided takes precedence.
+    run_unguided_mode = True
+    if args.guided:
+        run_unguided_mode = False
+    elif args.unguided: # Explicitly asking for unguided (which is default anyway)
+        run_unguided_mode = True
+        
     process_all_ai_autonomously(
         dry_run=args.dry_run,
         specific_citizen_username=args.citizen,
         kinos_model_override=kinos_model_to_use,
-        unguided_mode=args.unguided,
+        unguided_mode=run_unguided_mode,
         user_message=args.addMessage # Pass the new message
     )
