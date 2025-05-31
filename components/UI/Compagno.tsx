@@ -94,7 +94,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     relevancies: any[] | null;
     problems: any[] | null;
   } | null>(null);
-  const [kinosModel, setKinosModel] = useState<'gemini' | 'local'>('gemini'); // Default to gemini
+  const [kinosModel, setKinosModel] = useState<'gemini-2.5-flash-preview-05-20' | 'local'>('gemini-2.5-flash-preview-05-20'); // Default to gemini-2.5-flash-preview-05-20
   
 
   // Fetch unread notification count
@@ -1824,10 +1824,10 @@ Your response:`;
                       <div className="my-2 ml-1 flex items-center space-x-2 text-xs text-gray-500 px-2">
                         <span>AI Model:</span>
                         <button
-                          onClick={() => setKinosModel('gemini')}
-                          className={`px-2 py-0.5 rounded transition-colors ${kinosModel === 'gemini' ? 'bg-amber-600 text-white shadow-sm' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                          onClick={() => setKinosModel('gemini-2.5-flash-preview-05-20')}
+                          className={`px-2 py-0.5 rounded transition-colors ${kinosModel === 'gemini-2.5-flash-preview-05-20' ? 'bg-amber-600 text-white shadow-sm' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                         >
-                          Gemini
+                          Gemini 2.5 Flash
                         </button>
                         <button
                           onClick={() => setKinosModel('local')}
