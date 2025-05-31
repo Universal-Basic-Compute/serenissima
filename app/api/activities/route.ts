@@ -67,18 +67,14 @@ export async function GET(request: Request) {
       loggableFilters['timeRange'] = '24h';
       console.log('Applying 24-hour time range filter (no timezone).');
     } else if (ongoing) {
-      // Broad Airtable filter for ongoing, precise JS filter applied later
-      // When ongoing=true, we fetch more statuses and filter precisely in JS.
-      // We still exclude 'processed' and 'failed' at the Airtable level if possible,
-      // but 'interrupted' might be relevant to show if it just happened.
-      // The JS filter for 'ongoing' will correctly determine if an 'interrupted' activity
-      // should still be considered "ongoing" based on its EndDate.
-      // For now, let's keep the Airtable filter simple for ongoing=true:
+      // If ongoing=true, exclude 'processed', 'failed', AND 'interrupted' from the Airtable query.
+      // The precise JavaScript time-based filter will then determine true "ongoing" status.
       filterByFormulaParts.push(`{Status} != 'processed'`);
       filterByFormulaParts.push(`{Status} != 'failed'`);
-      // 'interrupted' will be fetched and then filtered by JS if ongoing=true
+      filterByFormulaParts.push(`{Status} != 'interrupted'`);
       loggableFilters['ongoing'] = 'true';
-      console.log('Applying broad Airtable status filter for ongoing activities (Status != processed AND Status != failed). JS will handle precise time logic, including for interrupted.');
+      loggableFilters['Status_ongoing_exclude'] = 'processed, failed, interrupted';
+      console.log('Applying Airtable status filter for ongoing activities (Status != processed, failed, interrupted). JS will handle precise time logic.');
     } else {
       // Default filter: if not specifically asking for 'ongoing' or a specific status via dynamic filter,
       // exclude processed, failed, AND interrupted.
