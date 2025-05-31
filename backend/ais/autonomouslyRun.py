@@ -203,6 +203,41 @@ def make_api_get_request(endpoint: str, params: Optional[Dict] = None) -> Option
             
     return None
 
+def _get_latest_activity_api(citizen_username: str) -> Optional[Dict]:
+    """Fetches the latest activity for a citizen via the Next.js API."""
+    try:
+        # Construct params for the GET request
+        # Sorting by EndDate descending and limiting to 1 should give the most current or last completed activity.
+        # We also want to ensure we get activities that might be ongoing (EndDate in future or null)
+        # or just completed. The `ongoing=true` param in /api/activities handles complex time-based filtering.
+        # However, for "latest", we might just want the one with the most recent EndDate or StartDate if EndDate is null.
+        # The /api/activities endpoint sorts by EndDate desc by default.
+        params = {
+            "citizenId": citizen_username,
+            "limit": 1,
+            # No specific status filter here, let the default sorting by EndDate give the "latest"
+            # The API sorts by EndDate desc, so this should give the most recently ended or current one.
+        }
+        log.info(f"{LogColors.OKBLUE}Fetching latest activity for {citizen_username} with params: {params}{LogColors.ENDC}")
+        
+        response_data = make_api_get_request("/api/activities", params=params) # Use existing helper
+
+        if response_data and response_data.get("success") and "activities" in response_data:
+            activities = response_data["activities"]
+            if activities and isinstance(activities, list) and len(activities) > 0:
+                log.info(f"{LogColors.OKGREEN}Successfully fetched latest activity for {citizen_username}.{LogColors.ENDC}")
+                return activities[0] # Return the first (and only) activity
+            else:
+                log.info(f"{LogColors.OKBLUE}No activities found for {citizen_username} when fetching latest.{LogColors.ENDC}")
+                return None
+        else:
+            log.warning(f"{LogColors.WARNING}Failed to get latest activity for {citizen_username} from API: {response_data.get('error') if response_data else 'No response'}{LogColors.ENDC}")
+            return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Exception fetching latest activity for {citizen_username}: {e}{LogColors.ENDC}", exc_info=True)
+        return None
+
+
 def make_api_post_request(endpoint: str, body: Optional[Dict] = None) -> Optional[Dict]:
     """Makes a POST request to the game API with retries."""
     url = f"{API_BASE_URL}{endpoint}"
@@ -527,7 +562,8 @@ API_DOCUMENTATION_SUMMARY = {
         "3.  **Airtable Schema**: Refer to `backend/docs/airtable_schema.md` for exact Airtable table and field names (they are PascalCase).\n"
         "4.  **Specific Endpoints**: Some endpoints have fixed parameters or unique behaviors (e.g., /api/resources/counts, /api/thoughts, /api/messages?type=...). If dynamic filtering doesn't yield expected results, consult their specific documentation or use their defined parameters.\n"
         "5.  **Focus**: Your goal is to make informed decisions. Choose API calls that provide the most relevant data for your current objectives.\n"
-        "6.  **Airtable Schema**: A summary of the Airtable schema (field names, types) may be available in `addSystem.airtable_schema_summary` (typically for non-local models) to help you understand data structures and construct precise filters for GET requests."
+        "6.  **Airtable Schema**: A summary of the Airtable schema (field names, types) may be available in `addSystem.airtable_schema_summary` (typically for non-local models) to help you understand data structures and construct precise filters for GET requests.\n"
+        "7.  **Latest Activity**: Your most recent or current activity details are available in `addSystem.latest_activity`."
     ),
     "example_get_endpoints": [
         "/api/citizens/{username}", # Specific citizen by username
@@ -570,18 +606,35 @@ def autonomously_run_ai_citizen(
 
     # Step 1: Gather Data
     log.info(f"{LogColors.OKCYAN}--- Step 1: Gather Data for {ai_username} ---{LogColors.ENDC}")
-    prompt_step1_context_mention = "Review your own citizen data in `addSystem.citizen_data` and the API documentation summary in `addSystem.api_docs`."
+    latest_activity_data = _get_latest_activity_api(ai_username)
+
+    prompt_step1_context_elements = [
+        "your own citizen data (`addSystem.citizen_data`)",
+        "the API documentation summary (`addSystem.api_docs`)",
+        "your latest activity (`addSystem.latest_activity`)"
+    ]
     if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-        prompt_step1_context_mention += " Also review the Airtable schema in `addSystem.airtable_schema_summary`."
-    else:
+        prompt_step1_context_elements.append("the Airtable schema (`addSystem.airtable_schema_summary`)")
+    if user_message:
+        prompt_step1_context_elements.append(f"an additional message ('{user_message}')")
+
+    prompt_step1_context_mention = f"Review {', '.join(prompt_step1_context_elements[:-1])}{' and ' if len(prompt_step1_context_elements) > 1 else ''}{prompt_step1_context_elements[-1]}."
+    if not (kinos_model_override and kinos_model_override.lower() == 'local') and "Airtable schema" not in prompt_step1_context_mention:
+         # This case should not happen if logic is correct, but as a fallback
+        pass # Schema already handled or not included
+    elif (kinos_model_override and kinos_model_override.lower() == 'local') and "Airtable schema" in prompt_step1_context_mention:
+        # This case means schema was mentioned but shouldn't be. This is complex to fix here.
+        # The construction of prompt_step1_context_elements should handle this.
+        # For now, we add a note if schema is omitted.
         prompt_step1_context_mention += " (Airtable schema summary is omitted for local models to save tokens)."
+
 
     prompt_step1_base = (
         f"You are {ai_display_name}, an AI citizen in La Serenissima. Your current goal is to understand your situation and identify opportunities. "
         f"The base API URL is {API_BASE_URL}. {prompt_step1_context_mention} "
     )
-    if user_message:
-        prompt_step1_base += f"An additional message has been provided for your consideration: '{user_message}'. "
+    # if user_message: # User message is now part of prompt_step1_context_elements
+    #     prompt_step1_base += f"An additional message has been provided for your consideration: '{user_message}'. "
     
     prompt_step1 = prompt_step1_base + (
         "Decide which single GET API endpoint you want to call to gather initial data relevant to your goals (e.g., your assets, market conditions, problems). "
@@ -593,6 +646,7 @@ def autonomously_run_ai_citizen(
         "api_docs": API_DOCUMENTATION_SUMMARY, 
         "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
         "citizen_data": ai_citizen_record["fields"],
+        "latest_activity": latest_activity_data or {} # Add latest activity, empty dict if None
     }
     if not (kinos_model_override and kinos_model_override.lower() == 'local'):
         add_system_step1["airtable_schema_summary"] = AIRTABLE_SCHEMA_CONTENT
@@ -798,15 +852,22 @@ def autonomously_run_ai_citizen_unguided(
         iteration_count += 1
         log.info(f"{LogColors.OKCYAN}--- Unguided Iteration {iteration_count} for {ai_username} ---{LogColors.ENDC}")
 
+        latest_activity_data_unguided = _get_latest_activity_api(ai_username)
+
         prompt_intro = f"You are {ai_display_name}, an AI citizen in La Serenissima. Your goal is to act autonomously and strategically. "
         
-        prompt_context_elements = ["citizen data", "API docs summary (`api_docs_summary`)", "extracted API Reference text (`api_reference_extracted_text`)"]
+        prompt_context_elements = [
+            "citizen data (`addSystem.citizen_data`)", 
+            "API docs summary (`addSystem.api_docs_summary`)", 
+            "extracted API Reference text (`addSystem.api_reference_extracted_text`)",
+            "your latest activity (`addSystem.latest_activity`)"
+        ]
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-            prompt_context_elements.append("Airtable schema (`airtable_schema_summary`)")
+            prompt_context_elements.append("Airtable schema (`addSystem.airtable_schema_summary`)")
         if previous_api_results:
-            prompt_context_elements.append("previous API results (`previous_api_results`)")
+            prompt_context_elements.append("previous API results (`addSystem.previous_api_results`)")
         if user_message and iteration_count == 1:
-            prompt_context_elements.append("the user_provided_message")
+            prompt_context_elements.append("the user_provided_message (`addSystem.user_provided_message`)")
             
         prompt_context_review = f"Review your current context in `addSystem` ({', '.join(prompt_context_elements)}). "
 
@@ -830,9 +891,10 @@ def autonomously_run_ai_citizen_unguided(
 
         add_system_data = {
             "api_docs_summary": API_DOCUMENTATION_SUMMARY,
-            "api_reference_extracted_text": API_REFERENCE_EXTRACTED_TEXT, # Use extracted text
+            "api_reference_extracted_text": API_REFERENCE_EXTRACTED_TEXT, 
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
             "citizen_data": ai_citizen_record["fields"],
+            "latest_activity": latest_activity_data_unguided or {}, # Add latest activity
             "previous_api_results": previous_api_results
         }
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
