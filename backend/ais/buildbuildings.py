@@ -519,6 +519,21 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
+def _get_kinos_model_for_citizen(social_class: Optional[str]) -> str:
+    """Determines the Kinos model based on social class."""
+    if not social_class:
+        return "local" # Default model if social class is unknown
+    
+    s_class_lower = social_class.lower()
+    if s_class_lower == "nobili":
+        return "gemini-2.5-pro-preview-05-06"
+    elif s_class_lower in ["cittadini", "forestieri"]:
+        return "gemini-2.5-flash-preview-05-20"
+    elif s_class_lower in ["popolani", "facchini"]:
+        return "local"
+    else: # Default for any other unlisted social class
+        return "local"
+
 def prepare_ai_building_strategy(tables: Dict[str, Table], ai_citizen: Dict, citizen_lands: List[Dict], citizen_buildings: List[Dict], all_buildings: List[Dict]) -> Dict:
     """Prepare a comprehensive data package for the AI to make building decisions."""
     
@@ -797,9 +812,16 @@ If you decide not to build anything at this time, return an empty JSON object.
             "max_files": 8
         }
 
-        if kinos_model_override:
-            payload["model"] = kinos_model_override
-            log_info(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (building strategy).")
+        actual_model_to_use = kinos_model_override
+        if not actual_model_to_use:
+            ai_social_class = data_package.get("citizen", {}).get("social_class")
+            actual_model_to_use = _get_kinos_model_for_citizen(ai_social_class)
+
+        if actual_model_to_use:
+            payload["model"] = actual_model_to_use
+            log_info(f"Using Kinos model '{actual_model_to_use}' for {ai_username} (building strategy).")
+        else: # Should not be reached
+            log_warning(f"Warning: No Kinos model override and could not determine model from social class for {ai_username}. Using Kinos default.")
         
         # Make the API request
         log_info(f"Making API request to Kinos for {ai_username}...")
@@ -1374,9 +1396,17 @@ Your response must be a JSON object with:
             "max_files": 15
         }
 
-        if kinos_model_override:
-            payload["model"] = kinos_model_override
-            log_info(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (building placement).")
+        actual_model_to_use_placement = kinos_model_override
+        if not actual_model_to_use_placement:
+            # ai_citizen_record is passed to this function, get social class from it
+            ai_social_class_placement = ai_citizen_record.get("fields", {}).get("SocialClass")
+            actual_model_to_use_placement = _get_kinos_model_for_citizen(ai_social_class_placement)
+
+        if actual_model_to_use_placement:
+            payload["model"] = actual_model_to_use_placement
+            log_info(f"Using Kinos model '{actual_model_to_use_placement}' for {ai_username} (building placement).")
+        else: # Should not be reached
+            log_warning(f"Warning: No Kinos model override and could not determine model from social class for {ai_username} (placement). Using Kinos default.")
         
         # Make the API request
         log_info(f"Making building placement API request to Kinos for {ai_username}...")

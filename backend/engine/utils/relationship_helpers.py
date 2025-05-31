@@ -197,6 +197,21 @@ def _get_kinos_api_key() -> Optional[str]:
         log.error(f"{LogColors.FAIL}Clé API Kinos (KINOS_API_KEY) non trouvée.{LogColors.ENDC}")
     return api_key
 
+def _rh_get_kinos_model_for_citizen(social_class: Optional[str]) -> str:
+    """RH: Determines the Kinos model based on social class."""
+    if not social_class:
+        return "local"
+    
+    s_class_lower = social_class.lower()
+    if s_class_lower == "nobili":
+        return "gemini-2.5-pro-preview-05-06"
+    elif s_class_lower in ["cittadini", "forestieri"]:
+        return "gemini-2.5-flash-preview-05-20"
+    elif s_class_lower in ["popolani", "facchini"]:
+        return "local"
+    else:
+        return "local"
+
 def _get_citizen_details(tables: Dict[str, Any], username: str) -> Optional[Dict[str, Any]]:
     """Récupère les détails d'un citoyen, notamment IsAI et FirstName."""
     try:
@@ -225,9 +240,26 @@ def _generate_kinos_message_content(
         headers = {"Authorization": f"Bearer {kinos_api_key}", "Content-Type": "application/json"}
         payload = {"message": prompt}
 
-        if kinos_model_override:
-            payload["model"] = kinos_model_override
-            log.info(f"Utilisation du modèle Kinos '{kinos_model_override}' pour {kin_username} -> {channel_username}.")
+        actual_model_to_use = kinos_model_override
+        if not actual_model_to_use:
+            # Determine social class from add_system_data if possible, or fetch if necessary
+            # This function is generic, so social class might not always be in add_system_data
+            # For reaction dialogues, the calling function _initiate_reaction_dialogue_if_both_ai
+            # will determine the model based on the kin_username's social class.
+            # This function will prioritize kinos_model_override if passed.
+            # If kinos_model_override is None, the calling function should have already decided.
+            # However, to be robust, if add_system_data contains profile info, we can try to use it.
+            # This is a bit complex as the structure of add_system_data can vary.
+            # For now, we rely on kinos_model_override being correctly set by the caller.
+            # If it's not set, Kinos default will be used.
+            # The primary logic for model selection based on social class should be in the functions
+            # that *prepare* the call to _generate_kinos_message_content.
+            pass # Rely on kinos_model_override or Kinos default if not set.
+
+        if actual_model_to_use: # If an override was provided
+            payload["model"] = actual_model_to_use
+            log.info(f"Utilisation du modèle Kinos '{actual_model_to_use}' pour {kin_username} -> {channel_username}.")
+        # If no override, Kinos default is used. The calling function is responsible for class-based selection.
         
         if add_system_data:
             try:
@@ -368,12 +400,16 @@ def _initiate_reaction_dialogue_if_both_ai(
         f"Focus on how this interaction could strategically advance your position or goals in Venice. Keep it short, gameplay-focused, and conversational."
     )
     
+    # Determine model for receiver
+    receiver_social_class = receiver_details.get("SocialClass")
+    model_for_receiver = _rh_get_kinos_model_for_citizen(receiver_social_class)
+
     receiver_reaction_content = _generate_kinos_message_content(
         kin_username=receiver_of_action_username,
         channel_username=actor_username,
         prompt=prompt_for_receiver,
         kinos_api_key=kinos_api_key,
-        kinos_model_override="local",
+        kinos_model_override=model_for_receiver, # Utiliser le modèle basé sur la classe sociale
         add_system_data=system_context_data # Passer le contexte
     )
 
@@ -410,12 +446,16 @@ def _initiate_reaction_dialogue_if_both_ai(
             f"Focus on how this interaction could strategically advance your position or goals in Venice. Keep it short, gameplay-focused, and conversational."
         )
 
+        # Determine model for actor
+        actor_social_class = actor_details.get("SocialClass")
+        model_for_actor_reply = _rh_get_kinos_model_for_citizen(actor_social_class)
+
         actor_reply_content = _generate_kinos_message_content(
             kin_username=actor_username,
             channel_username=receiver_of_action_username,
             prompt=prompt_for_actor_reply,
             kinos_api_key=kinos_api_key,
-            kinos_model_override="local",
+            kinos_model_override=model_for_actor_reply, # Utiliser le modèle basé sur la classe sociale
             add_system_data=system_context_data_for_actor_reply # Passer le contexte mis à jour
         )
 
