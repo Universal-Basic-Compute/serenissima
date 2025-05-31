@@ -134,7 +134,7 @@ export default function BuildingDetailsPanel({
   const [chatMessages, setChatMessages] = useState<{ id: string, sender: string, role: 'user' | 'assistant', text: string, time: string }[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isAiResponding, setIsAiResponding] = useState<boolean>(false); // Will double as context loading
-  const [kinosModel, setKinosModel] = useState<'gemini-2.5-flash-preview-05-20' | 'local'>('gemini-2.5-flash-preview-05-20'); // Added kinosModel state
+  const [kinosModel, setKinosModel] = useState<'gemini-2.5-pro-preview-05-06' | 'local'>('gemini-2.5-pro-preview-05-06'); // Added kinosModel state
     
   // State for citizen profiles
   const [ownerProfile, setOwnerProfile] = useState<any>(null);
