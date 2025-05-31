@@ -260,3 +260,33 @@ Common issues with the activity system:
 4. **Missing activities**: Can occur if the activity creation script fails to run on schedule
 
 To resolve these issues, check the activity creation logs and ensure all related systems (housing, employment, transport) are functioning correctly.
+
+## API-Driven Activity Creation
+
+In addition to the engine-driven activity creation (`createActivities.py`), activities can also be created directly via the `POST /api/actions/create-activity` endpoint. This method is primarily intended for AI agents (like those managed by `autonomouslyRun.py` in unguided mode) or other external systems that require precise control over activity generation.
+
+### Process:
+
+1.  **Client-Side Decision**: The client (e.g., Kinos AI) determines the full details of the activity to be created. This includes:
+    *   `citizenUsername`: The target citizen.
+    *   `activityType`: The specific type of activity.
+    *   `activityDetails`: A JSON object containing all necessary parameters for that activity type.
+        *   For travel-related activities (e.g., `goto_work`, `goto_home`), the client is responsible for first calling the `/api/transport` endpoint to obtain valid `pathData` (including path coordinates and timing) and then including this `pathData` within the `activityDetails`.
+2.  **API Request**: The client sends a POST request to `/api/actions/create-activity` with the composed payload.
+3.  **Server Validation**: The API endpoint validates the basic structure of the request and the `activityDetails` against predefined schemas for the given `activityType`. It does *not* perform complex game logic like pathfinding or resource availability checks (these are assumed to have been done by the client).
+4.  **Airtable Record Creation**: If validation passes, a new activity record is created in the `ACTIVITIES` table with `Status: "created"`.
+5.  **Engine Processing**: The standard `processActivities.py` script will eventually pick up this "created" activity and execute its corresponding processor logic.
+
+### Use Cases:
+
+-   **Unguided AI**: Allows AI agents to have fine-grained control over their actions, enabling more complex or emergent behaviors.
+-   **External Tools**: Could allow other tools or game masters to inject specific activities into the simulation.
+-   **Player-Initiated Complex Actions (Future)**: Could potentially be used by the UI to initiate complex, multi-step actions that are best defined as a specific activity.
+
+### Considerations:
+
+-   The client (AI) bears more responsibility for ensuring the validity and sensibleness of the activity parameters.
+-   This method bypasses the prioritized decision logic of `citizen_general_activities.py`.
+-   Care must be taken to avoid conflicts if both engine-driven and API-driven activity creation are active for the same citizen.
+
+Refer to the API Reference (`components/Documentation/ApiReference.tsx`) for the detailed payload structure of the `POST /api/actions/create-activity` endpoint.

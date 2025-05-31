@@ -662,22 +662,27 @@ def autonomously_run_ai_citizen_unguided(
         log.info(f"{LogColors.OKCYAN}--- Unguided Iteration {iteration_count} for {ai_username} ---{LogColors.ENDC}")
 
         current_prompt = (
-            f"You are {ai_display_name}, an AI citizen in La Serenissima. "
-            "Given your current context (see `addSystem`), "
-            "decide on your next API actions (GET or POST). "
-            "If no further actions are needed, respond with an empty 'actions' list. "
+            f"You are {ai_display_name}, an AI citizen in La Serenissima. Your goal is to act autonomously and strategically. "
+            "Review your current context in `addSystem` (citizen data, API docs, Airtable schema, previous API results if any). "
+            "Decide on a sequence of actions. Actions can be:\n"
+            "1. Generic GET requests to any API endpoint to gather information.\n"
+            "2. Generic POST requests to any API endpoint to perform general actions.\n"
+            "3. Specific POST requests to `/api/actions/create-activity` to directly create a new activity for yourself. If creating a travel activity, you must first call `/api/transport` to get pathData and include it in the `activityDetails`.\n"
+            "If no further actions are needed now, respond with an empty 'actions' list. "
             "Provide your reasoning or reflection in the 'reflection' field. "
             "Respond with a JSON object: "
-            "`{\"actions\": [{\"method\": \"GET\", \"endpoint\": \"/api/...\", \"params\": {...}}, ...], \"reflection\": \"Your thoughts...\"}`"
+            "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your thoughts...\"}`\n"
+            "For `/api/actions/create-activity`, the 'body' of your action should be the payload for that endpoint, including `citizenUsername`, `activityType`, and `activityDetails`."
         )
-        if previous_api_results: # Modify prompt slightly if there are previous results
+        if previous_api_results:
              current_prompt = (
                 f"You are {ai_display_name}. The results of your previous API calls are in `addSystem.previous_api_results`. "
                 "Based on this and your overall context (see `addSystem`), what do you want to do next? "
+                "Actions can be GET, POST, or a specific POST to `/api/actions/create-activity` (remember to get pathData first for travel). "
                 "If no further actions, respond with an empty 'actions' list. "
                 "Provide your reasoning or reflection in the 'reflection' field. "
                 "Respond with a JSON object: "
-                "`{\"actions\": [{\"method\": \"GET\", \"endpoint\": \"/api/...\", \"params\": {...}}, ...], \"reflection\": \"Your thoughts...\"}`"
+                "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your thoughts...\"}`"
             )
 
         add_system_data = {

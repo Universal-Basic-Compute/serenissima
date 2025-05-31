@@ -2445,6 +2445,96 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             </pre>
           </div>
         </div>
+
+        <div id="transport-post-create-activity" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/actions/create-activity</h3>
+          <p className="mb-2">
+            Allows direct creation of a specific activity for a citizen. This endpoint is intended for AI agents or advanced tools
+            that can pre-determine all necessary activity parameters, including pathfinding for travel.
+          </p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <p className="text-xs mb-2 text-gray-600">
+              Field names in the main payload should be camelCase. The server converts them to PascalCase for Airtable.
+              The structure of <code>activityDetails</code> varies significantly based on <code>activityType</code>.
+            </p>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "citizenUsername": "string", // Required: Username of the citizen
+  "activityType": "string", // Required: Type of activity (e.g., "rest", "goto_work", "production", "fetch_resource")
+  "activityDetails": {
+    // --- Example for "rest" ---
+    // "buildingId": "string", // ID of home or inn
+    // "locationType": "home" | "inn",
+    // "durationHours": number, // e.g., 8
+    // "notes": "string" // Optional
+
+    // --- Example for "goto_work" (or other travel) ---
+    // "toBuildingId": "string",
+    // "fromBuildingId": "string", // Optional, if starting from a specific building
+    // "pathData": { /* Full pathData object from /api/transport response */
+    //   "success": true,
+    //   "path": [{ "lat": number, "lng": number, ... }],
+    //   "timing": { "startDate": "ISOString", "endDate": "ISOString", "durationSeconds": number, ... }
+    // },
+    // "notes": "string" // Optional
+
+    // --- Example for "production" ---
+    // "buildingId": "string", // Workshop where production occurs
+    // "recipe": {
+    //   "inputs": { "resource_id_1": amount1, "resource_id_2": amount2 }, // Optional if no inputs
+    //   "outputs": { "output_resource_id": amount_produced },
+    //   "craftMinutes": number
+    // },
+    // "notes": "string" // Optional
+
+    // --- Example for "fetch_resource" ---
+    // "contractId": "string", // Optional, if fetching against a specific contract
+    // "fromBuildingId": "string", // Optional, if fetching from a specific building (requires pathData)
+    // "toBuildingId": "string", // Destination (e.g., citizen's home or workshop)
+    // "resourceId": "string", // Type of resource to fetch
+    // "amount": number,
+    // "pathData": { /* Required if fromBuildingId is specified */ }, // Optional
+    // "notes": "string" // Optional
+    
+    // ... other activity types will have different 'activityDetails' structures
+  },
+  "kinosReflection": "string" // Optional: AI's reasoning for this action
+}`}
+            </pre>
+            <p className="mt-2 text-sm">
+              Refer to the server-side Zod schemas in <code>app/api/actions/create-activity/route.ts</code> for the precise expected structure of <code>activityDetails</code> for each <code>activityType</code>.
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "message": "Activity 'activityType' created successfully for citizenUsername.",
+  "activity": { // The created Airtable activity record (fields in PascalCase)
+    "Id": "string", // Airtable Record ID
+    "ActivityId": "string",
+    "Citizen": "string",
+    "Type": "string",
+    "StartDate": "string", // ISO date string
+    "EndDate": "string", // ISO date string
+    "Status": "created",
+    // ... other fields based on activity type
+  }
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Important Notes</h4>
+            <ul className="list-disc pl-6">
+              <li>This endpoint requires the client (e.g., Kinos AI) to perform all necessary pre-calculations, including pathfinding.</li>
+              <li>The server validates the payload structure but assumes the semantic correctness of the provided details (e.g., that a path is valid).</li>
+              <li>This provides maximum control to the AI but also places more responsibility on it for constructing valid and sensible activities.</li>
+              <li>Activities created via this API will have their `Status` set to "created". The `processActivities.py` engine script will then pick them up for execution.</li>
+            </ul>
+          </div>
+        </div>
       </section>
       
       {/* Economy Section */}
