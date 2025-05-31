@@ -1826,8 +1826,15 @@ Your response:`;
                           <p><strong>Recent Notifications for AI:</strong> {contextualDataForChat.targetNotifications?.length ?? 0} items</p>
                           <p><strong>Recent Relevancies (AI to Sender):</strong> {contextualDataForChat.relevancies?.length ?? 0} items</p>
                           <p><strong>Recent Problems (AI or Sender):</strong> {contextualDataForChat.problems?.length ?? 0} items</p>
-                          {/* You can add a button to log the full object to console if needed */}
-                          {/* <button onClick={() => console.log('Full Contextual Data:', contextualDataForChat)} className="text-blue-500 text-xs">Log Full Context</button> */}
+                          
+                          <details className="mt-1 text-xs text-gray-500 border border-amber-100 rounded-sm">
+                            <summary className="cursor-pointer p-1 font-medium text-amber-600 hover:bg-amber-100 rounded-t-sm">
+                              View Raw Context Data
+                            </summary>
+                            <pre className="p-2 bg-amber-200/30 text-[10px] rounded-b-sm overflow-auto max-h-40 custom-scrollbar">
+                              {JSON.stringify(contextualDataForChat, null, 2)}
+                            </pre>
+                          </details>
                         </div>
                       </details>
                     )}
