@@ -64,27 +64,42 @@ class LogColors:
     FAIL = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
+    LIGHTBLUE = '\033[94m' # For Kinos prompts/responses
+    PINK = '\033[95m' # For API responses
 
 # Import colorama for log_header
 try:
-    from colorama import Fore, Style
+    from colorama import Fore, Style, init as colorama_init
+    colorama_init(autoreset=True) # Initialize colorama and autoreset styles
     colorama_available = True
 except ImportError:
     colorama_available = False
     # Define dummy Fore and Style if colorama is not available
     class Fore:
         CYAN = ''
+        MAGENTA = '' # Used in new log_header
+        YELLOW = '' # Used for dry_run
     class Style:
         BRIGHT = ''
-        RESET_ALL = ''
+        RESET_ALL = '' # Autoreset handles this, but keep for compatibility
 
-def log_header(message: str):
+def log_header(message: str, color_code: str = Fore.CYAN):
     """Prints a header message with a colorful border if colorama is available."""
     if colorama_available:
-        border = "=" * 80
-        print(f"\n{Fore.CYAN}{border}")
-        print(f"{Fore.CYAN}{Style.BRIGHT}{message.center(80)}")
-        print(f"{Fore.CYAN}{border}{Style.RESET_ALL}\n")
+        border_char = "═"
+        side_char = "║"
+        corner_tl = "╔"
+        corner_tr = "╗"
+        corner_bl = "╚"
+        corner_br = "╝"
+        
+        message_len = len(message)
+        # Adjust width dynamically or keep fixed, for now fixed at 80
+        width = 80 
+        
+        print(f"\n{color_code}{Style.BRIGHT}{corner_tl}{border_char * (width - 2)}{corner_tr}")
+        print(f"{color_code}{Style.BRIGHT}{side_char} {message.center(width - 4)} {side_char}")
+        print(f"{color_code}{Style.BRIGHT}{corner_bl}{border_char * (width - 2)}{corner_br}{Style.RESET_ALL}\n")
     else:
         border = "=" * (len(message) + 4)
         print(f"\n{border}")
@@ -106,12 +121,12 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
         tables = {
             "citizens": api.table(airtable_base_id, "CITIZENS"),
             "messages": api.table(airtable_base_id, "MESSAGES"), # For logging AI reflections
-            "notifications": api.table(airtable_base_id, "NOTIFICATIONS"),
+            "notifications": api.table(airtable_base_id, "NOTIFICATIONS"), # For admin notifications
         }
-        log.info(f"{LogColors.OKGREEN}Airtable connection initialized.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}Airtable connection initialized successfully.{LogColors.ENDC}")
         return tables
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Failed to initialize Airtable: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Failed to initialize Airtable: {e}{LogColors.ENDC}", exc_info=True)
         return None
 
 def get_kinos_api_key() -> Optional[str]:
@@ -130,20 +145,20 @@ def get_ai_citizens_for_autonomous_run(tables: Dict[str, Table], specific_userna
         base_formula_parts = ["{IsAI}=1", "{InVenice}=1", "NOT({SocialClass}='Nobili')"]
         if specific_username:
             base_formula_parts.append(f"{{Username}}='{_escape_airtable_value(specific_username)}'")
-            log.info(f"Fetching specific AI citizen for autonomous run: {specific_username}")
+            log.info(f"{LogColors.OKBLUE}Fetching specific AI citizen for autonomous run: {specific_username}{LogColors.ENDC}")
         else:
-            log.info("Fetching all eligible AI citizens for autonomous run.")
+            log.info(f"{LogColors.OKBLUE}Fetching all eligible AI citizens for autonomous run.{LogColors.ENDC}")
         
         formula = "AND(" + ", ".join(base_formula_parts) + ")"
         citizens = tables["citizens"].all(formula=formula)
         
         if not citizens:
-            log.warning(f"{LogColors.WARNING}No AI citizens found matching criteria.{LogColors.ENDC}")
+            log.warning(f"{LogColors.WARNING}No AI citizens found matching criteria: {formula}{LogColors.ENDC}")
         else:
-            log.info(f"Found {len(citizens)} AI citizen(s) for autonomous run.")
+            log.info(f"{LogColors.OKGREEN}Found {len(citizens)} AI citizen(s) for autonomous run.{LogColors.ENDC}")
         return citizens
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error fetching AI citizens: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error fetching AI citizens: {e}{LogColors.ENDC}", exc_info=True)
         return []
 
 # --- API Interaction Helpers ---
@@ -152,33 +167,42 @@ def make_api_get_request(endpoint: str, params: Optional[Dict] = None) -> Option
     """Makes a GET request to the game API."""
     url = f"{API_BASE_URL}{endpoint}"
     try:
-        log.info(f"Making GET request to: {url} with params: {params}")
+        log.info(f"{LogColors.OKBLUE}Making API GET request to: {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKBLUE} with params: {params}{LogColors.ENDC}")
         response = requests.get(url, params=params, timeout=20)
         response.raise_for_status()
-        return response.json()
+        response_json = response.json()
+        log.info(f"{LogColors.OKGREEN}API GET request to {url} successful.{LogColors.ENDC}")
+        log.debug(f"{LogColors.PINK}Response from GET {url}: {json.dumps(response_json, indent=2)[:500]}...{LogColors.ENDC}")
+        return response_json
     except requests.exceptions.RequestException as e:
-        log.error(f"{LogColors.FAIL}API GET request to {url} failed: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}API GET request to {url} failed: {e}{LogColors.ENDC}", exc_info=True)
         return None
     except json.JSONDecodeError:
-        log.error(f"{LogColors.FAIL}Failed to decode JSON response from GET {url}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Failed to decode JSON response from GET {url}{LogColors.ENDC}", exc_info=True)
         return None
 
 def make_api_post_request(endpoint: str, body: Optional[Dict] = None) -> Optional[Dict]:
     """Makes a POST request to the game API."""
     url = f"{API_BASE_URL}{endpoint}"
+    log_body_snippet = json.dumps(body, indent=2)[:200] + "..." if body else "None"
     try:
-        log.info(f"Making POST request to: {url} with body: {body}")
+        log.info(f"{LogColors.OKBLUE}Making API POST request to: {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKBLUE} with body: {log_body_snippet}{LogColors.ENDC}")
         response = requests.post(url, json=body, timeout=30)
         response.raise_for_status()
-        # Some POST requests might not return JSON (e.g., 204 No Content)
+        
         if response.content:
-            return response.json()
+            response_json = response.json()
+            log.info(f"{LogColors.OKGREEN}API POST request to {url} successful.{LogColors.ENDC}")
+            log.debug(f"{LogColors.PINK}Response from POST {url}: {json.dumps(response_json, indent=2)[:500]}...{LogColors.ENDC}")
+            return response_json
+        
+        log.info(f"{LogColors.OKGREEN}API POST request to {url} successful (Status: {response.status_code}, No content returned).{LogColors.ENDC}")
         return {"status_code": response.status_code, "success": True, "message": "POST successful, no content returned."}
     except requests.exceptions.RequestException as e:
-        log.error(f"{LogColors.FAIL}API POST request to {url} failed: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}API POST request to {url} failed: {e}{LogColors.ENDC}", exc_info=True)
         return {"success": False, "error": str(e)}
     except json.JSONDecodeError:
-        log.error(f"{LogColors.FAIL}Failed to decode JSON response from POST {url}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Failed to decode JSON response from POST {url}{LogColors.ENDC}", exc_info=True)
         return {"success": False, "error": "JSONDecodeError"}
 
 # --- Kinos Interaction Helper ---
@@ -207,12 +231,13 @@ def make_kinos_call(
 
     if kinos_model_override:
         payload["model"] = kinos_model_override
-        log.info(f"Using Kinos model override '{kinos_model_override}' for {ai_username}.")
+        log.info(f"{LogColors.OKBLUE}Using Kinos model override '{kinos_model_override}' for {ai_username}.{LogColors.ENDC}")
 
     try:
-        log.info(f"Sending request to Kinos for {ai_username} on channel {KINOS_CHANNEL_AUTONOMOUS_RUN}...")
-        # log.debug(f"Kinos Payload (excluding addSystem if large): { {k:v for k,v in payload.items() if k != 'addSystem'} }")
-        # if "addSystem" in payload: log.debug(f"Kinos addSystem keys: {add_system_data.keys() if add_system_data else 'None'}")
+        log.info(f"{LogColors.OKBLUE}Sending request to Kinos for {LogColors.BOLD}{ai_username}{LogColors.ENDC}{LogColors.OKBLUE} on channel {KINOS_CHANNEL_AUTONOMOUS_RUN}...{LogColors.ENDC}")
+        log.debug(f"{LogColors.LIGHTBLUE}Kinos Prompt for {ai_username}: {prompt[:200]}...{LogColors.ENDC}")
+        if add_system_data:
+            log.debug(f"{LogColors.LIGHTBLUE}Kinos addSystem keys for {ai_username}: {list(add_system_data.keys())}{LogColors.ENDC}")
 
 
         response = requests.post(kinos_url, headers=headers, json=payload, timeout=120) # Increased timeout
@@ -225,33 +250,36 @@ def make_kinos_call(
         
         assistant_messages = [msg for msg in messages_data.get("messages", []) if msg.get("role") == "assistant"]
         if not assistant_messages:
-            log.warning(f"{LogColors.WARNING}No assistant messages found in Kinos history for {ai_username}.{LogColors.ENDC}")
+            log.warning(f"{LogColors.WARNING}No assistant messages found in Kinos history for {ai_username}. Full history response: {messages_data}{LogColors.ENDC}")
             return None
         
         assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
         latest_ai_response_content = assistant_messages[0].get("content")
 
         if not latest_ai_response_content:
-            log.warning(f"{LogColors.WARNING}Latest Kinos assistant message for {ai_username} has no content.{LogColors.ENDC}")
+            log.warning(f"{LogColors.WARNING}Latest Kinos assistant message for {ai_username} has no content. Message object: {assistant_messages[0]}{LogColors.ENDC}")
             return None
         
         log.info(f"{LogColors.OKGREEN}Received Kinos response for {ai_username}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
-        # log.debug(f"Kinos raw response content for {ai_username}: {latest_ai_response_content[:500]}...")
+        log.debug(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username}: {latest_ai_response_content[:500]}...{LogColors.ENDC}")
 
         # Attempt to parse as JSON, otherwise return as text
         try:
-            return json.loads(latest_ai_response_content)
+            parsed_response = json.loads(latest_ai_response_content)
+            log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username}: {json.dumps(parsed_response, indent=2)[:500]}...{LogColors.ENDC}")
+            return parsed_response
         except json.JSONDecodeError:
             # If it's not JSON, it might be the textual reflection from step 3
+            log.debug(f"{LogColors.LIGHTBLUE}Kinos response for {ai_username} is not JSON, treating as reflection text.{LogColors.ENDC}")
             return {"reflection_text": latest_ai_response_content}
 
     except requests.exceptions.RequestException as e:
-        log.error(f"{LogColors.FAIL}Kinos API request error for {ai_username}: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Kinos API request error for {ai_username}: {e}{LogColors.ENDC}", exc_info=True)
         if hasattr(e, 'response') and e.response is not None:
-            log.error(f"Kinos error response: {e.response.text[:500]}")
+            log.error(f"{LogColors.FAIL}Kinos error response content: {e.response.text[:500]}{LogColors.ENDC}")
         return None
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error in make_kinos_call for {ai_username}: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error in make_kinos_call for {ai_username}: {e}{LogColors.ENDC}", exc_info=True)
         return None
 
 # --- API Documentation Summary ---
@@ -291,15 +319,15 @@ def autonomously_run_ai_citizen(
     ai_username = ai_citizen_record["fields"].get("Username")
     ai_display_name = ai_citizen_record["fields"].get("FirstName", ai_username)
     if not ai_username:
-        log.warning(f"AI citizen record {ai_citizen_record['id']} missing Username. Skipping.")
+        log.warning(f"{LogColors.WARNING}AI citizen record {ai_citizen_record['id']} missing Username. Skipping.{LogColors.ENDC}")
         return
 
-    log.info(f"{LogColors.HEADER}--- Starting Autonomous Run for {ai_username} ({ai_display_name}) ---{LogColors.ENDC}")
+    log_header(f"Starting Autonomous Run for {ai_username} ({ai_display_name})", color_code=Fore.MAGENTA if colorama_available else '')
 
     # Step 1: Gather Data
-    log.info(f"{LogColors.OKCYAN}Step 1: Gather Data for {ai_username}{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}--- Step 1: Gather Data for {ai_username} ---{LogColors.ENDC}")
     prompt_step1 = (
-        f"You are {ai_display_name}, an AI citizen in Serenissima. Your current goal is to understand your situation and identify opportunities. "
+        f"You are {ai_display_name}, an AI citizen in La Serenissima. Your current goal is to understand your situation and identify opportunities. "
         f"The base API URL is {API_BASE_URL}. Review the API documentation summary provided in `addSystem.api_docs`. "
         "Decide which single GET API endpoint you want to call to gather initial data relevant to your goals (e.g., your assets, market conditions, problems). "
         "Respond with a JSON object like: `{\"endpoint\": \"/api/your/choice\", \"params\": {\"key\": \"value\"}}` or `{\"endpoint\": \"/api/your/choice\"}` if no params. "
@@ -314,13 +342,14 @@ def autonomously_run_ai_citizen(
     api_get_request_details = None
     if kinos_response_step1 and isinstance(kinos_response_step1, dict) and "endpoint" in kinos_response_step1:
         api_get_request_details = kinos_response_step1
-        log.info(f"AI {ai_username} decided to call GET: {api_get_request_details}")
+        log.info(f"{LogColors.OKGREEN}AI {ai_username} decided to call GET: {LogColors.BOLD}{api_get_request_details['endpoint']}{LogColors.ENDC}{LogColors.OKGREEN} with params: {api_get_request_details.get('params')}{LogColors.ENDC}")
     elif dry_run:
-        log.info(f"[DRY RUN] AI {ai_username} would decide on a GET API call.")
+        log.info(f"{Fore.YELLOW}[DRY RUN] AI {ai_username} would decide on a GET API call.{Style.RESET_ALL}")
         # Simulate a common GET call for dry run
         api_get_request_details = {"endpoint": f"/api/citizens/{ai_username}"}
     else:
-        log.warning(f"Failed to get valid GET API decision from Kinos for {ai_username}. Response: {kinos_response_step1}")
+        log.warning(f"{LogColors.WARNING}Failed to get valid GET API decision from Kinos for {ai_username}. Response: {kinos_response_step1}{LogColors.ENDC}")
+        log_header(f"Autonomous Run for {ai_username} ({ai_display_name}) INTERRUPTED after Step 1", color_code=Fore.RED if colorama_available else '')
         return # End process for this AI if step 1 fails
 
     api_get_response_data = None
@@ -330,21 +359,20 @@ def autonomously_run_ai_citizen(
         if not dry_run:
             api_get_response_data = make_api_get_request(endpoint, params)
             if api_get_response_data:
-                log.info(f"Successfully received data from GET {endpoint} for {ai_username}.")
-                # log.debug(f"GET Response data for {ai_username}: {json.dumps(api_get_response_data, indent=2)[:1000]}...") # Log snippet
+                log.info(f"{LogColors.OKGREEN}Successfully received data from GET {endpoint} for {ai_username}.{LogColors.ENDC}")
             else:
-                log.warning(f"Failed to get data from GET {endpoint} for {ai_username}.")
-                # Potentially end here or allow AI to react to the failure in step 2
+                log.warning(f"{LogColors.WARNING}Failed to get data from GET {endpoint} for {ai_username}. AI will proceed with no data.{LogColors.ENDC}")
+                api_get_response_data = {"error": f"Failed to fetch data from {endpoint}"} # Provide error structure for AI
         else:
-            log.info(f"[DRY RUN] Would make GET request to {endpoint} with params {params} for {ai_username}.")
+            log.info(f"{Fore.YELLOW}[DRY RUN] Would make GET request to {endpoint} with params {params} for {ai_username}.{Style.RESET_ALL}")
             api_get_response_data = {"dry_run_data": f"Simulated response from GET {endpoint}"}
 
 
     # Step 2: Elaborate Strategy & Define Actions
-    log.info(f"{LogColors.OKCYAN}Step 2: Elaborate Strategy & Define Actions for {ai_username}{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}--- Step 2: Elaborate Strategy & Define Actions for {ai_username} ---{LogColors.ENDC}")
     prompt_step2 = (
         f"You are {ai_display_name}. You previously requested data via GET API. "
-        f"The response was (or simulated response if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
+        f"The response was (or simulated/error response if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
         "Based on this data, your overall goals, and the API documentation in `addSystem.api_docs`, define your strategy and the next actions. "
         "Respond with a JSON object: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {...}}, ...]}`. "
         "If no actions are needed now, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`."
@@ -361,52 +389,53 @@ def autonomously_run_ai_citizen(
         strategy_summary = kinos_response_step2.get("strategy_summary", strategy_summary)
         if "actions" in kinos_response_step2 and isinstance(kinos_response_step2["actions"], list):
             api_post_actions = kinos_response_step2["actions"]
-            log.info(f"AI {ai_username} strategy: {strategy_summary}")
-            log.info(f"AI {ai_username} decided on {len(api_post_actions)} POST actions.")
+            log.info(f"{LogColors.OKGREEN}AI {ai_username} strategy: {LogColors.BOLD}{strategy_summary}{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}AI {ai_username} decided on {len(api_post_actions)} POST actions.{LogColors.ENDC}")
+            if api_post_actions: log.debug(f"{LogColors.LIGHTBLUE}Actions: {json.dumps(api_post_actions, indent=2)}{LogColors.ENDC}")
         else:
-            log.warning(f"AI {ai_username} response for Step 2 did not contain a valid 'actions' list. Strategy: {strategy_summary}")
+            log.warning(f"{LogColors.WARNING}AI {ai_username} response for Step 2 did not contain a valid 'actions' list. Strategy: {strategy_summary}{LogColors.ENDC}")
     elif dry_run:
         strategy_summary = "[DRY RUN] AI would formulate a strategy."
-        log.info(strategy_summary)
-        log.info(f"[DRY RUN] AI {ai_username} would decide on POST API calls.")
-        # Simulate a common POST call for dry run
-        # api_post_actions = [{"method": "POST", "endpoint": "/api/messages/send", "body": {"sender": ai_username, "receiver": "ConsiglioDeiDieci", "content": "Reporting for duty."}}]
+        log.info(f"{Fore.YELLOW}{strategy_summary}{Style.RESET_ALL}")
+        log.info(f"{Fore.YELLOW}[DRY RUN] AI {ai_username} would decide on POST API calls.{Style.RESET_ALL}")
+        # api_post_actions = [{"method": "POST", "endpoint": "/api/messages/send", "body": {"sender": ai_username, "receiver": "ConsiglioDeiDieci", "content": "[DRY RUN] Reporting for duty."}}]
     else:
-        log.warning(f"Failed to get valid strategy/actions from Kinos for {ai_username} in Step 2. Response: {kinos_response_step2}")
+        log.warning(f"{LogColors.WARNING}Failed to get valid strategy/actions from Kinos for {ai_username} in Step 2. Response: {kinos_response_step2}{LogColors.ENDC}")
         # Continue to step 3 with no actions taken
 
     api_post_responses_summary = []
     if api_post_actions:
+        log.info(f"{LogColors.OKBLUE}Executing {len(api_post_actions)} POST action(s) for {ai_username}...{LogColors.ENDC}")
         for i, action in enumerate(api_post_actions):
             if isinstance(action, dict) and action.get("method") == "POST" and "endpoint" in action:
                 endpoint = action["endpoint"]
                 body = action.get("body")
-                log.info(f"Executing POST action {i+1}/{len(api_post_actions)} for {ai_username}: {endpoint}")
+                log.info(f"{LogColors.OKBLUE}--- Executing POST action {i+1}/{len(api_post_actions)} for {ai_username}: {LogColors.BOLD}{endpoint}{LogColors.ENDC}{LogColors.OKBLUE} ---{LogColors.ENDC}")
                 
                 post_response = None
                 if not dry_run:
                     post_response = make_api_post_request(endpoint, body)
                     if post_response and post_response.get("success"):
-                        log.info(f"POST to {endpoint} for {ai_username} successful.")
+                        log.info(f"{LogColors.OKGREEN}POST to {endpoint} for {ai_username} successful.{LogColors.ENDC}")
                     else:
-                        log.warning(f"POST to {endpoint} for {ai_username} failed or had no success flag. Response: {post_response}")
+                        log.warning(f"{LogColors.WARNING}POST to {endpoint} for {ai_username} failed or had no success flag. Response: {post_response}{LogColors.ENDC}")
                 else:
-                    log.info(f"[DRY RUN] Would make POST request to {endpoint} with body {body} for {ai_username}.")
+                    log.info(f"{Fore.YELLOW}[DRY RUN] Would make POST request to {endpoint} with body {json.dumps(body, indent=2)[:100]}... for {ai_username}.{Style.RESET_ALL}")
                     post_response = {"dry_run_post_response": f"Simulated response from POST {endpoint}", "success": True}
                 
                 api_post_responses_summary.append({
                     "action_endpoint": endpoint,
-                    "action_body": body, # Be mindful of logging sensitive data from body if any
-                    "response": post_response
+                    "action_body_snippet": json.dumps(body, indent=2)[:200] + "..." if body else "None",
+                    "response_summary": json.dumps(post_response, indent=2)[:200] + "..." if post_response else "None"
                 })
             else:
-                log.warning(f"Invalid action format from Kinos for {ai_username}: {action}")
+                log.warning(f"{LogColors.WARNING}Invalid action format from Kinos for {ai_username}: {action}{LogColors.ENDC}")
                 api_post_responses_summary.append({"error": "Invalid action format", "action_details": action})
     else:
-        log.info(f"No POST actions defined by {ai_username} in Step 2.")
+        log.info(f"{LogColors.OKBLUE}No POST actions defined by {ai_username} in Step 2.{LogColors.ENDC}")
 
     # Step 3: Note Results & Plan Next Steps
-    log.info(f"{LogColors.OKCYAN}Step 3: Note Results & Plan Next Steps for {ai_username}{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}--- Step 3: Note Results & Plan Next Steps for {ai_username} ---{LogColors.ENDC}")
     prompt_step3 = (
         f"You are {ai_display_name}. Your strategy was: '{strategy_summary}'. "
         f"Your POST actions resulted in (or simulated results if dry_run/failed): \n```json\n{json.dumps(api_post_responses_summary, indent=2)}\n```\n"
@@ -422,7 +451,7 @@ def autonomously_run_ai_citizen(
     ai_reflection = "No reflection generated."
     if kinos_response_step3 and isinstance(kinos_response_step3, dict) and "reflection_text" in kinos_response_step3:
         ai_reflection = kinos_response_step3["reflection_text"]
-        log.info(f"AI {ai_username} reflection: {ai_reflection}")
+        log.info(f"{LogColors.OKGREEN}AI {ai_username} reflection: {LogColors.BOLD}{ai_reflection}{LogColors.ENDC}")
         # Store reflection as a message to self
         if not dry_run and tables:
             try:
@@ -432,19 +461,19 @@ def autonomously_run_ai_citizen(
                     "Content": f"Autonomous Run Reflection:\nStrategy: {strategy_summary}\nReflection: {ai_reflection}",
                     "Type": "autonomous_run_log",
                     "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
-                    "ReadAt": datetime.now(VENICE_TIMEZONE).isoformat()
+                    "ReadAt": datetime.now(VENICE_TIMEZONE).isoformat() # Mark as read for self-log
                 })
-                log.info(f"Stored reflection for {ai_username}.")
+                log.info(f"{LogColors.OKGREEN}Stored reflection for {ai_username}.{LogColors.ENDC}")
             except Exception as e_msg:
-                log.error(f"Failed to store reflection message for {ai_username}: {e_msg}")
+                log.error(f"{LogColors.FAIL}Failed to store reflection message for {ai_username}: {e_msg}{LogColors.ENDC}", exc_info=True)
     elif dry_run:
         ai_reflection = "[DRY RUN] AI would generate a reflection."
-        log.info(ai_reflection)
-        if tables: log.info(f"[DRY RUN] Would store reflection for {ai_username}.")
+        log.info(f"{Fore.YELLOW}{ai_reflection}{Style.RESET_ALL}")
+        if tables: log.info(f"{Fore.YELLOW}[DRY RUN] Would store reflection for {ai_username}.{Style.RESET_ALL}")
     else:
-        log.warning(f"Failed to get valid reflection from Kinos for {ai_username} in Step 3. Response: {kinos_response_step3}")
+        log.warning(f"{LogColors.WARNING}Failed to get valid reflection from Kinos for {ai_username} in Step 3. Response: {kinos_response_step3}{LogColors.ENDC}")
 
-    log.info(f"{LogColors.HEADER}--- Autonomous Run for {ai_username} ({ai_display_name}) COMPLETED ---{LogColors.ENDC}\n")
+    log_header(f"Autonomous Run for {ai_username} ({ai_display_name}) COMPLETED", color_code=Fore.MAGENTA if colorama_available else '')
 
 
 def process_all_ai_autonomously(
@@ -453,7 +482,9 @@ def process_all_ai_autonomously(
     kinos_model_override: Optional[str] = None
 ):
     """Main function to process autonomous runs for AI citizens."""
-    log_header(f"Starting Autonomous AI Run Process (dry_run={dry_run}, citizen={specific_citizen_username or 'all'})")
+    run_mode = "DRY RUN" if dry_run else "LIVE RUN"
+    citizen_scope = specific_citizen_username if specific_citizen_username else "all eligible"
+    log_header(f"Starting Autonomous AI Process ({run_mode}, Citizen: {citizen_scope})", color_code=Fore.CYAN if colorama_available else '')
 
     tables = initialize_airtable()
     kinos_api_key = get_kinos_api_key()
@@ -464,17 +495,26 @@ def process_all_ai_autonomously(
 
     ai_citizens_to_process = get_ai_citizens_for_autonomous_run(tables, specific_citizen_username)
     if not ai_citizens_to_process:
-        return # Message already logged
+        log.warning(f"{LogColors.WARNING}No AI citizens to process. Exiting.{LogColors.ENDC}")
+        return
 
     processed_count = 0
+    start_time_total = time.time()
     for ai_citizen_record in ai_citizens_to_process:
+        start_time_citizen = time.time()
         autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override)
+        end_time_citizen = time.time()
+        log.info(f"{LogColors.OKBLUE}Time taken for {ai_citizen_record['fields'].get('Username', 'Unknown AI')}: {end_time_citizen - start_time_citizen:.2f} seconds.{LogColors.ENDC}")
         processed_count += 1
         if specific_citizen_username: # If processing a specific citizen, break after one.
             break
-        time.sleep(2) # Small delay between processing AIs to avoid overwhelming Kinos/API
+        if len(ai_citizens_to_process) > 1 and processed_count < len(ai_citizens_to_process) : # Avoid sleep if only one or last one
+            log.info(f"{LogColors.OKBLUE}Pausing for 2 seconds before next AI...{LogColors.ENDC}")
+            time.sleep(2) 
 
-    log_header(f"Autonomous AI Run Process Finished. Processed {processed_count} AI citizen(s).")
+    end_time_total = time.time()
+    total_duration = end_time_total - start_time_total
+    log_header(f"Autonomous AI Process Finished. Processed {processed_count} AI citizen(s) in {total_duration:.2f} seconds.", color_code=Fore.CYAN if colorama_available else '')
     
     # Admin Notification
     if not dry_run and tables and processed_count > 0:
@@ -484,15 +524,15 @@ def process_all_ai_autonomously(
                 admin_summary += f" (Specifically processed: {specific_citizen_username})"
             
             tables["notifications"].create({
-                "Citizen": "ConsiglioDeiDieci",
+                "Citizen": "ConsiglioDeiDieci", # Standard recipient for admin reports
                 "Type": "admin_report_autonomous_run",
                 "Content": admin_summary,
-                "Status": "unread",
-                "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat() + "Z"
+                "Status": "unread", # Ensure it's marked as unread
+                "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat() # Use timezone-aware ISO format
             })
-            log.info("Admin summary notification created for Autonomous Run.")
+            log.info(f"{LogColors.OKGREEN}Admin summary notification created for Autonomous Run.{LogColors.ENDC}")
         except Exception as e_admin_notif:
-            log.error(f"Failed to create admin summary notification: {e_admin_notif}")
+            log.error(f"{LogColors.FAIL}Failed to create admin summary notification: {e_admin_notif}{LogColors.ENDC}", exc_info=True)
 
 
 if __name__ == "__main__":
