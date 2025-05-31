@@ -410,12 +410,73 @@ def clean_thought_content(tables: Dict[str, Table], thought_content: str) -> str
 # Global variable to store Airtable schema content
 AIRTABLE_SCHEMA_CONTENT = ""
 
-# Global variable to store API Reference content
-API_REFERENCE_CONTENT = ""
+# Global variable to store API Reference content (raw and extracted)
+RAW_API_REFERENCE_CONTENT = ""
+API_REFERENCE_EXTRACTED_TEXT = ""
+
+def extract_text_from_api_reference(html_content: str) -> str:
+    """
+    Extracts key textual information from the ApiReference.tsx content.
+    This is a simplified extraction and might need refinement.
+    """
+    if not html_content:
+        return "API Reference content not available."
+
+    extracted_sections = []
+    
+    # Regex to find endpoint blocks (h3 for path, then subsequent relevant divs)
+    # This is a very basic regex and might need to be much more sophisticated
+    # or replaced with a proper HTML/JSX parser for robustness.
+    endpoint_blocks = re.finditer(
+        r'<h3.*?>(GET|POST|PATCH|DELETE)\s*([^\s<]+)</h3>\s*<p.*?>(.*?)</p>(.*?)(?=<h3|<section id="error-handling"|<section id="pagination"|<footer)', 
+        html_content, 
+        re.DOTALL | re.IGNORECASE
+    )
+
+    for block in endpoint_blocks:
+        method = block.group(1).strip()
+        path = block.group(2).strip()
+        description = block.group(3).strip()
+        details_html = block.group(4)
+
+        section_text = f"Endpoint: {method} {path}\nDescription: {description}\n"
+
+        # Extract Query Parameters
+        query_params_match = re.search(r'<h4[^>]*>Query Parameters</h4>.*?<ul.*?>(.*?)</ul>', details_html, re.DOTALL | re.IGNORECASE)
+        if query_params_match:
+            params_list_html = query_params_match.group(1)
+            params = re.findall(r'<li><code>(.*?)</code>(.*?)</li>', params_list_html, re.DOTALL | re.IGNORECASE)
+            if params:
+                section_text += "Query Parameters:\n"
+                for param_name, param_desc in params:
+                    param_desc_clean = re.sub(r'<.*?>', '', param_desc).strip()
+                    section_text += f"  - {param_name.strip()}: {param_desc_clean}\n"
+        
+        # Extract Request Body
+        req_body_match = re.search(r'<h4[^>]*>Request Body</h4>.*?<pre.*?>(.*?)</pre>', details_html, re.DOTALL | re.IGNORECASE)
+        if req_body_match:
+            body_example = req_body_match.group(1).strip()
+            body_example_clean = re.sub(r'<.*?>', '', body_example) # Basic tag stripping
+            section_text += f"Request Body Example:\n```json\n{body_example_clean}\n```\n"
+
+        # Extract Response
+        response_match = re.search(r'<h4[^>]*>Response</h4>.*?<pre.*?>(.*?)</pre>', details_html, re.DOTALL | re.IGNORECASE)
+        if response_match:
+            response_example = response_match.group(1).strip()
+            response_example_clean = re.sub(r'<.*?>', '', response_example) # Basic tag stripping
+            section_text += f"Response Example:\n```json\n{response_example_clean}\n```\n"
+            
+        extracted_sections.append(section_text)
+
+    if not extracted_sections:
+        return "Could not extract structured API details. Raw content might be too complex for simple regex."
+
+    return "\n\n---\n\n".join(extracted_sections)
+
 
 def load_api_reference_content():
-    """Loads the content of ApiReference.tsx."""
-    global API_REFERENCE_CONTENT
+    """Loads and extracts text from ApiReference.tsx."""
+    global RAW_API_REFERENCE_CONTENT, API_REFERENCE_EXTRACTED_TEXT
     try:
         # Assuming ApiReference.tsx is in components/Documentation/ApiReference.tsx
         # relative to the project root.
@@ -733,7 +794,7 @@ def autonomously_run_ai_citizen_unguided(
 
         prompt_intro = f"You are {ai_display_name}, an AI citizen in La Serenissima. Your goal is to act autonomously and strategically. "
         
-        prompt_context_elements = ["citizen data", "API docs summary (`api_docs_summary`)", "full API Reference (`api_reference_full`)"]
+        prompt_context_elements = ["citizen data", "API docs summary (`api_docs_summary`)", "extracted API Reference text (`api_reference_extracted_text`)"]
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
             prompt_context_elements.append("Airtable schema (`airtable_schema_summary`)")
         if previous_api_results:
@@ -763,7 +824,7 @@ def autonomously_run_ai_citizen_unguided(
 
         add_system_data = {
             "api_docs_summary": API_DOCUMENTATION_SUMMARY,
-            "api_reference_full": API_REFERENCE_CONTENT, 
+            "api_reference_extracted_text": API_REFERENCE_EXTRACTED_TEXT, # Use extracted text
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
             "citizen_data": ai_citizen_record["fields"],
             "previous_api_results": previous_api_results
