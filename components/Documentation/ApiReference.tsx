@@ -27,8 +27,18 @@ export default function ApiReference() {
             </p>
             <ul className="list-disc list-inside text-sm text-gray-700 pl-4 mt-1">
               <li>Example: <code>GET /api/buildings?Owner=NLR&Category=business</code>.</li>
-              <li>The server is generally flexible with the casing of query parameter keys (e.g., <code>Owner</code> or <code>owner</code> may work), but it's safest to assume Airtable field names are PascalCase (e.g., <code>SocialClass</code>, <code>ResourceType</code>). Refer to <code>backend/docs/airtable_schema.md</code> for exact Airtable field names.</li>
-              <li>Values are typically treated as strings. Numeric values are handled as numbers. Boolean values can be <code>true</code> or <code>false</code>.</li>
+              <li>The server is generally flexible with the casing of query parameter keys (e.g., <code>Owner</code> or <code>owner</code> may work). However, the actual Airtable field names used for filtering are <code>PascalCase</code> (e.g., <code>SocialClass</code>, <code>ResourceType</code>). Refer to <code>backend/docs/airtable_schema.md</code> for exact Airtable field names.</li>
+              <li>Values are typically treated as strings by default (et seront encadrées par des guillemets simples dans la formule Airtable). Les valeurs purement numériques sont traitées comme des nombres. Les chaînes booléennes "true" ou "false" (insensibles à la casse) sont converties en <code>TRUE()</code> ou <code>FALSE()</code>.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-amber-700 text-lg">Pagination for GET Requests:</h4>
+            <p className="text-sm text-gray-700">
+              Most GET endpoints that return lists support pagination using the following query parameters:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-700 pl-4 mt-1">
+              <li><code>limit</code> (optional): Specifies the maximum number of records to return. Defaults vary by endpoint (e.g., 100 or 1000).</li>
+              <li><code>offset</code> (optional): Specifies the number of records to skip. Used for fetching subsequent pages. Defaults to 0.</li>
             </ul>
           </div>
           <div>
@@ -252,18 +262,16 @@ export default function ApiReference() {
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'CITIZENS' table.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>SocialClass</code>, <code>IsAI</code>, <code>HomeCity</code>)
-              and the value is what you want to filter by. The base filter <code>{"{inVenice} = TRUE()"}</code> is always applied.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines on filtering and pagination parameters like <code>limit</code> and <code>offset</code>.
+            </p>
+            <p className="mb-2 text-sm">
+              A base filter <code>{"{inVenice} = TRUE()"}</code> is always applied for this endpoint.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of citizens returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?SocialClass=Nobili&IsAI=true</code> - Filters for AI citizens of Nobili class.</li>
-                  <li>Example: <code>?HomeCity=Florence</code> - Filters for citizens whose home city is Florence.</li>
-                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                  <li><code>?SocialClass=Nobili&IsAI=true</code> - Filters for AI citizens of Nobili class.</li>
+                  <li><code>?HomeCity=Florence</code> - Filters for citizens whose home city is Florence.</li>
                 </ul>
               </li>
             </ul>
@@ -631,18 +639,13 @@ export default function ApiReference() {
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <p className="mb-2 text-sm">
-              This endpoint supports dynamic filtering based on any field present in the Airtable 'LANDS' table.
-              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Owner</code>, <code>District</code>, <code>BuildingPointsCount</code>)
-              and the value is what you want to filter by.
+              Supports dynamic filtering and pagination. See the "Notes for AI Developers" section for general guidelines.
             </p>
             <ul className="list-disc pl-6">
-              <li><code>limit</code> (optional) - Limit the number of lands returned.</li>
-              <li><code>offset</code> (optional) - Offset for pagination.</li>
-              <li><em>Dynamic Filters:</em>
+              <li><em>Dynamic Filter Examples:</em>
                 <ul className="list-circle pl-5 mt-1">
-                  <li>Example: <code>?Owner=NLR&District=San%20Marco</code> - Filters for lands owned by 'NLR' in San Marco.</li>
-                  <li>Example: <code>?BuildingPointsCount=0</code> - Filters for lands with no building points.</li>
-                  <li>Values are treated as strings by default. Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                  <li><code>?Owner=NLR&District=San%20Marco</code> - Filters for lands owned by 'NLR' in San Marco.</li>
+                  <li><code>?BuildingPointsCount=0</code> - Filters for lands with no building points.</li>
                 </ul>
               </li>
             </ul>
@@ -1168,9 +1171,7 @@ export default function ApiReference() {
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
             <p className="text-xs mb-2 text-gray-600">
-              Field names can be provided in camelCase (e.g., <code>landId</code>) or snake_case (e.g., <code>land_id</code>).
-              The server will automatically convert them to PascalCase (e.g., <code>LandId</code>) for Airtable.
-              The examples below use camelCase.
+              The server automatically converts camelCase or snake_case keys in the request body to PascalCase for Airtable. See "Notes for AI Developers" for details.
             </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
