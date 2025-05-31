@@ -269,8 +269,22 @@ def make_kinos_call(
             log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username}: {json.dumps(parsed_response, indent=2)[:500]}...{LogColors.ENDC}")
             return parsed_response
         except json.JSONDecodeError:
-            # If it's not JSON, it might be the textual reflection from step 3
-            log.debug(f"{LogColors.LIGHTBLUE}Kinos response for {ai_username} is not JSON, treating as reflection text.{LogColors.ENDC}")
+            log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. Full response: {LogColors.LIGHTBLUE}{latest_ai_response_content}{LogColors.ENDC}")
+            # Attempt to extract JSON from markdown-like code blocks
+            import re
+            json_match = re.search(r"```json\s*([\s\S]*?)\s*```", latest_ai_response_content, re.MULTILINE)
+            if json_match:
+                json_str = json_match.group(1)
+                try:
+                    parsed_json_from_text = json.loads(json_str)
+                    log.info(f"{LogColors.OKGREEN}Successfully extracted and parsed JSON from Kinos text response for {ai_username}.{LogColors.ENDC}")
+                    log.debug(f"{LogColors.LIGHTBLUE}Extracted JSON: {json.dumps(parsed_json_from_text, indent=2)[:500]}...{LogColors.ENDC}")
+                    return parsed_json_from_text
+                except json.JSONDecodeError as e_inner:
+                    log.warning(f"{LogColors.WARNING}Failed to parse extracted JSON from Kinos response for {ai_username}. Error: {e_inner}. Extracted string: {json_str[:200]}...{LogColors.ENDC}")
+            
+            # If not direct JSON and no extractable JSON found, treat as reflection text
+            log.info(f"{LogColors.OKBLUE}Treating Kinos response for {ai_username} as reflection text.{LogColors.ENDC}")
             return {"reflection_text": latest_ai_response_content}
 
     except requests.exceptions.RequestException as e:
@@ -348,7 +362,9 @@ def autonomously_run_ai_citizen(
         # Simulate a common GET call for dry run
         api_get_request_details = {"endpoint": f"/api/citizens/{ai_username}"}
     else:
-        log.warning(f"{LogColors.WARNING}Failed to get valid GET API decision from Kinos for {ai_username}. Response: {kinos_response_step1}{LogColors.ENDC}")
+        # The warning for non-JSON response is now handled inside make_kinos_call.
+        # This log will capture cases where the response was None or not a dict with "endpoint".
+        log.warning(f"{LogColors.WARNING}Failed to get a valid GET API decision structure from Kinos for {ai_username}. Kinos response object: {kinos_response_step1}{LogColors.ENDC}")
         log_header(f"Autonomous Run for {ai_username} ({ai_display_name}) INTERRUPTED after Step 1", color_code=Fore.RED if colorama_available else '')
         return # End process for this AI if step 1 fails
 
