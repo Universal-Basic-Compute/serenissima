@@ -1000,12 +1000,7 @@ export default function TwoDPage() {
         </div>
             
         <div className="flex space-x-4">
-          <Link 
-            href="/"
-            className="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-white transition-colors font-serif"
-          >
-            3D View
-          </Link>
+          {/* 3D View button removed */}
         </div>
       </div>
       
