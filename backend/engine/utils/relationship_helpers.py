@@ -125,6 +125,71 @@ def update_trust_score_for_activity(
 
 # --- Fonctions d'assistance pour l'interaction Kinos ---
 
+# Helpers pour récupérer les données contextuelles pour Kinos via l'API Next.js
+def _rh_get_notifications_data_api(username: str, limit: int = 5) -> List[Dict]:
+    """RH: Fetches recent notifications for a citizen via the Next.js API."""
+    try:
+        url = f"{NEXT_JS_BASE_URL}/api/notifications"
+        payload = {"citizen": username, "limit": limit}
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "notifications" in data:
+            return data["notifications"]
+        log.warning(f"{LogColors.WARNING}RH: Failed to get notifications for {username} from API: {data.get('error')}{LogColors.ENDC}")
+        return []
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}RH: API error fetching notifications for {username}: {e}{LogColors.ENDC}")
+        return []
+
+def _rh_get_relevancies_data_api(relevant_to_username: str, target_username: Optional[str] = None, limit: int = 5) -> List[Dict]:
+    """RH: Fetches recent relevancies for a citizen via the Next.js API."""
+    try:
+        params = {"relevantToCitizen": relevant_to_username, "limit": str(limit)}
+        if target_username:
+            params["targetCitizen"] = target_username
+        
+        url = f"{NEXT_JS_BASE_URL}/api/relevancies"
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "relevancies" in data:
+            return data["relevancies"]
+        log.warning(f"{LogColors.WARNING}RH: Failed to get relevancies for {relevant_to_username} (target: {target_username}) from API: {data.get('error')}{LogColors.ENDC}")
+        return []
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}RH: API error fetching relevancies for {relevant_to_username} (target: {target_username}): {e}{LogColors.ENDC}")
+        return []
+
+def _rh_get_problems_data_api(username: str, limit: int = 5) -> List[Dict]:
+    """RH: Fetches active problems for a citizen via the Next.js API."""
+    try:
+        url = f"{NEXT_JS_BASE_URL}/api/problems?citizen={username}&status=active&limit={limit}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("success") and "problems" in data:
+            return data["problems"]
+        log.warning(f"{LogColors.WARNING}RH: Failed to get problems for {username} from API: {data.get('error')}{LogColors.ENDC}")
+        return []
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}RH: API error fetching problems for {username}: {e}{LogColors.ENDC}")
+        return []
+
+def _rh_get_relationship_data(tables: Dict[str, Any], username1: str, username2: str) -> Optional[Dict[str, Any]]:
+    """RH: Fetches relationship data between two citizens from Airtable."""
+    try:
+        user1, user2 = sorted([_escape_airtable_value(username1), _escape_airtable_value(username2)])
+        formula = f"AND({{Citizen1}}='{user1}', {{Citizen2}}='{user2}')"
+        records = tables["relationships"].all(formula=formula, max_records=1)
+        if records:
+            return records[0]['fields']
+        return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}RH: Error fetching relationship between {username1} and {username2}: {e}{LogColors.ENDC}")
+        return None
+
 def _get_kinos_api_key() -> Optional[str]:
     """Récupère la clé API Kinos depuis les variables d'environnement."""
     api_key = os.getenv("KINOS_API_KEY")
@@ -146,16 +211,31 @@ def _get_citizen_details(tables: Dict[str, Any], username: str) -> Optional[Dict
         log.error(f"{LogColors.FAIL}Erreur lors de la récupération des détails du citoyen {username}: {e}{LogColors.ENDC}")
         return None
 
-def _generate_kinos_message_content(kin_username: str, channel_username: str, prompt: str, kinos_api_key: str, kinos_model_override: Optional[str] = None) -> Optional[str]:
-    """Appelle Kinos pour générer le contenu d'un message."""
+def _generate_kinos_message_content(
+    kin_username: str, 
+    channel_username: str, 
+    prompt: str, 
+    kinos_api_key: str, 
+    kinos_model_override: Optional[str] = None,
+    add_system_data: Optional[Dict[str, Any]] = None
+) -> Optional[str]:
+    """Appelle Kinos pour générer le contenu d'un message, avec addSystem facultatif."""
     try:
         url = f"{KINOS_API_URL_BASE}/{kin_username}/channels/{channel_username}/messages"
         headers = {"Authorization": f"Bearer {kinos_api_key}", "Content-Type": "application/json"}
-        payload = {"message": prompt} # addSystem peut être ajouté ici si plus de contexte est nécessaire
+        payload = {"message": prompt}
 
         if kinos_model_override:
             payload["model"] = kinos_model_override
             log.info(f"Utilisation du modèle Kinos '{kinos_model_override}' pour {kin_username} -> {channel_username}.")
+        
+        if add_system_data:
+            try:
+                payload["addSystem"] = json.dumps(add_system_data)
+                log.info(f"Ajout de addSystem data pour {kin_username} -> {channel_username}.")
+            except TypeError as te:
+                log.error(f"{LogColors.FAIL}Erreur de sérialisation JSON pour addSystem data: {te}. Envoi sans addSystem.{LogColors.ENDC}")
+
 
         log.debug(f"Appel Kinos : URL={url}, Kin={kin_username}, Channel={channel_username}, PayloadKeys={list(payload.keys())}")
         response = requests.post(url, headers=headers, json=payload, timeout=45)
@@ -264,17 +344,28 @@ def _initiate_reaction_dialogue_if_both_ai(
     actor_display_name = actor_details.get("FirstName", actor_username)
     receiver_display_name = receiver_details.get("FirstName", receiver_of_action_username)
 
-    desc_for_receiver_prompt, desc_for_actor_reply_context = _construct_activity_description(
-        actor_display_name, receiver_display_name, activity_record
-    )
+    # Préparer le contexte addSystem
+    system_context_data = {
+        "initiator_profile": actor_details, # Celui qui a fait l'action originale
+        "responder_profile": receiver_details, # Celui qui réagit en premier
+        "relationship_between_us": _rh_get_relationship_data(tables, actor_username, receiver_of_action_username),
+        "initiator_recent_notifications": _rh_get_notifications_data_api(actor_username),
+        "responder_recent_notifications": _rh_get_notifications_data_api(receiver_of_action_username),
+        "initiator_recent_problems": _rh_get_problems_data_api(actor_username),
+        "responder_recent_problems": _rh_get_problems_data_api(receiver_of_action_username),
+        "relevancies_initiator_to_responder": _rh_get_relevancies_data_api(actor_username, receiver_of_action_username),
+        "relevancies_responder_to_initiator": _rh_get_relevancies_data_api(receiver_of_action_username, actor_username),
+        "triggering_activity_details": activity_record # Le JSON de l'activité
+    }
 
     log.info(f"Déclenchement du dialogue de réaction Kinos entre {actor_username} (acteur) et {receiver_of_action_username} (receveur) concernant l'activité : {activity_record.get('Type', 'Unknown')}.")
 
     # Étape 1: La réaction du receveur (receiver_of_action_username) à l'acteur (actor_username)
     prompt_for_receiver = (
-        f"You are {receiver_display_name}. "
-        f"{desc_for_receiver_prompt}\n\n" # desc_for_receiver_prompt contient maintenant le JSON
-        f"Based on these details, what is your immediate, brief, and natural reaction or comment TO {actor_display_name}? Keep it short and conversational."
+        f"You are {receiver_display_name}. An activity involving you and {actor_display_name} just occurred. "
+        f"Details are in `addSystem.triggering_activity_details`. Your profiles and relationship context are also in `addSystem`.\n"
+        f"Based on ALL this context, what is your immediate, brief, and natural reaction or comment TO {actor_display_name}? "
+        f"Focus on how this interaction could strategically advance your position or goals in Venice. Keep it short, gameplay-focused, and conversational."
     )
     
     receiver_reaction_content = _generate_kinos_message_content(
@@ -282,7 +373,8 @@ def _initiate_reaction_dialogue_if_both_ai(
         channel_username=actor_username,
         prompt=prompt_for_receiver,
         kinos_api_key=kinos_api_key,
-        kinos_model_override="local"  # Utiliser le modèle local
+        kinos_model_override="local",
+        add_system_data=system_context_data # Passer le contexte
     )
 
     if receiver_reaction_content:
@@ -293,12 +385,29 @@ def _initiate_reaction_dialogue_if_both_ai(
             content=receiver_reaction_content
         )
 
+        # Mettre à jour le contexte pour la réponse de l'acteur
+        # L'acteur devient l'initiateur du message, le receveur devient le répondeur
+        system_context_data_for_actor_reply = {
+            "initiator_profile": receiver_details, # Le receveur de l'action originale est maintenant l'initiateur de ce message de réaction
+            "responder_profile": actor_details,    # L'acteur original répond maintenant
+            "relationship_between_us": system_context_data["relationship_between_us"], # La relation est la même
+            "initiator_recent_notifications": system_context_data["responder_recent_notifications"], # Inverser les rôles pour les notifs/problèmes
+            "responder_recent_notifications": system_context_data["initiator_recent_notifications"],
+            "initiator_recent_problems": system_context_data["responder_recent_problems"],
+            "responder_recent_problems": system_context_data["initiator_recent_problems"],
+            "relevancies_initiator_to_responder": system_context_data["relevancies_responder_to_initiator"], # Inverser les relevancies
+            "relevancies_responder_to_initiator": system_context_data["relevancies_initiator_to_responder"],
+            "triggering_activity_details": activity_record, # L'activité originale reste le contexte principal
+            "their_reaction_to_activity": receiver_reaction_content # Ajouter la réaction du receveur au contexte de l'acteur
+        }
+
         # Étape 2: La réponse de l'acteur (actor_username) à la réaction du receveur
         prompt_for_actor_reply = (
-            f"You are {actor_display_name}. "
-            f"Regarding {desc_for_actor_reply_context}\n\n" # desc_for_actor_reply_context contient maintenant le JSON
-            f"{receiver_display_name} just said to you: '{receiver_reaction_content}'\n\n"
-            f"What is your brief, natural reply to their comment?"
+            f"You are {actor_display_name}. You recently performed an activity involving {receiver_display_name} (details in `addSystem.triggering_activity_details`).\n"
+            f"{receiver_display_name} just reacted to this by saying to you: '{receiver_reaction_content}' (this is also in `addSystem.their_reaction_to_activity`).\n"
+            f"Your profiles and relationship context are in `addSystem`.\n"
+            f"Based on ALL this context, what is your brief, natural reply? "
+            f"Focus on how this interaction could strategically advance your position or goals in Venice. Keep it short, gameplay-focused, and conversational."
         )
 
         actor_reply_content = _generate_kinos_message_content(
@@ -306,7 +415,8 @@ def _initiate_reaction_dialogue_if_both_ai(
             channel_username=receiver_of_action_username,
             prompt=prompt_for_actor_reply,
             kinos_api_key=kinos_api_key,
-            kinos_model_override="local"  # Utiliser le modèle local
+            kinos_model_override="local",
+            add_system_data=system_context_data_for_actor_reply # Passer le contexte mis à jour
         )
 
         if actor_reply_content:
