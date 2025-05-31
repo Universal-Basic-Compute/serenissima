@@ -94,6 +94,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     relevancies: any[] | null;
     problems: any[] | null;
   } | null>(null);
+  const [kinosModel, setKinosModel] = useState<'gemini' | 'local'>('gemini'); // Default to gemini
   
 
   // Fetch unread notification count
@@ -680,10 +681,9 @@ Remember: Your reply should be human-like, conversational, RELEVANT to ${senderD
 Your response:`;
             }
 
-            const kinosBody: any = { content: kinosPromptContent };
+            const kinosBody: any = { content: kinosPromptContent, model: kinosModel };
             if (addSystemPayload) {
               kinosBody.addSystem = addSystemPayload;
-              kinosBody.model = "local";
             }
 
             const kinosResponse = await fetch(
@@ -1813,9 +1813,28 @@ Your response:`;
                       </div>
                     )}
                   
+                    {/* Model Toggle UI */}
+                    {selectedCitizen && selectedCitizen !== 'compagno' && ( // Show toggle only when a citizen is selected for chat
+                      <div className="my-2 ml-1 flex items-center space-x-2 text-xs text-gray-500 px-2">
+                        <span>AI Model:</span>
+                        <button
+                          onClick={() => setKinosModel('gemini')}
+                          className={`px-2 py-0.5 rounded transition-colors ${kinosModel === 'gemini' ? 'bg-amber-600 text-white shadow-sm' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        >
+                          Gemini
+                        </button>
+                        <button
+                          onClick={() => setKinosModel('local')}
+                          className={`px-2 py-0.5 rounded transition-colors ${kinosModel === 'local' ? 'bg-amber-600 text-white shadow-sm' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        >
+                          Local
+                        </button>
+                      </div>
+                    )}
+                    
                     {/* Context Data Recap */}
                     {contextualDataForChat && selectedCitizen && selectedCitizen !== 'compagno' && (
-                      <details className="mb-2 text-xs text-gray-600 border border-amber-200 rounded-md">
+                      <details className="mb-2 text-xs text-gray-600 border border-amber-200 rounded-md mx-2"> {/* Added mx-2 for consistency */}
                         <summary className="cursor-pointer p-2 font-medium text-amber-700 hover:bg-amber-100 rounded-t-md">
                           Context Data for AI (Recap)
                         </summary>
