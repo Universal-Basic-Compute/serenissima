@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 
+// Helper to escape single quotes for Airtable formulas
+function escapeAirtableValue(value: string): string {
+  if (typeof value !== 'string') {
+    return String(value); // Should ideally be string, but safeguard
+  }
+  return value.replace(/'/g, "\\'");
+}
+
 // Utility function to convert field names to camelCase
 function toCamelCase(obj: Record<string, any>): Record<string, any> {
   const result: Record<string, any> = {};
@@ -220,8 +228,6 @@ export async function GET(request: Request) {
     // buildingPointsService.debugPointsStatus(); // Optional: can be noisy
     
     const url = new URL(request.url);
-    const type = url.searchParams.get('type');
-    const owner = url.searchParams.get('owner'); // Read the owner query parameter
     // Client-requested limit and offset for the API response
     const clientLimitParam = url.searchParams.get('limit');
     const clientOffsetParam = url.searchParams.get('offset');
@@ -230,8 +236,36 @@ export async function GET(request: Request) {
     const clientLimit = clientLimitParam ? parseInt(clientLimitParam) : undefined;
     const clientOffset = clientOffsetParam ? parseInt(clientOffsetParam) : 0;
     
+    const loggableFilters: Record<string, string> = {};
+    const formulaParts: string[] = [];
+    const reservedParams = ['limit', 'offset']; // Parameters handled by pagination logic, not for filtering
+
+    for (const [key, value] of url.searchParams.entries()) {
+      if (reservedParams.includes(key.toLowerCase())) {
+        continue;
+      }
+
+      const airtableField = key; // Assuming query param key IS the Airtable field name
+      loggableFilters[airtableField] = value;
+
+      // Attempt to parse as number
+      const numValue = parseFloat(value);
+      // Check if it's a clean number (e.g., "123" or "123.45", not "123a")
+      // and that its string representation matches the original value to avoid partial parses.
+      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
+        formulaParts.push(`{${airtableField}} = ${value}`);
+      } else if (value.toLowerCase() === 'true') {
+        formulaParts.push(`{${airtableField}} = TRUE()`);
+      } else if (value.toLowerCase() === 'false') {
+        formulaParts.push(`{${airtableField}} = FALSE()`);
+      } else {
+        // Default to string if not clearly numeric or boolean
+        formulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
+      }
+    }
+    
     console.log('%c GET /api/buildings request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-    console.log('Query parameters:', { type, owner, limit: clientLimit, offset: clientOffset });
+    console.log('Query parameters:', { filters: loggableFilters, limit: clientLimit, offset: clientOffset });
     
     // Check if Airtable configuration is available
     if (!apiKey || !baseId) {
@@ -256,23 +290,14 @@ export async function GET(request: Request) {
             'RentPrice', 'Occupant', 'IsConstructed', 'Category', 'RunBy',
             'Wages', 'Name' // Added Name here
           ],
-          // filterByFormula: type ? `{Type} = '${type}'` : '', // Old filter
+          // filterByFormula is now constructed dynamically
           view: 'Grid view',
           // DO NOT set maxRecords or offset here; eachPage handles fetching all pages.
         };
 
-        // Construct filterByFormula
-        const formulaParts = [];
-        if (type) {
-          formulaParts.push(`{Type} = '${type}'`);
-        }
-        if (owner) {
-          // Assuming 'Owner' in Airtable is a text field storing the username.
-          // If it's a linked record, this might need adjustment (e.g., using RECORD_ID()).
-          formulaParts.push(`{Owner} = '${owner}'`);
-        }
         if (formulaParts.length > 0) {
           selectParams.filterByFormula = `AND(${formulaParts.join(', ')})`;
+          console.log('Applying Airtable filter formula:', selectParams.filterByFormula);
         }
         
         base('BUILDINGS')

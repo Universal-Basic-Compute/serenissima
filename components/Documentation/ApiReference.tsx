@@ -964,10 +964,23 @@ const ApiReference: React.FC = () => {
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
+            <p className="mb-2 text-sm">
+              This endpoint supports dynamic filtering based on any field present in the Airtable 'BUILDINGS' table.
+              Provide query parameters where the key is the exact Airtable field name (case-sensitive, e.g., <code>Owner</code>, <code>Category</code>, <code>IsConstructed</code>, <code>Type</code>)
+              and the value is what you want to filter by.
+            </p>
             <ul className="list-disc pl-6">
-              <li><code>type</code> (optional) - Filter buildings by type (e.g., "market-stall", "house")</li>
-              <li><code>limit</code> (optional) - Limit the number of buildings returned (default: 1000)</li>
-              <li><code>offset</code> (optional) - Offset for pagination (default: 0)</li>
+              <li><code>limit</code> (optional) - Limit the number of buildings returned (default: 1000).</li>
+              <li><code>offset</code> (optional) - Offset for pagination (default: 0).</li>
+              <li><em>Dynamic Filters:</em>
+                <ul className="list-circle pl-5 mt-1">
+                  <li>Example: <code>?Owner=NLR&Category=business</code> - Filters for buildings owned by 'NLR' AND are of category 'business'.</li>
+                  <li>Example: <code>?Type=market-stall</code> - Filters for buildings of type 'market-stall'.</li>
+                  <li>Example: <code>?IsConstructed=true</code> - Filters for buildings that are constructed. (Use <code>true</code> or <code>false</code> for boolean fields).</li>
+                  <li>Example: <code>?RentPrice=0</code> - Filters for buildings with a rent price of 0.</li>
+                  <li>Values are treated as strings by default (and wrapped in single quotes in the Airtable formula). Purely numeric values are treated as numbers. Boolean strings "true" or "false" (case-insensitive) are converted to <code>TRUE()</code> or <code>FALSE()</code>.</li>
+                </ul>
+              </li>
             </ul>
           </div>
           
