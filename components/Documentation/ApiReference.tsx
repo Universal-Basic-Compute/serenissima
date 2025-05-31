@@ -379,7 +379,7 @@ const ApiReference: React.FC = () => {
   "citizen": {
     "username": "string", // Username of the citizen
     "guildId": "string", // ID of the guild (e.g., "umbra_lucrum_invenit")
-    "guildStatus": "string" // Status from the request, e.g., "pending"
+    "guildStatus": "string" // Status from the request body (e.g., "pending"), not a persisted field on the citizen record
   }
 }`}
             </pre>
@@ -995,8 +995,8 @@ const ApiReference: React.FC = () => {
       "createdAt": "string", // ISO date string
       "isConstructed": boolean, // True if construction is complete
       "wages": number | null, // Wages offered if it's a business
-      "constructionMinutesRemaining": number | null, // Remaining construction time
-      "updatedAt": "string | null" // ISO date string of last update
+      // "constructionMinutesRemaining" and "updatedAt" are not typically returned by this specific endpoint,
+      // but are available via GET /api/buildings/:buildingId
       // ... other fields from Airtable, camelCased
     }
   ]
@@ -1398,6 +1398,11 @@ const ApiReference: React.FC = () => {
   "buildingType": "string",
   "buildingName": "string",
   "owner": "string",
+  "category": "string | null",
+  "subCategory": "string | null",
+  "canImport": boolean,
+  "constructionCosts": { /* object */ } | null,
+  "consumeTier": "number | null", // Tier required to consume/use outputs, often same as buildTier
   "resources": {
     "stored": [
       {
@@ -1697,7 +1702,7 @@ const ApiReference: React.FC = () => {
   "name": "string", // Optional: Display name. If not provided, will be enriched from type definition.
   // Category, SubCategory, Tier, Description, Icon, ImportPrice, LifetimeHours, ConsumptionHours are NOT direct inputs.
   // They are enriched based on the 'type' from resource type definitions.
-  "position": { "lat": number, "lng": number } | string, // Required: Position of the resource stack itself (object or JSON string). This is stored in Airtable's 'Position' field.
+  "position": { "lat": number, "lng": number } | string, // Required: Position of the resource stack itself (object or JSON string). Intended to be stored in Airtable's 'Position' field.
   "count": number, // Optional: defaults to 1
   "asset": "string", // Optional: BuildingId, Citizen Username, or LandId where resource is located/associated. Stored in Airtable's 'Asset' field.
   "assetType": "string", // Optional: "building", "citizen", "land". Stored in Airtable's 'AssetType' field.
@@ -1721,7 +1726,7 @@ const ApiReference: React.FC = () => {
     "tier": number | null, // Enriched tier
     "description": "string", // Enriched description
     "icon": "string | null", // Enriched icon (filename)
-    "location": { "lat": number, "lng": number } | null, // Parsed position of the resource stack itself or its asset
+    "location": { "lat": number, "lng": number } | null, // Derived/parsed location of the resource stack or its asset
     "count": number,
     "asset": "string | null", // Associated asset (BuildingId, Username, LandId)
     "assetType": "string | null", // Type of associated asset ("building", "citizen", "land")
