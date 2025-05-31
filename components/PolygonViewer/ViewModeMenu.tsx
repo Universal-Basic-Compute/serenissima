@@ -18,28 +18,31 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
     eventBus.emit(EventTypes.VIEW_MODE_CHANGED, { viewMode: view });
     
     // Dispatch events to open specific panels or navigate
+    // First, ensure other main panels are closed if a new one is explicitly opened,
+    // or if a view that doesn't have a main panel is selected.
+    if (view !== 'governance') {
+      window.dispatchEvent(new CustomEvent('closeGovernancePanel'));
+    }
+    if (view !== 'guilds') {
+      window.dispatchEvent(new CustomEvent('closeGuildsPanel'));
+    }
+    if (view !== 'citizens') {
+      window.dispatchEvent(new CustomEvent('closeCitizenRegistry'));
+    }
+    // Assuming 'knowledge' panel might still be relevant for closure, even if no button opens it.
+    window.dispatchEvent(new CustomEvent('closeKnowledgePanel'));
+
+
     if (view === 'governance') {
       window.dispatchEvent(new CustomEvent('openGovernancePanel'));
     } else if (view === 'guilds') {
       window.dispatchEvent(new CustomEvent('openGuildsPanel'));
-    } else if (view === 'knowledge') {
-      window.dispatchEvent(new CustomEvent('openKnowledgePanel'));
     } else if (view === 'citizens') {
       // Dispatch an event to open the CitizenRegistry, similar to GovernancePanel
       window.dispatchEvent(new CustomEvent('openCitizenRegistry'));
       // The existing event dispatch for loadCitizens can remain if other components listen to it.
-    } else {
-      // Close all panels if switching to other views
-      window.dispatchEvent(new CustomEvent('closeGovernancePanel'));
-      window.dispatchEvent(new CustomEvent('closeGuildsPanel'));
-      window.dispatchEvent(new CustomEvent('closeKnowledgePanel'));
-    }
-  };
-  // Helper function to check if a view is disabled
-  const isDisabled = (view: ViewMode): boolean => {
-    // Only these views are enabled
-    const enabledViews: ActiveViewMode[] = ['buildings', 'land', 'contracts', 'citizens', 'transport'];
-    return !enabledViews.includes(view as ActiveViewMode);
+    } 
+    // Note: The 'else' block that previously closed panels is now handled by the upfront closing logic.
   };
 
   // Detailed descriptions for each view mode
