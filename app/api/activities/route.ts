@@ -68,11 +68,27 @@ export async function GET(request: Request) {
       console.log('Applying 24-hour time range filter (no timezone).');
     } else if (ongoing) {
       // Broad Airtable filter for ongoing, precise JS filter applied later
-      // Add status conditions separately to simplify the final AND formula
+      // When ongoing=true, we fetch more statuses and filter precisely in JS.
+      // We still exclude 'processed' and 'failed' at the Airtable level if possible,
+      // but 'interrupted' might be relevant to show if it just happened.
+      // The JS filter for 'ongoing' will correctly determine if an 'interrupted' activity
+      // should still be considered "ongoing" based on its EndDate.
+      // For now, let's keep the Airtable filter simple for ongoing=true:
       filterByFormulaParts.push(`{Status} != 'processed'`);
       filterByFormulaParts.push(`{Status} != 'failed'`);
+      // 'interrupted' will be fetched and then filtered by JS if ongoing=true
       loggableFilters['ongoing'] = 'true';
-      console.log('Applying broad Airtable status filter for ongoing activities (Status != processed AND Status != failed). JS will handle time logic.');
+      console.log('Applying broad Airtable status filter for ongoing activities (Status != processed AND Status != failed). JS will handle precise time logic, including for interrupted.');
+    } else {
+      // Default filter: if not specifically asking for 'ongoing' or a specific status via dynamic filter,
+      // exclude processed, failed, AND interrupted.
+      if (!searchParams.has('Status')) { // Only apply default if Status is not explicitly queried
+        filterByFormulaParts.push(`{Status} != 'processed'`);
+        filterByFormulaParts.push(`{Status} != 'failed'`);
+        filterByFormulaParts.push(`{Status} != 'interrupted'`);
+        loggableFilters['Status_default_exclude'] = 'processed, failed, interrupted';
+        console.log('Applying default status filter to exclude processed, failed, and interrupted activities.');
+      }
     }
 
     // Add dynamic filters from other query parameters
