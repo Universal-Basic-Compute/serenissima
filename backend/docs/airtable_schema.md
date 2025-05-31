@@ -140,7 +140,10 @@ Suit les actions en cours et terminées des citoyens.
 -   `Path` (Texte multiligne): Chaîne JSON d'un tableau de coordonnées pour le trajet.
 -   `Transporter` (Lien vers `CITIZENS` via `Username`): Citoyen responsable du transport (ex: opérateur de la gondole).
 -   `Status` (Texte): Statut de l'activité (ex: `created`, `processed`, `failed`).
--   `Notes` (Texte multiligne): Notes diverses.
+-   `Title` (Texte): Titre concis de l'activité.
+-   `Description` (Texte multiligne): Description de ce que l'activité implique.
+-   `Thought` (Texte multiligne): Réflexion à la première personne du citoyen concernant cette activité (raisonnement, objectifs, commentaires).
+-   `Notes` (Texte multiligne): Notes diverses, potentiellement pour des IDs ou informations non affichées.
 -   `Details` (Texte multiligne): Chaîne JSON pour des données structurées additionnelles, utilisées par certains types d'activités pour passer des informations à des processeurs ultérieurs (ex: `goto_building_for_storage_fetch` stocke ici les infos pour l'activité `fetch_from_storage` qui suivra).
 -   `Priority` (Nombre): Priorité de l'activité.
 -   `CreatedAt` (Date/Heure): Date de création de l'activité.

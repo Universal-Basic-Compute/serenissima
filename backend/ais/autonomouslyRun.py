@@ -437,6 +437,7 @@ API_DOCUMENTATION_SUMMARY = {
     ],
     "example_post_endpoints": [
         "/api/actions/construct-building", # Body keys can be camelCase, server will adapt.
+        "/api/actions/create-activity", # Body keys: citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)
         "/api/contracts", # Body keys like {"contractId": "...", "type": "..."}
         "/api/messages/send" # Body keys like {"sender": "...", "receiver": "...", "content": "..."}
     ]
@@ -669,10 +670,10 @@ def autonomously_run_ai_citizen_unguided(
             "2. Generic POST requests to any API endpoint to perform general actions.\n"
             "3. Specific POST requests to `/api/actions/create-activity` to directly create a new activity for yourself. For travel activities, provide `fromBuildingId` (if applicable) and `toBuildingId`; the server will handle pathfinding.\n"
             "If no further actions are needed now, respond with an empty 'actions' list. "
-            "Provide your reasoning or reflection in the 'reflection' field. "
+            "Provide your overall reasoning or reflection on this iteration in the 'reflection' field. "
             "Respond with a JSON object: "
-            "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your thoughts...\"}`\n"
-            "For `/api/actions/create-activity`, the 'body' of your action should be the payload for that endpoint, including `citizenUsername`, `activityType`, and `activityDetails` (without `pathData` for travel)."
+            "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your overall thoughts on this iteration...\"}`\n"
+            "For `/api/actions/create-activity`, the 'body' of your action should be the payload for that endpoint, including `citizenUsername`, `activityType`, `title`, `description`, `thought` (first-person narrative for the activity), and `activityDetails` (without `pathData` for travel). The 'reflection' field in the main Kinos response is for your overall iteration reflection, while the 'thought' field within the create-activity body is specific to that activity."
         )
         if previous_api_results:
              current_prompt = (
@@ -680,9 +681,10 @@ def autonomously_run_ai_citizen_unguided(
                 "Based on this and your overall context (see `addSystem`), what do you want to do next? "
                 "Actions can be GET, POST, or a specific POST to `/api/actions/create-activity`. For travel activities via `create-activity`, provide building IDs; server handles pathfinding. "
                 "If no further actions, respond with an empty 'actions' list. "
-                "Provide your reasoning or reflection in the 'reflection' field. "
+                "Provide your overall reasoning or reflection on this iteration in the 'reflection' field. "
                 "Respond with a JSON object: "
-                "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your thoughts...\"}`"
+                "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your overall thoughts on this iteration...\"}`\n"
+                "For `/api/actions/create-activity`, the 'body' of your action should include `title`, `description`, `thought` (first-person narrative for the activity), and `activityDetails`."
             )
 
         add_system_data = {

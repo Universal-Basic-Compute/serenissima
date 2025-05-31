@@ -129,7 +129,10 @@ const CreateActivityPayloadSchema = z.object({
     // Add other valid activity types here
   ]),
   activityDetails: z.any(), // We'll validate this based on activityType
-  kinosReflection: z.string().optional(),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  thought: z.string().min(1, "Thought (first-person narrative) is required"),
+  notes: z.string().optional(), // Formerly kinosReflection
 });
 
 // --- Main POST Handler ---
@@ -145,7 +148,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { citizenUsername, activityType, activityDetails, kinosReflection } = validationResult.data;
+    const { citizenUsername, activityType, activityDetails, title, description, thought, notes } = validationResult.data;
 
     // TODO: Implement security check: does the requester have authority for citizenUsername?
     // This might involve checking an API key associated with the AI agent.
@@ -159,7 +162,10 @@ export async function POST(request: Request) {
       Type: activityType,
       Status: "created", // All API-created activities start as 'created'
       CreatedAt: new Date().toISOString(),
-      Notes: kinosReflection ? `AI Reflection: ${kinosReflection}` : undefined,
+      Title: title,
+      Description: description,
+      Thought: thought,
+      Notes: notes, // Optional notes
     };
 
     // --- Specific Activity Type Logic & Validation ---
@@ -206,7 +212,8 @@ export async function POST(request: Request) {
         airtablePayload.FromBuilding = restDetails.data.buildingId; // Assuming rest happens AT a building
         airtablePayload.ToBuilding = restDetails.data.buildingId;
         endDate = new Date(startDate.getTime() + restDetails.data.durationHours * 60 * 60 * 1000);
-        if (restDetails.data.notes) airtablePayload.Notes = `${airtablePayload.Notes || ''}\nDetails: ${restDetails.data.notes}`.trim();
+        // Notes from activityDetails are appended to the main Notes field if provided
+        if (restDetails.data.notes) airtablePayload.Notes = `${airtablePayload.Notes ? airtablePayload.Notes + '\n' : ''}Details: ${restDetails.data.notes}`.trim();
         specificDetailsValid = true;
       } else {
          return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: restDetails.error.format() }, { status: 400 });
@@ -215,7 +222,7 @@ export async function POST(request: Request) {
       const idleDetails = IdleActivityDetailsSchema.safeParse(activityDetails);
       if (idleDetails.success) {
         endDate = new Date(startDate.getTime() + idleDetails.data.durationHours * 60 * 60 * 1000);
-        if (idleDetails.data.reason) airtablePayload.Notes = `${airtablePayload.Notes || ''}\nReason: ${idleDetails.data.reason}`.trim();
+        if (idleDetails.data.reason) airtablePayload.Notes = `${airtablePayload.Notes ? airtablePayload.Notes + '\n' : ''}Reason: ${idleDetails.data.reason}`.trim();
         specificDetailsValid = true;
       } else {
         return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: idleDetails.error.format() }, { status: 400 });
@@ -269,7 +276,7 @@ export async function POST(request: Request) {
         endDate = new Date(internalPathData.timing.endDate);
         if (internalPathData.transporter) airtablePayload.Transporter = internalPathData.transporter;
 
-        if (gotoData.notes) airtablePayload.Notes = `${airtablePayload.Notes || ''}\nDetails: ${gotoData.notes}`.trim();
+        if (gotoData.notes) airtablePayload.Notes = `${airtablePayload.Notes ? airtablePayload.Notes + '\n' : ''}Details: ${gotoData.notes}`.trim();
         specificDetailsValid = true;
       } else {
         return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: gotoDetailsResult.error.format() }, { status: 400 });
@@ -280,7 +287,7 @@ export async function POST(request: Request) {
             airtablePayload.FromBuilding = prodDetails.data.buildingId; // Production happens AT FromBuilding
             airtablePayload.Details = JSON.stringify({ recipe: prodDetails.data.recipe }); // Store recipe in Details
             endDate = new Date(startDate.getTime() + prodDetails.data.recipe.craftMinutes * 60 * 1000);
-            if (prodDetails.data.notes) airtablePayload.Notes = `${airtablePayload.Notes || ''}\nDetails: ${prodDetails.data.notes}`.trim();
+            if (prodDetails.data.notes) airtablePayload.Notes = `${airtablePayload.Notes ? airtablePayload.Notes + '\n' : ''}Details: ${prodDetails.data.notes}`.trim();
             specificDetailsValid = true;
         } else {
             return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: prodDetails.error.format() }, { status: 400 });
@@ -289,11 +296,12 @@ export async function POST(request: Request) {
         const fetchDetails = FetchResourceActivityDetailsSchema.safeParse(activityDetails);
         if (fetchDetails.success) {
             airtablePayload.ContractId = fetchDetails.data.contractId;
-            airtablePayload.FromBuilding = fetchData.fromBuildingId;
-            airtablePayload.ToBuilding = fetchData.toBuildingId;
-            airtablePayload.Resources = JSON.stringify([{ ResourceId: fetchData.resourceId, Amount: fetchData.amount }]);
+            airtablePayload.ContractId = fetchDetailsResult.data.contractId; // Corrected: use fetchDetailsResult.data
+            airtablePayload.FromBuilding = fetchDetailsResult.data.fromBuildingId;
+            airtablePayload.ToBuilding = fetchDetailsResult.data.toBuildingId;
+            airtablePayload.Resources = JSON.stringify([{ ResourceId: fetchDetailsResult.data.resourceId, Amount: fetchDetailsResult.data.amount }]);
 
-            if (fetchData.fromBuildingId) { // Travel is involved
+            if (fetchDetailsResult.data.fromBuildingId) { // Travel is involved
                 const fromPos = await getBuildingPosition(fetchData.fromBuildingId);
                 const toPos = await getBuildingPosition(fetchData.toBuildingId);
 
@@ -323,7 +331,7 @@ export async function POST(request: Request) {
                 // Default duration for non-travel fetch
                 endDate = new Date(startDate.getTime() + 5 * 60 * 1000); // 5 min default
             }
-            if (fetchData.notes) airtablePayload.Notes = `${airtablePayload.Notes || ''}\nDetails: ${fetchData.notes}`.trim();
+            if (fetchDetailsResult.data.notes) airtablePayload.Notes = `${airtablePayload.Notes ? airtablePayload.Notes + '\n' : ''}Details: ${fetchDetailsResult.data.notes}`.trim();
             specificDetailsValid = true;
         } else {
             return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: fetchDetailsResult.error.format() }, { status: 400 });

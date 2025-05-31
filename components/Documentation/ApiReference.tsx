@@ -2462,6 +2462,9 @@ fetch('/api/resources/counts?buildingId=building-123456789')
 {`{
   "citizenUsername": "string", // Required: Username of the citizen
   "activityType": "string", // Required: Type of activity (e.g., "rest", "goto_work", "production", "fetch_resource")
+  "title": "string", // Required: A concise title for the activity (e.g., "Resting at home", "Working at the forge")
+  "description": "string", // Required: A brief description of what the activity entails.
+  "thought": "string", // Required: First-person narrative from the citizen about this activity (reasoning, goals, comments).
   "activityDetails": {
     // --- Example for "rest" ---
     // "buildingId": "string", // ID of home or inn
@@ -2495,7 +2498,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
     
     // ... other activity types will have different 'activityDetails' structures
   },
-  "kinosReflection": "string" // Optional: AI's reasoning for this action
+  "notes": "string" // Optional: Internal notes, IDs, or non-displayed information.
 }`}
             </pre>
             <p className="mt-2 text-sm">
