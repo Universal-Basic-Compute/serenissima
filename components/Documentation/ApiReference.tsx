@@ -289,14 +289,16 @@ const ApiReference: React.FC = () => {
   "success": true,
   "citizen": {
     "id": "string",
-    "walletAddress": "string",
     "username": "string | null",
     "firstName": "string | null",
     "lastName": "string | null",
     "ducats": number,
     "coatOfArmsImageUrl": "string | null",
     "familyMotto": "string | null",
-    "createdAt": "string | null"
+    "createdAt": "string | null",
+    "guildId": "string | null",
+    "color": "string | null",
+    "socialClass": "string | null"
   }
 }`}
             </pre>
@@ -311,12 +313,13 @@ const ApiReference: React.FC = () => {
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "id": "string",
-  "username": "string",
-  "firstName": "string",
-  "lastName": "string",
-  "familyMotto": "string",
-  "coatOfArmsImageUrl": "string"
+  "id": "string", // Airtable Record ID of the citizen
+  "username": "string", // Optional: new username
+  "firstName": "string", // Optional: new first name
+  "lastName": "string", // Optional: new last name
+  "familyMotto": "string", // Optional: new family motto
+  "coatOfArmsImageUrl": "string", // Optional: new CoA image URL
+  "telegramUserId": "string" // Optional: Telegram User ID
 }`}
             </pre>
           </div>
@@ -328,15 +331,14 @@ const ApiReference: React.FC = () => {
   "success": true,
   "message": "Citizen profile updated successfully",
   "citizen": {
-    "id": "string",
-    "walletAddress": "string",
+    "id": "string", // Airtable Record ID
     "username": "string | null",
     "firstName": "string | null",
     "lastName": "string | null",
-    "ducats": number,
-    "coatOfArmsImageUrl": "string | null",
     "familyMotto": "string | null",
-    "createdAt": "string | null"
+    "coatOfArmsImageUrl": "string | null",
+    "telegramUserId": "string | null"
+    // ... any other fields that were updated, in camelCase
   }
 }`}
             </pre>
@@ -490,13 +492,14 @@ const ApiReference: React.FC = () => {
   "success": true,
   "lands": [
     {
-      "id": "string",
-      "owner": "string | null",
-      "coat_of_arms_image": "string | null",
-      "ducats": number,
-      "first_name": "string | null",
-      "last_name": "string | null",
-      "family_motto": "string | null"
+      "id": "string", // LandId or Airtable record ID
+      "owner": "string | null", // Username of the owner
+      "coat_of_arms_image": "string | null", // URL to CoA image
+      "_coat_of_arms_source": "string | undefined", // 'local' or undefined
+      "ducats": number, // Owner's ducats
+      "first_name": "string | null", // Owner's first name
+      "last_name": "string | null", // Owner's last name
+      "family_motto": "string | null" // Owner's family motto
     }
   ]
 }`}
@@ -714,9 +717,11 @@ const ApiReference: React.FC = () => {
             <h4 className="font-bold mb-2">Response</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
+  "success": true,
+  "version": "string", // ISO date string of when the data was generated
   "polygons": [
     {
-      "id": "string",
+      "id": "string", // Polygon ID (e.g., polygon-12345)
       "coordinates": [{ "lat": number, "lng": number }],
       "centroid": { "lat": number, "lng": number },
       "center": { "lat": number, "lng": number },
@@ -854,18 +859,23 @@ const ApiReference: React.FC = () => {
 {`{
   "buildings": [
     {
-      "id": "string",
-      "type": "string",
-      "land_id": "string",
-      "variant": "string",
-      "position": { "lat": number, "lng": number },
-      "rotation": number,
-      "owner": "string",
-      "created_at": "string",
-      "lease_price": number,
-      "rent_price": number,
-      "occupant": "string",
-      "point_id": "string | null"
+      "id": "string", // BuildingId (custom ID or Airtable record ID)
+      "type": "string", // e.g., "market-stall", "house"
+      "landId": "string", // ID of the land parcel it's on
+      "variant": "string", // Model variant
+      "position": { "lat": number, "lng": number }, // Resolved position
+      "point": "string | string[] | null", // Original point ID(s) from Airtable
+      "size": number, // Number of points the building occupies (e.g., 1 for single, 2-4 for multi-point)
+      "rotation": number, // Rotation in degrees or radians
+      "owner": "string | null", // Username of the owner
+      "runBy": "string | null", // Username of the operator
+      "category": "string | null", // e.g., "home", "business", "public_service"
+      "name": "string", // Formatted building name
+      "createdAt": "string", // ISO date string
+      "leasePrice": number,
+      "rentPrice": number,
+      "occupant": "string | null", // Username of the occupant
+      "isConstructed": boolean // True if construction is complete
     }
   ]
 }`}
@@ -910,17 +920,28 @@ const ApiReference: React.FC = () => {
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "building": {
-    "id": "string",
+    "buildingId": "string", // Custom BuildingId or Airtable record ID
     "type": "string",
-    "land_id": "string",
+    "landId": "string",
     "variant": "string",
-    "position": { "lat": number, "lng": number },
+    "position": { "lat": number, "lng": number }, // Resolved position
+    "point": "string | string[] | null", // Original point ID(s) from Airtable
+    "size": number, // Number of points the building occupies
     "rotation": number,
-    "owner": "string",
-    "created_at": "string",
-    "lease_price": number,
-    "rent_price": number,
-    "occupant": "string"
+    "owner": "string | null",
+    "runBy": "string | null",
+    "category": "string | null",
+    "subCategory": "string | null",
+    "createdAt": "string", // ISO date string
+    "updatedAt": "string", // ISO date string
+    "constructionMinutesRemaining": number,
+    "leasePrice": number,
+    "rentPrice": number,
+    "occupant": "string | null",
+    "isConstructed": boolean,
+    "historicalName": "string | undefined",
+    "englishName": "string | undefined",
+    "historicalDescription": "string | undefined"
   }
 }`}
             </pre>
@@ -935,13 +956,18 @@ const ApiReference: React.FC = () => {
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "type": "string",
-  "land_id": "string",
-  "variant": "string",
-  "position": { "lat": number, "lng": number },
-  "rotation": number,
-  "owner": "string",
-  "point_id": "string" // Optional
+  "id": "string", // Optional: custom BuildingId, otherwise one is generated
+  "type": "string", // Building type identifier
+  "landId": "string", // Land parcel ID
+  "variant": "string", // Optional: model variant, defaults to "model"
+  "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number }, // Required if pointId is not provided
+  "rotation": number, // Optional: rotation, defaults to 0
+  "owner": "string", // Optional: owner username, defaults to "system"
+  "pointId": "string", // Optional: ID of the specific point on the land
+  "createdAt": "string", // Optional: ISO date string, defaults to now
+  "leasePrice": number, // Optional: defaults to 0
+  "rentPrice": number, // Optional: defaults to 0
+  "occupant": "string" // Optional: defaults to empty
 }`}
             </pre>
           </div>
@@ -952,17 +978,17 @@ const ApiReference: React.FC = () => {
 {`{
   "success": true,
   "building": {
-    "id": "string",
+    "id": "string", // BuildingId (custom or generated)
     "type": "string",
-    "land_id": "string",
+    "landId": "string",
     "variant": "string",
-    "position": { "lat": number, "lng": number },
-    "point_id": "string | null",
+    "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number } | null,
+    "pointId": "string | null",
     "rotation": number,
     "owner": "string",
-    "created_at": "string",
-    "lease_price": number,
-    "rent_price": number,
+    "createdAt": "string", // ISO date string
+    "leasePrice": number,
+    "rentPrice": number,
     "occupant": "string"
   },
   "message": "Building created successfully"
@@ -979,13 +1005,14 @@ const ApiReference: React.FC = () => {
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "type": "string",
-  "land_id": "string",
-  "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number },
-  "walletAddress": "string",
-  "variant": "string",
-  "rotation": number,
-  "cost": number
+  "type": "string", // Building type identifier
+  "land_id": "string", // Land parcel ID
+  "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number }, // Position of the building
+  "walletAddress": "string", // Wallet address of the citizen creating the building
+  "variant": "string", // Optional: model variant, defaults to "model"
+  "rotation": number, // Optional: rotation, defaults to 0
+  "cost": number, // Optional: cost in Ducats, defaults to 0
+  "created_at": "string" // Optional: ISO date string, defaults to now
 }`}
             </pre>
           </div>
@@ -996,17 +1023,19 @@ const ApiReference: React.FC = () => {
 {`{
   "success": true,
   "building": {
-    "id": "string",
+    "id": "string", // BuildingId (custom or generated)
     "type": "string",
     "land_id": "string",
     "variant": "string",
     "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number },
     "rotation": number,
-    "owner": "string",
-    "created_at": "string",
+    "owner": "string", // Wallet address of the owner
+    "isConstructed": boolean,
+    "constructionMinutesRemaining": number,
+    "created_at": "string", // ISO date string
     "cost": number
   },
-  "message": "Building created successfully"
+  "message": "Building created successfully, construction project initiated."
 }`}
             </pre>
           </div>
@@ -1045,21 +1074,33 @@ const ApiReference: React.FC = () => {
   "success": true,
   "buildingTypes": [
     {
-      "type": "string",
-      "name": "string",
-      "category": "string",
-      "subCategory": "string",
-      "tier": number,
-      "pointType": "string | null",
-      "constructionCosts": {},
-      "maintenanceCost": number,
+      "type": "string", // Unique identifier for the building type
+      "name": "string", // Display name
+      "category": "string", // e.g., "residential", "commercial", "industrial"
+      "subCategory": "string", // e.g., "market", "workshop"
+      "buildTier": number, // Minimum citizen tier required to build
+      "pointType": "string | null", // Type of point it can be built on ('land', 'canal', 'bridge', 'building')
+      "size": number, // Number of points the building occupies (default 1)
+      "constructionCosts": { // Resources and ducats needed for construction
+        "ducats": number,
+        "resource_id": number 
+      } | null,
+      "maintenanceCost": number, // Daily maintenance cost in Ducats
       "shortDescription": "string",
-      "productionInformation": {},
-      "canImport": boolean
+      "productionInformation": { // Details about production, storage, sales
+        "storageCapacity": number,
+        "stores": ["string"], // Array of resource IDs it can store
+        "sells": ["string"], // Array of resource IDs it can sell
+        "inputResources": { "resource_id": number }, // Resources needed for production
+        "outputResources": { "resource_id": number } // Resources produced
+      } | null,
+      "canImport": boolean, // If the building can import resources
+      "commercialStorage": boolean, // If the building offers commercial storage services
+      "constructionMinutes": number // Time in minutes to construct
     }
   ],
   "filters": {
-    "pointType": "string | null"
+    "pointType": "string | null" // The pointType filter that was applied
   }
 }`}
             </pre>
@@ -1110,20 +1151,29 @@ const ApiReference: React.FC = () => {
             <h4 className="font-bold mb-2">Response</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "type": "string",
-  "name": "string",
+  "type": "string", // Unique identifier for the building type
+  "name": "string", // Display name
   "category": "string",
   "subCategory": "string",
-  "tier": number,
-  "constructionCosts": {},
+  "buildTier": number, // Minimum citizen tier required to build
+  "pointType": "string | null", // Type of point it can be built on
+  "size": number, // Number of points the building occupies
+  "constructionCosts": {
+    "ducats": number,
+    "resource_id": number
+  } | null,
   "maintenanceCost": number,
   "shortDescription": "string",
   "productionInformation": {
     "storageCapacity": number,
-    "stores": ["string"],
-    "sells": ["string"]
-  },
-  "canImport": boolean
+    "stores": ["string"], // Array of resource IDs it can store
+    "sells": ["string"], // Array of resource IDs it can sell
+    "inputResources": { "resource_id": number },
+    "outputResources": { "resource_id": number }
+  } | null,
+  "canImport": boolean,
+  "commercialStorage": boolean,
+  "constructionMinutes": number
 }`}
             </pre>
           </div>
@@ -1152,62 +1202,67 @@ const ApiReference: React.FC = () => {
   "resources": {
     "stored": [
       {
-        "id": "string",
-        "type": "string",
-        "name": "string",
-        "category": "string",
+        "id": "string", // Resource instance ID (from RESOURCES table)
+        "type": "string", // Resource type ID (e.g., "wood", "iron_ore")
+        "name": "string", // Display name of the resource
+        "category": "string", // e.g., "raw_materials", "food"
         "subCategory": "string",
-        "count": number,
+        "count": number, // Quantity stored
+        "icon": "string", // Path to icon image
+        "description": "string",
+        "rarity": "string" // e.g., "common", "rare"
+      }
+    ],
+    "publiclySold": [ // Resources offered for sale via public_sell contracts by this building
+      {
+        "id": "string", // Contract ID
+        "resourceType": "string",
+        "name": "string",
+        "category": "string",
+        "targetAmount": number, // Amount offered in the contract
+        "price": number, // Price per unit
+        "transporter": "string | null", // Transporter assigned to the contract, if any
         "icon": "string",
         "description": "string",
-        "rarity": "string"
+        "importPrice": number | null, // Import price of the resource, if available
+        "contractType": "public_sell"
       }
     ],
-    "publiclySold": [
+    "bought": [ // Resources this building type can buy/consume (from definition)
       {
-        "id": "string",
         "resourceType": "string",
         "name": "string",
         "category": "string",
-        "targetAmount": number,
-        "price": number,
-        "transporter": "string",
+        "amount": number, // Amount needed per production cycle or for operation
+        "icon": "string",
+        "description": "string"
+      }
+    ],
+    "sellable": [ // Resources this building type can produce/sell (from definition)
+      {
+        "resourceType": "string",
+        "name": "string",
+        "category": "string",
         "icon": "string",
         "description": "string",
-        "contractType": "string"
+        "importPrice": number | null,
+        "amount": number | undefined, // Amount produced per cycle, if applicable
+        "price": number | undefined // Current selling price if a contract exists
       }
     ],
-    "bought": [
-      {
-        "resourceType": "string",
-        "name": "string",
-        "category": "string",
-        "amount": number,
-        "icon": "string",
-        "description": "string"
-      }
-    ],
-    "sellable": [
+    "storable": [ // Resources this building type can store (from definition)
       {
         "resourceType": "string",
         "name": "string",
         "category": "string",
         "icon": "string",
-        "description": "string"
+        "description": "string",
+        "importPrice": number | null
       }
     ],
-    "storable": [
+    "transformationRecipes": [ // Crafting recipes available at this building
       {
-        "resourceType": "string",
-        "name": "string",
-        "category": "string",
-        "icon": "string",
-        "description": "string"
-      }
-    ],
-    "transformationRecipes": [
-      {
-        "id": "string",
+        "id": "string", // Recipe identifier
         "inputs": [
           {
             "resourceType": "string",
@@ -1296,19 +1351,21 @@ const ApiReference: React.FC = () => {
   "bridges": [
     {
       "id": "string",
-      "buildingId": "string",
-      "type": "string",
-      "name": "string",
+      "id": "string", // Airtable record ID
+      "buildingId": "string", // Custom BuildingId
+      "type": "string", // e.g., "bridge", "rialto_bridge"
+      "name": "string", // Display name
       "position": { "lat": number, "lng": number },
-      "owner": "string",
+      "owner": "string", // Username of the owner
       "isConstructed": boolean,
-      "constructionDate": "string | null",
-      "links": ["string"],
+      "constructionDate": "string | null", // ISO date string
+      "landId": "string | null", // ID of the land polygon this bridge point is associated with
+      "links": ["string"], // Array of connected polygon IDs
       "historicalName": "string",
       "englishName": "string",
       "historicalDescription": "string",
-      "orientation": number,
-      "distance": number | null
+      "orientation": number, // Orientation in radians
+      "distance": number | null // Length of the bridge if applicable
     }
   ]
 }`}
@@ -1444,19 +1501,19 @@ const ApiReference: React.FC = () => {
   "success": true,
   "globalResourceCounts": [
     {
-      "id": "string",
-      "name": "string",
-      "category": "string",
+      "id": "string", // ResourceId from Airtable or record ID
+      "name": "string", // Display name of the resource type
+      "category": "string", // e.g., "raw_materials", "food"
       "subCategory": "string",
-      "icon": "string",
-      "count": number,
-      "rarity": "string",
+      "icon": "string", // Filename of the icon (e.g., "wood.png")
+      "count": number, // Total count of this resource type
+      "rarity": "string", // e.g., "common", "rare"
       "description": "string",
-      "buildingId": "string",
-      "location": { "lat": number, "lng": number } | null
+      "buildingId": "string | undefined", // BuildingId if resource is in a building
+      "location": { "lat": number, "lng": number } | null // Location if applicable
     }
   ],
-  "playerResourceCounts": [
+  "playerResourceCounts": [ // Same structure as globalResourceCounts, but filtered for the player
     {
       "id": "string",
       "name": "string",
@@ -1466,7 +1523,7 @@ const ApiReference: React.FC = () => {
       "count": number,
       "rarity": "string",
       "description": "string",
-      "buildingId": "string",
+      "buildingId": "string | undefined",
       "location": { "lat": number, "lng": number } | null
     }
   ]
@@ -1523,29 +1580,39 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "success": true,
   "resourceTypes": [
     {
-      "id": "string",
-      "name": "string",
-      "category": "string",
+      "id": "string", // Unique identifier for the resource type (e.g., "wood", "iron_ore")
+      "name": "string", // Display name
+      "icon": "string | null", // Filename of the icon (e.g., "wood.png")
+      "category": "string", // e.g., "raw_materials", "food"
+      "subCategory": "string | null",
+      "tier": number | null, // Tier of the resource
       "description": "string",
-      "importPrice": number
+      "importPrice": number | null, // Cost to import one unit
+      "lifetimeHours": number | null, // How long the resource lasts if applicable
+      "consumptionHours": number | null // How long it takes to consume one unit if applicable
     }
   ],
-  "categories": [
+  "categories": [ // Resources grouped by category
     {
-      "name": "string",
-      "resources": [
+      "name": "string", // Category name
+      "resources": [ // Array of resource type objects belonging to this category
         {
           "id": "string",
           "name": "string",
+          "icon": "string | null",
           "category": "string",
+          "subCategory": "string | null",
+          "tier": number | null,
           "description": "string",
-          "importPrice": number
+          "importPrice": number | null,
+          "lifetimeHours": number | null,
+          "consumptionHours": number | null
         }
       ]
     }
   ],
   "filters": {
-    "category": "string | null"
+    "category": "string | null" // The category filter that was applied, if any
   }
 }`}
             </pre>
@@ -1659,8 +1726,22 @@ fetch('/api/resources/counts?buildingId=building-123456789')
 {`{
   "success": true,
   "path": [
-    { "lat": number, "lng": number, "type": "string", "nodeId": "string" }
-  ]
+    { "lat": number, "lng": number, "type": "string", "nodeId": "string", "transportMode": "gondola" | "walk" | null }
+  ],
+  "timing": { // Optional, added if path found
+    "startDate": "string", // ISO date string
+    "endDate": "string", // ISO date string
+    "durationSeconds": number,
+    "distanceMeters": number
+  },
+  "journey": [ // Optional, added if path found
+    {
+      "type": "land" | "bridge" | "dock",
+      "id": "string", // PolygonId or BuildingId
+      "position": { "lat": number, "lng": number }
+    }
+  ],
+  "transporter": "string | null" // Username of the gondolier if applicable
 }`}
             </pre>
           </div>
@@ -1681,19 +1762,27 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "graphInfo": {
     "totalNodes": number,
     "totalEdges": number,
-    "nodesByType": {},
-    "connectedComponents": number,
-    "componentSizes": {},
-    "pathfindingMode": "string",
+    "nodesByType": { "node_type": number }, // Count of nodes by type
+    "connectedComponents": number, // Number of distinct connected subgraphs
+    "componentSizes": { // Statistics about component sizes
+        "count": number,
+        "min": number,
+        "max": number,
+        "avg": number,
+        "largestComponents": [number] // Sizes of the 5 largest components
+    } | [], // Empty array if no components
+    "pathfindingMode": "string", // 'real' or 'all'
     "polygonsLoaded": boolean,
     "polygonCount": number,
-    "canalNetworkSegments": number
+    "canalNetworkSegments": number,
+    "error": "string | undefined" // Error message if debugGraph operation failed
   },
-  "bridges": [],
-  "docks": [],
+  "bridges": [ /* Array of bridge objects, see GET /api/bridges */ ],
+  "docks": [ /* Array of dock objects, see GET /api/docks */ ],
   "bridgeCount": number,
   "dockCount": number,
-  "requestedMode": "string"
+  "requestedMode": "string", // 'real' or 'all'
+  "allModeGraphInfo": { /* Same structure as graphInfo, if requestedMode was 'real' */ } | undefined
 }`}
             </pre>
           </div>
@@ -1718,9 +1807,29 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "path": [
-    { "lat": number, "lng": number, "type": "string", "nodeId": "string" }
-  ]
+  "path": [ // Array of points forming the path
+    { 
+      "lat": number, 
+      "lng": number, 
+      "type": "string", // Type of point (e.g., "land", "canal", "bridge_point")
+      "nodeId": "string", // ID of the graph node
+      "transportMode": "gondola" | "walk" | null // Mode of transport to reach this point
+    }
+  ],
+  "timing": { // Optional, added if path found
+    "startDate": "string", // ISO date string
+    "endDate": "string", // ISO date string
+    "durationSeconds": number,
+    "distanceMeters": number
+  },
+  "journey": [ // Optional, added if path found. Simplified list of key locations.
+    {
+      "type": "land" | "bridge" | "dock",
+      "id": "string", // PolygonId or BuildingId
+      "position": { "lat": number, "lng": number }
+    }
+  ],
+  "transporter": "string | null" // Username of the gondolier if a gondola segment is used
 }`}
             </pre>
           </div>
@@ -1745,19 +1854,27 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "graphInfo": {
     "totalNodes": number,
     "totalEdges": number,
-    "nodesByType": {},
-    "connectedComponents": number,
-    "componentSizes": {},
-    "pathfindingMode": "string",
+    "nodesByType": { "node_type_name": number }, // Count of nodes by their type
+    "connectedComponents": number, // Number of distinct connected subgraphs
+    "componentSizes": { // Statistics about component sizes if available
+        "count": number,
+        "min": number,
+        "max": number,
+        "avg": number,
+        "largestComponents": [number] // Sizes of the 5 largest components
+    } | [], // Empty array or specific structure if componentSizes is an array of numbers
+    "pathfindingMode": "string", // 'real' or 'all'
     "polygonsLoaded": boolean,
     "polygonCount": number,
-    "canalNetworkSegments": number
+    "canalNetworkSegments": number,
+    "error": "string | undefined" // Error message if debugGraph operation failed or timed out
   },
-  "bridges": [],
-  "docks": [],
+  "bridges": [ /* Array of bridge objects, see GET /api/bridges */ ],
+  "docks": [ /* Array of dock objects, see GET /api/docks */ ],
   "bridgeCount": number,
   "dockCount": number,
-  "requestedMode": "string"
+  "requestedMode": "string", // 'real' or 'all'
+  "allModeGraphInfo": { /* Same structure as graphInfo, if requestedMode was 'real' and comparison data was fetched */ } | undefined
 }`}
             </pre>
           </div>
@@ -1849,16 +1966,21 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "activities": [
     {
       "activityId": "string", // Airtable record ID
-      "citizen": "string", // Username of the citizen (was CitizenId)
-      "type": "string", // Type of activity (e.g., "goto_work", "production")
-      "path": "string", // JSON string representing the path coordinates
-      "startPoint": "string", // Description or coordinates of start
-      "endPoint": "string", // Description or coordinates of end
-      "startDate": "string", // ISO date string (was StartTime)
-      "endDate": "string", // ISO date string (was EndTime)
-      "status": "string", // e.g., "pending", "in_progress", "completed", "failed"
-      "createdAt": "string" // ISO date string
-      // ... any other fields from Airtable, camelCased
+      "citizen": "string", // Username of the citizen
+      "type": "string", // e.g., "goto_work", "production", "rest"
+      "path": "string | null", // JSON string of path coordinates, or null
+      "startPoint": "string | null", // Description or coordinates
+      "endPoint": "string | null", // Description or coordinates
+      "startDate": "string | null", // ISO date string
+      "endDate": "string | null", // ISO date string
+      "status": "string", // e.g., "pending", "in_progress", "completed", "failed", "processed"
+      "createdAt": "string", // ISO date string
+      "updatedAt": "string", // ISO date string
+      "notes": "string | null",
+      "targetBuildingId": "string | null",
+      "targetResourceId": "string | null",
+      "targetCitizenId": "string | null"
+      // ... other fields from Airtable, camelCased
     }
   ]
 }`}
@@ -1914,21 +2036,32 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "success": true,
   "contracts": [
     {
-      "id": "string",
-      "contractId": "string",
-      "type": "string",
-      "buyer": "string",
-      "seller": "string",
-      "resourceType": "string",
-      "imageUrl": "string",
-      "buyerBuilding": "string",
-      "sellerBuilding": "string",
-      "price": number,
-      "amount": number,
-      "createdAt": "string",
-      "endAt": "string",
-      "status": "string",
-      "location": { "lat": number, "lng": number } | null
+      "id": "string", // Airtable record ID
+      "contractId": "string", // Custom ContractId
+      "type": "string", // e.g., "public_sell", "import", "building_bid"
+      "buyer": "string | null", // Username of the buyer
+      "seller": "string | null", // Username of the seller
+      "resourceType": "string", // ID of the resource or building type for bids
+      "resourceName": "string", // Display name of the resource/building type
+      "resourceCategory": "string",
+      "resourceSubCategory": "string | null",
+      "resourceTier": number | null,
+      "resourceDescription": "string",
+      "resourceImportPrice": number | null,
+      "resourceLifetimeHours": number | null,
+      "resourceConsumptionHours": number | null,
+      "imageUrl": "string", // Path to resource/building type icon
+      "buyerBuilding": "string | null", // BuildingId of the buyer's building
+      "sellerBuilding": "string | null", // BuildingId of the seller's building
+      "price": number, // PricePerResource (for bids, this is the bid amount)
+      "amount": number, // TargetAmount (for bids, typically 1 for the building)
+      "asset": "string | null", // For bids, the BuildingId being bid on
+      "assetType": "string | null", // For bids, "building"
+      "createdAt": "string", // ISO date string
+      "endAt": "string | null", // ISO date string
+      "status": "string", // e.g., "active", "pending_materials", "completed", "expired"
+      "notes": "string | null", // Additional notes, e.g., for bids
+      "location": { "lat": number, "lng": number } | null // Location of the seller's building if applicable
     }
   ]
 }`}
@@ -1944,10 +2077,13 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "contracts": [ /* Array of contract objects, structure same as GET /api/contracts */ ]
+  "contracts": [
+    // Array of contract objects, structure same as GET /api/contracts
+    // Only 'public_sell' contracts with current stock > 0 in the seller's building are returned.
+  ]
 }`}
             </pre>
-            <p className="mt-2">This endpoint filters contracts from `GET /api/contracts` by checking current stock levels in the `RESOURCES` table for the `SellerBuilding` and `ResourceType`.</p>
+            <p className="mt-2">This endpoint filters 'public_sell' contracts by checking current stock levels in the `RESOURCES` table for the `SellerBuilding` and `ResourceType`.</p>
           </div>
         </div>
         
@@ -1994,22 +2130,25 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "success": true,
   "transactions": [
     {
-      "id": "string",
-      "type": "string",
-      "asset": "string",
-      "seller": "string",
-      "buyer": "string",
-      "price": number,
-      "createdAt": "string",
-      "executedAt": "string",
-      "metadata": {
-        "historicalName": "string",
-        "englishName": "string",
-        "description": "string"
+      "id": "string", // Airtable record ID
+      "type": "string", // e.g., "land_sale", "resource_purchase"
+      "asset": "string", // ID of the asset transacted (e.g., LandId, ResourceId)
+      "seller": "string", // Username of the seller
+      "buyer": "string", // Username of the buyer
+      "price": number, // Transaction price in Ducats
+      "createdAt": "string", // ISO date string of contract creation
+      "executedAt": "string", // ISO date string of transaction execution
+      "metadata": { // Additional metadata about the asset
+        "historicalName": "string | null",
+        "englishName": "string | null",
+        "description": "string | null"
       }
     }
   ],
-  "timestamp": number
+  "timestamp": number, // Timestamp of when the data was fetched
+  "_cached": "boolean | undefined", // Present if data is from cache
+  "_stale": "boolean | undefined", // Present if cached data is stale due to fetch error
+  "_error": "string | undefined" // Error message if fetch failed and stale cache was returned
 }`}
             </pre>
           </div>
