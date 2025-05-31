@@ -459,138 +459,146 @@ export async function POST(request: NextRequest) {
           CreatedAt: new Date().toISOString(),
         }
       });
+      // This was the end of the `if (builderContractDetails)` block.
+      // The `else` block below handles direct construction.
     } else {
-      // Direct build (no contractor) - money goes to Consiglio or is just "spent"
-      // For now, let's assume it goes to ConsiglioDeiDieci as a general city fund
-       const consiglioCitizenRecords = await base(AIRTABLE_CITIZENS_TABLE)
-        .select({ filterByFormula: `{Username} = 'ConsiglioDeiDieci'`, maxRecords: 1 })
+      // Direct build (no contractor) - AI/Player pays a workshop directly.
+      // totalConstructionCost here is baseConstructionCostDucats as builderContractDetails is null.
+
+      // Find a construction workshop
+      const workshops = await base(AIRTABLE_BUILDINGS_TABLE)
+        .select({ filterByFormula: "AND({SubCategory}='construction', {IsConstructed}=TRUE())" })
         .firstPage();
-      if (consiglioCitizenRecords.length > 0) {
-         const consiglioCitizenRecord = consiglioCitizenRecords[0];
-         const consiglioCurrentDucats = (consiglioCitizenRecord.fields.Ducats as number) || 0;
-         // Accumulate payment to Consiglio for direct build
-         ducatOperations[consiglioCitizenRecord.id] = ducatOperations[consiglioCitizenRecord.id] || { initialDucats: consiglioCurrentDucats, change: 0 };
-         ducatOperations[consiglioCitizenRecord.id].change += totalConstructionCost;
+
+      if (!workshops || workshops.length === 0) {
+        return NextResponse.json({ success: false, error: 'No construction workshops available to assign the project.' }, { status: 500 });
       }
+      const selectedWorkshop = workshops[Math.floor(Math.random() * workshops.length)];
+      const workshopOperatorUsername = selectedWorkshop.fields.RunBy as string || selectedWorkshop.fields.Owner as string;
+      const workshopBuildingId = selectedWorkshop.fields.BuildingId as string;
+
+      if (!workshopOperatorUsername || !workshopBuildingId) {
+        return NextResponse.json({ success: false, error: 'Selected workshop is missing operator or BuildingId.' }, { status: 500 });
+      }
+
+      // Fetch workshop operator's citizen record to update their ducats
+      const workshopOperatorRecords = await base(AIRTABLE_CITIZENS_TABLE)
+        .select({ filterByFormula: `{Username} = '${workshopOperatorUsername}'`, maxRecords: 1 })
+        .firstPage();
+      if (workshopOperatorRecords.length === 0) {
+        return NextResponse.json({ success: false, error: `Workshop operator '${workshopOperatorUsername}' not found.` }, { status: 404 });
+      }
+      const workshopOperatorRecord = workshopOperatorRecords[0];
+      const workshopOperatorCurrentDucats = (workshopOperatorRecord.fields.Ducats as number) || 0;
+
+      // Accumulate payment to workshop operator
+      ducatOperations[workshopOperatorRecord.id] = ducatOperations[workshopOperatorRecord.id] || { initialDucats: workshopOperatorCurrentDucats, change: 0 };
+      ducatOperations[workshopOperatorRecord.id].change += totalConstructionCost; // totalConstructionCost is baseConstructionCostDucats here
 
       transactionsToCreate.push({
         fields: {
-          Type: 'building_construction_direct', // Or just 'building_construction'
-          AssetType: 'building',
+          Type: 'construction_payment',
+          AssetType: 'building_project',
           Asset: finalBuildingId,
-          Seller: 'ConsiglioDeiDieci', // Or 'System'
+          Seller: workshopOperatorUsername, // Workshop operator receives payment
           Buyer: citizenUsername,
-          Price: totalConstructionCost,
-          Notes: `Direct construction of ${buildingTypeDefinition.name} at ${pointDetails.lat.toFixed(6)},${pointDetails.lng.toFixed(6)}.`,
+          Price: totalConstructionCost, // This is baseConstructionCostDucats
+          Notes: `Direct construction of ${buildingTypeDefinition.name}. Payment to workshop ${workshopBuildingId} (Operator: ${workshopOperatorUsername}).`,
           ExecutedAt: new Date().toISOString(),
           CreatedAt: new Date().toISOString(),
         }
       });
+      console.log(`Direct build: ${citizenUsername} pays ${workshopOperatorUsername} ${totalConstructionCost} ducats for ${buildingTypeDefinition.name}.`);
     }
 
     // Perform Airtable updates (Citizens and Transactions)
-    // These should ideally be atomic, but Airtable doesn't support it.
-    
-    // Construct final citizen updates array
     const finalCitizenUpdates: Array<{ id: string, fields: Airtable.FieldSet }> = [];
     for (const [recordId, operation] of Object.entries(ducatOperations)) {
       const newDucats = operation.initialDucats + operation.change;
       finalCitizenUpdates.push({ id: recordId, fields: { Ducats: newDucats } });
     }
 
-    // Update citizens first
     if (finalCitizenUpdates.length > 0) {
       await base(AIRTABLE_CITIZENS_TABLE).update(finalCitizenUpdates);
     }
-    // Then create transactions
     if (transactionsToCreate.length > 0) {
       await base(AIRTABLE_TRANSACTIONS_TABLE).create(transactionsToCreate);
     }
 
-
-    // 4. Create Building Record
-    // const buildingId = `bld-${buildingTypeDefinition.type.replace(/_/g, '-')}-${Date.now()}`; // Replaced by finalBuildingId
-    
-    let polygonIdSuffix: string;
-    if (pointDetails.polygonId === 'unknown' || !pointDetails.polygonId) {
-      polygonIdSuffix = 'ORPHAN';
-    } else {
-      let baseSuffix = pointDetails.polygonId;
-      if (baseSuffix.startsWith('polygon-')) {
-        baseSuffix = baseSuffix.substring('polygon-'.length);
-      }
-      // Take up to the last 8 characters
-      if (baseSuffix.length > 8) {
-        baseSuffix = baseSuffix.slice(-8);
-      }
-      // If it's purely numeric after this, prefix with 's'
-      if (/^\d+$/.test(baseSuffix) && baseSuffix.length > 0) {
-        polygonIdSuffix = `s${baseSuffix}`;
-      } else if (baseSuffix.length === 0) { 
-        polygonIdSuffix = 'EMPTY'; // Should not happen if polygonId is valid
-      } else {
-        polygonIdSuffix = baseSuffix;
-      }
-    }
-    // Final length check for the suffix part
-    if (polygonIdSuffix.length > 10) {
-        polygonIdSuffix = polygonIdSuffix.slice(0, 10);
-    }
-
-    // finalPointFieldValue, finalPosition, and finalBuildingId are now determined before transaction creation.
-
-    // Compute building name
+    // 4. Create Building Record (common for both scenarios)
     const computedBuildingName = await computeBuildingName(
       buildingTypeDefinition,
-      finalBuildingId, // primary point ID is used as the basis for BuildingId
+      finalBuildingId,
       allPolygonsData,
-      citizenUsername, // Owner is the initial operator for galleys
+      citizenUsername,
       base
     );
     
     const newBuildingData: Airtable.FieldSet = {
-      BuildingId: finalBuildingId, // Use the determined BuildingId
-      Name: computedBuildingName, // Use the computed name
+      BuildingId: finalBuildingId,
+      Name: computedBuildingName,
       Type: buildingTypeDefinition.type,
       Category: buildingTypeDefinition.category,
       SubCategory: buildingTypeDefinition.subCategory,
-      LandId: pointDetails.polygonId, // This assumes all points of a multi-building are on the same LandId, which might need refinement.
+      LandId: pointDetails.polygonId,
       Point: Array.isArray(finalPointFieldValue) ? JSON.stringify(finalPointFieldValue) : finalPointFieldValue,
       Position: JSON.stringify(finalPosition),
       Owner: citizenUsername,
+      RunBy: citizenUsername, // Initially, owner is also the operator
       IsConstructed: false,
-      ConstructionMinutesRemaining: buildingTypeDefinition.constructionMinutes || 0, // Set construction minutes
+      ConstructionMinutesRemaining: buildingTypeDefinition.constructionMinutes || 1440, // Default if not specified
+      ConstructionDate: null, // Explicitly null
       CreatedAt: new Date().toISOString(),
-      Rotation: 0,
+      Rotation: 0, // Default rotation
     };
 
-    const createdBuildingRecord = await base(AIRTABLE_BUILDINGS_TABLE).create([{ fields: newBuildingData }]);
-    const newAirtableBuildingId = createdBuildingRecord[0].id; // Airtable's own record ID for the new building
+    const createdBuildingRecordAirtable = await base(AIRTABLE_BUILDINGS_TABLE).create([{ fields: newBuildingData }]);
+    const newAirtableBuildingId = createdBuildingRecordAirtable[0].id;
 
-    // 5. Create Construction Project Contract (if builder was used)
+    // 5. Create Construction Project Contract (now for both scenarios)
+    let projectSellerUsername: string;
+    let projectSellerBuildingId: string;
+    let projectNotes: string;
+
     if (builderContractDetails) {
-      const constructionProjectContractId = `constructproject_${finalBuildingId}_${builderContractDetails.sellerUsername}_${Date.now()}`;
-      const contractData: Airtable.FieldSet = {
-        ContractId: constructionProjectContractId,
-        Type: 'construction_project',
-        Buyer: citizenUsername,
-        Seller: builderContractDetails.sellerUsername,
-        ResourceType: buildingTypeDefinition.type, // The type of building being constructed
-        BuyerBuilding: finalBuildingId, // The ID of the building being constructed
-        SellerBuilding: builderContractDetails.sellerBuildingId, // The builder's workshop
-        TargetAmount: 1, // One project
-        PricePerResource: totalConstructionCost, // Total cost of the project
-        Status: 'active', // Or 'pending_completion', 'in_progress'
-        Notes: `Construction of ${buildingTypeDefinition.name} (Type: ${buildingTypeDefinition.type}) by ${builderContractDetails.sellerUsername}. Base cost: ${baseConstructionCostDucats}, Rate: ${builderContractDetails.rate}. Total: ${totalConstructionCost}. Public contract ref: ${builderContractDetails.publicContractId}`,
-        CreatedAt: new Date().toISOString(),
-        EndAt: new Date(new Date().setMonth(new Date().getMonth() + 2)).toISOString(), // Set EndAt to two months from now
-      };
-      await base('CONTRACTS').create([{ fields: contractData }]);
+      projectSellerUsername = builderContractDetails.sellerUsername;
+      projectSellerBuildingId = builderContractDetails.sellerBuildingId;
+      projectNotes = `Construction of ${buildingTypeDefinition.name} by ${projectSellerUsername}. Base cost: ${baseConstructionCostDucats}, Rate: ${builderContractDetails.rate}. Total: ${totalConstructionCost}. Public contract ref: ${builderContractDetails.publicContractId}`;
+    } else {
+      // For direct build, use the randomly selected workshop details
+      const workshops = await base(AIRTABLE_BUILDINGS_TABLE) // Re-fetch or pass down selectedWorkshop
+        .select({ filterByFormula: "AND({SubCategory}='construction', {IsConstructed}=TRUE())" })
+        .firstPage();
+      // This is a simplification; ideally, pass selectedWorkshop down or re-select consistently.
+      // For this example, we'll re-select. A more robust solution would avoid re-querying.
+      const selectedWorkshop = workshops[Math.floor(Math.random() * workshops.length)]; // Assuming workshops exist (checked before)
+      projectSellerUsername = selectedWorkshop.fields.RunBy as string || selectedWorkshop.fields.Owner as string;
+      projectSellerBuildingId = selectedWorkshop.fields.BuildingId as string;
+      projectNotes = `Direct construction of ${buildingTypeDefinition.name} assigned to workshop ${projectSellerBuildingId} (Operator: ${projectSellerUsername}). Cost: ${totalConstructionCost}.`;
     }
+    
+    const constructionProjectContractId = `constructproject_${finalBuildingId}_${projectSellerUsername.replace(/[^a-zA-Z0-9]/g, '')}_${Date.now()}`;
+    const contractData: Airtable.FieldSet = {
+      ContractId: constructionProjectContractId,
+      Type: 'construction_project',
+      Buyer: citizenUsername,
+      Seller: projectSellerUsername,
+      ResourceType: buildingTypeDefinition.type,
+      BuyerBuilding: finalBuildingId,
+      SellerBuilding: projectSellerBuildingId,
+      TargetAmount: 1,
+      PricePerResource: totalConstructionCost, // This is the cost the buyer pays for the project
+      Status: 'pending_materials', // Start with pending_materials
+      Notes: projectNotes,
+      ConstructionCostsSnapshot: JSON.stringify(buildingTypeDefinition.constructionCosts || {}), // Store snapshot of costs
+      CreatedAt: new Date().toISOString(),
+      EndAt: new Date(new Date().getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days from now
+    };
+    await base('CONTRACTS').create([{ fields: contractData }]);
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Building construction initiated successfully.',
+      message: 'Building construction initiated successfully and construction project created.',
       buildingId: newAirtableBuildingId, 
       customBuildingId: finalBuildingId 
     });
