@@ -221,6 +221,7 @@ export async function GET(request: Request) {
     
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
+    const owner = url.searchParams.get('owner'); // Read the owner query parameter
     // Client-requested limit and offset for the API response
     const clientLimitParam = url.searchParams.get('limit');
     const clientOffsetParam = url.searchParams.get('offset');
@@ -230,7 +231,7 @@ export async function GET(request: Request) {
     const clientOffset = clientOffsetParam ? parseInt(clientOffsetParam) : 0;
     
     console.log('%c GET /api/buildings request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-    console.log('Query parameters:', { type, limit: clientLimit, offset: clientOffset });
+    console.log('Query parameters:', { type, owner, limit: clientLimit, offset: clientOffset });
     
     // Check if Airtable configuration is available
     if (!apiKey || !baseId) {
@@ -255,10 +256,24 @@ export async function GET(request: Request) {
             'RentPrice', 'Occupant', 'IsConstructed', 'Category', 'RunBy',
             'Wages', 'Name' // Added Name here
           ],
-          filterByFormula: type ? `{Type} = '${type}'` : '',
+          // filterByFormula: type ? `{Type} = '${type}'` : '', // Old filter
           view: 'Grid view',
           // DO NOT set maxRecords or offset here; eachPage handles fetching all pages.
         };
+
+        // Construct filterByFormula
+        const formulaParts = [];
+        if (type) {
+          formulaParts.push(`{Type} = '${type}'`);
+        }
+        if (owner) {
+          // Assuming 'Owner' in Airtable is a text field storing the username.
+          // If it's a linked record, this might need adjustment (e.g., using RECORD_ID()).
+          formulaParts.push(`{Owner} = '${owner}'`);
+        }
+        if (formulaParts.length > 0) {
+          selectParams.filterByFormula = `AND(${formulaParts.join(', ')})`;
+        }
         
         base('BUILDINGS')
           .select(selectParams)
