@@ -3515,6 +3515,25 @@ const darkenColor = (colorStr: string, percent: number): string => {
     };
   }, []); // Empty dependency array, setCurrentHoverState is stable
 
+  // Listen for event to show CitizenDetailsPanel from Compagno
+  useEffect(() => {
+    const handleShowCitizenDetailsFromCompagno = (event: CustomEvent) => {
+      if (event.detail && event.detail.citizen) {
+        const citizenData = event.detail.citizen;
+        // Sanitize citizen data if necessary, similar to how it's done for map clicks
+        const safeCitizen = CitizenRenderService.sanitizeCitizen(citizenData);
+        setSelectedCitizen(safeCitizen);
+        setShowCitizenDetailsPanel(true);
+      }
+    };
+
+    window.addEventListener('showCitizenDetailsPanelEvent', handleShowCitizenDetailsFromCompagno as EventListener);
+
+    return () => {
+      window.removeEventListener('showCitizenDetailsPanelEvent', handleShowCitizenDetailsFromCompagno as EventListener);
+    };
+  }, []); // Empty dependency array, runs once on mount
+
   const getSocialClassColor = (socialClass?: string): string => {
     const lowerSocialClass = socialClass?.toLowerCase();
     switch (lowerSocialClass) {

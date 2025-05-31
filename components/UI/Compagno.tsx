@@ -1683,9 +1683,18 @@ Your response:`;
                                 {citizens.find(u => u.username === selectedCitizen)?.firstName.charAt(0) || selectedCitizen.charAt(0) || '?'}
                               </div>
                             </div>
-                            <span className="font-medium">
+                            <button
+                              onClick={() => {
+                                const citizenToDisplay = citizens.find(c => c.username === selectedCitizen);
+                                if (citizenToDisplay) {
+                                  window.dispatchEvent(new CustomEvent('showCitizenDetailsPanelEvent', { detail: { citizen: citizenToDisplay } }));
+                                }
+                              }}
+                              className="font-medium hover:underline focus:outline-none"
+                              title={`View details for ${citizens.find(u => u.username === selectedCitizen)?.firstName || selectedCitizen}`}
+                            >
                               {citizens.find(u => u.username === selectedCitizen)?.firstName || ''} {citizens.find(u => u.username === selectedCitizen)?.lastName || ''}
-                            </span>
+                            </button>
                           </>
                         )}
                       </div>
