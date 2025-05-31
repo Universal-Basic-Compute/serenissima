@@ -364,7 +364,7 @@ def _initiate_reaction_dialogue_if_both_ai(
     prompt_for_receiver = (
         f"You are {receiver_display_name}. An activity involving you and {actor_display_name} just occurred. "
         f"Details are in `addSystem.triggering_activity_details`. Your profiles and relationship context are also in `addSystem`.\n"
-        f"Based on ALL this context, what is your immediate, brief, and natural reaction or comment TO {actor_display_name}? "
+        f"Based on ALL this context, what is your immediate and natural reaction or comment TO {actor_display_name}? "
         f"Focus on how this interaction could strategically advance your position or goals in Venice. Keep it short, gameplay-focused, and conversational."
     )
     
