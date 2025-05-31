@@ -95,6 +95,53 @@ CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE = [
     "POST /api/actions/construct-building - Initiate construction of a building. Body: {buildingTypeDefinition, pointDetails, citizenUsername, builderContractDetails (optional)}",
 ]
 
+CONCISE_AIRTABLE_SCHEMA_FIELD_LIST = {
+    "CITIZENS": [
+        "CitizenId", "Username", "FirstName", "LastName", "SocialClass", "Ducats", "IsAI", "InVenice", 
+        "Position", "Point", "HomeCity", "AteAt", "Description", "CorePersonality", "ImagePrompt", 
+        "ImageUrl", "LastActiveAt", "CoatOfArmsImageUrl", "Color", "SecondaryColor", "GuildId", 
+        "Preferences", "FamilyMotto", "CoatOfArms", "Wallet", "TelegramUserId", "DailyIncome", 
+        "DailyTurnover", "WeeklyIncome", "WeeklyTurnover", "MonthlyIncome", "MonthlyTurnover", 
+        "Influence", "CarryCapacityOverride", "CreatedAt", "UpdatedAt"
+    ],
+    "BUILDINGS": [
+        "BuildingId", "Name", "Type", "Category", "SubCategory", "LandId", "Position", "Point", 
+        "Rotation", "Owner", "RunBy", "Occupant", "LeasePrice", "RentPrice", "Wages", 
+        "IsConstructed", "ConstructionDate", "ConstructionMinutesRemaining", "Variant", "Notes", 
+        "CheckedAt", "CreatedAt", "UpdatedAt"
+    ],
+    "RESOURCES": [
+        "ResourceId", "Type", "Name", "Asset", "AssetType", "Owner", "Count", "Position", 
+        "ConsumedAt", "Notes", "CreatedAt", "UpdatedAt"
+    ],
+    "CONTRACTS": [
+        "ContractId", "Type", "Buyer", "Seller", "ResourceType", "ServiceFeePerUnit", "Transporter", 
+        "BuyerBuilding", "SellerBuilding", "Title", "Description", "TargetAmount", "PricePerResource", 
+        "Priority", "Status", "Notes", "Asset", "AssetType", "LastExecutedAt", "CreatedAt", "EndAt", 
+        "UpdatedAt"
+    ],
+    "ACTIVITIES": [
+        "ActivityId", "Type", "Citizen", "FromBuilding", "ToBuilding", "ContractId", "ResourceId", 
+        "Amount", "Resources", "TransportMode", "Path", "Transporter", "Status", "Title", 
+        "Description", "Thought", "Notes", "Details", "Priority", "CreatedAt", "StartDate", 
+        "EndDate", "UpdatedAt"
+    ],
+    "LANDS": [
+        "LandId", "HistoricalName", "EnglishName", "Owner", "LastIncome", "BuildingPointsCount", "District"
+    ],
+    "MESSAGES": [
+        "MessageId", "Sender", "Receiver", "Content", "Type", "ReadAt", "CreatedAt", "UpdatedAt"
+    ],
+    "PROBLEMS": [
+        "Citizen", "AssetType", "Asset", "Type", "Description", "Status", "Severity", "Position", 
+        "Location", "Title", "Solutions", "Notes", "CreatedAt", "ResolvedAt", "UpdatedAt"
+    ],
+    "RELEVANCIES": [
+        "RelevancyId", "Asset", "AssetType", "Category", "Type", "TargetCitizen", "RelevantToCitizen", 
+        "Score", "TimeHorizon", "Title", "Description", "Notes", "Status", "CreatedAt", "UpdatedAt"
+    ]
+}
+
 # Import colorama for log_header
 try:
     from colorama import Fore, Style, init as colorama_init
@@ -637,6 +684,7 @@ def autonomously_run_ai_citizen(
     prompt_step1_context_elements_guided = [
         "your own citizen data (`addSystem.citizen_data`)",
         "the list of key API endpoints (`addSystem.concise_api_endpoints`)",
+        "a list of Airtable fields (`addSystem.airtable_schema_fields`)",
         "your latest activity (`addSystem.latest_activity`)"
     ]
     if user_message:
@@ -657,6 +705,7 @@ def autonomously_run_ai_citizen(
     )
     add_system_step1 = {
         "concise_api_endpoints": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
+        "airtable_schema_fields": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
         "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
         "citizen_data": ai_citizen_record["fields"],
         "latest_activity": latest_activity_data or {}
@@ -701,7 +750,7 @@ def autonomously_run_ai_citizen(
 
     # Step 2: Elaborate Strategy & Define Actions
     log.info(f"{LogColors.OKCYAN}--- Step 2: Elaborate Strategy & Define Actions for {ai_username} ---{LogColors.ENDC}")
-    prompt_step2_context_mention_guided = "Based on this data, your citizen data (`addSystem.citizen_data`), your overall goals, and the list of key API endpoints (`addSystem.concise_api_endpoints`),"
+    prompt_step2_context_mention_guided = "Based on this data, your citizen data (`addSystem.citizen_data`), your overall goals, the list of key API endpoints (`addSystem.concise_api_endpoints`), and the Airtable field list (`addSystem.airtable_schema_fields`),"
         
     prompt_step2 = (
         f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. You previously requested data via GET API. "
@@ -713,6 +762,7 @@ def autonomously_run_ai_citizen(
     )
     add_system_step2 = {
         "concise_api_endpoints": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
+        "airtable_schema_fields": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
         "previous_get_response": api_get_response_data,
         "citizen_data": ai_citizen_record["fields"],
     }
@@ -774,7 +824,7 @@ def autonomously_run_ai_citizen(
 
     # Step 3: Note Results & Plan Next Steps
     log.info(f"{LogColors.OKCYAN}--- Step 3: Note Results & Plan Next Steps for {ai_username} ---{LogColors.ENDC}")
-    prompt_step3_context_mention_guided = "Reflect on these outcomes, considering your citizen data (`addSystem.citizen_data`) and the list of key API endpoints (`addSystem.concise_api_endpoints`) (all in `addSystem`)"
+    prompt_step3_context_mention_guided = "Reflect on these outcomes, considering your citizen data (`addSystem.citizen_data`), the list of key API endpoints (`addSystem.concise_api_endpoints`), and the Airtable field list (`addSystem.airtable_schema_fields`) (all in `addSystem`)"
 
     prompt_step3 = (
         f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. Your strategy was: '{strategy_summary}'. "
@@ -784,6 +834,7 @@ def autonomously_run_ai_citizen(
     )
     add_system_step3 = {
         "concise_api_endpoints": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
+        "airtable_schema_fields": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
         "post_actions_summary": api_post_responses_summary,
         "citizen_data": ai_citizen_record["fields"],
     }
