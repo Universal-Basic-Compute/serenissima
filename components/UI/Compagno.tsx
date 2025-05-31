@@ -1813,6 +1813,25 @@ Your response:`;
                       </div>
                     )}
                   
+                    {/* Context Data Recap */}
+                    {contextualDataForChat && selectedCitizen && selectedCitizen !== 'compagno' && (
+                      <details className="mb-2 text-xs text-gray-600 border border-amber-200 rounded-md">
+                        <summary className="cursor-pointer p-2 font-medium text-amber-700 hover:bg-amber-100 rounded-t-md">
+                          Context Data for AI (Recap)
+                        </summary>
+                        <div className="p-3 bg-amber-50 rounded-b-md space-y-1">
+                          <p><strong>AI Citizen Profile (Target):</strong> {contextualDataForChat.targetProfile?.firstName || contextualDataForChat.targetProfile?.username || 'N/A'}</p>
+                          <p><strong>Sender Citizen Profile:</strong> {contextualDataForChat.senderProfile?.firstName || contextualDataForChat.senderProfile?.username || 'N/A'}</p>
+                          <p><strong>Relationship with Sender:</strong> {contextualDataForChat.relationship?.type || 'N/A'} (Strength: {contextualDataForChat.relationship?.strengthScore ?? 'N/A'})</p>
+                          <p><strong>Recent Notifications for AI:</strong> {contextualDataForChat.targetNotifications?.length ?? 0} items</p>
+                          <p><strong>Recent Relevancies (AI to Sender):</strong> {contextualDataForChat.relevancies?.length ?? 0} items</p>
+                          <p><strong>Recent Problems (AI or Sender):</strong> {contextualDataForChat.problems?.length ?? 0} items</p>
+                          {/* You can add a button to log the full object to console if needed */}
+                          {/* <button onClick={() => console.log('Full Contextual Data:', contextualDataForChat)} className="text-blue-500 text-xs">Log Full Context</button> */}
+                        </div>
+                      </details>
+                    )}
+
                     {/* Input area */}
                     <form onSubmit={handleSubmit} className="border-t border-gray-200 p-2 flex items-end">
                       <textarea
