@@ -23,24 +23,31 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   // Load available tracks
   useEffect(() => {
     const loadTracks = async () => {
+      console.log('[BackgroundMusic] loadTracks called'); 
       try {
-        // Fetch the list of music files from the server
+        console.log('[BackgroundMusic] Attempting to fetch /api/music-tracks'); 
         const response = await fetch('/api/music-tracks');
+        console.log('[BackgroundMusic] Fetch response status:', response.status); 
         if (response.ok) {
           const data = await response.json();
+          console.log('[BackgroundMusic] Fetched data:', data); 
           if (data.tracks && Array.isArray(data.tracks)) {
+            console.log('[BackgroundMusic] Setting tracks:', data.tracks);
             setTracks(data.tracks);
+            setIsLoading(false);
+          } else {
+            console.error('[BackgroundMusic] No tracks array in response or not an array. Data:', data);
+            setTracks([]);
             setIsLoading(false);
           }
         } else {
-          console.error('Failed to load music tracks');
-          // No fallback to hardcoded tracks, API must provide full URLs
+          const errorText = await response.text();
+          console.error('[BackgroundMusic] Failed to load music tracks. Status:', response.status, 'Response text:', errorText);
           setTracks([]);
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Error loading music tracks:', error);
-        // No fallback to hardcoded tracks, API must provide full URLs
+        console.error('[BackgroundMusic] Error loading music tracks (in catch block):', error);
         setTracks([]);
         setIsLoading(false);
       }
@@ -89,7 +96,9 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
 
   // Initialize audio and play first track
   useEffect(() => {
+    console.log('[BackgroundMusic] Initialize audio effect. isLoading:', isLoading, 'tracks.length:', tracks.length); 
     if (!isLoading && tracks.length > 0) {
+      console.log('[BackgroundMusic] Conditions met to play first track.'); 
       // Always set up a track, even if we're not sure we can play it yet
       const randomIndex = Math.floor(Math.random() * tracks.length);
       const firstTrack = tracks[randomIndex];
