@@ -2470,13 +2470,9 @@ fetch('/api/resources/counts?buildingId=building-123456789')
     // "notes": "string" // Optional
 
     // --- Example for "goto_work" (or other travel) ---
-    // "toBuildingId": "string",
-    // "fromBuildingId": "string", // Optional, if starting from a specific building
-    // "pathData": { /* Full pathData object from /api/transport response */
-    //   "success": true,
-    //   "path": [{ "lat": number, "lng": number, ... }],
-    //   "timing": { "startDate": "ISOString", "endDate": "ISOString", "durationSeconds": number, ... }
-    // },
+    // "toBuildingId": "string", // Required
+    // "fromBuildingId": "string", // Required if travel is from a specific building (server will pathfind)
+    // // "pathData" is NO LONGER provided by client; server handles pathfinding.
     // "notes": "string" // Optional
 
     // --- Example for "production" ---
@@ -2494,7 +2490,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
     // "toBuildingId": "string", // Destination (e.g., citizen's home or workshop)
     // "resourceId": "string", // Type of resource to fetch
     // "amount": number,
-    // "pathData": { /* Required if fromBuildingId is specified */ }, // Optional
+    // // "pathData" is NO LONGER provided by client; server handles pathfinding if fromBuildingId is specified.
     // "notes": "string" // Optional
     
     // ... other activity types will have different 'activityDetails' structures
@@ -2528,9 +2524,9 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Important Notes</h4>
             <ul className="list-disc pl-6">
-              <li>This endpoint requires the client (e.g., Kinos AI) to perform all necessary pre-calculations, including pathfinding.</li>
-              <li>The server validates the payload structure but assumes the semantic correctness of the provided details (e.g., that a path is valid).</li>
-              <li>This provides maximum control to the AI but also places more responsibility on it for constructing valid and sensible activities.</li>
+              <li>For travel-related activities (e.g., `goto_work`, `fetch_resource` from a specific building), the server will internally call `/api/transport` to determine the path and timing if `fromBuildingId` and `toBuildingId` are provided. The client no longer needs to supply `pathData`.</li>
+              <li>The server validates the payload structure. For travel, it assumes the provided building IDs are valid and will attempt to fetch their positions for pathfinding.</li>
+              <li>This provides maximum control to the AI for defining *what* to do and *where*, while the server handles *how* to get there.</li>
               <li>Activities created via this API will have their `Status` set to "created". The `processActivities.py` engine script will then pick them up for execution.</li>
             </ul>
           </div>

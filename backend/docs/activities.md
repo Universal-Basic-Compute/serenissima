@@ -271,10 +271,10 @@ In addition to the engine-driven activity creation (`createActivities.py`), acti
     *   `citizenUsername`: The target citizen.
     *   `activityType`: The specific type of activity.
     *   `activityDetails`: A JSON object containing all necessary parameters for that activity type.
-        *   For travel-related activities (e.g., `goto_work`, `goto_home`), the client is responsible for first calling the `/api/transport` endpoint to obtain valid `pathData` (including path coordinates and timing) and then including this `pathData` within the `activityDetails`.
+        *   For travel-related activities (e.g., `goto_work`, `goto_home`, `fetch_resource` from a specific building), the client should provide `toBuildingId` and `fromBuildingId` (if applicable) within `activityDetails`. The `/api/actions/create-activity` endpoint will then internally call `/api/transport` to determine the path and timing. The client no longer needs to provide `pathData`.
 2.  **API Request**: The client sends a POST request to `/api/actions/create-activity` with the composed payload.
-3.  **Server Validation**: The API endpoint validates the basic structure of the request and the `activityDetails` against predefined schemas for the given `activityType`. It does *not* perform complex game logic like pathfinding or resource availability checks (these are assumed to have been done by the client).
-4.  **Airtable Record Creation**: If validation passes, a new activity record is created in the `ACTIVITIES` table with `Status: "created"`.
+3.  **Server Validation & Pathfinding**: The API endpoint validates the payload. If it's a travel activity requiring pathfinding between specified buildings, the server attempts to find a path. If pathfinding fails, an error is returned.
+4.  **Airtable Record Creation**: If validation and any necessary internal pathfinding succeed, a new activity record is created in the `ACTIVITIES` table with `Status: "created"`. The `Path`, `StartDate`, and `EndDate` fields are populated based on the pathfinding results.
 5.  **Engine Processing**: The standard `processActivities.py` script will eventually pick up this "created" activity and execute its corresponding processor logic.
 
 ### Use Cases:
@@ -285,7 +285,7 @@ In addition to the engine-driven activity creation (`createActivities.py`), acti
 
 ### Considerations:
 
--   The client (AI) bears more responsibility for ensuring the validity and sensibleness of the activity parameters.
+-   The client (AI) is responsible for providing correct building IDs for travel. The server handles the pathfinding.
 -   This method bypasses the prioritized decision logic of `citizen_general_activities.py`.
 -   Care must be taken to avoid conflicts if both engine-driven and API-driven activity creation are active for the same citizen.
 

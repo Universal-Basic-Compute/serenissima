@@ -71,10 +71,11 @@ const BaseActivityDetailsSchema = z.object({
 
 const GotoActivityDetailsSchema = BaseActivityDetailsSchema.extend({
   toBuildingId: z.string(),
-  pathData: PathDataSchema, // Path must be pre-calculated by the AI
-  // fromBuildingId is optional, if not provided, current citizen position is start
+  // fromBuildingId is optional. If not provided, pathfinding might start from citizen's current location (needs citizen data access)
+  // or this API could require it for explicit travel. For now, let's make it optional and handle logic.
   fromBuildingId: z.string().optional(), 
   notes: z.string().optional(),
+  // pathData is removed from input, will be fetched internally
 });
 
 const ProductionActivityDetailsSchema = BaseActivityDetailsSchema.extend({
@@ -93,7 +94,7 @@ const FetchResourceActivityDetailsSchema = BaseActivityDetailsSchema.extend({
   toBuildingId: z.string(), // Destination building (e.g., citizen's home or workshop)
   resourceId: z.string(), // Type of resource
   amount: z.number(),
-  pathData: PathDataSchema.optional(), // Required if fromBuildingId is specified
+  // pathData is removed from input, will be fetched internally if fromBuildingId is present
   notes: z.string().optional(),
 });
 
@@ -167,8 +168,37 @@ export async function POST(request: Request) {
     // For now, a simplified example:
 
     let specificDetailsValid = false;
-    let startDate: Date = new Date(); // Default start date
-    let endDate: Date | null = null;   // Default end date
+    let startDate: Date = new Date(); // Default start date for non-travel activities
+    let endDate: Date | null = null;   // Default end date for non-travel activities
+    let internalPathData: any = null; // To store pathData if fetched
+
+    // Helper function to fetch building position (simplified)
+    // In a real scenario, this might call /api/buildings/:id or directly query Airtable if this API has DB access
+    const getBuildingPosition = async (buildingId: string): Promise<{ lat: number; lng: number } | null> => {
+        // This is a placeholder. Implement actual fetching logic.
+        // For now, let's assume we can't fetch it here and it must be handled by the caller or a different service.
+        // However, for the new design, this endpoint *needs* to resolve building positions.
+        // This would typically involve an internal fetch or direct DB access.
+        // For this example, we'll simulate a fetch.
+        try {
+            const buildingApiUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/buildings/${encodeURIComponent(buildingId)}`;
+            const response = await fetch(buildingApiUrl);
+            if (!response.ok) {
+                console.warn(`[CreateActivity] Failed to fetch position for building ${buildingId}: ${response.status}`);
+                return null;
+            }
+            const data = await response.json();
+            if (data.building && data.building.position) {
+                return data.building.position; // Assuming position is {lat, lng}
+            }
+            console.warn(`[CreateActivity] Position not found for building ${buildingId} in API response.`);
+            return null;
+        } catch (e) {
+            console.error(`[CreateActivity] Error fetching position for building ${buildingId}:`, e);
+            return null;
+        }
+    };
+
 
     if (activityType === "rest") {
       const restDetails = RestActivityDetailsSchema.safeParse(activityDetails);
@@ -191,23 +221,58 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: idleDetails.error.format() }, { status: 400 });
       }
     } else if (["goto_work", "goto_home", "travel_to_inn", "goto_construction_site"].includes(activityType)) {
-      const gotoDetails = GotoActivityDetailsSchema.safeParse(activityDetails);
-      if (gotoDetails.success) {
-        airtablePayload.ToBuilding = gotoDetails.data.toBuildingId;
-        airtablePayload.Path = JSON.stringify(gotoDetails.data.pathData.path); // Store the path array
-        // StartDate and EndDate should come from pathData.timing
-        if (gotoDetails.data.pathData.timing) {
-            startDate = new Date(gotoDetails.data.pathData.timing.startDate);
-            endDate = new Date(gotoDetails.data.pathData.timing.endDate);
+      const gotoDetailsResult = GotoActivityDetailsSchema.safeParse(activityDetails);
+      if (gotoDetailsResult.success) {
+        const gotoData = gotoDetailsResult.data;
+        airtablePayload.ToBuilding = gotoData.toBuildingId;
+        if (gotoData.fromBuildingId) airtablePayload.FromBuilding = gotoData.fromBuildingId;
+        
+        // Internal Pathfinding
+        const toPos = await getBuildingPosition(gotoData.toBuildingId);
+        let fromPos = null;
+        if (gotoData.fromBuildingId) {
+            fromPos = await getBuildingPosition(gotoData.fromBuildingId);
         } else {
-            // Fallback if timing is not in pathData (should be an error from AI side)
-            return NextResponse.json({ success: false, error: "PathData must include timing for travel activities" }, { status: 400 });
+            // If fromBuildingId is not provided, we need citizen's current position.
+            // This API doesn't have direct access to citizen's current position without another call.
+            // For now, require fromBuildingId or assume AI handles "start from current pos" differently.
+            // OR, this endpoint could fetch citizen's current position if fromBuildingId is null.
+            // Let's assume for now if fromBuildingId is null, it's an error or needs client to handle.
+            // A better approach: if fromBuildingId is null, the AI should have placed the citizen at the start of the path already.
+            // This API would then expect a path if fromBuildingId is not given.
+            // For simplicity now: if fromBuildingId is given, we pathfind.
+            return NextResponse.json({ success: false, error: "fromBuildingId is required for server-side pathfinding in goto activities for now." }, { status: 400 });
         }
-        if (gotoDetails.data.fromBuildingId) airtablePayload.FromBuilding = gotoDetails.data.fromBuildingId;
-        if (gotoDetails.data.notes) airtablePayload.Notes = `${airtablePayload.Notes || ''}\nDetails: ${gotoDetails.data.notes}`.trim();
+
+        if (!fromPos || !toPos) {
+            return NextResponse.json({ success: false, error: "Could not determine start or end position for pathfinding." }, { status: 400 });
+        }
+
+        const transportApiUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/transport`;
+        const transportResponse = await fetch(transportApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ startPoint: fromPos, endPoint: toPos, startDate: new Date().toISOString() })
+        });
+
+        if (!transportResponse.ok) {
+            const errorBody = await transportResponse.text();
+            return NextResponse.json({ success: false, error: `Pathfinding failed: ${transportResponse.status} ${errorBody}` }, { status: 400 });
+        }
+        internalPathData = await transportResponse.json();
+        if (!internalPathData.success || !internalPathData.path || !internalPathData.timing) {
+            return NextResponse.json({ success: false, error: "Pathfinding did not return a valid path or timing.", details: internalPathData.error }, { status: 400 });
+        }
+
+        airtablePayload.Path = JSON.stringify(internalPathData.path);
+        startDate = new Date(internalPathData.timing.startDate);
+        endDate = new Date(internalPathData.timing.endDate);
+        if (internalPathData.transporter) airtablePayload.Transporter = internalPathData.transporter;
+
+        if (gotoData.notes) airtablePayload.Notes = `${airtablePayload.Notes || ''}\nDetails: ${gotoData.notes}`.trim();
         specificDetailsValid = true;
       } else {
-        return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: gotoDetails.error.format() }, { status: 400 });
+        return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: gotoDetailsResult.error.format() }, { status: 400 });
       }
     } else if (activityType === "production") {
         const prodDetails = ProductionActivityDetailsSchema.safeParse(activityDetails);
@@ -224,31 +289,44 @@ export async function POST(request: Request) {
         const fetchDetails = FetchResourceActivityDetailsSchema.safeParse(activityDetails);
         if (fetchDetails.success) {
             airtablePayload.ContractId = fetchDetails.data.contractId;
-            airtablePayload.FromBuilding = fetchDetails.data.fromBuildingId;
-            airtablePayload.ToBuilding = fetchDetails.data.toBuildingId;
-            airtablePayload.Resources = JSON.stringify([{ ResourceId: fetchDetails.data.resourceId, Amount: fetchDetails.data.amount }]); // Standardize to Resources field
-            if (fetchDetails.data.pathData && fetchDetails.data.pathData.path) {
-                airtablePayload.Path = JSON.stringify(fetchDetails.data.pathData.path);
-                 if (fetchDetails.data.pathData.timing) {
-                    startDate = new Date(fetchDetails.data.pathData.timing.startDate);
-                    endDate = new Date(fetchDetails.data.pathData.timing.endDate);
-                } else if (fetchDetails.data.fromBuildingId) { // Path implies travel
-                     return NextResponse.json({ success: false, error: "PathData must include timing for travel-based fetch_resource" }, { status: 400 });
+            airtablePayload.FromBuilding = fetchData.fromBuildingId;
+            airtablePayload.ToBuilding = fetchData.toBuildingId;
+            airtablePayload.Resources = JSON.stringify([{ ResourceId: fetchData.resourceId, Amount: fetchData.amount }]);
+
+            if (fetchData.fromBuildingId) { // Travel is involved
+                const fromPos = await getBuildingPosition(fetchData.fromBuildingId);
+                const toPos = await getBuildingPosition(fetchData.toBuildingId);
+
+                if (!fromPos || !toPos) {
+                    return NextResponse.json({ success: false, error: "Could not determine start or end position for fetch_resource pathfinding." }, { status: 400 });
                 }
-            } else if (fetchDetails.data.fromBuildingId) { // Travel implied by FromBuilding but no path
-                 return NextResponse.json({ success: false, error: "PathData is required for fetch_resource if FromBuilding is specified" }, { status: 400 });
-            }
-            // If no FromBuildingId and no PathData, it's a generic fetch (e.g. from market, path determined by processor)
-            // or an instant fetch if already at location (processor would handle this).
-            // For API creation, if it's not instant, path should be provided.
-            // If it's meant to be instant (e.g. already at source), EndDate might be very soon.
-            if (!endDate && !fetchDetails.data.fromBuildingId) { // Assume short duration if no travel
+                const transportApiUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/transport`;
+                const transportResponse = await fetch(transportApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ startPoint: fromPos, endPoint: toPos, startDate: new Date().toISOString() })
+                });
+                if (!transportResponse.ok) {
+                    const errorBody = await transportResponse.text();
+                    return NextResponse.json({ success: false, error: `Pathfinding for fetch_resource failed: ${transportResponse.status} ${errorBody}` }, { status: 400 });
+                }
+                internalPathData = await transportResponse.json();
+                if (!internalPathData.success || !internalPathData.path || !internalPathData.timing) {
+                     return NextResponse.json({ success: false, error: "Pathfinding for fetch_resource did not return a valid path or timing.", details: internalPathData.error }, { status: 400 });
+                }
+                airtablePayload.Path = JSON.stringify(internalPathData.path);
+                startDate = new Date(internalPathData.timing.startDate);
+                endDate = new Date(internalPathData.timing.endDate);
+                if (internalPathData.transporter) airtablePayload.Transporter = internalPathData.transporter;
+            } else {
+                // No fromBuildingId, so it's an instant fetch or from current location (not handled by this API creating a path)
+                // Default duration for non-travel fetch
                 endDate = new Date(startDate.getTime() + 5 * 60 * 1000); // 5 min default
             }
-            if (fetchDetails.data.notes) airtablePayload.Notes = `${airtablePayload.Notes || ''}\nDetails: ${fetchDetails.data.notes}`.trim();
+            if (fetchData.notes) airtablePayload.Notes = `${airtablePayload.Notes || ''}\nDetails: ${fetchData.notes}`.trim();
             specificDetailsValid = true;
         } else {
-            return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: fetchDetails.error.format() }, { status: 400 });
+            return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: fetchDetailsResult.error.format() }, { status: 400 });
         }
     }
     // ... Add more else if blocks for other activity types with their specific Zod schemas and payload mapping ...
