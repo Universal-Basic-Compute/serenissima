@@ -359,6 +359,29 @@ export async function POST(request: Request) {
     // Remove undefined notes
     if (airtablePayload.Notes === undefined) delete airtablePayload.Notes;
 
+    // --- Interrupt existing active activity before creating a new one ---
+    const nowUtcIso = new Date().toISOString();
+    const activeActivityFormula = `AND(
+      {Citizen} = '${citizenUsername}',
+      {StartDate} <= '${nowUtcIso}',
+      {EndDate} >= '${nowUtcIso}',
+      NOT(OR({Status} = 'processed', {Status} = 'failed', {Status} = 'interrupted'))
+    )`;
+
+    try {
+      const existingActiveActivities = await activitiesTable.select({ filterByFormula: activeActivityFormula }).all();
+      for (const activity of existingActiveActivities) {
+        log.info(`[API CreateActivity] Interrupting existing active activity ${activity.id} for ${citizenUsername}.`);
+        await activitiesTable.update(activity.id, {
+          Status: "interrupted",
+          Notes: `${activity.fields.Notes || ''}\nInterrupted at ${nowUtcIso} by new API-driven activity.`.trim()
+        });
+      }
+    } catch (e) {
+      console.error(`[API CreateActivity] Error trying to interrupt existing activities for ${citizenUsername}:`, e);
+      // Decide if this should be a fatal error or just a warning. For now, log and continue.
+    }
+    // --- End of interruption logic ---
 
     const createdRecord = await activitiesTable.create(airtablePayload);
 

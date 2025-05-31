@@ -139,7 +139,7 @@ Suit les actions en cours et terminées des citoyens.
 -   `TransportMode` (Texte): Mode de transport (ex: `walk`, `gondola`, `merchant_galley`).
 -   `Path` (Texte multiligne): Chaîne JSON d'un tableau de coordonnées pour le trajet.
 -   `Transporter` (Lien vers `CITIZENS` via `Username`): Citoyen responsable du transport (ex: opérateur de la gondole).
--   `Status` (Texte): Statut de l'activité (ex: `created`, `processed`, `failed`).
+-   `Status` (Texte): Statut de l'activité (ex: `created`, `in_progress`, `processed`, `failed`, `interrupted`).
 -   `Title` (Texte): Titre concis de l'activité.
 -   `Description` (Texte multiligne): Description de ce que l'activité implique.
 -   `Thought` (Texte multiligne): Réflexion à la première personne du citoyen concernant cette activité (raisonnement, objectifs, commentaires).
