@@ -175,9 +175,7 @@ export async function POST(request: NextRequest) {
         .catch(discussionError => {
           console.error(`[Dynamic Discussion] Error for ${guildId}#${kinOsChannelId}:`, discussionError);
         });
-    } else {
-      console.log(`[Dynamic Discussion] Skipped by chance for guild ${guildId}, channel ${kinOsChannelId}`);
-    }
+    // Removed the dangling 'else' block as the 'if' condition was commented out to force 100% trigger rate.
 
     return NextResponse.json({ success: true, message: 'KinOS notification process initiated for guild members. Dynamic discussion may follow.' });
 
