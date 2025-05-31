@@ -315,6 +315,13 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
   // Debugging logs (optional, can be removed after verification)
   // console.log(`[GuildDetails Render] Current citizenGuildId: '${citizenGuildId}', Viewed guild.guildId: '${guild.guildId}', Is member? ${citizenGuildId === guild.guildId}`);
 
+  // Add this log for debugging
+  console.log(
+    `[GuildDetails DEBUG] Render check for guild "${guild?.guildName}" (ID: "${guild?.guildId}"): 
+    Citizen's Guild ID from state (citizenGuildId): "${citizenGuildId}"
+    Is member (citizenGuildId === guild.guildId): ${citizenGuildId === guild.guildId}`
+  );
+
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header with banner image */}
