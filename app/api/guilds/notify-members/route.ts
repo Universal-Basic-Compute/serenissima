@@ -167,10 +167,11 @@ export async function POST(request: NextRequest) {
     });
 
     // New logic for dynamic discussion
-    if (Math.random() < 0.8) { // 80% chance
-      console.log(`[Dynamic Discussion] Triggered for guild ${guildId}, channel ${kinOsChannelId}`);
-      // This part will run asynchronously and not block the main response
-      initiateDynamicDiscussion(guildId, kinOsChannelId, messageContent, originalSenderUsername, base)
+    // if (Math.random() < 0.8) { // 80% chance
+    // Forcing 100% chance for debugging as requested
+    console.log(`[Dynamic Discussion] Triggered for guild ${guildId}, channel ${kinOsChannelId} (100% chance)`);
+    // This part will run asynchronously and not block the main response
+    initiateDynamicDiscussion(guildId, kinOsChannelId, messageContent, originalSenderUsername, base)
         .catch(discussionError => {
           console.error(`[Dynamic Discussion] Error for ${guildId}#${kinOsChannelId}:`, discussionError);
         });
@@ -348,18 +349,27 @@ async function initiateDynamicDiscussion(
   originalSenderUsername: string,
   airtableBase: Airtable.Base
 ) {
+  console.log(`[Dynamic Discussion EXEC] Entered for ${guildId}, channel ${kinOsChannelId}. Original sender: ${originalSenderUsername}`);
+
   // 1. Fetch Guild Master's username
+  console.log(`[Dynamic Discussion EXEC] Step 1: Fetching guild details for ${guildId}`);
   const guildDetails = await fetchGuildDetails(guildId, airtableBase);
-  if (!guildDetails || !guildDetails.gastaldo) {
-    console.log(`[Dynamic Discussion] Guild ${guildId} not found or Gastaldo not set. Aborting.`);
+  if (!guildDetails) {
+    console.log(`[Dynamic Discussion EXEC] Guild ${guildId} not found. Aborting.`);
+    return;
+  }
+  if (!guildDetails.gastaldo) {
+    console.log(`[Dynamic Discussion EXEC] Gastaldo not set for guild ${guildId} (${guildDetails.guildName}). Aborting.`);
     return;
   }
   const gastaldoUsername = guildDetails.gastaldo;
+  console.log(`[Dynamic Discussion EXEC] Gastaldo for ${guildId} is ${gastaldoUsername}`);
 
   // 2. Fetch Guild Members' details for the system prompt
+  console.log(`[Dynamic Discussion EXEC] Step 2: Fetching member details for ${guildId}`);
   const members = await fetchGuildMemberDetails(guildId, airtableBase);
   if (members.length === 0) {
-    console.log(`[Dynamic Discussion] No members found for guild ${guildId}. Aborting.`);
+    console.log(`[Dynamic Discussion EXEC] No members found for guild ${guildId}. Aborting.`);
     return;
   }
   const memberInfoForPrompt = members
@@ -371,33 +381,37 @@ async function initiateDynamicDiscussion(
   const masterPromptMessage = `[SYSTEM]A new message has been posted by ${originalSenderUsername} in the guild chat for channel "${tabName}" (Guild: ${guildDetails.guildName}). The message is: "${originalMessageContent}". Review the context and decide which guild member should respond to continue the discussion, or if no response is needed. Reply ONLY with a JSON object like: {"Username": "selected_username_here"} or {"Username": ""} if no one should respond or the topic is concluded.[/SYSTEM]`;
   const masterSystemContext = `You are the Gastaldo (Guild Master) for ${guildDetails.guildName}. Your task is to facilitate productive discussions in the guild chat. A new message has arrived. Your members are: ${memberInfoForPrompt}. The original sender ${originalSenderUsername} should not be selected to respond to their own message. Consider who is best suited or if the conversation should end.`;
 
-  console.log(`[Dynamic Discussion] Asking Gastaldo ${gastaldoUsername} for guild ${guildId}, channel ${kinOsChannelId}`);
+  console.log(`[Dynamic Discussion EXEC] Step 3: Asking Gastaldo ${gastaldoUsername} for guild ${guildId}, channel ${kinOsChannelId}. Prompt: ${masterPromptMessage}`);
 
   try {
+    console.log(`[Dynamic Discussion EXEC] Calling askKinOsForJsonDecision for Gastaldo ${gastaldoUsername}.`);
     const decisionResponse = await askKinOsForJsonDecision(
       gastaldoUsername,
       kinOsChannelId, // Master receives this in the same guild-tab channel
       masterPromptMessage,
       masterSystemContext
     );
+    console.log(`[Dynamic Discussion EXEC] Received decision from Gastaldo ${gastaldoUsername}:`, decisionResponse);
 
     // decisionResponse is already parsed JSON from askKinOsForJsonDecision
     const selectedUsername = decisionResponse.Username;
 
     if (selectedUsername && typeof selectedUsername === 'string' && selectedUsername.trim() !== "") {
+      console.log(`[Dynamic Discussion EXEC] Gastaldo selected username: '${selectedUsername}'`);
       if (selectedUsername === originalSenderUsername) {
-        console.log(`[Dynamic Discussion] Gastaldo selected the original sender ${selectedUsername}. Ignoring to prevent self-reply loop.`);
+        console.log(`[Dynamic Discussion EXEC] Gastaldo selected the original sender ${selectedUsername}. Ignoring to prevent self-reply loop.`);
         return;
       }
       if (!members.find(m => m.username === selectedUsername)) {
-        console.log(`[Dynamic Discussion] Gastaldo selected ${selectedUsername}, who is not a current member of guild ${guildId}. Aborting directive.`);
+        console.log(`[Dynamic Discussion EXEC] Gastaldo selected ${selectedUsername}, who is not a current member of guild ${guildId}. Aborting directive.`);
         return;
       }
 
-      console.log(`[Dynamic Discussion] Gastaldo ${gastaldoUsername} selected ${selectedUsername} to respond.`);
+      console.log(`[Dynamic Discussion EXEC] Gastaldo ${gastaldoUsername} selected ${selectedUsername} to respond.`);
 
       // 4. Send directive to the selected user
       const userDirective = `[SYSTEM]The Guild Master, ${gastaldoUsername}, has selected you to contribute to the discussion in the guild chat for channel "${tabName}" (Guild: ${guildDetails.guildName}). The last message was from ${originalSenderUsername}: "${originalMessageContent}". Please review the conversation and share your point of view in the channel.[/SYSTEM]`;
+      console.log(`[Dynamic Discussion EXEC] Step 4: Sending directive to selected user ${selectedUsername}. Directive: ${userDirective}`);
       
       await sendSystemDirectiveToKinOsChannel(
         selectedUsername,
@@ -406,12 +420,13 @@ async function initiateDynamicDiscussion(
         originalSenderUsername,
         guildId
       );
-      console.log(`[Dynamic Discussion] Directive sent to ${selectedUsername} for guild ${guildId}, channel ${kinOsChannelId}.`);
+      console.log(`[Dynamic Discussion EXEC] Directive sent to ${selectedUsername} for guild ${guildId}, channel ${kinOsChannelId}.`);
 
     } else {
-      console.log(`[Dynamic Discussion] Gastaldo ${gastaldoUsername} decided no further response is needed or provided an empty selection.`);
+      console.log(`[Dynamic Discussion EXEC] Gastaldo ${gastaldoUsername} decided no further response is needed or provided an empty/invalid selection. Selected: '${selectedUsername}'`);
     }
   } catch (error) {
-    console.error(`[Dynamic Discussion] Error during interaction with Gastaldo ${gastaldoUsername} or selected user:`, error);
+    console.error(`[Dynamic Discussion EXEC] Error during interaction with Gastaldo ${gastaldoUsername} or subsequent steps:`, error);
   }
+  console.log(`[Dynamic Discussion EXEC] Finished for ${guildId}, channel ${kinOsChannelId}.`);
 }
