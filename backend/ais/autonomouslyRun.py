@@ -631,7 +631,7 @@ def autonomously_run_ai_citizen_unguided(
              try:
                 tables["messages"].create({
                     "Sender": ai_username, "Receiver": ai_username,
-                    "Content": f"Unguided Autonomous Run Iteration {iteration_count} Reflection:\n{ai_reflection}",
+                    "Content": ai_reflection, # Store only the reflection text
                     "Type": "unguided_run_log", "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
                     "ReadAt": datetime.now(VENICE_TIMEZONE).isoformat()
                 })
