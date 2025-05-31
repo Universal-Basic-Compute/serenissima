@@ -31,11 +31,8 @@ const initAirtable = () => {
     throw new Error('Airtable credentials not configured');
   }
   
-  Airtable.configure({
-    apiKey: AIRTABLE_API_KEY
-  });
-  
-  return Airtable.base(AIRTABLE_BASE_ID);
+  // Initialize Airtable with requestTimeout
+  return new Airtable({ apiKey: AIRTABLE_API_KEY, requestTimeout: 30000 }).base(AIRTABLE_BASE_ID);
 };
 
 export async function POST(request: Request) {
