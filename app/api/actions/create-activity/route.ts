@@ -402,17 +402,3 @@ export async function POST(request: Request) {
     );
   }
 }
-````
-
-**2. Update `components/Documentation/ApiReference.tsx`**
-
-Add documentation for the new endpoint.
-
-````tsx
-components/Documentation/ApiReference.tsx
-<<<<<<< SEARCH
-              <li><a href="#transport-get-water-graph" className="text-amber-600 hover:underline text-sm">GET /api/get-water-graph</a></li>
-              <li><a href="#transport-get-activities" className="text-amber-600 hover:underline text-sm">GET /api/activities</a></li>
-            </ul>
-          </li>
-          <li><a href="#economy" className="text-amber-700 hover:underline">Economy & Finance</a>
