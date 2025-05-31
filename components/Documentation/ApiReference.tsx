@@ -47,7 +47,7 @@ const ApiReference: React.FC = () => {
       <section id="citizens" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Citizen Management</h2>
         
-        <div className="mb-8">
+        <div id="citizens-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/citizens</h3>
           <p className="mb-2">Retrieves a list of all citizens in Venice.</p>
           
@@ -80,7 +80,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="citizens-get-username" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/citizens/:username</h3>
           <p className="mb-2">Retrieves details for a specific citizen by username.</p>
           
@@ -118,7 +118,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="citizens-get-wallet" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/citizens/wallet/:walletAddress</h3>
           <p className="mb-2">Retrieves citizen details by wallet address.</p>
           
@@ -150,7 +150,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="citizens-post-update" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/citizens/update</h3>
           <p className="mb-2">Updates a citizen's profile information.</p>
           
@@ -190,7 +190,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="citizens-post-update-guild" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/citizens/update-guild</h3>
           <p className="mb-2">Updates a citizen's guild membership.</p>
           
@@ -220,7 +220,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="citizens-post-register" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/register</h3>
           <p className="mb-2">Registers a new citizen with a wallet address.</p>
           
@@ -255,7 +255,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="citizens-post-settings" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/citizen/settings</h3>
           <p className="mb-2">Updates a citizen's settings preferences.</p>
           
@@ -291,7 +291,7 @@ const ApiReference: React.FC = () => {
       <section id="lands" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Land Management</h2>
         
-        <div className="mb-8">
+        <div id="lands-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/lands</h3>
           <p className="mb-2">Retrieves a list of all land parcels.</p>
           
@@ -326,7 +326,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="lands-get-land-owners" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-land-owners</h3>
           <p className="mb-2">Retrieves land ownership information.</p>
           
@@ -351,7 +351,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="lands-get-land-rents" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-land-rents</h3>
           <p className="mb-2">Retrieves land rent information for all parcels.</p>
           
@@ -381,7 +381,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="lands-get-land-groups" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/land-groups</h3>
           <p className="mb-2">Retrieves groups of connected land parcels. Land parcels are considered connected if they are linked by constructed bridges.</p>
           
@@ -431,7 +431,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="lands-get-income-data" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-income-data</h3>
           <p className="mb-2">Retrieves income data for land parcels.</p>
           
@@ -452,7 +452,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="lands-calculate-land-rent" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/calculate-land-rent</h3>
           <p className="mb-2">Calculates and returns land rent values for all parcels.</p>
           
@@ -545,7 +545,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="lands-get-polygons" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-polygons</h3>
           <p className="mb-2">Retrieves polygon data for land parcels, including coordinates, building points, and historical information.</p>
           
@@ -620,7 +620,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="lands-get-polygon-id" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/polygons/:polygonId</h3>
           <p className="mb-2">Retrieves data for a specific polygon by ID.</p>
           
@@ -652,7 +652,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="lands-post-save-polygon" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/save-polygon</h3>
           <p className="mb-2">Saves a new polygon or updates an existing one.</p>
           
@@ -682,7 +682,7 @@ const ApiReference: React.FC = () => {
       <section id="buildings" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Building Management</h2>
         
-        <div className="mb-8">
+        <div id="buildings-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/buildings</h3>
           <p className="mb-2">Retrieves a list of all buildings. Supports filtering by type and pagination.</p>
           
@@ -741,7 +741,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-get-building-id" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/buildings/:buildingId</h3>
           <p className="mb-2">Retrieves details for a specific building by ID.</p>
           
@@ -774,7 +774,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-post-create" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/buildings</h3>
           <p className="mb-2">Creates a new building.</p>
           
@@ -818,7 +818,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-post-create-at-point" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/create-building-at-point</h3>
           <p className="mb-2">Creates a building at a specific point with cost deduction from the citizen's Ducats balance.</p>
           
@@ -874,7 +874,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-get-building-types" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/building-types</h3>
           <p className="mb-2">Retrieves a list of all available building types.</p>
           
@@ -913,7 +913,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-get-building-data-type" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/building-data/:type</h3>
           <p className="mb-2">Retrieves detailed data for a specific building type.</p>
           
@@ -942,7 +942,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-get-building-definition" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/building-definition</h3>
           <p className="mb-2">Retrieves building definition by type.</p>
           
@@ -976,7 +976,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-get-building-resources" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/building-resources/:buildingId</h3>
           <p className="mb-2">Retrieves comprehensive resource information for a building, including stored resources, resources for sale, and production capabilities.</p>
           
@@ -1107,7 +1107,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-get-building-points" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/building-points</h3>
           <p className="mb-2">Retrieves all building, canal, and bridge points.</p>
           
@@ -1131,7 +1131,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-get-bridges" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/bridges</h3>
           <p className="mb-2">Retrieves all bridges.</p>
           
@@ -1163,7 +1163,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="buildings-get-docks" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/docks</h3>
           <p className="mb-2">Retrieves all docks.</p>
           
@@ -1195,7 +1195,7 @@ const ApiReference: React.FC = () => {
       <section id="resources" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Resource Management</h2>
         
-        <div className="mb-8">
+        <div id="resources-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/resources</h3>
           <p className="mb-2">Retrieves a list of all resources.</p>
           
@@ -1230,7 +1230,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="resources-post-create" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/resources</h3>
           <p className="mb-2">Creates a new resource.</p>
           
@@ -1272,7 +1272,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8" id="resources-counts">
+        <div id="resources-get-counts" className="mb-8 scroll-mt-20">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/resources/counts</h3>
           <p className="mb-2">Retrieves resource counts grouped by type. Returns both global resource counts (all resources in the game) and player-specific resource counts (resources owned by the specified player).</p>
           
@@ -1352,7 +1352,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="resources-get-types" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/resource-types</h3>
           <p className="mb-2">Retrieves a list of all resource types.</p>
           
@@ -1408,7 +1408,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <h3 className="text-2xl font-serif text-amber-700 mb-2">Transport API</h3>
           <p className="mb-2">The Transport API provides pathfinding capabilities between points in Venice, considering both land and water routes.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="transport-get-path" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">GET /api/transport</h4>
             <p className="mb-2">Finds a path between two points using query parameters.</p>
             
@@ -1445,7 +1445,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             </pre>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="transport-post-path" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">POST /api/transport</h4>
             <p className="mb-2">Finds a path between two points with more options using JSON request body.</p>
             
@@ -1489,7 +1489,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             </ul>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="transport-post-water-only" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">POST /api/transport/water-only</h4>
             <p className="mb-2">Finds a water-only path between two points.</p>
             
@@ -1512,7 +1512,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             </pre>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="transport-get-debug" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">GET /api/transport/debug</h4>
             <p className="mb-2">Provides debug information about the transport graph.</p>
             
@@ -1546,7 +1546,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="transport-post-water-only-duplicate" className="mb-8 scroll-mt-20"> {/* ID adjusted for uniqueness if needed, or remove if truly duplicate */}
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/transport/water-only</h3>
           <p className="mb-2">Finds a water-only path between two points.</p>
           
@@ -1573,7 +1573,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="transport-get-debug-duplicate" className="mb-8 scroll-mt-20"> {/* ID adjusted for uniqueness if needed, or remove if truly duplicate */}
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/transport/debug</h3>
           <p className="mb-2">Provides debug information about the transport graph.</p>
           
@@ -1610,7 +1610,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="transport-get-water-points" className="mb-8 scroll-mt-20">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/water-points</h3>
           <p className="mb-2">Retrieves water points for the canal network.</p>
           
@@ -1631,7 +1631,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="transport-post-water-points" className="mb-8 scroll-mt-20">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/water-points</h3>
           <p className="mb-2">Creates or updates a water point for the canal network.</p>
           
@@ -1673,16 +1673,18 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="transport-get-activities" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/activities</h3>
           <p className="mb-2">Retrieves citizen activities, including transport paths.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>citizenId</code> (optional) - Filter activities by citizen ID</li>
-              <li><code>limit</code> (optional) - Limit the number of activities returned</li>
-              <li><code>hasPath</code> (optional) - Filter activities that have a path</li>
+              <li><code>citizenId</code> (optional) - Filter activities by citizen username (can be repeated for multiple citizens).</li>
+              <li><code>limit</code> (optional) - Limit the number of activities returned (default: 100).</li>
+              <li><code>hasPath</code> (optional, boolean) - Filter activities that have a path.</li>
+              <li><code>ongoing</code> (optional, boolean) - Filter for activities that are currently ongoing (start date is past, end date is in future or null).</li>
+              <li><code>timeRange</code> (optional, string) - e.g., "24h" to filter activities created in the last 24 hours. Overrides `ongoing` if both are present.</li>
             </ul>
           </div>
           
@@ -1693,16 +1695,17 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "success": true,
   "activities": [
     {
-      "ActivityId": "string",
-      "CitizenId": "string",
-      "Type": "string",
-      "Path": "string",
-      "StartPoint": "string",
-      "EndPoint": "string",
-      "StartTime": "string",
-      "EndTime": "string",
-      "Status": "string",
-      "CreatedAt": "string"
+      "activityId": "string", // Airtable record ID
+      "citizen": "string", // Username of the citizen (was CitizenId)
+      "type": "string", // Type of activity (e.g., "goto_work", "production")
+      "path": "string", // JSON string representing the path coordinates
+      "startPoint": "string", // Description or coordinates of start
+      "endPoint": "string", // Description or coordinates of end
+      "startDate": "string", // ISO date string (was StartTime)
+      "endDate": "string", // ISO date string (was EndTime)
+      "status": "string", // e.g., "pending", "in_progress", "completed", "failed"
+      "createdAt": "string" // ISO date string
+      // ... any other fields from Airtable, camelCased
     }
   ]
 }`}
@@ -1715,7 +1718,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       <section id="economy" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Economy & Finance</h2>
         
-        <div className="mb-8">
+        <div id="economy-get-overview" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/economy</h3>
           <p className="mb-2">Retrieves economic data for Venice.</p>
           
@@ -1739,7 +1742,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="economy-get-contracts" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/contracts</h3>
           <p className="mb-2">Retrieves resource contracts.</p>
           
@@ -1779,8 +1782,23 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             </pre>
           </div>
         </div>
+
+        <div id="economy-get-contracts-stocked" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/contracts/stocked-public-sell</h3>
+          <p className="mb-2">Retrieves 'public_sell' contracts that are confirmed to have stock available in the seller's building.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "contracts": [ /* Array of contract objects, structure same as GET /api/contracts */ ]
+}`}
+            </pre>
+            <p className="mt-2">This endpoint filters contracts from `GET /api/contracts` by checking current stock levels in the `RESOURCES` table for the `SellerBuilding` and `ResourceType`.</p>
+          </div>
+        </div>
         
-        <div className="mb-8">
+        <div id="economy-get-transactions-available" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/transactions/available</h3>
           <p className="mb-2">Retrieves available transactions.</p>
           
@@ -1803,7 +1821,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="economy-get-transactions-history" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/transactions/history</h3>
           <p className="mb-2">Retrieves transaction history.</p>
           
@@ -1844,7 +1862,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="economy-post-withdraw-compute" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/withdraw-compute</h3>
           <p className="mb-2">Withdraws compute tokens.</p>
           
@@ -1870,7 +1888,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="economy-get-loans" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/loans</h3>
           <p className="mb-2">Retrieves loans information.</p>
           
@@ -1900,7 +1918,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="economy-post-loans-apply" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/loans/apply</h3>
           <p className="mb-2">Applies for a loan.</p>
           
@@ -1938,6 +1956,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   }
 }`}
             </pre>
+            <p className="mt-2">Returns an empty array if no offers are found.</p>
           </div>
         </div>
       </section>
@@ -1946,7 +1965,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       <section id="governance" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Governance</h2>
         
-        <div className="mb-8">
+        <div id="governance-get-decrees" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/decrees</h3>
           <p className="mb-2">Retrieves all decrees.</p>
           
@@ -1981,7 +2000,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       <section id="guilds" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Guilds</h2>
         
-        <div className="mb-8">
+        <div id="guilds-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/guilds</h3>
           <p className="mb-2">Retrieves all guilds.</p>
           
@@ -2014,7 +2033,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="guilds-get-members" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/guild-members/:guildId</h3>
           <p className="mb-2">Retrieves members of a specific guild.</p>
           
@@ -2043,13 +2062,61 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             </pre>
           </div>
         </div>
+
+        <div id="guilds-get-public-builders" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-public-builders</h3>
+          <p className="mb-2">Retrieves a list of public construction contracts offered by builders.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "builders": [ // Array of public construction contract objects
+    {
+      "id": "string", // Airtable record ID of the contract
+      "contractId": "string", // Custom contract ID
+      "type": "public_construction",
+      "seller": "string", // Username of the builder
+      "sellerDetails": { // Enriched details of the builder citizen
+        "username": "string",
+        "citizenId": "string",
+        "firstName": "string",
+        "lastName": "string",
+        "socialClass": "string",
+        "imageUrl": "string | null",
+        "coatOfArmsImageUrl": "string | null",
+        "color": "string | null",
+        "familyMotto": "string | null"
+      },
+      "resourceType": "string", // Type of building/project offered
+      "resourceName": "string",
+      "resourceCategory": "string",
+      "resourceSubCategory": "string | null",
+      "imageUrl": "string", // Icon for the building type
+      "sellerBuilding": "string", // Builder's workshop BuildingId
+      "pricePerResource": number, // Cost for the construction project
+      "price": number, // Alias for pricePerResource
+      "amount": number, // Typically 1 for a construction project
+      "targetAmount": number, // Alias for amount
+      "status": "string", // e.g., "active"
+      "notes": "string | null",
+      "title": "string | null", // Title of the construction offer
+      "description": "string | null", // Description of the construction offer
+      "createdAt": "string", // ISO date string
+      "updatedAt": "string" // ISO date string
+    }
+  ]
+}`}
+            </pre>
+          </div>
+        </div>
       </section>
       
       {/* Relevancies Section */}
       <section id="relevancies" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Relevancy System</h2>
         
-        <div className="mb-8">
+        <div id="relevancies-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies</h3>
           <p className="mb-2">Retrieves available relevancy types.</p>
           
@@ -2077,8 +2144,8 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/:aiUsername</h3>
+        <div id="relevancies-get-citizen" className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/:citizen</h3>
           <p className="mb-2">Retrieves relevancies for a specific AI.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
@@ -2126,8 +2193,8 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           </div>
         </div>
         
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/proximity</h3>
+        <div id="relevancies-get-proximity-username" className="mb-8"> {/* Assuming this is the GET for a specific user */}
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/proximity/:aiUsername</h3>
           <p className="mb-2">Calculates proximity relevancies for an AI.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
@@ -2178,7 +2245,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="relevancies-post-proximity" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/relevancies/proximity</h3>
           <p className="mb-2">Calculates and saves proximity relevancies for an AI.</p>
           
@@ -2269,8 +2336,8 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/domination</h3>
+        <div id="relevancies-get-domination-username" className="mb-8">  {/* Assuming this is GET for specific user */}
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/domination/:aiUsername</h3>
           <p className="mb-2">Calculates land domination relevancies.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
@@ -2297,7 +2364,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="relevancies-post-domination" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/relevancies/domination</h3>
           <p className="mb-2">Calculates and saves land domination relevancies for an AI.</p>
           
@@ -2378,7 +2445,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="relevancies-get-types-type" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies/types/:type</h3>
           <p className="mb-2">Retrieves relevancies of a specific type.</p>
           
@@ -2431,7 +2498,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           <h3 className="text-2xl font-serif text-amber-700 mb-2">Relevancy Calculation API</h3>
           <p className="mb-2">The Relevancy Calculation API calculates and manages relevancy scores for AI citizens. Relevancies represent the importance of various assets (lands, citizens, etc.) to an AI.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="relevancies-get-calculate" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">GET /api/calculateRelevancies</h4>
             <p className="mb-2">Calculates relevancies for AIs without saving them to the database.</p>
             
@@ -2458,7 +2525,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             </pre>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="relevancies-post-calculate" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">POST /api/calculateRelevancies</h4>
             <p className="mb-2">Calculates and saves relevancies for an AI to the database.</p>
             
@@ -2523,7 +2590,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
       <section id="notifications" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Notifications</h2>
         
-        <div className="mb-8">
+        <div id="notifications-post-get" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/notifications</h3>
           <p className="mb-2">Retrieves notifications for a citizen.</p>
           
@@ -2558,7 +2625,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="notifications-post-mark-read" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/notifications/mark-read</h3>
           <p className="mb-2">Marks notifications as read.</p>
           
@@ -2583,7 +2650,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="notifications-post-unread-count" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/notifications/unread-count</h3>
           <p className="mb-2">Retrieves the count of unread notifications for a citizen.</p>
           
@@ -2610,9 +2677,9 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
       
       {/* Messages Section */}
       <section id="messages" className="mb-12">
-        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Messages</h2>
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Messaging & Thoughts</h2>
         
-        <div className="mb-8">
+        <div id="messages-post-get" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/messages</h3>
           <p className="mb-2">Retrieves messages between two citizens.</p>
           
@@ -2647,7 +2714,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="messages-post-send" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/messages/send</h3>
           <p className="mb-2">Sends a message from one citizen to another.</p>
           
@@ -2682,7 +2749,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="messages-post-update" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/messages/update</h3>
           <p className="mb-2">Updates a message's type.</p>
           
@@ -2710,15 +2777,41 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="messages-post-compagno" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/compagno</h3>
-          <p className="mb-2">Sends a message to the Compagno AI assistant.</p>
-          
+          <p className="mb-2">Retrieves messages by type. Can fetch the latest or all messages of a given type.</p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Request Body</h4>
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>type</code> (required) - The type of message to retrieve (e.g., "daily_update", "admin_report").</li>
+              <li><code>latest</code> (optional, boolean) - If "true", returns only the most recent message of that type. Otherwise, returns all messages of that type.</li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response (if latest=true)</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "message": "string"
+  "success": true,
+  "message": { // Single message object or null if not found
+    "messageId": "string",
+    "sender": "string",
+    "receiver": "string",
+    "content": "string",
+    "type": "string",
+    "createdAt": "string",
+    "readAt": "string | null"
+  }
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response (if latest is not true or not present)</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "message": [ // Array of message objects
+    { /* Message object structure as above */ }
+  ]
 }`}
             </pre>
           </div>
@@ -2733,13 +2826,56 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             </pre>
           </div>
         </div>
+
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/thoughts</h3>
+          <p className="mb-2">Retrieves a randomized list of recent "thought_log" messages from all citizens (last 24 hours).</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "thoughts": [
+    {
+      "messageId": "string", // Airtable record ID or custom MessageId
+      "citizenUsername": "string", // Sender of the thought
+      "originalContent": "string", // Full content of the thought_log
+      "mainThought": "string", // Extracted main thought/sentence
+      "createdAt": "string" // ISO date string
+    }
+  ]
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/thoughts?citizenUsername=:username&limit=:limit</h3>
+          <p className="mb-2">Retrieves recent "thought_log" messages for a specific citizen.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>citizenUsername</code> (required) - The username of the citizen.</li>
+              <li><code>limit</code> (optional) - Maximum number of thoughts to return (default: 5).</li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "thoughts": [ /* Array of thought objects, same structure as above */ ]
+}`}
+            </pre>
+          </div>
+        </div>
       </section>
       
       {/* Utilities Section */}
       <section id="utilities" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Utilities</h2>
         
-        <div className="mb-8">
+        <div id="utilities-get-check-loading-dir" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/check-loading-directory</h3>
           <p className="mb-2">Checks if the loading directory exists and creates it if it doesn't.</p>
           
@@ -2758,7 +2894,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
           </div>
         </div>
         
-        <div className="mb-8">
+        <div id="utilities-get-list-polygon-files" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/list-polygon-files</h3>
           <p className="mb-2">Lists all polygon files in the data directory.</p>
           
@@ -2802,7 +2938,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">Coat of Arms Management</h3>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="utilities-get-coat-of-arms-all" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">GET /api/get-coat-of-arms</h4>
             <p className="mb-2">Retrieves coat of arms data for all citizens.</p>
             
@@ -2816,8 +2952,8 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             </pre>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
-            <h4 className="font-bold mb-2">GET /apihttps://backend.serenissima.ai/public/assets/images/coat-of-arms/:path</h4>
+          <div id="utilities-get-coat-of-arms-path" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/coat-of-arms/[...path]</h4>
             <p className="mb-2">Serves coat of arms images.</p>
             
             <h5 className="font-bold mt-4 mb-2">Parameters</h5>
@@ -2829,7 +2965,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <p>Returns the image with appropriate content type headers.</p>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="utilities-post-fetch-coat-of-arms" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">POST /api/fetch-coat-of-arms</h4>
             <p className="mb-2">Fetches and caches a coat of arms image from an external URL.</p>
             
@@ -2850,7 +2986,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             </pre>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="utilities-post-upload-coat-of-arms" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">POST /api/upload-coat-of-arms</h4>
             <p className="mb-2">Uploads a coat of arms image.</p>
             
@@ -2873,7 +3009,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             </ul>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="utilities-post-create-coat-of-arms-dir" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">POST /api/create-coat-of-arms-dir</h4>
             <p className="mb-2">Creates the coat of arms directory if it doesn't exist.</p>
             
@@ -2910,7 +3046,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">Audio and Media</h3>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="utilities-post-tts" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">POST /api/tts</h4>
             <p className="mb-2">Converts text to speech using the Kinos Engine API.</p>
             
@@ -2927,7 +3063,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <p>Returns the audio data or a URL to the audio file.</p>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="utilities-get-music-tracks" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">GET /api/music-tracks</h4>
             <p className="mb-2">Retrieves available music tracks.</p>
             
@@ -2944,7 +3080,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">Cache Management</h3>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="utilities-post-flush-cache" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">POST /api/flush-cache</h4>
             <p className="mb-2">Flushes the server-side cache.</p>
             
@@ -2958,7 +3094,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             </pre>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+          <div id="utilities-get-flush-cache" className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
             <h4 className="font-bold mb-2">GET /api/flush-cache</h4>
             <p className="mb-2">Gets the timestamp of the last cache flush.</p>
             
@@ -3011,14 +3147,14 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
       <section id="data-access" className="mb-12">
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Data Access</h2>
         
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/data/:path</h3>
+        <div id="data-access-get-path" className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/data/[...path]</h3>
           <p className="mb-2">Serves files from the data directory with appropriate content type headers.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>path</code> - Path to the file in the data directory (can include subdirectories)</li>
+              <li><code>path</code> - Path segments to the file in the data directory.</li>
             </ul>
           </div>
           
