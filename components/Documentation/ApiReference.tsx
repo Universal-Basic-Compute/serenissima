@@ -34,8 +34,8 @@ const ApiReference: React.FC = () => {
               <li><a href="#citizens-post-update-guild" className="text-amber-600 hover:underline text-sm">POST /api/citizens/update-guild</a></li>
               <li><a href="#citizens-post-register" className="text-amber-600 hover:underline text-sm">POST /api/register</a></li>
               <li><a href="#citizens-post-settings" className="text-amber-600 hover:underline text-sm">POST /api/citizen/settings</a></li>
-              <li><a href="#citizens-post-update-activity" className="text-amber-600 hover:underline text-sm">POST /api/user/update-activity</a></li>
-              <li><a href="#citizens-get-transports" className="text-amber-600 hover:underline text-sm">GET /api/citizens/:username/transports</a></li>
+              <li><a href="#citizens-post-user-update-activity" className="text-amber-600 hover:underline text-sm">POST /api/user/update-activity</a></li>
+              <li><a href="#citizens-get-username-transports" className="text-amber-600 hover:underline text-sm">GET /api/citizens/:username/transports</a></li>
               <li><a href="#citizens-post-with-correspondence-stats" className="text-amber-600 hover:underline text-sm">POST /api/citizens/with-correspondence-stats</a></li>
               <li><a href="#citizens-get-all-users" className="text-amber-600 hover:underline text-sm">GET /api/get-all-users</a></li>
             </ul>
@@ -214,9 +214,9 @@ const ApiReference: React.FC = () => {
     "isAi": boolean, // Indicates if the citizen is AI-controlled
     "socialClass": "string", // Social class (e.g., Nobili, Cittadini)
     "description": "string", // Textual description of the citizen
-    "position": { "lat": number, "lng": number }, // Current geographical position
+    "position": { "lat": number, "lng": number } | string | null, // Current geographical position (can be JSON string)
     "influence": number, // Citizen's influence score
-    "wallet": "string", // Associated wallet address
+    "wallet": "string | null", // Associated wallet address
     "familyMotto": "string | null", // Family motto
     "color": "string | null", // Assigned color for map markers
     "guildId": "string | null", // ID of the guild they belong to
@@ -224,7 +224,7 @@ const ApiReference: React.FC = () => {
     "workplace": { "name": "string", "type": "string", "buildingId": "string" } | null, // Details of their workplace
     "home": "string | null", // BuildingId of their home
     "corePersonality": ["string", "string", "string"] | null, // Array of three personality traits
-    "preferences": "object | null", // Citizen's preferences object
+    "preferences": "object | null", // Citizen's preferences object (parsed from JSON string)
     "lastActiveAt": "string | null", // ISO date string of last activity
     "createdAt": "string", // ISO date string of creation
     "updatedAt": "string" // ISO date string of last update
@@ -421,6 +421,108 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
+        <div id="citizens-post-user-update-activity" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/user/update-activity</h3>
+          <p className="mb-2">Updates the `LastActiveAt` timestamp for the authenticated citizen. Primarily used to indicate user presence.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <p className="mb-2 text-sm">No explicit body required. Username may be derived from session or a test header/param.</p>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// Example: Can be an empty POST request or include username for testing
+// fetch('/api/user/update-activity?username=some_user', { method: 'POST' })
+// fetch('/api/user/update-activity', { method: 'POST', headers: {'X-User-Username': 'some_user'} })`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "message": "User 'some_user' activity updated successfully."
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="citizens-get-username-transports" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/citizens/:username/transports</h3>
+          <p className="mb-2">Retrieves resources of `AssetType` = 'citizen' associated with the specified username. This typically represents transport vehicles or similar assets owned/operated by the citizen.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Path Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>username</code> - The username of the citizen.</li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "transports": [ // Array of resource objects from the RESOURCES table
+    {
+      "id": "string", // Airtable Record ID of the resource
+      "ResourceId": "string", // Custom ResourceId
+      "Type": "string", // e.g., "gondola", "carriage"
+      "Name": "string",
+      "AssetType": "citizen",
+      "Asset": "string", // Should match the :username
+      "Owner": "string", // Username of the owner
+      "Count": number,
+      // ... other fields from the RESOURCES table
+    }
+  ]
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="citizens-post-with-correspondence-stats" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/citizens/with-correspondence-stats</h3>
+          <p className="mb-2">Retrieves a list of all other citizens along with messaging statistics relative to the `currentCitizenUsername` (e.g., last message timestamp, unread message count from them).</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "currentCitizenUsername": "string"
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "citizens": [
+    {
+      "id": "string", // Airtable Record ID of the other citizen
+      "username": "string",
+      "firstName": "string",
+      "lastName": "string",
+      "coatOfArmsImageUrl": "string | null",
+      "lastMessageTimestamp": "string | null", // ISO date string of the last message exchanged
+      "unreadMessagesFromCitizenCount": number // Count of unread messages from this citizen to currentCitizenUsername
+    }
+  ]
+}`}
+            </pre>
+          </div>
+        </div>
+        
+        <div id="citizens-get-all-users" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-all-users</h3>
+          <p className="mb-2">Retrieves all citizen records. This is likely a wrapper or alias for `GET /api/citizens` and returns data in the same format.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <p className="text-sm">See <a href="#citizens-get-all" className="text-amber-700 hover:underline">GET /api/citizens</a> for response structure.</p>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "citizens": [ /* Array of citizen objects */ ]
+}`}
+            </pre>
+          </div>
+        </div>
+
         <div id="citizens-post-settings" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/citizen/settings</h3>
           <p className="mb-2">Updates a citizen's settings preferences.</p>
@@ -893,8 +995,8 @@ const ApiReference: React.FC = () => {
       "createdAt": "string", // ISO date string
       "isConstructed": boolean, // True if construction is complete
       "wages": number | null, // Wages offered if it's a business
-      "constructionMinutesRemaining": number | null,
-      "updatedAt": "string | null" // ISO date string
+      "constructionMinutesRemaining": number | null, // Remaining construction time
+      "updatedAt": "string | null" // ISO date string of last update
       // ... other fields from Airtable, camelCased
     }
   ]
@@ -982,7 +1084,7 @@ const ApiReference: React.FC = () => {
   "variant": "string", // Optional: model variant, defaults to "model"
   "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number } | string, // Required if pointId is not provided. Can be object or JSON string.
   "rotation": number, // Optional: rotation, defaults to 0
-  "owner": "string", // Optional: owner username (or createdBy), defaults to "system"
+  "owner": "string", // Optional: owner username, defaults to "system"
   "pointId": "string | string[]", // Optional: ID(s) of the specific point(s) on the land. If array, position might be calculated as centroid.
   "createdAt": "string", // Optional: ISO date string, defaults to now
   "leasePrice": number, // Optional: defaults to 0
@@ -1561,20 +1663,20 @@ const ApiReference: React.FC = () => {
   {
     "id": "string", // ResourceId (custom) or Airtable Record ID
     "type": "string", // Resource type identifier (e.g., "wood")
-    "name": "string", // Display name
-    "category": "string",
-    "subCategory": "string | null",
-    "tier": number | null,
-    "description": "string",
-    "icon": "string | null", // Filename of the icon
+    "name": "string", // Display name, enriched from type definition
+    "category": "string", // Enriched from type definition
+    "subCategory": "string | null", // Enriched from type definition
+    "tier": number | null, // Enriched from type definition
+    "description": "string", // Enriched from type definition
+    "icon": "string | null", // Filename of the icon, enriched from type definition
     "count": number, // Quantity of this resource instance
     "asset": "string | null", // BuildingId, Citizen Username, or LandId where resource is located
     "assetType": "string | null", // "building", "citizen", or "land"
     "owner": "string | null", // Username of the owner
-    "location": { "lat": number, "lng": number } | null, // Derived location
-    "importPrice": number | null,
-    "lifetimeHours": number | null,
-    "consumptionHours": number | null,
+    "location": { "lat": number, "lng": number } | null, // Derived location of the resource stack itself or its asset
+    "importPrice": number | null, // Enriched from type definition
+    "lifetimeHours": number | null, // Enriched from type definition
+    "consumptionHours": number | null, // Enriched from type definition
     "createdAt": "string" // ISO date string
   }
 ]`}
@@ -1592,17 +1694,15 @@ const ApiReference: React.FC = () => {
 {`{
   "id": "string", // ResourceId (custom ID for the resource stack, e.g., "wood_pile_123")
   "type": "string", // Resource type identifier (e.g., "wood")
-  "name": "string", // Optional: Display name, defaults to type or enriched from resource type definition
-  // Category, SubCategory, Tier are not directly part of the POST request body for /api/resources.
-  // They are typically derived from the 'type' via resource type definitions.
-  // The 'Position' field in Airtable is for the resource's own location, not derived from Asset.
-  // "description": "string", // Optional, will be enriched if not provided
-  "position": { "lat": number, "lng": number } | string, // Required: Position of the resource itself (object or JSON string)
+  "name": "string", // Optional: Display name. If not provided, will be enriched from type definition.
+  // Category, SubCategory, Tier, Description, Icon, ImportPrice, LifetimeHours, ConsumptionHours are NOT direct inputs.
+  // They are enriched based on the 'type' from resource type definitions.
+  "position": { "lat": number, "lng": number } | string, // Required: Position of the resource stack itself (object or JSON string). This is stored in Airtable's 'Position' field.
   "count": number, // Optional: defaults to 1
-  "asset": "string", // Optional: BuildingId, Citizen Username, or LandId where resource is located/associated
-  "assetType": "string", // Optional: "building", "citizen", "land"; defaults to 'unknown'
-  "owner": "string", // Optional: Username of the owner, defaults to "system"
-  "createdAt": "string" // Optional: ISO date string, defaults to now
+  "asset": "string", // Optional: BuildingId, Citizen Username, or LandId where resource is located/associated. Stored in Airtable's 'Asset' field.
+  "assetType": "string", // Optional: "building", "citizen", "land". Stored in Airtable's 'AssetType' field.
+  "owner": "string", // Optional: Username of the owner, defaults to "system". Stored in Airtable's 'Owner' field.
+  "createdAt": "string" // Optional: ISO date string, defaults to now. Stored in Airtable's 'CreatedAt' field.
 }`}
             </pre>
           </div>
@@ -1620,11 +1720,11 @@ const ApiReference: React.FC = () => {
     "subCategory": "string | null", // Enriched subCategory
     "tier": number | null, // Enriched tier
     "description": "string", // Enriched description
-    "icon": "string | null", // Enriched icon
-    "position": { "lat": number, "lng": number }, // Parsed position of the resource itself
+    "icon": "string | null", // Enriched icon (filename)
+    "location": { "lat": number, "lng": number } | null, // Parsed position of the resource stack itself or its asset
     "count": number,
-    "asset": "string | null", // Associated asset
-    "assetType": "string | null", // Type of associated asset
+    "asset": "string | null", // Associated asset (BuildingId, Username, LandId)
+    "assetType": "string | null", // Type of associated asset ("building", "citizen", "land")
     "owner": "string | null", // Owner username
     "importPrice": number | null, // Enriched import price
     "lifetimeHours": number | null, // Enriched lifetime hours
@@ -1665,8 +1765,11 @@ const ApiReference: React.FC = () => {
       "count": number, // Total count of this resource type
       "rarity": "string", // e.g., "common", "rare"
       "description": "string",
-      "buildingId": "string | undefined", // BuildingId if resource is in a building (this seems to be from the individual resource record, not the aggregated type)
-      "location": { "lat": number, "lng": number } | null // Location if applicable (also from individual record)
+      // buildingId and location are from individual resource records, not typically part of aggregated type counts.
+      // They might appear if the aggregation logic in the endpoint is complex.
+      // For a pure type count, these would usually be omitted.
+      "buildingId": "string | undefined", 
+      "location": { "lat": number, "lng": number } | null 
     }
   ],
   "playerResourceCounts": [ // Same structure as globalResourceCounts, but filtered for the player
@@ -1675,7 +1778,7 @@ const ApiReference: React.FC = () => {
       "name": "string",
       "category": "string",
       "subCategory": "string | null",
-      "icon": "string",
+      "icon": "string", // Filename of the icon
       "count": number,
       "rarity": "string",
       "description": "string",
@@ -2226,6 +2329,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "EndAt": "string", // Optional: ISO date string for contract expiry
   "Title": "string", // Optional: For display purposes
   "Description": "string" // Optional: For display purposes
+  // CreatedAt is set by the server for new contracts
 }`}
             </pre>
           </div>
@@ -2243,11 +2347,16 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       "resourceType": "string | null",
       "resourceName": "string | null", // Enriched
       "resourceCategory": "string | null", // Enriched
-      // ... other enriched resource fields ...
-      "imageUrl": "string | null", // Enriched
+      "resourceSubCategory": "string | null", // Enriched
+      "resourceTier": "number | null", // Enriched
+      "resourceDescription": "string | null", // Enriched
+      "resourceImportPrice": "number | null", // Enriched
+      "resourceLifetimeHours": "number | null", // Enriched
+      "resourceConsumptionHours": "number | null", // Enriched
+      "imageUrl": "string | null", // Enriched path to icon
       "sellerBuilding": "string | null",
-      "price": number, // PricePerResource
-      "amount": number | null, // TargetAmount
+      "price": number, // PricePerResource from Airtable
+      "amount": number | null, // TargetAmount from Airtable
       "asset": "string | null",
       "assetType": "string | null",
       "createdAt": "string",
@@ -2299,8 +2408,8 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       "imageUrl": "string | null", // Path to resource/building type icon (e.g., /resources/wood.png)
       "buyerBuilding": "string | null", // BuildingId of the buyer's building
       "sellerBuilding": "string | null", // BuildingId of the seller's building
-      "price": number | null, // PricePerResource (for bids, this is the bid amount)
-      "amount": number | null, // TargetAmount (for bids, typically 1 for the building)
+      "price": number | null, // PricePerResource from Airtable (for bids, this is the bid amount)
+      "amount": number | null, // TargetAmount from Airtable (for bids, typically 1 for the building)
       "asset": "string | null", // For bids/projects, the BuildingId being bid on/constructed
       "assetType": "string | null", // For bids/projects, "building" or "building_project"
       "createdAt": "string", // ISO date string
@@ -2443,7 +2552,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       "price": number, // Transaction price in Ducats
       "createdAt": "string", // ISO date string of contract creation
       "executedAt": "string", // ISO date string of transaction execution
-      "metadata": { // Additional metadata about the asset
+      "metadata": { // Additional metadata about the asset (from contract notes if applicable)
         "historicalName": "string | null",
         "englishName": "string | null",
         "description": "string | null"
@@ -2735,7 +2844,9 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "success": true,
   "relevancies": [
     {
-      "relevancyId": "string", // Airtable Record ID
+      "relevancyId": "string", // Airtable Record ID (this is `record.id` from Airtable)
+      // Note: The 'RelevancyId' field from Airtable (if it exists as a custom field) is also mapped to 'relevancyId' in some specific GET routes.
+      // For this general GET /api/relevancies, 'relevancyId' is the Airtable record ID.
       "asset": "string", // ID of the asset (e.g., landId, buildingId, citizenUsername)
       "assetType": "string", // Type of the asset (e.g., "land", "building", "citizen")
       "category": "string", // Broad category of relevancy (e.g., "proximity", "domination", "opportunity")
@@ -2783,7 +2894,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "relevancies": [ // Array of relevancy objects, see GET /api/relevancies for structure
     {
       "id": "string", // Airtable Record ID
-      "relevancyId": "string", // Custom RelevancyId if exists, else same as id
+      "relevancyId": "string | undefined", // Custom RelevancyId from Airtable field, if present
       "asset": "string",
       "assetType": "string",
       "category": "string",
@@ -3077,7 +3188,7 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
   "relevancies": [ // Array of relevancy objects, see GET /api/relevancies for structure
     {
       "id": "string", // Airtable Record ID
-      "relevancyId": "string", // Custom RelevancyId if exists
+      "relevancyId": "string | undefined", // Custom RelevancyId from Airtable field, if present
       "asset": "string",
       "assetType": "string",
       "category": "string",
@@ -3222,6 +3333,8 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
 {`{
   "citizen": "string", // Username of the citizen
   "since": "string | number" // Optional: ISO date string or timestamp (milliseconds). Defaults to 1 week ago.
+  // Note: The 'since' filter is currently not strictly applied in the Airtable query due to timezone complexities,
+  // but the API might still accept it. The query fetches recent notifications sorted by CreatedAt.
 }`}
             </pre>
           </div>
@@ -3459,7 +3572,7 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
   "success": true,
   "thoughts": [
     {
-      "messageId": "string", // Airtable record ID or custom MessageId
+      "messageId": "string", // Airtable record ID or custom MessageId from 'MessageId' field
       "citizenUsername": "string", // Sender of the thought
       "originalContent": "string", // Full content of the thought_log
       "mainThought": "string", // Extracted main thought/sentence
