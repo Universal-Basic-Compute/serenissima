@@ -96,7 +96,12 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   } | null>(null);
   // const [kinosModel, setKinosModel] = useState<'gemini-2.5-pro-preview-05-06' | 'local'>('gemini-2.5-pro-preview-05-06'); // Removed: Model is now dynamic
 
-  const getKinosModelForSocialClass = (socialClass?: string): string => {
+  const getKinosModelForSocialClass = (username?: string, socialClass?: string): string => {
+    // Special case for NLR
+    if (username === 'NLR') {
+      return 'gemini-2.5-pro-preview-05-06';
+    }
+
     const lowerSocialClass = socialClass?.toLowerCase();
     switch (lowerSocialClass) {
       case 'nobili':
@@ -108,7 +113,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       case 'facchini':
         return 'local';
       default:
-        console.warn(`Unknown social class '${socialClass}', defaulting to gemini-2.5-flash-preview-05-20.`);
+        console.warn(`Unknown social class '${socialClass}' for user '${username}', defaulting to gemini-2.5-flash-preview-05-20.`);
         return 'gemini-2.5-flash-preview-05-20'; 
     }
   };
@@ -698,8 +703,9 @@ Remember: Your reply should be human-like, conversational, RELEVANT to ${senderD
 Your response:`;
             }
             
+            const targetUsernameForModel = contextualDataForChat?.targetProfile?.username;
             const targetSocialClass = contextualDataForChat?.targetProfile?.socialClass;
-            const determinedKinosModel = getKinosModelForSocialClass(targetSocialClass);
+            const determinedKinosModel = getKinosModelForSocialClass(targetUsernameForModel, targetSocialClass);
 
             const kinosBody: any = { content: kinosPromptContent, model: determinedKinosModel };
             if (addSystemPayload) {
