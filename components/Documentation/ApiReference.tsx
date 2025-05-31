@@ -962,12 +962,12 @@ const ApiReference: React.FC = () => {
 {`{
   "id": "string", // Optional: custom BuildingId, otherwise one is generated
   "type": "string", // Building type identifier
-  "landId": "string", // Land parcel ID
+  "landId": "string", // Land parcel ID (e.g. polygon-123)
   "variant": "string", // Optional: model variant, defaults to "model"
   "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number }, // Required if pointId is not provided
   "rotation": number, // Optional: rotation, defaults to 0
   "owner": "string", // Optional: owner username, defaults to "system"
-  "pointId": "string", // Optional: ID of the specific point on the land
+  "pointId": "string", // Optional: ID of the specific point on the land (e.g. building_45.437100_12.335800_0)
   "createdAt": "string", // Optional: ISO date string, defaults to now
   "leasePrice": number, // Optional: defaults to 0
   "rentPrice": number, // Optional: defaults to 0
@@ -984,16 +984,16 @@ const ApiReference: React.FC = () => {
   "building": {
     "id": "string", // BuildingId (custom or generated)
     "type": "string",
-    "landId": "string",
+    "landId": "string", // Land parcel ID
     "variant": "string",
-    "position": { "lat": number, "lng": number } | { "x": number, "y": number, "z": number } | null,
-    "pointId": "string | null",
+    "position": { "lat": number, "lng": number } | null, // Resolved position
+    "pointId": "string | string[] | null", // Original point ID(s) from Airtable or generated
     "rotation": number,
     "owner": "string",
     "createdAt": "string", // ISO date string
     "leasePrice": number,
     "rentPrice": number,
-    "occupant": "string"
+    "occupant": "string | null"
   },
   "message": "Building created successfully"
 }`}
@@ -1472,7 +1472,6 @@ const ApiReference: React.FC = () => {
   "success": true,
   "bridges": [
     {
-      "id": "string",
       "id": "string", // Airtable record ID
       "buildingId": "string", // Custom BuildingId
       "type": "string", // e.g., "bridge", "rialto_bridge"
@@ -1483,9 +1482,9 @@ const ApiReference: React.FC = () => {
       "constructionDate": "string | null", // ISO date string
       "landId": "string | null", // ID of the land polygon this bridge point is associated with
       "links": ["string"], // Array of connected polygon IDs
-      "historicalName": "string",
-      "englishName": "string",
-      "historicalDescription": "string",
+      "historicalName": "string | null",
+      "englishName": "string | null",
+      "historicalDescription": "string | null",
       "orientation": number, // Orientation in radians
       "distance": number | null // Length of the bridge if applicable
     }
@@ -1903,15 +1902,15 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "graphInfo": {
     "totalNodes": number,
     "totalEdges": number,
-    "nodesByType": { "node_type": number }, // Count of nodes by type
+    "nodesByType": { "node_type_name": number }, // Count of nodes by their type
     "connectedComponents": number, // Number of distinct connected subgraphs
-    "componentSizes": { // Statistics about component sizes
+    "componentSizes": { // Statistics about component sizes if available
         "count": number,
         "min": number,
         "max": number,
         "avg": number,
         "largestComponents": [number] // Sizes of the 5 largest components
-    } | [], // Empty array if no components
+    } | [], // Empty array or specific structure if componentSizes is an array of numbers
     "pathfindingMode": "string", // 'real' or 'all'
     "polygonsLoaded": boolean,
     "polygonCount": number,
@@ -2687,12 +2686,16 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         
         <div id="relevancies-get-all" className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies</h3>
-          <p className="mb-2">Retrieves available relevancy types.</p>
+          <p className="mb-2">Retrieves relevancy records. Can be filtered by citizen, asset type, or target.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>calculateAll</code> (optional) - If 'true', redirects to calculate all relevancies</li>
+              <li><code>calculateAll</code> (optional) - If 'true', redirects to calculate all relevancies for all citizens.</li>
+              <li><code>relevantToCitizen</code> (optional) - Filter relevancies for a specific citizen username (or comma-separated list).</li>
+              <li><code>assetType</code> (optional) - Filter relevancies by asset type (e.g., "land", "building", "citizen").</li>
+              <li><code>targetCitizen</code> (optional) - Filter relevancies by target citizen username (or comma-separated list).</li>
+              <li><code>excludeAll</code> (optional, boolean) - If 'true', excludes relevancies where `RelevantToCitizen` is 'all'.</li>
             </ul>
           </div>
           
@@ -2701,11 +2704,22 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "availableTypes": [
+  "relevancies": [
     {
-      "name": "string",
-      "description": "string",
-      "subtypes": ["string"]
+      "relevancyId": "string", // Airtable Record ID
+      "asset": "string",
+      "assetType": "string",
+      "category": "string",
+      "type": "string",
+      "targetCitizen": "string",
+      "relevantToCitizen": "string", // Can be a username, "all", or a JSON string array of usernames
+      "score": number,
+      "timeHorizon": "string",
+      "title": "string",
+      "description": "string", // Markdown supported
+      "notes": "string", // Markdown supported
+      "createdAt": "string", // ISO date string
+      "status": "string"
     }
   ]
 }`}
@@ -2822,8 +2836,8 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "aiUsername": "string",
-  "typeFilter": "string" // Optional
+  "Citizen": "string", // Username of the citizen
+  "typeFilter": "string" // Optional: 'connected' or 'geographic'
 }`}
             </pre>
           </div>
@@ -2941,7 +2955,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "aiUsername": "string"
+  "Citizen": "string" // Username of the citizen
 }`}
             </pre>
           </div>
