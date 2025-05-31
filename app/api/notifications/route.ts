@@ -38,8 +38,12 @@ const initAirtable = () => {
 export async function POST(request: Request) {
   try {
     // Parse the request body
-    const { citizen, since } = await request.json();
+    const rawBody = await request.json();
+    const body = keysToPascalCase(rawBody); // Convert keys to PascalCase
     
+    const citizen = body.Citizen; // Use PascalCase key
+    const since = body.Since; // Use PascalCase key
+
     if (!citizen) {
       console.log('\x1b[35m%s\x1b[0m', '[DEBUG] Error: Citizen is required');
       return NextResponse.json(
@@ -51,7 +55,7 @@ export async function POST(request: Request) {
     // If since is not provided, default to 1 week ago
     // Convert timestamp number to ISO string if it's a number
     const effectiveSince = since 
-      ? (typeof since === 'number' ? new Date(since).toISOString() : since)
+      ? (typeof since === 'number' ? new Date(since).toISOString() : String(since))
       : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     
     console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Fetching notifications for citizen: ${citizen}, since: ${effectiveSince}`);

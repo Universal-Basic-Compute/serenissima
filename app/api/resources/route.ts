@@ -2,6 +2,25 @@ import { NextResponse } from 'next/server';
 // import { loadAllResources } from '@/lib/utils/serverResourceUtils'; // Not used
 import Airtable from 'airtable';
 
+// Helper to convert a string to PascalCase
+// Handles snake_case, camelCase, and kebab-case
+const stringToPascalCase = (str: string): string => {
+  if (!str) return '';
+  return str
+    .replace(/([-_][a-z])/ig, ($1) => $1.toUpperCase().replace('-', '').replace('_', ''))
+    .replace(/^(.)/, ($1) => $1.toUpperCase());
+};
+
+// Helper function to convert all keys of an object to PascalCase (shallow)
+const keysToPascalCase = (obj: Record<string, any>): Record<string, any> => {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [stringToPascalCase(key), value])
+  );
+};
+
 // Define an interface for resource type definitions
 interface ResourceTypeDefinition {
   id: string;
@@ -199,32 +218,34 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const rawData = await request.json();
+    const pascalData = keysToPascalCase(rawData); // Convert keys to PascalCase
     
-    // Validate required fields
-    if (!data.id) {
+    // Validate required fields using PascalCase keys
+    if (!pascalData.Id) {
       return NextResponse.json(
-        { success: false, error: 'Resource ID is required' },
+        { success: false, error: 'Resource ID (id) is required' },
         { status: 400 }
       );
     }
     
-    if (!data.type) {
+    if (!pascalData.Type) {
       return NextResponse.json(
-        { success: false, error: 'Resource type is required' },
+        { success: false, error: 'Resource type (type) is required' },
         { status: 400 }
       );
     }
     
-    if (!data.position) {
-      return NextResponse.json(
-        { success: false, error: 'Position is required' },
-        { status: 400 }
-      );
-    }
+    // Position is optional in the POST request body as per documentation
+    // if (!pascalData.Position) {
+    //   return NextResponse.json(
+    //     { success: false, error: 'Position is required' },
+    //     { status: 400 }
+    //   );
+    // }
     
-    // Ensure position is properly formatted
-    let position = data.position;
+    // Ensure position is properly formatted if provided
+    let position = pascalData.Position;
     
     // If position is a string, try to parse it
     if (typeof position === 'string') {
@@ -249,44 +270,45 @@ export async function POST(request: Request) {
     }
     
     // Log the received data for debugging
-    console.log('Creating resource with data:', JSON.stringify({
-      ...data,
-      position: position
+    console.log('Creating resource with raw data:', JSON.stringify(rawData, null, 2));
+    console.log('Creating resource with PascalCase data:', JSON.stringify({
+      ...pascalData,
+      Position: position // Use the potentially parsed position
     }, null, 2));
 
     // Fetch resource type definition for defaults
     let definition: ResourceTypeDefinition | undefined;
-    if (data.type) {
+    if (pascalData.Type) {
       try {
         const resTypeResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/resource-types`);
         if (resTypeResponse.ok) {
           const resTypesData = await resTypeResponse.json();
           if (resTypesData.success && resTypesData.resourceTypes) {
-            definition = (resTypesData.resourceTypes as ResourceTypeDefinition[]).find(rt => rt.id === data.type);
+            definition = (resTypesData.resourceTypes as ResourceTypeDefinition[]).find(rt => rt.id === pascalData.Type);
           }
         }
       } catch (e) {
-        console.warn(`Could not fetch definition for resource type ${data.type}: ${e}`);
+        console.warn(`Could not fetch definition for resource type ${pascalData.Type}: ${e}`);
       }
     }
     
-    // Create a record in Airtable - ensure position is stored as a string
+    // Create a record in Airtable - ensure position is stored as a string if provided
     const airtablePayload: Record<string, any> = {
-      ResourceId: data.id, // Custom ID for the resource stack
-      Type: data.type,
-      Name: data.name || definition?.name || data.type,
-      // Category: data.category || definition?.category || 'unknown', // Removed Category
-      // SubCategory: data.subCategory || definition?.subCategory || null, // Removed SubCategory
-      // Tier: data.tier ?? definition?.tier ?? null, // Removed Tier
-      Description: data.description || definition?.description || '',
-      // Position: JSON.stringify(position), // Position of the resource itself - REMOVED
-      Count: data.count || 1,
-      Asset: data.asset || '', // BuildingId, Username, or LandId depending on AssetType
-      AssetType: data.assetType || 'unknown', // 'building', 'citizen', 'land'
-      Owner: data.owner || 'system',
-      CreatedAt: data.createdAt || new Date().toISOString()
-      // ImportPrice, LifetimeHours, ConsumptionHours could also be added here if they should be stored on instance
+      ResourceId: pascalData.Id, // Custom ID for the resource stack
+      Type: pascalData.Type,
+      Name: pascalData.Name || definition?.name || pascalData.Type,
+      Description: pascalData.Description || definition?.description || '',
+      Count: pascalData.Count || 1,
+      Asset: pascalData.Asset || '', 
+      AssetType: pascalData.AssetType || 'unknown', 
+      Owner: pascalData.Owner || 'system',
+      CreatedAt: pascalData.CreatedAt || new Date().toISOString()
     };
+
+    // Only add Position to Airtable payload if it was provided and parsed
+    if (position) {
+      airtablePayload.Position = JSON.stringify(position);
+    }
     
     const record = await new Promise((resolve, reject) => {
       base('RESOURCES').create(airtablePayload, function(err, record) {

@@ -1713,6 +1713,11 @@ const ApiReference: React.FC = () => {
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
+            <p className="text-xs mb-2 text-gray-600">
+              Field names can be provided in camelCase (e.g., <code>resourceId</code>) or snake_case.
+              The server will automatically convert them to PascalCase (e.g., <code>ResourceId</code>) for Airtable.
+              The example below uses camelCase.
+            </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "id": "string", // ResourceId (custom ID for the resource stack, e.g., "wood_pile_123")
@@ -1720,7 +1725,7 @@ const ApiReference: React.FC = () => {
   "name": "string", // Optional: Display name. If not provided, will be enriched from type definition.
   // Category, SubCategory, Tier, Description, Icon, ImportPrice, LifetimeHours, ConsumptionHours are NOT direct inputs.
   // They are enriched based on the 'type' from resource type definitions.
-  "position": { "lat": number, "lng": number } | string, // Optional: If 'asset' is not provided, this can be used for location context. Not directly stored on the resource record itself. Location is primarily determined by 'asset' and 'assetType'.
+  "position": { "lat": number, "lng": number } | string, // Optional: If 'asset' is not provided, this can be used for location context. If provided, it's stored in Airtable's 'Position' field. Location is primarily determined by 'asset' and 'assetType' if 'position' is not given.
   "count": number, // Optional: defaults to 1
   "asset": "string", // Optional: BuildingId, Citizen Username, or LandId where resource is located/associated. Stored in Airtable's 'Asset' field.
   "assetType": "string", // Optional: "building", "citizen", "land". Stored in Airtable's 'AssetType' field.
@@ -2335,23 +2340,28 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <p className="mb-2">Creates a new contract or updates an existing one based on `ContractId`.</p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
+            <p className="text-xs mb-2 text-gray-600">
+              Field names can be provided in camelCase (e.g., <code>contractId</code>) or snake_case.
+              The server will automatically convert them to PascalCase (e.g., <code>ContractId</code>) for Airtable.
+              The example below uses camelCase.
+            </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
-  "ContractId": "string", // Required: Unique ID for the contract (used for upsert)
-  "Type": "string", // Required: e.g., "public_sell", "import", "building_bid", "construction_project"
-  "PricePerResource": number, // Required: Price per unit, or total bid/project cost
-  "Status": "string", // Required: e.g., "active", "pending_materials"
-  "ResourceType": "string", // Conditionally required: ID of the resource (not for all types, e.g. some bids)
-  "Seller": "string", // Conditionally required: Username of the seller
-  "SellerBuilding": "string", // Conditionally required: BuildingId of the seller's building
-  "TargetAmount": number, // Conditionally required: Amount of resource
-  "Buyer": "string", // Conditionally required: Username of the buyer
-  "Asset": "string", // Conditionally required: BuildingId being bid on or constructed
-  "AssetType": "string", // Conditionally required: "building" or "building_project"
-  "Notes": "string", // Optional
-  "EndAt": "string", // Optional: ISO date string for contract expiry
-  "Title": "string", // Optional: For display purposes
-  "Description": "string" // Optional: For display purposes
+  "contractId": "string", // Required: Unique ID for the contract (used for upsert)
+  "type": "string", // Required: e.g., "public_sell", "import", "building_bid", "construction_project"
+  "pricePerResource": number, // Required: Price per unit, or total bid/project cost
+  "status": "string", // Required: e.g., "active", "pending_materials"
+  "resourceType": "string", // Conditionally required: ID of the resource (not for all types, e.g. some bids)
+  "seller": "string", // Conditionally required: Username of the seller
+  "sellerBuilding": "string", // Conditionally required: BuildingId of the seller's building
+  "targetAmount": number, // Conditionally required: Amount of resource
+  "buyer": "string", // Conditionally required: Username of the buyer
+  "asset": "string", // Conditionally required: BuildingId being bid on or constructed
+  "assetType": "string", // Conditionally required: "building" or "building_project"
+  "notes": "string", // Optional
+  "endAt": "string", // Optional: ISO date string for contract expiry
+  "title": "string", // Optional: For display purposes
+  "description": "string" // Optional: For display purposes
   // CreatedAt is set by the server for new contracts
 }`}
             </pre>
@@ -3352,6 +3362,11 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
+            <p className="text-xs mb-2 text-gray-600">
+              Field names can be provided in camelCase (e.g., <code>citizen</code>) or snake_case.
+              The server will automatically convert them to PascalCase (e.g., <code>Citizen</code>) for processing.
+              The example below uses camelCase.
+            </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "citizen": "string", // Username of the citizen
@@ -3445,6 +3460,11 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
+            <p className="text-xs mb-2 text-gray-600">
+              Field names can be provided in camelCase (e.g., <code>currentCitizen</code>) or snake_case.
+              The server will automatically convert them to PascalCase (e.g., <code>CurrentCitizen</code>) for processing.
+              The example below uses camelCase.
+            </p>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "currentCitizen": "string",

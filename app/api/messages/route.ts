@@ -1,6 +1,25 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
 
+// Helper to convert a string to PascalCase
+// Handles snake_case, camelCase, and kebab-case
+const stringToPascalCase = (str: string): string => {
+  if (!str) return '';
+  return str
+    .replace(/([-_][a-z])/ig, ($1) => $1.toUpperCase().replace('-', '').replace('_', ''))
+    .replace(/^(.)/, ($1) => $1.toUpperCase());
+};
+
+// Helper function to convert all keys of an object to PascalCase (shallow)
+const keysToPascalCase = (obj: Record<string, any>): Record<string, any> => {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [stringToPascalCase(key), value])
+  );
+};
+
 // Configure Airtable
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
@@ -22,11 +41,15 @@ const initAirtable = () => {
 export async function POST(request: Request) {
   try {
     // Parse the request body
-    const { currentCitizen, otherCitizen } = await request.json();
+    const rawBody = await request.json();
+    const body = keysToPascalCase(rawBody); // Convert keys to PascalCase
+
+    const currentCitizen = body.CurrentCitizen; // Use PascalCase key
+    const otherCitizen = body.OtherCitizen; // Use PascalCase key
     
     if (!currentCitizen || !otherCitizen) {
       return NextResponse.json(
-        { success: false, error: 'Both citizens are required' },
+        { success: false, error: 'Both currentCitizen and otherCitizen are required' },
         { status: 400 }
       );
     }
