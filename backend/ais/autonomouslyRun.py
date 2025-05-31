@@ -65,6 +65,32 @@ class LogColors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
 
+# Import colorama for log_header
+try:
+    from colorama import Fore, Style
+    colorama_available = True
+except ImportError:
+    colorama_available = False
+    # Define dummy Fore and Style if colorama is not available
+    class Fore:
+        CYAN = ''
+    class Style:
+        BRIGHT = ''
+        RESET_ALL = ''
+
+def log_header(message: str):
+    """Prints a header message with a colorful border if colorama is available."""
+    if colorama_available:
+        border = "=" * 80
+        print(f"\n{Fore.CYAN}{border}")
+        print(f"{Fore.CYAN}{Style.BRIGHT}{message.center(80)}")
+        print(f"{Fore.CYAN}{border}{Style.RESET_ALL}\n")
+    else:
+        border = "=" * (len(message) + 4)
+        print(f"\n{border}")
+        print(f"  {message}  ")
+        print(f"{border}\n")
+
 # --- Airtable and API Key Initialization ---
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
