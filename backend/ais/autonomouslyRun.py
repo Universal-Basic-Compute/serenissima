@@ -478,19 +478,25 @@ def load_api_reference_content():
     """Loads and extracts text from ApiReference.tsx."""
     global RAW_API_REFERENCE_CONTENT, API_REFERENCE_EXTRACTED_TEXT
     try:
-        # Assuming ApiReference.tsx is in components/Documentation/ApiReference.tsx
-        # relative to the project root.
         ref_file_path = os.path.join(PROJECT_ROOT, "components", "Documentation", "ApiReference.tsx")
         if os.path.exists(ref_file_path):
             with open(ref_file_path, "r", encoding="utf-8") as f:
-                API_REFERENCE_CONTENT = f.read()
-            log.info(f"{LogColors.OKGREEN}Successfully loaded API Reference content.{LogColors.ENDC}")
+                RAW_API_REFERENCE_CONTENT = f.read() # Store raw content
+            log.info(f"{LogColors.OKGREEN}Successfully loaded raw API Reference content.{LogColors.ENDC}")
+            # Now extract text from the raw content
+            API_REFERENCE_EXTRACTED_TEXT = extract_text_from_api_reference(RAW_API_REFERENCE_CONTENT)
+            if "Could not extract" not in API_REFERENCE_EXTRACTED_TEXT and API_REFERENCE_EXTRACTED_TEXT != "API Reference content not available.":
+                 log.info(f"{LogColors.OKGREEN}Successfully extracted text from API Reference. Length: {len(API_REFERENCE_EXTRACTED_TEXT)}{LogColors.ENDC}")
+            else:
+                 log.warning(f"{LogColors.WARNING}Extraction from API Reference might have issues: {API_REFERENCE_EXTRACTED_TEXT[:100]}...{LogColors.ENDC}")
         else:
             log.warning(f"{LogColors.WARNING}API Reference file not found at {ref_file_path}. Proceeding without it.{LogColors.ENDC}")
-            API_REFERENCE_CONTENT = "API Reference file not found."
+            RAW_API_REFERENCE_CONTENT = "API Reference file not found."
+            API_REFERENCE_EXTRACTED_TEXT = "API Reference file not found."
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error loading API Reference content: {e}{LogColors.ENDC}", exc_info=True)
-        API_REFERENCE_CONTENT = "Error loading API Reference."
+        log.error(f"{LogColors.FAIL}Error loading or extracting API Reference content: {e}{LogColors.ENDC}", exc_info=True)
+        RAW_API_REFERENCE_CONTENT = "Error loading API Reference."
+        API_REFERENCE_EXTRACTED_TEXT = "Error loading API Reference."
 
 def load_airtable_schema_content():
     """Loads the content of airtable_schema.md."""
