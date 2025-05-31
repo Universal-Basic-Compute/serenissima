@@ -465,10 +465,17 @@ def process_ai_thoughts(
         # The request is to "include the humans", so we will proceed.
         # The prompt in generate_ai_thought uses ai_display_name, which is fine.
 
+        # Adjust context data limits if using local model
+        default_context_limit = 20
+        context_limit = default_context_limit
+        if kinos_model_override and kinos_model_override.lower() == 'local':
+            context_limit = default_context_limit // 4
+            log.info(f"{LogColors.OKBLUE}Using reduced context limit of {context_limit} for local model.{LogColors.ENDC}")
+
         profile_for_context = _get_citizen_data_api(citizen_username)
-        notifications = _get_notifications_data_api(citizen_username)
-        relevancies = _get_relevancies_data_api(citizen_username)
-        problems = _get_problems_data_api(citizen_username)
+        notifications = _get_notifications_data_api(citizen_username, limit=context_limit)
+        relevancies = _get_relevancies_data_api(citizen_username, limit=context_limit)
+        problems = _get_problems_data_api(citizen_username, limit=context_limit)
 
         context_data = {
             "ai_citizen_profile": profile_for_context or {}, # Using "ai_citizen_profile" as key for Kinos
