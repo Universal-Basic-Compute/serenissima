@@ -16,7 +16,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const [tracks, setTracks] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // This state indicates if we are in the "pause between tracks"
+  const isPausedRef = useRef(isPaused); // Ref to hold the latest value of isPaused for setTimeout
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [showControls, setShowControls] = useState(false);
 
@@ -60,6 +61,12 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const playRandomTrack = useCallback(() => {
     if (tracks.length === 0) return;
 
+    console.log('[BackgroundMusic] playRandomTrack called.'); 
+    if (tracks.length === 0) {
+      console.log('[BackgroundMusic] playRandomTrack: No tracks available, returning.');
+      return;
+    }
+    
     // Get a random track that's different from the current one
     let newTrack;
     if (tracks.length === 1) {
@@ -82,16 +89,23 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     setIsPaused(false); // Ensure isPaused is reset
 
     if (audioRef.current) {
+      console.log(`[BackgroundMusic] playRandomTrack: Setting src to ${newTrack} and playing.`);
       audioRef.current.src = newTrack;
       audioRef.current.volume = volume;
-      audioRef.current.play().catch(error => {
-        console.error('Error playing audio:', error);
+      audioRef.current.play().then(() => {
+        console.log(`[BackgroundMusic] playRandomTrack: Audio playback started for ${newTrack}.`);
+        setIsPlaying(true); // Set isPlaying to true only after play() promise resolves
+      }).catch(error => {
+        console.error('[BackgroundMusic] playRandomTrack: Error playing audio:', error);
         // If autoplay is blocked, we'll need citizen interaction
         setIsPlaying(false);
       });
+    } else {
+      console.log('[BackgroundMusic] playRandomTrack: audioRef.current is null, cannot play.');
+      setIsPlaying(false); // Ensure isPlaying is false if audioRef is null
     }
 
-    setIsPlaying(true);
+    // setIsPlaying(true); // Moved into the .then() of play()
   }, [tracks, currentTrack, volume, audioRef, setCurrentTrack, setIsPaused, setIsPlaying]);
 
   // Initialize audio and play first track
@@ -162,39 +176,59 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     };
   }, [isLoading, tracks, volume, autoplay]); // Remove isPlaying and currentTrack from dependencies
 
+  // Update isPausedRef whenever isPaused state changes
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
   // Handle track ending - play next random track with a 10-second pause
   useEffect(() => {
     const audio = audioRef.current;
-    
+    let pauseTimeoutId: NodeJS.Timeout | null = null; // To store timeout ID for cleanup
+
     const handleEnded = () => {
       // Pause for 10 seconds before playing the next track
+      console.log('[BackgroundMusic] handleEnded: Track ended. Setting up pause.');
       setIsPlaying(false);
-      setIsPaused(true);
+      setIsPaused(true); // Enter "pause between tracks" state
       
       // Show a message that we're pausing between tracks
       setCurrentTrack('Pausing between tracks...');
       
-      // Wait 10 seconds before playing the next track
-      const pauseTimeout = setTimeout(() => {
-        // Only play the next track if we're still paused (and component is mounted)
-        if (isPaused && audioRef.current) { // Check audioRef.current to ensure component still mounted
+      // Clear any existing timeout to prevent multiple plays
+      if (pauseTimeoutId) {
+        clearTimeout(pauseTimeoutId);
+      }
+
+      pauseTimeoutId = setTimeout(() => {
+        console.log('[BackgroundMusic] handleEnded: Pause timeout finished. Checking isPausedRef.current:', isPausedRef.current);
+        // Only play the next track if we're still in the "paused between tracks" state (checked via ref)
+        // and the component is still mounted.
+        if (isPausedRef.current && audioRef.current) {
+          console.log('[BackgroundMusic] handleEnded: Conditions met, calling playRandomTrack.');
           playRandomTrack();
+        } else {
+          console.log('[BackgroundMusic] handleEnded: Conditions not met for playRandomTrack. isPausedRef.current:', isPausedRef.current, 'audioRef.current:', !!audioRef.current);
         }
       }, 10000); // 10 seconds
-      
-      // Clean up the timeout if the component unmounts during the pause
-      return () => clearTimeout(pauseTimeout);
     };
     
     if (audio) {
       // Ensure loop is false for this logic to work correctly
       audio.loop = false; 
       audio.addEventListener('ended', handleEnded);
+      console.log('[BackgroundMusic] handleEnded effect: Added "ended" event listener.');
       return () => {
         audio.removeEventListener('ended', handleEnded);
+        console.log('[BackgroundMusic] handleEnded effect: Removed "ended" event listener.');
+        // Clear the timeout if the component unmounts or dependencies change
+        if (pauseTimeoutId) {
+          clearTimeout(pauseTimeoutId);
+          console.log('[BackgroundMusic] handleEnded effect: Cleared pause timeout.');
+        }
       };
     }
-  }, [tracks, isPaused, playRandomTrack, setCurrentTrack, setIsPlaying, setIsPaused]);
+  }, [tracks, playRandomTrack, setCurrentTrack, setIsPlaying, setIsPaused]); // isPaused is kept as a dependency for the effect to re-run if its state setters are involved.
 
   // Update volume when it changes
   useEffect(() => {
