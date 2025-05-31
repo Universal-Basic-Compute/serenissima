@@ -1323,7 +1323,7 @@ Your response:`;
   return (
     <Portal>
       <div 
-        className={`fixed ${isOpen ? 'top-4 bottom-4' : 'bottom-4'} right-4 z-[100] ${className}`}
+        className={`fixed bottom-4 right-4 z-[100] ${className}`} // Panel is always anchored bottom-right
       >
       {/* Collapsed state - just show the mask icon */}
       {!isOpen && (
