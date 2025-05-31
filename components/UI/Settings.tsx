@@ -181,10 +181,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
           },
           body: JSON.stringify({
             wallet_address: username, // We're using the wallet_address field to pass the username
-            settings: {
-              qualityMode,
-              waterQuality
-            }
+            settings: settings // Send the whole settings object
           }),
         });
         
