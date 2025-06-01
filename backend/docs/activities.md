@@ -288,10 +288,10 @@ lancer le projet, ce qui peut impliquer des frais de dossier ou un acompte.
 `public_archives` (bureau du cadastre) pour enregistrer la modification du bail, ce qui peut entraîner des frais de dépôt.
     *   **Mécanisme Principal**: Crée une activité `goto_location` (vers domicile, bureau personnel, ou
 `public_archives`). À l'arrivée, une activité `file_lease_adjustment` est créée, et les frais sont payés.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId` ou `landId`,
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`,
 `newLeasePrice`, `strategy`, `targetOfficeBuildingId` (optionnel, ID du `public_archives`).
 
-1.  **Ajuster le Prix de Loyer d'un Bâtiment**
+2.  **Ajuster le Prix de Loyer d'un Bâtiment**
     *   **activityType**: `adjust_building_rent_price`
     *   **Description**: Le propriétaire du bâtiment se rend à son domicile, bureau, ou un `public_archives` pour
 enregistrer la modification du loyer, potentiellement en payant des frais d'enregistrement.

@@ -367,6 +367,22 @@ export default function ActivityReference() {
         </div>
         
         <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>adjust_building_rent_price</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for adjust_building_rent_price:
+{
+  "buildingId": "string",              // ID of the building to adjust rent price for
+  "newRentPrice": number,              // New rent price in Ducats
+  "strategy": "string",                // Optional: Strategy for adjustment (e.g., "standard", "aggressive")
+  "targetOfficeBuildingId": "string"   // Optional: Specific building to use (e.g., public_archives)
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must own the building. The activity creates a chain: first travel to an appropriate location (home, office, or public_archives), then file the adjustment. A filing fee of 1% of the new rent price (minimum 5 Ducats) is charged. Building occupant and operator (if different from owner) will be notified of the change.
+          </p>
+        </div>
+        
+        <div className="mt-4">
           <h4 className="font-semibold text-amber-800 mb-1"><code>buy_available_land</code></h4>
           <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`// activityDetails for buy_available_land:
