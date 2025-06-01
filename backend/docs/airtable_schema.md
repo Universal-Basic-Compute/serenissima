@@ -64,9 +64,9 @@ Contient les informations sur tous les bâtiments.
 -   `Position` (Texte multiligne): Chaîne JSON des coordonnées du point principal du bâtiment (ex: `{"lat": 45.43, "lng": 12.33}`). -> Doit être parsé par le front-end
 -   `Point` (Texte): Identifiant du point spécifique sur un polygone (ex: `building_lat_lng_index`) pour les bâtiments de taille 1. Pour les bâtiments de taille supérieure à 1, ce champ contient une chaîne JSON représentant une liste d'identifiants de points (ex: `["main_point_id", "additional_point_1", ...]`), où le premier point est le principal.
 -   `Rotation` (Nombre): Rotation du bâtiment en radians.
--   `Owner` (Lien vers `CITIZENS` via `Username`): Propriétaire du bâtiment.
--   `RunBy` (Lien vers `CITIZENS` via `Username`): Opérateur/gestionnaire du bâtiment.
--   `Occupant` (Lien vers `CITIZENS` via `Username`): Occupant actuel (travailleur ou résident).
+-   `Owner` (Texte): `Username` du propriétaire du bâtiment.
+-   `RunBy` (Texte): `Username` de l'opérateur/gestionnaire du bâtiment.
+-   `Occupant` (Texte): `Username` de l'occupant actuel (travailleur ou résident).
 -   `LeasePrice` (Nombre): Loyer payé au propriétaire du terrain.
 -   `RentPrice` (Nombre): Loyer payé par l'occupant/opérateur au propriétaire du bâtiment.
 -   `Wages` (Nombre): Salaires offerts par ce bâtiment s'il s'agit d'une entreprise.
@@ -102,15 +102,15 @@ Gère les accords commerciaux entre citoyens ou avec le public.
 
 -   `ContractId` (Texte): Identifiant personnalisé unique, souvent déterministe (ex: `contract-import-bld_xxx-timber`, `building_bid_BUILDINGID_BUYERNAME_TIMESTAMP`, `land_listing_LANDID_SELLER_TIMESTAMP`, `land_offer_LANDID_BUYER_TIMESTAMP`).
 -   `Type` (Texte): Type de contrat (ex: `import`, `public_sell`, `recurrent`, `construction_project`, `logistics_service_request`, `building_bid`, `land_listing`, `land_offer`, `land_sell` (ancien, à déprécier)).
--   `Buyer` (Lien vers `CITIZENS` via `Username`): Acheteur.
+-   `Buyer` (Texte): `Username` de l'acheteur.
     -   Pour `land_listing`: Null (l'acheteur est indéterminé jusqu'à l'achat).
-    -   Pour `land_offer`: Le citoyen qui fait l'offre.
--   `Seller` (Lien vers `CITIZENS` via `Username`): Vendeur.
-    -   Pour `land_listing`: Le propriétaire du terrain qui met en vente.
-    -   Pour `land_offer`: Le propriétaire actuel du terrain (si l'offre est ciblée) ou Null (si l'offre est spéculative pour un terrain non listé ou non possédé).
+    -   Pour `land_offer`: `Username` du citoyen qui fait l'offre.
+-   `Seller` (Texte): `Username` du vendeur.
+    -   Pour `land_listing`: `Username` du propriétaire du terrain qui met en vente.
+    -   Pour `land_offer`: `Username` du propriétaire actuel du terrain (si l'offre est ciblée) ou Null (si l'offre est spéculative pour un terrain non listé ou non possédé).
 -   `ResourceType` (Texte): Type de ressource concernée. Pour les contrats fonciers, ce champ n'est généralement pas utilisé directement pour la ressource "terrain", mais `AssetType` sera "land".
 -   `ServiceFeePerUnit` (Nombre): Utilisé par `logistics_service_request`.
--   `Transporter` (Lien vers `CITIZENS` via `Username`): Citoyen assigné au transport.
+-   `Transporter` (Texte): `Username` du citoyen assigné au transport (si applicable).
 -   `BuyerBuilding` (Texte): `BuildingId` du bâtiment de l'acheteur.
 -   `SellerBuilding` (Texte): `BuildingId` du bâtiment du vendeur.
 -   `Title` (Texte): Titre du contrat. Pour `land_listing`/`land_offer`, peut être "Listing for [LandName]" ou "Offer for [LandName]".
@@ -134,7 +134,7 @@ Suit les activités et actions en cours et terminées des citoyens. Avec l'unifi
 
 -   `ActivityId` (Texte): Identifiant personnalisé unique (ex: `goto_work_username_timestamp`, `make_offer_for_land_username_timestamp`).
 -   `Type` (Texte): Type d'activité ou d'action (ex: `rest`, `goto_home`, `production`, `bid_on_land` (peut être conservé pour des enchères plus complexes), `send_message`, `manage_public_sell_contract`, `list_land_for_sale`, `make_offer_for_land`, `accept_land_offer`, `buy_listed_land`, `cancel_land_listing`, `cancel_land_offer`, `buy_available_land`, `inspect_building_for_purchase`, `submit_building_purchase_offer`).
--   `Citizen` (Lien vers `CITIZENS` via `Username`): Citoyen effectuant l'activité/action.
+-   `Citizen` (Texte): `Username` du citoyen effectuant l'activité/action.
 -   `FromBuilding` (Texte): `BuildingId` personnalisé du lieu de départ/actuel.
 -   `ToBuilding` (Texte): `BuildingId` personnalisé de la destination.
 -   `ContractId` (Texte): `ContractId` personnalisé ou ID d'enregistrement Airtable du contrat lié (pour `fetch_resource`, `fetch_from_galley`, `deliver_resource_batch`, `deliver_to_storage`, `fetch_from_storage`).
@@ -143,7 +143,7 @@ Suit les activités et actions en cours et terminées des citoyens. Avec l'unifi
 -   `Resources` (Texte multiligne): Chaîne JSON d'un tableau d'objets `{"ResourceId": ..., "Amount": ...}` pour les livraisons groupées (ex: `deliver_resource_batch`, `fetch_from_galley`, `deliver_to_storage`, `fetch_from_storage`).
 -   `TransportMode` (Texte): Mode de transport (ex: `walk`, `gondola`, `merchant_galley`).
 -   `Path` (Texte multiligne): Chaîne JSON d'un tableau de coordonnées pour le trajet.
--   `Transporter` (Lien vers `CITIZENS` via `Username`): Citoyen responsable du transport (ex: opérateur de la gondole).
+-   `Transporter` (Texte): `Username` du citoyen responsable du transport (ex: opérateur de la gondole).
 -   `Status` (Texte): Statut de l'activité (ex: `created`, `in_progress`, `processed`, `failed`, `interrupted`).
 -   `Title` (Texte): Titre concis de l'activité.
 -   `Description` (Texte multiligne): Description de ce que l'activité implique.
@@ -163,7 +163,7 @@ Informations sur les parcelles de terrain.
 -   `LandId` (Texte): Identifiant personnalisé unique (ex: `polygon-timestamp`).
 -   `HistoricalName` (Texte): Nom historique de la parcelle.
 -   `EnglishName` (Texte): Nom anglais de la parcelle.
--   `Owner` (Lien vers `CITIZENS` via `Username`): Propriétaire du terrain.
+-   `Owner` (Texte): `Username` du propriétaire du terrain.
 -   `LastIncome` (Nombre): Dernier revenu enregistré pour ce terrain (utilisé pour les enchères IA).
 -   `BuildingPointsCount` (Nombre): Nombre de points de construction disponibles.
 -   `District` (Texte): Quartier où se situe le terrain.
@@ -172,7 +172,7 @@ Informations sur les parcelles de terrain.
 
 Messages et alertes pour les citoyens et les administrateurs.
 
--   `Citizen` (Lien vers `CITIZENS` via `Username`): Destinataire de la notification.
+-   `Citizen` (Texte): `Username` du destinataire de la notification.
 -   `Type` (Texte): Type de notification (ex: `rent_change`, `wage_adjustment_automated`, `admin_report_...`).
 -   `Content` (Texte multiligne): Contenu principal du message.
 -   `Details` (Texte multiligne): Chaîne JSON pour des données structurées additionnelles.
@@ -191,8 +191,8 @@ Enregistrement exaustif des échanges financiers.
 -   `Type` (Texte): Type de transaction (ex: `wage_payment`, `rent_payment`, `resource_purchase_on_fetch`).
 -   `AssetType` (Texte): Type de l'actif lié (ex: `building`, `contract`, `resource`).
 -   `Asset` (Texte): `BuildingId` personnalisé, `ContractId` personnalisé, ou `ResourceId` de l'actif lié.
--   `Seller` (Lien vers `CITIZENS` via `Username`): Vendeur/Payeur.
--   `Buyer` (Lien vers `CITIZENS` via `Username`): Acheteur/Receveur.
+-   `Seller` (Texte): `Username` du vendeur/payeur.
+-   `Buyer` (Texte): `Username` de l'acheteur/receveur.
 -   `Price` (Nombre): Montant en Ducats de la transaction.
 -   `Notes` (Texte multiligne): Chaîne JSON ou texte pour des détails.
 -   `CreatedAt` (Date/Heure): Date de création de l'enregistrement.
@@ -203,7 +203,7 @@ Enregistrement exaustif des échanges financiers.
 
 Suivi des problèmes rencontrés par les citoyens ou les systèmes.
 
--   `Citizen` (Lien vers `CITIZENS` via `Username`): Citoyen concerné ou rapporteur.
+-   `Citizen` (Texte): `Username` du citoyen concerné ou rapporteur.
 -   `AssetType` (Texte): Type de l'actif lié (ex: `building`, `resource`, `citizen`).
 -   `Asset` (Texte): `BuildingId` personnalisé, `ResourceId`, ou `CitizenId` de l'actif lié.
 -   `Type` (Texte): Catégorie du problème (ex: `homeless_citizen`, `building_vacant`).
@@ -231,7 +231,7 @@ Décrets et lois promulgués.
 -   `Status` (Texte): Statut actuel (ex: `proposed`, `active`, `repealed`, `expired`).
 -   `Category` (Texte): Catégorie générale (ex: `economic`, `social`, `military`).
 -   `SubCategory` (Texte): Sous-catégorie plus spécifique.
--   `Proposer` (Lien vers `CITIZENS` via `Username`): Citoyen ou entité ayant proposé le décret.
+-   `Proposer` (Texte): `Username` du citoyen ou nom de l'entité ayant proposé le décret.
 -   `FlavorText` (Texte multiligne): Texte d'ambiance ou citation.
 -   `HistoricalInspiration` (Texte multiligne): Inspiration historique ou contexte.
 -   `Notes` (Texte multiligne): Notes administratives ou commentaires.
@@ -268,8 +268,8 @@ Enregistrements des prêts entre citoyens ou institutions.
 
 -   `LoanId` (Texte): Identifiant unique du prêt.
 -   `Name` (Texte): Nom ou description du prêt.
--   `Lender` (Lien vers `CITIZENS` via `Username`): Citoyen ou entité qui prête l'argent.
--   `Borrower` (Lien vers `CITIZENS` via `Username`): Citoyen ou entité qui emprunte l'argent.
+-   `Lender` (Texte): `Username` du citoyen ou nom de l'entité qui prête l'argent.
+-   `Borrower` (Texte): `Username` du citoyen ou nom de l'entité qui emprunte l'argent.
 -   `Type` (Texte): Type de prêt (ex: `personal`, `business`, `mortgage`).
 -   `Status` (Texte): Statut du prêt (ex: `pending_approval`, `active`, `paid_off`, `defaulted`).
 -   `PrincipalAmount` (Nombre): Montant initial du prêt en Ducats.
@@ -290,8 +290,8 @@ Enregistrements des prêts entre citoyens ou institutions.
 Communications entre citoyens.
 
 -   `MessageId` (Texte): Identifiant unique du message.
--   `Sender` (Lien vers `CITIZENS` via `Username`): Expéditeur du message.
--   `Receiver` (Lien vers `CITIZENS` via `Username`): Destinataire du message.
+-   `Sender` (Texte): `Username` de l'expéditeur du message.
+-   `Receiver` (Texte): `Username` du destinataire du message.
 -   `Content` (Texte multiligne): Contenu du message.
 -   `Type` (Texte): Type de message (ex: `personal`, `business_inquiry`, `guild_communication`).
 -   `ReadAt` (Date/Heure): Horodatage de lecture par le destinataire.
@@ -307,8 +307,8 @@ Informations jugées pertinentes pour un citoyen.
 -   `AssetType` (Texte): Type de l'entité (ex: `building`, `contract`, `citizen`).
 -   `Category` (Texte): Catégorie de la pertinence (ex: `opportunity`, `threat`, `information`).
 -   `Type` (Texte): Type spécifique de pertinence (ex: `job_opening`, `low_stock_alert`).
--   `TargetCitizen` (Lien vers `CITIZENS` via `Username`): Citoyen à qui cette information est pertinente.
--   `RelevantToCitizen` (Lien vers `CITIZENS` via `Username`): (Semble redondant avec `TargetCitizen`, à clarifier).
+-   `TargetCitizen` (Texte): `Username` du citoyen à qui cette information est pertinente.
+-   `RelevantToCitizen` (Texte): `Username` du citoyen (Semble redondant avec `TargetCitizen`, à clarifier).
 -   `Score` (Nombre): Score de pertinence (plus élevé = plus pertinent).
 -   `TimeHorizon` (Texte): Horizon temporel de la pertinence (ex: `immediate`, `short_term`, `long_term`).
 -   `Title` (Texte): Titre concis de l'information.
@@ -323,8 +323,8 @@ Informations jugées pertinentes pour un citoyen.
 Liens et relations entre citoyens (bi-directionnel).
 
 -   `RelationshipId` (Texte): Identifiant unique de la relation.
--   `Citizen1` (Lien vers `CITIZENS` via `Username`): Premier citoyen dans la relation par ordre alphabétique.
--   `Citizen2` (Lien vers `CITIZENS` via `Username`): Second citoyen dans la relation par ordre alphabétique.
+-   `Citizen1` (Texte): `Username` du premier citoyen dans la relation (par ordre alphabétique).
+-   `Citizen2` (Texte): `Username` du second citoyen dans la relation (par ordre alphabétique).
 -   `Title` (Texte): Type de relation (ex: `Friend`, `BusinessPartner`, `Family`, `Rival`).
 -   `Description` (Texte multiligne): Description de la nature de la relation.
 -   `LastInteraction` (Date/Heure): Horodatage de la dernière interaction significative.
