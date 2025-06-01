@@ -1631,7 +1631,11 @@ Your response:`;
                               <div className="text-xs text-gray-500">
                                 {citizen.username === 'compagno' ? 'Virtual Assistant' : citizen.username}
                                 {citizen.distance !== null && citizen.distance !== undefined && citizen.username !== 'compagno' && (
-                                  <span className="ml-2 text-amber-600">({citizen.distance}m)</span>
+                                  <span className={`ml-2 ${
+                                    citizen.distance < 100 ? 'text-green-600' :
+                                    citizen.distance < 500 ? 'text-yellow-600' :
+                                    'text-amber-600'
+                                  }`}>({citizen.distance}m)</span>
                                 )}
                               </div>
                             </div>

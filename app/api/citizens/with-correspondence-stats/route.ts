@@ -165,7 +165,8 @@ export async function POST(request: NextRequest) {
       if (currentCitizenPosition) {
         const otherCitizenPosition = parsePosition(citizen.position);
         if (otherCitizenPosition) {
-          distance = parseFloat(calculateDistance(currentCitizenPosition, otherCitizenPosition).toFixed(0));
+          const rawDistance = calculateDistance(currentCitizenPosition, otherCitizenPosition);
+          distance = Math.ceil(rawDistance / 10) * 10; // Round up to the nearest 10
         }
       }
       return {
