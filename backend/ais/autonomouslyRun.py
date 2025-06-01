@@ -1055,7 +1055,7 @@ def autonomously_run_ai_citizen_unguided(
             cleaned_reflection_unguided = clean_thought_content(tables, ai_reflection)
             log.info(f"{LogColors.OKBLUE}AI {ai_username} (Unguided Iteration {iteration_count}) Cleaned Reflection: {LogColors.BOLD}{cleaned_reflection_unguided}{LogColors.ENDC}")
 
-        if not dry_run and tables:
+        if not dry_run and tables and cleaned_reflection_unguided.strip().lower() != "no reflection provided.":
              try:
                 tables["messages"].create({
                     "Sender": ai_username, "Receiver": ai_username,
@@ -1063,8 +1063,12 @@ def autonomously_run_ai_citizen_unguided(
                     "Type": "unguided_run_log", "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
                     "ReadAt": datetime.now(VENICE_TIMEZONE).isoformat()
                 })
+                log.info(f"{LogColors.OKGREEN}Stored unguided reflection for {ai_username}.{LogColors.ENDC}")
              except Exception as e_msg:
                 log.error(f"{LogColors.FAIL}Failed to store unguided reflection message for {ai_username}: {e_msg}{LogColors.ENDC}", exc_info=True)
+        elif cleaned_reflection_unguided.strip().lower() == "no reflection provided.":
+            log.info(f"{LogColors.OKBLUE}AI {ai_username} provided no reflection. Skipping message creation.{LogColors.ENDC}")
+
 
         api_actions = kinos_response.get("actions")
         if not api_actions or not isinstance(api_actions, list) or len(api_actions) == 0:
