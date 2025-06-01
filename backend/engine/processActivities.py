@@ -118,6 +118,7 @@ from backend.engine.activity_processors import (
         process_check_business_status as process_check_business_status_fn,
         process_fishing_activity as process_fishing_activity_fn # Import new processor
 )
+from backend.engine.activity_processors.bid_on_land_activity_processor import process_bid_on_land_fn
 # Load environment variables
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
@@ -351,6 +352,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "emergency_fishing": process_fishing_activity_fn, # New, uses same processor
         "idle": process_placeholder_activity_fn,
         "rest": process_placeholder_activity_fn,
+        "bid_on_land": process_bid_on_land_fn,
         "bid_on_land": process_bid_on_land_fn,
     }
 
