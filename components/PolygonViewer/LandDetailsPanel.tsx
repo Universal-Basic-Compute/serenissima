@@ -410,13 +410,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
 
   // Land purchase events are no longer handled to prevent land modification
   
-  // Add effect to maintain panel visibility after a purchase
-  useEffect(() => {
-    if (transaction && transaction.buyer === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress'))) {
-      // If the current citizen is the buyer, ensure the panel stays visible
-      setIsVisible(true);
-    }
-  }, [transaction]);
+  // The useEffect block below that referenced 'transaction' has been removed as 'transaction' is no longer defined.
+  // Visibility after actions is handled by selectedPolygonId and preventAutoClose.
   
   // Add additional effect to maintain visibility when preventAutoClose is true
   useEffect(() => {
