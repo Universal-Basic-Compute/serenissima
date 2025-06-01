@@ -315,6 +315,12 @@ enregistrer la modification du loyer, potentiellement en payant des frais d'enre
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId`, `newRentPrice`,
 `strategy`, `targetOfficeBuildingId` (optionnel, ID du `public_archives`).
 
+5.  **Ajuster le Prix de Location d'un Bâtiment (Lease Price)**
+    *   **activityType**: `adjust_building_lease_price`
+    *   **Description**: Le propriétaire foncier (qui possède le terrain sur lequel le bâtiment est construit) se rend à son domicile, à un bureau qu'il gère, ou à un `public_archives` (bureau du cadastre) pour enregistrer la modification du prix de location du bâtiment (le `LeasePrice` que l'opérateur du bâtiment paie au propriétaire foncier). Des frais d'enregistrement peuvent être perçus.
+    *   **Mécanisme Principal**: Crée une activité `goto_location` (vers domicile, bureau personnel, ou `public_archives`). À l'arrivée, une activité `file_building_lease_adjustment` est créée, et les frais sont payés. Le processeur mettra à jour le champ `LeasePrice` de l'enregistrement `BUILDINGS` concerné.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId` (ID du bâtiment dont le `LeasePrice` est ajusté), `newLeasePrice` (le nouveau montant du loyer du bâtiment), `strategy` (la stratégie de tarification utilisée), `targetOfficeBuildingId` (optionnel, ID du `public_archives`).
+
 ### Commerce et Contrats
 
 6.  **Créer/Modifier un Contrat de Vente Publique**
