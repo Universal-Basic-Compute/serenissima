@@ -84,8 +84,8 @@ CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE = [
     "GET /api/problems?Citizen={YourUsername}&Status=active - Check your active problems.",
     "GET /api/relevancies?RelevantToCitizen={YourUsername}&Category=opportunity - Check opportunities relevant to you.",
     "GET /api/activities?citizenId={YourUsername}&limit=5 - Get your 5 most recent activities.",
-    "GET /api/building-types - Get definitions of all building types (costs, production, etc.).",
-    "GET /api/resource-types - Get definitions of all resource types (import price, category, etc.).",
+    "GET /api/building-types - Get definitions of all building types (costs, production, etc.). - Important before any POST /buildings request!",
+    "GET /api/resource-types - Get definitions of all resource types (import price, category, etc.).- Important before any request involving resources!",
 
     # Actions (POST)
     "POST /api/actions/create-activity - Create an activity for yourself. Body: {citizenUsername, activityType, title, description, thought, activityDetails}",
