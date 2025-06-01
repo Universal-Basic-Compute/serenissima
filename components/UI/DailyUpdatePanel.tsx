@@ -89,9 +89,9 @@ const DailyUpdatePanel: React.FC<DailyUpdatePanelProps> = ({ onClose }) => {
   // Le contenu change en fonction de isLoading et messageContent.
   return (
     // Le wrapper principal du panneau. bg-black/80 a été retiré pour rendre l'arrière-plan (la carte) visible.
-    // z-40 le place au-dessus des éléments de l'interface principale (z-20, z-30) mais potentiellement sous d'autres modales/overlays à z-index plus élevé.
+    // z-[46] le place au-dessus des bulles de pensée (z-[45]) et des éléments de l'interface principale (z-20, z-30).
     <div 
-      className="fixed inset-0 z-40 flex items-center justify-center p-4 overflow-auto pointer-events-none"
+      className="fixed inset-0 z-[46] flex items-center justify-center p-4 overflow-auto pointer-events-none"
       style={!isPanelVisible ? { display: 'none' } : {}} // Contrôler la visibilité ici
     >
       <div
