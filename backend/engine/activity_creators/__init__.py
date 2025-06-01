@@ -41,6 +41,7 @@ from .offer_loan_creator import try_create as try_create_offer_loan_activity # N
 from .send_message_creator import try_create as try_create_send_message_activity # New message sending activity
 from .manage_guild_membership_creator import try_create as try_create_manage_guild_membership_activity # New guild membership activity
 from .bid_on_building_activity_creator import try_create as try_create_bid_on_building_activity # New building bid activity
+from .deliver_resource_batch_activity_creator import try_create as try_create_deliver_resource_batch_activity # New, for galley final deliveries
 
 # Land Management Activity Creators
 from .list_land_for_sale_creator import try_create as try_create_list_land_for_sale_activity
