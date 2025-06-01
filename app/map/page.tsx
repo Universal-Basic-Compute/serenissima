@@ -626,7 +626,7 @@ export default function MapPage() {
             const pngUrl = canvas.toDataURL('image/png');
             const downloadLink = document.createElement('a');
             downloadLink.href = pngUrl;
-            downloadLink.download = `polygon-${polygon.id || `image-${i}`}.png`;
+            downloadLink.download = `${polygon.id || `image-${i}`}.png`;
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
