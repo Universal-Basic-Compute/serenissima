@@ -179,7 +179,7 @@ export class AssetService {
       
       // Check if the .png image exists
       try {
-        const pngResponse = await fetch(pngImagePath, { method: 'HEAD' });
+        const pngResponse = await fetch(pngImagePath, { method: 'GET' }); // Changed HEAD to GET
         if (pngResponse.ok) {
           this.buildingImages[cacheKey] = pngImagePath;
           return pngImagePath;
