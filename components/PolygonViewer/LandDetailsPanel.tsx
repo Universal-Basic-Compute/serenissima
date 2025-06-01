@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
-import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
@@ -149,7 +148,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         // Fetch the owner details directly
         const fetchOwnerDetails = async () => {
           try {
-            const apiUrl = `${getBackendBaseUrl()}/api/citizens/${owner}`;
+            const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+            const apiUrl = `${API_BASE_URL}/api/citizens/${owner}`;
             console.log('Fetching owner details from:', apiUrl); // Log the constructed URL
             const citizenResponse = await fetch(apiUrl);
             
@@ -483,12 +483,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // Function to fetch transaction with retry logic
       const fetchTransactionWithRetry = async (retries = 3, delay = 1000) => {
         try {
-          let baseUrl = getBackendBaseUrl();
-          // Ensure baseUrl is a string; if undefined or null, treat as empty for relative path
-          if (baseUrl === null || typeof baseUrl === 'undefined') {
-            baseUrl = '';
-          }
-          const apiUrl = `${baseUrl}/api/contracts?Type=land_sell&AssetType=land&Asset=${selectedPolygonId}`;
+          const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+          const apiUrl = `${API_BASE_URL}/api/contracts?Type=land_sell&AssetType=land&Asset=${selectedPolygonId}`;
           console.log(`Fetching transaction from URL: ${apiUrl}`); // Log the exact URL
           // Use the new Next.js API route
           const response = await fetch(apiUrl);
@@ -560,12 +556,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // Function to fetch offers with retry logic
       const fetchOffersWithRetry = async (retries = 3, delay = 1000) => {
         try {
-          let baseUrl = getBackendBaseUrl();
-          // Ensure baseUrl is a string; if undefined or null, treat as empty for relative path
-          if (baseUrl === null || typeof baseUrl === 'undefined') {
-            baseUrl = '';
-          }
-          const apiUrl = `${baseUrl}/api/transactions/land-offers/${selectedPolygonId}`;
+          const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+          const apiUrl = `${API_BASE_URL}/api/transactions/land-offers/${selectedPolygonId}`;
           console.log(`Fetching offers from URL: ${apiUrl}`); // Log the exact URL
           // Use the new Next.js API route for land offers
           const response = await fetch(apiUrl);
@@ -811,8 +803,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     console.log('Removing listing, seller:', transaction.seller, 'wallet:', walletAddress);
                     
                     try {
+                      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
                       // Cancel the transaction
-                      const response = await fetch(`${getBackendBaseUrl()}/api/transaction/${transaction.id}/cancel`, {
+                      const response = await fetch(`${API_BASE_URL}/api/transaction/${transaction.id}/cancel`, {
                         method: 'POST',
                         headers: {
                           'Content-Type': 'application/json',
@@ -950,8 +943,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                           }
                           
                           try {
+                            const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
                             // Execute the transaction
-                            const response = await fetch(`${getBackendBaseUrl()}/api/transaction/${offer.id}/execute`, {
+                            const response = await fetch(`${API_BASE_URL}/api/transaction/${offer.id}/execute`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -1001,8 +995,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                           }
                           
                           try {
+                            const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
                             // Cancel the transaction
-                            const response = await fetch(`${getBackendBaseUrl()}/api/transaction/${offer.id}/cancel`, {
+                            const response = await fetch(`${API_BASE_URL}/api/transaction/${offer.id}/cancel`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
