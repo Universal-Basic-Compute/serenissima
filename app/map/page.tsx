@@ -60,6 +60,9 @@ export default function MapPage() {
   // State for PolygonDisplayPanel on map page
   const [selectedMapPolygonData, setSelectedMapPolygonData] = useState<any | null>(null);
   const [showMapPolygonDisplayPanel, setShowMapPolygonDisplayPanel] = useState<boolean>(false);
+
+  // State to store raw polygon data for batch download
+  const [rawPolygonsData, setRawPolygonsData] = useState<any[]>([]);
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -334,7 +337,8 @@ export default function MapPage() {
     fetch('/api/get-polygons')
       .then(response => response.json())
       .then(data => {
-        data.polygons.forEach((polygon: any, index: number) => {
+        setRawPolygonsData(data.polygons || []); // Store raw polygon data
+        (data.polygons || []).forEach((polygon: any, index: number) => {
           if (polygon.coordinates && polygon.coordinates.length > 2) {
             const path = polygon.coordinates.map((coord: any) => ({
               lat: coord.lat,
@@ -536,6 +540,113 @@ export default function MapPage() {
     setShowMapPolygonDisplayPanel(false);
     setSelectedMapPolygonData(null);
   };
+
+  const downloadAllPolygonImages = async () => {
+    if (rawPolygonsData.length === 0) {
+      alert("Aucun polygone à télécharger.");
+      return;
+    }
+
+    alert(`Préparation du téléchargement de ${rawPolygonsData.length} images de polygones. Cela peut prendre un moment.`);
+
+    for (let i = 0; i < rawPolygonsData.length; i++) {
+      const polygon = rawPolygonsData[i];
+      if (!polygon.coordinates || polygon.coordinates.length === 0) {
+        console.warn(`Polygone ${polygon.id} ignoré: pas de coordonnées.`);
+        continue;
+      }
+
+      // Logic duplicated from PolygonDisplayPanel for SVG generation and download
+      const SVG_SIZE = 300;
+      const PADDING = 20;
+      const HEIGHT_ADJUST_FACTOR = 0.7;
+      const { coordinates } = polygon;
+
+      let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+      coordinates.forEach((coord: {lng: number, lat: number}) => {
+        if (coord.lng < minLng) minLng = coord.lng;
+        if (coord.lng > maxLng) maxLng = coord.lng;
+        if (coord.lat < minLat) minLat = coord.lat;
+        if (coord.lat > maxLat) maxLat = coord.lat;
+      });
+
+      const polyDataWidth = maxLng - minLng;
+      const polyDataHeight = maxLat - minLat;
+
+      if (polyDataWidth === 0 && polyDataHeight === 0 && coordinates.length > 0) {
+        console.warn(`Polygone ${polygon.id} ignoré: sans superficie (dégénéré).`);
+        continue;
+      }
+      
+      const drawableWidth = SVG_SIZE - 2 * PADDING;
+      const drawableHeight = SVG_SIZE - 2 * PADDING;
+      let scale = 1;
+
+      if (polyDataWidth > 0 && polyDataHeight > 0) {
+        scale = Math.min(
+          drawableWidth / polyDataWidth,
+          drawableHeight / (polyDataHeight / HEIGHT_ADJUST_FACTOR)
+        );
+      } else if (polyDataWidth > 0) {
+        scale = drawableWidth / polyDataWidth;
+      } else if (polyDataHeight > 0) {
+        scale = drawableHeight / (polyDataHeight / HEIGHT_ADJUST_FACTOR);
+      }
+
+      const scaledWidth = polyDataWidth * scale;
+      const adjustedScaledHeight = (polyDataHeight / HEIGHT_ADJUST_FACTOR) * scale;
+      const offsetX = (SVG_SIZE - scaledWidth) / 2;
+      const offsetY = (SVG_SIZE - adjustedScaledHeight) / 2;
+
+      const pointsString = coordinates.map((coord: {lng: number, lat: number}) => {
+        const svgX = (coord.lng - minLng) * scale + offsetX;
+        const svgY = ((maxLat - coord.lat) / HEIGHT_ADJUST_FACTOR) * scale + offsetY;
+        return `${svgX},${svgY}`;
+      }).join(' ');
+
+      const svgString = `
+        <svg viewBox="0 0 ${SVG_SIZE} ${SVG_SIZE}" width="${SVG_SIZE}" height="${SVG_SIZE}" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100%" height="100%" fill="#F5E8C0" />
+          <polygon points="${pointsString}" fill="#E0C9A6" fillOpacity="0.7" stroke="#5D4037" strokeOpacity="0.8" strokeWidth="1" />
+        </svg>`;
+
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      // Using a Promise to handle async image loading before proceeding
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = SVG_SIZE;
+          canvas.height = SVG_SIZE;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, SVG_SIZE, SVG_SIZE);
+            const pngUrl = canvas.toDataURL('image/png');
+            const downloadLink = document.createElement('a');
+            downloadLink.href = pngUrl;
+            downloadLink.download = `polygon-${polygon.id || `image-${i}`}.png`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+          }
+          URL.revokeObjectURL(svgUrl);
+          resolve();
+        };
+        img.onerror = (e) => {
+          console.error(`Erreur de chargement du SVG en image pour le polygone ${polygon.id}:`, e);
+          URL.revokeObjectURL(svgUrl);
+          reject(e);
+        };
+        img.src = svgUrl;
+      });
+      
+      // Small delay to prevent browser from freezing or blocking downloads
+      await new Promise(resolve => setTimeout(resolve, 300)); 
+    }
+    alert("Téléchargement de toutes les images terminé.");
+  };
   
   // Set cursor to crosshair on initial load if waterPointMode is active
   useEffect(() => {
@@ -639,6 +750,13 @@ export default function MapPage() {
       >
         Back to 3D View
       </a>
+
+      <button
+        onClick={downloadAllPolygonImages}
+        className="absolute top-16 left-4 z-10 bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 transition-colors"
+      >
+        Télécharger toutes les images
+      </button>
       
       
       {/* Google Maps */}
