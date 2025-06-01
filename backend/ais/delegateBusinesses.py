@@ -28,6 +28,7 @@ log = logging.getLogger("delegate_businesses")
 # Load environment variables
 load_dotenv()
 
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000") # Added API_BASE_URL
 BUSINESS_LIMIT_PER_AI = 10
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
