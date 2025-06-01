@@ -1357,7 +1357,7 @@ Your response:`;
             {/* Unread messages badge - Blue */}
             {unreadMessagesCount > 0 && (
               <div 
-                className="absolute top-7 right-0 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-pulse z-10"
+                className="absolute top-[8.5rem] right-0 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-pulse z-10"
                 title={`${unreadMessagesCount} unread messages`}
               >
                 {unreadMessagesCount}
