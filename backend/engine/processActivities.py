@@ -426,6 +426,33 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         else: # if not success
             update_activity_status(tables, activity_id_airtable, "failed")
             failed_count += 1
+            
+            # If this activity is part of a chain, mark subsequent activities as failed
+            # Look for activities that depend on this one (same citizen, created at same time, with later start dates)
+            try:
+                activity_citizen = activity_record['fields'].get('Citizen')
+                activity_created_at = activity_record['fields'].get('CreatedAt')
+                activity_end_date = activity_record['fields'].get('EndDate')
+                
+                if activity_citizen and activity_created_at and activity_end_date:
+                    # Find activities for same citizen, created at same time (within 1 second), with start date = this activity's end date
+                    # This indicates they are part of the same chain
+                    created_at_min = (datetime.fromisoformat(activity_created_at.replace('Z', '+00:00')) - timedelta(seconds=1)).isoformat()
+                    created_at_max = (datetime.fromisoformat(activity_created_at.replace('Z', '+00:00')) + timedelta(seconds=1)).isoformat()
+                    
+                    formula = f"AND({{Citizen}}='{_escape_airtable_value(activity_citizen)}', {{CreatedAt}} >= '{created_at_min}', {{CreatedAt}} <= '{created_at_max}', {{StartDate}} >= '{activity_end_date}', {{Status}}='created')"
+                    dependent_activities = tables['activities'].all(formula=formula)
+                    
+                    if dependent_activities:
+                        log.warning(f"{LogColors.WARNING}Found {len(dependent_activities)} dependent activities in chain that will be marked as failed due to failure of activity {activity_guid}.{LogColors.ENDC}")
+                        for dep_activity in dependent_activities:
+                            dep_activity_id = dep_activity['id']
+                            dep_activity_guid = dep_activity['fields'].get('ActivityId', dep_activity_id)
+                            update_activity_status(tables, dep_activity_id, "failed")
+                            log.warning(f"{LogColors.WARNING}Marked dependent activity {dep_activity_guid} as failed.{LogColors.ENDC}")
+                            failed_count += 1
+            except Exception as e_chain:
+                log.error(f"{LogColors.FAIL}Error while checking for dependent activities in chain: {e_chain}{LogColors.ENDC}")
         
         # Gondola Fee Processing - Moved outside the if/else success block
         activity_path_json = activity_record['fields'].get('Path')
