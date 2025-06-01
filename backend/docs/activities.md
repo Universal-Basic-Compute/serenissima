@@ -367,6 +367,12 @@ ID du `customs_house` ou `broker_s_office`) est créée. Finalement, une activit
 `resourceType`, `targetAmount`, `pricePerResource`, `buyerBuildingId`, `targetOfficeBuildingId` (ID du `customs_house`
 ou `broker_s_office`).
 
+10. **Créer/Modifier un Contrat d'Importation Public**
+    *   **activityType**: `manage_public_import_contract`
+    *   **Description**: Le citoyen se déplace vers un bureau de commerce (ex: `customs_house`, `broker_s_office`) pour y enregistrer ou modifier une offre publique d'importation. Cette offre permet à n'importe quel marchand de vendre les ressources spécifiées au citoyen. L'enregistrement du contrat implique des frais de courtage.
+    *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`: ID du `customs_house` ou `broker_s_office`). À l'arrivée, une activité d'enregistrement d'offre publique (`activityType: register_public_import_agreement`, durée courte) est créée, durant laquelle les frais sont payés, et le processeur appellera `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `resourceType`, `targetAmount`, `pricePerResource`, `targetOfficeBuildingId` (ID du `customs_house` ou `broker_s_office`).
+
 10. **Créer/Modifier une Offre de Stockage Public**
     *   **activityType**: `manage_public_storage_offer`
     *   **Description**: Le citoyen se rend à son bâtiment de stockage (`sellerBuildingId`, ex: `small_warehouse`,

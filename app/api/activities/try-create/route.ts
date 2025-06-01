@@ -53,6 +53,17 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log des paramètres spécifiques pour manage_public_import_contract
+    if (activityType === 'manage_public_import_contract') {
+      console.log(`[API /activities/try-create] Processing manage_public_import_contract with parameters:`, 
+        activityParameters?.contractId ? `Modifying contract: ${activityParameters.contractId}` : 'Creating new contract',
+        `Resource: ${activityParameters?.resourceType}`,
+        `Amount: ${activityParameters?.targetAmount}`,
+        `Price: ${activityParameters?.pricePerResource}`,
+        `Office Building: ${activityParameters?.targetOfficeBuildingId}`
+      );
+    }
+    
     // Log des paramètres spécifiques pour manage_logistics_service_contract
     if (activityType === 'manage_logistics_service_contract') {
       console.log(`[API /activities/try-create] Processing manage_logistics_service_contract with parameters:`, 

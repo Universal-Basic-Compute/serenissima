@@ -27,6 +27,7 @@ from .fishing_activity_creator import try_create_fishing_activity # New fishing 
 from .return_to_workplace_activity_creator import try_create as try_create_return_to_workplace_activity # New
 from .manage_public_sell_contract_creator import try_create as try_create_manage_public_sell_contract_activity # New public sell contract activity
 from .manage_import_contract_creator import try_create as try_create_manage_import_contract_activity # New import contract activity
+from .manage_public_import_contract_creator import try_create as try_create_manage_public_import_contract_activity # New public import contract activity
 from .manage_logistics_service_contract_creator import try_create as try_create_manage_logistics_service_contract_activity # New logistics service contract activity
 from .buy_available_land_creator import try_create as try_create_buy_available_land_activity # New land purchase activity
 from .initiate_building_project_creator import try_create as try_create_initiate_building_project_activity # New building project activity
