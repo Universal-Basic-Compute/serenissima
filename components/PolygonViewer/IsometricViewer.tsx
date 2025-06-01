@@ -2882,9 +2882,10 @@ const darkenColor = (colorStr: string, percent: number): string => {
     
     // Draw land images first
     if (landImages && Object.keys(landImages).length > 0) {
-      polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
+      for (let i = 0; i < polygonsToRender.length; i++) {
+        const { polygon, coords, centerX, centerY } = polygonsToRender[i];
         // Skip if no coordinates
-        if (!coords || coords.length < 3 || !polygon.id) return;
+        if (!coords || coords.length < 3 || !polygon || !polygon.id) continue;
         
         // Get the preloaded image
         const img = landImages[polygon.id];
@@ -2899,7 +2900,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
             console.error(`Error drawing image for polygon ${polygon.id}:`, error);
           }
         }
-      });
+      }
     }
     
     // Draw polygons using RenderService, incorporating currentHoverState
@@ -2915,9 +2916,10 @@ const darkenColor = (colorStr: string, percent: number): string => {
     
     // Draw land images using preloaded images
     if (landImages && Object.keys(landImages).length > 0) {
-      polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
+      for (let i = 0; i < polygonsToRender.length; i++) {
+        const { polygon, coords, centerX, centerY } = polygonsToRender[i];
         // Skip if no coordinates or no polygon ID
-        if (!coords || coords.length < 3 || !polygon || !polygon.id) return;
+        if (!coords || coords.length < 3 || !polygon || !polygon.id) continue;
         
         // Get the preloaded image
         const img = landImages[polygon.id];
@@ -2932,7 +2934,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
             console.error(`Error drawing image for polygon ${polygon.id}:`, error);
           }
         }
-      });
+      }
     }
 
     // Second pass: Draw all polygon names (only in land view)
