@@ -823,7 +823,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   src={iconSrc}
                   alt={`${socialClassForIcon} icon`}
                   className="w-full h-full object-contain" // Use object-contain to maintain aspect ratio
-                  style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))' }} // Added drop-shadow to the image
+                  style={{ filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.5))' }} // Adjusted drop-shadow for more emphasis
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (target.src !== fallbackIconSrc) { // Avoid infinite loop if default also fails
@@ -921,7 +921,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   src={iconSrc}
                   alt={`${socialClassForIcon} icon`}
                   className="w-full h-full object-contain"
-                  style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))' }} // Added drop-shadow to the image
+                  style={{ filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.5))' }} // Adjusted drop-shadow for more emphasis
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (target.src !== fallbackIconSrc) {
