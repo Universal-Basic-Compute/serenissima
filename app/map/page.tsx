@@ -336,6 +336,15 @@ export default function MapPage() {
     drawingManagerRef.current = drawingManager;
     setIsGoogleLoaded(true);
   };
+
+  // Define clearEditingState before loadPolygonsOnMap as it's a dependency
+  const clearEditingState = useCallback(() => {
+    setEditingOverlayId(null);
+    if (editingOverlayRef.current) editingOverlayRef.current = null;
+    if (editingOverlayInitialBoundsRef.current) editingOverlayInitialBoundsRef.current = null;
+    editingHandlesRef.current.forEach(marker => marker.setMap(null));
+    editingHandlesRef.current = [];
+  }, [setEditingOverlayId]); // setEditingOverlayId is stable
   
   // Add a function to load polygons onto the map
   const loadPolygonsOnMap = useCallback(() => {
@@ -635,14 +644,6 @@ export default function MapPage() {
     setShowMapPolygonDisplayPanel(false);
     setSelectedMapPolygonData(null);
   };
-
-  const clearEditingState = useCallback(() => {
-    setEditingOverlayId(null);
-    if (editingOverlayRef.current) editingOverlayRef.current = null;
-    if (editingOverlayInitialBoundsRef.current) editingOverlayInitialBoundsRef.current = null;
-    editingHandlesRef.current.forEach(marker => marker.setMap(null));
-    editingHandlesRef.current = [];
-  }, [setEditingOverlayId]); // setEditingOverlayId is stable
 
   const createHandlesForOverlay = (overlay: google.maps.GroundOverlay, overlayId: string) => {
     clearEditingState(); // Clear any existing handles first
