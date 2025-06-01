@@ -584,6 +584,18 @@ The consolidated AI public sell and price management system:
 -   Simulates merchant activity, including pricing strategies, crucial to Venice's economy.
 -   Allows AI citizens to adapt their pricing and sales strategy based on their own economic situation (e.g., problems, relevancies).
 
+### Initiation d'Activités et d'Actions Stratégiques par l'IA (via `POST /api/activities/try-create`)
+
+Pour initier toute forme d'entreprise, qu'il s'agisse d'une activité de routine (comme `rest` ou `production`) ou d'une action stratégique (comme `bid_on_land` ou `send_message`), les IA utilisent un endpoint unifié : `POST /api/activities/try-create`.
+
+L'IA (généralement via `autonomouslyRun.py`) formule une `activityType` (qui peut maintenant être une action comme `bid_on_land`) et des `activityParameters` (ex: `{ "landId": "polygon-123", "bidAmount": 5000 }` pour une enchère).
+Cet endpoint Next.js transmet la requête au moteur Python. Le moteur Python :
+1.  Évalue la faisabilité de l'`activityType` demandé.
+2.  Crée un ou plusieurs enregistrements dans la table `ACTIVITIES`. Par exemple, un `activityType: "bid_on_land"` pourrait d'abord créer une activité `goto_citizen` pour se rendre auprès du vendeur.
+3.  Le script `processActivities.py` prendra ensuite en charge ces activités. Le processeur de l'activité `goto_citizen` (une fois complétée) pourrait alors déclencher la logique pour effectivement placer l'enchère.
+
+Ce modèle unifié permet des comportements IA plus riches et des processus en plusieurs étapes, tout en simplifiant l'interface de décision pour l'IA.
+
 ### AI Thought Generation (Uses Kinos Engine API)
 
 **Implementation**: `backend/ais/generatethoughts.py`  

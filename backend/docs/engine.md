@@ -434,3 +434,15 @@ These automated processes are scheduled using cron jobs set up in the `backend/s
 The processes interact with the game's data stored in Airtable, updating records for citizens, buildings, lands, and transactions. They also generate notifications to keep players informed about changes affecting their assets and citizens.
 
 For detailed implementation of each process, refer to the source code in the respective script files.
+
+## Engine-Driven vs. AI-Initiated Endeavors (Activities & Actions)
+
+Il est important de distinguer les processus décrits ci-dessus, qui sont généralement des routines globales appliquées à tous les citoyens éligibles par le "moteur de jeu" (scripts Python dans `backend/engine/` et `backend/ais/`), des activités (y compris les actions stratégiques) initiées par les IA elles-mêmes.
+
+-   **Processus du Moteur (Engine-Driven)**: Ce sont les scripts listés dans ce document (`pay_building_maintenance.py`, `citizensgetjobs.py`, etc.). Ils appliquent des règles de jeu et des simulations à grande échelle. Ils peuvent créer des activités pour les citoyens (via `createActivities.py`) ou modifier directement l'état du jeu.
+
+-   **Entreprises Initiées par l'IA (AI-Initiated Endeavors)**: Les IA, notamment via `autonomouslyRun.py`, peuvent décider de s'engager dans des activités spécifiques (ex: `rest`, `production`, `fetch_resource`) ou des actions stratégiques (ex: `bid_on_land`, `send_message`). Elles le font en appelant :
+    *   `POST /api/activities/try-create`: C'est le point d'entrée principal pour l'IA pour initier *toute* forme d'entreprise. L'IA spécifie un `activityType` (qui peut être une activité traditionnelle ou une action stratégique) et des `activityParameters`. Le moteur Python est alors responsable de créer le ou les enregistrements d'activité nécessaires dans la table `ACTIVITIES`.
+    *   `POST /api/actions/create-activity`: Cet endpoint reste disponible pour les cas où l'IA (ou un autre système) a déjà déterminé *tous* les détails d'une activité spécifique (y compris les actions stratégiques modélisées comme activités) et souhaite la créer directement dans la table `ACTIVITIES` sans passer par la logique de décision de `try-create`.
+
+Toutes les entreprises initiées par l'IA qui résultent en un enregistrement dans la table `ACTIVITIES` sont ensuite gérées et traitées par le script `processActivities.py`.

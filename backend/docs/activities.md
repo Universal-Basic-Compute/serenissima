@@ -281,7 +281,7 @@ This endpoint internally calls the relevant GET API and returns its response, wr
 -   This method bypasses the prioritized decision logic of `citizen_general_activities.py`.
 -   Care must be taken to avoid conflicts if both engine-driven and API-driven activity creation are active for the same citizen.
 
-Refer to the API Reference (`components/Documentation/ApiReference.tsx`) for the detailed payload structure of the `POST /api/actions/create-activity` endpoint.
+Refer to the API Reference (`components/Documentation/ApiReference.tsx`) for the detailed payload structure of the `POST /api/actions/create-activity` endpoint (for direct creation when all details are known) and `POST /api/activities/try-create` (for AI-initiated endeavors).
 
 ## API-Driven Activity Creation
 
