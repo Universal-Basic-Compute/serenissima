@@ -10,9 +10,9 @@ if (!fs.existsSync(polygonsDir)) {
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { polygonId: string } }
 ) {
-  const polygonId = params.id;
+  const polygonId = params.polygonId;
   try {
     const { bounds } = await request.json();
 
