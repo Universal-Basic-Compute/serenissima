@@ -104,6 +104,7 @@ export const HoverTooltip: React.FC = () => {
         
         // Get building image path
         const imagePath = await assetService.getBuildingImagePath(actualBuildingData.type);
+        console.log('TOOLTIP: Building image path:', imagePath);
         setBuildingImagePath(imagePath);
         
         setTooltipData({
@@ -216,6 +217,7 @@ export const HoverTooltip: React.FC = () => {
             alt={tooltipData.name || 'Building'}
             className="w-full h-full object-cover"
             onError={(e) => {
+              console.log(`Failed to load building image: ${e.currentTarget.src}`);
               // Fallback to default image if the specific one doesn't exist
               e.currentTarget.src = 'https://backend.serenissima.ai/public_assets/images/buildings/contract_stall.png';
             }}
