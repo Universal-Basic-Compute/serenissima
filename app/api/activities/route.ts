@@ -127,6 +127,14 @@ export async function GET(request: Request) {
       }
     });
     
+    if (response.status === 422) {
+      console.warn(`Airtable API returned 422 (Unprocessable Entity) for formula: ${filterByFormula}. Returning empty activities list.`);
+      return NextResponse.json(
+        { success: true, activities: [], _fallbackError: true, error: 'Airtable could not process the request formula.' },
+        { status: 200 }
+      );
+    }
+
     if (!response.ok) {
       console.error(`Airtable API error: ${response.status} ${response.statusText}`);
       return NextResponse.json(
