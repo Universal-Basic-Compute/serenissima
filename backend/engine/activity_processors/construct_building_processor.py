@@ -67,8 +67,8 @@ def process(
             else:
                 log.warning(f"{LogColors.WARNING}Could not find contract (Airtable ID: {contract_airtable_id}) to mark as completed for building {target_building_name_log}.{LogColors.ENDC}")
                 
-            # Note: This processor only updates the building and contract status and does not create follow-up activities.
-            # Any subsequent activities should be created by activity creators, not processors.
+            # This processor only updates the building and contract status.
+            # Any subsequent activities should be created by activity creators.
         else:
             tables['buildings'].update(target_building_airtable_id, {'ConstructionMinutesRemaining': new_minutes_remaining})
             log.info(f"{LogColors.OKGREEN}Building **{target_building_name_log}** ({target_building_custom_id}) progress updated. {new_minutes_remaining:.2f} minutes remaining.{LogColors.ENDC}")
@@ -76,8 +76,8 @@ def process(
         # Citizen's position is updated by the main processActivities loop to ToBuilding,
         # which is the construction site for this activity type.
         
-        # Note: This processor only updates the construction progress and does not create follow-up activities.
-        # Any subsequent construction activities should be created by activity creators, not processors.
+        # This processor only updates the construction progress.
+        # Any subsequent construction activities should be created by activity creators.
 
         # Trust score updates
         # contract_airtable_id is the Airtable Record ID. We need the contract to get the Buyer.

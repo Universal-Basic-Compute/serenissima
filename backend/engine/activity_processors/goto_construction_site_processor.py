@@ -36,8 +36,8 @@ def process(
     target_building_name_log = target_building_record_data['fields'].get('Name', target_building_custom_id)
     log.info(f"Citizen **{citizen_username}** arrived at site **{target_building_name_log}** ({target_building_custom_id}).")
     
-    # In the new architecture, the next activity in the chain (construct_building)
-    # should have been created by the activity creator, not by this processor.
+    # The next activity in the chain (construct_building)
+    # should have been created by the activity creator.
     # This processor simply marks the arrival at the construction site.
     
     log.info(f"{LogColors.OKGREEN}Successfully processed 'goto_construction_site' activity for {citizen_username} at {target_building_custom_id}.{LogColors.ENDC}")

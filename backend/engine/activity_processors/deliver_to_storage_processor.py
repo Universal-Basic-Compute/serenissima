@@ -335,8 +335,8 @@ def process(
     if delivery_person_username and owner_of_deposited_resources:
         update_trust_score_for_activity(tables, delivery_person_username, owner_of_deposited_resources, TRUST_SCORE_SUCCESS_SIMPLE, "delivery_to_storage", True)
 
-    # In the new architecture, any follow-up activities should have been created by the activity creator,
-    # not by this processor. This processor only handles the resource transfer.
+    # This processor only handles the resource transfer.
+    # Any follow-up activities should have been created by the activity creator.
 
     log.info(f"{LogColors.OKGREEN}Successfully processed 'deliver_to_storage' activity {activity_guid}.{LogColors.ENDC}")
     return True

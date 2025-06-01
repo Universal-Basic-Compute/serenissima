@@ -41,7 +41,7 @@ This script:
    - For most activities with a `ToBuilding` destination, the citizen's `Position` (coordinates) and `UpdatedAt` fields are updated to reflect their new location.
    - For `fetch_resource` activities, the processor itself handles updating the citizen's position to the `FromBuilding` (pickup location), so the generic update is skipped.
 
-IMPORTANT: In the new architecture, activity processors should ONLY process the current activity and NOT create follow-up activities.
+IMPORTANT: Activity processors should ONLY process the current activity and NOT create follow-up activities.
 Follow-up activities should be created by activity creators in the activity_creators directory.
 Processors should focus on:
 1. Executing the effects of the current activity (e.g., transferring resources, updating citizen state)
@@ -97,7 +97,7 @@ def process_placeholder_activity_fn(tables, activity_record, building_type_defs,
     activity_guid = activity_record['fields'].get('ActivityId', activity_record['id'])
     activity_type = activity_record['fields'].get('Type')
     log.info(f"{LogColors.OKCYAN}Activity {activity_guid} (type: {activity_type}) processed by placeholder (e.g., expired or simple state change).{LogColors.ENDC}")
-    # Note: Processors should only handle the current activity, not create follow-up activities
+    # Processors should only handle the current activity, not create follow-up activities
     return True
 
 # Import helper functions from activity_helpers
