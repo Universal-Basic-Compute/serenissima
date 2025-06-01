@@ -488,8 +488,7 @@ créée, et les frais associés sont payés.
 `mint`) ou rencontre un prêteur connu pour y soumettre une demande de prêt. Des frais de dossier ou d'évaluation peuvent être exigés par l'établissement.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `broker_s_office`/`mint` ou localisation du `lenderUsername`). À l'arrivée, une activité de soumission de demande
-(`activityType: submit_loan_application_form`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST
-/api/loans/apply`.
+(`activityType: submit_loan_application_form`, durée courte) est créée, les frais sont payés, et le processeur crée un enregistrement dans la table `LOANS` avec le statut "pending_approval".
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `amount`, `purpose`, `collateralDetails`
 (optionnel), `targetBuildingId` (optionnel, ID du `broker_s_office`/`mint`), `lenderUsername` (optionnel, pour le
 déplacement).

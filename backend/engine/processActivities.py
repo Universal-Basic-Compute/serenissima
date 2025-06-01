@@ -137,6 +137,7 @@ from backend.engine.activity_processors.adjust_land_lease_price_processor import
 from backend.engine.activity_processors.adjust_building_rent_price_processor import process_adjust_building_rent_price_fn
 from backend.engine.activity_processors.adjust_business_wages_processor import process_adjust_business_wages_fn
 from backend.engine.activity_processors.change_business_manager_processor import process_change_business_manager_fn
+from backend.engine.activity_processors.request_loan_processor import process_request_loan_fn
 # Load environment variables
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
@@ -386,6 +387,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "file_rent_adjustment": process_adjust_building_rent_price_fn, # Final step in adjust_building_rent_price chain
         "update_wage_ledger": process_adjust_business_wages_fn, # Final step in adjust_business_wages chain
         "finalize_operator_change": process_change_business_manager_fn, # Final step in change_business_manager chain
+        "submit_loan_application_form": process_request_loan_fn, # Final step in request_loan chain
     }
 
     tables = initialize_airtable()

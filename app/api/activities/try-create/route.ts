@@ -74,6 +74,17 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log des paramètres spécifiques pour request_loan
+    if (activityType === 'request_loan') {
+      console.log(`[API /activities/try-create] Processing request_loan with parameters:`, 
+        `Amount: ${activityParameters?.amount}`,
+        `Purpose: ${activityParameters?.purpose || 'Unspecified'}`,
+        `Lender: ${activityParameters?.lenderUsername || 'Financial institution'}`,
+        `Target Building: ${activityParameters?.targetBuildingId || 'Nearest financial institution'}`,
+        `Collateral: ${activityParameters?.collateralDetails ? 'Provided' : 'None'}`
+      );
+    }
+    
     // Log des paramètres spécifiques pour initiate_building_project
     if (activityType === 'initiate_building_project') {
       console.log(`[API /activities/try-create] Processing initiate_building_project with parameters:`, 
