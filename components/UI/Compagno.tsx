@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell, FaUser, FaSearch, FaArrowLeft } from 'react-icons/fa';
+import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell, FaUser, FaSearch, FaArrowLeft, FaInfoCircle } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { timeDescriptionService } from '@/lib/services/TimeDescriptionService';
@@ -1449,11 +1449,22 @@ Your response:`;
                 setActiveTab('chats');
                 fetchCitizens();
               }}
-              className={`flex-1 py-2 text-sm font-medium ${
+              className={`flex-1 py-2 text-sm font-medium relative ${ // Added relative for positioning
                 activeTab === 'chats' ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
               }`}
             >
-              Correspondence
+              <div className="flex items-center justify-center"> {/* Flex container for text and icon */}
+                Correspondence
+                <div className="relative group ml-1"> {/* Container for icon and tooltip */}
+                  <FaInfoCircle className="text-amber-500" />
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none">
+                    Instant conversation with citizens less than 100m away. For longer distances, messages must be physically carried.
+                    <svg className="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xmlSpace="preserve">
+                      <polygon className="fill-current" points="0,0 127.5,127.5 255,0"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
               {unreadMessagesCount > 0 && (
                 <span className="absolute top-1 right-2 bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
                   {unreadMessagesCount}
