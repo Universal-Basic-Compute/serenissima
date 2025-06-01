@@ -983,4 +983,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // handleConfirmPurchase is no longer directly used as purchases go through activities.
   // If a confirmation step is needed before calling handleGenericActivity,
   // that logic would be placed before the call.
+  // The existing LandPurchaseConfirmation modal might need to be adapted or removed
+  // if all purchases go through the new activity system.
+  function handleConfirmPurchase(): React.ReactNode {
+    console.log('Direct land purchase confirmation is being phased out. Use activity system.');
+    // This function might be removed or adapted if LandPurchaseConfirmation modal is removed/changed.
+    alert('Land purchases are now handled via the new market activity system.');
+    setIsPurchasing(false);
+    setShowPurchaseConfirmation(false);
+    return null;
+  }
 }
