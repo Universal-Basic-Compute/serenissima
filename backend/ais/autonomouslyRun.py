@@ -362,12 +362,20 @@ def _get_latest_activity_api(citizen_username: str) -> Optional[Dict]:
 def make_api_post_request(endpoint: str, body: Optional[Dict] = None) -> Optional[Dict]:
     """Makes a POST request to the game API with retries."""
     url = f"{API_BASE_URL}{endpoint}"
-    log_body_snippet = json.dumps(body, indent=2)[:200] + "..." if body else "None"
+    # log_body_snippet = json.dumps(body, indent=2)[:200] + "..." if body else "None" # Original snippet logging
+    full_body_log = json.dumps(body, indent=2) if body else "None"
     last_exception = None
 
     for attempt in range(MAX_RETRIES + 1):
         try:
-            log.info(f"{LogColors.OKBLUE}Making API POST request to: {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKBLUE} with body: {log_body_snippet} (Attempt {attempt + 1}/{MAX_RETRIES + 1}){LogColors.ENDC}")
+            # Log the full body if log level is DEBUG or lower, otherwise log a snippet.
+            if log.isEnabledFor(logging.DEBUG):
+                log.info(f"{LogColors.OKBLUE}Making API POST request to: {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKBLUE} with full body (Attempt {attempt + 1}/{MAX_RETRIES + 1}){LogColors.ENDC}")
+                log.debug(f"{LogColors.LIGHTBLUE}POST Body to {url}: {full_body_log}{LogColors.ENDC}")
+            else:
+                log_body_snippet_for_info = json.dumps(body, indent=2)[:200] + "..." if body else "None"
+                log.info(f"{LogColors.OKBLUE}Making API POST request to: {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKBLUE} with body: {log_body_snippet_for_info} (Attempt {attempt + 1}/{MAX_RETRIES + 1}){LogColors.ENDC}")
+
             response = requests.post(url, json=body, timeout=DEFAULT_TIMEOUT_POST)
             response.raise_for_status()
             
