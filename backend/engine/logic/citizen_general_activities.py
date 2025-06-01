@@ -1778,7 +1778,7 @@ def process_citizen_activity(
     citizen_username = citizen_record['fields'].get('Username')
     citizen_airtable_id = citizen_record['id']
     
-    if not citizen_custom_id: log.error(f"Missing CitizenId: {citizen_airtable_id}"); return False
+    if not citizen_custom_id: log.error(f"Missing CitizenId: {citizen_airtable_id}"); return None # Return None
     if not citizen_username: citizen_username = citizen_custom_id # Fallback
 
     citizen_name = f"{citizen_record['fields'].get('FirstName', '')} {citizen_record['fields'].get('LastName', '')}".strip() or citizen_username
