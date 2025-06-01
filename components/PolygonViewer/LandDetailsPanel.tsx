@@ -812,9 +812,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 {selectedPolygon?.historicalDescription && (
                   <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
                     <h3 className="text-sm uppercase font-medium text-amber-600 mb-1">Description</h3>
-                    <p className="text-xs text-gray-700 leading-relaxed custom-scrollbar max-h-24 overflow-y-auto">
+                    <div className="text-xs text-gray-700 leading-relaxed custom-scrollbar max-h-24 overflow-y-auto">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedPolygon.historicalDescription}</ReactMarkdown>
-                    </p>
+                    </div>
                   </div>
                 )}
               </>
