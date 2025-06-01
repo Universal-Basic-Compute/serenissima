@@ -137,12 +137,12 @@ Here are the types of problems currently managed by the system:
 
 ### 12. Unchecked Business Operation
 
--   **Description**: A business building's `CheckedAt` timestamp has not been updated in the last 24 hours. This indicates a lack of simulated active management by its operator (`RunBy`).
+-   **Description**: A business building's `CheckedAt` timestamp has not been updated in the last 24 hours. This indicates a lack of simulated active management by its operator (`RunBy`). The `CheckedAt` field is automatically updated when the `RunBy` citizen performs certain activities related to the business, such as arriving at work (via `goto_work`), initiating a `production` cycle, or potentially through a dedicated `check_business_status` activity if implemented.
 -   **Detection**: The system checks business category buildings for their `CheckedAt` timestamp. If this timestamp is older than 24 hours, a problem is generated for the `RunBy` citizen.
 -   **Impact/Severity**: Medium. A business deemed "unchecked" (due to lack of recent `RunBy` activity updating `CheckedAt`) suffers a 50% reduction in its overall productivity until its `CheckedAt` timestamp is updated again.
 -   **Suggested Solutions**:
     -   Ensure the `RunBy` citizen is actively engaged with the business. Their routine activities (like arriving at work, initiating production) should automatically update the `CheckedAt` timestamp.
-    -   If the `RunBy` citizen is unable to perform their duties (e.g., stuck, missing, lacking resources for activities), address those underlying issues.
+    -   If the `RunBy` citizen is unable to perform their duties (e.g., stuck, missing, lacking resources for activities that would update `CheckedAt`), address those underlying issues.
     -   Verify that the `RunBy` citizen is correctly assigned and present in Venice if required for their role.
     -   This problem highlights a lapse in the simulated operational oversight necessary for full productivity.
 

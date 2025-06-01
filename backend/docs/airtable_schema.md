@@ -55,7 +55,7 @@ Contient les informations sur tous les citoyens (IA et humains).
 
 Contient les informations sur tous les bâtiments.
 
--   `BuildingId` (Texte): Identifiant personnalisé unique (souvent dérivé de `Point` ou `Type_lat_lng`).
+-   `BuildingId` (Texte): Identifiant personnalisé unique (souvent dérivé de `Point` ou `Type_lat_lng`). Pour `merchant_galley`, cet ID est temporaire et le bâtiment est supprimé après le départ du marchand.
 -   `Name` (Texte): Nom descriptif du bâtiment (ex: "Atelier de Tisserand à Rio Terà dei Assassini"). Calculé à la création.
 -   `Type` (Texte): Type de bâtiment (ex: `canal_house`, `armory`, `merchant_galley`). Le nom lisible du bâtiment est généralement dérivé de ce champ par le client (ex: "Canal House") ou de la définition du type de bâtiment.
 -   `Category` (Texte): Catégorie du bâtiment (ex: `home`, `business`, `transport`).
