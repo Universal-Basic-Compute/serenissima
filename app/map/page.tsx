@@ -20,10 +20,11 @@ const mapContainerStyle = {
 
 // Polygon styling options
 const polygonOptions = {
-  fillColor: '#3388ff',
-  fillOpacity: 0.3,
-  strokeWeight: 2,
-  strokeColor: '#3388ff',
+  fillColor: '#FFF5D0', // Sand color like on the main page during the day
+  fillOpacity: 0.6,
+  strokeWeight: 1,      // Black stroke, 1px weight like on the main page
+  strokeColor: '#000000',
+  strokeOpacity: 0.8,
   editable: true,
   draggable: true
 };
@@ -328,11 +329,11 @@ export default function MapPage() {
             
             const mapPolygon = new google.maps.Polygon({
               paths: path,
-              strokeColor: '#3388ff',
+              strokeColor: '#000000', // Black stroke
               strokeOpacity: 0.8,
-              strokeWeight: 2,
-              fillColor: '#3388ff',
-              fillOpacity: 0.35,
+              strokeWeight: 1,        // 1px weight
+              fillColor: '#FFF5D0',   // Sand color
+              fillOpacity: 0.6,       // Adjusted opacity for lighter color
               map: mapRef.current
             });
             
