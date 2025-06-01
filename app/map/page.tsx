@@ -46,7 +46,8 @@ export default function MapPage() {
   const mapRef = useRef<google.maps.Map | null>(null);
   const drawingManagerRef = useRef<google.maps.drawing.DrawingManager | null>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
-  const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({});
+  const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({}); // State for data, not direct map objects for clearing
+  const drawnMapPolygonsRef = useRef<google.maps.Polygon[]>([]); // Ref to hold actual google.maps.Polygon objects
   const [centroidMarkers, setCentroidMarkers] = useState<{[id: string]: google.maps.Marker}>({});
   const [isDraggingCentroid, setIsDraggingCentroid] = useState(false);
   const [centroidDragMode, setCentroidDragMode] = useState(false);
@@ -283,6 +284,12 @@ export default function MapPage() {
   const onMapLoad = (map: google.maps.Map) => {
     console.log('Map loaded');
     mapRef.current = map;
+
+    // If Google API is already loaded by the time map is ready, load polygons.
+    if (isGoogleLoaded) {
+      console.log('onMapLoad: Google API already loaded, calling loadPolygonsOnMap.');
+      loadPolygonsOnMap();
+    }
     
     // Remove any existing click listeners to avoid duplicates
     google.maps.event.clearListeners(map, 'click');
@@ -311,15 +318,17 @@ export default function MapPage() {
   
   // Add a function to load polygons onto the map
   const loadPolygonsOnMap = useCallback(() => {
-    if (!mapRef.current || !isGoogleLoaded) return;
-    
-    // Clear existing polygons
-    Object.values(activeLandPolygons).forEach(polygon => {
-      polygon.setMap(null);
-    });
-    
-    // Reset active polygons
-    const newActiveLandPolygons: Record<string, google.maps.Polygon> = {};
+    if (!mapRef.current || !isGoogleLoaded) {
+      console.log('loadPolygonsOnMap: Aborted. mapRef.current:', !!mapRef.current, 'isGoogleLoaded:', isGoogleLoaded);
+      return;
+    }
+    console.log('loadPolygonsOnMap: Executing.');
+
+    // Clear existing polygons from the map using the ref
+    drawnMapPolygonsRef.current.forEach(p => p.setMap(null));
+    drawnMapPolygonsRef.current = []; // Reset the ref array
+
+    const newActivePolygonsState: Record<string, google.maps.Polygon> = {}; // For React state update
     
     // Fetch polygons from API
     fetch('/api/get-polygons')
@@ -342,8 +351,9 @@ export default function MapPage() {
               map: mapRef.current
             });
             
-            // Store reference to polygon
-            newActiveLandPolygons[polygon.id] = mapPolygon;
+            // Store reference to polygon for state, and in ref for direct manipulation
+            drawnMapPolygonsRef.current.push(mapPolygon);
+            newActivePolygonsState[polygon.id] = mapPolygon;
 
             // Add click listener to this mapPolygon
             mapPolygon.addListener('click', () => {
@@ -357,19 +367,25 @@ export default function MapPage() {
           }
         });
         
-        setActiveLandPolygons(newActiveLandPolygons);
+        setActiveLandPolygons(newActivePolygonsState);
+        console.log(`loadPolygonsOnMap: ${Object.keys(newActivePolygonsState).length} polygons set to state and map.`);
       })
       .catch(error => {
-        console.error('Error loading polygons:', error);
+        console.error('loadPolygonsOnMap: Error fetching or processing polygons:', error);
       });
-  }, [isGoogleLoaded]);
+  }, [isGoogleLoaded, setActiveLandPolygons, setSelectedMapPolygonData, setShowMapPolygonDisplayPanel]);
   
   // Add useEffect to load polygons when map is ready
   useEffect(() => {
-    if (mapRef.current && isGoogleLoaded) {
+    console.log('MapPage: useEffect for loading polygons triggered by isGoogleLoaded/loadPolygonsOnMap change.', { isGoogleLoaded, hasMapRef: !!mapRef.current });
+    // This effect runs when isGoogleLoaded becomes true.
+    // If map is already loaded by then, loadPolygonsOnMap will execute.
+    // If map is not yet loaded, onMapLoad will call loadPolygonsOnMap when map becomes ready.
+    if (isGoogleLoaded && mapRef.current) {
+      console.log('MapPage: Conditions met (isGoogleLoaded=true, mapRef exists), calling loadPolygonsOnMap.');
       loadPolygonsOnMap();
     }
-  }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap]); // centroidDragMode retiré des dépendances
+  }, [isGoogleLoaded, loadPolygonsOnMap]); // mapRef.current is not a direct dependency here.
   
   
   // Function to load WaterPoints
