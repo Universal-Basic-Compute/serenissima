@@ -1514,295 +1514,53 @@ Your response must be a JSON object with:
                                     log_error(f"Citizen {ai_username} does not have enough ducats to build {building_type}. Required: {construction_cost}, Available: {citizen_ducats}")
                                     return False
                                 
-                                # 3. Transfer ducats from citizen to ConsiglioDeiDieci
-                                # Find ConsiglioDeiDieci record
-                                consiglio_records = tables["citizens"].all(formula="{Username}='ConsiglioDeiDieci'")
-                                if not consiglio_records:
-                                    print("ConsiglioDeiDieci account not found, cannot transfer ducats")
-                                    return False
-                                
-                                consiglio_record = consiglio_records[0]
-                                consiglio_ducats = consiglio_record["fields"].get("Ducats", 0)
-                                log_info(f"ConsiglioDeiDieci has {consiglio_ducats} ducats before transfer")
-                                
-                                # Look up the citizen's record ID from Airtable using Username
-                                citizen_records = tables["citizens"].all(formula=f"{{Username}}='{ai_username}'")
-                                if not citizen_records:
-                                    log_error(f"Could not find Airtable record for citizen {ai_username}")
-                                    return False
-                                
-                                citizen_airtable_id = citizen_records[0]["id"]
-                                log_info(f"Found Airtable record ID for {ai_username}: {citizen_airtable_id}")
-                                
-                                # Update citizen's ducats using the Airtable record ID
-                                log_info(f"Updating {ai_username}'s ducats from {citizen_ducats} to {citizen_ducats - construction_cost}")
-                                tables["citizens"].update(citizen_airtable_id, {
-                                    "Ducats": citizen_ducats - construction_cost
-                                })
-                                
-                                # Get ConsiglioDeiDieci's Airtable record ID
-                                consiglio_airtable_id = consiglio_record["id"]
-                                log_info(f"Found Airtable record ID for ConsiglioDeiDieci: {consiglio_airtable_id}")
-                                
-                                # Update ConsiglioDeiDieci's ducats
-                                log_info(f"Updating ConsiglioDeiDieci's ducats from {consiglio_ducats} to {consiglio_ducats + construction_cost}")
-                                tables["citizens"].update(consiglio_airtable_id, {
-                                    "Ducats": consiglio_ducats + construction_cost
-                                })
-                                
-                                # 4. Create the building record
-                                # Generate a point ID if not present
+                                # Instead of direct creation, initiate the 'initiate_building_project' activity
                                 point_id = selected_point.get("id", f"point-{selected_point['lat']}-{selected_point['lng']}")
-                                # The BuildingId will now be the point_id
-                                building_id = point_id
                                 
-                                # Create a transaction record for the payment
-                                try:
-                                    # Get the API key and base ID from environment variables
-                                    airtable_api_key = os.getenv("AIRTABLE_API_KEY")
-                                    airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
-                                    
-                                    # Create the transactions table directly
-                                    transactions_table = Table(airtable_api_key, airtable_base_id, "TRANSACTIONS")
-                                    
-                                    # VENICE_TIMEZONE should be imported if not already
-                                    # from backend.engine.utils.activity_helpers import VENICE_TIMEZONE
-                                    transaction_record = {
-                                        "Type": "building_construction",
-                                        "Asset": building_id, # Use point_id as BuildingId for Asset
-                                        "Seller": "ConsiglioDeiDieci",
-                                        "Buyer": ai_username,
-                                        "Price": construction_cost,
-                                        "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
-                                        "ExecutedAt": datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
-                                        "Notes": f"Payment for {building_type} construction"
-                                    }
-                                    
-                                    transactions_table.create(transaction_record)
-                                    log_success(f"Created transaction record for {construction_cost} ducats payment from {ai_username} to ConsiglioDeiDieci")
-                                except Exception as transaction_error:
-                                    log_error(f"Error creating transaction record: {str(transaction_error)}")
-                                    # Continue even if transaction record creation fails
-                                
-                                log_success(f"Transferred {construction_cost} ducats from {ai_username} to ConsiglioDeiDieci")
-                                
-                                # Get the category from building type info
-                                # Default to "business" if category is not specified in the API response
-                                building_category = building_type_info.get("category", "unknown")
-
-                                # Construct the building Name
-                                building_type_name_for_computed_name = building_type_info.get('name', building_type) # Fallback to type if name missing
-                                
-                                location_name_for_building = "Unknown Location"
-                                if selected_point:
-                                    point_type = selected_point.get("point_type") # This was added in get_available_building_points
-                                    if point_type == "land": # Corresponds to buildingPoints
-                                        location_name_for_building = selected_point.get("streetName", "Unknown Street")
-                                    elif point_type == "canal" or point_type == "bridge": # Corresponds to canalPoints or bridgePoints
-                                        # For canal/bridge points, the 'name' might be in 'historicalName' or 'englishName' directly on the point object
-                                        # or within a 'connection' object for bridges.
-                                        # The 'selected_point' structure for canal/bridge points in available_points
-                                        # already has 'id', 'lat', 'lng', 'polygon_id', 'point_type'.
-                                        # We need to ensure the original point data from get-polygons (which has historicalName) is accessible
-                                        # or that historicalName was copied to selected_point.
-                                        # Assuming selected_point (which is an item from candidate_points_on_land)
-                                        # might have historicalName directly if it was a canal/bridge point.
-                                        # Let's check the structure of `candidate_points_on_land` items.
-                                        # The `get_available_building_points` function creates points like:
-                                        # {"lat": ..., "lng": ..., "polygon_id": ..., "point_type": "canal", "id": ...}
-                                        # It does NOT currently copy historicalName.
-                                        # We need to find the original point from polygon_data to get historicalName.
-                                        
-                                        original_point_data = None
-                                        chosen_land_polygon_info = polygon_data[0] if polygon_data else {}
-                                        
-                                        if point_type == "canal":
-                                            canal_points_on_land = chosen_land_polygon_info.get('canalPoints', [])
-                                            original_point_data = next((cp for cp in canal_points_on_land if cp.get('id') == selected_point.get('id')), None)
-                                        elif point_type == "bridge":
-                                            bridge_points_on_land = chosen_land_polygon_info.get('bridgePoints', [])
-                                            original_point_data = next((bp for bp in bridge_points_on_land if bp.get('id') == selected_point.get('id')), None)
-                                            if original_point_data and 'connection' in original_point_data and isinstance(original_point_data['connection'], dict):
-                                                location_name_for_building = original_point_data['connection'].get("historicalName") or original_point_data['connection'].get("englishName", "Unnamed Bridge")
-                                            elif original_point_data: # Fallback if connection object is missing/malformed but point exists
-                                                location_name_for_building = original_point_data.get("id", "Unnamed Bridge")
-                                            # else original_point_data is None, location_name_for_building remains "Unknown Location" or previous value
-                                        
-                                        # This 'if' was for canal or bridge, now bridge has its own logic above.
-                                        # For canal points, the original logic is fine.
-                                        if point_type == "canal":
-                                            if original_point_data: # original_point_data would be for canal here
-                                                location_name_for_building = original_point_data.get("historicalName") or original_point_data.get("englishName", "Unnamed Waterway")
-                                            # else: location_name_for_building remains "Unknown Location" or previous value if original_point_data is None
-
-                                        if not original_point_data: # Fallback if original point data not found for either canal or bridge
-                                            location_name_for_building = selected_point.get("id", "Unnamed Location") # Use point ID as last resort
-                                    else: # Default or unknown point_type (e.g. "land")
-                                        location_name_for_building = selected_point.get("streetName") or selected_point.get("id", "Unknown Area")
-                                else: # selected_point is None
-                                     chosen_land_polygon_info = polygon_data[0] if polygon_data else {}
-                                     location_name_for_building = chosen_land_polygon_info.get('name', 'Unknown Location')
-                                
-                                if building_type == "merchant_galley":
-                                    # ai_username is the RunBy for newly created galleys by this script
-                                    # Fetch citizen record to get FirstName and LastName
-                                    # ai_citizen_record is the record of the AI building the galley
-                                    ai_first_name = ai_citizen_record["fields"].get("FirstName", "")
-                                    ai_last_name = ai_citizen_record["fields"].get("LastName", "")
-                                    operator_display_name = f"{ai_first_name} {ai_last_name}".strip()
-                                    if not operator_display_name: # Fallback if names are empty
-                                        operator_display_name = ai_username
-                                    computed_building_name = f"Merchant Galley run by {operator_display_name}"
-                                else:
-                                    computed_building_name = f"{building_type_name_for_computed_name} at {location_name_for_building}"
-                                
-                                # Create the building record
-                                position_coordinates = {"lat": selected_point["lat"], "lng": selected_point["lng"]}
-                                position_json_string = json.dumps(position_coordinates)
-
-                                building_record = {
-                                    "BuildingId": building_id, # This is now point_id
-                                    "Name": computed_building_name, # Added computed Name
-                                    "Type": building_type,
-                                    "LandId": land_id,
-                                    "LeasePrice": 0,
-                                    "Variant": "model",
-                                    "Owner": ai_username,
-                                    "RunBy": ai_username, # Set RunBy to Owner
-                                    "IsConstructed": False, # Set IsConstructed to False for new constructions
-                                    "ConstructionDate": None, # Will be set upon completion
-                                    "ConstructionMinutesRemaining": building_type_info.get("constructionMinutes", 1440), # Default 1 day
-                                    "Point": point_id, 
-                                    "Position": position_json_string, 
-                                    "Category": building_category,
-                                    "Notes": f"Building {building_type} awaiting construction by AI {ai_username} on {land_id}.",
-                                    "RentPrice": 0,
-                                    "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat() # Use VENICE_TIMEZONE
-                                }
-                                
-                                log_data("Creating building record (pending construction)", building_record)
-                                
-                                # Add the building to Airtable
-                                try:
-                                    new_building_airtable_record = tables["buildings"].create(building_record)
-                                    log_success(f"Created new building record (pending construction): {building_id} of type {building_type} for {ai_username} on land {land_id}")
-                                    log_info(f"Building Airtable record ID: {new_building_airtable_record['id']}")
-
-                                    # Create a construction_project contract
-                                    # Find a construction workshop to assign as Seller
-                                    # This is a simplified selection logic. Could be more sophisticated.
-                                    construction_workshops = tables["buildings"].all(formula="AND({SubCategory}='construction', {IsConstructed}=TRUE())")
-                                    selected_workshop_record = None
-                                    if construction_workshops:
-                                        # Prioritize workshops run by the AI itself, then others.
-                                        ai_owned_workshops = [w for w in construction_workshops if w['fields'].get('RunBy') == ai_username]
-                                        if ai_owned_workshops:
-                                            selected_workshop_record = random.choice(ai_owned_workshops)
-                                        else:
-                                            selected_workshop_record = random.choice(construction_workshops)
-                                    
-                                    if selected_workshop_record:
-                                        seller_building_id = selected_workshop_record['fields'].get('BuildingId')
-                                        seller_username = selected_workshop_record['fields'].get('RunBy') or selected_workshop_record['fields'].get('Owner')
-
-                                        if seller_building_id and seller_username:
-                                            contracts_table = tables.get("contracts") # Ensure contracts table is available
-                                            if contracts_table:
-                                                # Prepare constructionCosts for notes
-                                                construction_costs_for_notes = building_type_info.get('constructionCosts', {})
-                                                notes_payload = {
-                                                    "constructionCosts": construction_costs_for_notes,
-                                                    "originalRequest": f"AI {ai_username} building {building_type} on {land_id}"
-                                                }
-                                                contract_payload = {
-                                                    "ContractId": f"construct-{building_id}-{seller_building_id.replace('_','-')}",
-                                                    "Type": "construction_project",
-                                                    "Buyer": ai_username, # Owner of the building to be constructed
-                                                    "Seller": seller_username, # Operator of the construction workshop
-                                                    "BuyerBuilding": building_id, # The building being constructed
-                                                    "SellerBuilding": seller_building_id, # The workshop
-                                                    "Status": "pending_materials",
-                                                    "Notes": json.dumps(notes_payload), # Store constructionCosts in Notes
-                                                    "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
-                                                    "EndAt": (datetime.now(VENICE_TIMEZONE) + timedelta(days=90)).isoformat() # Use VENICE_TIMEZONE
-                                                }
-                                                contracts_table.create(contract_payload)
-                                                log_success(f"Created construction_project contract for {building_id} assigned to workshop {seller_building_id} (Op: {seller_username}).")
-                                            else:
-                                                log_error("Contracts table not initialized. Cannot create construction_project contract.")
-                                        else:
-                                            log_error(f"Selected workshop {selected_workshop_record['id']} missing BuildingId or Operator. Cannot create construction_project contract.")
+                                # Determine builder details (simplified logic from original script)
+                                builder_username = None
+                                construction_workshops = tables["buildings"].all(formula="AND({SubCategory}='construction', {IsConstructed}=TRUE())")
+                                selected_workshop_record = None
+                                if construction_workshops:
+                                    ai_owned_workshops = [w for w in construction_workshops if w['fields'].get('RunBy') == ai_username]
+                                    if ai_owned_workshops:
+                                        selected_workshop_record = random.choice(ai_owned_workshops)
                                     else:
-                                        log_error("No available construction workshops found. Cannot create construction_project contract.")
+                                        selected_workshop_record = random.choice(construction_workshops)
+                                if selected_workshop_record:
+                                    builder_username = selected_workshop_record['fields'].get('RunBy') or selected_workshop_record['fields'].get('Owner')
 
-                                except Exception as building_error:
-                                    log_error(f"Error creating building record or construction contract: {str(building_error)}")
-                                    log_error(f"Exception traceback: {traceback.format_exc()}")
-                                    return False
-                                
-                                # 5. Create a notification for the citizen
-                                notification_content_citizen = f"🏗️ Construction Started: You have initiated construction of a **{building_type_info['name']}** on your land **{land_id}** for **{construction_cost} ⚜️ Ducats**. It is awaiting materials and construction."
-                                notification_citizen = {
-                                    "Citizen": ai_username,
-                                    "Type": "building_construction_started", # More specific type
-                                    "Content": notification_content_citizen,
-                                    "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
-                                    "ReadAt": None,
-                                    "Details": json.dumps({
-                                        "building_id": building_id,
-                                        "building_name": computed_building_name,
-                                        "building_type": building_type,
-                                        "land_id": land_id,
-                                        "cost": construction_cost,
-                                        "position": {
-                                            "lat": selected_point["lat"],
-                                            "lng": selected_point["lng"]
-                                        }
-                                    })
+                                activity_params = {
+                                    "landId": land_id,
+                                    "buildingTypeDefinition": building_type, # Pass the string type
+                                    "pointDetails": {
+                                        "pointId": point_id,
+                                        "lat": selected_point["lat"],
+                                        "lng": selected_point["lng"]
+                                    }
                                 }
+                                if builder_username:
+                                    activity_params["builderContractDetails"] = {
+                                        "builderUsername": builder_username,
+                                        "contractValue": construction_cost # Pass the ducats cost as contract value
+                                    }
                                 
-                                try:
-                                    tables["notifications"].create(notification_citizen)
-                                    log_success(f"📬 Created notification for {ai_username} about new building construction started.")
-                                except Exception as notification_error:
-                                    log_error(f"Error creating notification for {ai_username}: {str(notification_error)}")
+                                # The dry_run status for call_try_create_activity_api should come from the main script's dry_run flag
+                                # Assuming send_building_placement_request is called with a dry_run parameter
+                                # For now, let's assume the main dry_run flag is accessible or passed down.
+                                # If this function is called within a non-dry_run block of the main script, this will be False.
+                                main_dry_run_flag = "dry_run" in globals() and globals()["dry_run"] # Check if global dry_run exists
                                 
-                                # 6. Create a notification for the land owner if different from the building owner
-                                if land_id and ai_username:
-                                    land_owner = None
-                                    land_records = tables["lands"].all(formula=f"{{LandId}} = '{_escape_airtable_value(land_id)}'")
-                                    if land_records:
-                                        land_owner = land_records[0]["fields"].get("Owner")
-                                    
-                                    if land_owner and land_owner != ai_username:
-                                        notification_content_land_owner = f"🏗️ New Construction on Your Land: **{ai_username}** has started building a **{building_type_info['name']}** (Building ID: {building_id}) on your land **{land_id}**."
-                                        # Removed "Please set a wage" as it might not always be applicable or is handled elsewhere.
-                                        land_owner_notification = {
-                                            "Citizen": land_owner,
-                                            "Type": "building_on_owned_land", # More specific type
-                                            "Content": notification_content_land_owner,
-                                            "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
-                                            "ReadAt": None,
-                                            "Details": json.dumps({
-                                                "building_id": building_id,
-                                                "building_name": computed_building_name,
-                                                "building_type": building_type,
-                                                "land_id": land_id,
-                                                "builder_owner": ai_username # Citizen who owns/initiated the building
-                                            })
-                                        }
-                                        
-                                        try:
-                                            tables["notifications"].create(land_owner_notification)
-                                            log_success(f"📬 Created notification for land owner {land_owner} about new building on their land.")
-                                        except Exception as notification_error:
-                                            log_error(f"Error creating notification for land owner {land_owner}: {str(notification_error)}")
-                                            # Continue even if notification creation fails
-                                
-                                return True
-                            # else: # This 'else' corresponds to 'if selected_point:'
-                            #     log_error(f"Failed to select a valid point for building. AI choice was invalid and no random alternative found.")
-                            #     return False # Should be caught by earlier checks if points_of_expected_type_on_land was empty
+                                if call_try_create_activity_api(ai_username, "initiate_building_project", activity_params, main_dry_run_flag, log):
+                                    log_success(f"Successfully initiated 'initiate_building_project' activity for {ai_username} to build {building_type} on {land_id} at point {point_id}.")
+                                    # Notifications and ducat transfers will be handled by the activity processor.
+                                    return True
+                                else:
+                                    log_error(f"Failed to initiate 'initiate_building_project' activity for {ai_username}.")
+                                    return False
+                            else:
+                                log_error(f"Failed to select a valid point for building. AI choice was invalid and no random alternative found.")
+                                return False
                         else:
                             log_error(f"No 'selected_point_index' in AI placement decision for {ai_username}.")
                     else:
@@ -2058,6 +1816,48 @@ def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: 
     log_table(headers, rows)
     
     log_success("AI building strategy process completed")
+
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool,
+    log_ref: Any # Pass the script's logger (using global log here)
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    # API_BASE_URL is defined globally in this script as BASE_URL
+    if dry_run:
+        log_ref.info(f"{Fore.YELLOW}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{Style.RESET_ALL}")
+        return True # Simulate success for dry run
+
+    api_url = f"{BASE_URL}/api/activities/try-create"
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            log_ref.info(f"{Fore.GREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{Style.RESET_ALL}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 log_ref.info(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            log_ref.error(f"{Fore.RED}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{Style.RESET_ALL}")
+            return False
+    except requests.exceptions.RequestException as e:
+        log_ref.error(f"{Fore.RED}API request failed for activity '{activity_type}' for {citizen_username}: {e}{Style.RESET_ALL}")
+        return False
+    except json.JSONDecodeError:
+        log_ref.error(f"{Fore.RED}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{Style.RESET_ALL}")
+        return False
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AI Building Strategy Script")
