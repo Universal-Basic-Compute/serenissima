@@ -1068,7 +1068,7 @@ Your response:`;
             <img
               src={`/images/${citizen.socialClass.toLowerCase()}.png`}
               alt={citizen.socialClass}
-              className="w-8 h-8 mr-3 rounded-sm object-contain" // Ajustez la taille et le style au besoin
+              className="w-12 h-12 mr-3 rounded-sm object-contain" // Taille augmentée de w-8 h-8 à w-12 h-12
               onError={(e) => {
                 // Fallback si l'image spécifique à la classe sociale n'est pas trouvée
                 (e.target as HTMLImageElement).style.display = 'none'; 
