@@ -1780,6 +1780,8 @@ number => {
   useEffect(() => {
     if (!polygons || polygons.length === 0) return;
     
+    console.log('Starting to preload land images for', polygons.length, 'polygons');
+    
     // Initialize with empty object to ensure landImages is defined
     setLandImages({});
     
@@ -1800,6 +1802,8 @@ number => {
       return;
     }
     
+    console.log(`Attempting to load ${totalPolygons} land images`);
+    
     // Use a safer approach with for loop instead of forEach
     for (let i = 0; i < polygons.length; i++) {
       const polygon = polygons[i];
@@ -1809,6 +1813,7 @@ number => {
         const img = new Image();
         const handleLoad = () => {
           try {
+            console.log(`Successfully loaded image for polygon ${polygon.id}`);
             newLandImages[polygon.id] = img;
             loadedCount++;
             if (loadedCount === totalPolygons) {
@@ -1823,6 +1828,7 @@ number => {
         
         const handleError = () => {
           try {
+            console.warn(`Failed to load image for polygon ${polygon.id}`);
             loadedCount++;
             if (loadedCount === totalPolygons) {
               console.log(`Loaded ${Object.keys(newLandImages).length} land images (${loadedCount - Object.keys(newLandImages).length} failed)`);
@@ -1835,6 +1841,7 @@ number => {
         
         img.onload = handleLoad;
         img.onerror = handleError;
+        img.crossOrigin = "anonymous"; // Add cross-origin attribute to prevent CORS issues
         img.src = `/images/lands/${polygon.id}.png`;
       } catch (error) {
         console.error(`Error loading image for polygon ${polygon.id}:`, error);
@@ -2921,7 +2928,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     // Don't try to load images directly in the render loop - use preloaded images only
     // The preloaded images are handled in the next section
     
-    // Draw land images first
+    // Draw land images first - this is the first pass to ensure they're drawn under everything else
     if (typeof landImages !== 'undefined' && landImages && Object.keys(landImages).length > 0) {
       for (let i = 0; i < polygonsToRender.length; i++) {
         const { polygon, coords, centerX, centerY } = polygonsToRender[i];
@@ -2933,7 +2940,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
         if (img) {
           try {
             // Calculate image size based on polygon size
-            const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
+            const size = Math.min(300, Math.max(150, Math.floor(scale * 80))); // Increased size for better visibility
             
             // Draw the image centered on the polygon
             ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
@@ -2955,28 +2962,8 @@ const darkenColor = (colorStr: string, percent: number): string => {
       strokeOpacity: 0.5 // Keep borders visible but more subtle
     });
     
-    // Draw land images using preloaded images
-    if (typeof landImages !== 'undefined' && landImages && Object.keys(landImages).length > 0) {
-      for (let i = 0; i < polygonsToRender.length; i++) {
-        const { polygon, coords, centerX, centerY } = polygonsToRender[i];
-        // Skip if no coordinates or no polygon ID
-        if (!coords || coords.length < 3 || !polygon || !polygon.id) continue;
-        
-        // Get the preloaded image
-        const img = landImages[polygon.id];
-        if (img && img.complete && img.naturalWidth !== 0) {
-          try {
-            // Calculate image size based on polygon size
-            const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
-            
-            // Draw the image centered on the polygon
-            ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
-          } catch (error) {
-            console.error(`Error drawing image for polygon ${polygon.id}:`, error);
-          }
-        }
-      }
-    }
+    // We don't need to draw land images twice - the first pass above is sufficient
+    // This second pass is removed to avoid drawing the images twice
 
     // Second pass: Draw all polygon names (only in land view)
     // This is drawn on top of the polygons rendered by renderService.drawPolygons

@@ -635,6 +635,11 @@ export class RenderService {
         ctx.globalAlpha = options.strokeOpacity;
       }
       
+      // Draw the stroke
+      ctx.strokeStyle = isSelected ? '#FFD700' : isHovered ? '#FFFFFF' : '#000000';
+      ctx.lineWidth = isSelected ? 3 : isHovered ? 2 : 1;
+      ctx.stroke();
+      
       // Restore original global alpha
       ctx.globalAlpha = currentGlobalAlpha;
     });
