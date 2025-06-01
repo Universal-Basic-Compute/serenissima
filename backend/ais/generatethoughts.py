@@ -20,6 +20,7 @@ from typing import Dict, List, Optional, Any
 import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Base, Table
+from urllib3.util.retry import Retry # Added import for Retry
 
 # Add project root to sys.path
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -63,7 +64,14 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
         log.error(f"{LogColors.FAIL}Airtable credentials not found in environment variables.{LogColors.ENDC}")
         return None
     try:
-        api = Api(airtable_api_key)
+        # Configure a custom retry strategy
+        retry_strategy = Retry(
+            total=5,
+            backoff_factor=0.5,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["HEAD", "GET", "PUT", "DELETE", "OPTIONS", "TRACE", "POST"]
+        )
+        api = Api(airtable_api_key, retry_strategy=retry_strategy)
         base = Base(api, airtable_base_id)
         tables = {
             "citizens": base.table("CITIZENS"),

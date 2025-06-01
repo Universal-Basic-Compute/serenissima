@@ -39,6 +39,7 @@ import random # Added for selecting random building point
 from collections import defaultdict
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
+from urllib3.util.retry import Retry # Added import for Retry
 
 # Import activity creators
 from backend.engine.activity_creators import (
@@ -128,7 +129,14 @@ def initialize_airtable():
         # custom_session = requests.Session() # Removed custom session creation
         # custom_session.trust_env = False    # Removed custom session configuration
 
-        api = Api(api_key) # Instantiate Api, let it create and manage its own session
+        # Configure a custom retry strategy
+        retry_strategy = Retry(
+            total=5,  # Total number of retries
+            backoff_factor=0.5,  # Base for exponential backoff (e.g., 0.5s, 1s, 2s, 4s)
+            status_forcelist=[429, 500, 502, 503, 504],  # Status codes to retry on
+            allowed_methods=["HEAD", "GET", "PUT", "DELETE", "OPTIONS", "TRACE", "POST"] # Ensure POST is retried
+        )
+        api = Api(api_key, retry_strategy=retry_strategy) # Instantiate Api with custom retry strategy
         # api.session = custom_session # Removed custom session assignment
 
         # Construct Table instances using api.table()
