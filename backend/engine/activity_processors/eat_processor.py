@@ -102,135 +102,23 @@ def process_eat_from_inventory(
                 return _update_citizen_ate_at(tables, citizen_record['id'], now_iso)
             else:
                 log.warning(f"Not enough {food_resource_type_to_eat} ({current_inventory_amount}) in {citizen_username}'s inventory to eat {amount_to_eat}.")
+                return False
         else:
             log.warning(f"Food {food_resource_type_to_eat} not found in {citizen_username}'s inventory for activity {activity_guid}.")
+            return False
     
     except Exception as e_inv:
         log.error(f"Error processing 'eat_from_inventory' (inventory check) for {citizen_username} ({activity_guid}): {e_inv}")
-        # Fall through to check current location if inventory check fails unexpectedly
+        return False
 
-    # If specific food not found/sufficient in inventory, try to buy ANY food at current location
-    log.info(f"Food {food_resource_type_to_eat} not eaten from inventory. Checking current location for {citizen_username} to buy food.")
+    # Note: In the new architecture, we don't attempt to buy food at current location if inventory check fails.
+    # This should be handled by a separate activity created by an activity creator, not by this processor.
+    # The following code is removed as it creates a follow-up activity logic within the processor.
     
-    citizen_pos_str = citizen_record['fields'].get('Position')
-    if not citizen_pos_str:
-        log.warning(f"Citizen {citizen_username} has no position. Cannot check current building for food.")
-        return False
-    try:
-        citizen_position = json.loads(citizen_pos_str)
-    except json.JSONDecodeError:
-        log.warning(f"Could not parse citizen {citizen_username} position: {citizen_pos_str}")
-        return False
-
-    from backend.engine.utils.activity_helpers import get_closest_building_to_position # Local import
-    current_building_record = get_closest_building_to_position(tables, citizen_position, max_distance_meters=20)
-
-    if not current_building_record:
-        log.info(f"Citizen {citizen_username} is not currently at a known building. Cannot buy food.")
-        return False
-
-    current_building_id = current_building_record['fields'].get('BuildingId')
-    current_building_type = current_building_record['fields'].get('Type')
-    current_building_subcategory = current_building_record['fields'].get('SubCategory')
-    building_name_display = current_building_record['fields'].get('Name', current_building_id)
-
-    if not (current_building_type == 'tavern' or current_building_subcategory == 'retail_food'):
-        log.info(f"Citizen {citizen_username} is at {building_name_display} (Type: {current_building_type}, SubCat: {current_building_subcategory}), which does not sell food.")
-        return False
-
-    log.info(f"Citizen {citizen_username} is at {building_name_display}. Checking for available food to purchase.")
-
-    # Find cheapest available food at this location
-    cheapest_food_deal = None
-    min_price = float('inf')
-
-    # FOOD_RESOURCE_TYPES_FOR_EATING needs to be defined or imported
-    # For now, let's define it locally if not already.
-    # It's better to pass it or import from a shared constants module.
-    FOOD_RESOURCE_TYPES_FOR_EATING_LOCAL = ["bread", "fish", "preserved_fish", "fruit", "vegetables", "cheese", "olive_oil", "wine"]
-
-    for food_type_id_check in FOOD_RESOURCE_TYPES_FOR_EATING_LOCAL:
-        formula_food_contract = (
-            f"AND({{Type}}='public_sell', {{SellerBuilding}}='{_escape_airtable_value(current_building_id)}', "
-            f"{{ResourceType}}='{_escape_airtable_value(food_type_id_check)}', {{TargetAmount}}>0, "
-            f"{{EndAt}}>'{now_iso}', {{CreatedAt}}<='{now_iso}' )" # Use now_iso (Venice time)
-        )
-        try:
-            food_contracts = tables['contracts'].all(formula=formula_food_contract, sort=[('PricePerResource', 'asc')])
-            if food_contracts:
-                contract_rec = food_contracts[0]
-                price = float(contract_rec['fields'].get('PricePerResource', float('inf')))
-                if price < min_price:
-                    min_price = price
-                    cheapest_food_deal = {
-                        "food_resource_id": food_type_id_check,
-                        "price": price,
-                        "original_contract_id": contract_rec['fields'].get('ContractId', contract_rec['id']),
-                        "seller_building_record": current_building_record # Pass the building record
-                    }
-        except Exception as e_contract:
-            log.error(f"Error checking contracts for {food_type_id_check} at {current_building_id}: {e_contract}")
-
-    if not cheapest_food_deal:
-        log.info(f"No suitable food found for sale at {building_name_display} for {citizen_username}.")
-        return False
-
-    # Attempt to buy and eat the cheapest food
-    log.info(f"Attempting to buy {cheapest_food_deal['food_resource_id']} for {cheapest_food_deal['price']:.2f} Ducats at {building_name_display}.")
-    
-    # Use a refactored version of the retail purchase logic
-    # This part is complex and ideally should be a shared helper function.
-    # For now, adapting parts of process_eat_at_tavern's logic.
-    
-    citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
-    if citizen_ducats < cheapest_food_deal['price']:
-        log.warning(f"Citizen {citizen_username} has insufficient Ducats ({citizen_ducats:.2f}) for meal (cost: {cheapest_food_deal['price']:.2f}).")
-        return False
-
-    try:
-        new_citizen_ducats = citizen_ducats - cheapest_food_deal['price']
-        tables['citizens'].update(citizen_record['id'], {'Ducats': new_citizen_ducats})
-        log.info(f"{LogColors.OKGREEN}Citizen {citizen_username} paid {cheapest_food_deal['price']:.2f} Ducats. New balance: {new_citizen_ducats:.2f}{LogColors.ENDC}")
-
-        building_operator_username = current_building_record['fields'].get('RunBy') or current_building_record['fields'].get('Owner', "UnknownBuildingOperator")
-        operator_record = get_citizen_record(tables, building_operator_username)
-        if operator_record:
-            operator_ducats = float(operator_record['fields'].get('Ducats', 0))
-            tables['citizens'].update(operator_record['id'], {'Ducats': operator_ducats + cheapest_food_deal['price']})
-            log.info(f"{LogColors.OKGREEN}Credited operator {building_operator_username} with {cheapest_food_deal['price']:.2f} Ducats.{LogColors.ENDC}")
-
-        # Create transaction record
-        transaction_payload = {
-            "Type": "retail_food_purchase_fallback", # Distinguish from regular tavern/retail
-            "AssetType": "building", "Asset": current_building_id,
-            "Seller": building_operator_username, "Buyer": citizen_username,
-            "Price": cheapest_food_deal['price'],
-            "Notes": json.dumps({"activity_guid": activity_guid, "fallback_from_inventory": True, "food_resource_id": cheapest_food_deal['food_resource_id']}),
-            "CreatedAt": now_iso, "ExecutedAt": now_iso
-        }
-        tables['transactions'].create(transaction_payload)
-
-        # Update the public_sell contract
-        sell_contract_to_update = tables['contracts'].all(formula=f"{{ContractId}}='{_escape_airtable_value(cheapest_food_deal['original_contract_id'])}'", max_records=1)
-        if sell_contract_to_update:
-            contract_airtable_id = sell_contract_to_update[0]['id']
-            current_target_amount = float(sell_contract_to_update[0]['fields'].get('TargetAmount', 0))
-            new_target_amount = current_target_amount - FOOD_UNIT_CONSUMED
-            
-            update_payload_contract = {'TargetAmount': new_target_amount}
-            if new_target_amount <= 0:
-                update_payload_contract['Status'] = 'completed'
-            tables['contracts'].update(contract_airtable_id, update_payload_contract)
-            log.info(f"Decremented TargetAmount for public_sell contract {cheapest_food_deal['original_contract_id']}. New amount: {new_target_amount:.2f}")
-        
-        return _update_citizen_ate_at(tables, citizen_record['id'], now_iso)
-
-    except Exception as e_buy:
-        log.error(f"Error during fallback food purchase for {citizen_username} at {building_name_display}: {e_buy}")
-        return False
-    
-    return False # Should not be reached if logic is correct
-    # return False # This line was causing an IndentationError and seems redundant
+    # Note: All the fallback food purchase logic has been removed.
+    # In the new architecture, if eating from inventory fails, the processor should simply return False.
+    # A separate activity for buying food should be created by an activity creator, not by this processor.
+    return False
 
 def process_eat_at_home(
     tables: Dict[str, Any],
