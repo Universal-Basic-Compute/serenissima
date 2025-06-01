@@ -41,6 +41,18 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log des paramètres spécifiques pour manage_import_contract
+    if (activityType === 'manage_import_contract') {
+      console.log(`[API /activities/try-create] Processing manage_import_contract with parameters:`, 
+        activityParameters?.contractId ? `Modifying contract: ${activityParameters.contractId}` : 'Creating new contract',
+        `Resource: ${activityParameters?.resourceType}`,
+        `Amount: ${activityParameters?.targetAmount}`,
+        `Price: ${activityParameters?.pricePerResource}`,
+        `Buyer Building: ${activityParameters?.buyerBuildingId}`,
+        `Office Building: ${activityParameters?.targetOfficeBuildingId}`
+      );
+    }
+    
     // Endpoint générique sur le moteur Python pour initier des activités/actions
     let parsedPythonEngineUrl: URL;
     try {
