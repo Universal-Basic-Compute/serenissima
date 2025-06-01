@@ -81,6 +81,20 @@ const CoatOfArmsMarkers: React.FC<CoatOfArmsMarkersProps> = ({
     return null;
   }
 
+  const handleMouseEnter = (polygon: any, owner: string) => {
+    // Reuse polygon hover state, adding owner information
+    hoverStateService.setHoverState('polygon', polygon.id, { ...polygon, owner });
+  };
+
+  const handleMouseLeave = () => {
+    hoverStateService.clearHoverState();
+  };
+
+  const handleClick = (polygon: any) => {
+    // Emit an event similar to building clicks, but for polygons/land
+    eventBus.emit(EventTypes.POLYGON_SELECTED, { polygonId: polygon.id, polygonData: polygon });
+  };
+
   return (
     <>
       {polygonsToRender.map(({ polygon, centerX, centerY }) => {
@@ -103,11 +117,18 @@ const CoatOfArmsMarkers: React.FC<CoatOfArmsMarkersProps> = ({
           border: '2px solid white',
           boxShadow: '0 0 5px rgba(0,0,0,0.3)',
           zIndex: 20, // Increased z-index to be above citizens
-          pointerEvents: 'none', 
+          pointerEvents: 'auto', // Changed from 'none' to 'auto'
+          cursor: 'pointer', // Add cursor to indicate interactivity
         };
 
         return (
-          <div key={`${polygon.id}-coa-marker`} style={style}>
+          <div 
+            key={`${polygon.id}-coa-marker`} 
+            style={style}
+            onMouseEnter={() => handleMouseEnter(polygon, owner)}
+            onMouseLeave={handleMouseLeave}
+            onClick={() => handleClick(polygon)}
+          >
             <CoatOfArmsImage
               src={imageElement?.src} // Utilise .src de HTMLImageElement
               ownerName={owner}
