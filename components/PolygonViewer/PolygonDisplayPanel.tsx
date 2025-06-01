@@ -53,30 +53,44 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
   // 3. Calculate scale factor
   const drawableWidth = SVG_SIZE - 2 * PADDING;
   const drawableHeight = SVG_SIZE - 2 * PADDING;
+  const HEIGHT_ADJUST_FACTOR = 0.7; // Factor to adjust the height
 
   let scale = 1;
   if (polyDataWidth > 0 && polyDataHeight > 0) {
+    // Scale is determined by the original dimensions to fit the container
     scale = Math.min(drawableWidth / polyDataWidth, drawableHeight / polyDataHeight);
   } else if (polyDataWidth > 0) { // Polygon is a horizontal line
     scale = drawableWidth / polyDataWidth;
   } else if (polyDataHeight > 0) { // Polygon is a vertical line
+    // If it's a vertical line, scale is based on its height,
+    // but we want its displayed height to be drawableHeight * HEIGHT_ADJUST_FACTOR.
+    // So, the scale should make polyDataHeight * HEIGHT_ADJUST_FACTOR * scale = drawableHeight.
+    // This means scale = drawableHeight / (polyDataHeight * HEIGHT_ADJUST_FACTOR)
+    // However, to maintain consistency with how scale is used later for points,
+    // it's better to calculate scale based on original polyDataHeight and apply factor during point transformation.
+    // For a pure vertical line, polyDataHeight is the main dimension.
+    // The scale should make polyDataHeight fit drawableHeight.
+    // The 0.7 factor will then be applied to its apparent height.
     scale = drawableHeight / polyDataHeight;
   }
 
 
   // 4. Calculate scaled dimensions and offsets for centering
   const scaledWidth = polyDataWidth * scale;
-  const scaledHeight = polyDataHeight * scale;
+  // The actual height the polygon will take on screen after adjustment
+  const adjustedScaledHeight = polyDataHeight * scale * HEIGHT_ADJUST_FACTOR;
 
   const offsetX = (SVG_SIZE - scaledWidth) / 2;
-  const offsetY = (SVG_SIZE - scaledHeight) / 2;
+  // Center based on the adjusted height
+  const offsetY = (SVG_SIZE - adjustedScaledHeight) / 2;
 
   // 5. Transform points
   const pointsString = coordinates.map(coord => {
-    // Normalize longitude, then scale and add offset
     const svgX = (coord.lng - minLng) * scale + offsetX;
-    // Normalize latitude (invert Y-axis for typical map orientation: North up), then scale and add offset
-    const svgY = (maxLat - coord.lat) * scale + offsetY;
+    // Apply HEIGHT_ADJUST_FACTOR to the y-component of the point before scaling by the overall 'scale'.
+    // (maxLat - coord.lat) is the y-distance from the top of the bounding box, in original data units.
+    // We scale this distance by HEIGHT_ADJUST_FACTOR, then by the overall 'scale'.
+    const svgY = (maxLat - coord.lat) * HEIGHT_ADJUST_FACTOR * scale + offsetY;
     return `${svgX},${svgY}`;
   }).join(' ');
 
