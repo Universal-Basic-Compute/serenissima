@@ -117,7 +117,7 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
                     fillOpacity="0.6"
                     stroke="#000000"
                     strokeOpacity="0.8"
-                    strokeWidth={1 / scale} // Maintain a visual 1px stroke width
+                    strokeWidth="1.5" // Changed to a fixed value for consistent stroke appearance
                  />
             )}
           </svg>
