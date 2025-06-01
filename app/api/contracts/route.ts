@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import Airtable from 'airtable';
+// import Airtable from 'airtable'; // No longer directly using Airtable
 
-// Helper to escape single quotes for Airtable formulas
+// Helper to escape single quotes for Airtable formulas (still needed if constructing formulas for try-create, but less likely)
 function escapeAirtableValue(value: string): string {
   if (typeof value !== 'string') {
     return String(value);
@@ -9,21 +9,17 @@ function escapeAirtableValue(value: string): string {
   return value.replace(/'/g, "\\'");
 }
 
-// Helper function to parse building coordinates from building ID
+// Helper function to parse building coordinates from building ID (can be kept if needed for client-side display, but not for direct Airtable interaction here)
 const parseBuildingCoordinates = (buildingId: string): {lat: number, lng: number} | null => {
   if (!buildingId) return null;
-  
-  // Check if it's in the format "building_45.430345_12.353923"
   const parts = buildingId.split('_');
   if (parts.length >= 3 && parts[0] === 'building') {
     const lat = parseFloat(parts[1]);
     const lng = parseFloat(parts[2]);
-    
     if (!isNaN(lat) && !isNaN(lng)) {
       return { lat, lng };
     }
   }
-  
   return null;
 };
 
@@ -103,7 +99,7 @@ export async function GET(request: Request) {
       contractsTable
         .select({
           filterByFormula: filterByFormula,
-          sort: [{ field: 'CreatedAt', direction: 'desc' }] // Default sort, can be overridden by query params later
+          sort: [{ field: 'CreatedAt', direction: 'desc' }] 
         })
         .eachPage(
           (records, fetchNextPage) => {
@@ -120,13 +116,10 @@ export async function GET(request: Request) {
         );
     });
     
-    // Process records to include location data
     const contractsWithLocation = await Promise.all(
       (records as any[]).map(async (record) => {
         const resourceTypeId = record.get('ResourceType') || 'unknown';
         const resourceDef = resourceTypeDefinitions.get(resourceTypeId);
-
-        // Format the resource type for the image URL (lowercase, replace spaces with underscores)
         const formattedResourceType = resourceTypeId.toLowerCase().replace(/\s+/g, '_');
         
         const contractData: Record<string, any> = {
@@ -136,7 +129,6 @@ export async function GET(request: Request) {
           buyer: record.get('Buyer'),
           seller: record.get('Seller'),
           resourceType: resourceTypeId,
-          // Enrich with resource definition data
           resourceName: resourceDef?.name || resourceTypeId,
           resourceCategory: resourceDef?.category || 'Unknown',
           resourceSubCategory: resourceDef?.subCategory || null,
@@ -148,51 +140,34 @@ export async function GET(request: Request) {
           imageUrl: resourceDef?.icon ? `/resources/${resourceDef.icon}` : `/resources/${formattedResourceType}.png`,
           buyerBuilding: record.get('BuyerBuilding'),
           sellerBuilding: record.get('SellerBuilding'),
-          price: record.get('PricePerResource'), // For bids, this is the bid amount
-          amount: record.get('TargetAmount'), // For bids, TargetAmount might be 1 (for the building)
-          asset: record.get('Asset'), // BuildingId for building_bid
-          assetType: record.get('AssetType'), // 'building' for building_bid
+          price: record.get('PricePerResource'), 
+          amount: record.get('TargetAmount'), 
+          asset: record.get('Asset'), 
+          assetType: record.get('AssetType'), 
           createdAt: record.get('CreatedAt'),
           endAt: record.get('EndAt'),
           status: record.get('Status') || 'active',
-          notes: record.get('Notes'), // Include notes for bids
+          notes: record.get('Notes'), 
           location: null
         };
         
-        // Try to get location from the seller building ID directly (for public_sell, etc.)
-        // For building_bid, location might be derived from Asset (BuildingId) if needed, or not relevant for the contract marker itself.
         if (contractData.sellerBuilding) {
-          // First try to parse the building ID if it's in the format "building_lat_lng"
           const coordinates = parseBuildingCoordinates(contractData.sellerBuilding);
           if (coordinates) {
             contractData.location = coordinates;
-            console.log(`Parsed location from building ID: ${contractData.sellerBuilding} -> ${JSON.stringify(coordinates)}`);
           } else {
-            // If direct parsing fails, try to fetch the building data from the API
             try {
-              // First, ensure we have a valid base URL with proper protocol
-              const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                            (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-              
-              // Then construct the full URL properly
+              const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
               const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(contractData.sellerBuilding)}`, baseUrl);
               const buildingResponse = await fetch(buildingUrl.toString());
-              
               if (buildingResponse.ok) {
                 const buildingData = await buildingResponse.json();
                 if (buildingData.building && buildingData.building.position) {
-                  let position;
-                  try {
-                    position = typeof buildingData.building.position === 'string' 
-                      ? JSON.parse(buildingData.building.position) 
-                      : buildingData.building.position;
-                      
-                    if (position.lat && position.lng) {
-                      contractData.location = { lat: position.lat, lng: position.lng };
-                      console.log(`Fetched location for building: ${contractData.sellerBuilding} -> ${JSON.stringify(contractData.location)}`);
-                    }
-                  } catch (e) {
-                    console.error('Error parsing building position:', e);
+                  let position = typeof buildingData.building.position === 'string' 
+                    ? JSON.parse(buildingData.building.position) 
+                    : buildingData.building.position;
+                  if (position.lat && position.lng) {
+                    contractData.location = { lat: position.lat, lng: position.lng };
                   }
                 }
               }
@@ -201,12 +176,10 @@ export async function GET(request: Request) {
             }
           }
         }
-        
         return contractData;
       })
     );
     
-    // Add a summary log
     console.log(`Processed ${contractsWithLocation.length} contracts, ${contractsWithLocation.filter(c => c.location).length} with location data`);
     
     return NextResponse.json({
@@ -229,33 +202,102 @@ export async function POST(request: Request) {
     console.log('POST /api/contracts received body:', body);
 
     const {
-      ContractId, // This is the key for UPSERT
-      Type,
+      ContractId, 
+      Type, 
       ResourceType,
-      PricePerResource, // For bids, this is the bid amount
-      Seller, // For bids, this is the building owner (or system if not set on bid creation)
-      SellerBuilding, // For bids, this might be null or the building itself if we model it that way
-      TargetAmount, // For bids, this is likely 1 (representing the building)
+      PricePerResource,
+      Seller,
+      SellerBuilding,
+      TargetAmount,
       Status,
-      Buyer, // For bids, this is the bidder
-      Notes, // Optional
-      Asset, // For bids, this is the BuildingId
-      AssetType // For bids, this is 'building'
+      Buyer,
+      Notes,
+      Asset, 
+      AssetType, 
+      targetMarketBuildingId, // Expect this for certain types if needed by Python
+      targetOfficeBuildingId, // Expect this for certain types if needed by Python
+      // ... other potential fields from body that might be activityParameters
     } = body;
 
-    // Basic validation - adjust for building_bid specifics
+    let activityType: string;
+    let citizenUsername: string | undefined; 
+    let activityParameters: Record<string, any> = { ...body }; // Start with all body params
+
+    // --- Determine activityType and citizenUsername based on Contract Type ---
+    // The Python engine will handle the detailed logic for each activityType.
+    // This Next.js route primarily dispatches the request.
+    switch (Type) {
+      case 'public_sell':
+        activityType = 'manage_public_sell_contract';
+        citizenUsername = Seller;
+        // activityParameters should include: contractId (optional), resourceType, pricePerResource,
+        // targetAmount, sellerBuildingId, targetMarketBuildingId.
+        // Ensure targetMarketBuildingId is passed if available in body.
+        break;
+      
+      case 'building_bid':
+        activityType = 'bid_on_building';
+        citizenUsername = Buyer;
+        // activityParameters should include: buildingIdToBidOn (from Asset), bidAmount (from PricePerResource),
+        // targetOwnerUsername (optional, from Seller), targetOfficeBuildingId (optional).
+        activityParameters.buildingIdToBidOn = Asset;
+        activityParameters.bidAmount = PricePerResource;
+        if (Seller) activityParameters.targetOwnerUsername = Seller;
+        break;
+
+      case 'import_order': // This type might need to map to 'manage_import_contract'
+        activityType = 'manage_import_contract';
+        citizenUsername = Buyer; // Buyer initiates an import contract
+        // activityParameters: contractId (optional), resourceType, targetAmount, pricePerResource, 
+        // buyerBuildingId (from BuyerBuilding), targetOfficeBuildingId.
+        break;
+      
+      case 'public_import_order': // This type might need to map to 'manage_public_import_contract'
+        activityType = 'manage_public_import_contract';
+        citizenUsername = Buyer; // Buyer initiates a public import offer
+        // activityParameters: contractId (optional), resourceType, targetAmount, pricePerResource, targetOfficeBuildingId.
+        break;
+      
+      // TODO: Add more cases for other contract types defined in activities.md
+      // e.g., 'respond_to_building_bid', 'withdraw_building_bid', 'manage_public_storage_offer', etc.
+      // Each case will set activityType, citizenUsername, and adjust activityParameters as needed.
+      // For example, for 'respond_to_building_bid':
+      // case 'building_bid_response': // Assuming a Type for this
+      //   activityType = 'respond_to_building_bid';
+      //   citizenUsername = Seller; // The owner of the building responds
+      //   activityParameters.buildingBidContractId = ContractId; // The ID of the bid contract
+      //   activityParameters.response = Status; // e.g., "accepted" or "refused"
+      //   break;
+
+      default:
+        return NextResponse.json(
+          { success: false, error: `Contract Type '${Type}' is not supported for activity-based processing or is invalid.` },
+          { status: 400 }
+        );
+    }
+
+    if (!citizenUsername) {
+        return NextResponse.json(
+            { success: false, error: `Could not determine the responsible citizen (e.g., Seller or Buyer) for contract type ${Type}.`},
+            { status: 400 }
+        );
+    }
+
+    // Basic validation of core fields still useful before sending to try-create
     if (!ContractId || !Type || PricePerResource === undefined || !Status) {
       return NextResponse.json(
-        { success: false, error: 'Missing required core contract fields (ContractId, Type, PricePerResource, Status) for POST operation.' },
+        { success: false, error: 'Missing required core contract fields (ContractId, Type, PricePerResource, Status).' },
         { status: 400 }
       );
     }
+    // Type-specific validation can also be kept light here, relying on Python engine for deeper validation.
     if (Type === 'building_bid' && (!Buyer || !Asset || !AssetType || AssetType !== 'building')) {
       return NextResponse.json(
         { success: false, error: 'For building_bid, Buyer, Asset (BuildingId), and AssetType="building" are required.' },
         { status: 400 }
       );
     }
+    // For other types, ensure essential fields are present if not a building_bid
     if (Type !== 'building_bid' && (!ResourceType || !Seller || !SellerBuilding || TargetAmount === undefined)) {
        return NextResponse.json(
         { success: false, error: 'For non-building_bid types, ResourceType, Seller, SellerBuilding, and TargetAmount are required.' },
@@ -263,131 +305,60 @@ export async function POST(request: Request) {
       );
     }
 
+    // Clean up activityParameters: remove fields that are part of the top-level try-create payload
+    // or those that were remapped.
+    const fieldsToClean = ['Type', 'Citizen', /* any other top-level fields in try-create */];
+    if (activityType === 'bid_on_building') {
+        fieldsToClean.push('Asset', 'PricePerResource'); // These were mapped to specific activityParameters
+    }
+    for (const field of fieldsToClean) {
+        delete activityParameters[field];
+    }
+    // Ensure ContractId is passed as contractId if that's what the Python activity expects
+    if (activityParameters.ContractId && !activityParameters.contractId) {
+        activityParameters.contractId = activityParameters.ContractId;
+    }
+    // delete activityParameters.ContractId; // remove original if it was PascalCase and now have camelCase
 
-    const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-    const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-    const CONTRACTS_TABLE = process.env.AIRTABLE_CONTRACTS_TABLE || 'CONTRACTS';
+    const tryCreatePayload = {
+      citizenUsername: citizenUsername,
+      activityType: activityType,
+      activityParameters: activityParameters
+    };
 
-    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+    const tryCreateUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/activities/try-create`;
+    
+    console.log(`[contracts POST] Calling /api/activities/try-create for ${citizenUsername} (Type: ${Type} -> Activity: ${activityType}). Payload:`, JSON.stringify(tryCreatePayload, null, 2));
+
+    const response = await fetch(tryCreateUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(tryCreatePayload),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      console.error(`[contracts POST] Error from /api/activities/try-create (${response.status}) for ${Type}:`, responseData);
       return NextResponse.json(
-        { success: false, error: 'Airtable credentials not configured' },
-        { status: 500 }
+        { 
+          success: false, 
+          error: `Failed to process contract (Type: ${Type}) via activities service: ${responseData.error || response.statusText}`,
+          details: responseData.details 
+        },
+        { status: response.status }
       );
     }
-
-    const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
-    const contractsTable = airtable(CONTRACTS_TABLE);
-
-    // Check if contract exists
-    const existingRecords = await contractsTable.select({
-      filterByFormula: `{ContractId} = '${ContractId}'`,
-      maxRecords: 1
-    }).firstPage();
-
-    let savedRecord;
-
-    const fieldsToSave: Airtable.FieldSet = {
-      ContractId,
-      Type,
-      PricePerResource,
-      Status,
-    };
-    // Conditionally add fields based on contract type or if they are provided
-    if (ResourceType) fieldsToSave.ResourceType = ResourceType;
-    if (Seller) fieldsToSave.Seller = Seller;
-    if (SellerBuilding) fieldsToSave.SellerBuilding = SellerBuilding;
-    if (TargetAmount !== undefined) fieldsToSave.TargetAmount = TargetAmount;
-    if (Buyer) fieldsToSave.Buyer = Buyer;
-    if (Notes) fieldsToSave.Notes = Notes;
-    if (Asset) fieldsToSave.Asset = Asset;
-    if (AssetType) fieldsToSave.AssetType = AssetType;
-    if (body.EndAt) fieldsToSave.EndAt = body.EndAt; // If EndAt is provided in body
-    if (body.Title) fieldsToSave.Title = body.Title;
-    if (body.Description) fieldsToSave.Description = body.Description;
-
-
-    if (existingRecords.length > 0) {
-      // Update existing contract
-      const recordToUpdate = existingRecords[0];
-      console.log(`Updating existing contract ${recordToUpdate.id} with ContractId ${ContractId}`);
-      // Ensure CreatedAt is not overwritten
-      // delete fieldsToSave.CreatedAt; // CreatedAt should not be in fieldsToSave for updates
-      
-      savedRecord = await contractsTable.update(recordToUpdate.id, fieldsToSave);
-    } else {
-      // Create new contract
-      console.log(`Creating new contract with ContractId ${ContractId}`);
-      fieldsToSave.CreatedAt = new Date().toISOString(); // Set CreatedAt for new records
-      savedRecord = await contractsTable.create(fieldsToSave);
-    }
     
-    let responseContractData = { ...savedRecord.fields, id: savedRecord.id };
-
-    // Enrich with resource definition data for the response if ResourceType is present
-    if (responseContractData.ResourceType) {
-      let resourceDef;
-      try {
-        const resourceTypesResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/resource-types?id=${encodeURIComponent(responseContractData.ResourceType as string)}`);
-        if (resourceTypesResponse.ok) {
-          const resourceTypesData = await resourceTypesResponse.json();
-          if (resourceTypesData.success && resourceTypesData.resourceType) {
-            resourceDef = resourceTypesData.resourceType;
-          } else if (resourceTypesData.success && resourceTypesData.resourceTypes && Array.isArray(resourceTypesData.resourceTypes)) {
-              resourceDef = resourceTypesData.resourceTypes.find((def: any) => def.id === responseContractData.ResourceType);
-          }
-        }
-      } catch (e) {
-        console.error('Error fetching resource type definition for POST response enrichment:', e);
-      }
-
-      const formattedResourceType = (responseContractData.ResourceType as string).toLowerCase().replace(/\s+/g, '_');
-      responseContractData = {
-        ...responseContractData,
-        resourceName: resourceDef?.name || responseContractData.ResourceType,
-        resourceCategory: resourceDef?.category || 'Unknown',
-        resourceSubCategory: resourceDef?.subCategory || null,
-        resourceTier: resourceDef?.tier ?? null,
-        resourceDescription: resourceDef?.description || '',
-        resourceImportPrice: resourceDef?.importPrice ?? 0,
-        resourceLifetimeHours: resourceDef?.lifetimeHours ?? null,
-        resourceConsumptionHours: resourceDef?.consumptionHours ?? null,
-        imageUrl: resourceDef?.icon ? `/resources/${resourceDef.icon}` : `/resources/${formattedResourceType}.png`,
-      };
-    }
-    
-    // Attempt to parse location for the response (primarily for non-building_bid types)
-    if (responseContractData.SellerBuilding) {
-      const coordinates = parseBuildingCoordinates(responseContractData.SellerBuilding as string);
-      if (coordinates) {
-        responseContractData.location = coordinates;
-      } else {
-        try {
-          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-          const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(responseContractData.SellerBuilding as string)}`, baseUrl);
-          const buildingResponse = await fetch(buildingUrl.toString());
-          if (buildingResponse.ok) {
-            const buildingData = await buildingResponse.json();
-            if (buildingData.building && buildingData.building.position) {
-              let position = typeof buildingData.building.position === 'string' 
-                ? JSON.parse(buildingData.building.position) 
-                : buildingData.building.position;
-              if (position.lat && position.lng) {
-                responseContractData.location = { lat: position.lat, lng: position.lng };
-              }
-            }
-          }
-        } catch (e) {
-          console.error('Error fetching building location for POST response enrichment:', e);
-        }
-      }
-    }
-
-
-    return NextResponse.json({
-      success: true,
-      contract: responseContractData,
-      message: existingRecords.length > 0 ? 'Contract updated successfully' : 'Contract created successfully'
-    });
+    console.log(`[contracts POST] Success response from /api/activities/try-create for ${Type}:`, responseData);
+    // The response from try-create will be different from the original direct Airtable upsert.
+    // Client consuming this endpoint will need to adapt.
+    return NextResponse.json(
+      responseData, // Proxy the full response from try-create
+      { status: response.status }
+    );
 
   } catch (error) {
     console.error('Error in POST /api/contracts:', error);
