@@ -128,7 +128,7 @@ export async function POST(request: Request) {
     
     // Log des paramètres spécifiques pour initiate_building_project
     if (activityType === 'initiate_building_project') {
-      console.log(`[API /activities/try-create] Processing initiate_building_project with parameters:`, 
+      console.log(`[API /activities/try-create] Processing initiate_building_project with parameters:`,
         `Land ID: ${activityParameters?.landId}`,
         `Building Type: ${activityParameters?.buildingTypeDefinition?.id || 'Unknown'}`,
         `Point Details: ${JSON.stringify(activityParameters?.pointDetails || {})}`,
@@ -136,6 +136,27 @@ export async function POST(request: Request) {
         `Target Office: ${activityParameters?.targetOfficeBuildingId || 'Nearest town_hall'}`
       );
     }
+
+    // Log des paramètres spécifiques pour les nouvelles activités de gestion foncière
+    if (activityType === 'list_land_for_sale') {
+      console.log(`[API /activities/try-create] Processing list_land_for_sale:`, activityParameters);
+    }
+    if (activityType === 'make_offer_for_land') {
+      console.log(`[API /activities/try-create] Processing make_offer_for_land:`, activityParameters);
+    }
+    if (activityType === 'accept_land_offer') {
+      console.log(`[API /activities/try-create] Processing accept_land_offer:`, activityParameters);
+    }
+    if (activityType === 'buy_listed_land') {
+      console.log(`[API /activities/try-create] Processing buy_listed_land:`, activityParameters);
+    }
+    if (activityType === 'cancel_land_listing') {
+      console.log(`[API /activities/try-create] Processing cancel_land_listing:`, activityParameters);
+    }
+    if (activityType === 'cancel_land_offer') {
+      console.log(`[API /activities/try-create] Processing cancel_land_offer:`, activityParameters);
+    }
+    // buy_available_land est déjà loggué plus haut
     
     // Endpoint générique sur le moteur Python pour initier des activités/actions
     let parsedPythonEngineUrl: URL;

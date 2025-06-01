@@ -765,123 +765,162 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             )}
           </div>
           
-          {/* 4. Transaction information with enhanced styling */}
-          {transaction && !transaction.buyer && (
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">For Sale</h3>
-              <p className="text-2xl font-semibold text-center">
-                <span style={{ color: '#d4af37' }}>
-                  <AnimatedDucats 
-                    value={transaction.price} 
-                    suffix="⚜️ ducats" 
-                    duration={1500}
-                  />
-                </span>
-              </p>
-              
-              {/* Transaction data debugging - not rendered */}
-              {(() => {
-                // This is an immediately-invoked function expression (IIFE) that doesn't return anything
-                console.log('Transaction data:', transaction);
-                console.log('Transaction seller type:', typeof transaction.seller);
-                return null; // Return null to avoid the TypeScript error
-              })()}
-              
-              {/* Check if current citizen is the seller using our helper function */}
-              {isCurrentCitizenTheSeller(transaction) ? (
-                /* Show Remove from Sale button if citizen is the owner */
-                <button
-                  onClick={async () => {
-                    // Get the current wallet address
-                    const walletAddress = getWalletAddress();
-                    
-                    if (!walletAddress) {
-                      alert('Please connect your wallet first');
-                      return;
-                    }
-                    
-                    console.log('Removing listing, seller:', transaction.seller, 'wallet:', walletAddress);
-                    
-                    try {
-                      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-                      // Cancel the transaction
-                      const response = await fetch(`${API_BASE_URL}/api/transaction/${transaction.id}/cancel`, {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                          seller: walletAddress
-                        }),
-                      });
-                      
-                      if (!response.ok) {
-                        throw new Error('Failed to remove listing');
-                      }
-                      
-                      alert('Your land has been removed from sale');
-                      // Refresh the panel
-                      setRefreshKey(prevKey => prevKey + 1);
-                    } catch (error) {
-                      console.error('Error removing listing:', error);
-                      alert('Failed to remove listing. Please try again.');
-                    }
-                  }}
-                  className="mt-4 w-full px-4 py-3 bg-white text-amber-600 text-base font-medium rounded-lg hover:bg-amber-50 transition-colors flex items-center justify-center border-2 border-amber-600"
+          {/* 4. Land Market Information & Actions */}
+          <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200 space-y-4">
+            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Market Status</h3>
+
+            {isLoading && <p className="text-amber-700">Loading market data...</p>}
+
+            {/* Case 1: Land is listed for sale by the owner */}
+            {landListingByOwner && (
+              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                <p className="text-lg font-semibold text-amber-800">
+                  For Sale by {landListingByOwner.SellerName || landListingByOwner.Seller}
+                </p>
+                <p className="text-2xl font-semibold text-center my-2">
+                  <span style={{ color: '#d4af37' }}>
+                    <AnimatedDucats 
+                      value={landListingByOwner.PricePerResource} 
+                      suffix="⚜️ ducats" 
+                      duration={1500}
+                    />
+                  </span>
+                </p>
+                {!isOwner && currentCitizenUsername && normalizeIdentifier(landListingByOwner.Seller) !== normalizeIdentifier(currentCitizenUsername) && (
+                  <ActionButton
+                    onClick={() => handleGenericActivity('buy_listed_land', { contractId: landListingByOwner.id, landId: selectedPolygonId, price: landListingByOwner.PricePerResource })}
+                    variant="primary"
+                    className="w-full mt-2"
+                  >
+                    Buy Now at {landListingByOwner.PricePerResource.toLocaleString()} ⚜️
+                  </ActionButton>
+                )}
+                {isOwner && normalizeIdentifier(landListingByOwner.Seller) === normalizeIdentifier(currentCitizenUsername) && (
+                   <ActionButton
+                    onClick={() => handleGenericActivity('cancel_land_listing', { contractId: landListingByOwner.id, landId: selectedPolygonId })}
+                    variant="danger"
+                    className="w-full mt-2"
+                  >
+                    Cancel Your Listing
+                  </ActionButton>
+                )}
+              </div>
+            )}
+
+            {/* Case 2: Current citizen is owner and land is NOT listed by them */}
+            {isOwner && !myLandListing && (
+              <ActionButton
+                onClick={() => setShowListForSaleModal(true)}
+                variant="primary"
+                className="w-full"
+              >
+                List Your Land for Sale
+              </ActionButton>
+            )}
+            
+            {/* Case 3: Land is unowned (available from state) */}
+            {isAvailableFromState && (
+                <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-center">
+                    <p className="text-lg font-semibold text-green-800">Available from the Republic</p>
+                    {/* Assuming a fixed price for state land, e.g., 10000. This should come from config or game balance. */}
+                    <p className="text-xl text-green-700 my-1">Price: 10,000 ⚜️ ducats</p> 
+                    <ActionButton
+                        onClick={() => handleGenericActivity('buy_available_land', { landId: selectedPolygonId, expectedPrice: 10000, targetBuildingId: "town_hall_default" })} // targetBuildingId might be needed by processor
+                        variant="success"
+                        className="w-full mt-2"
+                    >
+                        Acquire from Republic
+                    </ActionButton>
+                </div>
+            )}
+
+            {/* Display Incoming Buy Offers (if current citizen is the owner and land is not listed by them OR is listed by them) */}
+            {isOwner && incomingBuyOffers.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-md font-semibold text-amber-700 mb-2">Incoming Offers to Buy:</h4>
+                {incomingBuyOffers.map(offer => (
+                  <div key={offer.id} className="p-3 mb-2 rounded-lg bg-blue-50 border border-blue-200">
+                    <p>Offer from: {offer.BuyerName || offer.Buyer}</p>
+                    <p>Amount: {offer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
+                    <ActionButton
+                      onClick={() => handleGenericActivity('accept_land_offer', { contractId: offer.id, landId: selectedPolygonId })}
+                      variant="success"
+                      className="w-full mt-1"
+                    >
+                      Accept Offer
+                    </ActionButton>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Display Current Citizen's Buy Offer (if they are not the owner) */}
+            {myBuyOffer && !isOwner && (
+              <div className="mt-4 p-3 rounded-lg bg-purple-50 border border-purple-200">
+                <h4 className="text-md font-semibold text-purple-700 mb-1">Your Offer to Buy:</h4>
+                <p>Amount: {myBuyOffer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
+                <ActionButton
+                  onClick={() => handleGenericActivity('cancel_land_offer', { contractId: myBuyOffer.id, landId: selectedPolygonId })}
+                  variant="danger"
+                  className="w-full mt-1"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Remove from Sale
-                </button>
-              ) : (
-                /* Show Acquire Land button if citizen is not the owner */
-                <button
-                  onClick={() => {
-                    // Get the current wallet address using the more reliable getWalletAddress function
-                    const walletAddress = getWalletAddress();
-                    
-                    console.log('Attempting to acquire land, seller:', transaction.seller, 'wallet:', walletAddress);
-                    
-                    if (!walletAddress) {
-                      alert('Please connect your wallet first');
-                      return;
-                    }
-                    
-                    // Check if this is the citizen's own listing
-                    if (isCurrentCitizenTheSeller(transaction)) {
-                      console.log('Citizen tried to purchase their own listing');
-                      alert('You cannot purchase your own listing');
-                      return;
-                    }
-                    
-                    console.log('Dispatching showLandPurchaseModal event');
-                    // Dispatch a global event to show the purchase modal
-                    window.dispatchEvent(new CustomEvent('showLandPurchaseModal', {
-                      detail: { 
-                        landId: selectedPolygonId,
-                        landName: selectedPolygon?.historicalName || selectedPolygon?.englishName,
-                        transaction: transaction,
-                        onComplete: () => {
-                          // This will be called after the purchase is complete
-                          console.log('Purchase completed, refreshing panel');
-                          setRefreshKey(prevKey => prevKey + 1);
-                          setJustCompletedTransaction(true);
+                  Cancel Your Offer
+                </ActionButton>
+              </div>
+            )}
+            
+            {/* Show "Make an Offer" input/button if:
+                - Land is owned by someone else OR land is unowned but NOT available from state (e.g. specific auction)
+                - AND current citizen does not already have an active buy offer for this land
+                - AND the land is not currently listed by the owner (to avoid confusion with "Buy Now")
+            */}
+            {currentCitizenUsername && !isOwner && !myBuyOffer && !landListingByOwner && !isAvailableFromState && (
+              showOfferInput ? (
+                <div className="flex flex-col w-full space-y-3 mt-3">
+                  <div className="flex space-x-2">
+                    <input
+                      type="number"
+                      value={offerAmount}
+                      onChange={(e) => setOfferAmount(parseInt(e.target.value) || 0)}
+                      className="px-3 py-2 border border-amber-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      placeholder="Offer amount in ⚜️ ducats"
+                      min="1"
+                    />
+                    <ActionButton
+                      onClick={() => {
+                        if (offerAmount <= 0) {
+                          alert('Please enter a valid offer amount.');
+                          return;
                         }
-                      }
-                    }));
-                  }}
-                  className="mt-4 w-full px-4 py-3 bg-amber-600 text-white text-base font-medium rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
+                        handleGenericActivity('make_offer_for_land', { 
+                          landId: selectedPolygonId, 
+                          offerPrice: offerAmount, 
+                          sellerUsername: owner // Can be null if land is unowned and offers are allowed
+                        });
+                      }}
+                      variant="primary"
+                      disabled={isLoading}
+                    >
+                      Submit Offer
+                    </ActionButton>
+                  </div>
+                  <ActionButton onClick={() => setShowOfferInput(false)} variant="secondary" disabled={isLoading}>
+                    Cancel
+                  </ActionButton>
+                </div>
+              ) : (
+                <ActionButton
+                  onClick={() => setShowOfferInput(true)}
+                  variant="primary"
+                  className="w-full mt-2"
+                  disabled={isLoading}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Acquire Land
-                </button>
-              )}
-            </div>
-          )}
-          
+                  Make an Offer to Purchase
+                </ActionButton>
+              )
+            )}
+          </div>
+
           {/* 5. Historical Name with enhanced styling */}
           {selectedPolygon?.historicalName && (
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
@@ -900,245 +939,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               <p className="text-sm text-gray-700 leading-relaxed">{selectedPolygon.historicalDescription}</p>
             </div>
           )}
-
-          
-          {/* Offers section with enhanced styling */}
-          {offers.length > 0 && (
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-3">Offers</h3>
-              <div className="space-y-3">
-                {offers.map((offer, index) => (
-                  <div key={index} className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold text-green-600">
-                        {offer.price.toLocaleString()} <span className="text-xs">⚜️ ducats</span>
-                      </span>
-                      <span className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
-                        {new Date(offer.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="text-xs mt-1">
-                      {offer.seller === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) ? (
-                        <span className="text-blue-600 font-medium">Your outgoing offer</span>
-                      ) : (
-                        <span className="text-purple-600 font-medium">Incoming offer from {offer.seller.slice(0, 6)}...{offer.seller.slice(-4)}</span>
-                      )}
-                    </div>
-                    {/* Add accept button for incoming offers with improved styling */}
-                    {offer.seller !== owner && (
-                      <button
-                        onClick={async () => {
-                          // Get the current wallet address
-                          const walletAddress = getWalletAddress();
-                        
-                          if (!walletAddress) {
-                            alert('Please connect your wallet first');
-                            return;
-                          }
-                        
-                          // Only the owner can accept offers
-                          if (owner !== walletAddress) {
-                            alert('Only the current owner can accept offers');
-                            return;
-                          }
-                          
-                          try {
-                            const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-                            // Execute the transaction
-                            const response = await fetch(`${API_BASE_URL}/api/transaction/${offer.id}/execute`, {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({
-                                buyer: offer.seller
-                              }),
-                            });
-                            
-                            if (!response.ok) {
-                              throw new Error('Failed to accept offer');
-                            }
-                            
-                            const data = await response.json();
-                            alert(`Offer accepted! Land transferred to ${offer.seller}`);
-                            // Refresh the page to update the UI
-                            window.location.reload();
-                          } catch (error) {
-                            console.error('Error accepting offer:', error);
-                            alert('Failed to accept offer. Please try again.');
-                          }
-                        }}
-                        className="mt-2 w-full px-3 py-2 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Accept Offer
-                      </button>
-                    )}
-                    {/* Add cancel button for outgoing offers with improved styling */}
-                    {offer.seller === owner && (
-                      <button
-                        onClick={async () => {
-                          // Get the current wallet address
-                          const walletAddress = getWalletAddress();
-                          
-                          if (!walletAddress) {
-                            alert('Please connect your wallet first');
-                            return;
-                          }
-                          
-                          // Only the seller can cancel their own offers
-                          if (owner !== walletAddress) {
-                            alert('Only the offer creator can cancel it');
-                            return;
-                          }
-                          
-                          try {
-                            const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-                            // Cancel the transaction
-                            const response = await fetch(`${API_BASE_URL}/api/transaction/${offer.id}/cancel`, {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({
-                                seller: walletAddress
-                              }),
-                            });
-                            
-                            if (!response.ok) {
-                              throw new Error('Failed to cancel offer');
-                            }
-                            
-                            const data = await response.json();
-                            alert('Offer cancelled successfully');
-                            // Refresh offers
-                            setOffers(offers.filter(o => o.id !== offer.id));
-                          } catch (error) {
-                            console.error('Error cancelling offer:', error);
-                            alert('Failed to cancel offer. Please try again.');
-                          }
-                        }}
-                        className="mt-2 w-full px-3 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        Cancel Offer
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Action buttons at the bottom with improved styling */}
+        {/* Action buttons at the bottom are now integrated above or removed if redundant */}
         <div className="pt-4 mt-auto border-t-2 border-amber-300">
-          {owner && !isCurrentCitizenTheOwner(owner) && (
-            // Only show "Make an Offer" button if the land is owned by someone else (not the current citizen)
-            showOfferInput ? (
-              <div className="flex flex-col w-full space-y-3">
-                <div className="flex space-x-2">
-                  <input
-                    type="number"
-                    value={offerAmount}
-                    onChange={(e) => setOfferAmount(parseInt(e.target.value) || 0)}
-                    className="px-3 py-2 border border-amber-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    placeholder="Offer amount in ⚜️ ducats"
-                    min="1"
-                  />
-                  <ActionButton
-                    onClick={async () => {
-                      // Get the current wallet address
-                      const walletAddress = getWalletAddress();
-                      
-                      if (!walletAddress) {
-                        alert('Please connect your wallet first');
-                        return;
-                      }
-                      
-                      if (offerAmount <= 0) {
-                        alert('Please enter a valid offer amount');
-                        return;
-                      }
-                      
-                      try {
-                        // Use the TransactionService to create the transaction
-                        const { getTransactionService } = require('../../lib/services/TransactionService');
-                        const transactionService = getTransactionService();
-                        
-                        // Create a transaction for the land
-                        const transaction = await transactionService.createOffer(
-                          selectedPolygonId!, // The land ID
-                          'land', // Explicitly set type to 'land'
-                          owner!, // Current owner as seller
-                          offerAmount, // The offer amount
-                          {
-                            historicalName: selectedPolygon?.historicalName,
-                            englishName: selectedPolygon?.englishName,
-                            description: selectedPolygon?.historicalDescription
-                          }
-                        );
-                        
-                        alert(`Offer of ${offerAmount.toLocaleString()} ⚜️ ducats created successfully!`);
-                        setShowOfferInput(false);
-                        
-                        // Refresh the offers list
-                        setRefreshKey(prevKey => prevKey + 1);
-                      } catch (error) {
-                        console.error('Error creating offer:', error);
-                        alert('Failed to create offer. Please try again.');
-                      }
-                    }}
-                    variant="primary"
-                  >
-                    Submit Offer
-                  </ActionButton>
-                </div>
-                <ActionButton
-                  onClick={() => setShowOfferInput(false)}
-                  variant="secondary"
-                >
-                  Cancel
-                </ActionButton>
-              </div>
-            ) : (
-              <ActionButton
-                onClick={() => setShowOfferInput(true)}
-                variant="primary"
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-lg shadow-md border border-amber-700 transition-all flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="font-serif">Make an Offer to Purchase</span>
-              </ActionButton>
-            )
-          )}
-          
-          {/* Show a message if the citizen owns this property */}
-          {owner && owner === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) && (
-            <div className="bg-amber-100 p-4 rounded-lg text-center border border-amber-300">
-              <p className="text-amber-800 font-medium">This property belongs to your noble house</p>
-              <p className="text-sm text-amber-600 mt-1 italic">
-                "May your family prosper under the wings of the Lion of Saint Mark"
-              </p>
-              
-              {/* Add List for Sale button */}
-              <button
-                onClick={() => setShowListForSaleModal(true)}
-                className="mt-4 w-full bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg shadow-md border border-amber-700 transition-all flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="font-serif">List Land For Sale</span>
-              </button>
-            </div>
-          )}
+           {/* This section can be used for general actions or kept empty if all actions are contextual above */}
         </div>
         
         {/* Add a decorative Venetian footer */}
@@ -1176,21 +981,24 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           englishName={selectedPolygon?.englishName}
           landDescription={selectedPolygon?.historicalDescription}
           onClose={() => setShowListForSaleModal(false)}
-          onComplete={() => {
+          onComplete={(price: number) => {
             // Refresh the panel to show the new listing
+            // The modal now calls handleGenericActivity directly.
+            // This onComplete might still be useful for UI cleanup or notifications.
+            console.log(`ListLandForSaleModal completed, price: ${price}`);
             setRefreshKey(prevKey => prevKey + 1);
+            setShowListForSaleModal(false); // Ensure modal closes
           }}
+          // Pass the handleGenericActivity function to the modal
+          onInitiateListForSale={(landId, price) => 
+            handleGenericActivity('list_land_for_sale', { landId, price, sellerUsername: currentCitizenUsername })
+          }
         />
       )}
     </div>
   );
   
-  // Land purchase confirmation is disabled to prevent land modification
-  function handleConfirmPurchase(): React.ReactNode {
-    console.log('Land purchase is disabled to prevent land modification');
-    alert('Land purchase is not allowed in this version');
-    setIsPurchasing(false);
-    setShowPurchaseConfirmation(false);
-    return null; // Return null to satisfy ReactNode type requirement
-  }
+  // handleConfirmPurchase is no longer directly used as purchases go through activities.
+  // If a confirmation step is needed before calling handleGenericActivity,
+  // that logic would be placed before the call.
 }

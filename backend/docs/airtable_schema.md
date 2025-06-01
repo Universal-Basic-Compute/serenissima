@@ -100,24 +100,29 @@ Stocke les instances de ressources et leur emplacement.
 
 Gère les accords commerciaux entre citoyens ou avec le public.
 
--   `ContractId` (Texte): Identifiant personnalisé unique, souvent déterministe (ex: `contract-import-bld_xxx-timber`, `building_bid_BUILDINGID_BUYERNAME_TIMESTAMP`).
--   `Type` (Texte): Type de contrat (ex: `import`, `public_sell`, `recurrent`, `construction_project`, `logistics_service_request`, `building_bid`).
--   `Buyer` (Lien vers `CITIZENS` via `Username`): Acheteur. Peut être "public" pour les ventes publiques. Pour `construction_project`, c'est le commanditaire de la construction. Pour `logistics_service_request`, c'est le client. Pour `building_bid`, c'est le citoyen qui place l'offre.
--   `Seller` (Lien vers `CITIZENS` via `Username`): Vendeur. Peut être un système (ex: "Italia" pour les importations). Pour `logistics_service_request`, c'est l'opérateur du Porter Guild Hall.
--   `ResourceType` (Texte): Type de ressource concernée. Pour `logistics_service_request`, ce champ peut être vide. Pour `public_storage`, c'est le type de ressource stockée.
--   `ServiceFeePerUnit` (Nombre): Utilisé par `logistics_service_request` pour définir le coût du service de portage par unité de ressource livrée. Non utilisé pour `public_storage`.
--   `Transporter` (Lien vers `CITIZENS` via `Username`): Citoyen assigné au transport (si applicable).
--   `BuyerBuilding` (Texte): `BuildingId` personnalisé du bâtiment de l'acheteur. Pour `construction_project`, c'est le `BuildingId` du bâtiment en cours de construction. Pour `logistics_service_request`, c'est le bâtiment de destination du client. Non applicable pour `public_storage`.
--   `SellerBuilding` (Texte): `BuildingId` personnalisé du bâtiment du vendeur. Pour `construction_project`, c'est l'atelier de construction. Pour `logistics_service_request`, c'est le Porter Guild Hall. Pour `public_storage`, c'est le bâtiment offrant le stockage. Pour `building_bid`, ce champ peut être non pertinent ou stocker le `BuildingId` de l'actif (redondant avec `Asset`).
--   `Title` (Texte): Un titre accrocheur pour le contrat, visible par les acheteurs potentiels (surtout pour `public_sell` et `public_storage`). Pour `building_bid`, pourrait être "Bid for [Building Name]".
--   `Description` (Texte multiligne): Une description plus détaillée du service ou du bien offert par le contrat.
--   `TargetAmount` (Nombre): Quantité totale de ressource pour ce contrat (ex: pour `import`, `public_sell`) ou quantité par transaction (ex: pour `recurrent`). Pour `logistics_service_request`, peut représenter un volume total de service. Pour `building_bid`, généralement 1.
--   `PricePerResource` (Nombre): Prix unitaire de la ressource. Pour `public_storage`, ce champ stocke le taux de la commission de stockage. Pour `building_bid`, c'est le montant total de l'offre pour le bâtiment.
+-   `ContractId` (Texte): Identifiant personnalisé unique, souvent déterministe (ex: `contract-import-bld_xxx-timber`, `building_bid_BUILDINGID_BUYERNAME_TIMESTAMP`, `land_listing_LANDID_SELLER_TIMESTAMP`, `land_offer_LANDID_BUYER_TIMESTAMP`).
+-   `Type` (Texte): Type de contrat (ex: `import`, `public_sell`, `recurrent`, `construction_project`, `logistics_service_request`, `building_bid`, `land_listing`, `land_offer`, `land_sell` (ancien, à déprécier)).
+-   `Buyer` (Lien vers `CITIZENS` via `Username`): Acheteur.
+    -   Pour `land_listing`: Null (l'acheteur est indéterminé jusqu'à l'achat).
+    -   Pour `land_offer`: Le citoyen qui fait l'offre.
+-   `Seller` (Lien vers `CITIZENS` via `Username`): Vendeur.
+    -   Pour `land_listing`: Le propriétaire du terrain qui met en vente.
+    -   Pour `land_offer`: Le propriétaire actuel du terrain (si l'offre est ciblée) ou Null (si l'offre est spéculative pour un terrain non listé ou non possédé).
+-   `ResourceType` (Texte): Type de ressource concernée. Pour les contrats fonciers, ce champ n'est généralement pas utilisé directement pour la ressource "terrain", mais `AssetType` sera "land".
+-   `ServiceFeePerUnit` (Nombre): Utilisé par `logistics_service_request`.
+-   `Transporter` (Lien vers `CITIZENS` via `Username`): Citoyen assigné au transport.
+-   `BuyerBuilding` (Texte): `BuildingId` du bâtiment de l'acheteur.
+-   `SellerBuilding` (Texte): `BuildingId` du bâtiment du vendeur.
+-   `Title` (Texte): Titre du contrat. Pour `land_listing`/`land_offer`, peut être "Listing for [LandName]" ou "Offer for [LandName]".
+-   `Description` (Texte multiligne): Description.
+-   `TargetAmount` (Nombre): Généralement 1 pour les contrats fonciers.
+-   `PricePerResource` (Nombre): Prix du terrain. Pour `land_listing`, c'est le prix demandé. Pour `land_offer`, c'est le prix offert.
 -   `Priority` (Nombre): Priorité du contrat.
--   `Status` (Texte): Statut du contrat (ex: `active`, `completed`, `failed`, `ended_by_ai`). Pour `building_bid`, peut être `active` (offre ouverte), `accepted` (offre acceptée par le propriétaire), `refused` (offre refusée), `withdrawn` (offre retirée par l'enchérisseur).
--   `Notes` (Texte multiligne): Chaîne JSON ou texte pour des détails supplémentaires. Pour `building_bid`, peut contenir des conditions ou messages de l'enchérisseur.
--   `Asset` (Texte): (Nouveau/Utilisation étendue) Pour `building_bid`, stocke le `BuildingId` du bâtiment concerné par l'offre.
--   `AssetType` (Texte): (Nouveau/Utilisation étendue) Pour `building_bid`, stocke la valeur `'building'`.
+-   `Status` (Texte): Statut du contrat (ex: `active`, `completed`, `failed`, `ended_by_ai`, `cancelled`, `accepted`, `expired`).
+    -   Pour `land_listing` et `land_offer`: `active` (en cours), `accepted` (accepté, déclenche la vente), `cancelled` (annulé par l'initiateur), `expired` (si une date de fin est atteinte).
+-   `Notes` (Texte multiligne): Chaîne JSON ou texte pour des détails supplémentaires.
+-   `Asset` (Texte): Pour les contrats fonciers, stocke le `LandId`. Pour `building_bid`, stocke le `BuildingId`.
+-   `AssetType` (Texte): Pour les contrats fonciers, stocke `'land'`. Pour `building_bid`, stocke `'building'`.
 -   `LastExecutedAt` (Date/Heure): Horodatage de la dernière exécution partielle (ex: pour `fetch_from_galley`).
 -   `CreatedAt` (Date/Heure): Date de création du contrat.
 -   `EndAt` (Date/Heure): Date de fin de validité du contrat. Pour `building_bid`, peut être la date d'expiration de l'offre.
@@ -127,8 +132,8 @@ Gère les accords commerciaux entre citoyens ou avec le public.
 
 Suit les activités et actions en cours et terminées des citoyens. Avec l'unification du système, cette table enregistre toutes les entreprises initiées par les citoyens, qu'il s'agisse d'activités de longue durée ou d'actions stratégiques discrètes.
 
--   `ActivityId` (Texte): Identifiant personnalisé unique (ex: `goto_work_username_timestamp`, `bid_on_land_username_timestamp`).
--   `Type` (Texte): Type d'activité ou d'action (ex: `rest`, `goto_home`, `production`, `bid_on_land`, `send_message`, `manage_public_sell_contract`).
+-   `ActivityId` (Texte): Identifiant personnalisé unique (ex: `goto_work_username_timestamp`, `make_offer_for_land_username_timestamp`).
+-   `Type` (Texte): Type d'activité ou d'action (ex: `rest`, `goto_home`, `production`, `bid_on_land` (peut être conservé pour des enchères plus complexes), `send_message`, `manage_public_sell_contract`, `list_land_for_sale`, `make_offer_for_land`, `accept_land_offer`, `buy_listed_land`, `cancel_land_listing`, `cancel_land_offer`, `buy_available_land`).
 -   `Citizen` (Lien vers `CITIZENS` via `Username`): Citoyen effectuant l'activité/action.
 -   `FromBuilding` (Texte): `BuildingId` personnalisé du lieu de départ/actuel.
 -   `ToBuilding` (Texte): `BuildingId` personnalisé de la destination.
