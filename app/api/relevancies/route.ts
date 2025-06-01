@@ -124,7 +124,7 @@ export async function GET(request: Request) {
     // Fetch relevancies from Airtable with the constructed filter
     const relevanciesRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
       .select({
-        filterByFormula: filterFormula || '',
+        filterByFormula: filterByFormula || '',
         maxRecords: 100,
         sort: [{ field: 'CreatedAt', direction: 'desc' }]  // Sort by CreatedAt in descending order
       })

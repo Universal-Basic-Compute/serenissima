@@ -6,6 +6,21 @@ const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_NOTIFICATIONS_TABLE = process.env.AIRTABLE_NOTIFICATIONS_TABLE || 'NOTIFICATIONS';
 
+// Helper function to convert object keys to PascalCase
+function keysToPascalCase(obj: Record<string, any>): Record<string, any> {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(keysToPascalCase);
+  }
+  return Object.keys(obj).reduce((acc, key) => {
+    const pascalKey = key.charAt(0).toUpperCase() + key.slice(1);
+    acc[pascalKey] = keysToPascalCase(obj[key]);
+    return acc;
+  }, {} as Record<string, any>);
+}
+
 // Format date for Airtable filter formula
 const formatDateForAirtable = (dateString: string): string => {
   try {
