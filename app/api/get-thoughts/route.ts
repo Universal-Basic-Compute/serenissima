@@ -107,18 +107,18 @@ export async function GET() {
 
     const records: Records<FieldSet> = await messagesTable
       .select({
-        // Filter for type 'thought_log' and created in the last 24 hours
+        // Filter for types 'thought_log', 'unguided_run_log', 'autonomous_run_log' and created in the last 24 hours
         // Formula for comparing dates: IS_AFTER({FieldName}, 'YYYY-MM-DDTHH:mm:ssZ')
         // It's often more reliable to fetch records for the type and then filter date/sender=recipient in code,
         // especially if Sender/Recipient are linked records.
         // However, constructing a robust date filter for Airtable:
-        filterByFormula: `AND(OR({Type} = 'thought_log', {Type} = 'unguided_run_log'), IS_AFTER({CreatedAt}, '${twentyFourHoursAgo}'))`,
+        filterByFormula: `AND(OR({Type} = 'thought_log', {Type} = 'unguided_run_log', {Type} = 'autonomous_run_log'), IS_AFTER({CreatedAt}, '${twentyFourHoursAgo}'))`,
         fields: ['MessageId', 'Sender', 'Receiver', 'Content', 'Type', 'CreatedAt'], // Changed Recipient to Receiver
         sort: [{ field: 'CreatedAt', direction: 'desc' }],
       })
       .all();
 
-    console.log(`[API GetThoughts] Fetched ${records.length} thought_log records from the last 24 hours.`);
+    console.log(`[API GetThoughts] Fetched ${records.length} relevant log records from the last 24 hours.`);
 
     const thoughts: Thought[] = [];
 
