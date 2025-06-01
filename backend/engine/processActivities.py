@@ -137,6 +137,7 @@ from backend.engine.activity_processors.buy_available_land_processor import proc
 from backend.engine.activity_processors.initiate_building_project_processor import process_initiate_building_project_fn
 from backend.engine.activity_processors.adjust_land_lease_price_processor import process_adjust_land_lease_price_fn
 from backend.engine.activity_processors.adjust_building_rent_price_processor import process_adjust_building_rent_price_fn
+from backend.engine.activity_processors.adjust_building_lease_price_processor import process_file_building_lease_adjustment_fn # New
 from backend.engine.activity_processors.adjust_business_wages_processor import process_adjust_business_wages_fn
 from backend.engine.activity_processors.change_business_manager_processor import process_change_business_manager_fn
 from backend.engine.activity_processors.request_loan_processor import process_request_loan_fn
@@ -391,6 +392,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "submit_building_project": process_initiate_building_project_fn, # Final step in initiate_building_project chain
         "file_lease_adjustment": process_adjust_land_lease_price_fn, # Final step in adjust_land_lease_price chain
         "file_rent_adjustment": process_adjust_building_rent_price_fn, # Final step in adjust_building_rent_price chain
+        "file_building_lease_adjustment": process_file_building_lease_adjustment_fn, # Final step for adjust_building_lease_price
         "update_wage_ledger": process_adjust_business_wages_fn, # Final step in adjust_business_wages chain
         "finalize_operator_change": process_change_business_manager_fn, # Final step in change_business_manager chain
         "submit_loan_application_form": process_request_loan_fn, # Final step in request_loan chain

@@ -484,30 +484,7 @@ If you decide not to adjust any leases at this time, return an empty array.
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
-def update_building_lease_price(tables, building_id: str, new_lease_price: float) -> bool:
-    """Update the lease amount for a building."""
-    try:
-        # Find the building record
-        formula = f"{{BuildingId}}='{building_id}'"
-        buildings = tables["buildings"].all(formula=formula)
-        
-        if not buildings:
-            print(f"Building {building_id} not found")
-            return False
-        
-        building = buildings[0]
-        current_lease = building["fields"].get("LeasePrice", 0)
-        
-        # Update the lease amount
-        tables["buildings"].update(building["id"], {
-            "LeasePrice": new_lease_price
-        })
-        
-        print(f"Updated lease amount for building {building_id} from {current_lease} to {new_lease_price}")
-        return True
-    except Exception as e:
-        print(f"Error updating lease amount for building {building_id}: {str(e)}")
-        return False
+# Removed update_building_lease_price function as its logic is now handled by 'adjust_building_lease_price' activity
 
 def create_notification_for_building_owner(tables, building_id: str, building_name: str, owner: str, ai_username: str, 
                                           old_lease: float, new_lease: float, reason: str) -> bool:
@@ -572,6 +549,51 @@ def create_admin_notification(tables, ai_lease_adjustments: Dict[str, List[Dict]
         print("📜 Created admin notification with AI lease adjustment summary")
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
+
+# --- API Call Helper ---
+# Note: This script uses print for logging, so log_ref.info/error will become print.
+# Consider standardizing logging if this script is to be maintained alongside others.
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool
+    # log_ref: Any # Using print instead of a logger object here
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        print(f"[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}")
+        return True
+
+    # API_BASE_URL needs to be defined or accessible in this scope.
+    # Assuming BASE_URL defined at the top of the script is intended for this.
+    api_url = f"{BASE_URL}/api/activities/try-create"
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            print(f"Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 print(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            print(f"API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed for activity '{activity_type}' for {citizen_username}: {e}")
+        return False
+    except json.JSONDecodeError:
+        print(f"Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}")
+        return False
 
 def process_ai_lease_adjustments(dry_run: bool = False):
     """Main function to process AI lease adjustments."""
@@ -711,10 +733,13 @@ def process_ai_lease_adjustments(dry_run: bool = False):
                         print(f"Skipping building {building_id} - AI {ai_username} does not own the land {land_id} (owned by {land_owner})")
                         continue
                     
-                    # Update the lease amount
-                    success = update_building_lease_price(tables, building_id, new_lease_price)
-                    
-                    if success:
+                    # Update the lease amount via activity
+                    activity_params = {
+                        "buildingId": building_id, # Pass custom BuildingId
+                        "newLeasePrice": new_lease_price,
+                        "strategy": "kinos_direct_decision" # Or derive strategy if Kinos provides it
+                    }
+                    if call_try_create_activity_api(ai_username, "adjust_building_lease_price", activity_params, dry_run):
                         building_name_for_notif = building["fields"].get("Name", building_id)
                         # Create notification for building owner if different from AI
                         if building_owner and building_owner != ai_username:
