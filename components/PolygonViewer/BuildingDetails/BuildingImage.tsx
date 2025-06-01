@@ -49,17 +49,30 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
         );
         
         if (buildingTypeDef && buildingTypeDef.appearance && buildingTypeDef.appearance.imagePath) {
-          console.log(`BuildingImage: Found potential image path in building type data: ${buildingTypeDef.appearance.imagePath}`);
-          // Ensure the path from definition is valid by trying to fetch it
+          let potentialPath = buildingTypeDef.appearance.imagePath;
+          const baseAssetUrl = 'https://backend.serenissima.ai/public_assets/';
+
+          if (!potentialPath.startsWith('http')) { // If not a full URL, assume relative to public_assets
+            potentialPath = `${baseAssetUrl}${potentialPath.replace(/^\//, '')}`;
+          }
+          
+          // Clean up potential double prefixes, similar to HoverTooltip logic
+          if (potentialPath.startsWith(baseAssetUrl + 'https://')) {
+            potentialPath = potentialPath.substring(baseAssetUrl.length);
+          } else if (potentialPath.startsWith('https://https://')) {
+            potentialPath = potentialPath.substring('https://'.length);
+          }
+
+          console.log(`BuildingImage: Found potential image path in building type data, resolved to: ${potentialPath}`);
           try {
-            const response = await fetch(buildingTypeDef.appearance.imagePath, { method: 'HEAD' });
+            const response = await fetch(potentialPath, { method: 'HEAD' });
             if (response.ok) {
-              console.log(`BuildingImage: Confirmed image path from definition: ${buildingTypeDef.appearance.imagePath}`);
-              return buildingTypeDef.appearance.imagePath;
+              console.log(`BuildingImage: Confirmed image path from definition: ${potentialPath}`);
+              return potentialPath;
             }
-            console.warn(`BuildingImage: Path from definition ${buildingTypeDef.appearance.imagePath} not found or invalid.`);
+            console.warn(`BuildingImage: Path from definition ${potentialPath} not found or invalid.`);
           } catch (error) {
-            console.warn(`BuildingImage: Error checking path from definition ${buildingTypeDef.appearance.imagePath}:`, error);
+            console.warn(`BuildingImage: Error checking path from definition ${potentialPath}:`, error);
           }
         }
       }

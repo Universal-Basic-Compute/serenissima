@@ -110,7 +110,7 @@ export const HoverTooltip: React.FC = () => {
         setTooltipData({
           type: 'building',
           name: actualBuildingData.name || (actualBuildingData.type ? buildingService.formatBuildingType(actualBuildingData.type) : 'Unknown Building'),
-          buildingType: actualBuildingData.type,
+          buildingType: actualBuildingData.type, // This is used by the fallback logic for image path
           owner: actualBuildingData.owner
         });
       }
@@ -213,12 +213,35 @@ export const HoverTooltip: React.FC = () => {
         {/* Add the building image */}
         <div className="w-96 h-80 mb-2 overflow-hidden rounded">
           <img 
-            src={
-              // Check if buildingImagePath starts with a double URL prefix and fix it
-              buildingImagePath && buildingImagePath.startsWith('https://backend.serenissima.ai/public_assetshttps://') 
-                ? buildingImagePath.replace('https://backend.serenissima.ai/public_assetshttps://', 'https://') 
-                : buildingImagePath || `https://backend.serenissima.ai/public_assets/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_') || 'default'}.png`
-            }
+            src={(() => {
+              const baseAssetUrl = 'https://backend.serenissima.ai/public_assets/';
+              let finalImagePath: string;
+
+              if (buildingImagePath) { // buildingImagePath comes from state, which is from assetService
+                  if (buildingImagePath.startsWith('https://') || buildingImagePath.startsWith('http://')) {
+                      // It's already a full URL. Check for common double prefix issues.
+                      const doublePrefix1 = baseAssetUrl + 'https://'; // e.g. "https://backend.../public_assets/https://"
+                      const doublePrefix2 = 'https://https://'; // More general double https
+
+                      if (buildingImagePath.startsWith(doublePrefix1)) {
+                          finalImagePath = buildingImagePath.substring(baseAssetUrl.length); // Remove the first baseAssetUrl
+                      } else if (buildingImagePath.startsWith(doublePrefix2)) {
+                          finalImagePath = buildingImagePath.substring('https://'.length); // Remove one 'https://'
+                      } else {
+                          finalImagePath = buildingImagePath; // Assume it's a correct full URL
+                      }
+                  } else {
+                      // Assume it's a path relative to baseAssetUrl (e.g., "images/buildings/foo.png")
+                      // Ensure no leading slash if buildingImagePath is like "/images/..."
+                      finalImagePath = baseAssetUrl + buildingImagePath.replace(/^\//, '');
+                  }
+              } else {
+                  // Fallback if buildingImagePath is null or empty
+                  const typeForPath = tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_') || 'default';
+                  finalImagePath = `${baseAssetUrl}images/buildings/${typeForPath}.png`;
+              }
+              return finalImagePath;
+            })()}
             alt={tooltipData.name || 'Building'}
             className="w-full h-full object-cover"
             onError={(e) => {
