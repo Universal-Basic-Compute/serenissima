@@ -81,8 +81,8 @@ export async function POST(request: NextRequest) {
 
       // Simpler Euclidean distance for game map units (assuming lat/lng are x/y)
       // The scale of this distance will depend on how lat/lng are used in your game.
-      // Let's assume 1 unit of lat/lng difference is roughly 100 "game meters" for display.
-      return Math.sqrt(dx * dx + dy * dy) * 100; // Arbitrary scaling factor
+      // Let's assume 1 unit of lat/lng difference is roughly 1 "game meter" for display.
+      return Math.sqrt(dx * dx + dy * dy) * 1; // Adjusted scaling factor
     };
 
     // 1. Fetch all citizens from the CITIZENS table, including their positions
