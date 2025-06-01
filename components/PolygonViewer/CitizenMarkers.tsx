@@ -771,25 +771,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           const citizenId = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id; // Use username first for ID check
           const isCitizenInvolvedInBuildingHover = involvedCitizenIdsInBuildingHover.has(citizenId);
 
-          let bgColor;
-          if (financialAspect === 'default' || !financialDataRange || !getFinancialAspectColor) {
-            bgColor = citizenService.getSocialClassColor(socialClass);
-          } else {
-            // TODO: Adjust the 'value' based on how 'lease', 'rent', 'wages' should apply to citizens.
-            // Using citizen.Ducats as a placeholder example for financial coloring.
-            let value: number | undefined;
-            switch (financialAspect) {
-              case 'lease': // Placeholder: Using Ducats
-              case 'rent':  // Placeholder: Using Ducats
-              case 'wages': // Placeholder: Using Ducats
-                value = citizen.Ducats || citizen.ducats; // Assuming citizen object has Ducats
-                break;
-              default:
-                value = undefined;
-            }
-            bgColor = getFinancialAspectColor(value, financialDataRange.min, financialDataRange.max);
-          }
-          
+          const socialClassRaw = (citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Citizen').trim();
+          const socialClassForIcon = socialClassRaw || 'Citizen'; // Fallback for empty string after trim
+          const iconFilename = `${socialClassForIcon}.png`;
+          const iconSrc = `/images/icons/${iconFilename}`;
+          const fallbackIconSrc = '/images/icons/Citizen.png';
+
           return (
             <div 
               key={citizenId || `citizen-${Math.random()}`}
@@ -807,15 +794,15 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className={`w-4 h-4 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center ${
+                className={`w-8 h-8 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center ${
                   isCitizenInvolvedInBuildingHover ? 'scale-150' : '' // Apply scale if citizen is involved
                 } ${
                   citizen.username === currentUsername ? 'ring-2 ring-purple-500 ring-opacity-80' : 
                   citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
                 }`}
                 style={{ 
-                  backgroundColor: bgColor, // Use the dynamically determined background color
-                  border: '1px solid white',
+                  // backgroundColor is removed, border and boxShadow remain for the container
+                  border: '1px solid white', // Optional: if you want a border around the icon container
                   boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
                              citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
@@ -824,9 +811,18 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   citizen.worksFor === currentUsername ? ' - Works for you' : ''
                 }`}
               >
-                <span className="text-white text-[8px] font-bold">
-                  {firstName?.[0] || '?'}{lastName?.[0] || '?'}
-                </span>
+                <img
+                  src={iconSrc}
+                  alt={`${socialClassForIcon} icon`}
+                  className="w-full h-full object-contain" // Use object-contain to maintain aspect ratio
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== fallbackIconSrc) { // Avoid infinite loop if default also fails
+                      target.src = fallbackIconSrc;
+                      target.alt = `${socialClassForIcon} (icon missing, fallback to Citizen)`;
+                    }
+                  }}
+                />
               </div>
             </div>
           );
@@ -838,56 +834,32 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           // Only show citizens that aren't being animated
           return !animatedCitizens[citizenId];
         }).map((citizen) => {
-          // Original static citizen rendering code...
-          // Log the original position and the transformed screen coordinates
           const originalPos = citizen.position;
           const position = latLngToScreen(citizen.position.lat, citizen.position.lng);
           
-          // Debug log to verify position transformation
-          if (Math.random() < 0.05) { // Only log ~5% of citizens to avoid console spam
+          if (Math.random() < 0.05) {
             const firstName = citizen.firstname || citizen.FirstName || '';
             const lastName = citizen.lastname || citizen.LastName || '';
             const displayName = firstName || lastName ? 
               `${firstName} ${lastName}`.trim() : 
               `Citizen ${citizen.citizenid || citizen.CitizenId || citizen.id || 'unknown'}`;
-            
-            /**console.log(`Citizen ${displayName} position:`, {
-              original: originalPos,
-              screen: position
-            });*/
           }
           
-          // Skip if position is off-screen (with some margin)
           if (position.x < -100 || position.x > canvasWidth + 100 || 
               position.y < -100 || position.y > canvasHeight + 100) {
             return null;
           }
           
-          // Ensure we have the required properties for display
           const firstName = citizen.firstname || citizen.FirstName || citizen.firstName || '';
           const lastName = citizen.lastname || citizen.LastName || citizen.lastName || '';
-          const socialClass = citizen.socialclass || citizen.SocialClass || citizen.socialClass || '';
-          const citizenId = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id; // Use username first for ID check
+          const socialClass = (citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Citizen').trim();
+          const citizenId = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id;
           const isCitizenInvolvedInBuildingHover = involvedCitizenIdsInBuildingHover.has(citizenId);
 
-          let bgColor;
-          if (financialAspect === 'default' || !financialDataRange || !getFinancialAspectColor) {
-            bgColor = citizenService.getSocialClassColor(socialClass);
-          } else {
-            // TODO: Adjust the 'value' based on how 'lease', 'rent', 'wages' should apply to citizens.
-            // Using citizen.Ducats as a placeholder example for financial coloring.
-            let value: number | undefined;
-            switch (financialAspect) {
-              case 'lease': // Placeholder: Using Ducats
-              case 'rent':  // Placeholder: Using Ducats
-              case 'wages': // Placeholder: Using Ducats
-                value = citizen.Ducats || citizen.ducats; // Assuming citizen object has Ducats
-                break;
-              default:
-                value = undefined;
-            }
-            bgColor = getFinancialAspectColor(value, financialDataRange.min, financialDataRange.max);
-          }
+          const socialClassForIcon = socialClass || 'Citizen';
+          const iconFilename = `${socialClassForIcon}.png`;
+          const iconSrc = `/images/icons/${iconFilename}`;
+          const fallbackIconSrc = '/images/icons/Citizen.png';
           
           return (
             <div 
@@ -897,24 +869,23 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 left: `${position.x}px`,
                 top: `${position.y}px`,
                 transform: 'translate(-50%, -50%)',
-                zIndex: 19, // Increased z-index
-                position: 'absolute', // Ensure absolute positioning works
-                transition: 'none' // Remove transition to avoid lag
+                zIndex: 19,
+                position: 'absolute',
+                transition: 'none'
               }}
               onClick={() => handleCitizenClick(citizen)}
               onMouseEnter={() => handleCitizenHover(citizen)}
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className={`w-4 h-4 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center ${
-                  isCitizenInvolvedInBuildingHover ? 'scale-150' : '' // Apply scale if citizen is involved
+                className={`w-8 h-8 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center ${
+                  isCitizenInvolvedInBuildingHover ? 'scale-150' : ''
                 } ${
                   citizen.username === currentUsername ? 'ring-2 ring-purple-500 ring-opacity-80' : 
                   citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
                 }`}
                 style={{ 
-                  backgroundColor: bgColor, // Use the dynamically determined background color
-                  border: '1px solid white',
+                  border: '1px solid white', // Optional
                   boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
                              citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
@@ -923,9 +894,18 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   citizen.worksFor === currentUsername ? ' - Works for you' : ''
                 }`}
               >
-                <span className="text-white text-[8px] font-bold">
-                  {firstName?.[0] || '?'}{lastName?.[0] || '?'}
-                </span>
+                <img
+                  src={iconSrc}
+                  alt={`${socialClassForIcon} icon`}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== fallbackIconSrc) {
+                      target.src = fallbackIconSrc;
+                      target.alt = `${socialClassForIcon} (icon missing, fallback to Citizen)`;
+                    }
+                  }}
+                />
               </div>
             </div>
           );
