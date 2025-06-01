@@ -67,32 +67,50 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
     loadLandImages();
   }, [isVisible, polygonsToRender]);
 
-  // Initialize custom settings for new polygons
+  // Initialize and update custom settings for polygons
   useEffect(() => {
     if (!isVisible || polygonsToRender.length === 0) return;
 
     const newSettings: Record<string, { x: number, y: number, width: number, height: number }> = {};
-    let hasNewPolygons = false;
+    let hasChanges = false;
 
     polygonsToRender.forEach(({ polygon, centerX, centerY }) => {
       if (!polygon || !polygon.id) return;
       
+      const baseSize = 75; // Default base size
+      
       if (!customImageSettings[polygon.id]) {
-        const baseSize = 75; // Default base size
+        // Initialize settings for new polygons
         newSettings[polygon.id] = {
           x: centerX - (baseSize * scale) / 2,
           y: centerY - (baseSize * scale) / 2,
           width: baseSize * scale,
           height: baseSize * scale
         };
-        hasNewPolygons = true;
+        hasChanges = true;
+      } else if (!resizeMode) {
+        // Update position for existing polygons when not in resize mode
+        // This makes images move with the map when panning/zooming
+        const currentSettings = customImageSettings[polygon.id];
+        const newX = centerX - (currentSettings.width / 2);
+        const newY = centerY - (currentSettings.height / 2);
+        
+        // Only update if position has changed significantly
+        if (Math.abs(currentSettings.x - newX) > 1 || Math.abs(currentSettings.y - newY) > 1) {
+          newSettings[polygon.id] = {
+            ...currentSettings,
+            x: newX,
+            y: newY
+          };
+          hasChanges = true;
+        }
       }
     });
 
-    if (hasNewPolygons) {
+    if (hasChanges) {
       setCustomImageSettings(prev => ({ ...prev, ...newSettings }));
     }
-  }, [isVisible, polygonsToRender, scale, customImageSettings]);
+  }, [isVisible, polygonsToRender, scale, customImageSettings, resizeMode]);
 
   // Add mouse event handlers for the document
   useEffect(() => {
@@ -252,7 +270,8 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
               filter: nightFilter,
               opacity: 1,
               border: isSelected ? '2px dashed yellow' : 'none',
-              cursor: resizeMode ? 'move' : 'default'
+              cursor: resizeMode ? 'move' : 'default',
+              transform: resizeMode ? 'none' : undefined // Ensure no transform when in resize mode
             }}
             onMouseEnter={() => {
               if (!resizeMode) {
