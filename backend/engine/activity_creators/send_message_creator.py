@@ -32,11 +32,17 @@ def try_create(
     content = details.get('content')
     message_type = details.get('messageType', 'personal')
     target_building_id = details.get('targetBuildingId')  # Optional specific meeting place
+    conversation_length = details.get('conversationLength', 3)  # Default to 3 exchanges
     
     # Validate required parameters
     if not (receiver_username and content):
         log.error(f"Missing required details for send_message: receiverUsername or content")
         return False
+    
+    # Validate conversation_length
+    if not isinstance(conversation_length, int) or conversation_length < 1:
+        log.warning(f"Invalid conversationLength: {conversation_length}. Using default value of 3.")
+        conversation_length = 3
 
     sender = citizen_record['fields'].get('Username')
     ts = int(datetime.now(VENICE_TIMEZONE).timestamp())
@@ -148,7 +154,8 @@ def try_create(
     details_json = json.dumps({
         "receiverUsername": receiver_username,
         "content": content,
-        "messageType": message_type
+        "messageType": message_type,
+        "conversationLength": conversation_length
     })
     
     # 1. Create goto_location activity
@@ -163,6 +170,7 @@ def try_create(
             "receiverUsername": receiver_username,
             "content": content,
             "messageType": message_type,
+            "conversationLength": conversation_length,
             "activityType": "send_message",
             "nextStep": "deliver_message_interaction"
         }),

@@ -2,8 +2,9 @@ import logging
 import json
 import requests
 import os
+import html
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, Tuple
 from pyairtable import Table
 from backend.engine.utils.activity_helpers import _escape_airtable_value, VENICE_TIMEZONE
 
@@ -13,6 +14,7 @@ log = logging.getLogger(__name__)
 KINOS_API_URL = os.getenv("KINOS_API_URL", "https://api.kinos-engine.ai")
 KINOS_BLUEPRINT = os.getenv("KINOS_BLUEPRINT", "serenissima-ai")
 KINOS_MODEL = os.getenv("KINOS_MODEL", "gemini/gemini-2.5-pro-preview-03-25")
+DEFAULT_CONVERSATION_LENGTH = int(os.getenv("DEFAULT_CONVERSATION_LENGTH", "3"))
 
 def process_reply_to_message_fn(
     tables: Dict[str, Any],
@@ -39,6 +41,7 @@ def process_reply_to_message_fn(
     original_message_id = details.get('originalMessageId')
     receiver_username = details.get('receiverUsername')  # The original sender
     message_type = details.get('messageType', 'personal')
+    conversation_length = details.get('conversationLength', DEFAULT_CONVERSATION_LENGTH)
     
     if not (citizen and receiver_username and original_message_id):
         log.error(f"Missing data for reply: citizen={citizen}, receiver={receiver_username}, originalMessageId={original_message_id}")
@@ -63,11 +66,49 @@ def process_reply_to_message_fn(
     original_message = message_records[0]
     original_content = original_message['fields'].get('Content', '')
     
-    # Generate a reply using Kinos API
-    reply_content = generate_reply_with_kinos(citizen, receiver_username, original_content)
-    if not reply_content:
-        # Fallback to a simple reply if Kinos API fails
-        reply_content = f"Thank you for your message. I am responding to: \"{original_content[:50]}...\""
+    # Generate a conversation with multiple exchanges using Kinos API
+    final_reply_content = ""
+    conversation_history = []
+    
+    if conversation_length > 1:
+        log.info(f"Starting a conversation with {conversation_length} exchanges between {citizen} and {receiver_username}")
+        conversation_history = conduct_conversation(citizen, receiver_username, original_content, conversation_length)
+        
+        if conversation_history:
+            # The last message in the conversation is the final reply
+            final_reply_content = conversation_history[-1][1]  # (role, content) tuple
+            
+            # Add all intermediate messages to the channel history
+            for i, (role, content) in enumerate(conversation_history[:-1]):
+                # Skip the first message which is the original prompt
+                if i == 0 and role == "user":
+                    continue
+                
+                # Add intermediate messages to channel history
+                if role == "assistant":
+                    add_message_to_kinos_channel(
+                        receiver_username, 
+                        citizen, 
+                        content, 
+                        role="assistant", 
+                        metadata={"intermediate": True}
+                    )
+                elif role == "user":
+                    add_message_to_kinos_channel(
+                        citizen,
+                        receiver_username,
+                        content,
+                        role="user",
+                        metadata={"intermediate": True}
+                    )
+    
+    # If no conversation was conducted or it failed, generate a simple reply
+    if not final_reply_content:
+        final_reply_content = generate_reply_with_kinos(citizen, receiver_username, original_content)
+    
+    # If all API calls failed, use a fallback reply
+    if not final_reply_content:
+        final_reply_content = f"Thank you for your message. I am responding to: \"{original_content[:50]}...\""
     
     try:
         # 1. Create the reply message record
@@ -77,7 +118,7 @@ def process_reply_to_message_fn(
             "MessageId": reply_message_id,
             "Sender": citizen,
             "Receiver": receiver_username,
-            "Content": reply_content,
+            "Content": final_reply_content,
             "Type": message_type,
             "CreatedAt": datetime.utcnow().isoformat()
         }
@@ -114,7 +155,9 @@ def process_reply_to_message_fn(
                 "sender": citizen,
                 "messageType": message_type,
                 "originalMessageId": original_message_id,
-                "preview": reply_content[:50] + ("..." if len(reply_content) > 50 else "")
+                "preview": final_reply_content[:50] + ("..." if len(final_reply_content) > 50 else ""),
+                "conversationLength": conversation_length,
+                "hadConversation": len(conversation_history) > 0
             }),
             "Asset": reply_message_id,
             "AssetType": "message",
@@ -124,8 +167,8 @@ def process_reply_to_message_fn(
         
         tables["notifications"].create(notification_fields)
         
-        # 4. Add the message to the Kinos channel for the receiver
-        add_message_to_kinos_channel(receiver_username, citizen, reply_content)
+        # 4. Add the final message to the Kinos channel for the receiver
+        add_message_to_kinos_channel(receiver_username, citizen, final_reply_content)
         
         log.info(f"Successfully delivered reply from {citizen} to {receiver_username}")
         log.info(f"Created reply message record with ID: {reply_message_id}")
@@ -136,6 +179,139 @@ def process_reply_to_message_fn(
         import traceback
         log.error(traceback.format_exc())
         return False
+
+def conduct_conversation(
+    replier_username: str, 
+    sender_username: str, 
+    original_message: str, 
+    max_exchanges: int
+) -> List[Tuple[str, str]]:
+    """
+    Conduct a multi-turn conversation between the replier and sender.
+    
+    Args:
+        replier_username: The username of the citizen replying to the message
+        sender_username: The username of the original sender
+        original_message: The content of the original message
+        max_exchanges: Maximum number of message exchanges to simulate
+    
+    Returns:
+        List of (role, content) tuples representing the conversation history
+    """
+    conversation_history = [("user", original_message)]
+    
+    try:
+        # First response from the replier
+        first_reply = generate_reply_with_kinos(replier_username, sender_username, original_message)
+        if not first_reply:
+            log.error(f"Failed to generate first reply in conversation")
+            return []
+        
+        conversation_history.append(("assistant", first_reply))
+        
+        # Continue the conversation for the specified number of exchanges
+        for i in range(1, max_exchanges - 1):
+            # Alternate between sender and replier
+            if i % 2 == 1:  # Sender's turn
+                # Generate a follow-up message from the sender
+                sender_message = generate_follow_up_message(
+                    sender_username, 
+                    replier_username, 
+                    conversation_history
+                )
+                if not sender_message:
+                    log.error(f"Failed to generate sender message in conversation round {i}")
+                    break
+                
+                conversation_history.append(("user", sender_message))
+            else:  # Replier's turn
+                # Generate a response from the replier
+                replier_message = generate_follow_up_message(
+                    replier_username, 
+                    sender_username, 
+                    conversation_history
+                )
+                if not replier_message:
+                    log.error(f"Failed to generate replier message in conversation round {i}")
+                    break
+                
+                conversation_history.append(("assistant", replier_message))
+        
+        # Ensure the conversation ends with the replier's message
+        if len(conversation_history) % 2 == 1:  # If last message was from sender
+            final_reply = generate_follow_up_message(
+                replier_username, 
+                sender_username, 
+                conversation_history
+            )
+            if final_reply:
+                conversation_history.append(("assistant", final_reply))
+        
+        return conversation_history
+    except Exception as e:
+        log.error(f"Error conducting conversation: {e}")
+        return conversation_history  # Return whatever we have so far
+
+def generate_follow_up_message(
+    speaker_username: str, 
+    listener_username: str, 
+    conversation_history: List[Tuple[str, str]]
+) -> Optional[str]:
+    """
+    Generate a follow-up message in a conversation based on the history.
+    
+    Args:
+        speaker_username: The username of the citizen speaking next
+        listener_username: The username of the citizen listening
+        conversation_history: List of (role, content) tuples representing the conversation so far
+    
+    Returns:
+        The generated message content or None if the API call fails
+    """
+    try:
+        endpoint = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{speaker_username}/channels/{listener_username}/messages"
+        
+        # Format the conversation history for the API
+        formatted_history = []
+        for role, content in conversation_history:
+            formatted_history.append({"role": role, "content": content})
+        
+        # Determine if this is the sender or replier speaking
+        is_replier = conversation_history[0][1] != speaker_username  # First message is from sender
+        
+        system_prompt = f"You are {speaker_username}, a citizen of La Serenissima, in a conversation with {listener_username}. "
+        if is_replier:
+            system_prompt += "Continue the conversation naturally, responding to what was just said."
+        else:
+            system_prompt += "Continue the conversation naturally, asking follow-up questions or responding to what was just said."
+        
+        payload = {
+            "content": "Please continue this conversation with a natural response.",
+            "model": KINOS_MODEL,
+            "history_length": 25,
+            "mode": "creative",
+            "addSystem": system_prompt,
+            "conversation": formatted_history
+        }
+        
+        log.info(f"Generating follow-up message from {speaker_username} to {listener_username}")
+        response = requests.post(endpoint, json=payload)
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            message_content = response_data.get("content", "")
+            
+            # Unescape HTML entities if present
+            message_content = html.unescape(message_content)
+            
+            log.info(f"Successfully generated follow-up message")
+            return message_content
+        else:
+            log.error(f"Failed to generate follow-up message: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        log.error(f"Error generating follow-up message: {e}")
+        return None
 
 def generate_reply_with_kinos(replier_username: str, sender_username: str, original_message: str) -> Optional[str]:
     """
@@ -168,7 +344,6 @@ def generate_reply_with_kinos(replier_username: str, sender_username: str, origi
             reply_content = response_data.get("content", "")
             
             # Unescape HTML entities if present
-            import html
             reply_content = html.unescape(reply_content)
             
             log.info(f"Successfully generated reply with Kinos API")
@@ -180,7 +355,13 @@ def generate_reply_with_kinos(replier_username: str, sender_username: str, origi
         log.error(f"Error calling Kinos API: {e}")
         return None
 
-def add_message_to_kinos_channel(receiver_username: str, sender_username: str, message_content: str) -> bool:
+def add_message_to_kinos_channel(
+    receiver_username: str, 
+    sender_username: str, 
+    message_content: str,
+    role: str = "user",
+    metadata: Dict[str, Any] = None
+) -> bool:
     """
     Add the message to the Kinos channel to keep the AI's conversation history up to date.
     
@@ -188,6 +369,8 @@ def add_message_to_kinos_channel(receiver_username: str, sender_username: str, m
         receiver_username: The username of the message receiver
         sender_username: The username of the message sender
         message_content: The content of the message
+        role: The role of the message sender (user or assistant)
+        metadata: Additional metadata for the message
     
     Returns:
         True if successful, False otherwise
@@ -195,13 +378,18 @@ def add_message_to_kinos_channel(receiver_username: str, sender_username: str, m
     try:
         endpoint = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{receiver_username}/channels/{sender_username}/add-message"
         
+        default_metadata = {
+            "source": "serenissima_game",
+            "tags": ["in_game_message"]
+        }
+        
+        if metadata:
+            default_metadata.update(metadata)
+        
         payload = {
             "message": message_content,
-            "role": "user",
-            "metadata": {
-                "source": "serenissima_game",
-                "tags": ["in_game_message"]
-            }
+            "role": role,
+            "metadata": default_metadata
         }
         
         log.info(f"Adding message to Kinos channel for {receiver_username}")

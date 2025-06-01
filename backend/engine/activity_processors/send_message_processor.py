@@ -196,7 +196,8 @@ def _process_message_delivery(
             "Details": json.dumps({
                 "originalMessageId": message_id,
                 "receiverUsername": sender,  # The original sender becomes the receiver of the reply
-                "messageType": message_type
+                "messageType": message_type,
+                "conversationLength": 3  # Default to 3 exchanges in the conversation
             }),
             "Status": "created",
             "Title": f"Replying to message from {sender}",
