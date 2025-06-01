@@ -64,6 +64,13 @@ export default function MapPage() {
 
   // State to store raw polygon data for batch download
   const [rawPolygonsData, setRawPolygonsData] = useState<any[]>([]);
+
+  // State for editing GroundOverlays
+  const [editingOverlayId, setEditingOverlayId] = useState<string | null>(null);
+  const editingOverlayRef = useRef<google.maps.GroundOverlay | null>(null);
+  const editingOverlayInitialBoundsRef = useRef<google.maps.LatLngBounds | null>(null);
+  const editingHandlesRef = useRef<google.maps.Marker[]>([]);
+  const isDraggingHandleRef = useRef<boolean>(false);
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -308,6 +315,16 @@ export default function MapPage() {
       // e.g., deselecting polygons or other elements.
       // For now, this is a placeholder.
       console.log('Map clicked at:', event.latLng.toJSON());
+
+      // If an overlay is being edited, clicking the map deselects it
+      if (editingOverlayId && !isDraggingHandleRef.current) {
+        console.log('Map clicked while editing overlay, clearing editing state.');
+        clearEditingState();
+      } else if (showMapPolygonDisplayPanel) {
+        // If display panel is open and map is clicked, close it.
+        setShowMapPolygonDisplayPanel(false);
+        setSelectedMapPolygonData(null);
+      }
     });
     
     // Add this debug message
@@ -403,6 +420,12 @@ export default function MapPage() {
                 }
               );
               groundOverlaysMapRef.current[polygon.id] = groundOverlay; // Store in the map
+
+              // Add click listener to the GroundOverlay
+              groundOverlay.addListener('click', () => {
+                handleOverlayClick(polygon.id, groundOverlay);
+              });
+
             } else {
               console.warn(`Could not calculate bounds or mapRef not ready for polygon ${polygon.id}, skipping image overlay.`);
             }
