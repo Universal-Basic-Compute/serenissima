@@ -88,7 +88,7 @@ Stocke les instances de ressources et leur emplacement.
 -   `Name` (Texte): Nom lisible de la ressource.
 -   `Asset` (Texte): Identifiant personnalisé de l'entité qui détient cette ressource (ex: `BuildingId` d'un bâtiment, `Username` d'un citoyen).
 -   `AssetType` (Texte): Type de l'entité détentrice (ex: `building`, `citizen`).
--   `Owner` (Lien vers `CITIZENS` via `Username`): Propriétaire de cette pile de ressources.
+-   `Owner` (Texte): `Username` du propriétaire de cette pile de ressources.
 -   `Count` (Nombre): Quantité de cette ressource.
 -   `Position` (Texte multiligne): Chaîne JSON des coordonnées de la ressource (ex: `{"lat": 45.43, "lng": 12.33}`). Utilisé si la ressource n'est pas directement dans un bâtiment ou sur un citoyen, ou pour surcharger leur position.
 -   `ConsumedAt` (Date/Heure): Horodatage ISO de la dernière consommation (pour la production).
