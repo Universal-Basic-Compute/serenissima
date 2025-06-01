@@ -142,3 +142,26 @@ export async function connectAndPersistWallet(address: string): Promise<any> {
     return null;
   }
 }
+
+/**
+ * Retrieves the current citizen's username from storage.
+ * Prefers sessionStorage, then falls back to localStorage.
+ * @returns The citizen's username or null if not found.
+ */
+export function getCurrentCitizenUsername(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  // Try sessionStorage first
+  const sessionUsername = sessionStorage.getItem('username');
+  if (sessionUsername) {
+    return sessionUsername;
+  }
+
+  // Fallback to localStorage
+  const localUsername = localStorage.getItem('username');
+  if (localUsername) {
+    return localUsername;
+  }
+
+  return null;
+}
