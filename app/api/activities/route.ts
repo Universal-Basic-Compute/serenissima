@@ -61,11 +61,14 @@ export async function GET(request: Request) {
     }
 
     // Handle specific timeRange or ongoing filters
+    let applyDefaultStatusExclusion = true; // Flag to control application of default status exclusion
+
     if (timeRange === '24h') {
       const twentyFourHourFilter = `IS_AFTER({CreatedAt}, DATEADD(NOW(), -24, 'hours'))`;
       filterByFormulaParts.push(twentyFourHourFilter);
       loggableFilters['timeRange'] = '24h';
       console.log('Applying 24-hour time range filter (no timezone).');
+      applyDefaultStatusExclusion = false; // Specific time range filter applied
     } else if (ongoing) {
       // If ongoing=true, filter for statuses 'created' or 'in_progress' at the Airtable level.
       // The precise JavaScript time-based filter will then determine true "ongoing" status.
@@ -73,25 +76,22 @@ export async function GET(request: Request) {
       loggableFilters['ongoing'] = 'true';
       loggableFilters['Status_ongoing_include'] = 'created, in_progress';
       console.log('Applying Airtable status filter for ongoing activities (Status = created OR Status = in_progress). JS will handle precise time logic.');
-    } else {
-      // Default filter: if not specifically asking for 'ongoing' or a specific status via dynamic filter,
-      // exclude processed, failed, AND interrupted.
-      if (!searchParams.has('Status')) { // Only apply default if Status is not explicitly queried
-        filterByFormulaParts.push(`{Status} != 'processed'`);
-        filterByFormulaParts.push(`{Status} != 'failed'`);
-        filterByFormulaParts.push(`{Status} != 'interrupted'`);
-        loggableFilters['Status_default_exclude'] = 'processed, failed, interrupted';
-        console.log('Applying default status filter to exclude processed, failed, and interrupted activities.');
-      }
+      applyDefaultStatusExclusion = false; // Specific 'ongoing' filter applied
     }
 
     // Add dynamic filters from other query parameters
+    // This needs to happen before deciding on default status exclusion,
+    // because if 'Status' is dynamically filtered, we shouldn't apply the default.
     for (const [key, value] of searchParams.entries()) {
       if (reservedParams.includes(key.toLowerCase())) {
         continue;
       }
       const airtableField = key; // Assuming query param key IS the Airtable field name
       loggableFilters[airtableField] = value;
+
+      if (airtableField.toLowerCase() === 'status') { // Case-insensitive check for 'Status'
+        applyDefaultStatusExclusion = false; // User is providing a specific status filter
+      }
 
       const numValue = parseFloat(value);
       if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
@@ -102,6 +102,23 @@ export async function GET(request: Request) {
         filterByFormulaParts.push(`{${airtableField}} = FALSE()`);
       } else {
         filterByFormulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
+      }
+    }
+
+    // Apply default status exclusion if no other status-related filter was applied
+    if (applyDefaultStatusExclusion) {
+      // If limit is 1 and no other specific time/status filters were applied by earlier logic,
+      // assume it's a "get latest" request and don't exclude by status.
+      const isLikelyGetLatestRequest = limit === 1 && !timeRange && !ongoing && !searchParams.has('Status'); // Re-check searchParams.has('Status') here for safety
+      
+      if (!isLikelyGetLatestRequest) {
+        filterByFormulaParts.push(`{Status} != 'processed'`);
+        filterByFormulaParts.push(`{Status} != 'failed'`);
+        filterByFormulaParts.push(`{Status} != 'interrupted'`);
+        loggableFilters['Status_default_exclude'] = 'processed, failed, interrupted';
+        console.log('Applying default status filter to exclude processed, failed, and interrupted activities.');
+      } else {
+        console.log('Likely "get latest" request (limit=1, no explicit status/time filters). Skipping default status exclusion.');
       }
     }
     
