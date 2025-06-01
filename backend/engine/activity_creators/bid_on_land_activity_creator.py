@@ -18,10 +18,12 @@ def try_create(
     details: Dict[str, Any]
 ) -> bool:
     """
-    Create a goto_location activity for the citizen to travel to an official location
-    (courthouse or town_hall) to submit a land bid.
+    Create both activities in the bid_on_land chain at once:
+    1. A goto_location activity for travel to the official location
+    2. A submit_land_bid activity that will execute after arrival
     
-    This is the first step in a multi-activity chain for bidding on land.
+    This approach creates the complete activity chain upfront rather than
+    creating the second activity upon completion of the first.
     """
     land_id = details.get('landId')
     bid_amount = details.get('bidAmount')
@@ -49,24 +51,28 @@ def try_create(
         log.error(f"Could not find path between {from_building} and {to_building}")
         return False
     
-    # Create goto_location activity
+    # Create activity IDs
     goto_activity_id = f"goto_location_for_bid_{_escape_airtable_value(land_id)}_{citizen}_{ts}"
+    submit_activity_id = f"submit_land_bid_{_escape_airtable_value(land_id)}_{citizen}_{ts}"
     
     now_utc = datetime.utcnow()
-    start_date = now_utc.isoformat()
+    travel_start_date = now_utc.isoformat()
     
-    # Calculate end date based on path duration
+    # Calculate travel end date based on path duration
     duration_seconds = path_data.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min if not specified
-    end_date = (now_utc + timedelta(seconds=duration_seconds)).isoformat()
+    travel_end_date = (now_utc + timedelta(seconds=duration_seconds)).isoformat()
+    
+    # Calculate submission activity times (15 minutes after arrival)
+    submit_start_date = travel_end_date  # Start immediately after arrival
+    submit_end_date = (datetime.fromisoformat(travel_end_date.replace('Z', '+00:00')) + timedelta(minutes=15)).isoformat()
     
     # Store bid details in the Details field for the processor to use
     details_json = json.dumps({
         "landId": land_id,
-        "bidAmount": bid_amount,
-        "activityType": "bid_on_land",
-        "nextStep": "submit_land_bid"
+        "bidAmount": bid_amount
     })
     
+    # 1. Create goto_location activity
     goto_payload = {
         "ActivityId": goto_activity_id,
         "Type": "goto_location",
@@ -74,21 +80,49 @@ def try_create(
         "FromBuilding": from_building,
         "ToBuilding": to_building,
         "Path": json.dumps(path_data.get('path', [])),
-        "Details": details_json,
+        "Details": json.dumps({
+            "landId": land_id,
+            "bidAmount": bid_amount,
+            "activityType": "bid_on_land",
+            "nextStep": "submit_land_bid"
+        }),
         "Status": "created",
         "Title": f"Traveling to submit bid on land {land_id}",
         "Description": f"Traveling to {to_building_record['fields'].get('Name', to_building)} to submit a bid of {bid_amount} Ducats on land {land_id}",
-        "Notes": f"First step of bid_on_land process. Will create submit_land_bid activity upon arrival.",
-        "CreatedAt": start_date,
-        "StartDate": start_date,
-        "EndDate": end_date,
+        "Notes": f"First step of bid_on_land process. Will be followed by submit_land_bid activity.",
+        "CreatedAt": travel_start_date,
+        "StartDate": travel_start_date,
+        "EndDate": travel_end_date,
+        "Priority": 20  # Medium-high priority for economic activities
+    }
+    
+    # 2. Create submit_land_bid activity (to be executed after arrival)
+    submit_payload = {
+        "ActivityId": submit_activity_id,
+        "Type": "submit_land_bid",
+        "Citizen": citizen,
+        "FromBuilding": to_building,  # Citizen is already at the courthouse/town_hall
+        "ToBuilding": to_building,    # Stays at the same location
+        "Details": details_json,
+        "Status": "created",
+        "Title": f"Submitting bid on land {land_id}",
+        "Description": f"Submitting a bid of {bid_amount} Ducats on land {land_id}",
+        "Notes": f"Second step of bid_on_land process. Will create building_bid contract.",
+        "CreatedAt": travel_start_date,  # Created at the same time as the goto activity
+        "StartDate": submit_start_date,  # But starts after the goto activity ends
+        "EndDate": submit_end_date,
         "Priority": 20  # Medium-high priority for economic activities
     }
 
     try:
+        # Create both activities in sequence
         tables["activities"].create(goto_payload)
-        log.info(f"Created goto_location activity {goto_activity_id} for citizen {citizen} to bid on land {land_id}")
+        tables["activities"].create(submit_payload)
+        
+        log.info(f"Created complete bid_on_land activity chain for citizen {citizen}:")
+        log.info(f"  1. goto_location activity {goto_activity_id}")
+        log.info(f"  2. submit_land_bid activity {submit_activity_id}")
         return True
     except Exception as e:
-        log.error(f"Failed to create goto_location activity for bid_on_land: {e}")
+        log.error(f"Failed to create bid_on_land activity chain: {e}")
         return False

@@ -16,7 +16,10 @@ def process_goto_location_fn(
     
     This is a generic travel activity processor that can be used as part of
     multi-activity chains. It checks the Details field for "activityType" and
-    "nextStep" to determine if a specialized processor should handle the arrival.
+    "nextStep" to determine if any special handling is needed.
+    
+    With the new approach of creating complete activity chains upfront,
+    this processor no longer needs to create follow-up activities.
     """
     fields = activity_record.get('fields', {})
     citizen = fields.get('Citizen')
@@ -39,16 +42,10 @@ def process_goto_location_fn(
     
     if activity_type and next_step:
         log.info(f"goto_location is part of a {activity_type} activity chain, next step: {next_step}")
+        log.info(f"The {next_step} activity should already be scheduled to start after this activity.")
         
-        # Delegate to specialized processors based on activityType
-        if activity_type == "bid_on_land" and next_step == "submit_land_bid":
-            from backend.engine.activity_processors.bid_on_land_activity_processor import process_bid_on_land_fn
-            return process_bid_on_land_fn(tables, activity_record, building_type_defs, resource_defs)
-        
-        # Add more specialized handlers here as needed
-        # elif activity_type == "another_multi_step_activity":
-        #     from backend.engine.activity_processors.another_processor import process_fn
-        #     return process_fn(tables, activity_record, building_type_defs, resource_defs)
+        # No need to delegate to specialized processors or create follow-up activities
+        # as they are already created by the activity creator
     
     # Default: just mark as processed
     log.info(f"Processed goto_location activity for citizen {citizen}")

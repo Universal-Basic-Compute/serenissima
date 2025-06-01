@@ -17,7 +17,7 @@ def process_bid_on_land_fn(
     Process activities in the bid_on_land chain.
     
     This processor handles two types of activities:
-    1. goto_location - When citizen arrives at courthouse/town_hall, create submit_land_bid activity
+    1. goto_location - When citizen arrives at courthouse/town_hall (no action needed as submit_land_bid is already created)
     2. submit_land_bid - Create the actual building_bid contract
     """
     fields = activity_record.get('fields', {})
@@ -33,7 +33,11 @@ def process_bid_on_land_fn(
     
     # Handle goto_location activity (first step in chain)
     if activity_type == "goto_location" and details.get("activityType") == "bid_on_land":
-        return _handle_arrival_at_official_location(tables, activity_record, details)
+        # No need to create the submit_land_bid activity as it's already created
+        # Just log and return success
+        log.info(f"Citizen {citizen} has arrived at the official location for bid on land {details.get('landId')}.")
+        log.info(f"The submit_land_bid activity should already be scheduled to start after this activity.")
+        return True
     
     # Handle submit_land_bid activity (second step in chain)
     elif activity_type == "submit_land_bid":
@@ -55,61 +59,8 @@ def process_bid_on_land_fn(
         log.error(f"Unexpected activity type in bid_on_land processor: {activity_type}")
         return False
 
-def _handle_arrival_at_official_location(
-    tables: Dict[str, Any],
-    arrival_activity: Dict[str, Any],
-    details: Dict[str, Any]
-) -> bool:
-    """
-    Handle citizen arrival at courthouse/town_hall.
-    Create a submit_land_bid activity to represent the paperwork and official submission.
-    """
-    fields = arrival_activity.get('fields', {})
-    citizen = fields.get('Citizen')
-    to_building = fields.get('ToBuilding')  # courthouse/town_hall
-    land_id = details.get('landId')
-    bid_amount = details.get('bidAmount')
-    
-    if not (citizen and to_building and land_id and bid_amount):
-        log.error(f"Missing data for creating submit_land_bid: citizen={citizen}, to_building={to_building}, land_id={land_id}, bid_amount={bid_amount}")
-        return False
-    
-    # Create a short duration activity for the submission process
-    now_utc = datetime.utcnow()
-    start_date = now_utc.isoformat()
-    # Submission takes 15 minutes
-    end_date = (now_utc + timedelta(minutes=15)).isoformat()
-    
-    ts = int(datetime.now(VENICE_TIMEZONE).timestamp())
-    submit_activity_id = f"submit_land_bid_{_escape_airtable_value(land_id)}_{citizen}_{ts}"
-    
-    submit_payload = {
-        "ActivityId": submit_activity_id,
-        "Type": "submit_land_bid",
-        "Citizen": citizen,
-        "FromBuilding": to_building,  # Citizen is already at the courthouse/town_hall
-        "ToBuilding": to_building,    # Stays at the same location
-        "Details": json.dumps({
-            "landId": land_id,
-            "bidAmount": bid_amount
-        }),
-        "Status": "created",
-        "Title": f"Submitting bid on land {land_id}",
-        "Description": f"Submitting a bid of {bid_amount} Ducats on land {land_id}",
-        "Notes": f"Second step of bid_on_land process. Will create building_bid contract.",
-        "CreatedAt": start_date,
-        "StartDate": start_date,
-        "EndDate": end_date,
-        "Priority": 20  # Medium-high priority for economic activities
-    }
-    
-    try:
-        tables["activities"].create(submit_payload)
-        log.info(f"Created submit_land_bid activity {submit_activity_id} for citizen {citizen}")
-        return True
-    except Exception as e:
-        log.error(f"Failed to create submit_land_bid activity: {e}")
-        return False
+# The _handle_arrival_at_official_location function is no longer needed since
+# we create both activities upfront in the activity creator
 
 def _create_land_bid_contract(
     tables: Dict[str, Any],
