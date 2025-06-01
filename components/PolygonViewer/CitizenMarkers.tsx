@@ -834,7 +834,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 />
                 <span
                   className="absolute inset-0 flex items-center justify-center text-[9px] font-bold pointer-events-none" // Adjusted font size
-                  style={{ color: initialsColor, textShadow: '0px 0px 2px rgba(0,0,0,0.8)' }} 
+                  style={{ color: initialsColor, textShadow: '0px 0px 1px rgba(0,0,0,0.6)' }} 
                 >
                   {firstName?.[0]?.toUpperCase() || ''}{lastName?.[0]?.toUpperCase() || ''}
                 </span>
@@ -932,7 +932,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 />
                 <span
                   className="absolute inset-0 flex items-center justify-center text-[9px] font-bold pointer-events-none" // Adjusted font size
-                  style={{ color: initialsColor, textShadow: '0px 0px 2px rgba(0,0,0,0.8)' }} 
+                  style={{ color: initialsColor, textShadow: '0px 0px 1px rgba(0,0,0,0.6)' }} 
                 >
                   {firstName?.[0]?.toUpperCase() || ''}{lastName?.[0]?.toUpperCase() || ''}
                 </span>
