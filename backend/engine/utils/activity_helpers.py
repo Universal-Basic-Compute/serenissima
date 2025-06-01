@@ -1037,3 +1037,57 @@ def update_resource_count(
         import traceback
         log.error(traceback.format_exc())
         return False
+
+def create_activity_record(
+    tables: Dict[str, Table],
+    citizen_username: str,
+    activity_type: str,
+    start_date_iso: str,
+    end_date_iso: str,
+    from_building_id: Optional[str] = None,
+    to_building_id: Optional[str] = None,
+    path_json: Optional[str] = None,
+    details_json: Optional[str] = None,
+    notes: Optional[str] = None,
+    contract_id: Optional[str] = None, # Custom ContractId, not Airtable record ID
+    transporter_username: Optional[str] = None, # Username of the transporter, if any
+    title: Optional[str] = None, # Optional title for the activity
+    description: Optional[str] = None, # Optional description
+    thought: Optional[str] = None # Optional thought from the citizen
+) -> Optional[Dict]:
+    """Creates a new activity record in Airtable."""
+    activity_guid = f"{activity_type.lower().replace('_', '-')}-{citizen_username.lower()}-{uuid.uuid4().hex[:8]}"
+    
+    payload = {
+        "ActivityId": activity_guid,
+        "Citizen": citizen_username,
+        "Type": activity_type,
+        "StartDate": start_date_iso,
+        "EndDate": end_date_iso,
+        "Status": "created" # Default status for new activities
+    }
+    if from_building_id: payload["FromBuilding"] = from_building_id
+    if to_building_id: payload["ToBuilding"] = to_building_id
+    if path_json: payload["Path"] = path_json
+    if details_json: payload["Details"] = details_json
+    if notes: payload["Notes"] = notes
+    if contract_id: payload["ContractId"] = contract_id
+    if transporter_username: payload["Transporter"] = transporter_username
+    if title: payload["Title"] = title
+    if description: payload["Description"] = description
+    if thought: payload["Thought"] = thought
+    
+    # Add CreatedAt timestamp
+    payload["CreatedAt"] = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
+
+    try:
+        log.info(f"{LogColors.OKBLUE}Creating activity: {activity_guid} for {citizen_username} of type {activity_type}{LogColors.ENDC}")
+        log.debug(f"Activity payload: {json.dumps(payload, indent=2)}")
+        new_activity_record = tables['activities'].create(payload)
+        log.info(f"{LogColors.OKGREEN}Successfully created activity {activity_guid} (Airtable ID: {new_activity_record['id']}).{LogColors.ENDC}")
+        return new_activity_record
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error creating activity {activity_guid} for {citizen_username}: {e}{LogColors.ENDC}")
+        import traceback
+        log.error(traceback.format_exc())
+        return None
