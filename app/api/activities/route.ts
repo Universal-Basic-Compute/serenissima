@@ -56,7 +56,7 @@ export async function GET(request: Request) {
     
     // Handle specific hasPath filter
     if (hasPath) {
-      filterByFormulaParts.push(`NOT({Path} = BLANK())`);
+      filterByFormulaParts.push(`CONTAINS({Path}, '[')`);
       loggableFilters['hasPath'] = 'true';
     }
 
