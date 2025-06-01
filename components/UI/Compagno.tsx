@@ -1645,7 +1645,8 @@ Your response:`;
                                   <span className={`ml-2 opacity-70 ${
                                     citizen.distance < 100 ? 'text-green-600' :
                                     citizen.distance < 500 ? 'text-yellow-600' :
-                                    'text-amber-600'
+                                    citizen.distance <= 1500 ? 'text-amber-600' : 
+                                    'text-red-600' // Orange-rouge pour les distances > 1500m
                                   }`}>(~{
                                     citizen.distance >= 1000 
                                       ? `${(citizen.distance / 1000).toFixed(1)}km` 
