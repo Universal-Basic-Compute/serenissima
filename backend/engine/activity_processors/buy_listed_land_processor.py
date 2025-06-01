@@ -131,7 +131,8 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
 
         # Optional: Cancel other active offers for this land made by the buyer or others
         # Example: Cancel active 'land_offer' by the buyer for this land
-        buyer_offers_formula = f"AND({{Asset}}='{land_id_being_bought}', {{AssetType}}='land', {{Type}}='land_offer', {{BuyerUsername}}='{buyer_username}', {{Status}}='active')"
+        # Assuming 'Buyer' field in CONTRACTS stores the username directly
+        buyer_offers_formula = f"AND({{Asset}}='{land_id_being_bought}', {{AssetType}}='land', {{Type}}='land_offer', {{Buyer}}='{buyer_username}', {{Status}}='active')"
         buyer_offers = tables['contracts'].all(formula=buyer_offers_formula)
         for offer in buyer_offers:
             tables['contracts'].update(offer['id'], {"Status": "cancelled", "Notes": f"Cancelled: Buyer {buyer_username} purchased land {land_id_being_bought} via listing."})

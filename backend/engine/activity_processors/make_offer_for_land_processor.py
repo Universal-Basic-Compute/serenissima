@@ -58,7 +58,8 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
         land_name = land_record['fields'].get('HistoricalName', land_id_for_offer)
 
         # Check if buyer already has an active offer for this land
-        existing_offer_formula = f"AND({{Asset}}='{land_id_for_offer}', {{AssetType}}='land', {{Type}}='land_offer', {{BuyerUsername}}='{buyer_username}', {{Status}}='active')"
+        # Assuming 'Buyer' field in CONTRACTS stores the username directly
+        existing_offer_formula = f"AND({{Asset}}='{land_id_for_offer}', {{AssetType}}='land', {{Type}}='land_offer', {{Buyer}}='{buyer_username}', {{Status}}='active')"
         existing_offers = tables['contracts'].all(formula=existing_offer_formula)
         if existing_offers:
             log.warning(f"{LogColors.WARNING}Citizen {buyer_username} already has an active offer for land {land_id_for_offer}. Activity {activity_guid}. Skipping new offer.{LogColors.ENDC}")
@@ -94,13 +95,16 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
             "Description": f"{buyer_username} offers to buy land {land_name} (ID: {land_id_for_offer}) for {offer_price} ducats.",
             "CreatedAt": now_iso,
             "UpdatedAt": now_iso,
-            "BuyerUsername": buyer_username, # Store username as text for easier querying
+            # Buyer field will store the username directly
             # Optional: EndAt for offer expiration
         }
-        if seller_airtable_id_list:
-            contract_payload["Seller"] = seller_airtable_id_list
-            if target_seller_username: # If we identified a target seller by username
-                 contract_payload["SellerUsername"] = target_seller_username
+        # Ensure the 'Buyer' field in contract_payload is the username string
+        contract_payload["Buyer"] = buyer_username
+
+        if target_seller_username: # If a specific seller is targeted
+            # Assuming 'Seller' field also stores username directly
+            contract_payload["Seller"] = target_seller_username
+        # If no target_seller_username, the Seller field might be left null or handled as per game logic for speculative offers
 
         new_contract = tables['contracts'].create(contract_payload)
         log.info(f"{LogColors.SUCCESS}Successfully created land offer contract {new_contract['id']} (Custom ID: {contract_id}) for land {land_id_for_offer} by {buyer_username} at {offer_price} ducats. Activity {activity_guid}.{LogColors.ENDC}")

@@ -144,7 +144,8 @@ def process_accept_land_offer_fn(tables: dict, activity_record: dict, building_t
             log.info(f"{LogColors.PROCESS}Cancelled other active offer {other_offer['fields'].get('ContractId')} for land {land_id_being_sold}.{LogColors.ENDC}")
         
         # Example: Cancel active 'land_listing' by the seller for this land
-        seller_listing_formula = f"AND({{Asset}}='{land_id_being_sold}', {{AssetType}}='land', {{Type}}='land_listing', {{SellerUsername}}='{seller_username}', {{Status}}='active')"
+        # Assuming 'Seller' field in CONTRACTS stores the username directly
+        seller_listing_formula = f"AND({{Asset}}='{land_id_being_sold}', {{AssetType}}='land', {{Type}}='land_listing', {{Seller}}='{seller_username}', {{Status}}='active')"
         seller_listings = tables['contracts'].all(formula=seller_listing_formula)
         for listing in seller_listings:
             tables['contracts'].update(listing['id'], {"Status": "cancelled", "Notes": f"Cancelled: Land {land_id_being_sold} sold via offer {offer_contract_custom_id}."})

@@ -69,7 +69,8 @@ def process_list_land_for_sale_fn(tables: dict, activity_record: dict, building_
             return False
 
         # Check for existing active 'land_listing' by this seller for this land
-        existing_listing_formula = f"AND({{Asset}}='{land_id_to_list}', {{AssetType}}='land', {{Type}}='land_listing', {{SellerUsername}}='{seller_username}', {{Status}}='active')"
+        # Assuming 'Seller' field in CONTRACTS stores the username directly
+        existing_listing_formula = f"AND({{Asset}}='{land_id_to_list}', {{AssetType}}='land', {{Type}}='land_listing', {{Seller}}='{seller_username}', {{Status}}='active')"
         existing_listings = tables['contracts'].all(formula=existing_listing_formula)
         if existing_listings:
             log.warning(f"{LogColors.WARNING}Citizen {seller_username} already has an active listing for land {land_id_to_list}. Activity {activity_guid}. Skipping new listing.{LogColors.ENDC}")
@@ -98,10 +99,13 @@ def process_list_land_for_sale_fn(tables: dict, activity_record: dict, building_
             "Description": f"Land parcel {land_name} (ID: {land_id_to_list}) offered for sale by {seller_username} for {price} ducats.",
             "CreatedAt": now_iso,
             "UpdatedAt": now_iso,
-            "SellerUsername": seller_username, # Store username as text for easier querying
+            # Seller field will store the username directly as per clarification
             # Optional: EndAt for listing expiration
         }
         
+        # Ensure the 'Seller' field in contract_payload is the username string, not a list
+        contract_payload["Seller"] = seller_username 
+
         new_contract = tables['contracts'].create(contract_payload)
         log.info(f"{LogColors.SUCCESS}Successfully created land listing contract {new_contract['id']} (Custom ID: {contract_id}) for land {land_id_to_list} by {seller_username} at {price} ducats. Activity {activity_guid}.{LogColors.ENDC}")
         
