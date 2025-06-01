@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     // Prepare filter formula based on parameters
     const filterFormulaParts: string[] = [];
     const loggableFilters: Record<string, string> = {};
-    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection', 'calculateAll', 'relevantToCitizen', 'assetType', 'targetCitizen', 'excludeAll'];
+    const reservedParams = ['limit', 'offset', 'sortfield', 'sortdirection', 'calculateall', 'relevanttocitizen', 'assettype', 'targetcitizen', 'excludeall'];
 
     // Helper function to escape single quotes in usernames for Airtable formulas
     // const escapeAirtableString = (str: string) => str.replace(/'/g, "\\'"); // Already defined as escapeAirtableValue
