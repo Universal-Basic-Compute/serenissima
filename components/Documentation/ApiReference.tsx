@@ -2450,9 +2450,9 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <p className="mb-2">
             Attempts to have a citizen perform a specified type of endeavor, which can be a traditional activity (e.g., "eat", "rest", "production") or a strategic action (e.g., "bid_on_land", "send_message", "manage_public_sell_contract").
             This endpoint delegates the decision-making logic to the Python backend engine.
-            The Python engine, based on the <code>activityType</code> and <code>activityParameters</code>, will determine the best course of action.
-            This will result in the creation of one or more records in the `ACTIVITIES` table, potentially including preliminary steps like travel.
-            The endpoint returns the result from the Python engine, indicating the outcome of the attempt to initiate the endeavor.
+            The Python engine, based on the <code>activityType</code> and <code>activityParameters</code>, will determine the best course of action and create the **entire chain of necessary activities** (e.g., travel to a location, then perform the action).
+            This results in one or more records in the `ACTIVITIES` table.
+            The endpoint returns the result from the Python engine, indicating the outcome of the attempt to initiate the endeavor and potentially the first activity created in the chain.
           </p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
@@ -2505,7 +2505,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/actions/create-activity</h3>
           <p className="mb-2">
             Allows direct creation of a specific activity for a citizen. This endpoint is intended for AI agents or advanced tools
-            that can pre-determine all necessary activity parameters, including pathfinding for travel.
+            that can pre-determine all necessary parameters for a *single, granular* activity. For more complex endeavors requiring sequences (e.g., travel then action), use <code>POST /api/activities/try-create</code>.
           </p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
@@ -2584,21 +2584,18 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <ul className="list-disc pl-6">
               <li>For travel-related activities (e.g., `goto_work`, `fetch_resource` from a specific building), the server will internally call `/api/transport` to determine the path and timing if `fromBuildingId` and `toBuildingId` are provided. The client no longer needs to supply `pathData`.</li>
               <li>The server validates the payload structure. For travel, it assumes the provided building IDs are valid and will attempt to fetch their positions for pathfinding.</li>
-              <li>This provides maximum control to the AI for defining *what* to do and *where*, while the server handles *how* to get there.</li>
-              <li>Activities created via this API will have their `Status` set to "created". The `processActivities.py` engine script will then pick them up for execution.</li>
+              <li>This provides maximum control to the AI for defining *what* to do and *where* for a single step, while the server handles *how* to get there if travel is part of that single step.</li>
+              <li>Activities created via this API will have their `Status` set to "created". The `processActivities.py` engine script will then pick them up for execution when their `EndDate` is reached, finalizing their effects but not creating subsequent activities.</li>
             </ul>
           </div>
         </div>
 
         {/* The following block is a duplicate of the one above and will be removed. */}
-
-        <div id="transport-post-create-activity" className="mb-8 scroll-mt-20">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/actions/create-activity</h3>
-          <p className="mb-2">
-            Allows direct creation of a specific activity for a citizen. This endpoint is intended for AI agents or advanced tools
-            that can pre-determine all necessary activity parameters. For travel activities, the server handles pathfinding.
-          </p>
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
+        {/* DUPLICATE BLOCK REMOVED */}
+      </section>
+      
+      {/* Economy Section */}
+      <section id="economy" className="mb-12">
             <h4 className="font-bold mb-2">Request Body</h4>
             <p className="text-xs mb-2 text-gray-600">
               Field names in the main payload should be camelCase. The server converts them to PascalCase for Airtable.

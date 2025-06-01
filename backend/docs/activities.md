@@ -30,7 +30,7 @@ Les activités principales (liste non exhaustive, incluant maintenant des "actio
 - **`goto_construction_site`**, **`deliver_construction_materials`**, **`construct_building`**: Activités liées à la construction.
 - **`leave_venice`**: Un Forestiero quitte Venise.
 
-Activities are managed by the `createActivities.py` script (pour les activités routinières générées par le moteur) and initiated by AI agents via `POST /api/activities/try-create` (pour les activités et actions décidées par l'IA). All these result in records in the `ACTIVITIES` table and are processed by `processActivities.py`. This system applies equally to both AI and human citizens.
+Activities are managed by the `createActivities.py` script (pour les activités routinières générées par le moteur) and initiated by AI agents via `POST /api/activities/try-create` (pour les activités et actions décidées par l'IA). Ces systèmes sont maintenant responsables de la création de **chaînes complètes d'activités** si nécessaire. Par exemple, une demande pour "manger à la maison" alors que le citoyen n'y est pas générera une activité `goto_home` suivie d'une activité `eat_at_home`. Tous ces enregistrements sont stockés dans la table `ACTIVITIES` et sont ensuite traités individuellement par `processActivities.py` lorsque leur `EndDate` est atteinte. Ce système s'applique de manière égale aux citoyens IA et humains.
 
 ### Unified Citizen Activity Model
 
@@ -131,7 +131,7 @@ Each activity is stored in the ACTIVITIES table with the following fields:
 
 ### Activity Creation Process
 
-Le script `createActivities.py` identifie les citoyens sans activité en cours et tente de leur en assigner une nouvelle. La logique de décision principale est encapsulée dans `citizen_general_activities.py` et prend en compte :
+Le script `createActivities.py` (via `citizen_general_activities.py`) identifie les citoyens sans activité en cours et tente de leur assigner une nouvelle **séquence d'activités**. La logique de décision principale est encapsulée dans `citizen_general_activities.py` et prend en compte :
 1.  L'heure actuelle à Venise.
 2.  La classe sociale du citoyen, qui détermine ses plages horaires pour le repos, le travail et les loisirs/consommation.
     *   **Facchini (Journaliers)**: Repos: 21h-5h; Travail: 5h-12h, 13h-19h; Loisirs: 12h-13h, 19h-21h.
@@ -243,12 +243,12 @@ In addition to the engine-driven activity creation (`createActivities.py`), acti
     *   `description`: A brief description of what the activity entails.
     *   `thought`: A first-person narrative from the citizen about this activity.
     *   `activityDetails`: A JSON object containing all necessary parameters for that activity type.
-        *   For travel-related activities (e.g., `goto_work`, `goto_home`, `fetch_resource` from a specific building), the client should provide `toBuildingId` and `fromBuildingId` (if applicable) within `activityDetails`. The `/api/actions/create-activity` endpoint will then internally call `/api/transport` to determine the path and timing. The client no longer needs to provide `pathData`.
+        *   For travel-related activities (e.g., `goto_work`, `goto_home`, `fetch_resource` from a specific building), the client should provide `toBuildingId` and `fromBuildingId` (if applicable) within `activityDetails`. The `/api/actions/create-activity` endpoint (si utilisé pour une activité de voyage unique) appellera alors en interne `/api/transport` pour déterminer le chemin et la durée.
     *   `notes` (optional): Internal notes or non-displayed information.
-2.  **API Request**: The client sends a POST request to `/api/actions/create-activity` with the composed payload.
+2.  **API Request**: The client sends a POST request to `/api/actions/create-activity` with the composed payload for a single activity.
 3.  **Server Validation & Pathfinding**: The API endpoint validates the payload. If it's a travel activity requiring pathfinding between specified buildings, the server attempts to find a path. If pathfinding fails, an error is returned.
 4.  **Airtable Record Creation**: If validation and any necessary internal pathfinding succeed, a new activity record is created in the `ACTIVITIES` table with `Status: "created"`. The `Path`, `StartDate`, and `EndDate` fields are populated based on the pathfinding results. `Title`, `Description`, `Thought`, and `Notes` are also saved.
-5.  **Engine Processing**: The standard `processActivities.py` script will eventually pick up this "created" activity and execute its corresponding processor logic.
+5.  **Engine Processing**: The standard `processActivities.py` script will eventually pick up this "created" activity when its `EndDate` is reached and execute its corresponding processor logic to finalize its effects. Il ne créera pas d'activité de suivi.
 
 ### Use Cases:
 
@@ -281,7 +281,7 @@ This endpoint internally calls the relevant GET API and returns its response, wr
 -   This method bypasses the prioritized decision logic of `citizen_general_activities.py`.
 -   Care must be taken to avoid conflicts if both engine-driven and API-driven activity creation are active for the same citizen.
 
-Refer to the API Reference (`components/Documentation/ApiReference.tsx`) for the detailed payload structure of the `POST /api/actions/create-activity` endpoint (for direct creation when all details are known) and `POST /api/activities/try-create` (for AI-initiated endeavors).
+Refer to the API Reference (`components/Documentation/ApiReference.tsx`) for the detailed payload structure of the `POST /api/actions/create-activity` endpoint (for direct creation of a single activity when all details are known) and `POST /api/activities/try-create` (for AI-initiated endeavors where the engine will build the necessary activity chain).
 
 ## API-Driven Activity Creation
 
