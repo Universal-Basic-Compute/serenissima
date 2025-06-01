@@ -14,7 +14,16 @@ from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse, FileResponse
 from dotenv import load_dotenv
 import pathlib
-from typing import Optional, List # Added List
+from typing import Optional, List, Dict, Any # Added Dict, Any
+
+# For logging and retry strategy
+import logging
+import pytz
+from urllib3.util.retry import Retry
+from colorama import Fore # For log_header color
+
+# Import helpers
+from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors # LogColors will be used as Fore
 
 # Add the current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -101,6 +110,26 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI app with lifespan manager
 app = FastAPI(title="Wallet Storage API", lifespan=lifespan)
+
+# Setup logger for this module
+log = logging.getLogger(__name__)
+
+# Define log_header function (or import if it's moved to a central utility)
+# For now, defining it here if it's specific to main.py's direct use
+# If it's meant to be globally available, it should be in a shared utils module
+# and imported. Given the previous context, it was in citizen_general_activities.py
+# but activity_helpers.py is more suitable for such a utility.
+# Let's assume it's NOT in activity_helpers.py for now and define a simple one.
+# If it IS in activity_helpers.py, the import above should be:
+# from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors as Fore, log_header
+
+def log_header(message: str, color_code: str = Fore.CYAN): # Simple version
+    """Prints a header message."""
+    # This is a simplified version. If the colorful one is needed, ensure colorama is handled.
+    # For now, just print. The Fore.MAGENTA will work if colorama is imported and Fore is LogColors.
+    # The flake8 error was about Fore, so let's ensure it's aliased.
+    print(f"\n{color_code}--- {message} ---{Style.RESET_ALL if 'Style' in globals() else ''}\n")
+
 
 # Add CORS middleware
 app.add_middleware(
@@ -2876,7 +2905,7 @@ async def try_create_activity_endpoint(request_data: TryCreateActivityRequest):
     Attempts to create a specific activity for a citizen.
     Delegates logic to the game engine.
     """
-    log_header(f"Received request to try-create activity: {request_data.activityType} for {request_data.citizenUsername}", color_code=Fore.MAGENTA)
+    log_header(f"Received request to try-create activity: {request_data.activityType} for {request_data.citizenUsername}", color_code=LogColors.HEADER) # Use LogColors.HEADER or specific color
     
     try:
         # Initialize Airtable tables (consider moving to a dependency injection pattern for larger apps)
