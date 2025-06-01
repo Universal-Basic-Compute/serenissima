@@ -500,24 +500,6 @@ ID du `broker_s_office`/`mint` ou `courthouse`/`town_hall`). À l'arrivée, une 
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `targetBorrowerUsername` (optionnel),
 `amount`, `interestRate`, `termDays`, `targetOfficeBuildingId` (ID de l'établissement pertinent).
 
-20. **Retirer des Jetons COMPUTE**
-    *   **activityType**: `withdraw_compute_tokens`
-    *   **Description**: Le joueur se rend à un `broker_s_office` ou `mint` (banque/bureau de change) pour initier le
-retrait. L'établissement peut prélever des frais de transaction pour ce service.
-    *   **Mécanisme Principal**: Crée une activité `goto_location` (vers `broker_s_office` ou `mint`). À l'arrivée, une
-activité `initiate_token_withdrawal` est créée, et les frais de transaction sont déduits.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `ducatsAmount`, `walletAddress`,
-`targetBuildingId` (optionnel, ID du `broker_s_office`/`mint`).
-
-21. **Injecter des Jetons COMPUTE**
-    *   **activityType**: `inject_compute_tokens`
-    *   **Description**: Le joueur se rend à un `broker_s_office` ou `mint` (banque/bureau de change) pour initier
-l'injection. L'établissement peut prélever des frais de transaction pour ce service.
-    *   **Mécanisme Principal**: Crée une activité `goto_location` (vers `broker_s_office` ou `mint`). À l'arrivée, une
-activité `initiate_token_injection` est créée, et les frais de transaction sont déduits.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `computeTokenAmount`,
-`transactionProof`, `targetBuildingId` (optionnel, ID du `broker_s_office`/`mint`).
-
 ### Social et Communication
 
 22. **Envoyer un Message**
