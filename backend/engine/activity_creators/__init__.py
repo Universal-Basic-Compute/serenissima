@@ -14,6 +14,7 @@ from .eat_activity_creator import (
     try_create_eat_at_tavern_activity
 )
 from .fetch_from_galley_activity_creator import try_create as try_create_fetch_from_galley_activity
+from .bid_on_land_activity_creator import try_create as try_create_bid_on_land_activity
 from .leave_venice_activity_creator import try_create as try_create_leave_venice_activity
 from .deliver_construction_materials_creator import try_create_deliver_construction_materials_activity
 from .construct_building_creator import try_create_construct_building_activity
