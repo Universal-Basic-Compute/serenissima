@@ -351,6 +351,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "emergency_fishing": process_fishing_activity_fn, # New, uses same processor
         "idle": process_placeholder_activity_fn,
         "rest": process_placeholder_activity_fn,
+        "bid_on_land": process_bid_on_land_fn,
     }
 
     tables = initialize_airtable()
