@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { hoverStateService } from '@/lib/services/HoverStateService'; // AJOUTER CET IMPORT
+import { eventBus, EventTypes } from '@/lib/utils/eventBus'; // AJOUTER CET IMPORT
 
 // Définition du type PolygonData basée sur son utilisation dans IsometricViewer
 interface PolygonData {
