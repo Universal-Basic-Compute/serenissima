@@ -6,7 +6,7 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 import { findClosestPointOnPolygonEdge } from '@/lib/utils/fileUtils';
-import PolygonDisplayPanel from '@/components/PolygonViewer/PolygonDisplayPanel'; // Import the new panel
+import PolygonDisplayPanel from '../../components/PolygonViewer/PolygonDisplayPanel'; // Import the new panel using relative path
 
 // Venice coordinates
 const center = {
