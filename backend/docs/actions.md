@@ -84,6 +84,18 @@ Ce document détaille les actions stratégiques et économiques que les citoyens
     *   **Mécanisme Principal**: Mise à jour du statut du contrat `building_bid` en `withdrawn`.
     *   **API Pertinente**: `POST /api/contracts` (pour mettre à jour le statut du contrat).
 
+14. **Créer/Gérer un Contrat d'Achat avec Majoration (Markup Buy Contract)**
+    *   **Type**: `manage_markup_buy_contract`
+    *   **Description**: Un citoyen établit un contrat pour acheter des biens à un prix majoré, souvent pour un besoin urgent ou une revente rapide. Cela indique une volonté de payer plus cher pour un accès immédiat ou garanti à des ressources.
+    *   **Mécanisme Principal**: Création ou mise à jour d'un contrat de type `markup_buy` (ou un type similaire) où l'acheteur spécifie la ressource, la quantité, et le prix maximum qu'il est prêt à payer.
+    *   **API Pertinente**: `POST /api/contracts`.
+
+15. **Créer/Gérer un Contrat de Demande de Stockage (Storage Query Contract)**
+    *   **Type**: `manage_storage_query_contract`
+    *   **Description**: Un citoyen ou une entreprise cherchant activement de l'espace de stockage pour ses biens crée un contrat pour solliciter des offres de stockage. Ceci est distinct de l'offre de stockage publique (où un propriétaire propose son espace).
+    *   **Mécanisme Principal**: Création ou mise à jour d'un contrat de type `storage_query` (ou un type similaire) détaillant les besoins en stockage (type de ressource, quantité, durée souhaitée).
+    *   **API Pertinente**: `POST /api/contracts`.
+
 ## Gestion du Travail et des Entreprises
 
 14. **Ajuster les Salaires d'une Entreprise**
