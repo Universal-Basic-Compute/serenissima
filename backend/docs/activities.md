@@ -422,7 +422,7 @@ contrat via `POST /api/contracts`. Les taxes de transaction sont gérées lors d
 ("accepted" ou "refused"), `bidderUsername` (optionnel, pour le déplacement), `targetOfficeBuildingId` (optionnel, ID
 du `courthouse`/`town_hall`).
 
-9. **Retirer une Offre d'Achat sur un Bâtiment**
+15. **Retirer une Offre d'Achat sur un Bâtiment**
     *   **activityType**: `withdraw_building_bid`
     *   **Description**: L'enchérisseur se rend à un lieu officiel (ex: `courthouse`, `town_hall`) ou rencontre le
 propriétaire du bâtiment (`targetOwnerUsername`) pour notifier formellement le retrait de son offre d'achat. Des frais de dossier pour le retrait peuvent être exigés.
@@ -434,7 +434,7 @@ via `POST /api/contracts`.
 `targetOwnerUsername` (optionnel, pour le déplacement), `targetOfficeBuildingId` (optionnel, ID du
 `courthouse`/`town_hall`).
 
-9. **Créer/Gérer un Contrat d'Achat avec Majoration (Markup Buy Contract)**
+16. **Créer/Gérer un Contrat d'Achat avec Majoration (Markup Buy Contract)**
     *   **activityType**: `manage_markup_buy_contract`
     *   **Description**: Le citoyen se rend à son bâtiment (`buyerBuildingId`) pour évaluer un besoin urgent, puis se
 déplace vers un lieu de marché (ex: `market_stall`, `weighing_station`) pour y enregistrer un contrat d'achat avec
