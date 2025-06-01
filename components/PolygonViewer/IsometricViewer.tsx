@@ -3547,7 +3547,8 @@ const darkenColor = (colorStr: string, percent: number): string => {
     waterRoutePath, transportPath, currentHoverState, 
     buildingPositionsCache, canvasDims, // Added canvasDims to ensure re-draw if it changes
     occupantLine, latLngToScreen, // Added occupantLine and latLngToScreen
-    isNight // Added isNight
+    isNight, // Added isNight
+    landImages // Add landImages to the dependency array
   ]);
   
 
