@@ -89,16 +89,16 @@ CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE = [
     "GET /api/resource-types - Get definitions of all resource types (import price, category, etc.).- Important before any request involving resources!",
     
     # Utility for common GET requests
-    "POST /api/try-read - Execute a predefined GET request. Body: {requestType, parameters: {username?, buildingId?, ...}}",
+    "POST /api/try-read - Execute a predefined GET request. Body: {requestType, parameters: {username?, buildingId?, ...}} (Consult compendium_of_simplified_reads for details)",
 
-    # Initiating Endeavors (Activities & Strategic Actions)
-    "POST /api/activities/try-create - Request the game engine to initiate an endeavor (activity or strategic action). Body: {citizenUsername, activityType, activityParameters (optional)}. The engine will create the necessary activity records.",
-    "POST /api/actions/create-activity - Directly create a detailed activity record if all parameters are known. Body: {citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)}",
+    # Initiating ALL Endeavors (Activities & Strategic Actions)
+    "POST /api/activities/try-create - PRIMARY METHOD TO TAKE ACTION. Request the game engine to initiate an endeavor. Body: {citizenUsername, activityType, activityParameters (optional)}. The engine will create the necessary activity records. Consult 'guide_to_decreeing_undertakings' (activities.md) for available 'activityType's and their 'activityParameters'.",
+    
+    # Direct Activity Creation (Advanced - use if ALL details are known and try-create is not suitable)
+    "POST /api/actions/create-activity - Directly create a detailed activity record. Body: {citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)}. Consult 'guide_to_decreeing_undertakings' (activities.md) for activity details."
 
-    # Other Direct Actions (if still applicable, though try-create is preferred for AI)
-    "POST /api/contracts - Create or update a contract. Body: {contractId, type, resourceType, pricePerResource, targetAmount, seller, sellerBuilding, buyer, buyerBuilding, status, notes, endAt, asset, assetType}",
-    "POST /api/messages/send - Send a message to another citizen. Body: {sender, receiver, content, type}",
-    # "POST /api/actions/construct-building" is now likely an activityType for try-create or a detailed create-activity.
+    # Direct POST endpoints like /api/contracts, /api/messages/send, /api/buildings are DEPRECATED for AI use.
+    # Use /api/activities/try-create with the appropriate activityType instead.
 ]
 
 CONCISE_AIRTABLE_SCHEMA_FIELD_LIST = {
@@ -971,17 +971,17 @@ API_DOCUMENTATION_SUMMARY = {
         "/api/buildings?Type=market_stall&IsConstructed=true", # All constructed market stalls
         "/api/lands?Owner={YourUsername}&District=San Polo", # Your lands in San Polo
         "/api/resources/counts?owner={YourUsername}", # Your resource counts (specific endpoint)
-        "/api/contracts?Seller={YourUsername}&Type=public_sell&Status=active", # Your active public sell contracts
-        "/api/contracts?ResourceType=wood&Type=public_sell&Status=active", # Active public sell contracts for wood
+        # Note: Querying contracts directly is possible, but actions on contracts should be via /api/activities/try-create.
+        "/api/contracts?Seller={YourUsername}&Type=public_sell&Status=active", 
+        "/api/contracts?ResourceType=wood&Type=public_sell&Status=active", 
         "/api/problems?Citizen={YourUsername}&Status=active", # Your active problems
         "/api/relevancies?RelevantToCitizen={YourUsername}&Category=opportunity&Score=>50" # High-score opportunities for you
     ],
-    "example_post_endpoints": [
-        "/api/activities/try-create", # Preferred for AI to initiate any endeavor. Body: {"citizenUsername": "...", "activityType": "...", "activityParameters": {...}}
+    "example_post_endpoints": [ # AI should STRONGLY prefer /api/activities/try-create for actions.
+        "/api/activities/try-create", # PREFERRED METHOD FOR ALL ACTIONS. Body: {"citizenUsername": "...", "activityType": "...", "activityParameters": {...}}. Consult activities.md for types and params.
         "/api/try-read", # Utility for common GETs. Body: {"requestType": "type", "parameters": {...}}
-        "/api/actions/create-activity", # For direct creation of a fully detailed activity. Body keys: citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)
-        "/api/contracts", # Direct contract management. Body keys like {"contractId": "...", "type": "..."}
-        "/api/messages/send" # Direct message sending. Body keys like {"sender": "...", "receiver": "...", "content": "..."}
+        "/api/actions/create-activity" # ADVANCED: For direct creation of a fully detailed activity. Body keys: citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)
+        # Direct POSTs to /api/contracts, /api/messages/send, /api/buildings are DEPRECATED for AI use.
     ]
 }
 
@@ -1382,15 +1382,128 @@ def autonomously_run_ai_citizen_unguided(
                             log 
                         )
                     elif action_endpoint == "/api/actions/create-activity" and action_body and "citizenUsername" in action_body and "activityType" in action_body:
-                        # This is a direct creation of a single activity.
-                        # For now, let it pass through make_api_post_request.
-                        # Future: Could also be routed if we want more control/logging.
-                        log.info(f"{LogColors.OKBLUE}AI chose to use /api/actions/create-activity. Proceeding with direct POST.{LogColors.ENDC}")
+                        log.info(f"{LogColors.OKBLUE}AI chose to use /api/actions/create-activity. Proceeding with direct POST (this is for fully detailed single activities).{LogColors.ENDC}")
                         action_response_data = make_api_post_request(action_endpoint, action_body)
+                    
+                    # --- Intercept direct POST to /api/contracts ---
+                    elif action_endpoint == "/api/contracts":
+                        log.info(f"{LogColors.OKBLUE}AI attempting POST /api/contracts. Converting to try-create activity.{LogColors.ENDC}")
+                        contract_type = action_body.get("type")
+                        activity_type_contracts = None
+                        activity_params_contracts = {}
+
+                        if contract_type == "public_sell":
+                            activity_type_contracts = "manage_public_sell_contract"
+                            activity_params_contracts = {
+                                "contractId_to_create_if_new": action_body.get("contractId"), # Kinos might provide a deterministic ID
+                                "resourceType": action_body.get("resourceType"),
+                                "pricePerResource": action_body.get("pricePerResource"),
+                                "targetAmount": action_body.get("targetAmount", 0.0), # Default to 0.0 as per some existing logic
+                                "sellerBuildingId": action_body.get("sellerBuilding"),
+                                "title": action_body.get("title"), # AI should provide these if not using auto-gen
+                                "description": action_body.get("description"),
+                                "notes": action_body.get("notes") # Pass as dict if possible, or string
+                            }
+                        elif contract_type == "import":
+                            activity_type_contracts = "manage_import_contract"
+                            activity_params_contracts = {
+                                "contractId_to_create_if_new": action_body.get("contractId"),
+                                "resourceType": action_body.get("resourceType"),
+                                "targetAmount": action_body.get("targetAmount"),
+                                "pricePerResource": action_body.get("pricePerResource"),
+                                "buyerBuildingId": action_body.get("buyerBuilding"),
+                                "title": action_body.get("title"),
+                                "description": action_body.get("description"),
+                                "notes": action_body.get("notes")
+                            }
+                        # Add more contract type mappings here (markup_buy, storage_query, etc.)
+                        # Example for markup_buy:
+                        elif contract_type == "markup_buy":
+                            activity_type_contracts = "manage_markup_buy_contract"
+                            activity_params_contracts = {
+                                "contractId_to_create_if_new": action_body.get("contractId"),
+                                "resourceType": action_body.get("resourceType"),
+                                "targetAmount": action_body.get("targetAmount"),
+                                "maxPricePerResource": action_body.get("pricePerResource"), # Assuming pricePerResource from Kinos is maxPrice
+                                "buyerBuildingId": action_body.get("buyerBuilding"),
+                                "sellerBuildingId": action_body.get("sellerBuilding"),
+                                "sellerUsername": action_body.get("seller"),
+                                "title": action_body.get("title"),
+                                "description": action_body.get("description"),
+                                "notes": action_body.get("notes")
+                            }
+                        # Example for land_sale_offer (bidding on land)
+                        elif contract_type == "land_sale_offer":
+                            activity_type_contracts = "bid_on_land"
+                            activity_params_contracts = {
+                                "landId": action_body.get("resourceType"), # LandId is in ResourceType for land_sale_offer
+                                "bidAmount": action_body.get("pricePerResource") # Bid amount is in PricePerResource
+                                # targetOfficeBuildingId is optional for bid_on_land
+                            }
+                        
+                        if activity_type_contracts:
+                            action_response_data = call_try_create_activity_api(
+                                ai_username, # The AI is initiating this action for itself
+                                activity_type_contracts,
+                                activity_params_contracts,
+                                dry_run, # Will be false here
+                                log
+                            )
+                        else:
+                            log.warning(f"{LogColors.WARNING}Unsupported contract type '{contract_type}' for POST /api/contracts by {ai_username}. Action not taken.{LogColors.ENDC}")
+                            action_response_data = {"error": f"Unsupported contract type for /api/contracts: {contract_type}", "success": False}
+                    
+                    # --- Intercept direct POST to /api/messages/send ---
+                    elif action_endpoint == "/api/messages/send":
+                        log.info(f"{LogColors.OKBLUE}AI attempting POST /api/messages/send. Converting to try-create send_message activity.{LogColors.ENDC}")
+                        activity_params_message = {
+                            "receiverUsername": action_body.get("receiver"),
+                            "content": action_body.get("content"),
+                            "messageType": action_body.get("type", "message") # Default to "message"
+                        }
+                        # Sender for the activity is ai_username
+                        action_response_data = call_try_create_activity_api(
+                            ai_username,
+                            "send_message",
+                            activity_params_message,
+                            dry_run, # Will be false here
+                            log
+                        )
+
+                    # --- Intercept direct POST to /api/buildings (construction) ---
+                    elif action_endpoint == "/api/buildings":
+                        log.info(f"{LogColors.OKBLUE}AI attempting POST /api/buildings. Converting to try-create initiate_building_project activity.{LogColors.ENDC}")
+                        # Expected body for POST /api/buildings: { type, landId, point (string "polygon-id_bp_0" or {lat,lng}), owner, runBy, ... }
+                        # Activity params for initiate_building_project: { landId, buildingTypeDefinition, pointDetails: {pointId, lat, lng}, builderContractDetails (optional) }
+                        
+                        point_details_param = {}
+                        point_from_body = action_body.get("point")
+                        if isinstance(point_from_body, str): # e.g., "polygon-123_bp_0"
+                            point_details_param["pointId"] = point_from_body
+                            # Lat/Lng might need to be resolved by the activity creator if only pointId is given
+                        elif isinstance(point_from_body, dict) and "lat" in point_from_body and "lng" in point_from_body:
+                            point_details_param["lat"] = point_from_body["lat"]
+                            point_details_param["lng"] = point_from_body["lng"]
+                            point_details_param["pointId"] = point_from_body.get("id") # if available
+
+                        activity_params_build = {
+                            "landId": action_body.get("landId"),
+                            "buildingTypeDefinition": action_body.get("type"), # 'type' from body maps to 'buildingTypeDefinition'
+                            "pointDetails": point_details_param
+                            # builderContractDetails can be added if AI specifies a builder and contractValue
+                        }
+                        # Initiator is ai_username
+                        action_response_data = call_try_create_activity_api(
+                            ai_username,
+                            "initiate_building_project",
+                            activity_params_build,
+                            dry_run, # Will be false here
+                            log
+                        )
                     else:
-                        # For other POST endpoints, use the generic make_api_post_request
-                        action_response_data = make_api_post_request(action_endpoint, action_body)
-                else:
+                        log.warning(f"{LogColors.WARNING}AI {ai_username} attempted unhandled POST to {action_endpoint}. This action will NOT be performed. Please use /api/activities/try-create.{LogColors.ENDC}")
+                        action_response_data = {"error": f"Direct POST to {action_endpoint} is not allowed for AI. Use /api/activities/try-create.", "success": False}
+                else: # Method not GET or POST
                     log.warning(f"{LogColors.WARNING}Unsupported action method '{action_method}' from Kinos for {ai_username}.{LogColors.ENDC}")
                     action_response_data = {"error": f"Unsupported method: {action_method}", "success": False}
             else: # dry_run is true
