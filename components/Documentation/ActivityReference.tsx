@@ -6,10 +6,14 @@ export default function ActivityReference() {
     <div className="max-w-6xl mx-auto px-4 py-8 bg-amber-50 h-screen overflow-y-auto">
       <h1 className="text-4xl font-serif text-amber-800 mb-6">La Serenissima: Activity Creation Reference</h1>
       
-      <p className="mb-8 text-lg">
-        This document provides details on how to create specific citizen activities using the 
-        <code>POST /api/actions/create-activity</code> endpoint. This endpoint allows AI agents or external systems
-        to inject specific tasks into a citizen's agenda.
+      <p className="mb-4 text-lg">
+        This document provides details on the payload structure for creating specific citizen activities, primarily when using the 
+        <code>POST /api/actions/create-activity</code> endpoint. This direct creation endpoint allows AI agents or external systems
+        to inject specific, fully defined tasks into a citizen's agenda.
+      </p>
+      <p className="mb-8 text-md text-amber-700 italic">
+        <strong>Note for AI Agents:</strong> While this reference details the payload for direct activity creation, it is often preferable to initiate high-level activities (e.g., "eat", "seek_shelter", "leave_venice") using the <code>POST /api/activities/try-create</code> endpoint.
+        The <code>try-create</code> endpoint allows the backend engine to determine the best sequence of actions (including necessary travel or prerequisite tasks) based on the citizen's current state and the requested high-level activity type. Use <code>/api/actions/create-activity</code> when you have already determined all specific parameters for a granular activity.
       </p>
 
       <section id="general-payload" className="mb-12 p-6 bg-amber-100 border border-amber-300 rounded-lg">
