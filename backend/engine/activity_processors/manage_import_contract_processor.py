@@ -70,9 +70,26 @@ def _create_or_update_import_contract(
     existing_contract_id = details.get('contractId')
     
     if not (citizen and office_building_id and resource_type and 
-            target_amount is not None and price_per_resource is not None and buyer_building_id):
-        log.error(f"Missing data for register_import_agreement: citizen={citizen}, office={office_building_id}, resource={resource_type}, amount={target_amount}, price={price_per_resource}, buyer_building={buyer_building_id}")
+            target_amount is not None and price_per_resource is not None):
+        log.error(f"Missing data for register_import_agreement: citizen={citizen}, office={office_building_id}, resource={resource_type}, amount={target_amount}, price={price_per_resource}")
         return False
+    
+    # Si buyer_building_id est null, rechercher les contrats d'importation publics correspondants
+    if not buyer_building_id:
+        log.info(f"No buyer building specified for import contract. Looking for public import contracts for {resource_type}.")
+        # Rechercher les contrats d'importation publics actifs pour ce type de ressource
+        formula = f"AND({{Type}}='public_import', {{ResourceType}}='{_escape_airtable_value(resource_type)}', {{Status}}='active')"
+        public_import_contracts = tables['contracts'].all(formula=formula)
+        
+        if public_import_contracts:
+            # Prendre le premier contrat correspondant
+            public_contract = public_import_contracts[0]
+            buyer_building_id = public_contract['fields'].get('BuyerBuilding')
+            log.info(f"Found public import contract for {resource_type}. Using buyer building: {buyer_building_id}")
+        
+        if not buyer_building_id:
+            log.error(f"No buyer building specified and no matching public import contracts found for {resource_type}")
+            return False
     
     # Calculate broker/customs fee (typically 3% of total value, minimum 15 Ducats)
     total_value = float(price_per_resource) * float(target_amount)

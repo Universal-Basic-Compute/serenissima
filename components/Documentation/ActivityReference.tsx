@@ -550,12 +550,13 @@ export default function ActivityReference() {
   "resourceType": "string",            // Type of resource to import
   "targetAmount": number,              // Amount to import
   "pricePerResource": number,          // Price willing to pay per unit
-  "buyerBuildingId": "string",         // Building where goods will be delivered
+  "buyerBuildingId": "string",         // Optional: Building where goods will be delivered
+                                       // If null, system will look for matching public import contracts
   "targetOfficeBuildingId": "string"   // Office building to register the contract
 }`}
           </pre>
           <p className="text-xs mt-1 text-gray-600">
-            <strong>Prerequisites:</strong> Citizen must own or operate the buyer building. Creates a chain: assess import needs at buyer building, then travel to customs/broker office to register the agreement.
+            <strong>Prerequisites:</strong> If buyerBuildingId is provided, citizen must own or operate that building. Creates a chain: travel to customs/broker office to register the agreement. If no buyerBuildingId is provided, the system will look for matching public import contracts.
           </p>
         </div>
         

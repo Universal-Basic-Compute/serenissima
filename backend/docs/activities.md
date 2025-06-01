@@ -354,18 +354,9 @@ lieu de notification).
 
 9.  **Créer/Modifier un Contrat d'Importation**
     *   **activityType**: `manage_import_contract`
-    *   **Description**: Le citoyen se rend à son bâtiment d'achat (`buyerBuildingId`) pour évaluer ses besoins, puis
-se déplace vers un bureau de commerce (ex: `customs_house`, `broker_s_office`) pour y enregistrer ou modifier un
-contrat d'importation. L'enregistrement du contrat peut impliquer des frais de courtage ou des droits de douane anticipés.
-    *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
-`buyerBuildingId`). À l'arrivée, une activité d'évaluation des besoins (`activityType: assess_import_needs`, durée
-courte) peut être créée. Ensuite, une autre activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
-ID du `customs_house` ou `broker_s_office`) est créée. Finalement, une activité d'enregistrement de contrat
-(`activityType: register_import_agreement`, durée courte) est créée, durant laquelle les frais sont payés, et le processeur appellera `POST
-/api/contracts`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel),
-`resourceType`, `targetAmount`, `pricePerResource`, `buyerBuildingId`, `targetOfficeBuildingId` (ID du `customs_house`
-ou `broker_s_office`).
+    *   **Description**: Le citoyen se déplace vers un bureau de commerce (ex: `customs_house`, `broker_s_office`) pour y enregistrer ou modifier un contrat d'importation. L'enregistrement du contrat peut impliquer des frais de courtage ou des droits de douane anticipés.
+    *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`: ID du `customs_house` ou `broker_s_office`). À l'arrivée, une activité d'enregistrement de contrat (`activityType: register_import_agreement`, durée courte) est créée, durant laquelle les frais sont payés, et le processeur appellera `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `resourceType`, `targetAmount`, `pricePerResource`, `buyerBuildingId` (optionnel, si non fourni, le système recherchera des contrats d'importation publics correspondants), `targetOfficeBuildingId` (ID du `customs_house` ou `broker_s_office`).
 
 10. **Créer/Modifier un Contrat d'Importation Public**
     *   **activityType**: `manage_public_import_contract`

@@ -36,20 +36,27 @@ def try_create(
     
     # Validate required parameters
     if not (resource_type and price_per_resource is not None and target_amount is not None and 
-            buyer_building_id and target_office_building_id):
-        log.error(f"Missing required details for manage_import_contract: resourceType, pricePerResource, targetAmount, buyerBuildingId, or targetOfficeBuildingId")
+            target_office_building_id):
+        log.error(f"Missing required details for manage_import_contract: resourceType, pricePerResource, targetAmount, or targetOfficeBuildingId")
         return False
 
     citizen = citizen_record['fields'].get('Username')
     ts = int(datetime.now(VENICE_TIMEZONE).timestamp())
     
-    # Get building records for path calculation
-    buyer_building_record = get_building_record(tables, buyer_building_id)
+    # Get building record for office
     office_building_record = get_building_record(tables, target_office_building_id)
     
-    if not buyer_building_record or not office_building_record:
-        log.error(f"Could not find building records for {buyer_building_id} or {target_office_building_id}")
+    if not office_building_record:
+        log.error(f"Could not find building record for {target_office_building_id}")
         return False
+    
+    # Get buyer building record if specified
+    buyer_building_record = None
+    if buyer_building_id:
+        buyer_building_record = get_building_record(tables, buyer_building_id)
+        if not buyer_building_record:
+            log.error(f"Could not find building record for buyer building {buyer_building_id}")
+            return False
     
     # Get current citizen position to determine first path
     citizen_position_str = citizen_record['fields'].get('Position')
@@ -63,7 +70,7 @@ def try_create(
     
     # Determine if we need to go to buyer building first or if citizen is already there
     citizen_at_buyer_building = False
-    if current_position:
+    if buyer_building_id and current_position and buyer_building_record:
         buyer_position = _get_building_position(buyer_building_record)
         if buyer_position:
             # Simple check if positions are close enough (within ~10 meters)
@@ -76,13 +83,6 @@ def try_create(
     register_activity_id = f"register_import_{_escape_airtable_value(resource_type)}_{citizen}_{ts}"
     
     now_utc = datetime.utcnow()
-    
-    # Skip the buyer building step entirely and go directly to the office
-    # Calculate activity times for direct path to office
-    path_to_office = find_path_between_buildings(None, office_building_record, current_position=current_position)
-    if not path_to_office or not path_to_office.get('path'):
-        log.error(f"Could not find path to office building {target_office_building_id}")
-        return False
     
     # Skip the buyer building step entirely and go directly to the office
     # Calculate activity times for direct path to office
