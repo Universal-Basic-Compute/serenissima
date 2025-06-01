@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { AirtableBase } from '@/lib/airtable'; // Assurez-vous que ce chemin est correct
+import Airtable from 'airtable'; // Importation directe d'Airtable
 import { z } from 'zod';
 import { subDays, formatISO } from 'date-fns';
 
@@ -38,7 +38,15 @@ export async function GET(
     }
     const { buildingId } = paramsValidation.data;
 
-    const transactionsTable = AirtableBase('TRANSACTIONS');
+    // Initialisation d'Airtable
+    const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+    const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      console.error('Airtable credentials not configured for buildings-economics');
+      return NextResponse.json({ success: false, error: 'Airtable credentials not configured' }, { status: 500 });
+    }
+    const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+    const transactionsTable = base('TRANSACTIONS');
     const sevenDaysAgo = formatISO(subDays(new Date(), 7));
 
     const filterFormula = `AND({AssetType} = 'building', {Asset} = '${buildingId}', IS_AFTER({ExecutedAt}, '${sevenDaysAgo}'))`;

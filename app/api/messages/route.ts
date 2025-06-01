@@ -145,7 +145,7 @@ export async function GET(request: Request) {
     
     console.log(`[API Messages GET] Filter formula: ${filterFormula}`);
 
-    let queryOptions: Airtable.SelectOptions = {
+    let queryOptions: Airtable.SelectOptions<FieldSet> = { // Ajout de <FieldSet>
       filterByFormula: filterFormula,
       sort: [{ field: 'CreatedAt', direction: 'asc' }], // Changed to asc for chat history
     };

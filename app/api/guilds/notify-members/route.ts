@@ -38,6 +38,11 @@ interface GuildDetails {
   // other guild fields if needed
 }
 
+interface GuildMember { // Ajout de l'interface GuildMember
+  username: string;
+  // Ajoutez d'autres champs si nécessaire, par exemple firstName, lastName
+}
+
 const initAirtable = () => {
   if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
     throw new Error('Airtable API key or Base ID is missing');

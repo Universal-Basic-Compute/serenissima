@@ -339,6 +339,9 @@ export async function POST(request: Request) {
         });
       });
 
+      // Déclaration de actualConstructionMaterialCost déplacée ici
+      const actualConstructionMaterialCost = constructionCostsForContract.ducats || 0;
+
       if (constructionWorkshops.length > 0) {
         // Simple selection logic: pick a random workshop. Could be more sophisticated.
         const selectedWorkshop = constructionWorkshops[Math.floor(Math.random() * constructionWorkshops.length)];
@@ -423,7 +426,15 @@ export async function POST(request: Request) {
             });
         });
         if (workshopsForPayment.length > 0) {
-            const workshopForPayment = workshopsForPayment.find(w => w.fields.BuildingId === (await (base!('CONTRACTS') as unknown as AirtableTable).select({filterByFormula: `{ContractId} = 'construct-${buildingId}-${(w.fields.BuildingId as string).replace(/[^a-zA-Z0-9-]/g, '')}'`}).firstPage())?.[0]?.fields.SellerBuilding);
+            const workshopForPayment = await (async () => { // IIFE async pour permettre await dans find
+                for (const w of workshopsForPayment) {
+                    const contractRecords = await (base!('CONTRACTS') as unknown as AirtableTable).select({filterByFormula: `{ContractId} = 'construct-${buildingId}-${(w.fields.BuildingId as string).replace(/[^a-zA-Z0-9-]/g, '')}'`}).firstPage();
+                    if (contractRecords?.[0]?.fields.SellerBuilding === w.fields.BuildingId) {
+                        return w;
+                    }
+                }
+                return undefined;
+            })();
             
             if (workshopForPayment) {
                 const operatorUsernameForPayment = workshopForPayment.fields.RunBy as string || workshopForPayment.fields.Owner as string;

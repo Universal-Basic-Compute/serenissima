@@ -968,7 +968,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 {!isOwner && currentCitizenUsername && normalizeIdentifier(landListingByOwner.Seller) !== normalizeIdentifier(currentCitizenUsername) && (
                   <ActionButton
                     onClick={() => handleGenericActivity('buy_listed_land', { contractId: landListingByOwner.id, landId: selectedPolygonId, price: landListingByOwner.PricePerResource })}
-                    variant="primary"
+                    variant="primary" // "success" n'est pas une variante valide
                     className="w-full mt-2"
                   >
                     Buy Now at {landListingByOwner.PricePerResource.toLocaleString()} ⚜️
@@ -1005,7 +1005,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     <p className="text-xl text-green-700 my-1">Price: 10,000 ⚜️ ducats</p> 
                     <ActionButton
                         onClick={() => handleGenericActivity('buy_available_land', { landId: selectedPolygonId, expectedPrice: 10000, targetBuildingId: "town_hall_default" })} // targetBuildingId might be needed by processor
-                        variant="success"
+                        variant="primary" // "success" n'est pas une variante valide
                         className="w-full mt-2"
                     >
                         Acquire from Republic
@@ -1023,7 +1023,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     <p>Amount: {offer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
                     <ActionButton
                       onClick={() => handleGenericActivity('accept_land_offer', { contractId: offer.id, landId: selectedPolygonId })}
-                      variant="success"
+                      variant="primary" // "success" n'est pas une variante valide
                       className="w-full mt-1"
                     >
                       Accept Offer

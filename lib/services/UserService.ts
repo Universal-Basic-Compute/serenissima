@@ -47,6 +47,7 @@ export interface CitizenProfile {
   color?: string;
   Ducats?: number;
   walletAddress?: string;
+  guildId?: string | null; // Ajout de guildId
 }
 
 /**

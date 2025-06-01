@@ -2,7 +2,7 @@ import React from 'react'; // Ensure React is in scope for JSX
 import Link from 'next/link';
 
 // Using a standard function declaration for the component
-export default function ApiReference() {
+function ApiReference() { // Suppression de 'export default' ici
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 bg-amber-50 h-screen overflow-y-auto">
       <h1 className="text-4xl font-serif text-amber-800 mb-6">La Serenissima API Reference</h1>

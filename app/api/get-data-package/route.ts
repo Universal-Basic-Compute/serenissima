@@ -103,9 +103,10 @@ async function fetchLastActivity(username: string): Promise<AirtableRecord<Field
 
 async function fetchOwnedLands(username: string): Promise<AirtableRecord<FieldSet>[]> {
   try {
-    return await airtable('LANDS').select({
+    const records = await airtable('LANDS').select({
       filterByFormula: `{Owner} = '${escapeAirtableValue(username)}'`,
     }).all();
+    return [...records]; // Convert ReadonlyArray to Array
   } catch (error) {
     console.error(`Error fetching lands for ${username}:`, error);
     return [];
@@ -114,9 +115,10 @@ async function fetchOwnedLands(username: string): Promise<AirtableRecord<FieldSe
 
 async function fetchBuildingsOnLand(landId: string): Promise<AirtableRecord<FieldSet>[]> {
   try {
-    return await airtable('BUILDINGS').select({
+    const records = await airtable('BUILDINGS').select({
       filterByFormula: `{LandId} = '${escapeAirtableValue(landId)}'`,
     }).all();
+    return [...records]; // Convert ReadonlyArray to Array
   } catch (error) {
     console.error(`Error fetching buildings on land ${landId}:`, error);
     return [];
@@ -154,9 +156,10 @@ async function fetchPolygonDataForLand(landId: string): Promise<PolygonData | nu
 
 async function fetchOwnedBuildings(username: string): Promise<AirtableRecord<FieldSet>[]> {
   try {
-    return await airtable('BUILDINGS').select({
+    const records = await airtable('BUILDINGS').select({
       filterByFormula: `{Owner} = '${escapeAirtableValue(username)}'`,
     }).all();
+    return [...records]; // Convert ReadonlyArray to Array
   } catch (error) {
     console.error(`Error fetching buildings for ${username}:`, error);
     return [];
@@ -208,9 +211,10 @@ async function fetchBuildingResourceDetails(buildingId: string): Promise<Buildin
 async function fetchCitizenContracts(username: string): Promise<AirtableRecord<FieldSet>[]> {
   try {
     const escapedUsername = escapeAirtableValue(username);
-    return await airtable('CONTRACTS').select({
+    const records = await airtable('CONTRACTS').select({
       filterByFormula: `AND(OR({Buyer} = '${escapedUsername}', {Seller} = '${escapedUsername}'), {Status} = 'active')`,
     }).all();
+    return [...records]; // Convert ReadonlyArray to Array
   } catch (error) {
     console.error(`Error fetching contracts for ${username}:`, error);
     return [];
@@ -234,10 +238,11 @@ async function fetchGuildDetails(guildId: string): Promise<AirtableRecord<FieldS
 async function fetchCitizenLoans(username: string): Promise<AirtableRecord<FieldSet>[]> {
   try {
     const escapedUsername = escapeAirtableValue(username);
-    return await airtable('LOANS').select({
+    const records = await airtable('LOANS').select({
       filterByFormula: `OR({Lender} = '${escapedUsername}', {Borrower} = '${escapedUsername}')`,
       sort: [{ field: 'CreatedAt', direction: 'desc' }], // Optional: sort by creation date
     }).all();
+    return [...records]; // Convert ReadonlyArray to Array
   } catch (error) {
     console.error(`Error fetching loans for ${username}:`, error);
     return [];
@@ -261,7 +266,12 @@ async function fetchCitizenRelationships(username: string): Promise<AirtableReco
 
     scoredRecords.sort((a, b) => b.combinedScore - a.combinedScore);
     
-    return scoredRecords.slice(0, 20);
+    // Map back to original AirtableRecord structure if combinedScore was only for sorting
+    // and ensure it's a mutable array.
+    return scoredRecords.slice(0, 20).map(r => {
+      const { combinedScore, ...originalRecord } = r;
+      return originalRecord as AirtableRecord<FieldSet>;
+    });
   } catch (error) {
     console.error(`Error fetching relationships for ${username}:`, error);
     return [];
@@ -271,12 +281,12 @@ async function fetchCitizenRelationships(username: string): Promise<AirtableReco
 async function fetchCitizenProblems(username: string): Promise<AirtableRecord<FieldSet>[]> {
   try {
     const escapedUsername = escapeAirtableValue(username);
-    return await airtable('PROBLEMS').select({
+    const records = await airtable('PROBLEMS').select({
       filterByFormula: `{Citizen} = '${escapedUsername}'`,
       sort: [{ field: 'CreatedAt', direction: 'desc' }],
       maxRecords: 20,
-    }).all(); // .all() is fine here as maxRecords will limit it server-side if possible, or client-side after fetching all.
-              // For strict 20, firstPage() might be better if the table is huge.
+    }).all();
+    return [...records]; // Convert ReadonlyArray to Array
   } catch (error) {
     console.error(`Error fetching problems for ${username}:`, error);
     return [];
@@ -322,13 +332,19 @@ export async function GET(request: Request) {
         const pointField = bldg.fields.Point;
         const buildingType = (bldg.fields.Type as string || '').toLowerCase();
 
-        const addPointsToSet = (points: string | string[], set: Set<string>) => {
+        const addPointsToSet = (points: unknown, set: Set<string>) => {
           if (typeof points === 'string') {
             set.add(points);
           } else if (Array.isArray(points)) {
             points.forEach(p => {
-              if (typeof p === 'string') set.add(p);
+              if (typeof p === 'string') {
+                set.add(p);
+              } else {
+                // console.warn(`Non-string element in point array: ${p}`);
+              }
             });
+          } else {
+            // console.warn(`Unexpected pointField type: ${typeof points}`, points);
           }
         };
 
