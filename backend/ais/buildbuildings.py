@@ -1551,7 +1551,7 @@ Your response must be a JSON object with:
                                 # If this function is called within a non-dry_run block of the main script, this will be False.
                                 main_dry_run_flag = "dry_run" in globals() and globals()["dry_run"] # Check if global dry_run exists
                                 
-                                if call_try_create_activity_api(ai_username, "initiate_building_project", activity_params, main_dry_run_flag, log):
+                                if call_try_create_activity_api(ai_username, "initiate_building_project", activity_params, main_dry_run_flag, module_logger): # Pass renamed logger
                                     log_success(f"Successfully initiated 'initiate_building_project' activity for {ai_username} to build {building_type} on {land_id} at point {point_id}.")
                                     # Notifications and ducat transfers will be handled by the activity processor.
                                     return True
