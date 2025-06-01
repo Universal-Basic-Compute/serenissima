@@ -1119,28 +1119,19 @@ def _handle_production_and_general_work_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
-    citizen_social_class: str # Added social_class
-) -> bool:
+    citizen_social_class: str 
+) -> Optional[Dict]:
     """Prio 31: Handles production, restocking for general workplaces if it's work time."""
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
     if not workplace_record:
-        return False
+        return None
 
     workplace_type = workplace_record['fields'].get('Type')
     if not is_work_time(citizen_social_class, now_venice_dt, workplace_type=workplace_type):
-        return False
+        return None
         
-    # Nobili do not "work" in this sense, their activities are handled by leisure.
-    # The is_work_time function already handles Nobili for class-based schedules.
-    # If a Nobili were to work at a building with specific hours (e.g. as an employee), 
-    # is_work_time would use those building hours.
-    # However, the general assumption is Nobili don't take up "jobs" like this.
-    # If social_class is Nobili AND it fell back to class schedule, is_work_time returns False.
-    # If it used building schedule, it could be True. We might need an explicit Nobili check here
-    # if we want to prevent them from doing production even if a building they own has hours.
-    # For now, relying on is_work_time's Nobili logic for class schedules.
     if citizen_social_class == "Nobili" and not BUILDING_TYPE_WORK_SCHEDULES.get(workplace_type):
-         return False # Explicitly prevent Nobili if falling back to class schedule (which is_work_time handles)
+         return None 
 
     workplace_category = workplace_record['fields'].get('Category', '').lower()
     workplace_subcategory = workplace_record['fields'].get('SubCategory', '').lower()
@@ -1150,23 +1141,24 @@ def _handle_production_and_general_work_tasks(
 
 
     # This handler is for general business/production, not construction or porter guilds
-    if workplace_category != 'business' or workplace_subcategory in ['construction', 'porter_guild_hall', 'storage']: # Exclude storage as well for now
-        return False
+    if workplace_category != 'business' or workplace_subcategory in ['construction', 'porter_guild_hall', 'storage']: 
+        return None
     
-    if not citizen_position: return False # Needs position to evaluate being at work
+    if not citizen_position: return None 
     workplace_pos = _get_building_position_coords(workplace_record)
     if not workplace_pos or _calculate_distance_meters(citizen_position, workplace_pos) > 20:
-        return False # Not at workplace
+        # If not at workplace, this handler won't create a goto_work. That's handled by _handle_general_goto_work.
+        return None 
 
     log.info(f"{LogColors.OKCYAN}[Travail Général] Citoyen {citizen_name} à {workplace_custom_id} ({workplace_type}). Évaluation des tâches.{LogColors.ENDC}")
 
     building_type_def = get_building_type_info(workplace_type, building_type_defs)
     if not building_type_def or 'productionInformation' not in building_type_def:
         log.info(f"Pas d'information de production pour {workplace_type}. Impossible de produire ou réapprovisionner.")
-        return False
+        return None
     
     prod_info = building_type_def['productionInformation']
-    recipes = prod_info.get('Arti', []) if isinstance(prod_info, dict) else [] # Ensure prod_info is dict
+    recipes = prod_info.get('Arti', []) if isinstance(prod_info, dict) else [] 
     storage_capacity = float(prod_info.get('storageCapacity', 0))
     
     # 1. Try to produce
@@ -1189,18 +1181,21 @@ def _handle_production_and_general_work_tasks(
                 current_total_stock_volume = sum(current_workplace_stock_map.values())
                 # Approximate available space check
                 if storage_capacity == 0 or (storage_capacity - current_total_stock_volume + sum(float(qty) for qty in recipe_def.get('inputs', {}).values())) >= output_total_volume:
-                    if try_create_production_activity(tables, citizen_airtable_id, citizen_custom_id, citizen_username, workplace_custom_id, recipe_def, now_utc_dt):
+                    # Create production activity with immediate start
+                    production_activity = try_create_production_activity(
+                        tables, citizen_airtable_id, citizen_custom_id, citizen_username, 
+                        workplace_custom_id, recipe_def, now_utc_dt, start_time_utc_iso=None
+                    )
+                    if production_activity:
                         log.info(f"{LogColors.OKGREEN}[Travail Général] Citoyen {citizen_name} a commencé la production à {workplace_custom_id}.{LogColors.ENDC}")
-                        return True
+                        return production_activity # Return the created activity
                 else:
                     log.info(f"Pas assez d'espace de stockage à {workplace_custom_id} pour la sortie de la recette {recipe_idx}.")
 
     # 2. Try to restock inputs for production
-    if recipes: # Only try to restock if there are recipes
-        current_workplace_stock_map_for_restock = get_building_resources(tables, workplace_custom_id) # Re-fetch or use above
-        
-        # Determine needed resources based on recipes and current stock
-        # This is a simplified needs assessment. A more complex one would look at target stock levels.
+    # This section will create a travel activity (fetch/goto) and then chain a production activity.
+    if recipes: 
+        current_workplace_stock_map_for_restock = get_building_resources(tables, workplace_custom_id)
         for recipe_def_restock in recipes:
             if not isinstance(recipe_def_restock, dict): continue
             for input_res_id, input_qty_needed_val in recipe_def_restock.get('inputs', {}).items():
@@ -1211,9 +1206,14 @@ def _handle_production_and_general_work_tasks(
                     res_name_display = _get_res_display_name_module(input_res_id, resource_defs)
                     log.info(f"{LogColors.OKBLUE}[Travail Général] {workplace_custom_id} a besoin de {needed_amount:.2f} de {res_name_display} pour la production.{LogColors.ENDC}")
 
-                    # Attempt to acquire needed_amount of input_res_id for workplace_custom_id, operated by workplace_operator
-
+                    first_fetch_activity: Optional[Dict] = None
+                    
                     # Prio 1: Fetch from dedicated storage contract (storage_query)
+                    # ... (existing logic to find sq_contract, storage_facility_record, etc.)
+                    # If found and path_to_storage exists:
+                    #     first_fetch_activity = try_create_goto_work_activity(...)
+                    #     if first_fetch_activity: break # Break from inner loop (inputs for this recipe)
+                    # if first_fetch_activity: break # Break from outer loop (recipes)
                     storage_query_contracts = tables['contracts'].all(
                         formula=f"AND({{Type}}='storage_query', {{Buyer}}='{_escape_airtable_value(workplace_operator)}', {{BuyerBuilding}}='{_escape_airtable_value(workplace_custom_id)}', {{ResourceType}}='{_escape_airtable_value(input_res_id)}', {{Status}}='active', IS_BEFORE(NOW(), {{EndAt}}))"
                     )
@@ -1230,7 +1230,7 @@ def _handle_production_and_general_work_tasks(
                                 if amount_to_fetch_from_storage >= 0.1:
                                     log.info(f"    [Travail Général] Trouvé {actual_stored_amount:.2f} de {res_name_display} dans l'entrepôt {storage_facility_id}. Va chercher {amount_to_fetch_from_storage:.2f}.")
                                     storage_facility_pos = _get_building_position_coords(storage_facility_record)
-                                    if citizen_position and storage_facility_pos: # Citizen is at workplace
+                                    if citizen_position and storage_facility_pos:
                                         path_to_storage = get_path_between_points(citizen_position, storage_facility_pos, transport_api_url)
                                         if path_to_storage and path_to_storage.get('success'):
                                             goto_notes = f"Aller à l'entrepôt {storage_facility_id} pour chercher {amount_to_fetch_from_storage:.2f} {res_name_display} pour l'atelier {workplace_custom_id}."
@@ -1240,16 +1240,24 @@ def _handle_production_and_general_work_tasks(
                                                 "storage_query_contract_id": sq_contract['fields'].get('ContractId', sq_contract['id']),
                                                 "resources_to_fetch": [{"ResourceId": input_res_id, "Amount": amount_to_fetch_from_storage}]
                                             }
-                                            if try_create_goto_work_activity(
+                                            first_fetch_activity = try_create_goto_work_activity(
                                                 tables, citizen_custom_id, citizen_username, citizen_airtable_id,
                                                 storage_facility_id, path_to_storage,
                                                 None, resource_defs, False, citizen_position_str_val, now_utc_dt,
-                                                custom_notes=goto_notes, activity_type="goto_building_for_storage_fetch", details_payload=fetch_details
-                                            ):
+                                                custom_notes=goto_notes, activity_type="goto_building_for_storage_fetch", 
+                                                details_payload=fetch_details, start_time_utc_iso=None # Immediate start for travel
+                                            )
+                                            if first_fetch_activity:
                                                 log.info(f"      [Travail Général] Activité 'goto_building_for_storage_fetch' créée vers {storage_facility_id}.")
-                                                return True
-                    
+                                                break # Found a way to get this input, break from inputs loop
+                    if first_fetch_activity: break # Break from recipes loop
+
                     # Prio 2: Fetch via recurrent contract
+                    # ... (existing logic to find contract_rec, from_bldg_rec_rec, etc.)
+                    # If found and path_src_rec exists:
+                    #     first_fetch_activity = try_create_resource_fetching_activity(...)
+                    #     if first_fetch_activity: break
+                    # if first_fetch_activity: break
                     recurrent_contracts = get_citizen_contracts(tables, workplace_operator)
                     for contract_rec in recurrent_contracts:
                         if contract_rec['fields'].get('ResourceType') == input_res_id and contract_rec['fields'].get('BuyerBuilding') == workplace_custom_id:
@@ -1257,124 +1265,165 @@ def _handle_production_and_general_work_tasks(
                             if not from_bldg_id_rec: continue
                             from_bldg_rec_rec = get_building_record(tables, from_bldg_id_rec)
                             if not from_bldg_rec_rec: continue
-                            
                             amount_rec_contract = float(contract_rec['fields'].get('TargetAmount', 0) or 0)
                             amount_to_fetch_rec = min(needed_amount, amount_rec_contract)
-                            
                             seller_rec = contract_rec['fields'].get('Seller')
                             if not seller_rec: continue
                             _, source_stock_rec = get_building_storage_details(tables, from_bldg_id_rec, seller_rec)
-                            
                             if source_stock_rec.get(input_res_id, 0.0) >= amount_to_fetch_rec and amount_to_fetch_rec > 0.01:
                                 contract_custom_id_rec_str = contract_rec['fields'].get('ContractId', contract_rec['id'])
                                 if _has_recent_failed_activity_for_contract(tables, 'fetch_resource', contract_custom_id_rec_str): continue
-                                
                                 log.info(f"    [Travail Général] Tentative de récupération via contrat récurrent {contract_custom_id_rec_str} depuis {from_bldg_id_rec} pour {res_name_display}.")
                                 path_src_rec = get_path_between_points(citizen_position, _get_building_position_coords(from_bldg_rec_rec), transport_api_url)
                                 if path_src_rec and path_src_rec.get('success'):
-                                    if try_create_resource_fetching_activity(
+                                    first_fetch_activity = try_create_resource_fetching_activity(
                                         tables, citizen_airtable_id, citizen_custom_id, citizen_username,
                                         contract_custom_id_rec_str, from_bldg_id_rec, workplace_custom_id,
-                                        input_res_id, amount_to_fetch_rec, path_src_rec, now_utc_dt, resource_defs
-                                    ):
+                                        input_res_id, amount_to_fetch_rec, path_src_rec, now_utc_dt, resource_defs, start_time_utc_iso=None
+                                    )
+                                    if first_fetch_activity:
                                         log.info(f"      [Travail Général] Activité 'fetch_resource' créée pour contrat récurrent {contract_custom_id_rec_str}.")
-                                        return True
-                    
+                                        break 
+                    if first_fetch_activity: break
+
                     # Prio 3: Buy from public sell contract
+                    # ... (existing logic to find contract_ps, seller_bldg_rec_ps, etc.)
+                    # If found and path_seller_ps exists:
+                    #     first_fetch_activity = try_create_resource_fetching_activity(...)
+                    #     if first_fetch_activity: break
+                    # if first_fetch_activity: break
                     public_sell_formula = f"AND({{Type}}='public_sell', {{ResourceType}}='{_escape_airtable_value(input_res_id)}', {{EndAt}}>'{now_utc_dt.isoformat()}', {{TargetAmount}}>0)"
-                    all_public_sell_for_res = tables['contracts'].all(formula=public_sell_formula, sort=['PricePerResource']) # Tri ascendant par PricePerResource
+                    all_public_sell_for_res = tables['contracts'].all(formula=public_sell_formula, sort=['PricePerResource'])
                     for contract_ps in all_public_sell_for_res:
                         seller_bldg_id_ps = contract_ps['fields'].get('SellerBuilding')
                         if not seller_bldg_id_ps: continue
                         seller_bldg_rec_ps = get_building_record(tables, seller_bldg_id_ps)
                         if not seller_bldg_rec_ps: continue
-
                         price_ps = float(contract_ps['fields'].get('PricePerResource', 0))
                         available_ps = float(contract_ps['fields'].get('TargetAmount', 0))
                         seller_ps = contract_ps['fields'].get('Seller')
                         if not seller_ps: continue
-
-                        buyer_rec_ps = get_citizen_record(tables, workplace_operator) # Workplace operator is the buyer
+                        buyer_rec_ps = get_citizen_record(tables, workplace_operator)
                         if not buyer_rec_ps: continue
                         ducats_ps = float(buyer_rec_ps['fields'].get('Ducats', 0))
-                        
                         max_affordable_ps = (ducats_ps / price_ps) if price_ps > 0 else float('inf')
                         amount_to_buy_ps = min(needed_amount, available_ps, max_affordable_ps)
                         amount_to_buy_ps = float(f"{amount_to_buy_ps:.4f}")
-
                         if amount_to_buy_ps >= 0.1:
                             _, source_stock_ps = get_building_storage_details(tables, seller_bldg_id_ps, seller_ps)
                             if source_stock_ps.get(input_res_id, 0.0) >= amount_to_buy_ps:
                                 contract_custom_id_ps_str = contract_ps['fields'].get('ContractId', contract_ps['id'])
                                 if _has_recent_failed_activity_for_contract(tables, 'fetch_resource', contract_custom_id_ps_str): continue
-                                
                                 log.info(f"    [Travail Général] Tentative d'achat via contrat public {contract_custom_id_ps_str} depuis {seller_bldg_id_ps} pour {res_name_display}.")
                                 path_seller_ps = get_path_between_points(citizen_position, _get_building_position_coords(seller_bldg_rec_ps), transport_api_url)
                                 if path_seller_ps and path_seller_ps.get('success'):
-                                    if try_create_resource_fetching_activity(
+                                    first_fetch_activity = try_create_resource_fetching_activity(
                                         tables, citizen_airtable_id, citizen_custom_id, citizen_username,
                                         contract_custom_id_ps_str, seller_bldg_id_ps, workplace_custom_id,
-                                        input_res_id, amount_to_buy_ps, path_seller_ps, now_utc_dt, resource_defs
-                                    ):
+                                        input_res_id, amount_to_buy_ps, path_seller_ps, now_utc_dt, resource_defs, start_time_utc_iso=None
+                                    )
+                                    if first_fetch_activity:
                                         log.info(f"      [Travail Général] Activité 'fetch_resource' créée pour contrat public {contract_custom_id_ps_str}.")
-                                        return True
+                                        break
+                    if first_fetch_activity: break
                     
                     # Prio 4: Generic fetch_resource (fallback)
+                    # ... (existing logic)
+                    # If successful:
+                    #     first_fetch_activity = try_create_resource_fetching_activity(...)
+                    #     if first_fetch_activity: break
+                    # if first_fetch_activity: break
                     log.info(f"    [Travail Général] Aucune source contractuelle trouvée pour {res_name_display}. Tentative de récupération générique.")
-                    if try_create_resource_fetching_activity(
+                    first_fetch_activity = try_create_resource_fetching_activity(
                         tables, citizen_airtable_id, citizen_custom_id, citizen_username,
                         None, None, workplace_custom_id, input_res_id, 
-                        min(needed_amount, 10.0), # Fetch needed or up to 10 units
-                        None, now_utc_dt, resource_defs
-                    ):
+                        min(needed_amount, 10.0), 
+                        None, now_utc_dt, resource_defs, start_time_utc_iso=None
+                    )
+                    if first_fetch_activity:
                         log.info(f"{LogColors.OKGREEN}[Travail Général] Citoyen {citizen_name} va chercher {res_name_display} pour {workplace_custom_id} (générique).{LogColors.ENDC}")
-                        return True
-                    # If one fetch is initiated, return True for this cycle.
-    
+                        break
+            if first_fetch_activity: break # Break from recipes loop if a fetch was initiated for any input
+
+        if first_fetch_activity:
+            # Chain production activity after the fetch
+            # The EndDate of fetch_resource is arrival at workplace.
+            # The EndDate of goto_building_for_storage_fetch is arrival at storage.
+            # We need to ensure the chained production starts *after* arrival back at the workplace.
+            # This requires the fetch activity processor to potentially create the production activity,
+            # OR for the fetch activity to have a "final destination" field.
+            # For now, let's assume the fetch activity's EndDate is arrival at the workplace.
+            # This is a simplification and might need refinement.
+            # The recipe_def_restock here is the one for which we initiated the fetch.
+            
+            # IMPORTANT: The current fetch_resource and goto_building_for_storage_fetch activities
+            # have their EndDate as arrival at the *source* or *storage*.
+            # We need a way to chain the production *after* returning to the workplace.
+            # This might require a new activity type like "return_to_workplace_with_goods"
+            # or modifying the fetch processors to create the production activity.
+            # For this refactor, we will assume the fetch activity's EndDate is arrival back at the workplace.
+            # This is a temporary simplification.
+            
+            # Find the recipe that triggered this fetch.
+            recipe_to_chain = None
+            for r_def in recipes:
+                if input_res_id in r_def.get('inputs', {}):
+                    recipe_to_chain = r_def
+                    break
+            
+            if recipe_to_chain:
+                next_start_time_iso = first_fetch_activity['fields']['EndDate']
+                chained_production = try_create_production_activity(
+                    tables, citizen_airtable_id, citizen_custom_id, citizen_username,
+                    workplace_custom_id, recipe_to_chain, now_utc_dt, # now_utc_dt is for fallback
+                    start_time_utc_iso=next_start_time_iso
+                )
+                if chained_production:
+                    log.info(f"{LogColors.OKGREEN}[Travail Général] Production chaînée après récupération de {res_name_display}, début à {next_start_time_iso}.{LogColors.ENDC}")
+                else:
+                    log.warning(f"{LogColors.WARNING}[Travail Général] Échec de la création de production chaînée après récupération de {res_name_display}.{LogColors.ENDC}")
+            return first_fetch_activity # Return the first activity of the chain
+
     # 3. Try to deliver excess output to storage
+    # This creates a 'deliver_to_storage' activity and does not chain anything after it.
     current_workplace_total_load, current_workplace_stock_map_for_delivery = get_building_storage_details(tables, workplace_custom_id, workplace_operator)
     if storage_capacity > 0 and (current_workplace_total_load / storage_capacity) > STORAGE_FULL_THRESHOLD:
         log.info(f"{LogColors.OKCYAN}[Travail Général] {workplace_custom_id} est >{STORAGE_FULL_THRESHOLD*100:.0f}% plein. Vérification des contrats de stockage.{LogColors.ENDC}")
-        # Iterate through current_workplace_stock_map_for_delivery
         for res_id_to_deliver, amount_at_workplace in current_workplace_stock_map_for_delivery.items():
             if amount_at_workplace <= 0.1: continue
-            
-            # Find storage_query contract for this resource, operator, and workplace
             storage_query_contracts = tables['contracts'].all(
                 formula=f"AND({{Type}}='storage_query', {{Buyer}}='{_escape_airtable_value(workplace_operator)}', {{BuyerBuilding}}='{_escape_airtable_value(workplace_custom_id)}', {{ResourceType}}='{_escape_airtable_value(res_id_to_deliver)}', {{Status}}='active', IS_BEFORE(NOW(), {{EndAt}}))"
             )
             if storage_query_contracts:
                 sq_contract = storage_query_contracts[0]
-                storage_facility_id = sq_contract['fields'].get('SellerBuilding') # This is the ToBuilding for deliver_to_storage
+                storage_facility_id = sq_contract['fields'].get('SellerBuilding')
                 if storage_facility_id:
                     storage_facility_record = get_building_record(tables, storage_facility_id)
                     if storage_facility_record:
-                        # Check capacity at storage facility for this resource under this contract
                         _, facility_stock_map = get_building_storage_details(tables, storage_facility_id, workplace_operator)
                         current_stored_in_facility = facility_stock_map.get(res_id_to_deliver, 0.0)
                         contracted_capacity = float(sq_contract['fields'].get('TargetAmount', 0))
                         remaining_facility_capacity_for_contract = contracted_capacity - current_stored_in_facility
-
                         if remaining_facility_capacity_for_contract > 0.1:
-                            amount_to_deliver = min(amount_at_workplace * 0.5, # Deliver up to 50% of stock
+                            amount_to_deliver = min(amount_at_workplace * 0.5, 
                                                     get_citizen_effective_carry_capacity(citizen_record) - get_citizen_current_load(tables, citizen_username),
                                                     remaining_facility_capacity_for_contract)
                             amount_to_deliver = float(f"{amount_to_deliver:.4f}")
-
                             if amount_to_deliver >= 0.1:
                                 storage_facility_pos = _get_building_position_coords(storage_facility_record)
                                 if citizen_position and storage_facility_pos:
                                     path_to_storage = get_path_between_points(citizen_position, storage_facility_pos, transport_api_url)
                                     if path_to_storage and path_to_storage.get('success'):
-                                        if try_create_deliver_to_storage_activity(
+                                        deliver_activity = try_create_deliver_to_storage_activity(
                                             tables, citizen_record, workplace_record, storage_facility_record,
                                             [{"ResourceId": res_id_to_deliver, "Amount": amount_to_deliver}],
                                             sq_contract['fields'].get('ContractId', sq_contract['id']),
-                                            path_to_storage, now_utc_dt
-                                        ):
+                                            path_to_storage, now_utc_dt, start_time_utc_iso=None # Immediate start for delivery
+                                        )
+                                        if deliver_activity:
                                             log.info(f"{LogColors.OKGREEN}[Travail Général] Citoyen {citizen_name} va livrer {amount_to_deliver:.2f} de {res_id_to_deliver} à l'entrepôt {storage_facility_id}.{LogColors.ENDC}")
-                                            return True
-    return False
+                                            return deliver_activity # Return the delivery activity
+    return None # No activity created by this handler this cycle
 
 
 def _handle_forestieri_daytime_tasks(
