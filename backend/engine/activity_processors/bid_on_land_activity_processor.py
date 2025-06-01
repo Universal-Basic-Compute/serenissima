@@ -91,6 +91,34 @@ def _create_land_bid_contract_direct(
     # Calculate a reasonable expiration date (7 days from now)
     end_date = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
     
+    # Calculate registration fee (0.5% of bid amount, minimum 10 Ducats)
+    # Based on average daily wage of 2000 Ducats
+    registration_fee = max(10, bid_amount * 0.005)
+    
+    # Get the building where the bid is being submitted (courthouse/town_hall)
+    # This should be in the ToBuilding field of the submit_land_bid activity
+    building_id = None
+    building_operator = "ConsiglioDeiDieci"  # Default to city government
+    
+    # For submit_land_bid activity, we can get the building from the activity record
+    activity_type = "submit_land_bid"
+    formula = f"AND({{Type}}='{activity_type}', {{Citizen}}='{_escape_airtable_value(citizen)}', {{Status}}='processed', {{Details}} CONTAINS '{_escape_airtable_value(land_id)}')"
+    try:
+        recent_activities = tables["activities"].all(formula=formula, sort=["-CreatedAt"], max_records=1)
+        if recent_activities:
+            building_id = recent_activities[0]['fields'].get('ToBuilding')
+            
+            # Get the building operator (RunBy) to pay the fee to
+            if building_id:
+                building_formula = f"{{BuildingId}}='{_escape_airtable_value(building_id)}'"
+                buildings = tables["buildings"].all(formula=building_formula, max_records=1)
+                if buildings and buildings[0]['fields'].get('RunBy'):
+                    building_operator = buildings[0]['fields'].get('RunBy')
+                    log.info(f"Found building operator {building_operator} for building {building_id}")
+    except Exception as e:
+        log.warning(f"Error finding building operator for fee payment: {e}")
+        # Continue with default ConsiglioDeiDieci
+    
     contract_fields: Dict[str, Any] = {
         "ContractId": contract_id,
         "Type": "building_bid",
@@ -107,13 +135,59 @@ def _create_land_bid_contract_direct(
     }
 
     try:
+        # Check if citizen has enough Ducats to pay the registration fee
+        citizen_formula = f"{{Username}}='{_escape_airtable_value(citizen)}'"
+        citizen_records = tables["citizens"].all(formula=citizen_formula, max_records=1)
+        
+        if not citizen_records:
+            log.error(f"Citizen {citizen} not found for fee payment")
+            return False
+            
+        citizen_record = citizen_records[0]
+        citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
+        
+        if citizen_ducats < registration_fee:
+            log.error(f"Citizen {citizen} has insufficient funds ({citizen_ducats} Ducats) to pay registration fee of {registration_fee} Ducats")
+            return False
+        
+        # Deduct fee from citizen
+        tables["citizens"].update(citizen_record['id'], {'Ducats': citizen_ducats - registration_fee})
+        
+        # Add fee to building operator
+        operator_formula = f"{{Username}}='{_escape_airtable_value(building_operator)}'"
+        operator_records = tables["citizens"].all(formula=operator_formula, max_records=1)
+        
+        if operator_records:
+            operator_record = operator_records[0]
+            operator_ducats = float(operator_record['fields'].get('Ducats', 0))
+            tables["citizens"].update(operator_record['id'], {'Ducats': operator_ducats + registration_fee})
+        
+        # Record the transaction
+        transaction_fields = {
+            "Type": "bid_registration_fee",
+            "AssetType": "contract",
+            "Asset": contract_id,
+            "Seller": citizen,  # Citizen pays
+            "Buyer": building_operator,  # Building operator receives
+            "Price": registration_fee,
+            "Notes": json.dumps({
+                "land_id": land_id,
+                "bid_amount": bid_amount,
+                "building_id": building_id
+            }),
+            "CreatedAt": datetime.utcnow().isoformat(),
+            "ExecutedAt": datetime.utcnow().isoformat()
+        }
+        tables["transactions"].create(transaction_fields)
+        
+        # Create the contract
         tables["contracts"].create(contract_fields)
         log.info(f"Created building_bid contract {contract_id} for land {land_id} by {citizen}")
-        
-        # Could add a small fee payment here for bid registration
-        # This would involve creating a transaction record
+        log.info(f"Collected registration fee of {registration_fee} Ducats from {citizen} paid to {building_operator}")
         
         return True
     except Exception as e:
         log.error(f"Failed to create building_bid contract {contract_id}: {e}")
+        import traceback
+        log.error(traceback.format_exc())
         return False
