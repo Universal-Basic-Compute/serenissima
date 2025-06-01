@@ -49,6 +49,7 @@ const normalizeKeysCamelCaseShallow = (obj: Record<string, any>): Record<string,
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_ACTIVITIES_TABLE = process.env.AIRTABLE_ACTIVITIES_TABLE || 'ACTIVITIES';
+const AIRTABLE_MESSAGES_TABLE = process.env.AIRTABLE_MESSAGES_TABLE || 'MESSAGES'; // Added for fetching thoughts
 
 if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
   throw new Error('Airtable API key or Base ID is not configured in environment variables.');
@@ -56,6 +57,7 @@ if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
 
 const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 const activitiesTable = airtable(AIRTABLE_ACTIVITIES_TABLE);
+const messagesTable = airtable(AIRTABLE_MESSAGES_TABLE); // Added messages table instance
 
 // --- Zod Schemas for Validation ---
 const PositionSchema = z.object({
@@ -156,7 +158,7 @@ const CreateActivityPayloadSchema = z.object({
   activityDetails: z.any(), // We'll validate this based on activityType
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  thought: z.string().min(1, "Thought (first-person narrative) is required"),
+  thought: z.string().optional(), // Made thought optional
   notes: z.string().optional(), // Formerly kinosReflection
 });
 
@@ -177,7 +179,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { citizenUsername, activityType, activityDetails: rawActivityDetails, title, description, thought, notes } = validationResult.data;
+    let { citizenUsername, activityType, activityDetails: rawActivityDetails, title, description, thought, notes } = validationResult.data;
 
     // Normalize activityDetails keys to camelCase before specific Zod schema validation
     const activityDetails = normalizeKeysCamelCaseShallow(rawActivityDetails || {});
@@ -189,6 +191,30 @@ export async function POST(request: Request) {
 
     console.log(`[API CreateActivity] Received request for ${citizenUsername} to perform ${activityType}`);
 
+    // Fetch latest thought if not provided or empty
+    if (!thought) {
+      console.log(`[API CreateActivity] Thought not provided for ${citizenUsername}. Fetching latest relevant log.`);
+      try {
+        const thoughtRecords = await messagesTable.select({
+          filterByFormula: `AND({Sender} = '${citizenUsername}', OR({Type} = 'unguided_run_log', {Type} = 'autonomous_run_log'))`,
+          sort: [{ field: 'CreatedAt', direction: 'desc' }],
+          maxRecords: 1,
+          fields: ['Content']
+        }).firstPage();
+
+        if (thoughtRecords && thoughtRecords.length > 0 && thoughtRecords[0].fields.Content) {
+          thought = thoughtRecords[0].fields.Content as string;
+          console.log(`[API CreateActivity] Using fetched thought for ${citizenUsername}: "${thought.substring(0, 50)}..."`);
+        } else {
+          console.log(`[API CreateActivity] No relevant thought log found for ${citizenUsername}. Using default.`);
+          thought = "No specific thought provided for this action."; // Default if none found
+        }
+      } catch (e) {
+        console.error(`[API CreateActivity] Error fetching thought for ${citizenUsername}:`, e);
+        thought = "Error fetching thought; proceeding with default."; // Default on error
+      }
+    }
+
     const airtablePayload: Record<string, any> = {
       ActivityId: `${activityType}_${citizenUsername}_${Date.now()}`,
       Citizen: citizenUsername,
@@ -197,7 +223,7 @@ export async function POST(request: Request) {
       CreatedAt: new Date().toISOString(),
       Title: title,
       Description: description,
-      Thought: thought,
+      Thought: thought, // Use the potentially fetched or original thought
       Notes: notes, // Optional notes
     };
 
