@@ -204,4 +204,7 @@ def process(
         return False # Critical failure
 
     log.info(f"{LogColors.OKGREEN}Successfully processed 'leave_venice' activity {activity_guid} for {forestiero_username}.{LogColors.ENDC}")
+    
+    # Note: In the new architecture, we don't create follow-up activities here.
+    # The activity creator should have already created the entire chain.
     return True

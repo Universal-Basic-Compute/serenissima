@@ -66,6 +66,9 @@ def process(
                 log.info(f"{LogColors.OKGREEN}Construction contract **{contract_custom_id_log}** marked as 'completed'.{LogColors.ENDC}")
             else:
                 log.warning(f"{LogColors.WARNING}Could not find contract (Airtable ID: {contract_airtable_id}) to mark as completed for building {target_building_name_log}.{LogColors.ENDC}")
+                
+            # Note: This processor only updates the building and contract status and does not create follow-up activities.
+            # Any subsequent activities should be created by activity creators, not processors.
         else:
             tables['buildings'].update(target_building_airtable_id, {'ConstructionMinutesRemaining': new_minutes_remaining})
             log.info(f"{LogColors.OKGREEN}Building **{target_building_name_log}** ({target_building_custom_id}) progress updated. {new_minutes_remaining:.2f} minutes remaining.{LogColors.ENDC}")
