@@ -25,3 +25,4 @@ from .fetch_for_logistics_client_activity_creator import try_create as try_creat
 from .check_business_status_activity_creator import try_create as try_create_check_business_status_activity
 from .fishing_activity_creator import try_create_fishing_activity # New fishing activity creator
 from .return_to_workplace_activity_creator import try_create as try_create_return_to_workplace_activity # New
+from .manage_public_sell_contract_creator import try_create as try_create_manage_public_sell_contract_activity # New public sell contract activity

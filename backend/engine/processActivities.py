@@ -121,6 +121,7 @@ from backend.engine.activity_processors import (
         process_goto_location as process_goto_location_fn # Import goto_location processor
 )
 from backend.engine.activity_processors.bid_on_land_activity_processor import process_bid_on_land_fn
+from backend.engine.activity_processors.manage_public_sell_contract_processor import process_manage_public_sell_contract_fn
 # Load environment variables
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
@@ -357,6 +358,8 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "bid_on_land": process_bid_on_land_fn,
         "goto_location": process_goto_location_fn, # New processor for multi-activity chains
         "submit_land_bid": process_bid_on_land_fn, # Second step in bid_on_land chain
+        "prepare_goods_for_sale": process_manage_public_sell_contract_fn, # First step in manage_public_sell_contract chain
+        "register_public_sell_offer": process_manage_public_sell_contract_fn, # Final step in manage_public_sell_contract chain
     }
 
     tables = initialize_airtable()

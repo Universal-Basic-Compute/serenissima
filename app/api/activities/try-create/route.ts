@@ -29,6 +29,18 @@ export async function POST(request: Request) {
       ...(activityParameters && { activityParameters: activityParameters }), // Inclure les paramètres s'ils existent
     };
     
+    // Log des paramètres spécifiques pour manage_public_sell_contract
+    if (activityType === 'manage_public_sell_contract') {
+      console.log(`[API /activities/try-create] Processing manage_public_sell_contract with parameters:`, 
+        activityParameters?.contractId ? `Modifying contract: ${activityParameters.contractId}` : 'Creating new contract',
+        `Resource: ${activityParameters?.resourceType}`,
+        `Amount: ${activityParameters?.targetAmount}`,
+        `Price: ${activityParameters?.pricePerResource}`,
+        `Seller Building: ${activityParameters?.sellerBuildingId}`,
+        `Market Building: ${activityParameters?.targetMarketBuildingId}`
+      );
+    }
+    
     // Endpoint générique sur le moteur Python pour initier des activités/actions
     let parsedPythonEngineUrl: URL;
     try {
