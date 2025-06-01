@@ -779,7 +779,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
 
           const getInitialsColor = (socialClass: string): string => {
             switch (socialClass.toLowerCase()) {
-              case 'nobili': return '#FFD700'; // Gold
+              case 'nobili': return '#FF6347'; // Tomato (Light Red)
               case 'cittadini': return '#ADD8E6'; // Light Blue
               case 'popolani': return '#FFC107'; // Amber (Brighter Gold/Orange)
               case 'forestieri': return '#90EE90'; // Light Green
@@ -878,7 +878,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
 
           const getInitialsColor = (socialClass: string): string => {
             switch (socialClass.toLowerCase()) {
-              case 'nobili': return '#FFD700'; // Gold
+              case 'nobili': return '#FF6347'; // Tomato (Light Red)
               case 'cittadini': return '#ADD8E6'; // Light Blue
               case 'popolani': return '#FFC107'; // Amber (Brighter Gold/Orange)
               case 'forestieri': return '#90EE90'; // Light Green
