@@ -244,6 +244,7 @@ export default function ApiReference() {
           <li><a href="#data-access" className="text-amber-700 hover:underline">Data Access</a>
             <ul className="list-circle pl-6 space-y-1 mt-1">
               <li><a href="#data-access-get-path" className="text-amber-600 hover:underline text-sm">GET /api/data/:path</a></li>
+              <li><a href="#data-access-get-data-package" className="text-amber-600 hover:underline text-sm">GET /api/get-data-package</a></li>
             </ul>
           </li>
           <li><a href="#error-handling" className="text-amber-700 hover:underline">Error Handling</a></li>
@@ -5090,6 +5091,50 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
     "bridge-id": { "lat": number, "lng": number }
   },
   "totalPoints": number
+}`}
+            </pre>
+          </div>
+        </div>
+
+        <div id="data-access-get-data-package" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-data-package</h3>
+          <p className="mb-2">Retrieves a comprehensive data package for a specific citizen, including their details, last activity, owned lands with buildings, and unoccupied building points. Useful for AI context gathering.</p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>citizenUsername</code> (required) - The username of the citizen.</li>
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "data": {
+    "citizen": { /* Citizen details, camelCased, includes airtableId */ },
+    "lastActivity": { /* Last activity details, camelCased, includes airtableId */ } | null,
+    "ownedLands": [
+      {
+        // Land details, camelCased, includes airtableId
+        "landId": "string", 
+        "owner": "string",
+        // ... other land fields
+        "buildings": [
+          {
+            // Building details on this land, camelCased, includes airtableId
+            "buildingId": "string",
+            "type": "string",
+            "point": "string | string[]", // Point(s) occupied by this building
+            // ... other building fields
+          }
+        ],
+        "unoccupiedBuildingPoints": [
+          { "id": "string", "lat": number, "lng": number }
+        ],
+        "totalBuildingPoints": number
+      }
+    ]
+  }
 }`}
             </pre>
           </div>

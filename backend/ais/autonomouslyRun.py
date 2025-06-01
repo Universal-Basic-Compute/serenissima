@@ -1063,16 +1063,27 @@ def autonomously_run_ai_citizen_unguided(
         iteration_count += 1
         log.info(f"{LogColors.OKCYAN}--- Unguided Iteration {iteration_count} for {ai_username} ---{LogColors.ENDC}")
 
-        latest_activity_data_unguided = _get_latest_activity_api(ai_username)
+        # Fetch the comprehensive data package at the start of each iteration (or less frequently if desired)
+        initial_data_package = None
+        if not dry_run:
+            log.info(f"{LogColors.OKBLUE}Fetching initial data package for {ai_username}...{LogColors.ENDC}")
+            initial_data_package = make_api_get_request(f"/api/get-data-package?citizenUsername={ai_username}")
+            if not initial_data_package or not initial_data_package.get("success"):
+                log.warning(f"{LogColors.WARNING}Failed to fetch initial data package for {ai_username}. Proceeding with limited context. Error: {initial_data_package.get('error') if initial_data_package else 'No response'}{LogColors.ENDC}")
+                initial_data_package = {"error": "Failed to fetch initial data package"} # Provide error structure
+        else:
+            log.info(f"{Fore.YELLOW}[DRY RUN] Would fetch initial data package for {ai_username}.{Style.RESET_ALL}")
+            initial_data_package = {"dry_run_data": "Simulated initial data package"}
+        
+        # latest_activity_data_unguided = _get_latest_activity_api(ai_username) # Now part of initial_data_package
 
         prompt_intro = f"You are {ai_display_name}, an AI citizen in La Serenissima. Your goal is to act autonomously and strategically. "
         
         prompt_context_elements = [
-            "citizen data (`addSystem.citizen_data`)", 
+            "your initial data package (`addSystem.initial_data_package`) which includes your citizen details, last activity, owned lands, buildings on them, and unoccupied building points",
             "API docs summary (`addSystem.api_docs_summary`)", 
             "extracted API Reference text (`addSystem.api_reference_extracted_text`)",
-            "Activity Creation Reference text (`addSystem.activity_creation_reference_text`)", # Added new context
-            "your latest activity (`addSystem.latest_activity`)"
+            "Activity Creation Reference text (`addSystem.activity_creation_reference_text`)",
         ]
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
             prompt_context_elements.append("Airtable schema (`addSystem.airtable_schema_summary`)")
@@ -1102,12 +1113,13 @@ def autonomously_run_ai_citizen_unguided(
 
 
         add_system_data = {
+            "initial_data_package": initial_data_package.get("data") if initial_data_package and initial_data_package.get("success") else initial_data_package, # Pass the 'data' part or the error/dry_run object
             "api_docs_summary": API_DOCUMENTATION_SUMMARY,
             "api_reference_extracted_text": API_REFERENCE_EXTRACTED_TEXT,
-            "activity_creation_reference_text": ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT, # Added new context
+            "activity_creation_reference_text": ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT, 
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
-            "citizen_data": ai_citizen_record["fields"],
-            "latest_activity": latest_activity_data_unguided or {}, # Add latest activity
+            # "citizen_data": ai_citizen_record["fields"], # Now part of initial_data_package
+            # "latest_activity": latest_activity_data_unguided or {}, # Now part of initial_data_package
             "previous_api_results": previous_api_results
         }
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
