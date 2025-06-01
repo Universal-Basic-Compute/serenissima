@@ -506,25 +506,19 @@ ID du `broker_s_office`/`mint` ou `courthouse`/`town_hall`). À l'arrivée, une 
     *   **activityType**: `send_message`
     *   **Description**: Le citoyen se déplace physiquement vers la position du destinataire
 (`receiverUsername`), son domicile, ou son lieu de travail (`targetBuildingId`) pour lui remettre un message en
-personne.
+personne. L'activité `reply_to_message` est créée automatiquement et effectuée à l'arrivée du citoyen.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`,
 `targetCitizenUsername`: `receiverUsername` ou `targetBuildingId`). Une fois à proximité ou à destination, une activité
-de remise de message (`activityType: deliver_message_interaction`, durée courte) est créée. Le processeur crée un enregistrement dans la table `MESSAGES` et met à jour ou crée une relation dans la table `RELATIONSHIPS`.
+de remise de message (`activityType: deliver_message_interaction`, durée courte) est créée. Le processeur crée un enregistrement dans la table `MESSAGES`, met à jour ou crée une relation dans la table `RELATIONSHIPS`, et crée automatiquement une activité `reply_to_message` pour le destinataire.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `receiverUsername`, `content`,
 `messageType` (optionnel), `targetBuildingId` (optionnel, lieu de rencontre privilégié comme le domicile ou lieu de
 travail du destinataire).
 
 1.  **Répondre à un Message**
     *   **activityType**: `reply_to_message`
-    *   **Description**: Similaire à `send_message`, le citoyen se déplace physiquement vers l'expéditeur original du
-message (`receiverUsername`) pour lui remettre sa réponse en personne.
-    *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`,
-`targetCitizenUsername`: `receiverUsername` ou `targetBuildingId`). Une fois à proximité ou à destination, une activité
-de remise de réponse (`activityType: deliver_reply_interaction`, durée courte) est créée. Le processeur de cette
-dernière appellera `POST /api/messages/send`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `originalMessageId`, `receiverUsername`
-(l'expéditeur du message original), `content`, `messageType` (optionnel), `targetBuildingId` (optionnel, lieu de
-rencontre privilégié).
+    *   **Description**: Activité créée automatiquement lorsqu'un citoyen reçoit un message. Le citoyen est déjà à l'emplacement où il a reçu le message original, donc aucun déplacement n'est nécessaire.
+    *   **Mécanisme Principal**: Cette activité est automatiquement créée par le processeur de `deliver_message_interaction` et programmée pour commencer 10 minutes après la réception du message. Le processeur crée un message de réponse, met à jour la relation entre les citoyens, et envoie une notification à l'expéditeur original.
+    *   **Paramètres Attendus**: Aucun paramètre n'est attendu de l'utilisateur car cette activité est créée automatiquement avec tous les détails nécessaires.
 
 1.  **Mettre à Jour son Profil Citoyen**
     *   **activityType**: `update_citizen_profile`

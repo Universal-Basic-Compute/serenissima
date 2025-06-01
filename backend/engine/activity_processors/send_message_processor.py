@@ -3,7 +3,13 @@ import json
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 from pyairtable import Table
-from backend.engine.utils.activity_helpers import _escape_airtable_value, VENICE_TIMEZONE
+from backend.engine.utils.activity_helpers import (
+    _escape_airtable_value, 
+    VENICE_TIMEZONE,
+    find_path_between_buildings,
+    get_building_record,
+    get_citizen_record
+)
 
 log = logging.getLogger(__name__)
 
@@ -70,6 +76,8 @@ def _process_message_delivery(
     if not receiver_records:
         log.error(f"Receiver {receiver_username} not found")
         return False
+    
+    receiver_record = receiver_records[0]
     
     try:
         # 1. Create the message record
@@ -153,6 +161,55 @@ def _process_message_delivery(
         }
         
         tables["notifications"].create(notification_fields)
+        
+        # 4. Create a reply_to_message activity for the receiver
+        # Get current position of the receiver
+        receiver_position_str = receiver_record['fields'].get('Position')
+        current_position = None
+        if receiver_position_str:
+            try:
+                current_position = json.loads(receiver_position_str)
+            except json.JSONDecodeError:
+                log.warning(f"Could not parse receiver position: {receiver_position_str}")
+        
+        # Get the sender's current position (which should be where the message was delivered)
+        from_building_id = fields.get('FromBuilding')
+        
+        # Create a timestamp for the activity IDs
+        ts = int(datetime.now(VENICE_TIMEZONE).timestamp())
+        
+        # Create the reply activity ID
+        reply_activity_id = f"reply_to_message_{receiver_username}_{sender}_{ts}"
+        
+        # Set the activity to start in 10 minutes and last for 10 minutes
+        now_utc = datetime.utcnow()
+        reply_start_date = (now_utc + timedelta(minutes=10)).isoformat()
+        reply_end_date = (now_utc + timedelta(minutes=20)).isoformat()
+        
+        # Create the reply_to_message activity
+        reply_payload = {
+            "ActivityId": reply_activity_id,
+            "Type": "reply_to_message",
+            "Citizen": receiver_username,
+            "FromBuilding": from_building_id,  # Start from where the message was delivered
+            "ToBuilding": from_building_id,    # Reply at the same location
+            "Details": json.dumps({
+                "originalMessageId": message_id,
+                "receiverUsername": sender,  # The original sender becomes the receiver of the reply
+                "messageType": message_type
+            }),
+            "Status": "created",
+            "Title": f"Replying to message from {sender}",
+            "Description": f"Preparing a reply to the {message_type} message from {sender}",
+            "Notes": f"Automatically created reply activity in response to message {message_id}",
+            "CreatedAt": datetime.utcnow().isoformat(),
+            "StartDate": reply_start_date,
+            "EndDate": reply_end_date,
+            "Priority": 30  # Medium priority for social activities
+        }
+        
+        tables["activities"].create(reply_payload)
+        log.info(f"Created reply_to_message activity {reply_activity_id} for {receiver_username} to respond to {sender}")
         
         log.info(f"Successfully delivered message from {sender} to {receiver_username}")
         log.info(f"Created message record with ID: {message_id}")
