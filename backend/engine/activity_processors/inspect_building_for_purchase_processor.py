@@ -1,4 +1,5 @@
 import logging
+import json # Added import
 from typing import Dict, Any
 
 from backend.engine.utils.activity_helpers import LogColors
