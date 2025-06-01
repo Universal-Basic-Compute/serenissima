@@ -29,11 +29,24 @@ export async function POST(request: Request) {
     };
     
     // Endpoint générique sur le moteur Python
-    const pythonEngineUrl = `${PYTHON_ENGINE_BASE_URL}/api/v1/engine/try-create-activity`; 
+    let parsedPythonEngineUrl: URL;
+    try {
+      let base = PYTHON_ENGINE_BASE_URL;
+      // Assurer que la base URL a un schéma, sinon fetch peut lever une TypeError
+      if (!base.startsWith('http://') && !base.startsWith('https://')) {
+        console.warn(`[API /activities/try-create] PYTHON_ENGINE_BASE_URL (${base}) is missing scheme, prepending http://`);
+        base = 'http://' + base;
+      }
+      parsedPythonEngineUrl = new URL('/api/v1/engine/try-create-activity', base);
+    } catch (e: any) {
+      console.error(`[API /activities/try-create] Invalid PYTHON_ENGINE_BASE_URL: ${PYTHON_ENGINE_BASE_URL}. Error: ${e.message}`);
+      return NextResponse.json({ success: false, error: 'Internal server configuration error: Python engine URL is invalid.' }, { status: 500 });
+    }
+    const pythonEngineUrlValidated = parsedPythonEngineUrl.toString();
     
-    console.log(`[API /activities/try-create] Calling Python engine at: ${pythonEngineUrl} with payload:`, pythonPayload);
+    console.log(`[API /activities/try-create] Calling Python engine at: ${pythonEngineUrlValidated} with payload:`, pythonPayload);
 
-    const engineResponse = await fetch(pythonEngineUrl, {
+    const engineResponse = await fetch(pythonEngineUrlValidated, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
