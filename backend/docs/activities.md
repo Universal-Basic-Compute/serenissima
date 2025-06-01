@@ -255,7 +255,7 @@ pour cet endpoint devront contenir les informations spécifiques à chaque actio
 1.  **Faire une Offre sur un Terrain**
     *   **activityType**: `bid_on_land`
     *   **Description**: Le citoyen se déplace physiquement vers un lieu officiel (ex: `courthouse` ou `town_hall`)
-pour y soumettre formellement une offre sur une parcelle de terrain. L'enregistrement de l'offre, potentiellement soumis à des frais d'enregistrement ou à une petite taxe, se fait après cette interaction sur place.
+pour y soumettre formellement une offre sur une parcelle de terrain. L'enregistrement de l'offre, potentiellement soumis à des frais d'enregistrement ou à une petite taxe, se fait après cette interaction sur place (pour calibrer la taxe/frais, le salaire moyen est à 2000 Ducats/jour dans le jeu).
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `courthouse` ou `town_hall`). Une fois arrivé, une activité de soumission d'offre (`activityType:
 submit_land_bid_offer`, durée courte) est créée. Le processeur de `submit_land_bid_offer` appellera `POST
