@@ -242,6 +242,46 @@ def terminate_empty_storage_query_contracts(tables: Dict[str, Table], dry_run: b
     log.info(f"Finished terminating empty 'storage_query' contracts. Terminated: {terminated_count}")
     return terminated_count
 
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool,
+    log_ref: Any # Pass the script's logger
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        log_ref.info(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True # Simulate success for dry run
+
+    api_url = f"{API_BASE_URL}/api/activities/try-create"
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 log_ref.info(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        log_ref.error(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
 
 def process_storage_queries(dry_run: bool = False):
     log.info(f"{LogColors.HEADER}Starting Storage Query Contract Adjustment (dry_run={dry_run})...{LogColors.ENDC}")
@@ -401,39 +441,31 @@ def process_storage_queries(dry_run: bool = False):
                         "created_by_script": "automated_adjuststoragequeriescontracts.py"
                     }
 
-                    contract_payload = {
-                        "ContractId": query_contract_id,
-                        "Type": "storage_query",
-                        "Buyer": ai_username,
-                        "BuyerBuilding": biz_building_id,
-                        "Seller": seller_storage_operator,
-                        "SellerBuilding": offer_info["storage_facility_record"]["fields"].get("BuildingId"),
-                        "ResourceType": resource_id,
-                        "PricePerResource": offer_info["price"],
-                        "TargetAmount": actual_target_amount_for_query,
-                        "Status": "active",
-                        "Priority": 5,
-                        "CreatedAt": now.isoformat(),
-                        "EndAt": end_at.isoformat(),
-                        "Title": title,
-                        "Description": description,
-                        "Notes": json.dumps(notes_payload)
+                    activity_params = {
+                        "contractId_to_create_if_new": query_contract_id, # Pass the deterministically generated ID
+                        "resourceType": resource_id,
+                        "amountNeeded": actual_target_amount_for_query,
+                        "durationDays": CONTRACT_DURATION_MONTHS * 30, # Approximate days
+                        "buyerBuildingId": biz_building_id,
+                        "pricePerResource": offer_info["price"], # Price from the source public_storage offer
+                        "sellerBuildingId": offer_info["storage_facility_record"]["fields"].get("BuildingId"),
+                        "sellerUsername": seller_storage_operator,
+                        "title": title,
+                        "description": description,
+                        "notes": notes_payload # Pass as dict, API will handle JSON stringification if needed by creator
                     }
-
-                    try:
-                        if dry_run:
-                            log.info(f"        [DRY RUN] Would create 'storage_query' contract {query_contract_id} for {actual_target_amount_for_query:.0f} of {res_name_log} from {biz_building_name} to {offer_info['storage_facility_record']['fields'].get('Name', offer_info['storage_facility_record']['fields'].get('BuildingId'))}.")
-                            total_contracts_managed +=1
-                        else:
-                            tables["contracts"].create(contract_payload)
-                            log.info(f"        {LogColors.OKGREEN}Created 'storage_query' contract {query_contract_id} for {actual_target_amount_for_query:.0f} of {res_name_log} from {biz_building_name} to {offer_info['storage_facility_record']['fields'].get('Name', offer_info['storage_facility_record']['fields'].get('BuildingId'))}.{LogColors.ENDC}")
-                            total_contracts_managed +=1
-                        
+                    
+                    # Use ai_username (which is biz_runner_username) for the activity initiation
+                    if call_try_create_activity_api(ai_username, "manage_storage_query_contract", activity_params, dry_run, log):
+                        log.info(f"        Successfully initiated 'manage_storage_query_contract' for {actual_target_amount_for_query:.0f} of {res_name_log} from {biz_building_name} to {offer_info['storage_facility_record']['fields'].get('Name', offer_info['storage_facility_record']['fields'].get('BuildingId'))}.")
+                        total_contracts_managed +=1
                         volume_to_offload_total -= actual_target_amount_for_query
                         remaining_amount_of_this_resource_to_offload -= actual_target_amount_for_query
-                    except Exception as e_contract:
-                        log.error(f"        {LogColors.FAIL}Error creating 'storage_query' contract {query_contract_id} for {res_name_log}: {e_contract}{LogColors.ENDC}")
-                    log.error(traceback.format_exc())
+                    else:
+                        log.error(f"        {LogColors.FAIL}Failed to initiate 'manage_storage_query_contract' for {query_contract_id} for {res_name_log}.{LogColors.ENDC}")
+                        # Consider if traceback.format_exc() is still needed here or if call_try_create_activity_api logs enough.
+                        # For now, let's assume the helper's logging is sufficient. If errors persist, re-add:
+                        # log.error(traceback.format_exc())
 
     log.info(f"{LogColors.OKGREEN}Storage Query Contract Adjustment process finished.{LogColors.ENDC}")
     log.info(f"Total 'storage_query' contracts created or updated (or simulated): {total_contracts_managed}")

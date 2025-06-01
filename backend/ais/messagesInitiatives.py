@@ -342,33 +342,7 @@ def generate_ai_initiative_message(tables: Dict[str, Table], ai_username: str, t
         print(f"Erreur dans generate_ai_initiative_message pour {ai_username} à {target_username}: {e}")
         return None
 
-def create_response_message_api(sender_username: str, receiver_username: str, content: str, message_type: str = "message") -> bool:
-    """Crée un message de réponse en utilisant l'API."""
-    try:
-        api_url = f"{BASE_URL}/api/messages/send"
-        payload = {
-            "sender": sender_username,
-            "receiver": receiver_username,
-            "content": content,
-            "type": message_type
-        }
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(api_url, headers=headers, json=payload, timeout=15)
-        response.raise_for_status()
-        
-        response_data = response.json()
-        if response_data.get("success"):
-            print(f"Message d'initiative envoyé de {sender_username} à {receiver_username} via API.")
-            return True
-        else:
-            print(f"L'API a échoué à envoyer le message de {sender_username} à {receiver_username}: {response_data.get('error')}")
-            return False
-    except requests.exceptions.RequestException as e:
-        print(f"Échec de la requête API lors de l'envoi du message de {sender_username} à {receiver_username}: {e}")
-        return False
-    except Exception as e:
-        print(f"Erreur lors de l'envoi du message via API de {sender_username} à {receiver_username}: {e}")
-        return False
+# create_response_message_api is removed as its functionality is replaced by 'send_message' activity
 
 def create_admin_notification(tables: Dict[str, Table], initiatives_summary: Dict[str, Any]) -> None:
     """Crée une notification pour les administrateurs avec le résumé des initiatives."""
@@ -397,6 +371,46 @@ def create_admin_notification(tables: Dict[str, Table], initiatives_summary: Dic
     except Exception as e:
         print(f"Erreur lors de la création de la notification d'administration : {e}")
 
+# --- API Call Helper ---
+# Note: This script uses print for logging.
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        print(f"[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}")
+        return True
+
+    api_url = f"{BASE_URL}/api/activities/try-create" # BASE_URL is defined at the top
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            print(f"Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 print(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            print(f"API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed for activity '{activity_type}' for {citizen_username}: {e}")
+        return False
+    except json.JSONDecodeError:
+        print(f"Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}")
+        return False
 
 # Update process_ai_message_initiatives definition
 def process_ai_message_initiatives(dry_run: bool = False, citizen1_arg: Optional[str] = None, citizen2_arg: Optional[str] = None, kinos_model_override_arg: Optional[str] = None):
@@ -434,12 +448,13 @@ def process_ai_message_initiatives(dry_run: bool = False, citizen1_arg: Optional
         if not dry_run:
             message_content = generate_ai_initiative_message(tables, ai_username, target_username, kinos_model_override_arg)
             if message_content:
-                success = create_response_message_api(
-                    sender_username=ai_username,
-                    receiver_username=target_username,
-                    content=message_content
-                )
-                if success:
+                activity_params = {
+                    "receiverUsername": target_username,
+                    "content": message_content,
+                    "messageType": "message" # Default type
+                    # targetBuildingId is optional for send_message activity
+                }
+                if call_try_create_activity_api(ai_username, "send_message", activity_params, dry_run):
                     initiatives_summary["total_messages_sent"] += 1
                     initiatives_summary["details"][ai_username]["messages_sent_count"] += 1
                     initiatives_summary["details"][ai_username]["targets"].append(target_username)
@@ -521,12 +536,12 @@ def process_ai_message_initiatives(dry_run: bool = False, citizen1_arg: Optional
                     if not dry_run:
                         message_content = generate_ai_initiative_message(tables, ai_username, target_username, kinos_model_override_arg)
                         if message_content:
-                            success = create_response_message_api(
-                                sender_username=ai_username,
-                                receiver_username=target_username,
-                                content=message_content
-                            )
-                            if success:
+                            activity_params = {
+                                "receiverUsername": target_username,
+                                "content": message_content,
+                                "messageType": "message"
+                            }
+                            if call_try_create_activity_api(ai_username, "send_message", activity_params, dry_run): # dry_run is False here
                                 initiatives_summary["total_messages_sent"] += 1
                                 initiatives_summary["details"][ai_username]["messages_sent_count"] += 1
                                 initiatives_summary["details"][ai_username]["targets"].append(target_username)
