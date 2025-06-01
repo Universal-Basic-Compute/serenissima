@@ -255,12 +255,11 @@ pour cet endpoint devront contenir les informations spécifiques à chaque actio
 1.  **Faire une Offre sur un Terrain**
     *   **activityType**: `bid_on_land`
     *   **Description**: Le citoyen se déplace physiquement vers un lieu officiel (ex: `courthouse` ou `town_hall`)
-pour y soumettre formellement une offre sur une parcelle de terrain. L'enregistrement de l'offre se fait après cette
-interaction sur place.
+pour y soumettre formellement une offre sur une parcelle de terrain. L'enregistrement de l'offre, potentiellement soumis à des frais d'enregistrement ou à une petite taxe, se fait après cette interaction sur place.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `courthouse` ou `town_hall`). Une fois arrivé, une activité de soumission d'offre (`activityType:
 submit_land_bid_offer`, durée courte) est créée. Le processeur de `submit_land_bid_offer` appellera `POST
-/api/contracts` pour enregistrer l'enchère.
+/api/contracts` pour enregistrer l'enchère et déduira les frais applicables du citoyen.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `bidAmount`,
 `targetBuildingId` (optionnel, ID du `courthouse` ou `town_hall` pertinent).
 
@@ -268,21 +267,21 @@ submit_land_bid_offer`, durée courte) est créée. Le processeur de `submit_lan
     *   **activityType**: `buy_available_land`
     *   **Description**: Le citoyen se déplace physiquement vers un lieu officiel (ex: `courthouse` ou `town_hall`)
 pour y finaliser l'achat direct d'une parcelle de terrain. La transaction (vérification des fonds, transfert de
-propriété) est effectuée après cette interaction sur place.
+propriété), qui inclut le paiement du terrain ainsi que d'éventuels frais de transaction ou taxes foncières, est effectuée après cette interaction sur place.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `courthouse` ou `town_hall`). Une fois arrivé, une activité de finalisation d'achat (`activityType:
-finalize_land_purchase_transaction`, durée courte) est créée. Le processeur de cette dernière gérera la transaction.
+finalize_land_purchase_transaction`, durée courte) est créée. Le processeur de cette dernière gérera la transaction et les paiements associés.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `expectedPrice`,
 `targetBuildingId` (optionnel, ID du `courthouse` ou `town_hall` pertinent).
 
 3.  **Initier un Projet de Construction de Bâtiment**
     *   **activityType**: `initiate_building_project`
     *   **Description**: Le citoyen se rend sur le terrain (`landId`), puis potentiellement à un `town_hall` (bureau
-d'urbanisme) ou à un `masons_lodge` / `master_builders_workshop` (atelier de constructeur) pour soumettre les plans et
-lancer le projet.
+d'urbanisme) pour obtenir un permis de construire (moyennant des frais), ou à un `masons_lodge` / `master_builders_workshop` (atelier de constructeur) pour soumettre les plans et
+lancer le projet, ce qui peut impliquer des frais de dossier ou un acompte.
     *   **Mécanisme Principal**: Séquence d'activités : `goto_land_plot` (pour inspection), puis `goto_location` (vers
 `town_hall` ou l'atelier du constructeur si `builderContractDetails` fourni). À la destination finale, une activité
-`submit_building_project` est créée.
+`submit_building_project` est créée, durant laquelle les paiements initiaux (permis, frais) sont effectués.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `buildingTypeDefinition`,
 `pointDetails`, `builderContractDetails` (optionnel, incluant `sellerBuildingId` qui pourrait être un `masons_lodge` ou
 `master_builders_workshop`), `targetOfficeBuildingId` (optionnel, ID du `town_hall` ou de l'atelier).
@@ -290,18 +289,18 @@ lancer le projet.
 4.  **Ajuster le Prix de Location d'un Terrain**
     *   **activityType**: `adjust_land_lease_price`
     *   **Description**: Le propriétaire foncier se rend à son domicile, à un bureau qu'il gère, ou à un
-`public_archives` (bureau du cadastre) pour enregistrer la modification du bail.
+`public_archives` (bureau du cadastre) pour enregistrer la modification du bail, ce qui peut entraîner des frais de dépôt.
     *   **Mécanisme Principal**: Crée une activité `goto_location` (vers domicile, bureau personnel, ou
-`public_archives`). À l'arrivée, une activité `file_lease_adjustment` est créée.
+`public_archives`). À l'arrivée, une activité `file_lease_adjustment` est créée, et les frais sont payés.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId` ou `landId`,
 `newLeasePrice`, `strategy`, `targetOfficeBuildingId` (optionnel, ID du `public_archives`).
 
 5.  **Ajuster le Prix de Loyer d'un Bâtiment**
     *   **activityType**: `adjust_building_rent_price`
     *   **Description**: Le propriétaire du bâtiment se rend à son domicile, bureau, ou un `public_archives` pour
-enregistrer la modification du loyer.
+enregistrer la modification du loyer, potentiellement en payant des frais d'enregistrement.
     *   **Mécanisme Principal**: Crée une activité `goto_location` (vers domicile, bureau personnel, ou
-`public_archives`). À l'arrivée, une activité `file_rent_adjustment` est créée.
+`public_archives`). À l'arrivée, une activité `file_rent_adjustment` est créée, et les frais sont acquittés.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId`, `newRentPrice`,
 `strategy`, `targetOfficeBuildingId` (optionnel, ID du `public_archives`).
 
@@ -311,12 +310,12 @@ enregistrer la modification du loyer.
     *   **activityType**: `manage_public_sell_contract`
     *   **Description**: Le citoyen se rend à son bâtiment de vente (`sellerBuildingId`) pour préparer les
 marchandises, puis se déplace vers un lieu de marché (ex: `market_stall`, `merceria`, `weighing_station`) pour y
-enregistrer ou modifier son offre de vente publique.
+enregistrer ou modifier son offre de vente publique. L'utilisation d'un étal de marché ou la pesée officielle peuvent entraîner des frais ou une commission sur les ventes futures.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 `sellerBuildingId`). À l'arrivée, une activité de préparation (`activityType: prepare_goods_for_sale`, durée courte)
 peut être créée. Ensuite, une autre activité de déplacement (`activityType: goto_location`, `targetBuildingId`: ID du
 `market_stall`, etc.) est créée. Finalement, une activité d'enregistrement de contrat (`activityType:
-register_public_sell_offer`, durée courte) est créée, dont le processeur appellera `POST /api/contracts`.
+register_public_sell_offer`, durée courte) est créée, durant laquelle les frais initiaux de marché sont payés, et le processeur appellera `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel),
 `resourceType`, `pricePerResource`, `targetAmount`, `sellerBuildingId`, `targetMarketBuildingId` (ID du `market_stall`,
 `merceria`, ou `weighing_station`).
@@ -325,20 +324,20 @@ register_public_sell_offer`, durée courte) est créée, dont le processeur appe
     *   **activityType**: `modify_public_sell_price` (Note: `manage_public_sell_contract` avec un `contractId` existant
 est la méthode préférée.)
     *   **Description**: Le citoyen se rend à un lieu de marché (ex: `market_stall`, `weighing_station`) ou à son
-bâtiment de vente pour y soumettre une modification de prix pour un contrat de vente publique existant.
+bâtiment de vente pour y soumettre une modification de prix pour un contrat de vente publique existant. Des frais de modification peuvent s'appliquer.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `market_stall` ou `sellerBuildingId`). À l'arrivée, une activité de modification de prix (`activityType:
-submit_price_modification`, durée courte) est créée, dont le processeur appellera `POST /api/contracts`.
+submit_price_modification`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId`, `newPricePerResource`,
 `targetBuildingId` (ID du lieu de modification).
 
 8.  **Terminer un Contrat de Vente Publique**
     *   **activityType**: `end_public_sell_contract`
     *   **Description**: Le citoyen se rend à un lieu de marché (ex: `market_stall`, `weighing_station`) ou à son
-bâtiment de vente pour y notifier la fin de son offre de vente publique.
+bâtiment de vente pour y notifier la fin de son offre de vente publique. Des frais de résiliation anticipée ou de dossier peuvent être perçus.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `market_stall` ou `sellerBuildingId`). À l'arrivée, une activité de terminaison de contrat (`activityType:
-submit_contract_termination`, durée courte) est créée, dont le processeur appellera `POST /api/contracts`.
+submit_contract_termination`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId`, `targetBuildingId` (ID du
 lieu de notification).
 
@@ -346,12 +345,12 @@ lieu de notification).
     *   **activityType**: `manage_import_contract`
     *   **Description**: Le citoyen se rend à son bâtiment d'achat (`buyerBuildingId`) pour évaluer ses besoins, puis
 se déplace vers un bureau de commerce (ex: `customs_house`, `broker_s_office`) pour y enregistrer ou modifier un
-contrat d'importation.
+contrat d'importation. L'enregistrement du contrat peut impliquer des frais de courtage ou des droits de douane anticipés.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 `buyerBuildingId`). À l'arrivée, une activité d'évaluation des besoins (`activityType: assess_import_needs`, durée
 courte) peut être créée. Ensuite, une autre activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `customs_house` ou `broker_s_office`) est créée. Finalement, une activité d'enregistrement de contrat
-(`activityType: register_import_agreement`, durée courte) est créée, dont le processeur appellera `POST
+(`activityType: register_import_agreement`, durée courte) est créée, durant laquelle les frais sont payés, et le processeur appellera `POST
 /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel),
 `resourceType`, `targetAmount`, `pricePerResource`, `buyerBuildingId`, `targetOfficeBuildingId` (ID du `customs_house`
@@ -361,12 +360,12 @@ ou `broker_s_office`).
     *   **activityType**: `manage_public_storage_offer`
     *   **Description**: Le citoyen se rend à son bâtiment de stockage (`sellerBuildingId`, ex: `small_warehouse`,
 `granary`) pour évaluer la capacité, puis se déplace vers un lieu de marché (ex: `weighing_station`) pour y
-enregistrer/modifier son offre de stockage.
+enregistrer/modifier son offre de stockage. Des frais d'enregistrement ou une commission sur les futurs frais de stockage peuvent être demandés.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 `sellerBuildingId`). À l'arrivée, une activité d'évaluation de capacité (`activityType: assess_storage_capacity`, durée
 courte) peut être créée. Ensuite, une autre activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `weighing_station` ou `market_stall`) est créée. Finalement, une activité d'enregistrement d'offre
-(`activityType: register_public_storage_contract`, durée courte) est créée, dont le processeur appellera `POST
+(`activityType: register_public_storage_contract`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST
 /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel),
 `sellerBuildingId` (ID de l'entrepôt), `resourceType` (ou "any"), `capacityOffered`, `pricePerUnitPerDay`,
@@ -376,13 +375,13 @@ ID du `weighing_station` ou `market_stall`) est créée. Finalement, une activit
     *   **activityType**: `bid_on_building`
     *   **Description**: Le citoyen se rend au bâtiment cible (`buildingIdToBidOn`) pour l'inspecter. Ensuite, il se
 déplace vers un lieu officiel (ex: `courthouse`, `town_hall`) ou rencontre le propriétaire (`targetOwnerUsername`) pour
-soumettre formellement son offre d'achat.
+soumettre formellement son offre d'achat. Le dépôt de l'offre peut être soumis à des frais de dossier.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 `buildingIdToBidOn`) pour inspection. À l'arrivée, une activité d'inspection (`activityType:
 inspect_building_for_purchase`, durée courte) peut être créée. Ensuite, une autre activité de déplacement
 (`activityType: goto_location`, `targetBuildingId`: ID du `courthouse`/`town_hall` ou localisation du
 `targetOwnerUsername`) est créée. Finalement, une activité de soumission d'offre (`activityType:
-submit_building_purchase_offer`, durée courte) est créée, dont le processeur appellera `POST /api/contracts`.
+submit_building_purchase_offer`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingIdToBidOn`, `bidAmount`,
 `targetOwnerUsername` (optionnel), `targetOfficeBuildingId` (optionnel, ID du `courthouse`/`town_hall`).
 
@@ -390,11 +389,11 @@ submit_building_purchase_offer`, durée courte) est créée, dont le processeur 
     *   **activityType**: `respond_to_building_bid`
     *   **Description**: Le propriétaire du bâtiment se rend à un lieu officiel (ex: `courthouse`, `town_hall`) ou
 rencontre l'enchérisseur (`bidderUsername`) pour communiquer formellement sa décision (accepter ou refuser) concernant
-une offre d'achat.
+une offre d'achat. L'enregistrement de la décision peut entraîner des frais administratifs. Si la vente est acceptée, des taxes de transaction seront dues.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `courthouse`/`town_hall` ou localisation du `bidderUsername`). À l'arrivée, une activité de communication de
-décision (`activityType: communicate_bid_response`, durée courte) est créée, dont le processeur mettra à jour le
-contrat via `POST /api/contracts`.
+décision (`activityType: communicate_bid_response`, durée courte) est créée, les frais administratifs sont payés, et le processeur mettra à jour le
+contrat via `POST /api/contracts`. Les taxes de transaction sont gérées lors de la finalisation de la vente.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingBidContractId`, `response`
 ("accepted" ou "refused"), `bidderUsername` (optionnel, pour le déplacement), `targetOfficeBuildingId` (optionnel, ID
 du `courthouse`/`town_hall`).
@@ -402,10 +401,10 @@ du `courthouse`/`town_hall`).
 13. **Retirer une Offre d'Achat sur un Bâtiment**
     *   **activityType**: `withdraw_building_bid`
     *   **Description**: L'enchérisseur se rend à un lieu officiel (ex: `courthouse`, `town_hall`) ou rencontre le
-propriétaire du bâtiment (`targetOwnerUsername`) pour notifier formellement le retrait de son offre d'achat.
+propriétaire du bâtiment (`targetOwnerUsername`) pour notifier formellement le retrait de son offre d'achat. Des frais de dossier pour le retrait peuvent être exigés.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `courthouse`/`town_hall` ou localisation du `targetOwnerUsername`). À l'arrivée, une activité de notification de
-retrait (`activityType: notify_bid_withdrawal`, durée courte) est créée, dont le processeur mettra à jour le contrat
+retrait (`activityType: notify_bid_withdrawal`, durée courte) est créée, les frais sont payés, et le processeur mettra à jour le contrat
 via `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingBidContractId`,
 `targetOwnerUsername` (optionnel, pour le déplacement), `targetOfficeBuildingId` (optionnel, ID du
@@ -415,12 +414,12 @@ via `POST /api/contracts`.
     *   **activityType**: `manage_markup_buy_contract`
     *   **Description**: Le citoyen se rend à son bâtiment (`buyerBuildingId`) pour évaluer un besoin urgent, puis se
 déplace vers un lieu de marché (ex: `market_stall`, `weighing_station`) pour y enregistrer un contrat d'achat avec
-majoration.
+majoration. Des frais de publication d'annonce ou de courtage peuvent s'appliquer.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 `buyerBuildingId`). À l'arrivée, une activité d'évaluation (`activityType: assess_urgent_need`, durée courte) peut être
 créée. Ensuite, une autre activité de déplacement (`activityType: goto_location`, `targetBuildingId`: ID du
 `market_stall`/`weighing_station`) est créée. Finalement, une activité d'enregistrement de contrat (`activityType:
-register_markup_buy_agreement`, durée courte) est créée, dont le processeur appellera `POST /api/contracts`.
+register_markup_buy_agreement`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel),
 `resourceType`, `targetAmount`, `maxPricePerResource`, `buyerBuildingId`, `targetMarketBuildingId` (ID du lieu de
 marché).
@@ -429,12 +428,12 @@ marché).
     *   **activityType**: `manage_storage_query_contract`
     *   **Description**: Le citoyen se rend à son bâtiment (`buyerBuildingId`) pour évaluer ses besoins de stockage,
 puis se déplace vers un lieu de marché (ex: `market_stall`, `weighing_station`) pour y enregistrer une demande de
-stockage.
+stockage. Des frais de publication de demande peuvent être perçus.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 `buyerBuildingId`). À l'arrivée, une activité d'évaluation (`activityType: assess_storage_needs`, durée courte) peut
 être créée. Ensuite, une autre activité de déplacement (`activityType: goto_location`, `targetBuildingId`: ID du
 `market_stall`/`weighing_station`) est créée. Finalement, une activité d'enregistrement de demande (`activityType:
-register_storage_request_contract`, durée courte) est créée, dont le processeur appellera `POST /api/contracts`.
+register_storage_request_contract`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel),
 `resourceType`, `amountNeeded`, `durationDays`, `buyerBuildingId`, `targetMarketBuildingId` (ID du lieu de marché).
 
@@ -452,10 +451,10 @@ activité `update_wage_ledger` est créée.
 17. **Déléguer une Entreprise / Demander ou Prendre une Entreprise pour Soi**
     *   **activityType**: `manage_business_operation`
     *   **Description**: Implique de se rendre au bâtiment de l'entreprise, puis potentiellement de rencontrer les
-parties concernées ou de se rendre à un `courthouse`/`town_hall` (étude de notaire).
+parties concernées ou de se rendre à un `courthouse`/`town_hall` (étude de notaire) pour officialiser le changement d'opérateur, ce qui peut entraîner des frais notariaux ou d'enregistrement.
     *   **Mécanisme Principal**: Séquence : `goto_location` (vers `businessBuildingId`), puis `goto_location` (vers la
 partie concernée ou `courthouse`/`town_hall`). À la destination finale, une activité `finalize_operator_change` est
-créée.
+créée, et les frais associés sont payés.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `businessBuildingId`,
 `newOperatorUsername` (si applicable), `currentOperatorUsername` (si applicable), `ownerUsername` (si applicable),
 `reason`, `targetOfficeBuildingId` (optionnel, ID du `courthouse`/`town_hall`), `operationType` ("delegate",
@@ -466,10 +465,10 @@ créée.
 18. **Demander un Prêt**
     *   **activityType**: `request_loan`
     *   **Description**: Le citoyen se déplace physiquement vers un établissement financier (ex: `broker_s_office`,
-`mint`) ou rencontre un prêteur connu pour y soumettre une demande de prêt.
+`mint`) ou rencontre un prêteur connu pour y soumettre une demande de prêt. Des frais de dossier ou d'évaluation peuvent être exigés par l'établissement.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `broker_s_office`/`mint` ou localisation du `lenderUsername`). À l'arrivée, une activité de soumission de demande
-(`activityType: submit_loan_application_form`, durée courte) est créée, dont le processeur appellera `POST
+(`activityType: submit_loan_application_form`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST
 /api/loans/apply`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `amount`, `purpose`, `collateralDetails`
 (optionnel), `targetBuildingId` (optionnel, ID du `broker_s_office`/`mint`), `lenderUsername` (optionnel, pour le
@@ -478,28 +477,28 @@ déplacement).
 19. **Offrir un Prêt**
     *   **activityType**: `offer_loan`
     *   **Description**: Le citoyen se rend à un établissement financier (ex: `broker_s_office`, `mint`) ou à une étude
-notariale (ex: `courthouse`, `town_hall`) pour y enregistrer une offre de prêt.
+notariale (ex: `courthouse`, `town_hall`) pour y enregistrer une offre de prêt. Des frais d'enregistrement ou de publication de l'offre peuvent être perçus.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `broker_s_office`/`mint` ou `courthouse`/`town_hall`). À l'arrivée, une activité d'enregistrement d'offre de prêt
-(`activityType: register_loan_offer_terms`, durée courte) est créée, dont le processeur appellera `POST /api/loans`.
+(`activityType: register_loan_offer_terms`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST /api/loans`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `targetBorrowerUsername` (optionnel),
 `amount`, `interestRate`, `termDays`, `targetOfficeBuildingId` (ID de l'établissement pertinent).
 
 20. **Retirer des Jetons COMPUTE**
     *   **activityType**: `withdraw_compute_tokens`
     *   **Description**: Le joueur se rend à un `broker_s_office` ou `mint` (banque/bureau de change) pour initier le
-retrait.
+retrait. L'établissement peut prélever des frais de transaction pour ce service.
     *   **Mécanisme Principal**: Crée une activité `goto_location` (vers `broker_s_office` ou `mint`). À l'arrivée, une
-activité `initiate_token_withdrawal` est créée.
+activité `initiate_token_withdrawal` est créée, et les frais de transaction sont déduits.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `ducatsAmount`, `walletAddress`,
 `targetBuildingId` (optionnel, ID du `broker_s_office`/`mint`).
 
 21. **Injecter des Jetons COMPUTE**
     *   **activityType**: `inject_compute_tokens`
     *   **Description**: Le joueur se rend à un `broker_s_office` ou `mint` (banque/bureau de change) pour initier
-l'injection.
+l'injection. L'établissement peut prélever des frais de transaction pour ce service.
     *   **Mécanisme Principal**: Crée une activité `goto_location` (vers `broker_s_office` ou `mint`). À l'arrivée, une
-activité `initiate_token_injection` est créée.
+activité `initiate_token_injection` est créée, et les frais de transaction sont déduits.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `computeTokenAmount`,
 `transactionProof`, `targetBuildingId` (optionnel, ID du `broker_s_office`/`mint`).
 
@@ -533,9 +532,9 @@ rencontre privilégié).
 24. **Mettre à Jour son Profil Citoyen**
     *   **activityType**: `update_citizen_profile`
     *   **Description**: Le citoyen se rend à son domicile ou à un `public_archives` (bureau public) pour enregistrer
-les modifications.
+les modifications. Des frais de dossier peuvent être demandés au `public_archives`.
     *   **Mécanisme Principal**: Crée une activité `goto_location` (vers domicile ou `public_archives`). À l'arrivée,
-une activité `file_profile_update` est créée.
+une activité `file_profile_update` est créée, et les frais sont payés si applicable.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `citizenAirtableId`, `firstName`,
 `lastName`, `familyMotto`, `coatOfArmsImageUrl`, `telegramUserId` (tous optionnels), `targetOfficeBuildingId`
 (optionnel, ID du `public_archives`).
@@ -543,9 +542,9 @@ une activité `file_profile_update` est créée.
 25. **Gérer son Appartenance à une Guilde**
     *   **activityType**: `manage_guild_membership`
     *   **Description**: Le citoyen se rend au `guild_hall` de la guilde concernée pour effectuer une action liée à son
-appartenance.
+appartenance (rejoindre, quitter, accepter une invitation). Des frais d'adhésion ou des cotisations peuvent être dus à la guilde.
     *   **Mécanisme Principal**: Crée une activité `goto_location` (vers le `guildHallBuildingId` qui est un
-`guild_hall`). À l'arrivée, une activité `perform_guild_membership_action` est créée.
+`guild_hall`). À l'arrivée, une activité `perform_guild_membership_action` est créée, et les paiements à la guilde sont effectués si nécessaire.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `guildId`, `membershipAction` ("join",
 "leave", "accept_invite"), `guildHallBuildingId` (ID du `guild_hall` spécifique).
 
@@ -571,9 +570,9 @@ appellera `POST /api/notifications/mark-read`.
 28. **Télécharger un Blason**
     *   **activityType**: `upload_coat_of_arms`
     *   **Description**: Le joueur se rend à une `art_academy` ou un `bottega` (atelier d'artiste/bureau héraldique)
-pour faire enregistrer son nouveau blason.
+pour faire enregistrer son nouveau blason. Des frais pour le service de l'artiste ou pour l'enregistrement héraldique peuvent être demandés.
     *   **Mécanisme Principal**: Crée une activité `goto_location` (vers `art_academy` ou `bottega`). À l'arrivée, une
-activité `submit_coat_of_arms_design` est créée.
+activité `submit_coat_of_arms_design` est créée, et les frais sont payés.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `imageData` ou `filename`,
 `targetOfficeBuildingId` (optionnel, ID de l'`art_academy`/`bottega`).
 
