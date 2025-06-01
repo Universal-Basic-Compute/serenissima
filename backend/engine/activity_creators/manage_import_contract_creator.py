@@ -84,15 +84,16 @@ def try_create(
         log.error(f"Could not find path to office building {target_office_building_id}")
         return False
     
+    # Skip the buyer building step entirely and go directly to the office
+    # Calculate activity times for direct path to office
+    path_to_office = find_path_between_buildings(None, office_building_record, current_position=current_position)
+    if not path_to_office or not path_to_office.get('path'):
+        log.error(f"Could not find path to office building {target_office_building_id}")
+        return False
+    
     # Set start times
     assess_start_date = now_utc.isoformat()
     goto_office_start_date = assess_start_date
-    
-    # Calculate path from buyer building to office
-    path_to_office = find_path_between_buildings(buyer_building_record, office_building_record)
-    if not path_to_office or not path_to_office.get('path'):
-        log.error(f"Could not find path from buyer building {buyer_building_id} to office {target_office_building_id}")
-        return False
     
     # Calculate office travel duration
     office_duration_seconds = path_to_office.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min
@@ -107,63 +108,12 @@ def try_create(
     # Prepare activity payloads
     activities_to_create = []
     
-    # 1. Create goto_buyer_building activity (if needed)
-    if not citizen_at_buyer_building:
-        goto_buyer_payload = {
-            "ActivityId": f"goto_buyer_{_escape_airtable_value(resource_type)}_{citizen}_{ts}",
-            "Type": "goto_location",
-            "Citizen": citizen,
-            "FromBuilding": None,  # Starting from current position
-            "ToBuilding": buyer_building_id,
-            "Path": json.dumps(path_to_buyer.get('path', [])),
-            "Details": json.dumps({
-                "resourceType": resource_type,
-                "activityType": "manage_import_contract",
-                "nextStep": "assess_import_needs"
-            }),
-            "Status": "created",
-            "Title": f"Traveling to assess import needs for {resource_type}",
-            "Description": f"Traveling to {buyer_building_record['fields'].get('Name', buyer_building_id)} to assess import needs for {resource_type}",
-            "Notes": f"First step of manage_import_contract process. Will be followed by needs assessment.",
-            "CreatedAt": assess_start_date,
-            "StartDate": assess_start_date,
-            "EndDate": assess_end_date,
-            "Priority": 20  # Medium-high priority for economic activities
-        }
-        activities_to_create.append(goto_buyer_payload)
-    
-    # 2. Create assess_import_needs activity (short duration at buyer building)
-    assess_needs_payload = {
-        "ActivityId": assess_activity_id,
-        "Type": "assess_import_needs",
-        "Citizen": citizen,
-        "FromBuilding": buyer_building_id,
-        "ToBuilding": buyer_building_id,  # Same location
-        "Details": json.dumps({
-            "resourceType": resource_type,
-            "targetAmount": target_amount,
-            "pricePerResource": price_per_resource,
-            "contractId": contract_id,
-            "activityType": "manage_import_contract",
-            "nextStep": "goto_office"
-        }),
-        "Status": "created",
-        "Title": f"Assessing import needs for {resource_type}",
-        "Description": f"Evaluating import requirements for {target_amount} {resource_type} at {price_per_resource} Ducats each",
-        "Notes": f"{'Modifying' if contract_id else 'Creating new'} import contract for {resource_type}",
-        "CreatedAt": assess_start_date,
-        "StartDate": assess_start_date if citizen_at_buyer_building else assess_end_date,
-        "EndDate": goto_office_start_date,
-        "Priority": 20
-    }
-    activities_to_create.append(assess_needs_payload)
-    
-    # 3. Create goto_office activity
+    # Create goto_office activity (direct from current position)
     goto_office_payload = {
         "ActivityId": goto_office_activity_id,
         "Type": "goto_location",
         "Citizen": citizen,
-        "FromBuilding": buyer_building_id,
+        "FromBuilding": None,  # Starting from current position
         "ToBuilding": target_office_building_id,
         "Path": json.dumps(path_to_office.get('path', [])),
         "Details": json.dumps({
@@ -178,7 +128,7 @@ def try_create(
         "Status": "created",
         "Title": f"Traveling to {'modify' if contract_id else 'register'} import contract",
         "Description": f"Traveling to {office_building_record['fields'].get('Name', target_office_building_id)} to {'modify' if contract_id else 'register'} import contract for {target_amount} {resource_type}",
-        "Notes": f"Second step of manage_import_contract process. Will be followed by contract registration.",
+        "Notes": f"First step of manage_import_contract process. Will be followed by contract registration.",
         "CreatedAt": assess_start_date,
         "StartDate": goto_office_start_date,
         "EndDate": goto_office_end_date,
