@@ -10,8 +10,9 @@ const TryCreateActivityRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  let rawBody: any; // Declare rawBody here to make it accessible in the catch block
   try {
-    const rawBody = await request.json();
+    rawBody = await request.json(); // Assign here
     const validationResult = TryCreateActivityRequestSchema.safeParse(rawBody);
 
     if (!validationResult.success) {
@@ -105,9 +106,28 @@ export async function POST(request: Request) {
     // or errors in the Next.js code before or after the fetch call (e.g. if request.json() fails).
     const activityTypeForLog = typeof rawBody === 'object' && rawBody !== null && 'activityType' in rawBody && typeof rawBody.activityType === 'string' ? rawBody.activityType : 'unknown';
     console.error(`[API /activities/try-create] Internal error for activityType ${activityTypeForLog}:`, error);
+
+    // Check for ECONNREFUSED, potentially nested in error.cause
+    let isConnectionRefused = false;
     if (error.code === 'ECONNREFUSED') {
-        return NextResponse.json({ success: false, error: 'Python engine service is unavailable.' }, { status: 503 });
+      isConnectionRefused = true;
+    } else if (error.cause) {
+      // Node.js fetch often wraps system errors in 'cause'
+      if (error.cause.code === 'ECONNREFUSED') {
+        isConnectionRefused = true;
+      } else if (Array.isArray(error.cause.errors) && error.cause.errors.length > 0) {
+        // Handle AggregateError case if ECONNREFUSED is in the first error of the aggregate
+        if (error.cause.errors[0]?.code === 'ECONNREFUSED') {
+          isConnectionRefused = true;
+        }
+      }
     }
+
+    if (isConnectionRefused) {
+        console.error('[API /activities/try-create] Detected ECONNREFUSED. Python engine is likely down or unreachable.');
+        return NextResponse.json({ success: false, error: 'Python engine service is unavailable (ECONNREFUSED).' }, { status: 503 });
+    }
+    
     return NextResponse.json({ success: false, error: error.message || 'Failed to process try-create activity request' }, { status: 500 });
   }
 }
