@@ -181,6 +181,42 @@ def log_header(message: str, color_code: str = Fore.CYAN):
         print(f"  {message}  ")
         print(f"{border}\n")
 
+# --- Helper function to count entities in API response ---
+
+def _get_entity_count_from_response(response_json: Any) -> Optional[int]:
+    """Tries to determine the number of main entities in an API JSON response."""
+    if isinstance(response_json, list):
+        return len(response_json)
+    if isinstance(response_json, dict):
+        # Prioritized keys for common list responses based on API reference
+        list_keys = [
+            "citizens", "buildings", "lands", "contracts", "activities", 
+            "thoughts", "problems", "relevancies", "notifications", "messages", 
+            "loans", "guilds", "members", "decrees", "transactions", 
+            "polygons", "bridges", "docks", "buildingTypes", "resourceTypes",
+            "landRents", "landGroups", "incomeData", "tracks", "files", 
+            "waterPoints", "globalResourceCounts", "playerResourceCounts"
+            # "resources" is often a direct list, handled by the isinstance(list) check.
+        ]
+        for key in list_keys:
+            if key in response_json and isinstance(response_json[key], list):
+                return len(response_json[key])
+        
+        # Specific nested structures
+        if "waterGraph" in response_json and isinstance(response_json["waterGraph"], dict):
+            if "waterEdges" in response_json["waterGraph"] and isinstance(response_json["waterGraph"]["waterEdges"], list):
+                return len(response_json["waterGraph"]["waterEdges"])
+            if "waterPoints" in response_json["waterGraph"] and isinstance(response_json["waterGraph"]["waterPoints"], list):
+                return len(response_json["waterGraph"]["waterPoints"])
+
+        # Generic fallback: if any top-level value is a list (and not common metadata/status keys)
+        # This is a broader check and might catch unexpected lists.
+        for key, value in response_json.items():
+            if isinstance(value, list) and key.lower() not in ["success", "error", "details", "message", "errors", "warnings"]:
+                log.debug(f"Found a list under a generic key '{key}' for entity count.")
+                return len(value)
+    return None
+
 # --- Airtable and API Key Initialization ---
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
@@ -263,7 +299,11 @@ def make_api_get_request(endpoint: str, params: Optional[Dict] = None) -> Option
             response = requests.get(url, params=params, timeout=DEFAULT_TIMEOUT_GET)
             response.raise_for_status()
             response_json = response.json()
-            log.info(f"{LogColors.OKGREEN}API GET request to {url} successful.{LogColors.ENDC}")
+            
+            entity_count = _get_entity_count_from_response(response_json)
+            count_message = f" Fetched {entity_count} entities." if entity_count is not None else ""
+            
+            log.info(f"{LogColors.OKGREEN}API GET request to {url} successful.{count_message}{LogColors.ENDC}")
             log.debug(f"{LogColors.PINK}Response from GET {url}: {json.dumps(response_json, indent=2)[:500]}...{LogColors.ENDC}")
             return response_json
         except requests.exceptions.RequestException as e:
