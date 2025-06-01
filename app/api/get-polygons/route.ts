@@ -64,7 +64,8 @@ export async function GET(request: Request) {
               englishName: data.englishName,
               historicalDescription: data.historicalDescription,
               nameConfidence: data.nameConfidence,
-              areaInSquareMeters: data.areaInSquareMeters
+              areaInSquareMeters: data.areaInSquareMeters,
+              imageOverlayBounds: data.imageOverlayBounds || null // Add this line for essential mode too
             };
           }
           
@@ -83,7 +84,8 @@ export async function GET(request: Request) {
             englishName: data.englishName,
             historicalDescription: data.historicalDescription,
             nameConfidence: data.nameConfidence,
-            areaInSquareMeters: data.areaInSquareMeters
+            areaInSquareMeters: data.areaInSquareMeters,
+            imageOverlayBounds: data.imageOverlayBounds || null // Add this line
           };
         } else {
           console.warn(`Invalid data format in ${file}`);

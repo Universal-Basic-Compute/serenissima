@@ -12,17 +12,72 @@ interface Polygon {
   [key: string]: any; // Allow other properties
 }
 
+import React, { useRef, useState, useEffect } from 'react';
+
+interface Point {
+  lat: number;
+  lng: number;
+}
+
+interface Polygon {
+  id: string;
+  coordinates: Point[];
+  imageOverlayBounds?: google.maps.LatLngBoundsLiteral | null; // Added for map context
+  [key: string]: any; 
+}
+
 interface PolygonDisplayPanelProps {
   polygon: Polygon;
   onClose: () => void;
+  isMapContext?: boolean; // To know if we are in the /map context
+  // Callbacks for map context
+  onPreviewOverlayBounds?: (polygonId: string, bounds: google.maps.LatLngBoundsLiteral) => void;
+  onSaveOverlayBounds?: (polygonId: string, bounds: google.maps.LatLngBoundsLiteral) => void;
 }
 
-const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onClose }) => {
+const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ 
+  polygon, 
+  onClose, 
+  isMapContext = false,
+  onPreviewOverlayBounds,
+  onSaveOverlayBounds 
+}) => {
   const SVG_SIZE = 300;
   const PADDING = 20;
   const svgRef = useRef<SVGSVGElement>(null);
 
-  if (!polygon || !polygon.coordinates || polygon.coordinates.length === 0) {
+  // State for image bounds input fields
+  const [northBound, setNorthBound] = useState<string>('');
+  const [southBound, setSouthBound] = useState<string>('');
+  const [eastBound, setEastBound] = useState<string>('');
+  const [westBound, setWestBound] = useState<string>('');
+
+  useEffect(() => {
+    if (isMapContext && polygon.imageOverlayBounds) {
+      setNorthBound(polygon.imageOverlayBounds.north.toString());
+      setSouthBound(polygon.imageOverlayBounds.south.toString());
+      setEastBound(polygon.imageOverlayBounds.east.toString());
+      setWestBound(polygon.imageOverlayBounds.west.toString());
+    } else if (isMapContext) {
+        // If no stored bounds, try to calculate from coordinates for initial display
+        // This is a rough estimate and might not match Google Maps GroundOverlay's default perfectly
+        if (polygon.coordinates && polygon.coordinates.length > 0) {
+            let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+            polygon.coordinates.forEach(coord => {
+                if (coord.lng < minLng) minLng = coord.lng;
+                if (coord.lng > maxLng) maxLng = coord.lng;
+                if (coord.lat < minLat) minLat = coord.lat;
+                if (coord.lat > maxLat) maxLat = coord.lat;
+            });
+            setNorthBound(maxLat.toString());
+            setSouthBound(minLat.toString());
+            setEastBound(maxLng.toString());
+            setWestBound(minLng.toString());
+        }
+    }
+  }, [polygon.imageOverlayBounds, polygon.coordinates, isMapContext]);
+
+  if (!polygon || (!polygon.coordinates && !isMapContext) || (polygon.coordinates && polygon.coordinates.length === 0 && !isMapContext)) {
     return null;
   }
 
@@ -82,16 +137,49 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
   const offsetY = (SVG_SIZE - adjustedScaledHeight) / 2;
 
   // 5. Transform points
-  const pointsString = coordinates.map(coord => {
-    const svgX = (coord.lng - minLng) * scale + offsetX;
-    // Divide by HEIGHT_ADJUST_FACTOR to expand the y-component before scaling by the overall 'scale'.
-    // (maxLat - coord.lat) is the y-distance from the top of the bounding box, in original data units.
-    const svgY = ((maxLat - coord.lat) / HEIGHT_ADJUST_FACTOR) * scale + offsetY;
-    return `${svgX},${svgY}`;
-  }).join(' ');
+  // SVG rendering logic - only if not in map context or if coordinates are present
+  let pointsString = '';
+  if (polygon.coordinates && polygon.coordinates.length > 0) {
+    let minLngSvg = Infinity, maxLngSvg = -Infinity, minLatSvg = Infinity, maxLatSvg = -Infinity;
+    polygon.coordinates.forEach(coord => {
+        if (coord.lng < minLngSvg) minLngSvg = coord.lng;
+        if (coord.lng > maxLngSvg) maxLngSvg = coord.lng;
+        if (coord.lat < minLatSvg) minLatSvg = coord.lat;
+        if (coord.lat > maxLatSvg) maxLatSvg = coord.lat;
+    });
+    const polyDataWidthSvg = maxLngSvg - minLngSvg;
+    const polyDataHeightSvg = maxLatSvg - minLatSvg;
+    const HEIGHT_ADJUST_FACTOR = 0.7;
+    const drawableWidth = SVG_SIZE - 2 * PADDING;
+    const drawableHeight = SVG_SIZE - 2 * PADDING;
+    let scaleSvg = 1;
+
+    if (polyDataWidthSvg > 0 && polyDataHeightSvg > 0) {
+        scaleSvg = Math.min(
+        drawableWidth / polyDataWidthSvg,
+        drawableHeight / (polyDataHeightSvg / HEIGHT_ADJUST_FACTOR)
+        );
+    } else if (polyDataWidthSvg > 0) {
+        scaleSvg = drawableWidth / polyDataWidthSvg;
+    } else if (polyDataHeightSvg > 0) {
+        scaleSvg = drawableHeight / (polyDataHeightSvg / HEIGHT_ADJUST_FACTOR);
+    }
+
+    const scaledWidthSvg = polyDataWidthSvg * scaleSvg;
+    const adjustedScaledHeightSvg = (polyDataHeightSvg / HEIGHT_ADJUST_FACTOR) * scaleSvg;
+    const offsetXSvg = (SVG_SIZE - scaledWidthSvg) / 2;
+    const offsetYSvg = (SVG_SIZE - adjustedScaledHeightSvg) / 2;
+
+    pointsString = polygon.coordinates.map(coord => {
+        const svgX = (coord.lng - minLngSvg) * scaleSvg + offsetXSvg;
+        const svgY = ((maxLatSvg - coord.lat) / HEIGHT_ADJUST_FACTOR) * scaleSvg + offsetYSvg;
+        return `${svgX},${svgY}`;
+    }).join(' ');
+  }
+
 
   const handleDownloadImage = () => {
-    if (svgRef.current) {
+    if (svgRef.current && pointsString) { // Ensure pointsString is available for SVG download
       const svgElement = svgRef.current;
       const svgString = new XMLSerializer().serializeToString(svgElement);
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
@@ -150,31 +238,99 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
             &times;
           </button>
         </div>
-        <div className="w-full aspect-square bg-[#F5E8C0] rounded"> {/* Changed background class for Tailwind, though SVG fill is dominant */}
-          <svg ref={svgRef} viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} width="100%" height="100%">
-            <rect width="100%" height="100%" fill="#F5E8C0" /> {/* Old parchment background for SVG */}
-            {pointsString && polyDataWidth >= 0 && polyDataHeight >= 0 && ( // Ensure valid polygon data
-                 <polygon
+        {/* SVG Display of Polygon - Conditional */}
+        {pointsString && (
+            <div className="w-full aspect-square bg-[#F5E8C0] rounded mb-4">
+            <svg ref={svgRef} viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} width="100%" height="100%">
+                <rect width="100%" height="100%" fill="#F5E8C0" />
+                <polygon
                     points={pointsString}
-                    fill="#E0C9A6" // A slightly darker parchment/aged paper color for the polygon itself
-                    fillOpacity="0.7" // Adjusted opacity
-                    stroke="#5D4037" // A dark brown stroke, like old ink
+                    fill="#E0C9A6"
+                    fillOpacity="0.7"
+                    stroke="#5D4037"
                     strokeOpacity="0.8"
-                    strokeWidth="1" 
-                 />
-            )}
-          </svg>
-        </div>
+                    strokeWidth="1"
+                />
+            </svg>
+            </div>
+        )}
+
         {polygon.historicalName && (
             <p className="mt-2 text-sm text-gray-700">Historical Name: {polygon.historicalName}</p>
         )}
+
+        {/* Image Bounds Adjustment UI - Only for map context */}
+        {isMapContext && onPreviewOverlayBounds && onSaveOverlayBounds && (
+          <div className="mt-4 border-t pt-4">
+            <h4 className="text-md font-semibold mb-2 text-gray-700">Ajuster l'image sur la carte</h4>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <label htmlFor="northBound" className="block text-gray-600">Nord:</label>
+                <input type="number" step="any" id="northBound" value={northBound} onChange={(e) => setNorthBound(e.target.value)} className="w-full p-1 border rounded border-gray-300"/>
+              </div>
+              <div>
+                <label htmlFor="southBound" className="block text-gray-600">Sud:</label>
+                <input type="number" step="any" id="southBound" value={southBound} onChange={(e) => setSouthBound(e.target.value)} className="w-full p-1 border rounded border-gray-300"/>
+              </div>
+              <div>
+                <label htmlFor="eastBound" className="block text-gray-600">Est:</label>
+                <input type="number" step="any" id="eastBound" value={eastBound} onChange={(e) => setEastBound(e.target.value)} className="w-full p-1 border rounded border-gray-300"/>
+              </div>
+              <div>
+                <label htmlFor="westBound" className="block text-gray-600">Ouest:</label>
+                <input type="number" step="any" id="westBound" value={westBound} onChange={(e) => setWestBound(e.target.value)} className="w-full p-1 border rounded border-gray-300"/>
+              </div>
+            </div>
+            <div className="mt-3 flex justify-between items-center">
+              <button
+                onClick={() => {
+                  const bounds = {
+                    north: parseFloat(northBound),
+                    south: parseFloat(southBound),
+                    east: parseFloat(eastBound),
+                    west: parseFloat(westBound),
+                  };
+                  if (Object.values(bounds).every(v => !isNaN(v))) {
+                    onPreviewOverlayBounds(polygon.id, bounds);
+                  } else {
+                    alert("Veuillez entrer des valeurs numériques valides pour les limites.");
+                  }
+                }}
+                className="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors text-xs"
+              >
+                Prévisualiser
+              </button>
+              <button
+                onClick={() => {
+                  const bounds = {
+                    north: parseFloat(northBound),
+                    south: parseFloat(southBound),
+                    east: parseFloat(eastBound),
+                    west: parseFloat(westBound),
+                  };
+                  if (Object.values(bounds).every(v => !isNaN(v))) {
+                    onSaveOverlayBounds(polygon.id, bounds);
+                  } else {
+                    alert("Veuillez entrer des valeurs numériques valides pour les limites.");
+                  }
+                }}
+                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-xs"
+              >
+                Sauvegarder Limites
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="mt-4 flex justify-end">
-          <button
-            onClick={handleDownloadImage}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
-          >
-            Télécharger l'image
-          </button>
+          {pointsString && ( /* Only show download if SVG is rendered */
+            <button
+                onClick={handleDownloadImage}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm mr-2"
+            >
+                Télécharger l'image (SVG)
+            </button>
+          )}
         </div>
       </div>
     </div>

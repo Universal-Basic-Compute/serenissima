@@ -366,16 +366,36 @@ export default function MapPage() {
 
             // Create and add GroundOverlay for the land image
             const imageUrl = `/images/lands/${polygon.id}.png`;
-            const pathForBounds = mapPolygon.getPath();
-            const imageBounds = new google.maps.LatLngBounds();
-            for (let k = 0; k < pathForBounds.getLength(); k++) {
-              imageBounds.extend(pathForBounds.getAt(k));
-            }
+            let finalImageBounds: google.maps.LatLngBounds | google.maps.LatLngBoundsLiteral;
 
-            if (!imageBounds.isEmpty() && mapRef.current) {
+            if (polygon.imageOverlayBounds && 
+                typeof polygon.imageOverlayBounds.north === 'number' &&
+                typeof polygon.imageOverlayBounds.south === 'number' &&
+                typeof polygon.imageOverlayBounds.east === 'number' &&
+                typeof polygon.imageOverlayBounds.west === 'number') {
+              // Use stored bounds if available and valid
+              finalImageBounds = polygon.imageOverlayBounds;
+              console.log(`Using stored imageOverlayBounds for polygon ${polygon.id}`);
+            } else {
+              // Calculate bounds from polygon path as fallback
+              const pathForBounds = mapPolygon.getPath();
+              const calculatedBounds = new google.maps.LatLngBounds();
+              for (let k = 0; k < pathForBounds.getLength(); k++) {
+                calculatedBounds.extend(pathForBounds.getAt(k));
+              }
+              finalImageBounds = calculatedBounds;
+            }
+            
+            // Ensure finalImageBounds is not empty before creating overlay
+            const checkBounds = finalImageBounds instanceof google.maps.LatLngBounds ? finalImageBounds : new google.maps.LatLngBounds(
+              { lat: (finalImageBounds as google.maps.LatLngBoundsLiteral).south, lng: (finalImageBounds as google.maps.LatLngBoundsLiteral).west },
+              { lat: (finalImageBounds as google.maps.LatLngBoundsLiteral).north, lng: (finalImageBounds as google.maps.LatLngBoundsLiteral).east }
+            );
+
+            if (!checkBounds.isEmpty() && mapRef.current) {
               const groundOverlay = new google.maps.GroundOverlay(
                 imageUrl,
-                imageBounds,
+                finalImageBounds,
                 {
                   opacity: 0.7, // Changed opacity to 0.7
                   map: mapRef.current,
@@ -388,13 +408,37 @@ export default function MapPage() {
             }
 
             // Add click listener to this mapPolygon
-            mapPolygon.addListener('click', () => {
-              setSelectedMapPolygonData({
-                id: polygon.id,
-                coordinates: polygon.coordinates, // Ensure this is in {lat, lng} format
-                historicalName: polygon.historicalName // Pass historicalName if available
-              });
-              setShowMapPolygonDisplayPanel(true);
+            mapPolygon.addListener('click', (event: google.maps.MapMouseEvent) => {
+              // If an overlay is being edited, clicking its polygon should not open the display panel.
+              // Instead, it could potentially deselect the overlay editing.
+              if (editingOverlayId) {
+                // Check if the click was on the polygon associated with the currently edited overlay
+                if (editingOverlayId !== polygon.id) {
+                  // Clicked on a different polygon while another is being edited
+                  clearEditingState(); // Deselect current editing state
+                  // Then proceed to select the new polygon for display panel
+                  setSelectedMapPolygonData({
+                    id: polygon.id,
+                    coordinates: polygon.coordinates,
+                    historicalName: polygon.historicalName,
+                    imageOverlayBounds: polygon.imageOverlayBounds || groundOverlaysMapRef.current[polygon.id]?.getBounds()?.toJSON() || null
+                  });
+                  setShowMapPolygonDisplayPanel(true);
+                } else {
+                  // Clicked on the polygon of the currently edited overlay.
+                  // Do nothing, or maybe deselect editing state if preferred.
+                  // For now, do nothing to keep handles active.
+                }
+              } else {
+                // No overlay is being edited, normal behavior for polygon click
+                setSelectedMapPolygonData({
+                  id: polygon.id,
+                  coordinates: polygon.coordinates,
+                  historicalName: polygon.historicalName,
+                  imageOverlayBounds: polygon.imageOverlayBounds || groundOverlaysMapRef.current[polygon.id]?.getBounds()?.toJSON() || null
+                });
+                setShowMapPolygonDisplayPanel(true);
+              }
             });
           }
         });
@@ -568,6 +612,59 @@ export default function MapPage() {
     setShowMapPolygonDisplayPanel(false);
     setSelectedMapPolygonData(null);
   };
+
+  const handlePreviewOverlayBoundsOnMap = useCallback((polygonId: string, bounds: google.maps.LatLngBoundsLiteral) => {
+    const overlay = groundOverlaysMapRef.current[polygonId];
+    if (overlay && mapRef.current) {
+      try {
+        const newBounds = new google.maps.LatLngBounds(
+          { lat: bounds.south, lng: bounds.west },
+          { lat: bounds.north, lng: bounds.east }
+        );
+        overlay.setBounds(newBounds);
+        // Update the stored raw data for consistency if panel is reopened before save/reload
+        const updatedRawData = rawPolygonsData.map(p => 
+          p.id === polygonId ? { ...p, imageOverlayBounds: bounds } : p
+        );
+        setRawPolygonsData(updatedRawData);
+        if (selectedMapPolygonData && selectedMapPolygonData.id === polygonId) {
+            setSelectedMapPolygonData(prev => prev ? ({...prev, imageOverlayBounds: bounds}) : null);
+        }
+
+      } catch (error) {
+        console.error("Error setting bounds for preview:", error);
+        alert("Erreur lors de la mise à jour des limites pour l'aperçu. Vérifiez les valeurs.");
+      }
+    }
+  }, [rawPolygonsData, selectedMapPolygonData]);
+
+  const handleSaveOverlayBoundsToBackend = useCallback(async (polygonId: string, bounds: google.maps.LatLngBoundsLiteral) => {
+    try {
+      const response = await fetch(`/api/polygons/${polygonId}/image-bounds`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bounds }),
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        alert(`Limites de l'image pour ${polygonId} sauvegardées avec succès!`);
+        // Optionally, update local rawPolygonsData to reflect the save without a full reload
+        const updatedRawData = rawPolygonsData.map(p => 
+          p.id === polygonId ? { ...p, imageOverlayBounds: bounds } : p
+        );
+        setRawPolygonsData(updatedRawData);
+         // Update selectedMapPolygonData if it's the one being edited
+        if (selectedMapPolygonData && selectedMapPolygonData.id === polygonId) {
+            setSelectedMapPolygonData(prev => prev ? ({...prev, imageOverlayBounds: bounds}) : null);
+        }
+      } else {
+        throw new Error(result.error || `Échec de la sauvegarde des limites de l'image.`);
+      }
+    } catch (error: any) {
+      console.error(`Erreur lors de la sauvegarde des limites pour ${polygonId}:`, error);
+      alert(`Erreur: ${error.message}`);
+    }
+  }, [rawPolygonsData, selectedMapPolygonData]);
 
   const downloadAllPolygonImages = async () => {
     if (rawPolygonsData.length === 0) {
@@ -814,6 +911,9 @@ export default function MapPage() {
         <PolygonDisplayPanel
           polygon={selectedMapPolygonData}
           onClose={handleCloseMapPolygonDisplayPanel}
+          isMapContext={true}
+          onPreviewOverlayBounds={handlePreviewOverlayBoundsOnMap}
+          onSaveOverlayBounds={handleSaveOverlayBoundsToBackend}
         />
       )}
     </div>
