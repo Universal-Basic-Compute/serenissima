@@ -17,26 +17,26 @@ Les `Type` listés ci-dessous sont les `activityType` à utiliser avec `POST /ap
 2.  **Acheter un Terrain Disponible**
     *   **activityType**: `buy_available_land`
     *   **Description**: Un citoyen initie le processus d'achat direct d'une parcelle de terrain disponible à un prix fixe.
-    *   **Mécanisme Principal**: Crée une activité. Le processeur de cette activité gérera la vérification des fonds, le transfert de propriété et des Ducats, potentiellement via un appel interne à un service de transaction.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur de cette activité gérera la vérification des fonds, le transfert de propriété et des Ducats, potentiellement via un appel interne à un service de transaction (ex: `POST /api/transactions/land/purchase` ou logique équivalente).
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `expectedPrice`.
 
 3.  **Initier un Projet de Construction de Bâtiment**
     *   **activityType**: `initiate_building_project`
-    *   **Description**: Un citoyen initie le processus de construction d'un nouveau bâtiment. Cela peut impliquer le placement du plan, le paiement des coûts initiaux et la création d'un contrat de construction.
-    *   **Mécanisme Principal**: Crée une activité (ou une série d'activités). Les processeurs géreront la déduction des coûts, la création de l'enregistrement du bâtiment (non construit), et la création du contrat de construction. Pourrait utiliser en interne `/api/create-building-at-point` et `/api/actions/construct-building` ou leur logique.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `buildingType` (identifiant du type de bâtiment), `pointDetails` (si placement précis), `builderContractDetails` (optionnel).
+    *   **Description**: Un citoyen initie le processus de construction d'un nouveau bâtiment. Cela peut impliquer le placement du plan (via `/api/create-building-at-point`), le paiement des coûts initiaux, et la création d'un contrat de construction (via `/api/actions/construct-building`).
+    *   **Mécanisme Principal**: Crée une activité (ou une série d'activités). Les processeurs géreront la déduction des coûts, la création de l'enregistrement du bâtiment (non construit), et la création du contrat de construction.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `buildingTypeDefinition` (objet JSON complet de la définition du type de bâtiment), `pointDetails` (objet JSON avec `lat`, `lng`, `polygonId`, `pointType`), `builderContractDetails` (optionnel, objet JSON avec `sellerUsername`, `sellerBuildingId`, `rate`, `publicContractId`).
 
 4.  **Ajuster le Prix de Location d'un Terrain**
     *   **activityType**: `adjust_land_lease_price`
     *   **Description**: Un propriétaire foncier initie le processus de modification du bail (`LeasePrice`) pour les bâtiments sur ses terrains.
-    *   **Mécanisme Principal**: Crée une activité. Le processeur de cette activité mettra à jour le `LeasePrice` sur les bâtiments concernés, potentiellement via un appel interne à `PATCH /api/buildings/{buildingId}` ou une logique similaire à `backend/ais/adjustleases.py`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId` (du bâtiment dont le bail est ajusté) OU `landId` (pour ajuster tous les baux sur ce terrain), `newLeasePrice`.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur de cette activité mettra à jour le `LeasePrice` sur les bâtiments concernés, potentiellement via un appel interne à `PATCH /api/buildings/{buildingId}` ou une logique similaire à `backend/ais/adjustleases.py` ou `backend/ais/automated_adjustleases.py`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId` (du bâtiment dont le bail est ajusté) OU `landId` (pour ajuster tous les baux sur ce terrain), `newLeasePrice`, `strategy` (optionnel, ex: "standard", "low", "high" pour guider la logique automatisée).
 
 5.  **Ajuster le Prix de Loyer d'un Bâtiment**
     *   **activityType**: `adjust_building_rent_price`
     *   **Description**: Un propriétaire de bâtiment initie la modification du loyer (`RentPrice`) pour sa propriété.
-    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le `RentPrice` du bâtiment, potentiellement via `PATCH /api/buildings/{buildingId}` ou une logique similaire à `backend/ais/adjustrents.py`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId`, `newRentPrice`.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le `RentPrice` du bâtiment, potentiellement via `PATCH /api/buildings/{buildingId}` ou une logique similaire à `backend/ais/adjustrents.py` ou `backend/ais/automated_adjustrents.py`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId`, `newRentPrice`, `strategy` (optionnel, ex: "standard", "low", "high").
 
 ## Commerce et Contrats
 
@@ -47,7 +47,7 @@ Les `Type` listés ci-dessous sont les `activityType` à utiliser avec `POST /ap
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel, pour modification), `resourceType`, `pricePerResource`, `targetAmount`, `sellerBuildingId`.
 
 7.  **Modifier le Prix d'une Vente Publique**
-    *   **activityType**: `modify_public_sell_price` (ou utiliser `manage_public_sell_contract` avec `contractId`)
+    *   **activityType**: `modify_public_sell_price` (Note: `manage_public_sell_contract` avec un `contractId` existant est la méthode préférée pour modifier un contrat, y compris son prix.)
     *   **Description**: Un citoyen initie l'ajustement du prix d'un contrat `public_sell` existant.
     *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le contrat via `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId`, `newPricePerResource`.
@@ -68,7 +68,7 @@ Les `Type` listés ci-dessous sont les `activityType` à utiliser avec `POST /ap
     *   **activityType**: `manage_public_storage_offer`
     *   **Description**: Un citoyen initie la création/modification d'une offre de stockage public.
     *   **Mécanisme Principal**: Crée une activité. Le processeur gérera la création/mise à jour du contrat `public_storage` via `POST /api/contracts`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `sellerBuildingId` (l'entrepôt), `resourceType` (ou "any"), `capacityOffered`, `pricePerUnitPerDay`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `sellerBuildingId` (l'entrepôt), `resourceType` (ou "any"), `capacityOffered` (quantité d'espace), `pricePerUnitPerDay` (prix par unité de capacité par jour), `pricingStrategy` (optionnel, ex: "low", "standard", "high" pour guider `automated_adjustpublicstoragecontracts.py`).
 
 11. **Faire une Offre d'Achat sur un Bâtiment Existant**
     *   **activityType**: `bid_on_building`
@@ -105,8 +105,8 @@ Les `Type` listés ci-dessous sont les `activityType` à utiliser avec `POST /ap
 16. **Ajuster les Salaires d'une Entreprise**
     *   **activityType**: `adjust_business_wages`
     *   **Description**: Un gestionnaire d'entreprise (`RunBy`) initie la modification des salaires.
-    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le champ `Wages` du bâtiment, potentiellement via `PATCH /api/buildings/{buildingId}` ou une logique similaire à `backend/ais/adjustwages.py`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `businessBuildingId`, `newWageAmount`.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le champ `Wages` du bâtiment, potentiellement via `PATCH /api/buildings/{buildingId}` ou une logique similaire à `backend/ais/adjustwages.py` ou `backend/ais/automated_adjustwages.py`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `businessBuildingId`, `newWageAmount`, `strategy` (optionnel, ex: "standard", "low", "high").
 
 17. **Déléguer une Entreprise / Demander ou Prendre une Entreprise pour Soi**
     *   **activityType**: `manage_business_operation`
@@ -158,7 +158,7 @@ Les `Type` listés ci-dessous sont les `activityType` à utiliser avec `POST /ap
     *   **activityType**: `update_citizen_profile`
     *   **Description**: Un citoyen initie la mise à jour de son profil.
     *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le profil via `POST /api/citizens/update`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `firstName`, `lastName`, `familyMotto`, `coatOfArmsImageUrl`, `telegramUserId` (tous optionnels).
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `citizenAirtableId` (ID Airtable du citoyen à mettre à jour), `firstName`, `lastName`, `familyMotto`, `coatOfArmsImageUrl`, `telegramUserId` (tous optionnels).
 
 25. **Gérer son Appartenance à une Guilde**
     *   **activityType**: `manage_guild_membership`
@@ -184,7 +184,7 @@ Les `Type` listés ci-dessous sont les `activityType` à utiliser avec `POST /ap
     *   **activityType**: `upload_coat_of_arms`
     *   **Description**: Un joueur initie le téléchargement d'un blason.
     *   **Mécanisme Principal**: Crée une activité. Le processeur gérera l'upload via `POST /api/upload-coat-of-arms`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `imageData` (ou URL de l'image à récupérer).
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `imageData` (données de l'image en base64 ou similaire, ou un mécanisme pour que le serveur récupère un fichier temporaire), `filename` (optionnel).
 
 29. **Mettre à Jour les Paramètres Citoyen**
     *   **activityType**: `update_citizen_settings`
