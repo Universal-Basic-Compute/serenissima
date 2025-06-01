@@ -29,15 +29,24 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // ✅ Charger fichier spécifique
     if (fs.existsSync(specificPolygonPath)) {
+      let fileContent;
       try {
-        const fileContent = fs.readFileSync(specificPolygonPath, 'utf8');
+        fileContent = fs.readFileSync(specificPolygonPath, 'utf8');
+      } catch (readError) {
+        console.error(`Error reading specific polygon file ${specificPolygonPath}:`, readError);
+        // Si le fichier spécifique existe mais ne peut pas être lu, c'est une erreur serveur.
+        return NextResponse.json({ error: `Failed to read data file for polygon ${polygonId}. Check file permissions or integrity.` }, { status: 500 });
+      }
+
+      try {
         const polygonData = JSON.parse(fileContent);
         polygonsCache[polygonId] = polygonData; // Cache it
         console.log(`Found and cached polygon ${polygonId} from specific file.`);
         return NextResponse.json(polygonData);
       } catch (parseError) {
         console.error(`Error parsing specific polygon file ${specificPolygonPath}:`, parseError);
-        // Potentially fall through to other methods or return error, for now, fall through
+        // Si le fichier spécifique existe mais est corrompu.
+        return NextResponse.json({ error: `Error parsing data for polygon ${polygonId}. The data file may be corrupt.` }, { status: 500 });
       }
     }
 
