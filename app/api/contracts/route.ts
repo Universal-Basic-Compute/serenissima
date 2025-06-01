@@ -157,9 +157,20 @@ export async function GET(request: Request) {
             contractData.location = coordinates;
           } else {
             try {
-              const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-              const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(contractData.sellerBuilding)}`, baseUrl);
-              const buildingResponse = await fetch(buildingUrl.toString());
+              // Détermine l'URL de base pour les appels fetch côté serveur.
+              // En développement, cela devrait être http://localhost:3000.
+              // En production, NEXT_PUBLIC_BASE_URL doit être l'URL canonique de l'application.
+              const serverSideFetchBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+              const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(contractData.sellerBuilding)}`, serverSideFetchBaseUrl);
+              
+              console.log(`[contracts GET] Tentative de récupération des détails du bâtiment pour ${contractData.sellerBuilding} depuis ${buildingUrl.toString()}`);
+              
+              const buildingResponse = await fetch(buildingUrl.toString(), {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'User-Agent': 'contracts-service-internal-fetch' // Identifie l'appelant
+                }
+              });
               if (buildingResponse.ok) {
                 const buildingData = await buildingResponse.json();
                 if (buildingData.building && buildingData.building.position) {
