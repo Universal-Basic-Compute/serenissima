@@ -1371,7 +1371,7 @@ Your response:`;
       {/* Expanded chat window */}
       {isOpen && (
         <div 
-          className={`bg-white rounded-lg shadow-xl flex flex-col border-2 border-amber-600 overflow-hidden slide-in ${
+          className={`bg-white rounded-lg shadow-xl flex flex-col border-2 border-amber-600 overflow-visible slide-in ${
             isExpanded 
               ? 'w-[1000px] max-h-[90vh]' // Increased width and max-height
               : 'w-96 max-h-[700px]'
