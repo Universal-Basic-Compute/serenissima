@@ -483,8 +483,15 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // Function to fetch transaction with retry logic
       const fetchTransactionWithRetry = async (retries = 3, delay = 1000) => {
         try {
+          let baseUrl = getBackendBaseUrl();
+          // Ensure baseUrl is a string; if undefined or null, treat as empty for relative path
+          if (baseUrl === null || typeof baseUrl === 'undefined') {
+            baseUrl = '';
+          }
+          const apiUrl = `${baseUrl}/api/transaction/land/${selectedPolygonId}`;
+          console.log(`Fetching transaction from URL: ${apiUrl}`); // Log the exact URL
           // Use the new Next.js API route
-          const response = await fetch(`${getBackendBaseUrl()}/api/transaction/land/${selectedPolygonId}`);
+          const response = await fetch(apiUrl);
 
           if (!response.ok) {
             if (response.status === 404) {
@@ -539,8 +546,15 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // Function to fetch offers with retry logic
       const fetchOffersWithRetry = async (retries = 3, delay = 1000) => {
         try {
+          let baseUrl = getBackendBaseUrl();
+          // Ensure baseUrl is a string; if undefined or null, treat as empty for relative path
+          if (baseUrl === null || typeof baseUrl === 'undefined') {
+            baseUrl = '';
+          }
+          const apiUrl = `${baseUrl}/api/transactions/land-offers/${selectedPolygonId}`;
+          console.log(`Fetching offers from URL: ${apiUrl}`); // Log the exact URL
           // Use the new Next.js API route for land offers
-          const response = await fetch(`${getBackendBaseUrl()}/api/transactions/land-offers/${selectedPolygonId}`);
+          const response = await fetch(apiUrl);
           
           if (!response.ok) {
             if (response.status === 404) {
