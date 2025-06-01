@@ -131,7 +131,7 @@ Each activity is stored in the ACTIVITIES table with the following fields:
 
 ### Activity Creation Process
 
-Le script `createActivities.py` (via `citizen_general_activities.py`) identifie les citoyens sans activité en cours et tente de leur assigner une nouvelle **séquence d'activités**. La logique de décision principale est encapsulée dans `citizen_general_activities.py` et prend en compte :
+Le script `createActivities.py` (via `citizen_general_activities.py`) identifie les citoyens sans activité en cours et tente de leur assigner une nouvelle **séquence d'activités**. Un citoyen est considéré comme "sans activité en cours" si aucune activité avec ce citoyen comme `Citizen` n'a sa période (`StartDate` à `EndDate`) chevauchant l'heure actuelle. La logique de décision principale est encapsulée dans `citizen_general_activities.py` et prend en compte :
 1.  L'heure actuelle à Venise.
 2.  La classe sociale du citoyen, qui détermine ses plages horaires pour le repos, le travail et les loisirs/consommation.
     *   **Facchini (Journaliers)**: Repos: 21h-5h; Travail: 5h-12h, 13h-19h; Loisirs: 12h-13h, 19h-21h.
@@ -236,6 +236,21 @@ Refer to the API Reference (`components/Documentation/ApiReference.tsx`) for the
 `POST /api/actions/create-activity` endpoint (for direct creation of a single activity when all details are known) and
 `POST /api/activities/try-create` (for AI-initiated endeavors where the engine will build the necessary activity
 chain).
+
+### Gestion des Activités Simultanées et Séquentielles
+
+Le système gère les activités des citoyens de la manière suivante :
+
+1. **Activités Simultanées** : Le système ne permet généralement pas à un citoyen d'avoir plusieurs activités simultanées. Lorsqu'une activité est en cours (l'heure actuelle se situe entre son `StartDate` et son `EndDate`), le script `createActivities.py` n'assignera pas de nouvelle activité à ce citoyen.
+
+2. **Chaînes d'Activités** : Lors de l'utilisation de `POST /api/activities/try-create` pour des actions complexes (comme `manage_public_sell_contract` ou `initiate_building_project`), le système crée une chaîne d'activités séquentielles où :
+   - Chaque activité dans la chaîne a un `StartDate` égal au `EndDate` de l'activité précédente
+   - Toutes les activités de la chaîne sont créées en même temps avec le statut `created`
+   - Si une activité dans la chaîne échoue, les activités suivantes sont automatiquement marquées comme `failed`
+
+3. **Priorités et Interruptions** : Les activités créées par le moteur suivent une hiérarchie de priorités (voir la section "Priorités des Activités"). Cependant, une fois qu'une activité est en cours, elle n'est pas interrompue par des activités de priorité plus élevée - ces dernières devront attendre que l'activité en cours soit terminée.
+
+4. **Activités Créées par l'API** : Les activités créées directement via l'API sont soumises aux mêmes règles - elles ne peuvent pas être assignées à un citoyen qui a déjà une activité en cours, sauf si elles sont explicitement programmées pour commencer après la fin de l'activité actuelle.
 
 ## Actions Stratégiques des Citoyens (en tant qu'Activités)
 
