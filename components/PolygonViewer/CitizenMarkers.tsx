@@ -777,6 +777,18 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           const iconSrc = `/images/icons/${iconFilename}`;
           const fallbackIconSrc = '/images/icons/Citizen.png';
 
+          const getInitialsColor = (socialClass: string): string => {
+            switch (socialClass.toLowerCase()) {
+              case 'nobili': return '#FFD700'; // Gold
+              case 'cittadini': return '#ADD8E6'; // Light Blue
+              case 'popolani': return '#D2B48C'; // Tan (Light Bronze)
+              case 'forestieri': return '#90EE90'; // Light Green
+              case 'facchini': return '#A9A9A9'; // Dark Gray
+              default: return '#FFFFFF'; // White
+            }
+          };
+          const initialsColor = getInitialsColor(socialClassForIcon);
+
           return (
             <div 
               key={citizenId || `citizen-${Math.random()}`}
@@ -820,8 +832,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   }}
                 />
                 <span
-                  className="absolute inset-0 flex items-center justify-center text-white text-[9px] font-bold pointer-events-none" // Adjusted font size
-                  style={{ textShadow: '0px 0px 2px rgba(0,0,0,0.8)' }} 
+                  className="absolute inset-0 flex items-center justify-center text-[9px] font-bold pointer-events-none" // Adjusted font size
+                  style={{ color: initialsColor, textShadow: '0px 0px 2px rgba(0,0,0,0.8)' }} 
                 >
                   {firstName?.[0]?.toUpperCase() || ''}{lastName?.[0]?.toUpperCase() || ''}
                 </span>
@@ -862,6 +874,18 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           const iconFilename = `${socialClassForIcon}.png`;
           const iconSrc = `/images/icons/${iconFilename}`;
           const fallbackIconSrc = '/images/icons/Citizen.png';
+
+          const getInitialsColor = (socialClass: string): string => {
+            switch (socialClass.toLowerCase()) {
+              case 'nobili': return '#FFD700'; // Gold
+              case 'cittadini': return '#ADD8E6'; // Light Blue
+              case 'popolani': return '#D2B48C'; // Tan (Light Bronze)
+              case 'forestieri': return '#90EE90'; // Light Green
+              case 'facchini': return '#A9A9A9'; // Dark Gray
+              default: return '#FFFFFF'; // White
+            }
+          };
+          const initialsColor = getInitialsColor(socialClassForIcon);
           
           return (
             <div 
@@ -905,8 +929,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   }}
                 />
                 <span
-                  className="absolute inset-0 flex items-center justify-center text-white text-[9px] font-bold pointer-events-none" // Adjusted font size
-                  style={{ textShadow: '0px 0px 2px rgba(0,0,0,0.8)' }} 
+                  className="absolute inset-0 flex items-center justify-center text-[9px] font-bold pointer-events-none" // Adjusted font size
+                  style={{ color: initialsColor, textShadow: '0px 0px 2px rgba(0,0,0,0.8)' }} 
                 >
                   {firstName?.[0]?.toUpperCase() || ''}{lastName?.[0]?.toUpperCase() || ''}
                 </span>
