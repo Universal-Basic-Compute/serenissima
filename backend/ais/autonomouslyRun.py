@@ -1126,7 +1126,7 @@ def autonomously_run_ai_citizen(
             log.info(f"{LogColors.OKBLUE}AI {ai_username} cleaned reflection: {LogColors.BOLD}{cleaned_reflection}{LogColors.ENDC}")
 
         # Store reflection as a message to self
-        if not dry_run and tables:
+        if not dry_run and tables and cleaned_reflection.strip(): # Check if cleaned_reflection is not empty
             try:
                 tables["messages"].create({
                     "Sender": ai_username,
@@ -1139,6 +1139,8 @@ def autonomously_run_ai_citizen(
                 log.info(f"{LogColors.OKGREEN}Stored cleaned reflection for {ai_username}.{LogColors.ENDC}")
             except Exception as e_msg:
                 log.error(f"{LogColors.FAIL}Failed to store reflection message for {ai_username}: {e_msg}{LogColors.ENDC}", exc_info=True)
+        elif not cleaned_reflection.strip():
+            log.info(f"{LogColors.OKBLUE}Cleaned reflection for {ai_username} is empty. Skipping message creation.{LogColors.ENDC}")
     elif dry_run:
         ai_reflection = "[DRY RUN] AI would generate a reflection."
         log.info(f"{Fore.YELLOW}{ai_reflection}{Style.RESET_ALL}")
@@ -1266,7 +1268,7 @@ def autonomously_run_ai_citizen_unguided(
             # Log full cleaned reflection at DEBUG level
             log.debug(f"{LogColors.LIGHTBLUE}AI {ai_username} (Unguided Iteration {iteration_count}) Full Cleaned Reflection: {cleaned_reflection_unguided}{LogColors.ENDC}")
 
-        if not dry_run and tables and cleaned_reflection_unguided.strip().lower() != "no reflection provided.":
+        if not dry_run and tables and cleaned_reflection_unguided.strip() and cleaned_reflection_unguided.strip().lower() != "no reflection provided.":
              try:
                 tables["messages"].create({
                     "Sender": ai_username, "Receiver": ai_username,
@@ -1277,8 +1279,10 @@ def autonomously_run_ai_citizen_unguided(
                 log.info(f"{LogColors.OKGREEN}Stored unguided reflection for {ai_username}.{LogColors.ENDC}")
              except Exception as e_msg:
                 log.error(f"{LogColors.FAIL}Failed to store unguided reflection message for {ai_username}: {e_msg}{LogColors.ENDC}", exc_info=True)
+        elif not cleaned_reflection_unguided.strip():
+            log.info(f"{LogColors.OKBLUE}Cleaned unguided reflection for {ai_username} is empty. Skipping message creation.{LogColors.ENDC}")
         elif cleaned_reflection_unguided.strip().lower() == "no reflection provided.":
-            log.info(f"{LogColors.OKBLUE}AI {ai_username} provided no reflection. Skipping message creation.{LogColors.ENDC}")
+            log.info(f"{LogColors.OKBLUE}AI {ai_username} provided 'no reflection provided.'. Skipping message creation.{LogColors.ENDC}")
 
 
         api_actions = kinos_response.get("actions")
