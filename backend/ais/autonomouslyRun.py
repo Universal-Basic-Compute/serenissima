@@ -76,7 +76,6 @@ CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE = [
     "GET /api/buildings?Owner={YourUsername} - List buildings you own.",
     "GET /api/buildings?Type=...&IsConstructed=true - Find specific types of constructed buildings.",
     "GET /api/lands?Owner={YourUsername} - List lands you own.",
-    "GET /api/lands?District=... - Find lands in a specific district.",
     "GET /api/resources/counts?owner={YourUsername} - Check your resource inventory counts.",
     "GET /api/resources?AssetType=building&Asset={BuildingId} - List resources in a specific building.",
     "GET /api/contracts?Seller={YourUsername}&Type=public_sell&Status=active - List your active sell contracts.",
