@@ -32,3 +32,4 @@ from .buy_available_land_creator import try_create as try_create_buy_available_l
 from .initiate_building_project_creator import try_create as try_create_initiate_building_project_activity # New building project activity
 from .adjust_land_lease_price_creator import try_create as try_create_adjust_land_lease_price_activity # New land lease price adjustment activity
 from .adjust_building_rent_price_creator import try_create as try_create_adjust_building_rent_price_activity # New building rent price adjustment activity
+from .adjust_business_wages_creator import try_create as try_create_adjust_business_wages_activity # New business wages adjustment activity

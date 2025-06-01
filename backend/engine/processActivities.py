@@ -135,6 +135,7 @@ from backend.engine.activity_processors.buy_available_land_processor import proc
 from backend.engine.activity_processors.initiate_building_project_processor import process_initiate_building_project_fn
 from backend.engine.activity_processors.adjust_land_lease_price_processor import process_adjust_land_lease_price_fn
 from backend.engine.activity_processors.adjust_building_rent_price_processor import process_adjust_building_rent_price_fn
+from backend.engine.activity_processors.adjust_business_wages_processor import process_adjust_business_wages_fn
 # Load environment variables
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
@@ -382,6 +383,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "submit_building_project": process_initiate_building_project_fn, # Final step in initiate_building_project chain
         "file_lease_adjustment": process_adjust_land_lease_price_fn, # Final step in adjust_land_lease_price chain
         "file_rent_adjustment": process_adjust_building_rent_price_fn, # Final step in adjust_building_rent_price chain
+        "update_wage_ledger": process_adjust_business_wages_fn, # Final step in adjust_business_wages chain
     }
 
     tables = initialize_airtable()

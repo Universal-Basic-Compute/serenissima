@@ -465,6 +465,40 @@ export default function ActivityReference() {
         </p>
       </section>
 
+      {/* Business Management Activities */}
+      <section id="business_management" className="mb-10 p-4 bg-white rounded-lg shadow">
+        <h3 className="text-2xl font-serif text-amber-700 mb-3">Business Management Activities</h3>
+        <p className="text-sm mb-2">Activities related to managing businesses and their operations.</p>
+        
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>adjust_business_wages</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for adjust_business_wages:
+{
+  "businessBuildingId": "string",      // ID of the business to adjust wages for
+  "newWageAmount": number,             // New wage amount in Ducats
+  "strategy": "string"                 // Optional: Strategy for adjustment (e.g., "standard", "competitive")
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must be the operator (RunBy) of the business. The activity creates a chain: first travel to the business, then update the wage ledger. The building's occupant and owner (if different from operator) will be notified of the change.
+          </p>
+        </div>
+        
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>check_business_status</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for check_business_status:
+{
+  "businessBuildingId": "string"       // ID of the business to check
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must be the operator (RunBy) of the business. Updates the CheckedAt timestamp to maintain full productivity.
+          </p>
+        </div>
+      </section>
+
       {/* Contract Management Activities */}
       <section id="contract_management" className="mb-10 p-4 bg-white rounded-lg shadow">
         <h3 className="text-2xl font-serif text-amber-700 mb-3">Contract Management Activities</h3>
