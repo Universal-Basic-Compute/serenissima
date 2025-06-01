@@ -121,7 +121,7 @@ Gère les accords commerciaux entre citoyens ou avec le public.
 -   `Status` (Texte): Statut du contrat (ex: `active`, `completed`, `failed`, `ended_by_ai`, `cancelled`, `accepted`, `expired`).
     -   Pour `land_listing` et `land_offer`: `active` (en cours), `accepted` (accepté, déclenche la vente), `cancelled` (annulé par l'initiateur), `expired` (si une date de fin est atteinte).
 -   `Notes` (Texte multiligne): Chaîne JSON ou texte pour des détails supplémentaires.
--   `Asset` (Texte): Pour les contrats fonciers, stocke le `LandId`. Pour `building_bid`, stocke le `BuildingId`.
+-   `Asset` (Texte): Pour les contrats fonciers, stocke le `LandId`. Pour `building_bid`, stocke le `BuildingId` personnalisé du bâtiment concerné.
 -   `AssetType` (Texte): Pour les contrats fonciers, stocke `'land'`. Pour `building_bid`, stocke `'building'`.
 -   `LastExecutedAt` (Date/Heure): Horodatage de la dernière exécution partielle (ex: pour `fetch_from_galley`).
 -   `CreatedAt` (Date/Heure): Date de création du contrat.

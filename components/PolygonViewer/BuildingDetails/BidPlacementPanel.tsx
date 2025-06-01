@@ -33,51 +33,57 @@ const BidPlacementPanel: React.FC<BidPlacementPanelProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Placeholder for API call
-      console.log('Submitting bid:', {
-        buildingId,
-        bidder: currentUser,
-        amount: bidAmount,
-        notes,
+      // TODO: Determine fromBuildingId. This is the citizen's current location.
+      // This might require access to global state or a service that tracks citizen location.
+      // For now, using a placeholder or making it a required prop if available.
+      // As a temporary measure, if we don't have fromBuildingId, the backend creator might default
+      // or the call might fail if the creator strictly requires it.
+      // A common pattern is for the AI/System to know the citizen's current building.
+      // If the UI is initiating, it might need to fetch this or have it passed down.
+      const fromBuildingId = "CITIZEN_CURRENT_BUILDING_ID_PLACEHOLDER"; // Needs to be replaced with actual logic
+
+      // targetOfficeBuildingId can be omitted, and the backend creator will pick a default.
+      // If a specific office is desired, it should be passed.
+      // For UI initiated bids, defaulting in backend is often simpler.
+
+      const activityDetails = {
+        citizenUsername: currentUser, // The backend /api/activities/try-create uses the authenticated user or this
+        activityType: "bid_on_building",
+        activityParameters: {
+          buildingIdToBidOn: buildingId,
+          bidAmount: bidAmount,
+          fromBuildingId: fromBuildingId, // Citizen's current location building ID
+          // targetOfficeBuildingId: "ID_OF_COURTHOUSE_OR_TOWNHALL", // Optional: If known
+          // notes: notes, // Notes can be part of the contract later, or in activity's main Notes field
+        },
+        title: `Placing bid on building ${buildingName}`,
+        description: `User ${currentUser} is initiating a bid of ${bidAmount} for ${buildingName}. Notes: ${notes}`,
+        thought: `I am placing a bid of ${bidAmount} Ducats for ${buildingName}. ${notes ? 'My notes: ' + notes : ''}`
+      };
+      
+      console.log('Submitting bid_on_building activity:', activityDetails);
+
+      const response = await fetch('/api/activities/try-create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(activityDetails),
       });
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // TODO: Replace with actual API call to /api/contracts (POST)
-      // const response = await fetch('/api/contracts', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     ContractId: `building_bid_${buildingId}_${currentUser}_${Date.now()}`,
-      //     Type: 'building_bid',
-      //     Asset: buildingId,
-      //     AssetType: 'building',
-      //     Buyer: currentUser, // Bidder
-      //     PricePerResource: bidAmount, // Bid amount
-      //     TargetAmount: 1, // For the building itself
-      //     Status: 'active',
-      //     Notes: notes,
-      //     // Seller might be set by backend or left null until acceptance
-      //   }),
-      // });
 
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   throw new Error(errorData.error || 'Failed to place bid.');
-      // }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to initiate bid on building activity. Status: ${response.status}`);
+      }
       
-      // const result = await response.json();
-      // if (result.success) {
-      //   onBidPlaced();
-      // } else {
-      //   throw new Error(result.error || 'API returned success false.');
-      // }
-
-      alert(`Bid of ${bidAmount} Ducats placed for ${buildingName}! (This is a placeholder)`);
-      onBidPlaced(); // Call this after successful API call
+      const result = await response.json();
+      if (result.success) {
+        alert(`Bid process initiated for ${bidAmount} Ducats on ${buildingName}! This will involve several steps for your citizen.`);
+        onBidPlaced(); // Callback to refresh UI or close panel
+      } else {
+        throw new Error(result.message || result.error || 'API returned success:false for bid initiation.');
+      }
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while initiating bid.';
       console.error('Error placing bid:', errorMessage);
       setError(errorMessage);
     } finally {

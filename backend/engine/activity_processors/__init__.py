@@ -30,4 +30,6 @@ from .goto_building_for_storage_fetch_processor import process as process_goto_b
 from .fetch_for_logistics_client_processor import process as process_fetch_for_logistics_client
 from .check_business_status_processor import process as process_check_business_status
 from .fishing_processor import process_fishing_activity # New fishing activity processor
+from .inspect_building_for_purchase_processor import process_inspect_building_for_purchase_fn
+from .submit_building_purchase_offer_processor import process_submit_building_purchase_offer_fn
 # Add other processors here as they are created
