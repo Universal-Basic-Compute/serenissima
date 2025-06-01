@@ -29,6 +29,10 @@ log = logging.getLogger("delegate_businesses")
 load_dotenv()
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000") # Added API_BASE_URL
+
+# Import LogColors from shared utils
+from backend.engine.utils.activity_helpers import LogColors
+
 BUSINESS_LIMIT_PER_AI = 10
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
