@@ -345,6 +345,90 @@ export default function ActivityReference() {
         </div>
       </section>
 
+      {/* Land Management Activities */}
+      <section id="land_management" className="mb-10 p-4 bg-white rounded-lg shadow">
+        <h3 className="text-2xl font-serif text-amber-700 mb-3">Land Management Activities</h3>
+        <p className="text-sm mb-2">Activities related to land ownership and management.</p>
+        
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>adjust_land_lease_price</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for adjust_land_lease_price:
+{
+  "landId": "string",                  // ID of the land to adjust lease price for
+  "newLeasePrice": number,             // New lease price in Ducats
+  "strategy": "string",                // Optional: Strategy for adjustment (e.g., "standard", "aggressive")
+  "targetOfficeBuildingId": "string"   // Optional: Specific building to use (e.g., public_archives)
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must own the land. The activity creates a chain: first travel to an appropriate location (home, office, or public_archives), then file the adjustment. A filing fee of 1% of the new lease price (minimum 5 Ducats) is charged. Building owners on the land will be notified of the change.
+          </p>
+        </div>
+        
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>buy_available_land</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for buy_available_land:
+{
+  "landId": "string",                  // ID of the land to purchase
+  "expectedPrice": number,             // Expected price in Ducats
+  "fromBuildingId": "string",          // Optional: Starting location
+  "targetBuildingId": "string"         // Required: Official building (courthouse/town_hall) for transaction
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Land must be owned by "ConsiglioDeiDieci" (available for purchase). Citizen must have sufficient funds for both the land price and transaction fee (1% of land price, minimum 20 Ducats).
+          </p>
+        </div>
+        
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>bid_on_land</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for bid_on_land:
+{
+  "landId": "string",                  // ID of the land to bid on
+  "bidAmount": number,                 // Bid amount in Ducats
+  "fromBuildingId": "string",          // Required: Starting location
+  "targetBuildingId": "string"         // Required: Official building (courthouse/town_hall) for bid submission
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must have sufficient funds for the registration fee (0.5% of bid amount, minimum 10 Ducats). Creates a building_bid contract with 7-day expiration.
+          </p>
+        </div>
+      </section>
+
+      {/* Building Project Activities */}
+      <section id="building_project" className="mb-10 p-4 bg-white rounded-lg shadow">
+        <h3 className="text-2xl font-serif text-amber-700 mb-3"><code>initiate_building_project</code></h3>
+        <p className="text-sm mb-2">Start a new building construction project on owned land.</p>
+        <h4 className="font-semibold text-amber-800 mb-1"><code>activityDetails</code> Structure:</h4>
+        <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "landId": "string",                  // ID of the land for construction
+  "buildingTypeDefinition": {          // Building type details
+    "id": "string",                    // Building type ID (e.g., "bakery", "weaver_workshop")
+    "name": "string",                  // Human-readable name
+    // Other building type properties
+  },
+  "pointDetails": {                    // Location for the building
+    "lat": number,
+    "lng": number
+  },
+  "builderContractDetails": {          // Optional: Details if hiring a builder
+    "builderUsername": "string",
+    "contractValue": number
+  },
+  "targetOfficeBuildingId": "string"   // Optional: Specific building for permit (town_hall)
+}`}
+        </pre>
+        <p className="text-xs mt-2 text-gray-600">
+          <strong>Prerequisites:</strong> 
+          Citizen must own the land. Must have sufficient funds for permit fee (5% of building cost, minimum 50 Ducats) and builder deposit if applicable (20% of contract value). Creates a multi-step activity chain: travel to land, inspect site, travel to office, submit project.
+        </p>
+      </section>
+
       {/* Leave Venice Activity */}
       <section id="leave_venice_activity" className="mb-10 p-4 bg-white rounded-lg shadow">
         <h3 className="text-2xl font-serif text-amber-700 mb-3"><code>leave_venice</code></h3>
