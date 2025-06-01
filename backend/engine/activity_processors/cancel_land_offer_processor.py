@@ -23,9 +23,9 @@ def process_cancel_land_offer_fn(tables: dict, activity_record: dict, building_t
     """
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
-    canceller_airtable_id = activity_fields.get('Citizen')[0] # Citizen performing the activity
+    activity_citizen_username = activity_fields.get('Citizen') # Canceller's username
 
-    log.info(f"{LogColors.PROCESS}Processing 'execute_cancel_land_offer' activity {activity_guid} by canceller Airtable ID {canceller_airtable_id}.{LogColors.ENDC}")
+    log.info(f"{LogColors.PROCESS}Processing 'execute_cancel_land_offer' activity {activity_guid} by canceller {activity_citizen_username}.{LogColors.ENDC}")
 
     try:
         details_str = activity_fields.get('Details')
@@ -42,12 +42,12 @@ def process_cancel_land_offer_fn(tables: dict, activity_record: dict, building_t
             log.error(f"{LogColors.FAIL}Missing offerContractId in activity {activity_guid} details: {details}{LogColors.ENDC}")
             return False
 
-        # Get canceller citizen record
-        canceller_citizen_record = tables['citizens'].get(canceller_airtable_id)
-        if not canceller_citizen_record:
-            log.error(f"{LogColors.FAIL}Canceller citizen (Airtable ID: {canceller_airtable_id}) not found for activity {activity_guid}.{LogColors.ENDC}")
-            return False
-        # canceller_username = canceller_citizen_record['fields'].get('Username')
+        # Get canceller citizen record (though username from activity is primary identifier)
+        # canceller_citizen_record = get_citizen_record(tables, activity_citizen_username)
+        # if not canceller_citizen_record:
+        #     log.error(f"{LogColors.FAIL}Canceller citizen '{activity_citizen_username}' not found for activity {activity_guid}.{LogColors.ENDC}")
+        #     return False
+        canceller_username = activity_citizen_username # Confirmed
 
         # Get the land_offer contract
         offer_contract_record = get_contract_record(tables, offer_contract_custom_id)
@@ -64,10 +64,10 @@ def process_cancel_land_offer_fn(tables: dict, activity_record: dict, building_t
             log.warning(f"{LogColors.WARNING}Offer contract {offer_contract_custom_id} is not 'active' (Status: {offer_contract_fields.get('Status')}). Assuming already cancelled or completed. Activity {activity_guid}.{LogColors.ENDC}")
             return True # Treat as success if already not active
 
-        # Verify the canceller is the buyer/offerer
-        buyer_airtable_id_list = offer_contract_fields.get('Buyer')
-        if not buyer_airtable_id_list or canceller_airtable_id not in buyer_airtable_id_list:
-            log.error(f"{LogColors.FAIL}Citizen (Airtable ID: {canceller_airtable_id}) is not the buyer/offerer of offer {offer_contract_custom_id}. Buyer IDs: {buyer_airtable_id_list}. Cannot cancel. Activity {activity_guid}.{LogColors.ENDC}")
+        # Verify the canceller is the buyer/offerer (assuming 'Buyer' field stores username string)
+        contract_buyer_username = offer_contract_fields.get('Buyer')
+        if not contract_buyer_username or canceller_username != contract_buyer_username:
+            log.error(f"{LogColors.FAIL}Citizen {canceller_username} is not the buyer/offerer ('{contract_buyer_username}') of offer {offer_contract_custom_id}. Cannot cancel. Activity {activity_guid}.{LogColors.ENDC}")
             return False
 
         # Update offer contract status

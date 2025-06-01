@@ -27,9 +27,9 @@ def process_accept_land_offer_fn(tables: dict, activity_record: dict, building_t
     """
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
-    seller_airtable_id = activity_fields.get('Citizen')[0] # Citizen performing the activity (seller)
+    activity_citizen_username = activity_fields.get('Citizen') # Seller's username
 
-    log.info(f"{LogColors.PROCESS}Processing 'execute_accept_land_offer' activity {activity_guid} by seller Airtable ID {seller_airtable_id}.{LogColors.ENDC}")
+    log.info(f"{LogColors.PROCESS}Processing 'execute_accept_land_offer' activity {activity_guid} by seller {activity_citizen_username}.{LogColors.ENDC}")
 
     try:
         details_str = activity_fields.get('Details')
@@ -47,11 +47,12 @@ def process_accept_land_offer_fn(tables: dict, activity_record: dict, building_t
             return False
 
         # Get seller citizen record
-        seller_citizen_record = tables['citizens'].get(seller_airtable_id)
+        seller_citizen_record = get_citizen_record(tables, activity_citizen_username)
         if not seller_citizen_record:
-            log.error(f"{LogColors.FAIL}Seller citizen (Airtable ID: {seller_airtable_id}) not found for activity {activity_guid}.{LogColors.ENDC}")
+            log.error(f"{LogColors.FAIL}Seller citizen '{activity_citizen_username}' not found for activity {activity_guid}.{LogColors.ENDC}")
             return False
-        seller_username = seller_citizen_record['fields'].get('Username')
+        seller_airtable_id = seller_citizen_record['id'] # For updating Ducats
+        seller_username = activity_citizen_username # Confirmed
 
         # Get the land_offer contract
         offer_contract_record = get_contract_record(tables, offer_contract_custom_id)
@@ -87,14 +88,10 @@ def process_accept_land_offer_fn(tables: dict, activity_record: dict, building_t
             log.error(f"{LogColors.FAIL}Land {land_id_being_sold} not found. Activity {activity_guid}.{LogColors.ENDC}")
             return False
         
-        current_owner_airtable_id_list = land_record['fields'].get('Owner')
-        if not current_owner_airtable_id_list or seller_airtable_id not in current_owner_airtable_id_list:
-            current_owner_username_display = "Unknown/None"
-            if current_owner_airtable_id_list:
-                owner_rec_temp = tables['citizens'].get(current_owner_airtable_id_list[0])
-                if owner_rec_temp: current_owner_username_display = owner_rec_temp['fields'].get('Username', 'Unknown ID')
-            
-            log.error(f"{LogColors.FAIL}Seller {seller_username} (Airtable ID: {seller_airtable_id}) does not own land {land_id_being_sold}. Current owner: {current_owner_username_display}. Activity {activity_guid}.{LogColors.ENDC}")
+        # Assuming 'Owner' field in LANDS stores the username directly
+        current_land_owner_username = land_record['fields'].get('Owner')
+        if not current_land_owner_username or current_land_owner_username != seller_username:
+            log.error(f"{LogColors.FAIL}Seller {seller_username} does not own land {land_id_being_sold}. Current owner: {current_land_owner_username or 'None'}. Activity {activity_guid}.{LogColors.ENDC}")
             return False
 
         # Financial transaction
@@ -112,8 +109,8 @@ def process_accept_land_offer_fn(tables: dict, activity_record: dict, building_t
         tables['citizens'].update(buyer_airtable_id, {'Ducats': buyer_ducats - sale_price})
         log.info(f"{LogColors.PROCESS}Transferred {sale_price} ducats from buyer {buyer_username} to seller {seller_username}. Activity {activity_guid}.{LogColors.ENDC}")
 
-        # Transfer land ownership
-        tables['lands'].update(land_record['id'], {'Owner': [buyer_airtable_id]}) # Link to buyer's citizen record
+        # Transfer land ownership (store username string)
+        tables['lands'].update(land_record['id'], {'Owner': buyer_username}) 
         log.info(f"{LogColors.PROCESS}Transferred ownership of land {land_id_being_sold} to buyer {buyer_username}. Activity {activity_guid}.{LogColors.ENDC}")
 
         # Update offer contract status

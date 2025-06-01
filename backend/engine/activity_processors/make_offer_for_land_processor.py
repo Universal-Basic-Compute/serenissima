@@ -25,9 +25,9 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
     """
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
-    citizen_airtable_id = activity_fields.get('Citizen')[0]
+    activity_citizen_username = activity_fields.get('Citizen') # Username string
 
-    log.info(f"{LogColors.PROCESS}Processing 'finalize_make_offer_for_land' activity {activity_guid} for citizen Airtable ID {citizen_airtable_id}.{LogColors.ENDC}")
+    log.info(f"{LogColors.PROCESS}Processing 'finalize_make_offer_for_land' activity {activity_guid} for citizen {activity_citizen_username}.{LogColors.ENDC}")
 
     try:
         details_str = activity_fields.get('Details')
@@ -45,10 +45,11 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
             log.error(f"{LogColors.FAIL}Missing landId, offerPrice, or buyerUsername in activity {activity_guid} details: {details}{LogColors.ENDC}")
             return False
 
-        buyer_citizen_record = tables['citizens'].get(citizen_airtable_id)
-        if not buyer_citizen_record or buyer_citizen_record['fields'].get('Username') != buyer_username:
-            log.error(f"{LogColors.FAIL}Citizen mismatch for activity {activity_guid}. Activity by {buyer_citizen_record['fields'].get('Username') if buyer_citizen_record else 'Unknown'}, details specify buyer {buyer_username}.{LogColors.ENDC}")
+        if activity_citizen_username != buyer_username:
+            log.error(f"{LogColors.FAIL}Citizen mismatch for activity {activity_guid}. Activity by {activity_citizen_username}, details specify buyer {buyer_username}.{LogColors.ENDC}")
             return False
+        
+        buyer_citizen_record = get_citizen_record(tables, buyer_username) # Fetch by username
 
         land_record = get_land_record(tables, land_id_for_offer)
         if not land_record:
@@ -65,17 +66,10 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
             log.warning(f"{LogColors.WARNING}Citizen {buyer_username} already has an active offer for land {land_id_for_offer}. Activity {activity_guid}. Skipping new offer.{LogColors.ENDC}")
             return True # Treat as success
 
-        # Determine Seller (linked record ID) if target_seller_username is provided
-        seller_airtable_id_list = None
-        if target_seller_username:
-            seller_citizen_record = get_citizen_record(tables, target_seller_username)
-            if seller_citizen_record:
-                seller_airtable_id_list = [seller_citizen_record['id']]
-            else:
-                log.warning(f"{LogColors.WARNING}Target seller {target_seller_username} not found. Offer will be speculative or for unowned land if applicable. Activity {activity_guid}.{LogColors.ENDC}")
+        # No need to fetch seller_airtable_id_list if 'Seller' field stores username directly
         
         # Check buyer's funds (optional, for logging or soft validation)
-        buyer_ducats = float(buyer_citizen_record['fields'].get('Ducats', 0))
+        buyer_ducats = float(buyer_citizen_record['fields'].get('Ducats', 0)) if buyer_citizen_record else 0
         if buyer_ducats < float(offer_price):
             log.warning(f"{LogColors.WARNING}Buyer {buyer_username} has insufficient funds ({buyer_ducats}) for offer price ({offer_price}). Offer will be created but may not be fulfillable. Activity {activity_guid}.{LogColors.ENDC}")
 
@@ -85,7 +79,7 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
         contract_payload = {
             "ContractId": contract_id,
             "Type": "land_offer",
-            "Buyer": buyer_username, # Directly use the username string
+            "Buyer": buyer_username, 
             "Asset": land_id_for_offer,
             "AssetType": "land",
             "PricePerResource": float(offer_price),

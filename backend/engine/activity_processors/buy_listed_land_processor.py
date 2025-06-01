@@ -27,9 +27,9 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
     """
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
-    buyer_airtable_id = activity_fields.get('Citizen')[0] # Citizen performing the activity (buyer)
+    activity_citizen_username = activity_fields.get('Citizen') # Buyer's username
 
-    log.info(f"{LogColors.PROCESS}Processing 'execute_buy_listed_land' activity {activity_guid} by buyer Airtable ID {buyer_airtable_id}.{LogColors.ENDC}")
+    log.info(f"{LogColors.PROCESS}Processing 'execute_buy_listed_land' activity {activity_guid} by buyer {activity_citizen_username}.{LogColors.ENDC}")
 
     try:
         details_str = activity_fields.get('Details')
@@ -48,11 +48,12 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
             return False
 
         # Get buyer citizen record
-        buyer_citizen_record = tables['citizens'].get(buyer_airtable_id)
+        buyer_citizen_record = get_citizen_record(tables, activity_citizen_username)
         if not buyer_citizen_record:
-            log.error(f"{LogColors.FAIL}Buyer citizen (Airtable ID: {buyer_airtable_id}) not found for activity {activity_guid}.{LogColors.ENDC}")
+            log.error(f"{LogColors.FAIL}Buyer citizen '{activity_citizen_username}' not found for activity {activity_guid}.{LogColors.ENDC}")
             return False
-        buyer_username = buyer_citizen_record['fields'].get('Username')
+        buyer_airtable_id = buyer_citizen_record['id'] # For updating Ducats
+        buyer_username = activity_citizen_username # Confirmed
 
         # Get the land_listing contract
         listing_contract_record = get_contract_record(tables, listing_contract_custom_id)
@@ -106,8 +107,8 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
         tables['citizens'].update(buyer_airtable_id, {'Ducats': buyer_ducats - purchase_price})
         log.info(f"{LogColors.PROCESS}Transferred {purchase_price} ducats from buyer {buyer_username} to seller {seller_username}. Activity {activity_guid}.{LogColors.ENDC}")
 
-        # Transfer land ownership
-        tables['lands'].update(land_record['id'], {'Owner': [buyer_airtable_id]}) # Link to buyer's citizen record
+        # Transfer land ownership (store username string)
+        tables['lands'].update(land_record['id'], {'Owner': buyer_username})
         log.info(f"{LogColors.PROCESS}Transferred ownership of land {land_id_being_bought} to buyer {buyer_username}. Activity {activity_guid}.{LogColors.ENDC}")
 
         # Update listing contract status

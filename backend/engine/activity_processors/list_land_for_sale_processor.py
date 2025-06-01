@@ -26,9 +26,10 @@ def process_list_land_for_sale_fn(tables: dict, activity_record: dict, building_
     """
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
-    citizen_airtable_id = activity_fields.get('Citizen')[0] # Assuming single link
+    # Citizen field in ACTIVITIES table now stores the username string
+    activity_citizen_username = activity_fields.get('Citizen') 
 
-    log.info(f"{LogColors.PROCESS}Processing 'finalize_list_land_for_sale' activity {activity_guid} for citizen Airtable ID {citizen_airtable_id}.{LogColors.ENDC}")
+    log.info(f"{LogColors.PROCESS}Processing 'finalize_list_land_for_sale' activity {activity_guid} for citizen {activity_citizen_username}.{LogColors.ENDC}")
 
     try:
         details_str = activity_fields.get('Details')
@@ -46,9 +47,8 @@ def process_list_land_for_sale_fn(tables: dict, activity_record: dict, building_
             return False
 
         # Verify the citizen performing the activity is indeed the sellerUsername from details
-        citizen_record = tables['citizens'].get(citizen_airtable_id)
-        if not citizen_record or citizen_record['fields'].get('Username') != seller_username:
-            log.error(f"{LogColors.FAIL}Citizen mismatch for activity {activity_guid}. Activity by {citizen_record['fields'].get('Username') if citizen_record else 'Unknown'}, details specify seller {seller_username}.{LogColors.ENDC}")
+        if activity_citizen_username != seller_username:
+            log.error(f"{LogColors.FAIL}Citizen mismatch for activity {activity_guid}. Activity by {activity_citizen_username}, details specify seller {seller_username}.{LogColors.ENDC}")
             return False
 
         # Verify the seller owns the land
@@ -57,15 +57,14 @@ def process_list_land_for_sale_fn(tables: dict, activity_record: dict, building_
             log.error(f"{LogColors.FAIL}Land {land_id_to_list} not found for listing by {seller_username}. Activity {activity_guid}.{LogColors.ENDC}")
             return False
         
-        current_owner_username = land_record['fields'].get('Owner') # This is a linked record ID to CITIZENS
-        if not current_owner_username:
+        # Assuming 'Owner' field in LANDS stores the username directly
+        current_land_owner_username = land_record['fields'].get('Owner') 
+        if not current_land_owner_username:
             log.error(f"{LogColors.FAIL}Land {land_id_to_list} has no owner. Cannot be listed by {seller_username}. Activity {activity_guid}.{LogColors.ENDC}")
             return False
         
-        # Fetch the owner's citizen record to get their Username
-        owner_citizen_record = tables['citizens'].get(current_owner_username[0]) # Assuming single link
-        if not owner_citizen_record or owner_citizen_record['fields'].get('Username') != seller_username:
-            log.error(f"{LogColors.FAIL}Land {land_id_to_list} is owned by {owner_citizen_record['fields'].get('Username') if owner_citizen_record else 'Unknown'}, not by {seller_username}. Activity {activity_guid}.{LogColors.ENDC}")
+        if current_land_owner_username != seller_username:
+            log.error(f"{LogColors.FAIL}Land {land_id_to_list} is owned by {current_land_owner_username}, not by {seller_username}. Activity {activity_guid}.{LogColors.ENDC}")
             return False
 
         # Check for existing active 'land_listing' by this seller for this land
