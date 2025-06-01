@@ -149,7 +149,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         // Fetch the owner details directly
         const fetchOwnerDetails = async () => {
           try {
-            const citizenResponse = await fetch(`${getBackendBaseUrl()}/api/citizens/${owner}`);
+            const apiUrl = `${getBackendBaseUrl()}/api/citizens/${owner}`;
+            console.log('Fetching owner details from:', apiUrl); // Log the constructed URL
+            const citizenResponse = await fetch(apiUrl);
             
             if (citizenResponse.ok) {
               const citizenData = await citizenResponse.json();
