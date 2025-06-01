@@ -20,6 +20,31 @@ const keysToPascalCase = (obj: Record<string, any>): Record<string, any> => {
   );
 };
 
+// Helper to convert a string to camelCase
+const toCamelCase = (s: string) => {
+  if (!s) return s;
+  return s.replace(/([-_][a-z])/ig, ($1) => {
+    return $1.toUpperCase()
+      .replace('-', '')
+      .replace('_', '');
+  }).replace(/^([A-Z])/, (firstChar) => firstChar.toLowerCase());
+};
+
+// Helper function to convert all keys of an object to camelCase (shallow)
+const normalizeKeysCamelCaseShallow = (obj: Record<string, any>): Record<string, any> => {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  const newObj: Record<string, any> = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      newObj[toCamelCase(key)] = obj[key]; // Only transform keys, not nested objects
+    }
+  }
+  return newObj;
+};
+
+
 // Airtable Configuration
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
@@ -139,7 +164,11 @@ const CreateActivityPayloadSchema = z.object({
 export async function POST(request: Request) {
   try {
     const rawBody = await request.json();
-    const validationResult = CreateActivityPayloadSchema.safeParse(rawBody);
+    // Normalize top-level keys to camelCase before Zod validation
+    const normalizedRawBody = normalizeKeysCamelCaseShallow(rawBody);
+    console.log("[API CreateActivity] Normalized Raw Body for Zod:", JSON.stringify(normalizedRawBody, null, 2));
+
+    const validationResult = CreateActivityPayloadSchema.safeParse(normalizedRawBody);
 
     if (!validationResult.success) {
       return NextResponse.json(
@@ -148,13 +177,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const { citizenUsername, activityType, activityDetails, title, description, thought, notes } = validationResult.data;
+    const { citizenUsername, activityType, activityDetails: rawActivityDetails, title, description, thought, notes } = validationResult.data;
 
+    // Normalize activityDetails keys to camelCase before specific Zod schema validation
+    const activityDetails = normalizeKeysCamelCaseShallow(rawActivityDetails || {});
+    console.log("[API CreateActivity] Normalized ActivityDetails for specific Zod:", JSON.stringify(activityDetails, null, 2));
+    
     // TODO: Implement security check: does the requester have authority for citizenUsername?
     // This might involve checking an API key associated with the AI agent.
     // For now, we assume the request is authorized.
 
-    log.info(`[API CreateActivity] Received request for ${citizenUsername} to perform ${activityType}`);
+    console.log(`[API CreateActivity] Received request for ${citizenUsername} to perform ${activityType}`);
 
     const airtablePayload: Record<string, any> = {
       ActivityId: `${activityType}_${citizenUsername}_${Date.now()}`,
@@ -190,17 +223,17 @@ export async function POST(request: Request) {
             const buildingApiUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/buildings/${encodeURIComponent(buildingId)}`;
             const response = await fetch(buildingApiUrl);
             if (!response.ok) {
-                console.warn(`[CreateActivity] Failed to fetch position for building ${buildingId}: ${response.status}`);
+                console.warn(`[API CreateActivity] Failed to fetch position for building ${buildingId}: ${response.status}`);
                 return null;
             }
             const data = await response.json();
             if (data.building && data.building.position) {
                 return data.building.position; // Assuming position is {lat, lng}
             }
-            console.warn(`[CreateActivity] Position not found for building ${buildingId} in API response.`);
+            console.warn(`[API CreateActivity] Position not found for building ${buildingId} in API response.`);
             return null;
         } catch (e) {
-            console.error(`[CreateActivity] Error fetching position for building ${buildingId}:`, e);
+            console.error(`[API CreateActivity] Error fetching position for building ${buildingId}:`, e);
             return null;
         }
     };
@@ -293,15 +326,15 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: prodDetails.error.format() }, { status: 400 });
         }
     } else if (activityType === "fetch_resource") {
-        const fetchDetails = FetchResourceActivityDetailsSchema.safeParse(activityDetails);
-        if (fetchDetails.success) {
-            airtablePayload.ContractId = fetchDetails.data.contractId;
-            airtablePayload.ContractId = fetchDetailsResult.data.contractId; // Corrected: use fetchDetailsResult.data
-            airtablePayload.FromBuilding = fetchDetailsResult.data.fromBuildingId;
-            airtablePayload.ToBuilding = fetchDetailsResult.data.toBuildingId;
-            airtablePayload.Resources = JSON.stringify([{ ResourceId: fetchDetailsResult.data.resourceId, Amount: fetchDetailsResult.data.amount }]);
+        const fetchDetailsResult = FetchResourceActivityDetailsSchema.safeParse(activityDetails); // Renamed for clarity
+        if (fetchDetailsResult.success) {
+            const fetchData = fetchDetailsResult.data; // Use a new const for validated data
+            airtablePayload.ContractId = fetchData.contractId;
+            airtablePayload.FromBuilding = fetchData.fromBuildingId;
+            airtablePayload.ToBuilding = fetchData.toBuildingId;
+            airtablePayload.Resources = JSON.stringify([{ ResourceId: fetchData.resourceId, Amount: fetchData.amount }]);
 
-            if (fetchDetailsResult.data.fromBuildingId) { // Travel is involved
+            if (fetchData.fromBuildingId) { // Travel is involved
                 const fromPos = await getBuildingPosition(fetchData.fromBuildingId);
                 const toPos = await getBuildingPosition(fetchData.toBuildingId);
 
@@ -331,7 +364,7 @@ export async function POST(request: Request) {
                 // Default duration for non-travel fetch
                 endDate = new Date(startDate.getTime() + 5 * 60 * 1000); // 5 min default
             }
-            if (fetchDetailsResult.data.notes) airtablePayload.Notes = `${airtablePayload.Notes ? airtablePayload.Notes + '\n' : ''}Details: ${fetchDetailsResult.data.notes}`.trim();
+            if (fetchData.notes) airtablePayload.Notes = `${airtablePayload.Notes ? airtablePayload.Notes + '\n' : ''}Details: ${fetchData.notes}`.trim();
             specificDetailsValid = true;
         } else {
             return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: fetchDetailsResult.error.format() }, { status: 400 });
@@ -371,7 +404,7 @@ export async function POST(request: Request) {
     try {
       const existingActiveActivities = await activitiesTable.select({ filterByFormula: activeActivityFormula }).all();
       for (const activity of existingActiveActivities) {
-        log.info(`[API CreateActivity] Interrupting existing active activity ${activity.id} for ${citizenUsername}.`);
+        console.log(`[API CreateActivity] Interrupting existing active activity ${activity.id} for ${citizenUsername}.`);
         await activitiesTable.update(activity.id, {
           Status: "interrupted",
           Notes: `${activity.fields.Notes || ''}\nInterrupted at ${nowUtcIso} by new API-driven activity.`.trim()
@@ -383,6 +416,7 @@ export async function POST(request: Request) {
     }
     // --- End of interruption logic ---
 
+    console.log("[API CreateActivity] Final Airtable Payload:", JSON.stringify(airtablePayload, null, 2));
     const createdRecord = await activitiesTable.create(airtablePayload);
 
     return NextResponse.json({ 
