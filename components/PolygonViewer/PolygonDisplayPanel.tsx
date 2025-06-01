@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 interface Point {
   lat: number;
@@ -20,6 +20,7 @@ interface PolygonDisplayPanelProps {
 const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onClose }) => {
   const SVG_SIZE = 300;
   const PADDING = 20;
+  const svgRef = useRef<SVGSVGElement>(null);
 
   if (!polygon || !polygon.coordinates || polygon.coordinates.length === 0) {
     return null;
@@ -89,6 +90,53 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
     return `${svgX},${svgY}`;
   }).join(' ');
 
+  const handleDownloadImage = () => {
+    if (svgRef.current) {
+      const svgElement = svgRef.current;
+      const svgString = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        // Set canvas dimensions based on SVG viewbox to maintain aspect ratio and resolution
+        const viewBox = svgElement.getAttribute('viewBox');
+        let canvasWidth = SVG_SIZE;
+        let canvasHeight = SVG_SIZE;
+        if (viewBox) {
+          const parts = viewBox.split(' ');
+          if (parts.length === 4) {
+            canvasWidth = parseInt(parts[2], 10);
+            canvasHeight = parseInt(parts[3], 10);
+          }
+        }
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+          const pngUrl = canvas.toDataURL('image/png');
+          
+          const downloadLink = document.createElement('a');
+          downloadLink.href = pngUrl;
+          downloadLink.download = `polygon-${polygon.id || 'image'}.png`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+        }
+        URL.revokeObjectURL(svgUrl); // Clean up blob URL
+      };
+      img.onerror = (e) => {
+        console.error("Error loading SVG into image:", e);
+        URL.revokeObjectURL(svgUrl); // Clean up blob URL
+        alert("Could not download image. Error loading SVG.");
+      };
+      img.src = svgUrl;
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
@@ -103,7 +151,7 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
           </button>
         </div>
         <div className="w-full aspect-square bg-[#F5E8C0] rounded"> {/* Changed background class for Tailwind, though SVG fill is dominant */}
-          <svg viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} width="100%" height="100%">
+          <svg ref={svgRef} viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} width="100%" height="100%">
             <rect width="100%" height="100%" fill="#F5E8C0" /> {/* Old parchment background for SVG */}
             {pointsString && polyDataWidth >= 0 && polyDataHeight >= 0 && ( // Ensure valid polygon data
                  <polygon
@@ -120,6 +168,14 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
         {polygon.historicalName && (
             <p className="mt-2 text-sm text-gray-700">Historical Name: {polygon.historicalName}</p>
         )}
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={handleDownloadImage}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
+          >
+            Télécharger l'image
+          </button>
+        </div>
       </div>
     </div>
   );
