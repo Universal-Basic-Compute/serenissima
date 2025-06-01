@@ -466,7 +466,7 @@ def make_kinos_call(
             return None
         
         log.info(f"{LogColors.OKGREEN}Received Kinos response for {ai_username}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
-        log.debug(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username}: {latest_ai_response_content[:500]}...{LogColors.ENDC}")
+        log.info(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username} (preview): {latest_ai_response_content[:500]}...{LogColors.ENDC}") # Changed from log.debug
 
         # Attempt to parse as JSON, otherwise return as text
         try:
