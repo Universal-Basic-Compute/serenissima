@@ -488,30 +488,44 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           if (baseUrl === null || typeof baseUrl === 'undefined') {
             baseUrl = '';
           }
-          const apiUrl = `${baseUrl}/api/transaction/land/${selectedPolygonId}`;
+          const apiUrl = `${baseUrl}/api/contracts?Type=land_sell&AssetType=land&Asset=${selectedPolygonId}`;
           console.log(`Fetching transaction from URL: ${apiUrl}`); // Log the exact URL
           // Use the new Next.js API route
           const response = await fetch(apiUrl);
 
           if (!response.ok) {
+            // If status is 404, it could mean the /api/contracts endpoint itself is not found,
+            // or it's configured to return 404 for "no results" (less common for query-based endpoints).
             if (response.status === 404) {
-              // No transaction found, that's okay
-              console.log(`No transaction found for land ${selectedPolygonId}`);
+              console.log(`No transaction found for land ${selectedPolygonId} (API returned 404).`);
               setTransaction(null);
               return null;
             }
             throw new Error(`Failed to fetch transaction: ${response.status} ${response.statusText}`);
           }
 
-          const data = await response.json();
-          if (data) {
-            console.log(`Transaction data for land ${selectedPolygonId}:`, data);
-            setTransaction(data);
+          const responseData = await response.json(); // Expected: { success: boolean, contracts: Array<any> }
+          
+          if (responseData.success && responseData.contracts) {
+            if (responseData.contracts.length > 0) {
+              // Assuming the first contract is the relevant "for sale" listing.
+              const currentLandSaleContract = responseData.contracts[0];
+              console.log(`Transaction data for land ${selectedPolygonId}:`, currentLandSaleContract);
+              setTransaction(currentLandSaleContract);
+              return currentLandSaleContract;
+            } else {
+              console.log(`No 'land_sell' contract found for land ${selectedPolygonId} (empty contracts array).`);
+              setTransaction(null);
+              return null;
+            }
           } else {
-            console.log(`No transaction data returned for land ${selectedPolygonId}`);
+            console.log(`API request for contracts was not successful or data format is unexpected for land ${selectedPolygonId}:`, responseData);
+            if (responseData.error) {
+                console.error(`API error message: ${responseData.error}`);
+            }
             setTransaction(null);
+            return null;
           }
-          return data;
         } catch (error) {
           console.error(`Error fetching transaction (attempt ${4-retries}/3):`, error);
           if (retries > 1) {
