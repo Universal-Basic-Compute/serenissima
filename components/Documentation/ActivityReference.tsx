@@ -81,7 +81,7 @@ export default function ActivityReference() {
       <section id="travel" className="mb-10 p-4 bg-white rounded-lg shadow">
         <h3 className="text-2xl font-serif text-amber-700 mb-3">Travel Activities</h3>
         <p className="text-sm mb-2">
-          Includes <code>goto_work</code>, <code>goto_home</code>, <code>travel_to_inn</code>, <code>goto_construction_site</code>.
+          Includes <code>goto_work</code>, <code>goto_home</code>, <code>travel_to_inn</code>.
           The server handles pathfinding if <code>fromBuildingId</code> and <code>toBuildingId</code> are provided.
         </p>
         <h4 className="font-semibold text-amber-800 mb-1"><code>activityDetails</code> Structure (Example for <code>goto_work</code>):</h4>
@@ -260,24 +260,6 @@ export default function ActivityReference() {
           <p className="text-xs mt-1 text-gray-600"><strong>Prerequisites:</strong> Valid <code>storageContractId</code>. Resources must be available at <code>storageBuildingId</code> under that contract. Citizen travels from <code>storageBuildingId</code> to <code>toBuildingId</code>. Server handles pathing.</p>
         </div>
       </section>
-      
-      {/* Check Business Status Activity */}
-      <section id="check_business_status" className="mb-10 p-4 bg-white rounded-lg shadow">
-        <h3 className="text-2xl font-serif text-amber-700 mb-3"><code>check_business_status</code></h3>
-        <p className="text-sm mb-2">Citizen (operator) visits their business to update its <code>CheckedAt</code> timestamp, ensuring full productivity.</p>
-        <h4 className="font-semibold text-amber-800 mb-1"><code>activityDetails</code> Structure:</h4>
-        <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
-{`{
-  "businessBuildingId": "string" // Airtable BuildingId of the business to check
-}`}
-        </pre>
-        <p className="text-xs mt-2 text-gray-600">
-          <strong>Prerequisites:</strong> 
-          The <code>citizenUsername</code> must be the <code>RunBy</code> for the <code>businessBuildingId</code>.
-          If the citizen is not already at the business, a travel activity (e.g., <code>goto_work</code> with <code>businessBuildingId</code> as destination) should precede this, or the server will pathfind if <code>fromBuildingId</code> is also provided (though this activity type itself is more about the action at the location). The API will create a path if <code>fromBuildingId</code> and <code>toBuildingId</code> (which would be <code>businessBuildingId</code>) are given.
-        </p>
-      </section>
-
       {/* Fishing Activities */}
       <section id="fishing_activities" className="mb-10 p-4 bg-white rounded-lg shadow">
         <h3 className="text-2xl font-serif text-amber-700 mb-3">Fishing Activities (<code>fishing</code>, <code>emergency_fishing</code>)</h3>
@@ -413,6 +395,22 @@ export default function ActivityReference() {
             <strong>Prerequisites:</strong> Citizen must have sufficient funds for the registration fee (0.5% of bid amount, minimum 10 Ducats). Creates a building_bid contract with 7-day expiration.
           </p>
         </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>adjust_building_lease_price</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for adjust_building_lease_price:
+{
+  "buildingId": "string",              // ID of the building to adjust lease price for
+  "newLeasePrice": number,             // New lease price in Ducats
+  "strategy": "string",                // Optional: Strategy for adjustment
+  "targetOfficeBuildingId": "string"   // Optional: Specific building to use (e.g., public_archives)
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen (land owner) must own the land on which the building is situated. Activity chain: travel to an appropriate location, then file adjustment. Fee: 1% of new lease price (min 5 Ducats).
+          </p>
+        </div>
       </section>
 
       {/* Building Project Activities */}
@@ -520,8 +518,8 @@ export default function ActivityReference() {
 
       {/* Contract Management Activities */}
       <section id="contract_management" className="mb-10 p-4 bg-white rounded-lg shadow">
-        <h3 className="text-2xl font-serif text-amber-700 mb-3">Contract Management Activities</h3>
-        <p className="text-sm mb-2">Activities related to creating and managing various types of contracts.</p>
+        <h3 className="text-2xl font-serif text-amber-700 mb-3">Contract Management & Trading Activities</h3>
+        <p className="text-sm mb-2">Activities related to creating, managing, and responding to various types of contracts and offers.</p>
         
         <div className="mt-4">
           <h4 className="font-semibold text-amber-800 mb-1"><code>manage_public_sell_contract</code></h4>
@@ -591,6 +589,255 @@ export default function ActivityReference() {
           </pre>
           <p className="text-xs mt-1 text-gray-600">
             <strong>Prerequisites:</strong> Citizen must own or operate the client building. Creates a chain: assess logistics needs at client building, then travel to porter guild hall to register the service contract.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>modify_public_sell_price</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for modify_public_sell_price:
+{
+  "contractId": "string",              // Required: ID of the existing public sell contract
+  "newPricePerResource": number,       // New price per unit
+  "targetBuildingId": "string"         // Required: Market building or seller's building for modification
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must be the owner of the contract. Activity chain: travel to target building, submit modification. Fee may apply. Note: <code>manage_public_sell_contract</code> with existing <code>contractId</code> is often preferred.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>end_public_sell_contract</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for end_public_sell_contract:
+{
+  "contractId": "string",              // Required: ID of the public sell contract to end
+  "targetBuildingId": "string"         // Required: Market building or seller's building for notification
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must be the owner of the contract. Activity chain: travel to target building, submit termination. Fee may apply.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>manage_public_storage_offer</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for manage_public_storage_offer:
+{
+  "contractId": "string",              // Optional: ID of existing contract to modify
+  "sellerBuildingId": "string",        // Required: Building offering storage (e.g., warehouse)
+  "resourceType": "string",            // Optional: Specific resource type, or "any"
+  "capacityOffered": number,           // Amount of storage capacity offered
+  "pricePerUnitPerDay": number,        // Price per unit per day
+  "pricingStrategy": "string",         // Optional: Strategy for pricing
+  "targetMarketBuildingId": "string"   // Optional: Market building to register the offer
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must own/operate the storage building. Activity chain: assess capacity, travel to market, register offer. Fee may apply.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>bid_on_building</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for bid_on_building:
+{
+  "buildingIdToBidOn": "string",       // Required: ID of the building to bid on
+  "bidAmount": number,                 // Required: Amount of the bid
+  "targetOwnerUsername": "string",     // Optional: Username of the building owner (for direct interaction)
+  "targetOfficeBuildingId": "string"   // Optional: Official building (courthouse/town_hall) for bid submission
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must have funds for bid registration fee. Activity chain: inspect building, travel to office/owner, submit offer.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>respond_to_building_bid</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for respond_to_building_bid:
+{
+  "buildingBidContractId": "string",   // Required: ID of the building bid contract
+  "response": "accepted" | "refused",  // Required: Decision on the bid
+  "bidderUsername": "string",          // Optional: Username of the bidder (for direct interaction)
+  "targetOfficeBuildingId": "string"   // Optional: Official building for communicating decision
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must be the owner of the building being bid on. Activity chain: travel to office/bidder, communicate decision. Admin fee may apply.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>withdraw_building_bid</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for withdraw_building_bid:
+{
+  "buildingBidContractId": "string",   // Required: ID of the building bid contract to withdraw
+  "targetOwnerUsername": "string",     // Optional: Username of the building owner (for notification)
+  "targetOfficeBuildingId": "string"   // Optional: Official building for notification
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must be the original bidder. Activity chain: travel to office/owner, notify withdrawal. Fee may apply.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>manage_markup_buy_contract</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for manage_markup_buy_contract:
+{
+  "contractId": "string",              // Optional: ID of existing contract to modify
+  "resourceType": "string",            // Required: Type of resource needed
+  "targetAmount": number,              // Required: Amount needed
+  "maxPricePerResource": number,       // Required: Maximum price willing to pay
+  "buyerBuildingId": "string",         // Required: Building where resource is needed
+  "targetMarketBuildingId": "string"   // Required: Market building to register the contract
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen associated with buyer building. Activity chain: assess need, travel to market, register contract. Fee may apply.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>manage_storage_query_contract</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for manage_storage_query_contract:
+{
+  "contractId": "string",              // Optional: ID of existing contract to modify
+  "resourceType": "string",            // Required: Type of resource needing storage
+  "amountNeeded": number,              // Required: Amount of resource needing storage
+  "durationDays": number,              // Required: Duration for which storage is needed
+  "buyerBuildingId": "string",         // Required: Building associated with the storage need
+  "targetMarketBuildingId": "string"   // Required: Market building to register the query
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen associated with buyer building. Activity chain: assess needs, travel to market, register query. Fee may apply.
+          </p>
+        </div>
+      </section>
+
+      {/* Financial Activities */}
+      <section id="financial_activities" className="mb-10 p-4 bg-white rounded-lg shadow">
+        <h3 className="text-2xl font-serif text-amber-700 mb-3">Financial Activities</h3>
+        <p className="text-sm mb-2">Activities related to loans and financial transactions.</p>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>request_loan</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for request_loan:
+{
+  "amount": number,                    // Required: Amount of Ducats requested
+  "purpose": "string",                 // Required: Reason for the loan
+  "collateralDetails": "string",       // Optional: Description of collateral offered
+  "targetBuildingId": "string",        // Optional: ID of financial institution (e.g., broker_s_office, mint)
+  "lenderUsername": "string"           // Optional: Specific citizen to request loan from
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Activity chain: travel to institution/lender, submit application. Application fee may apply. Creates a LOANS record.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>offer_loan</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for offer_loan:
+{
+  "targetBorrowerUsername": "string",  // Optional: Specific citizen to offer loan to
+  "amount": number,                    // Required: Amount of Ducats offered
+  "interestRate": number,              // Required: Interest rate (e.g., 0.05 for 5%)
+  "termDays": number,                  // Required: Loan term in days
+  "targetOfficeBuildingId": "string"   // Required: ID of institution to register the offer (e.g., broker_s_office)
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must have sufficient funds. Activity chain: travel to institution, register offer. Registration fee may apply. Creates a LOANS record.
+          </p>
+        </div>
+      </section>
+
+      {/* Social & Communication Activities */}
+      <section id="social_communication_activities" className="mb-10 p-4 bg-white rounded-lg shadow">
+        <h3 className="text-2xl font-serif text-amber-700 mb-3">Social & Communication Activities</h3>
+        <p className="text-sm mb-2">Activities related to citizen interaction and profile management.</p>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>send_message</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for send_message:
+{
+  "receiverUsername": "string",        // Required: Username of the message recipient
+  "content": "string",                 // Required: Message content
+  "messageType": "string",             // Optional: Type of message (e.g., "personal", "business")
+  "targetBuildingId": "string"         // Optional: Preferred meeting location (e.g., receiver's home/work)
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Activity chain: travel to recipient/target building, deliver message. Creates MESSAGES record and may trigger <code>reply_to_message</code> for recipient.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>reply_to_message</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for reply_to_message:
+{
+  // Typically no direct user-provided details needed as this is auto-triggered.
+  // The system will populate necessary details from the original message.
+  "originalMessageId": "string", // System-populated: ID of the message being replied to
+  "replyContent": "string"       // System-populated or AI-generated: Content of the reply
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Note:</strong> This activity is usually created automatically by the system when a citizen receives a message via <code>send_message</code>. It's listed for completeness.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>update_citizen_profile</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for update_citizen_profile:
+{
+  "citizenAirtableId": "string",       // Required: Airtable Record ID of the citizen
+  "firstName": "string",               // Optional: New first name
+  "lastName": "string",                // Optional: New last name
+  "familyMotto": "string",             // Optional: New family motto
+  "coatOfArmsImageUrl": "string",      // Optional: New URL for coat of arms
+  "telegramUserId": "string",          // Optional: New Telegram User ID
+  "targetOfficeBuildingId": "string"   // Optional: ID of public_archives for registration
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Activity chain: travel to public_archives, file update. Filing fee may apply.
+          </p>
+        </div>
+      </section>
+
+      {/* Guild Management Activities */}
+      <section id="guild_management_activities" className="mb-10 p-4 bg-white rounded-lg shadow">
+        <h3 className="text-2xl font-serif text-amber-700 mb-3">Guild Management Activities</h3>
+        <p className="text-sm mb-2">Activities related to guild membership.</p>
+
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>manage_guild_membership</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for manage_guild_membership:
+{
+  "guildId": "string",                 // Required: ID of the guild
+  "membershipAction": "join" | "leave" | "accept_invite", // Required: Action to perform
+  "guildHallBuildingId": "string"      // Required: ID of the guild hall building
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Activity chain: travel to guild hall, perform action. Fees/dues may apply.
           </p>
         </div>
       </section>
