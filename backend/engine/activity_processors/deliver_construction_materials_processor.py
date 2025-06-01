@@ -209,6 +209,9 @@ def process(
                 elif current_contract_status != 'materials_delivered' and current_contract_status != 'completed' and current_contract_status != 'construction_in_progress':
                     # If it's some other status but all materials are there, maybe it should also be materials_delivered
                     log.info(f"Contract {contract_custom_id_from_activity} status is '{current_contract_status}'. All materials delivered. Consider if status update is needed.")
+                    
+                # Note: This processor only updates the contract status and does not create follow-up activities.
+                # Any subsequent construction activities should be created by activity creators, not processors.
 
         else:
             log.warning(f"Could not find 'constructionCosts' in contract notes for {contract_custom_id_from_activity} or it's not a dict. Cannot check if all materials are delivered. Notes content: {current_notes_str}")
