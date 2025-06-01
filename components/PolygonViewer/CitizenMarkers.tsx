@@ -781,9 +781,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             switch (socialClass.toLowerCase()) {
               case 'nobili': return '#FFD700'; // Gold
               case 'cittadini': return '#ADD8E6'; // Light Blue
-              case 'popolani': return '#D2B48C'; // Tan (Light Bronze)
+              case 'popolani': return '#DAA520'; // GoldenRod (Brighter Bronze/Gold)
               case 'forestieri': return '#90EE90'; // Light Green
-              case 'facchini': return '#A9A9A9'; // Dark Gray
+              case 'facchini': return '#696969'; // DimGray (Darker Gray)
               default: return '#FFFFFF'; // White
             }
           };
@@ -879,9 +879,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             switch (socialClass.toLowerCase()) {
               case 'nobili': return '#FFD700'; // Gold
               case 'cittadini': return '#ADD8E6'; // Light Blue
-              case 'popolani': return '#D2B48C'; // Tan (Light Bronze)
+              case 'popolani': return '#DAA520'; // GoldenRod (Brighter Bronze/Gold)
               case 'forestieri': return '#90EE90'; // Light Green
-              case 'facchini': return '#A9A9A9'; // Dark Gray
+              case 'facchini': return '#696969'; // DimGray (Darker Gray)
               default: return '#FFFFFF'; // White
             }
           };
