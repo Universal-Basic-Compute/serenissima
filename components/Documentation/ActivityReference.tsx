@@ -365,6 +365,65 @@ export default function ActivityReference() {
         </p>
       </section>
 
+      {/* Contract Management Activities */}
+      <section id="contract_management" className="mb-10 p-4 bg-white rounded-lg shadow">
+        <h3 className="text-2xl font-serif text-amber-700 mb-3">Contract Management Activities</h3>
+        <p className="text-sm mb-2">Activities related to creating and managing various types of contracts.</p>
+        
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>manage_public_sell_contract</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for manage_public_sell_contract:
+{
+  "contractId": "string",              // Optional: ID of existing contract to modify
+  "resourceType": "string",            // Type of resource to sell
+  "pricePerResource": number,          // Price per unit
+  "targetAmount": number,              // Amount to sell
+  "sellerBuildingId": "string",        // Building where goods are stored
+  "targetMarketBuildingId": "string"   // Market building to register the contract
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must own or operate the seller building. Creates a chain: prepare goods at seller building, then travel to market to register the offer.
+          </p>
+        </div>
+        
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>manage_import_contract</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for manage_import_contract:
+{
+  "contractId": "string",              // Optional: ID of existing contract to modify
+  "resourceType": "string",            // Type of resource to import
+  "targetAmount": number,              // Amount to import
+  "pricePerResource": number,          // Price willing to pay per unit
+  "buyerBuildingId": "string",         // Building where goods will be delivered
+  "targetOfficeBuildingId": "string"   // Office building to register the contract
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must own or operate the buyer building. Creates a chain: assess import needs at buyer building, then travel to customs/broker office to register the agreement.
+          </p>
+        </div>
+        
+        <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>manage_logistics_service_contract</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for manage_logistics_service_contract:
+{
+  "contractId": "string",              // Optional: ID of existing contract to modify
+  "resourceType": "string",            // Optional: Specific resource type for logistics
+  "serviceFeePerUnit": number,         // Fee per unit transported
+  "clientBuildingId": "string",        // Building requiring logistics services
+  "targetGuildHallId": "string"        // Porter guild hall to register the contract
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Citizen must own or operate the client building. Creates a chain: assess logistics needs at client building, then travel to porter guild hall to register the service contract.
+          </p>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="mt-12 pt-8 border-t border-amber-300 text-center text-amber-700">
         <p>La Serenissima Activity Creation Documentation</p>
