@@ -266,22 +266,34 @@ export async function GET(request: Request) {
         continue;
       }
 
-      const airtableField = key; // Assuming query param key IS the Airtable field name
+      const airtableField = stringToPascalCase(key); // Convert query key to PascalCase
       loggableFilters[airtableField] = value;
 
+      let processedValue = value;
+      // Normalize the 'Type' field value to match storage format
+      if (airtableField === 'Type') {
+        processedValue = value.toLowerCase()
+          .replace(/'/g, '-') // Replace apostrophes with hyphens
+          .replace(/\s+/g, '-'); // Replace spaces with hyphens
+        // Note: This does not convert underscores to hyphens, matching POST logic.
+        // If "retail_food" is queried, it remains "retail_food".
+        // If "retail food" is queried, it becomes "retail-food".
+        if (value !== processedValue) {
+          console.log(`Normalized 'Type' query value from '${value}' to '${processedValue}'`);
+        }
+      }
+
       // Attempt to parse as number
-      const numValue = parseFloat(value);
-      // Check if it's a clean number (e.g., "123" or "123.45", not "123a")
-      // and that its string representation matches the original value to avoid partial parses.
-      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === value) {
-        formulaParts.push(`{${airtableField}} = ${value}`);
-      } else if (value.toLowerCase() === 'true') {
+      const numValue = parseFloat(processedValue);
+      if (!isNaN(numValue) && isFinite(numValue) && numValue.toString() === processedValue) {
+        formulaParts.push(`{${airtableField}} = ${processedValue}`);
+      } else if (processedValue.toLowerCase() === 'true') {
         formulaParts.push(`{${airtableField}} = TRUE()`);
-      } else if (value.toLowerCase() === 'false') {
+      } else if (processedValue.toLowerCase() === 'false') {
         formulaParts.push(`{${airtableField}} = FALSE()`);
       } else {
         // Default to string if not clearly numeric or boolean
-        formulaParts.push(`{${airtableField}} = '${escapeAirtableValue(value)}'`);
+        formulaParts.push(`{${airtableField}} = '${escapeAirtableValue(processedValue)}'`);
       }
     }
     
