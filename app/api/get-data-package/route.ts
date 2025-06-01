@@ -49,9 +49,28 @@ interface BuildingPoint {
   lng: number;
 }
 
+// Define more specific types for canal and bridge points if their structure differs significantly
+// For now, assuming they also have at least id, lat, lng.
+interface CanalPoint {
+  id: string;
+  lat: number;
+  lng: number;
+  // edge?: { lat: number; lng: number }; // Example from API ref
+}
+
+interface BridgePoint {
+  id: string;
+  lat: number;
+  lng: number;
+  // edge?: { lat: number; lng: number }; // Example from API ref
+  // connection?: any; // Example from API ref
+}
+
 interface PolygonData {
   id: string; // LandId
   buildingPoints?: BuildingPoint[];
+  canalPoints?: CanalPoint[];
+  bridgePoints?: BridgePoint[];
   // Add other polygon fields if needed, e.g., coordinates, center
 }
 
@@ -121,6 +140,8 @@ async function fetchPolygonDataForLand(landId: string): Promise<PolygonData | nu
       return {
         id: landData.landId, // or landData.id
         buildingPoints: landData.buildingPoints || [],
+        canalPoints: landData.canalPoints || [], // Add canalPoints
+        bridgePoints: landData.bridgePoints || [], // Add bridgePoints
       };
     }
     console.warn(`No land data found for ${landId} via /api/lands`);
@@ -157,19 +178,47 @@ export async function GET(request: Request) {
       const polygonData = await fetchPolygonDataForLand(landId);
 
       let unoccupiedBuildingPoints: BuildingPoint[] = [];
-      if (polygonData && polygonData.buildingPoints) {
-        const occupiedPointIds = new Set<string>();
-        buildingsOnLandRecords.forEach(bldg => {
-          const pointField = bldg.fields.Point;
-          if (typeof pointField === 'string') {
-            occupiedPointIds.add(pointField);
-          } else if (Array.isArray(pointField)) {
-            pointField.forEach(p => {
-              if (typeof p === 'string') occupiedPointIds.add(p);
+      let unoccupiedCanalPoints: CanalPoint[] = [];
+      let unoccupiedBridgePoints: BridgePoint[] = [];
+
+      const occupiedBuildingPointIds = new Set<string>();
+      const occupiedCanalPointIds = new Set<string>();
+      const occupiedBridgePointIds = new Set<string>();
+
+      buildingsOnLandRecords.forEach(bldg => {
+        const pointField = bldg.fields.Point;
+        const buildingType = (bldg.fields.Type as string || '').toLowerCase();
+
+        const addPointsToSet = (points: string | string[], set: Set<string>) => {
+          if (typeof points === 'string') {
+            set.add(points);
+          } else if (Array.isArray(points)) {
+            points.forEach(p => {
+              if (typeof p === 'string') set.add(p);
             });
           }
-        });
-        unoccupiedBuildingPoints = polygonData.buildingPoints.filter(bp => !occupiedPointIds.has(bp.id));
+        };
+
+        if (buildingType === 'dock') {
+          addPointsToSet(pointField, occupiedCanalPointIds);
+        } else if (buildingType === 'bridge' || buildingType === 'rialto_bridge') {
+          addPointsToSet(pointField, occupiedBridgePointIds);
+        } else {
+          // Assume other buildings occupy buildingPoints
+          addPointsToSet(pointField, occupiedBuildingPointIds);
+        }
+      });
+
+      if (polygonData) {
+        if (polygonData.buildingPoints) {
+          unoccupiedBuildingPoints = polygonData.buildingPoints.filter(bp => !occupiedBuildingPointIds.has(bp.id));
+        }
+        if (polygonData.canalPoints) {
+          unoccupiedCanalPoints = polygonData.canalPoints.filter(cp => !occupiedCanalPointIds.has(cp.id));
+        }
+        if (polygonData.bridgePoints) {
+          unoccupiedBridgePoints = polygonData.bridgePoints.filter(bp => !occupiedBridgePointIds.has(bp.id));
+        }
       }
       
       ownedLandsData.push({
@@ -178,6 +227,10 @@ export async function GET(request: Request) {
         buildings: buildingsOnLandRecords.map(b => ({...normalizeKeysCamelCaseShallow(b.fields), airtableId: b.id})),
         unoccupiedBuildingPoints: unoccupiedBuildingPoints,
         totalBuildingPoints: polygonData?.buildingPoints?.length || 0,
+        unoccupiedCanalPoints: unoccupiedCanalPoints,
+        totalCanalPoints: polygonData?.canalPoints?.length || 0,
+        unoccupiedBridgePoints: unoccupiedBridgePoints,
+        totalBridgePoints: polygonData?.bridgePoints?.length || 0,
       });
     }
 
