@@ -27,8 +27,15 @@ def try_create(
     try:
         activity_id_str = f"secure_wh_{citizen_custom_id}_{uuid.uuid4()}"
         
-        start_date_iso_to_use = current_time_utc.isoformat()
-        end_date_iso_to_use = (current_time_utc + datetime.timedelta(hours=1)).isoformat()
+        effective_start_dt: datetime.datetime
+        if start_time_utc_iso:
+            effective_start_dt = datetime.datetime.fromisoformat(start_time_utc_iso.replace("Z", "+00:00"))
+            if effective_start_dt.tzinfo is None: effective_start_dt = pytz.UTC.localize(effective_start_dt)
+        else:
+            effective_start_dt = current_time_utc
+        
+        effective_start_date_iso = effective_start_dt.isoformat()
+        effective_end_date_iso = (effective_start_dt + datetime.timedelta(hours=1)).isoformat()
 
         activity_payload = {
             "ActivityId": activity_id_str,
