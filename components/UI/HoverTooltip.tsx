@@ -212,9 +212,17 @@ export const HoverTooltip: React.FC = () => {
         {/* Add the building image */}
         <div className="w-96 h-80 mb-2 overflow-hidden rounded">
           <img 
-            src={buildingImagePath 
-              ? `${buildingImagePath}/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.png` 
-              : `https://backend.serenissima.ai/public_assets/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.png`} 
+            src={
+              (() => {
+                const filename = `${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.png`;
+                if (buildingImagePath) {
+                  return buildingImagePath.includes('/images/buildings')
+                    ? `${buildingImagePath}/${filename}`
+                    : `${buildingImagePath}/images/buildings/${filename}`;
+                }
+                return `https://backend.serenissima.ai/public_assets/images/buildings/${filename}`;
+              })()
+            }
             alt={tooltipData.name || 'Building'}
             className="w-full h-full object-cover"
             onError={(e) => {
