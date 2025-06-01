@@ -3230,7 +3230,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   "success": true,
   "relevancies": [
     {
-      "relevancyId": "string", // Airtable Record ID (this is `record.id` from Airtable)
+      "relevancyId": "string", // Airtable Record ID (this is 'record.id' from Airtable)
       // Note: The 'RelevancyId' field from Airtable (if it exists as a custom field) is also mapped to 'relevancyId' in some specific GET routes.
       // For this general GET /api/relevancies, 'relevancyId' is the Airtable record ID.
       "asset": "string", // ID of the asset (e.g., landId, buildingId, citizenUsername)
