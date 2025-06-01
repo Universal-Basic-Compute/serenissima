@@ -1780,6 +1780,9 @@ number => {
   useEffect(() => {
     if (!polygons || polygons.length === 0) return;
     
+    // Initialize with empty object to ensure landImages is defined
+    setLandImages({});
+    
     const newLandImages: Record<string, HTMLImageElement> = {};
     let loadedCount = 0;
     let totalPolygons = 0;
@@ -2915,7 +2918,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     // The preloaded images are handled in the next section
     
     // Draw land images first
-    if (landImages && Object.keys(landImages).length > 0) {
+    if (typeof landImages !== 'undefined' && landImages && Object.keys(landImages).length > 0) {
       for (let i = 0; i < polygonsToRender.length; i++) {
         const { polygon, coords, centerX, centerY } = polygonsToRender[i];
         // Skip if no coordinates
@@ -2949,7 +2952,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     });
     
     // Draw land images using preloaded images
-    if (landImages && Object.keys(landImages).length > 0) {
+    if (typeof landImages !== 'undefined' && landImages && Object.keys(landImages).length > 0) {
       for (let i = 0; i < polygonsToRender.length; i++) {
         const { polygon, coords, centerX, centerY } = polygonsToRender[i];
         // Skip if no coordinates or no polygon ID
