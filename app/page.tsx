@@ -1040,7 +1040,7 @@ export default function TwoDPage() {
         />
 
         {/* Daily Update Panel - s'affiche par-dessus */}
-        <DailyUpdatePanel onClose={handleDailyUpdateClose} />
+        <DailyUpdatePanel onClose={handleDailyUpdateClose} isUserLoggedIn={isUserLoggedIn} />
       </div>
     );
   }
