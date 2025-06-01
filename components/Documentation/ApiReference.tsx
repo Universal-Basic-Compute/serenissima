@@ -258,6 +258,7 @@ export default function ApiReference() {
               <li><Link href="/activity-reference#general-payload" className="text-amber-600 hover:underline text-sm">POST /api/actions/create-activity</Link></li>
             </ul>
           </li>
+          <li><a href="#utilities-post-try-read" className="text-amber-700 hover:underline">Utility: Try Read (Simplified GETs)</a></li>
         </ul>
       </div>
       

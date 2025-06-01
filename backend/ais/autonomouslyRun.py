@@ -87,6 +87,9 @@ CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE = [
     "GET /api/activities?citizenId={YourUsername}&limit=5 - Get your 5 most recent activities.",
     "GET /api/building-types - Get definitions of all building types (costs, production, etc.). - Important before any POST /buildings request!",
     "GET /api/resource-types - Get definitions of all resource types (import price, category, etc.).- Important before any request involving resources!",
+    
+    # Utility for common GET requests
+    "POST /api/try-read - Execute a predefined GET request. Body: {requestType, parameters: {username?, buildingId?, ...}}",
 
     # Actions (POST)
     "POST /api/actions/create-activity - Create an activity for yourself. Body: {citizenUsername, activityType, title, description, thought, activityDetails}",
@@ -815,7 +818,8 @@ API_DOCUMENTATION_SUMMARY = {
         "4.  **Specific Endpoints**: Some endpoints have fixed parameters or unique behaviors (e.g., /api/resources/counts, /api/thoughts, /api/messages?type=...). If dynamic filtering doesn't yield expected results, consult their specific documentation or use their defined parameters.\n"
         "5.  **Focus**: Your goal is to make informed decisions. Choose API calls that provide the most relevant data for your current objectives.\n"
         "6.  **Airtable Schema**: A summary of the Airtable schema (field names, types) may be available in `addSystem.airtable_schema_summary` (typically for non-local models) to help you understand data structures and construct precise filters for GET requests.\n"
-        "7.  **Latest Activity**: Your most recent or current activity details are available in `addSystem.latest_activity`."
+        "7.  **Latest Activity**: Your most recent or current activity details are available in `addSystem.latest_activity`.\n"
+        "8.  **Utility `try-read` Endpoint**: For common information gathering, you can use `POST /api/try-read` with a `requestType` (e.g., 'get_my_profile', 'get_lands_for_sale') and necessary `parameters` (e.g., `{\"username\": \"YourUsername\"}`). This simplifies accessing frequently needed data."
     ),
     "example_get_endpoints": [
         "/api/citizens/{username}", # Specific citizen by username
@@ -830,6 +834,7 @@ API_DOCUMENTATION_SUMMARY = {
         "/api/relevancies?RelevantToCitizen={YourUsername}&Category=opportunity&Score=>50" # High-score opportunities for you
     ],
     "example_post_endpoints": [
+        "/api/try-read", # Utility for common GETs. Body: {"requestType": "type", "parameters": {...}}
         "/api/actions/construct-building", # Body keys can be camelCase, server will adapt.
         "/api/actions/create-activity", # Body keys: citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)
         "/api/contracts", # Body keys like {"contractId": "...", "type": "..."}

@@ -287,9 +287,28 @@ In addition to the engine-driven activity creation (`createActivities.py`), acti
 -   **External Tools**: Could allow other tools or game masters to inject specific activities into the simulation.
 -   **Player-Initiated Complex Actions (Future)**: Could potentially be used by the UI to initiate complex, multi-step actions that are best defined as a specific activity.
 
+### Utility Endpoint: `POST /api/try-read`
+
+To simplify common data retrieval tasks for AI agents, a utility endpoint `POST /api/try-read` is available. This endpoint allows an AI to request predefined GET operations using a simple JSON payload.
+
+**Request Body Example:**
+```json
+{
+  "requestType": "get_my_profile",
+  "parameters": { "username": "NLR" }
+}
+```
+
+**Supported `requestType` values include:**
+`get_my_profile`, `get_my_lands`, `get_my_buildings`, `get_my_inventory`, `get_my_active_sell_contracts`, `get_my_active_import_contracts`, `get_my_problems`, `get_my_opportunities`, `get_my_latest_activity`, `get_lands_for_sale`, `get_building_types`, `get_resource_types`, `get_public_builders`, `get_stocked_public_sell_contracts`, `get_global_thoughts`, `get_citizen_thoughts`, `get_all_guilds`, `get_active_decrees`, `get_data_package`, `get_building_details`, `get_building_resources`, `get_land_details`, `get_problem_details`.
+
+Each `requestType` may require specific fields within the `parameters` object (e.g., `username`, `buildingId`). Refer to the main API Reference for details on each underlying GET request.
+
+This endpoint internally calls the relevant GET API and returns its response, wrapped in a success/error structure. It helps abstract away the specific URL construction and parameter formatting for common queries.
+
 ### Considerations:
 
--   The client (AI) is responsible for providing correct building IDs for travel. The server handles the pathfinding.
+-   The client (AI) is responsible for providing correct building IDs for travel when using `POST /api/actions/create-activity`. The server handles the pathfinding.
 -   This method bypasses the prioritized decision logic of `citizen_general_activities.py`.
 -   Care must be taken to avoid conflicts if both engine-driven and API-driven activity creation are active for the same citizen.
 
