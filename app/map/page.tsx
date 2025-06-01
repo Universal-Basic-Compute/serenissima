@@ -377,7 +377,7 @@ export default function MapPage() {
                 imageUrl,
                 imageBounds,
                 {
-                  opacity: 0.5,
+                  opacity: 0.7, // Changed opacity to 0.7
                   map: mapRef.current,
                   zIndex: 1 // Ensure images are drawn on top of polygons (default zIndex for polygons is often 0)
                 }
