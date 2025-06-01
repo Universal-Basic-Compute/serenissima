@@ -448,7 +448,7 @@ register_markup_buy_agreement`, durée courte) est créée, les frais sont payé
 `resourceType`, `targetAmount`, `maxPricePerResource`, `buyerBuildingId`, `targetMarketBuildingId` (ID du lieu de
 marché).
 
-11. **Créer/Gérer un Contrat de Demande de Stockage (Storage Query Contract)**
+17. **Créer/Gérer un Contrat de Demande de Stockage (Storage Query Contract)**
     *   **activityType**: `manage_storage_query_contract`
     *   **Description**: Le citoyen se rend à son bâtiment (`buyerBuildingId`) pour évaluer ses besoins de stockage,
 puis se déplace vers un lieu de marché (ex: `market_stall`, `weighing_station`) pour y enregistrer une demande de
@@ -461,7 +461,7 @@ register_storage_request_contract`, durée courte) est créée, les frais sont p
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel),
 `resourceType`, `amountNeeded`, `durationDays`, `buyerBuildingId`, `targetMarketBuildingId` (ID du lieu de marché).
 
-12. **Créer/Gérer un Contrat de Service Logistique**
+18. **Créer/Gérer un Contrat de Service Logistique**
     *   **activityType**: `manage_logistics_service_contract`
     *   **Description**: Le citoyen se rend à son bâtiment client (`clientBuildingId`) pour évaluer les besoins logistiques, puis se déplace vers une guilde de porteurs (`porter_guild_hall`) pour y enregistrer ou modifier un contrat de service logistique. Des frais d'enregistrement ou une commission sur les futurs services peuvent être perçus.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`: `clientBuildingId`). À l'arrivée, une activité d'évaluation (`activityType: assess_logistics_needs`, durée courte) est créée. Ensuite, une autre activité de déplacement (`activityType: goto_location`, `targetBuildingId`: ID du `porter_guild_hall`) est créée. Finalement, une activité d'enregistrement de contrat (`activityType: register_logistics_service_contract`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST /api/contracts`.
@@ -469,7 +469,7 @@ register_storage_request_contract`, durée courte) est créée, les frais sont p
 
 ### Gestion du Travail et des Entreprises
 
-13. **Ajuster les Salaires d'une Entreprise**
+19. **Ajuster les Salaires d'une Entreprise**
     *   **activityType**: `adjust_business_wages`
     *   **Description**: Le gestionnaire se rend à son entreprise (`businessBuildingId`) pour mettre à jour le registre
 des salaires.
