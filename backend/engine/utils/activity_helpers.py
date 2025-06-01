@@ -7,7 +7,7 @@ import requests
 import pytz
 import math # Added for Haversine distance
 import os # Added import for os module
-from typing import Dict, List, Optional, Any, Tuple # Added Tuple
+from typing import Dict, List, Optional, Any, Tuple, Union # Added Tuple and Union
 from pyairtable import Table # Import Table for type hinting
 from dateutil import parser as dateutil_parser # For robust date parsing
 
@@ -591,6 +591,73 @@ def get_building_resources(tables: Dict[str, Table], building_id: str) -> Dict[s
     except Exception as e:
         log.error(f"{LogColors.FAIL}Error getting resources for building {building_id}: {e}{LogColors.ENDC}")
         return {}
+
+def find_path_between_buildings_or_coords(
+    start_location: Union[Dict[str, Any], Dict[str, float]], # Can be building record or {lat, lng}
+    end_location: Union[Dict[str, Any], Dict[str, float]],   # Can be building record or {lat, lng}
+    api_base_url: str,
+    transport_api_url: Optional[str] = None # Allow specific transport API URL override
+) -> Optional[Dict]:
+    """
+    Finds a path between two locations, which can be building records or coordinate dictionaries.
+    Uses the transport API.
+    """
+    start_pos_coords: Optional[Dict[str, float]] = None
+    end_pos_coords: Optional[Dict[str, float]] = None
+
+    # Determine start coordinates
+    if isinstance(start_location, dict) and 'lat' in start_location and 'lng' in start_location:
+        start_pos_coords = start_location
+    elif isinstance(start_location, dict) and 'fields' in start_location: # Assume building record
+        start_pos_coords = _get_building_position_coords(start_location)
+    else:
+        log.warning(f"{LogColors.WARNING}Invalid start_location type for pathfinding: {type(start_location)}{LogColors.ENDC}")
+        return None
+
+    # Determine end coordinates
+    if isinstance(end_location, dict) and 'lat' in end_location and 'lng' in end_location:
+        end_pos_coords = end_location
+    elif isinstance(end_location, dict) and 'fields' in end_location: # Assume building record
+        end_pos_coords = _get_building_position_coords(end_location)
+    else:
+        log.warning(f"{LogColors.WARNING}Invalid end_location type for pathfinding: {type(end_location)}{LogColors.ENDC}")
+        return None
+
+    if not start_pos_coords or not end_pos_coords:
+        log.warning(f"{LogColors.WARNING}Missing position data for pathfinding. Start: {start_pos_coords}, End: {end_pos_coords}{LogColors.ENDC}")
+        return None
+
+    final_transport_api_url = transport_api_url or f"{api_base_url}/api/transport"
+    log.info(f"{LogColors.OKBLUE}Finding path between locations using API: {final_transport_api_url}{LogColors.ENDC}")
+    log.debug(f"Pathfinding from: {start_pos_coords} to: {end_pos_coords}")
+
+    try:
+        response = requests.post(
+            final_transport_api_url,
+            json={
+                "startPoint": start_pos_coords,
+                "endPoint": end_pos_coords,
+                "startDate": datetime.datetime.now(pytz.UTC).isoformat()
+            }
+        )
+        response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+        
+        data = response.json()
+        if data.get("success") and "path" in data:
+            log.info(f"{LogColors.OKGREEN}Found path with {len(data['path'])} points.{LogColors.ENDC}")
+            return data
+        else:
+            log.warning(f"{LogColors.WARNING}No path found or API error: {data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return None
+    except requests.exceptions.RequestException as e_req:
+        log.error(f"{LogColors.FAIL}RequestException finding path: {e_req}{LogColors.ENDC}")
+        return None
+    except json.JSONDecodeError as e_json:
+        log.error(f"{LogColors.FAIL}JSONDecodeError finding path: {e_json}. Response text: {response.text[:200]}{LogColors.ENDC}")
+        return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Exception finding path: {str(e)}{LogColors.ENDC}", exc_info=True)
+        return None
 
 def can_produce_output(resources: Dict[str, float], recipe: Dict) -> bool:
     """Check if there are enough resources to produce the output according to the recipe."""
