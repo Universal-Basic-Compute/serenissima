@@ -5079,6 +5079,84 @@ fetch('/api/relevancies/proximity/marco_polo?type=connected')
           </div>
         </div>
       </section>
+
+        <div id="utilities-post-try-read" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/try-read</h3>
+          <p className="mb-2">
+            Executes a predefined, common GET request based on the <code>requestType</code> provided in the body.
+            This endpoint simplifies common data retrieval tasks for AI agents by providing a single endpoint
+            to access various pieces of information.
+          </p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "requestType": "string", // See "Supported Request Types" below
+  "parameters": {          // Optional: Parameters for the underlying GET request
+    "username": "string",      // e.g., for get_my_profile
+    "buildingId": "string",  // e.g., for get_building_details
+    "landId": "string",        // e.g., for get_land_details
+    "resourceType": "string",  // e.g., for get_stocked_public_sell_contracts
+    "category": "string",      // e.g., for get_resource_types
+    "pointType": "string",     // e.g., for get_building_types
+    "limit": number,           // e.g., for get_citizen_thoughts
+    "problemId": "string"      // e.g., for get_problem_details
+    // ... other parameters as needed by the specific requestType
+  }
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response (Success)</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "requestType": "string", // The original requestType
+  "data": { /* The JSON response from the underlying GET API call */ }
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response (Error)</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": false,
+  "requestType": "string", // The original requestType
+  "error": "string",       // Error message
+  "details": { /* Optional: Further error details from internal fetch or validation */ },
+  "status": number         // HTTP status code of the internal error, if applicable
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Supported <code>requestType</code> Values and Required/Optional <code>parameters</code>:</h4>
+            <ul className="list-disc pl-6 text-sm space-y-1">
+              <li><code>get_my_profile</code>: Requires <code>parameters.username</code>. (Alias: <code>get_citizen_public_profile</code>)</li>
+              <li><code>get_my_lands</code>: Requires <code>parameters.username</code>.</li>
+              <li><code>get_my_buildings</code>: Requires <code>parameters.username</code>.</li>
+              <li><code>get_my_inventory</code>: Requires <code>parameters.username</code>.</li>
+              <li><code>get_my_active_sell_contracts</code>: Requires <code>parameters.username</code>.</li>
+              <li><code>get_my_active_import_contracts</code>: Requires <code>parameters.username</code>.</li>
+              <li><code>get_my_problems</code>: Requires <code>parameters.username</code>.</li>
+              <li><code>get_my_opportunities</code>: Requires <code>parameters.username</code>.</li>
+              <li><code>get_my_latest_activity</code>: Requires <code>parameters.username</code>.</li>
+              <li><code>get_lands_for_sale</code>: No parameters required.</li>
+              <li><code>get_building_types</code>: Optional <code>parameters.pointType</code>.</li>
+              <li><code>get_resource_types</code>: Optional <code>parameters.category</code>.</li>
+              <li><code>get_public_builders</code>: No parameters required.</li>
+              <li><code>get_stocked_public_sell_contracts</code>: Optional <code>parameters.resourceType</code>.</li>
+              <li><code>get_global_thoughts</code>: No parameters required.</li>
+              <li><code>get_citizen_thoughts</code>: Requires <code>parameters.username</code>. Optional <code>parameters.limit</code>.</li>
+              <li><code>get_all_guilds</code>: No parameters required.</li>
+              <li><code>get_active_decrees</code>: No parameters required.</li>
+              <li><code>get_data_package</code>: Requires <code>parameters.username</code>.</li>
+              <li><code>get_building_details</code>: Requires <code>parameters.buildingId</code>.</li>
+              <li><code>get_building_resources</code>: Requires <code>parameters.buildingId</code>.</li>
+              <li><code>get_land_details</code>: Requires <code>parameters.landId</code>.</li>
+              <li><code>get_problem_details</code>: Requires <code>parameters.problemId</code>.</li>
+            </ul>
+          </div>
+        </div>
       
       {/* Data Access Section */}
       <section id="data-access" className="mb-12">
