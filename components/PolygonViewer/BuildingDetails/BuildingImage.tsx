@@ -65,7 +65,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
 
           console.log(`BuildingImage: Found potential image path in building type data, resolved to: ${potentialPath}`);
           try {
-            const response = await fetch(potentialPath, { method: 'HEAD' });
+            const response = await fetch(potentialPath, { method: 'GET' }); // Changed HEAD to GET
             if (response.ok) {
               console.log(`BuildingImage: Confirmed image path from definition: ${potentialPath}`);
               return potentialPath;
@@ -83,7 +83,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
       const snakeCasePath = `https://backend.serenissima.ai/public_assets/images/buildings/${snakeCaseType}.png`;
       console.log(`BuildingImage: Trying snake_case path: ${snakeCasePath}`);
       try {
-        const response = await fetch(snakeCasePath, { method: 'HEAD' });
+        const response = await fetch(snakeCasePath, { method: 'GET' }); // Changed HEAD to GET
         if (response.ok) {
           console.log(`BuildingImage: Found image at snake_case path: ${snakeCasePath}`);
           return snakeCasePath;
@@ -96,7 +96,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
       const directPath = `https://backend.serenissima.ai/public_assets/images/buildings/${type.toLowerCase()}.png`;
       console.log(`BuildingImage: Trying direct path: ${directPath}`);
       try {
-        const response = await fetch(directPath, { method: 'HEAD' });
+        const response = await fetch(directPath, { method: 'GET' }); // Changed HEAD to GET
         if (response.ok) {
           console.log(`BuildingImage: Found image at direct path: ${directPath}`);
           return directPath;
