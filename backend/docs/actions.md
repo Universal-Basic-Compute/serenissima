@@ -98,13 +98,13 @@ Ce document détaille les actions stratégiques et économiques que les citoyens
 
 ## Gestion du Travail et des Entreprises
 
-14. **Ajuster les Salaires d'une Entreprise**
+16. **Ajuster les Salaires d'une Entreprise**
     *   **Type**: `adjust_business_wages`
     *   **Description**: Un citoyen qui gère une entreprise (`RunBy`) modifie le montant des salaires (`Wages`) offerts aux employés de cette entreprise.
     *   **Mécanisme Principal**: Mise à jour du champ `Wages` sur l'enregistrement du bâtiment de l'entreprise.
     *   **API Pertinente (Exemple)**: `PATCH /api/buildings/{buildingId}` ou un endpoint dédié pour les ajustements de salaires par l'IA (`backend/ais/adjustwages.py`).
 
-15. **Déléguer une Entreprise / Demander ou Prendre une Entreprise pour Soi**
+17. **Déléguer une Entreprise / Demander ou Prendre une Entreprise pour Soi**
     *   **Type**: `manage_business_operation`
     *   **Description**:
         *   **Déléguer**: Un citoyen IA qui gère trop d'entreprises peut en transférer la gestion (`RunBy`) à une autre IA.
@@ -114,59 +114,63 @@ Ce document détaille les actions stratégiques et économiques que les citoyens
 
 ## Finance
 
-16. **Demander un Prêt**
+18. **Demander un Prêt**
     *   **Type**: `request_loan`
     *   **Description**: Un citoyen sollicite un emprunt financier, spécifiant le montant, et potentiellement le but ou les garanties.
     *   **Mécanisme Principal**: Création d'un enregistrement de prêt avec un statut "en attente d'approbation".
     *   **API Pertinente**: `POST /api/loans/apply`.
 
-17. **Offrir un Prêt**
+19. **Offrir un Prêt**
     *   **Type**: `offer_loan`
     *   **Description**: Un citoyen ou une institution disposant de fonds excédentaires propose des prêts à d'autres.
     *   **Mécanisme Principal**: Pourrait impliquer la création de "modèles de prêt" ou la réponse à des demandes de prêt.
     *   **API Pertinente (Exemple)**: `POST /api/loans` (pour créer une offre de prêt) ou gestion des demandes via l'interface.
 
-18. **Retirer des Jetons COMPUTE / Injecter des $COMPUTE**
-    *   **Type**: `manage_compute_tokens`
-    *   **Description**:
-        *   **Retirer**: Un joueur convertit ses Ducats en jeu en jetons $COMPUTE sur la blockchain.
-        *   **Injecter**: Un joueur convertit des jetons $COMPUTE de la blockchain en Ducats en jeu.
-    *   **Mécanisme Principal**: Interaction avec un service de portefeuille ou un smart contract pour gérer la conversion entre la monnaie en jeu et les tokens externes.
-    *   **API Pertinente (Exemple)**: `POST /api/withdraw-compute` (pour le retrait). L'injection pourrait être gérée par un processus externe qui crédite ensuite le compte en jeu.
+20. **Retirer des Jetons COMPUTE**
+    *   **Type**: `withdraw_compute_tokens`
+    *   **Description**: Un joueur convertit ses Ducats en jeu en jetons $COMPUTE sur la blockchain.
+    *   **Mécanisme Principal**: Interaction avec un service de portefeuille ou un smart contract pour initier le processus de retrait des Ducats du jeu vers des jetons $COMPUTE externes.
+    *   **API Pertinente (Exemple)**: `POST /api/withdraw-compute`.
+
+21. **Injecter des Jetons COMPUTE**
+    *   **Type**: `inject_compute_tokens`
+    *   **Description**: Un joueur convertit des jetons $COMPUTE externes (blockchain) en Ducats utilisables dans le jeu.
+    *   **Mécanisme Principal**: Implique généralement un dépôt de jetons $COMPUTE sur un compte blockchain désigné, suivi d'un processus de vérification et de crédit des Ducats équivalents sur le compte du joueur en jeu. Ce processus peut être partiellement externe au jeu lui-même.
+    *   **API Pertinente (Exemple)**: L'API `/api/transfer-compute` (non documentée publiquement pour les joueurs mais utilisée en interne) peut être appelée par des systèmes backend pour enregistrer et finaliser l'injection de Ducats après qu'une transaction blockchain externe a été confirmée. Du point de vue du joueur, cela se manifeste par une augmentation de son solde de Ducats.
 
 ## Social et Communication
 
-19. **Envoyer un Message**
+22. **Envoyer un Message**
     *   **Type**: `send_message`
     *   **Description**: Un citoyen rédige et envoie une communication textuelle à un autre citoyen.
     *   **Mécanisme Principal**: Création d'un enregistrement dans la table `MESSAGES`.
     *   **API Pertinente**: `POST /api/messages/send`.
 
-20. **Répondre à un Message**
+23. **Répondre à un Message**
     *   **Type**: `reply_to_message`
     *   **Description**: Un citoyen formule et envoie une réponse à un message qu'il a reçu.
     *   **Mécanisme Principal**: Similaire à l'envoi d'un message, mais souvent dans le contexte d'une conversation existante.
     *   **API Pertinente**: `POST /api/messages/send`.
 
-21. **Mettre à Jour son Profil Citoyen**
+24. **Mettre à Jour son Profil Citoyen**
     *   **Type**: `update_citizen_profile`
     *   **Description**: Un citoyen modifie des informations personnelles de son profil, comme sa devise familiale, son blason, ou son ID Telegram.
     *   **Mécanisme Principal**: Mise à jour des champs correspondants dans l'enregistrement du citoyen.
     *   **API Pertinente**: `POST /api/citizens/update`.
 
-22. **Gérer son Appartenance à une Guilde**
+25. **Gérer son Appartenance à une Guilde**
     *   **Type**: `manage_guild_membership`
     *   **Description**: Un citoyen postule pour rejoindre une guilde, accepte une invitation, quitte une guilde, ou participe aux activités de gouvernance de sa guilde.
     *   **Mécanisme Principal**: Mise à jour du champ `GuildId` du citoyen et potentiellement interaction avec des systèmes de gestion de guilde.
     *   **API Pertinente**: `POST /api/citizens/update-guild`.
 
-23. **Générer/Enregistrer une Pensée Stratégique**
+26. **Générer/Enregistrer une Pensée Stratégique**
     *   **Type**: `log_strategic_thought`
     *   **Description**: Une IA citoyen réfléchit à sa situation actuelle, à ses objectifs, et formule une pensée ou une stratégie. Cette réflexion est ensuite enregistrée.
     *   **Mécanisme Principal**: Appel à un moteur d'IA (Kinos) pour générer la pensée, puis création d'un message de type `thought_log` ou `unguided_run_log` du citoyen à lui-même.
     *   **Scripts Pertinents**: `backend/ais/generatethoughts.py`, `backend/ais/autonomouslyRun.py`.
 
-24. **Marquer des Notifications comme Lues**
+27. **Marquer des Notifications comme Lues**
     *   **Type**: `mark_notifications_read`
     *   **Description**: Un citoyen consulte ses notifications et les marque comme ayant été lues.
     *   **Mécanisme Principal**: Mise à jour du champ `ReadAt` des enregistrements de notification.
@@ -174,13 +178,13 @@ Ce document détaille les actions stratégiques et économiques que les citoyens
 
 ## Personnalisation
 
-25. **Télécharger un Blason**
+28. **Télécharger un Blason**
     *   **Type**: `upload_coat_of_arms`
     *   **Description**: Un joueur télécharge une image personnalisée pour servir de blason à son citoyen.
     *   **Mécanisme Principal**: Envoi d'un fichier image au serveur, qui le stocke et met à jour l'URL du blason du citoyen.
     *   **API Pertinente**: `POST /api/upload-coat-of-arms`.
 
-26. **Mettre à Jour les Paramètres Citoyen**
+29. **Mettre à Jour les Paramètres Citoyen**
     *   **Type**: `update_citizen_settings`
     *   **Description**: Un joueur modifie des paramètres de jeu personnels, comme le volume de la musique, les effets sonores, la qualité graphique, etc.
     *   **Mécanisme Principal**: Enregistrement des préférences du joueur, souvent associées à son compte ou portefeuille.
