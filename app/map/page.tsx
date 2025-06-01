@@ -378,7 +378,8 @@ export default function MapPage() {
                 imageBounds,
                 {
                   opacity: 0.5,
-                  map: mapRef.current
+                  map: mapRef.current,
+                  zIndex: 1 // Ensure images are drawn on top of polygons (default zIndex for polygons is often 0)
                 }
               );
               drawnGroundOverlaysRef.current.push(groundOverlay);
