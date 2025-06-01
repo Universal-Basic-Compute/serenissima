@@ -481,8 +481,8 @@ def make_kinos_call(
                     log.warning(f"{LogColors.WARNING}Failed to parse extracted JSON from Kinos response for {ai_username}. Error: {e_inner}. Extracted string: {json_str[:200]}...{LogColors.ENDC}")
             
             # If not direct JSON and no extractable JSON found, treat as reflection text
-            log.info(f"{LogColors.OKBLUE}Treating Kinos response for {ai_username} as reflection text.{LogColors.ENDC}")
-            return {"reflection_text": latest_ai_response_content}
+            log.info(f"{LogColors.OKBLUE}Treating Kinos response for {ai_username} as reflection text and providing empty actions list.{LogColors.ENDC}")
+            return {"actions": [], "reflection": latest_ai_response_content}
 
     except requests.exceptions.RequestException as e:
         log.error(f"{LogColors.FAIL}Kinos API request error for {ai_username}: {e}{LogColors.ENDC}", exc_info=True)
