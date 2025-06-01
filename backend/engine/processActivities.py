@@ -458,6 +458,8 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
                     created_at_min = (datetime.fromisoformat(activity_created_at.replace('Z', '+00:00')) - timedelta(seconds=1)).isoformat()
                     created_at_max = (datetime.fromisoformat(activity_created_at.replace('Z', '+00:00')) + timedelta(seconds=1)).isoformat()
                     
+                    # In the new architecture, activities in a chain are created together by the activity creator
+                    # and have their StartDate set to the EndDate of the previous activity in the chain
                     formula = f"AND({{Citizen}}='{_escape_airtable_value(activity_citizen)}', {{CreatedAt}} >= '{created_at_min}', {{CreatedAt}} <= '{created_at_max}', {{StartDate}} >= '{activity_end_date}', {{Status}}='created')"
                     dependent_activities = tables['activities'].all(formula=formula)
                     

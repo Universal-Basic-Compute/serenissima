@@ -314,5 +314,8 @@ def process(
     if fetch_person_username and destination_operator_username: # Successful delivery to destination operator
         update_trust_score_for_activity(tables, fetch_person_username, destination_operator_username, TRUST_SCORE_SUCCESS_SIMPLE, "fetch_from_storage_delivery", True)
 
+    # In the new architecture, any follow-up activities should have been created by the activity creator,
+    # not by this processor. This processor only handles the resource transfer.
+
     log.info(f"{LogColors.OKGREEN}Successfully processed 'fetch_from_storage' activity {activity_guid}.{LogColors.ENDC}")
     return True
