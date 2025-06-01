@@ -53,12 +53,12 @@ export async function GET(request: Request) {
           if (essential) {
             return {
               id,
-              coordinates: validCoordinates,
+              // coordinates: validCoordinates, // Removed as per request
               centroid: data.centroid || calculateCentroid(validCoordinates),
               center: data.center,
-              bridgePoints: data.bridgePoints || [],
-              canalPoints: data.canalPoints || [],
-              buildingPoints: data.buildingPoints || []
+              // bridgePoints: data.bridgePoints || [], // Removed as per request
+              // canalPoints: data.canalPoints || [], // Removed as per request
+              // buildingPoints: data.buildingPoints || [] // Removed as per request
             };
           }
           
