@@ -1782,22 +1782,35 @@ number => {
     
     const newLandImages: Record<string, HTMLImageElement> = {};
     let loadedCount = 0;
+    let totalPolygons = 0;
+    
+    // Count valid polygons with IDs first
+    polygons.forEach(polygon => {
+      if (polygon && polygon.id) {
+        totalPolygons++;
+      }
+    });
+    
+    if (totalPolygons === 0) {
+      console.log('No valid polygons with IDs found for image loading');
+      return;
+    }
     
     polygons.forEach(polygon => {
-      if (!polygon.id) return;
+      if (!polygon || !polygon.id) return;
       
       const img = new Image();
       img.onload = () => {
         newLandImages[polygon.id] = img;
         loadedCount++;
-        if (loadedCount === polygons.length) {
-          console.log(`Loaded ${loadedCount} land images`);
+        if (loadedCount === totalPolygons) {
+          console.log(`Loaded ${Object.keys(newLandImages).length} land images`);
           setLandImages(newLandImages);
         }
       };
       img.onerror = () => {
         loadedCount++;
-        if (loadedCount === polygons.length) {
+        if (loadedCount === totalPolygons) {
           console.log(`Loaded ${Object.keys(newLandImages).length} land images (${loadedCount - Object.keys(newLandImages).length} failed)`);
           setLandImages(newLandImages);
         }
