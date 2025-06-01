@@ -1080,7 +1080,7 @@ def autonomously_run_ai_citizen_unguided(
         prompt_intro = f"You are {ai_display_name}, an AI citizen in La Serenissima. Your goal is to act autonomously and strategically. "
         
         prompt_context_elements = [
-            "your initial data package (`addSystem.initial_data_package`) which includes your citizen details, last activity, owned lands, buildings on them, and unoccupied building points",
+            "your data package (`addSystem.data_package`) which includes your citizen details, last activity, owned lands, buildings on them, and unoccupied building points",
             "API docs summary (`addSystem.api_docs_summary`)", 
             "extracted API Reference text (`addSystem.api_reference_extracted_text`)",
             "Activity Creation Reference text (`addSystem.activity_creation_reference_text`)",
@@ -1113,13 +1113,13 @@ def autonomously_run_ai_citizen_unguided(
 
 
         add_system_data = {
-            "initial_data_package": initial_data_package.get("data") if initial_data_package and initial_data_package.get("success") else initial_data_package, # Pass the 'data' part or the error/dry_run object
+            "data_package": initial_data_package.get("data") if initial_data_package and initial_data_package.get("success") else initial_data_package, # Pass the 'data' part or the error/dry_run object
             "api_docs_summary": API_DOCUMENTATION_SUMMARY,
             "api_reference_extracted_text": API_REFERENCE_EXTRACTED_TEXT,
             "activity_creation_reference_text": ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT, 
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
-            # "citizen_data": ai_citizen_record["fields"], # Now part of initial_data_package
-            # "latest_activity": latest_activity_data_unguided or {}, # Now part of initial_data_package
+            # "citizen_data": ai_citizen_record["fields"], # Now part of data_package
+            # "latest_activity": latest_activity_data_unguided or {}, # Now part of data_package
             "previous_api_results": previous_api_results
         }
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
