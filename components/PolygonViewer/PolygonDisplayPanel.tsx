@@ -99,9 +99,11 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
             {pointsString && polyDataWidth >= 0 && polyDataHeight >= 0 && ( // Ensure valid polygon data
                  <polygon
                     points={pointsString}
-                    fill="rgba(128, 128, 128, 0.7)" // Medium gray fill
-                    stroke="rgba(50, 50, 50, 0.9)" // Dark gray stroke
-                    strokeWidth={1 / scale * 2} // Maintain a somewhat consistent stroke width visually
+                    fill="#FFF5D0"
+                    fillOpacity="0.6"
+                    stroke="#000000"
+                    strokeOpacity="0.8"
+                    strokeWidth={1 / scale} // Maintain a visual 1px stroke width
                  />
             )}
           </svg>
