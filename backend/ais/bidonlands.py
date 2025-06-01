@@ -2,13 +2,27 @@ import os
 import sys
 import json
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any # Added Any
+import requests # Added requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
 # Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.citizen_utils import find_citizen_by_identifier
+
+# --- Configuration ---
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
+# VENICE_TIMEZONE could be imported if needed for date operations, but not directly used here yet.
+# from backend.engine.utils.activity_helpers import VENICE_TIMEZONE
+
+class LogColors: # Basic LogColors for consistency if not imported
+    FAIL = '\033[91m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    ENDC = '\033[0m'
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -77,8 +91,48 @@ def get_existing_bids(tables, ai_username: str) -> Dict[str, Dict]:
         print(f"Error getting existing bids: {str(e)}")
         return {}
 
-def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Optional[Dict] = None) -> bool:
-    """Create a new bid or update an existing one."""
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        print(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True
+
+    api_url = f"{API_BASE_URL}/api/activities/try-create"
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            print(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 print(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            print(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        print(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
+
+def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Optional[Dict] = None, dry_run: bool = False) -> bool:
+    """Initiates a bid_on_land activity."""
     try:
         land_id = land["fields"].get("LandId")
         last_income = land["fields"].get("LastIncome", 0)
@@ -100,94 +154,34 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
             return False
         
         # Get current land owner
-        land_owner = land["fields"].get("Owner")
-        
+        # land_owner = land["fields"].get("Owner") # Land owner info is for Kinos/activity, not direct use here
+
+        final_bid_amount = 0
         if existing_bid:
-            # Increase existing bid by 14% if AI has enough compute
-            current_bid = existing_bid["fields"].get("Price", 0)
-            new_bid = current_bid * 1.2
+            # AI wants to increase its existing bid
+            current_bid_price = existing_bid["fields"].get("PricePerResource", 0) # Corrected field name
+            final_bid_amount = current_bid_price * 1.2 # Increase by 20% (was 1.2 in original logic for new_bid)
             
-            if ai_compute < new_bid * 2:
-                print(f"AI {ai_username} doesn't have enough compute to increase bid on {land_id}. Needs {new_bid * 2}, has {ai_compute}")
+            if ai_compute < final_bid_amount * 2: # Check affordability for the increased bid
+                print(f"{LogColors.WARNING}AI {ai_username} doesn't have enough compute to increase bid on {land_id}. Needs {final_bid_amount * 2:.0f}, has {ai_compute:.0f}{LogColors.ENDC}")
                 return False
-            
-            # Update the contract with the new bid price
-            now = datetime.now().isoformat()
-            tables["contracts"].update(existing_bid["id"], {
-                "PricePerResource": new_bid,
-                "UpdatedAt": now
-            })
-            
-            print(f"Updated land_sale_offer contract for {land_id} from {current_bid} to {new_bid} by AI {ai_username}")
-            
-            # Send notification to land owner about the updated bid
-            if land_owner:
-                try:
-                    notification_content = f"📈 Bid Update: AI **{ai_username}** has increased their bid on your land **{land_id}** from {current_bid} to **{new_bid} ⚜️ Ducats**."
-                    tables["notifications"].create({
-                        "Citizen": land_owner,
-                        "Type": "bid_update",
-                        "Content": notification_content,
-                        "CreatedAt": now,
-                        "ReadAt": None,
-                        "Details": json.dumps({
-                            "land_id": land_id,
-                            "bidder": ai_username,
-                            "previous_bid": current_bid,
-                            "new_bid": new_bid,
-                            "timestamp": now
-                        })
-                    })
-                    print(f"Sent bid update notification to land owner {land_owner}")
-                except Exception as e:
-                    print(f"Error sending notification to land owner: {str(e)}")
-            
-            return True
+            print(f"AI {ai_username} is increasing bid on {land_id} from {current_bid_price:.0f} to {final_bid_amount:.0f}.")
         else:
-            # Create a new bid
-            now = datetime.now().isoformat()
-            
-            # Create a new land_sale_offer contract
-            contract_data = {
-                "Type": "land_sale_offer",
-                "ResourceType": land_id,
-                "Buyer": ai_username, # AI is offering to buy
-                "Seller": land_owner if land_owner else "Republic", # Current land owner or Republic
-                "PricePerResource": bid_amount,
-                "Amount": 1,
-                "Status": "pending", # This offer needs to be accepted by the seller
-                "CreatedAt": now,
-                "UpdatedAt": now,
-                "Notes": json.dumps({"bidder_ai": ai_username, "land_owner_at_bid_time": land_owner})
-            }
-            
-            tables["contracts"].create(contract_data)
-            print(f"Created new land_sale_offer contract for {land_id} at {bid_amount} by AI {ai_username} to {land_owner if land_owner else 'Republic'}")
-            
-            # Send notification to land owner about the new bid
-            if land_owner:
-                try:
-                    notification_content = f"📬 New Bid: AI **{ai_username}** has placed a bid of **{bid_amount} ⚜️ Ducats** on your land **{land_id}**."
-                    tables["notifications"].create({
-                        "Citizen": land_owner,
-                        "Type": "new_bid",
-                        "Content": notification_content,
-                        "CreatedAt": now,
-                        "ReadAt": None,
-                        "Details": json.dumps({
-                            "land_id": land_id,
-                            "bidder": ai_username,
-                            "bid_amount": bid_amount,
-                            "timestamp": now
-                        })
-                    })
-                    print(f"Sent new bid notification to land owner {land_owner}")
-                except Exception as e:
-                    print(f"Error sending notification to land owner: {str(e)}")
-            
-            return True
+            # AI is placing a new bid
+            final_bid_amount = bid_amount
+            print(f"AI {ai_username} is placing a new bid of {final_bid_amount:.0f} on {land_id}.")
+
+        activity_params = {
+            "landId": land_id,
+            "bidAmount": final_bid_amount
+            # targetOfficeBuildingId is optional for the activity creator
+            # The activity processor for submit_land_bid_offer should handle finding/updating existing pending bids.
+        }
+        
+        return call_try_create_activity_api(ai_username, "bid_on_land", activity_params, dry_run)
+
     except Exception as e:
-        print(f"Error creating/updating bid: {str(e)}")
+        print(f"{LogColors.FAIL}Error preparing bid_on_land activity for {ai_username} on {land_id}: {e}{LogColors.ENDC}")
         return False
 
 def create_admin_notification(tables, ai_bid_counts: Dict[str, int]) -> None:
@@ -285,17 +279,19 @@ def process_ai_land_bidding(dry_run: bool = False):
             # Check if AI already has a bid on this land
             existing_bid = existing_bids.get(land_id)
             
-            # Create or update bid
-            if not dry_run:
-                success = create_or_update_bid(tables, ai_citizen, land, existing_bid)
-                if success:
-                    ai_bid_counts[ai_username] += 1
-            else:
+            # Create or update bid by initiating activity
+            # Pass dry_run to create_or_update_bid
+            success = create_or_update_bid(tables, ai_citizen, land, existing_bid, dry_run)
+            if success: # This now means activity was successfully initiated (or simulated in dry_run)
+                ai_bid_counts[ai_username] += 1
+            # Logging of what would happen in dry_run is now inside call_try_create_activity_api
+            # and the dry_run path of create_or_update_bid.
+            # else:
                 # In dry run mode, just log what would happen
-                if existing_bid:
-                    print(f"[DRY RUN] Would update bid for {land_id} by AI {ai_username}")
-                else:
-                    print(f"[DRY RUN] Would create new bid for {land_id} by AI {ai_username}")
+                # if existing_bid:
+                #     print(f"[DRY RUN] Would update bid for {land_id} by AI {ai_username}")
+                # else:
+                #     print(f"[DRY RUN] Would create new bid for {land_id} by AI {ai_username}")
                 ai_bid_counts[ai_username] += 1
     
     # Create admin notification with summary

@@ -11,6 +11,18 @@ from pyairtable import Api, Base, Table # Import Base
 
 # Add the parent directory to the path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Import LogColors if available, or define a basic version
+try:
+    from backend.engine.utils.activity_helpers import LogColors
+except ImportError:
+    class LogColors:
+        FAIL = '\033[91m'
+        OKGREEN = '\033[92m'
+        WARNING = '\033[93m'
+        OKBLUE = '\033[94m'
+        OKCYAN = '\033[96m'
+        ENDC = '\033[0m'
 # find_citizen_by_identifier was unused
 
 # Configuration for API calls
@@ -370,6 +382,46 @@ def create_response_message_api(sender_username: str, receiver_username: str, co
         print(f"Error sending message via API from {sender_username} to {receiver_username}: {e}")
         return False
 
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        print(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True
+
+    api_url = f"{BASE_URL}/api/activities/try-create" # BASE_URL is defined at the top
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            print(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 print(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            print(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        print(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
+
 def create_admin_notification(tables, ai_response_counts: Dict[str, int]) -> None:
     """Create a notification for admins with the AI response summary."""
     try:
@@ -482,16 +534,19 @@ def process_ai_messages(dry_run: bool = False):
                     
                     if should_respond:
                         # Generate AI response, passing tables object
-                        response_content = generate_ai_response(tables, ai_username, sender_username, message_content)
+                        response_content = generate_ai_response(tables, ai_username, sender_username, message_content, kinos_model_override_arg)
                         
                         if response_content:
-                            # Create response message using API
-                            # Sender is AI, Receiver is the original sender
-                            sent_success = create_response_message_api(sender_username=ai_username, 
-                                                                       receiver_username=sender_username, 
-                                                                       content=response_content)
-                            if sent_success:
+                            activity_params = {
+                                "receiverUsername": sender_username,
+                                "content": response_content,
+                                "messageType": "reply", # Indicate it's a reply
+                                "inReplyToMessageId": message_record.get("fields", {}).get("MessageId", message_id) # Pass original MessageId if available
+                            }
+                            if call_try_create_activity_api(ai_username, "send_message", activity_params, dry_run):
                                 ai_response_counts[ai_username] += 1
+                            else:
+                                print(f"{LogColors.FAIL}Failed to initiate send_message activity for reply from {ai_username} to {sender_username}.{LogColors.ENDC}")
                         else:
                             print(f"No response generated by Kinos for message {message_id} from {sender_username} to {ai_username}.")
                     # else: # This 'else' corresponds to should_respond being False
@@ -517,10 +572,18 @@ def process_ai_messages(dry_run: bool = False):
                         print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have responded (10% chance).")
 
                 if dry_run_should_respond:
-                    print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos")
+                    print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos (Model: {kinos_model_override_arg or 'default'})")
                     # Simulate response generation for counting purposes
-                    ai_response_counts[ai_username] += 1 
-                    print(f"[DRY RUN] Would send response from {ai_username} (sender) to {sender_username} (receiver) via API")
+                    # In dry run, call_try_create_activity_api will log and return True
+                    activity_params_dry_run = {
+                        "receiverUsername": sender_username,
+                        "content": "[DRY RUN Simulated Response]",
+                        "messageType": "reply",
+                        "inReplyToMessageId": message_record.get("fields", {}).get("MessageId", message_id)
+                    }
+                    if call_try_create_activity_api(ai_username, "send_message", activity_params_dry_run, dry_run):
+                        ai_response_counts[ai_username] += 1
+                    # print(f"[DRY RUN] Would send response from {ai_username} (sender) to {sender_username} (receiver) via API")
                 # else: # No action if dry_run_should_respond is False
     
     # Create admin notification with summary

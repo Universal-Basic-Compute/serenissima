@@ -2,13 +2,27 @@ import os
 import sys
 import json
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any # Added Any
+import requests # Added requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
 # Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.citizen_utils import find_citizen_by_identifier
+
+# --- Configuration ---
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
+# VENICE_TIMEZONE could be imported if needed for date operations.
+# from backend.engine.utils.activity_helpers import VENICE_TIMEZONE
+
+class LogColors: # Basic LogColors for consistency
+    FAIL = '\033[91m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    ENDC = '\033[0m'
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -68,8 +82,49 @@ def get_available_land_transactions(tables) -> List[Dict]:
         print(f"Error getting available land transactions: {str(e)}")
         return []
 
-def execute_land_purchase_contract(tables, contract_id: str, buyer_username: str) -> Optional[Dict]:
-    """Update a land_sale contract with a buyer, marking it as executed."""
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        print(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True
+
+    api_url = f"{API_BASE_URL}/api/activities/try-create"
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            print(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 print(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            print(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        print(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
+
+# execute_land_purchase_contract and update_land_with_owner will be removed as their logic is handled by the activity.
+# def execute_land_purchase_contract(tables, contract_id: str, buyer_username: str) -> Optional[Dict]:
+    # """Update a land_sale contract with a buyer, marking it as executed."""
     try:
         now = datetime.now().isoformat()
         
@@ -95,27 +150,7 @@ def execute_land_purchase_contract(tables, contract_id: str, buyer_username: str
         print(f"Error executing land_sale contract {contract_id}: {str(e)}") # Changed transaction_id to contract_id
         return False # Should be None to match the function's return type hint Optional[Dict] or handle error differently
 
-def update_land_with_owner(tables, land_id: str, owner: str) -> bool:
-    """Update a land with a new owner."""
-    try:
-        # Find the land record
-        formula = f"{{LandId}}='{land_id}'"
-        lands = tables["lands"].all(formula=formula)
-        
-        if not lands:
-            print(f"Land {land_id} not found")
-            return False
-        
-        # Update the land with the new owner
-        tables["lands"].update(lands[0]["id"], {
-            "Owner": owner
-        })
-        
-        print(f"Updated land {land_id} with owner {owner}")
-        return True
-    except Exception as e:
-        print(f"Error updating land {land_id}: {str(e)}")
-        return False
+# Removed update_land_with_owner function
 
 def create_notification(tables, citizen: str, land_id: str, price: float) -> bool:
     """Create a notification for the citizen about the land purchase."""
@@ -230,85 +265,28 @@ def process_ai_land_purchases(dry_run: bool = False):
             
             print(f"AI {ai_username} can afford land {land_id} (listed by {original_seller_username}) for {price} ducats")
             
-            if not dry_run:
-                # Execute the land_sale contract
-                executed_contract = execute_land_purchase_contract(tables, contract_id, ai_username)
-                
-                if executed_contract:
-                    # Update the land with the new owner
-                    land_update_success = update_land_with_owner(tables, land_id, ai_username)
-                    
-                    if land_update_success:
-                        # Update the AI citizen's ducats
-                        new_ai_ducats = ai_ducats - price
-                        tables["citizens"].update(ai_citizen["id"], {"Ducats": new_ai_ducats})
-                        print(f"Updated AI {ai_username}'s ducats from {ai_ducats} to {new_ai_ducats}")
+            activity_params = {
+                "landId": land_id,
+                "expectedPrice": price,
+                "landSaleContractId": contract_id # Pass the ID of the 'land_sale' contract
+                # targetOfficeBuildingId is optional
+            }
 
-                        # Update original seller's ducats
-                        if original_seller_username and original_seller_username != "Republic":
-                            seller_record_data = find_citizen_by_identifier(tables, original_seller_username)
-                            if seller_record_data:
-                                seller_current_ducats = seller_record_data["fields"].get("Ducats", 0)
-                                new_seller_ducats = seller_current_ducats + price
-                                tables["citizens"].update(seller_record_data["id"], {"Ducats": new_seller_ducats})
-                                print(f"Updated seller {original_seller_username}'s ducats from {seller_current_ducats} to {new_seller_ducats}")
-                            else:
-                                print(f"Warning: Could not find seller {original_seller_username} to update ducats.")
-                        
-                        # Create a transaction log for the ducat transfer
-                        try:
-                            tables["transactions_log_table"].create({
-                                "Type": "transfer_log",
-                                "Asset": "compute_token_for_land_sale",
-                                "Seller": original_seller_username, # Receiver of ducats
-                                "Buyer": ai_username,             # Payer of ducats
-                                "Price": price,
-                                "CreatedAt": datetime.now().isoformat(),
-                                "ExecutedAt": datetime.now().isoformat(),
-                                "Notes": json.dumps({
-                                    "contract_id": contract_id,
-                                    "land_id": land_id,
-                                    "purchase_by_ai": True
-                                })
-                            })
-                            print(f"Created transfer_log for land purchase: {ai_username} paid {price} to {original_seller_username} for {land_id}")
-                        except Exception as e:
-                            print(f"Error creating transfer_log for land purchase: {str(e)}")
-
-                        # Create notification for the AI citizen
-                        create_notification(tables, ai_username, land_id, price)
-                        
-                        # Create notification for the original seller
-                        if original_seller_username and original_seller_username != "Republic" and original_seller_username != ai_username :
-                            try:
-                                notification_content = f"💸 Land Sold: Your land **{land_id}** has been purchased by **{ai_username}** for **{price} ⚜️ Ducats**."
-                                tables["notifications"].create({
-                                    "Citizen": original_seller_username,
-                                    "Type": "land_sold",
-                                    "Content": notification_content,
-                                    "CreatedAt": datetime.now().isoformat(),
-                                    "Details": json.dumps({
-                                        "land_id": land_id,
-                                        "buyer": ai_username,
-                                        "price": price,
-                                        "timestamp": datetime.now().isoformat()
-                                    })
-                                })
-                                print(f"Sent land sold notification to {original_seller_username}")
-                            except Exception as e:
-                                print(f"Error sending land sold notification: {str(e)}")
-                        
-                        # Add to purchases list for admin notification
-                        purchases.append({
-                            "citizen": ai_username,
-                            "land_id": land_id,
-                            "price": price
-                        })
-                        
-                        # Remove this transaction from available transactions
-                        available_transactions.remove(selected_transaction)
+            if call_try_create_activity_api(ai_username, "buy_available_land", activity_params, dry_run):
+                print(f"{LogColors.OKGREEN}Successfully initiated 'buy_available_land' activity for AI {ai_username} for land {land_id}.{LogColors.ENDC}")
+                # Add to purchases list for admin notification (even in dry_run for summary)
+                purchases.append({
+                    "citizen": ai_username,
+                    "land_id": land_id,
+                    "price": price,
+                    "status": "initiated" if not dry_run else "simulated_initiation"
+                })
+                # Remove this transaction from available transactions so it's not considered again in this run
+                available_transactions.remove(selected_transaction)
             else:
-                print(f"[DRY RUN] Would purchase land {land_id} for {price} ducats for AI {ai_username}")
+                print(f"{LogColors.FAIL}Failed to initiate 'buy_available_land' activity for AI {ai_username} for land {land_id}.{LogColors.ENDC}")
+        else:
+            print(f"AI {ai_username} cannot afford any available land")
         else:
             print(f"AI {ai_username} cannot afford any available land")
     
