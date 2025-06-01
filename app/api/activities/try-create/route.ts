@@ -74,6 +74,17 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log des paramètres spécifiques pour initiate_building_project
+    if (activityType === 'initiate_building_project') {
+      console.log(`[API /activities/try-create] Processing initiate_building_project with parameters:`, 
+        `Land ID: ${activityParameters?.landId}`,
+        `Building Type: ${activityParameters?.buildingTypeDefinition?.id || 'Unknown'}`,
+        `Point Details: ${JSON.stringify(activityParameters?.pointDetails || {})}`,
+        `Builder Contract: ${activityParameters?.builderContractDetails ? 'Provided' : 'Not provided'}`,
+        `Target Office: ${activityParameters?.targetOfficeBuildingId || 'Nearest town_hall'}`
+      );
+    }
+    
     // Endpoint générique sur le moteur Python pour initier des activités/actions
     let parsedPythonEngineUrl: URL;
     try {

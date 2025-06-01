@@ -278,12 +278,9 @@ finalize_land_purchase`, durée courte) est créée. Le processeur de cette dern
     *   **activityType**: `initiate_building_project`
     *   **Description**: Le citoyen se rend sur le terrain (`landId`), pour obtenir un permis de construire (moyennant des frais), ou à un `masons_lodge` / `master_builders_workshop` (atelier de constructeur) pour soumettre les plans et
 lancer le projet, ce qui peut impliquer des frais de dossier ou un acompte.
-    *   **Mécanisme Principal**: Séquence d'activités : `goto_land_plot` (pour inspection), puis `goto_location` (vers
-`town_hall` ou l'atelier du constructeur si `builderContractDetails` fourni). À la destination finale, une activité
-`submit_building_project` est créée, durant laquelle les paiements initiaux (permis, frais) sont effectués.
+    *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`) vers le terrain pour inspection. À l'arrivée, une activité d'inspection (`activityType: inspect_land_plot`, durée courte) est créée. Ensuite, une autre activité de déplacement (`activityType: goto_location`, `targetBuildingId`: ID du `town_hall` ou de l'atelier du constructeur) est créée. Finalement, une activité de soumission de projet (`activityType: submit_building_project`, durée courte) est créée, durant laquelle les paiements initiaux (permis, frais) sont effectués et le bâtiment est créé avec `IsConstructed: false`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `buildingTypeDefinition`,
-`pointDetails`, `builderContractDetails` (optionnel, incluant `sellerBuildingId` qui pourrait être un `masons_lodge` ou
-`master_builders_workshop`), `targetOfficeBuildingId` (optionnel, ID du `town_hall` ou de l'atelier).
+`pointDetails`, `builderContractDetails` (optionnel, incluant `builderUsername` et `contractValue`), `targetOfficeBuildingId` (optionnel, ID du `town_hall` ou de l'atelier).
 
 1.  **Ajuster le Prix de Location d'un Terrain**
     *   **activityType**: `adjust_land_lease_price`

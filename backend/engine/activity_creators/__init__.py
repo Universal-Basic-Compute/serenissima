@@ -29,3 +29,4 @@ from .manage_public_sell_contract_creator import try_create as try_create_manage
 from .manage_import_contract_creator import try_create as try_create_manage_import_contract_activity # New import contract activity
 from .manage_logistics_service_contract_creator import try_create as try_create_manage_logistics_service_contract_activity # New logistics service contract activity
 from .buy_available_land_creator import try_create as try_create_buy_available_land_activity # New land purchase activity
+from .initiate_building_project_creator import try_create as try_create_initiate_building_project_activity # New building project activity
