@@ -267,26 +267,26 @@ def _handle_leave_venice(
 ) -> bool:
     """Prio 1: Handles Forestieri departure."""
     if citizen_social_class != "Forestieri":
-        return False
+        return None # Changed from False
 
     # Forestieri departure logic might be complex, involving duration of stay, objectives, etc.
     # For now, let's assume a simplified condition or delegate to a specific Forestieri handler.
     # This handler is high priority, so it should be relatively certain.
     # The existing process_forestieri_departure_check can be used here.
     if not process_forestieri_departure_check(tables, citizen_record, now_utc_dt):
-        return False
+        return None # Changed from False
 
     log.info(f"{LogColors.OKCYAN}[Départ] Forestiero {citizen_name}: Conditions de départ remplies.{LogColors.ENDC}")
 
     # Find nearest public_dock as exit point
     if not citizen_position:
         log.warning(f"{LogColors.WARNING}[Départ] Citoyen {citizen_name}: Pas de position pour trouver un quai de départ.{LogColors.ENDC}")
-        return False
+        return None # Changed from False
 
     public_docks = tables['buildings'].all(formula="{Type}='public_dock'")
     if not public_docks:
         log.warning(f"{LogColors.WARNING}[Départ] Citoyen {citizen_name}: Aucun quai public trouvé pour le départ.{LogColors.ENDC}")
-        return False
+        return None # Changed from False
 
     closest_dock_record = None
     min_dist_to_dock = float('inf')
@@ -300,7 +300,7 @@ def _handle_leave_venice(
     
     if not closest_dock_record:
         log.warning(f"{LogColors.WARNING}[Départ] Citoyen {citizen_name}: Aucun quai public avec position valide trouvé.{LogColors.ENDC}")
-        return False
+        return None # Changed from False
 
     exit_point_custom_id = closest_dock_record['fields'].get('BuildingId')
     exit_point_pos = _get_building_position_coords(closest_dock_record)
@@ -308,22 +308,22 @@ def _handle_leave_venice(
 
     if not exit_point_custom_id or not exit_point_pos:
         log.warning(f"{LogColors.WARNING}[Départ] Citoyen {citizen_name}: Quai de départ {exit_point_name_display} n'a pas d'ID ou de position.{LogColors.ENDC}")
-        return False
+        return None # Changed from False
 
     path_to_exit_data = get_path_between_points(citizen_position, exit_point_pos, transport_api_url)
     if not (path_to_exit_data and path_to_exit_data.get('success')):
         log.warning(f"{LogColors.WARNING}[Départ] Citoyen {citizen_name}: Impossible de trouver un chemin vers le quai de départ {exit_point_name_display}.{LogColors.ENDC}")
-        return False
+        return None # Changed from False
     
     # For now, assume no galley to delete for simplicity. This can be added later.
     from backend.engine.activity_creators.leave_venice_activity_creator import try_create as try_create_leave_venice_activity
-    if try_create_leave_venice_activity(
+    activity_record = try_create_leave_venice_activity( # Capture record
         tables, citizen_custom_id, citizen_username, citizen_airtable_id,
         exit_point_custom_id, path_to_exit_data, None, now_utc_dt
-    ):
+    )
+    if activity_record:
         log.info(f"{LogColors.OKGREEN}[Départ] Citoyen {citizen_name}: Activité 'leave_venice' créée via {exit_point_name_display}.{LogColors.ENDC}")
-        return True
-    return False
+    return activity_record # Return record or None
 
 
 def _handle_eat_from_inventory(
@@ -347,12 +347,13 @@ def _handle_eat_from_inventory(
         try:
             inventory_food = tables['resources'].all(formula=formula, max_records=1)
             if inventory_food and float(inventory_food[0]['fields'].get('Count', 0)) >= 1.0:
-                if try_create_eat_from_inventory_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, food_type_id, 1.0, current_time_utc=now_utc_dt, resource_defs=resource_defs):
+                activity_record = try_create_eat_from_inventory_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, food_type_id, 1.0, current_time_utc=now_utc_dt, resource_defs=resource_defs)
+                if activity_record:
                     log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_from_inventory' créée pour '{food_name}'.{LogColors.ENDC}")
-                    return True
+                    return activity_record # Return the activity record
         except Exception as e_inv_food:
             log.error(f"{LogColors.FAIL}[Faim] Citoyen {citizen_name}: Erreur vérification inventaire pour '{food_name}': {e_inv_food}{LogColors.ENDC}")
-    return False
+    return None # Changed from False
 
 def _handle_eat_at_home_or_goto(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
@@ -361,12 +362,12 @@ def _handle_eat_at_home_or_goto(
     citizen_social_class: str # Added social_class
 ) -> bool:
     """Prio 3: Handles eating at home or going home to eat if hungry and it's leisure time."""
-    if not citizen_record['is_hungry']: return False
+    if not citizen_record['is_hungry']: return None # Changed from False
     if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
-        return False
+        return None # Changed from False
 
     home_record = get_citizen_home(tables, citizen_username)
-    if not home_record: return False
+    if not home_record: return None # Changed from False
 
     log.info(f"{LogColors.OKCYAN}[Faim - Maison] Citoyen {citizen_name} ({citizen_social_class}): Affamé et en période de loisirs. Vérification domicile.{LogColors.ENDC}")
     home_name_display = _get_bldg_display_name_module(tables, home_record)
@@ -390,23 +391,23 @@ def _handle_eat_at_home_or_goto(
         except Exception as e_home_food:
             log.error(f"{LogColors.FAIL}[Faim] Citoyen {citizen_name}: Erreur vérification nourriture à {home_name_display}: {e_home_food}{LogColors.ENDC}")
 
-    if not food_type_at_home_id: return False # No food at home
+    if not food_type_at_home_id: return None # Changed from False; No food at home
 
     path_data_for_eat = None
     if not is_at_home:
-        if not citizen_position or not home_position: return False # Cannot pathfind
+        if not citizen_position or not home_position: return None # Changed from False; Cannot pathfind
         path_data_for_eat = get_path_between_points(citizen_position, home_position, transport_api_url)
-        if not (path_data_for_eat and path_data_for_eat.get('success')): return False # Pathfinding failed
+        if not (path_data_for_eat and path_data_for_eat.get('success')): return None # Changed from False; Pathfinding failed
 
-    if try_create_eat_at_home_activity(
+    activity_record = try_create_eat_at_home_activity( # Capture record
         tables, citizen_custom_id, citizen_username, citizen_airtable_id,
         home_building_id, food_type_at_home_id, 1.0, is_at_home, path_data_for_eat,
         current_time_utc=now_utc_dt, resource_defs=resource_defs
-    ):
+    )
+    if activity_record:
         activity_type_created = "eat_at_home" if is_at_home else "goto_home"
         log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité '{activity_type_created}' créée pour manger '{food_at_home_name}' à {home_name_display}.{LogColors.ENDC}")
-        return True
-    return False
+    return activity_record # Return record or None
 
 def _handle_eat_at_tavern_or_goto(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
@@ -415,22 +416,22 @@ def _handle_eat_at_tavern_or_goto(
     citizen_social_class: str # Added social_class
 ) -> bool:
     """Prio 6: Handles eating at tavern or going to tavern to eat if hungry and it's leisure time."""
-    if not citizen_record['is_hungry']: return False
+    if not citizen_record['is_hungry']: return None # Changed from False
     if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
-        return False
-    if not citizen_position: return False
+        return None # Changed from False
+    if not citizen_position: return None # Changed from False
     
     citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
-    if citizen_ducats < TAVERN_MEAL_COST_ESTIMATE: return False
+    if citizen_ducats < TAVERN_MEAL_COST_ESTIMATE: return None # Changed from False
 
     log.info(f"{LogColors.OKCYAN}[Faim - Taverne] Citoyen {citizen_name} ({citizen_social_class}): Affamé et en période de loisirs. Recherche taverne.{LogColors.ENDC}")
     closest_tavern_record = get_closest_inn(tables, citizen_position) # Inn also serves as tavern
-    if not closest_tavern_record: return False
+    if not closest_tavern_record: return None # Changed from False
 
     tavern_name_display = _get_bldg_display_name_module(tables, closest_tavern_record)
     tavern_pos = _get_building_position_coords(closest_tavern_record)
     tavern_custom_id = closest_tavern_record['fields'].get('BuildingId', closest_tavern_record['id'])
-    if not tavern_pos or not tavern_custom_id: return False
+    if not tavern_pos or not tavern_custom_id: return None # Changed from False
 
     # Check if tavern sells food (simplified check)
     tavern_sells_food = False
@@ -446,20 +447,21 @@ def _handle_eat_at_tavern_or_goto(
                 tavern_sells_food = True; break
         except Exception: pass # Ignore errors in this simplified check for now
     
-    if not tavern_sells_food: return False
+    if not tavern_sells_food: return None # Changed from False
 
     is_at_tavern = _calculate_distance_meters(citizen_position, tavern_pos) < 20
+    activity_record = None # Initialize
     if is_at_tavern:
-        if try_create_eat_at_tavern_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, tavern_custom_id, current_time_utc=now_utc_dt, resource_defs=resource_defs):
+        activity_record = try_create_eat_at_tavern_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, tavern_custom_id, current_time_utc=now_utc_dt, resource_defs=resource_defs)
+        if activity_record:
             log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_at_tavern' créée à {tavern_name_display}.{LogColors.ENDC}")
-            return True
     else:
         path_to_tavern = get_path_between_points(citizen_position, tavern_pos, transport_api_url)
         if path_to_tavern and path_to_tavern.get('success'):
-            if try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, tavern_custom_id, path_to_tavern, current_time_utc=now_utc_dt):
+            activity_record = try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, tavern_custom_id, path_to_tavern, current_time_utc=now_utc_dt)
+            if activity_record:
                 log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'travel_to_inn' (vers taverne) créée vers {tavern_name_display}.{LogColors.ENDC}")
-                return True
-    return False
+    return activity_record # Return record or None
 
 def _handle_deposit_inventory_at_work(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
@@ -1497,14 +1499,14 @@ def _handle_general_goto_work(
     # If a Nobili is an "employee" at a building with specific hours, is_work_time would use building hours.
     # To be absolutely sure Nobili don't get a goto_work from this general handler:
     if citizen_social_class == "Nobili" and not BUILDING_TYPE_WORK_SCHEDULES.get(workplace_type):
-        return False
+        return None # Changed from False
 
-    if not citizen_position: return False
+    if not citizen_position: return None # Changed from False
     workplace_pos = _get_building_position_coords(workplace_record)
-    if not workplace_pos: return False
+    if not workplace_pos: return None # Changed from False
 
     if _calculate_distance_meters(citizen_position, workplace_pos) < 20:
-        return False # Already at workplace
+        return None # Changed from False; already at workplace, no "goto" activity created by this handler
 
     log.info(f"{LogColors.OKCYAN}[Aller au Travail] Citoyen {citizen_name} ({citizen_social_class}) n'est pas à son lieu de travail. Création goto_work.{LogColors.ENDC}")
     path_to_work = get_path_between_points(citizen_position, workplace_pos, transport_api_url)
@@ -1516,13 +1518,120 @@ def _handle_general_goto_work(
             home_pos = _get_building_position_coords(home_record)
             if home_pos: is_at_home_val = _calculate_distance_meters(citizen_position, home_pos) < 20
         
-        if try_create_goto_work_activity(
+        activity_record = try_create_goto_work_activity( # Capture the record
             tables, citizen_custom_id, citizen_username, citizen_airtable_id,
             workplace_custom_id_val, path_to_work, home_record, resource_defs,
             is_at_home_val, citizen_position_str_val, now_utc_dt
-        ):
-            return True
-    return False
+        )
+        return activity_record # Return the record or None
+    return None # Changed from False
+
+# --- Dispatcher for Specific Activity Requests ---
+def dispatch_specific_activity_request(
+    tables: Dict[str, Table],
+    citizen_record_full: Dict, # Full Airtable record for the citizen
+    activity_type: str,
+    activity_parameters: Optional[Dict[str, Any]],
+    resource_defs: Dict,
+    building_type_defs: Dict,
+    now_venice_dt: datetime.datetime,
+    now_utc_dt: datetime.datetime,
+    transport_api_url: str,
+    api_base_url: str
+) -> Dict[str, Any]:
+    """
+    Attempts to create a specific activity for a citizen based on activity_type and parameters.
+    Returns a dictionary with success status, message, and optionally the created activity.
+    """
+    # Extract common citizen details
+    citizen_custom_id = citizen_record_full['fields'].get('CitizenId')
+    citizen_username = citizen_record_full['fields'].get('Username')
+    citizen_airtable_id = citizen_record_full['id']
+    citizen_name = f"{citizen_record_full['fields'].get('FirstName', '')} {citizen_record_full['fields'].get('LastName', '')}".strip() or citizen_username
+    citizen_social_class = citizen_record_full['fields'].get('SocialClass', 'Facchini')
+    
+    citizen_position_str = citizen_record_full['fields'].get('Position')
+    citizen_position: Optional[Dict[str, float]] = None
+    try:
+        if citizen_position_str: citizen_position = json.loads(citizen_position_str)
+    except Exception: pass
+
+    if not citizen_position: # Fallback if position is missing or invalid
+        log.warning(f"Citizen {citizen_username} has no valid position. Attempting to assign random for specific activity.")
+        citizen_position = _fetch_and_assign_random_starting_position(tables, citizen_record_full, api_base_url)
+        if citizen_position:
+            citizen_position_str = json.dumps(citizen_position)
+        else:
+            return {"success": False, "message": "Citizen has no position and failed to assign one.", "activity": None, "reason": "missing_position"}
+
+    # Prepare is_hungry state for eat handlers
+    is_hungry = False
+    ate_at_str = citizen_record_full['fields'].get('AteAt')
+    if ate_at_str:
+        try:
+            ate_at_dt = dateutil_parser.isoparse(ate_at_str.replace('Z', '+00:00'))
+            if ate_at_dt.tzinfo is None: ate_at_dt = pytz.UTC.localize(ate_at_dt)
+            if (now_utc_dt - ate_at_dt) > datetime.timedelta(hours=12): is_hungry = True
+        except ValueError: is_hungry = True 
+    else: is_hungry = True
+    citizen_record_full['is_hungry'] = is_hungry # Modify a copy if concerned about side effects, or pass as arg
+
+    # Common arguments for handler functions
+    handler_args = (
+        tables, citizen_record_full, False, resource_defs, building_type_defs,
+        now_venice_dt, now_utc_dt, transport_api_url, api_base_url,
+        citizen_position, citizen_custom_id, citizen_username, citizen_airtable_id, 
+        citizen_name, citizen_position_str, citizen_social_class
+    )
+    
+    activity_record = None
+    strategy_applied = "default_order"
+    params = activity_parameters or {}
+
+    if activity_type == "eat":
+        strategy = params.get("strategy")
+        strategy_applied = strategy if strategy else "default_order"
+
+        if not is_hungry:
+             return {"success": False, "message": f"{citizen_name} is not hungry.", "activity": None, "reason": "not_hungry"}
+
+        if strategy == "inventory":
+            activity_record = _handle_eat_from_inventory(*handler_args)
+        elif strategy == "home":
+            activity_record = _handle_eat_at_home_or_goto(*handler_args)
+        elif strategy == "tavern":
+            activity_record = _handle_eat_at_tavern_or_goto(*handler_args)
+        else: # No specific strategy or unknown strategy, try all in order
+            activity_record = _handle_eat_from_inventory(*handler_args)
+            if not activity_record:
+                activity_record = _handle_eat_at_home_or_goto(*handler_args)
+            if not activity_record:
+                activity_record = _handle_eat_at_tavern_or_goto(*handler_args)
+        
+        if activity_record:
+            return {"success": True, "message": f"Activity '{activity_record['fields']['Type']}' created for {citizen_name} (strategy: {strategy_applied}).", "activity": activity_record['fields']}
+        else:
+            return {"success": False, "message": f"Could not create 'eat' activity for {citizen_name} (strategy: {strategy_applied}).", "activity": None, "reason": "no_eating_option_found"}
+
+    elif activity_type == "leave_venice":
+        activity_record = _handle_leave_venice(*handler_args)
+        if activity_record:
+            return {"success": True, "message": f"Activity '{activity_record['fields']['Type']}' created for {citizen_name}.", "activity": activity_record['fields']}
+        else:
+            return {"success": False, "message": f"Could not create 'leave_venice' activity for {citizen_name}.", "activity": None, "reason": "conditions_not_met_or_pathfinding_failed"}
+    
+    # Add other activity_type handlers here...
+    # Example for a hypothetical "seek_shelter"
+    # elif activity_type == "seek_shelter":
+    #     activity_record = _handle_night_shelter(*handler_args) # Assuming _handle_night_shelter is adapted
+    #     if activity_record:
+    #         return {"success": True, "message": "Seek shelter activity initiated.", "activity": activity_record['fields']}
+    #     else:
+    #         return {"success": False, "message": "Could not find shelter.", "activity": None, "reason": "no_shelter_found"}
+
+    else:
+        return {"success": False, "message": f"Activity type '{activity_type}' is not supported for direct creation by the Python engine yet.", "activity": None, "reason": "unsupported_activity_type"}
+
 
 # --- Main Activity Processing Function ---
 

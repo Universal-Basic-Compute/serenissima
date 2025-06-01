@@ -111,6 +111,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Pydantic Models for API Requests/Responses ---
+class TryCreateActivityRequest(BaseModel):
+    citizenUsername: str
+    activityType: str
+    activityParameters: Optional[Dict[str, Any]] = None
+
+class ActivityResponseItem(BaseModel): # Structure of an activity field for response
+    ActivityId: Optional[str] = None
+    Type: Optional[str] = None
+    Citizen: Optional[str] = None
+    FromBuilding: Optional[str] = None
+    ToBuilding: Optional[str] = None
+    ContractId: Optional[str] = None
+    Resources: Optional[str] = None # JSON string
+    TransportMode: Optional[str] = None
+    Path: Optional[str] = None # JSON string
+    Transporter: Optional[str] = None
+    Status: Optional[str] = None
+    Title: Optional[str] = None
+    Description: Optional[str] = None
+    Thought: Optional[str] = None
+    Notes: Optional[str] = None
+    Details: Optional[str] = None # JSON string
+    Priority: Optional[int] = None
+    CreatedAt: Optional[str] = None
+    StartDate: Optional[str] = None
+    EndDate: Optional[str] = None
+    # Add other fields from Airtable ACTIVITIES table as needed
+
+class TryCreateActivityResponse(BaseModel):
+    success: bool
+    message: str
+    activity: Optional[ActivityResponseItem] = None # This will be the 'fields' part of the Airtable record
+    reason: Optional[str] = None
+
+
 # Define request models
 class WalletRequest(BaseModel):
     wallet_address: str
@@ -2832,6 +2868,84 @@ async def inject_compute_complete(data: dict):
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
+
+# --- New Endpoint for Specific Activity Creation ---
+@app.post("/api/v1/engine/try-create-activity", response_model=TryCreateActivityResponse)
+async def try_create_activity_endpoint(request_data: TryCreateActivityRequest):
+    """
+    Attempts to create a specific activity for a citizen.
+    Delegates logic to the game engine.
+    """
+    log_header(f"Received request to try-create activity: {request_data.activityType} for {request_data.citizenUsername}", color_code=Fore.MAGENTA)
+    
+    try:
+        # Initialize Airtable tables (consider moving to a dependency injection pattern for larger apps)
+        # For now, direct initialization is fine.
+        airtable_api_key_engine = os.getenv("AIRTABLE_API_KEY")
+        airtable_base_id_engine = os.getenv("AIRTABLE_BASE_ID")
+        if not airtable_api_key_engine or not airtable_base_id_engine:
+            raise HTTPException(status_code=500, detail="Airtable not configured on server.")
+
+        retry_strategy = Retry(total=3, backoff_factor=0.3, status_forcelist=[429, 500, 502, 503, 504])
+        api_engine = Api(airtable_api_key_engine, retry_strategy=retry_strategy)
+        tables_engine = {
+            'citizens': api_engine.table(airtable_base_id_engine, 'CITIZENS'),
+            'buildings': api_engine.table(airtable_base_id_engine, 'BUILDINGS'),
+            'activities': api_engine.table(airtable_base_id_engine, 'ACTIVITIES'),
+            'contracts': api_engine.table(airtable_base_id_engine, 'CONTRACTS'),
+            'resources': api_engine.table(airtable_base_id_engine, 'RESOURCES'),
+            'relationships': api_engine.table(airtable_base_id_engine, 'RELATIONSHIPS')
+        }
+
+        # Import necessary functions from the engine
+        from backend.engine.utils.activity_helpers import (
+            get_resource_types_from_api, 
+            get_building_types_from_api,
+            VENICE_TIMEZONE # Import VENICE_TIMEZONE
+        )
+        from backend.engine.logic.citizen_general_activities import dispatch_specific_activity_request
+
+        # Fetch citizen record
+        citizen_record_list = tables_engine['citizens'].all(formula=f"{{Username}}='{_escape_airtable_value(request_data.citizenUsername)}'", max_records=1)
+        if not citizen_record_list:
+            return JSONResponse(status_code=404, content={"success": False, "message": f"Citizen '{request_data.citizenUsername}' not found.", "activity": None, "reason": "citizen_not_found"})
+        citizen_record_full = citizen_record_list[0]
+
+        # Get current times
+        now_venice_dt = datetime.datetime.now(VENICE_TIMEZONE)
+        now_utc_dt = now_venice_dt.astimezone(pytz.UTC)
+
+        # Fetch definitions (these could be cached globally in a real app)
+        resource_defs = get_resource_types_from_api()
+        building_type_defs = get_building_types_from_api()
+        if not resource_defs or not building_type_defs:
+             return JSONResponse(status_code=503, content={"success": False, "message": "Failed to load resource or building definitions from API.", "activity": None, "reason": "definitions_load_failed"})
+
+
+        # Call the dispatcher
+        result = dispatch_specific_activity_request(
+            tables=tables_engine,
+            citizen_record_full=citizen_record_full,
+            activity_type=request_data.activityType,
+            activity_parameters=request_data.activityParameters,
+            resource_defs=resource_defs,
+            building_type_defs=building_type_defs,
+            now_venice_dt=now_venice_dt,
+            now_utc_dt=now_utc_dt,
+            transport_api_url=os.getenv("TRANSPORT_API_URL", "http://localhost:3000/api/transport"),
+            api_base_url=os.getenv("API_BASE_URL", "http://localhost:3000")
+        )
+        
+        # The result from dispatch_specific_activity_request should match TryCreateActivityResponse structure
+        return JSONResponse(status_code=200 if result["success"] else 400, content=result)
+
+    except HTTPException as http_exc:
+        # Re-raise HTTPException to let FastAPI handle it
+        raise http_exc
+    except Exception as e:
+        log.error(f"Error in /api/v1/engine/try-create-activity for {request_data.citizenUsername}, type {request_data.activityType}: {e}", exc_info=True)
+        return JSONResponse(status_code=500, content={"success": False, "message": f"Internal server error: {str(e)}", "activity": None, "reason": "internal_server_error"})
+
 
 # The scheduler is now started via the lifespan event manager above.
 # The direct call to start_scheduler() is removed.
