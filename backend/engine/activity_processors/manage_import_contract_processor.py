@@ -39,9 +39,10 @@ def process_manage_import_contract_fn(
         log.info(f"Citizen {citizen} has completed travel for manage_import_contract. Next step: {next_step}")
         return True
     
-    # Handle assess_import_needs activity
+    # Handle assess_import_needs activity - no longer used but kept for backward compatibility
     elif activity_type == "assess_import_needs":
-        return _handle_assess_import_needs(tables, activity_record, details)
+        log.info(f"assess_import_needs activity is deprecated but processing for backward compatibility")
+        return True
     
     # Handle register_import_agreement activity
     elif activity_type == "register_import_agreement":
@@ -51,62 +52,7 @@ def process_manage_import_contract_fn(
         log.error(f"Unexpected activity type in manage_import_contract processor: {activity_type}")
         return False
 
-def _handle_assess_import_needs(
-    tables: Dict[str, Any],
-    activity_record: Dict[str, Any],
-    details: Dict[str, Any]
-) -> bool:
-    """
-    Handle the assess_import_needs activity.
-    Verify that the business has a legitimate need for the imports.
-    """
-    fields = activity_record.get('fields', {})
-    citizen = fields.get('Citizen')
-    buyer_building_id = fields.get('FromBuilding')
-    resource_type = details.get('resourceType')
-    target_amount = details.get('targetAmount')
-    
-    if not (citizen and buyer_building_id and resource_type and target_amount is not None):
-        log.error(f"Missing data for assess_import_needs: citizen={citizen}, buyer_building_id={buyer_building_id}, resource_type={resource_type}, target_amount={target_amount}")
-        return False
-    
-    # Check if the citizen is the owner or operator of the building
-    try:
-        building_formula = f"{{BuildingId}}='{_escape_airtable_value(buyer_building_id)}'"
-        building_records = tables['buildings'].all(formula=building_formula, max_records=1)
-        
-        if not building_records:
-            log.error(f"Building {buyer_building_id} not found")
-            return False
-        
-        building_record = building_records[0]
-        building_owner = building_record['fields'].get('Owner')
-        building_operator = building_record['fields'].get('RunBy')
-        
-        if citizen != building_owner and citizen != building_operator:
-            log.warning(f"Citizen {citizen} is neither the owner nor operator of building {buyer_building_id}")
-            # We'll continue anyway, but log the warning
-        
-        # Check current inventory levels of this resource type at the building
-        resource_formula = f"AND({{AssetType}}='building', {{Asset}}='{_escape_airtable_value(buyer_building_id)}', {{Type}}='{_escape_airtable_value(resource_type)}')"
-        resource_records = tables['resources'].all(formula=resource_formula)
-        
-        total_available = sum(float(record['fields'].get('Count', 0)) for record in resource_records)
-        
-        # Calculate a reasonable import amount based on building type and current inventory
-        building_type = building_record['fields'].get('Type')
-        
-        # This is a simplified assessment - in a real system, you might have more complex logic
-        # based on production rates, storage capacity, etc.
-        if total_available < target_amount * 0.2:  # Less than 20% of target already in stock
-            log.info(f"Building {buyer_building_id} has low stock of {resource_type} ({total_available} units). Import of {target_amount} is justified.")
-        else:
-            log.info(f"Building {buyer_building_id} already has {total_available} units of {resource_type}. Import of {target_amount} may be excessive but will proceed.")
-        
-        return True
-    except Exception as e:
-        log.error(f"Error assessing import needs: {e}")
-        return False
+# _handle_assess_import_needs function is removed as it's no longer needed
 
 def _create_or_update_import_contract(
     tables: Dict[str, Any],

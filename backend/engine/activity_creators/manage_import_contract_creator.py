@@ -77,25 +77,16 @@ def try_create(
     
     now_utc = datetime.utcnow()
     
-    # Calculate activity times
-    if citizen_at_buyer_building:
-        # Skip the first goto_location if already at buyer building
-        assess_start_date = now_utc.isoformat()
-        assess_end_date = (now_utc + timedelta(minutes=15)).isoformat()  # 15 min to assess needs
-        goto_office_start_date = assess_end_date
-    else:
-        # Need to go to buyer building first
-        # Calculate path to buyer building
-        path_to_buyer = find_path_between_buildings(None, buyer_building_record, current_position=current_position)
-        if not path_to_buyer or not path_to_buyer.get('path'):
-            log.error(f"Could not find path to buyer building {buyer_building_id}")
-            return False
-        
-        assess_start_date = now_utc.isoformat()
-        # Calculate travel duration to buyer building
-        buyer_duration_seconds = path_to_buyer.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min
-        assess_end_date = (now_utc + timedelta(seconds=buyer_duration_seconds)).isoformat()
-        goto_office_start_date = (now_utc + timedelta(seconds=buyer_duration_seconds) + timedelta(minutes=15)).isoformat()
+    # Skip the buyer building step entirely and go directly to the office
+    # Calculate activity times for direct path to office
+    path_to_office = find_path_between_buildings(None, office_building_record, current_position=current_position)
+    if not path_to_office or not path_to_office.get('path'):
+        log.error(f"Could not find path to office building {target_office_building_id}")
+        return False
+    
+    # Set start times
+    assess_start_date = now_utc.isoformat()
+    goto_office_start_date = assess_start_date
     
     # Calculate path from buyer building to office
     path_to_office = find_path_between_buildings(buyer_building_record, office_building_record)
