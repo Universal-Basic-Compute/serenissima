@@ -450,22 +450,9 @@ activité `update_wage_ledger` est créée.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `businessBuildingId`, `newWageAmount`,
 `strategy`.
 
-17. **Déléguer une Entreprise / Demander ou Prendre une Entreprise pour Soi**
-    *   **activityType**: `manage_business_operation`
-    *   **Description**: Implique de se rendre au bâtiment de l'entreprise, puis potentiellement de rencontrer les
-parties concernées ou de se rendre à un `courthouse`/`town_hall` (étude de notaire) pour officialiser le changement d'opérateur, ce qui peut entraîner des frais notariaux ou d'enregistrement.
-    *   **Mécanisme Principal**: Séquence : `goto_location` (vers `businessBuildingId`), puis `goto_location` (vers la
-partie concernée ou `courthouse`/`town_hall`). À la destination finale, une activité `finalize_operator_change` est
-créée, et les frais associés sont payés.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `businessBuildingId`,
-`newOperatorUsername` (si applicable), `currentOperatorUsername` (si applicable), `ownerUsername` (si applicable),
-`reason`, `targetOfficeBuildingId` (optionnel, ID du `courthouse`/`town_hall`), `operationType` ("delegate",
-"request_management", "claim_management").
-
-17. **Déléguer une Entreprise / Demander ou Prendre une Entreprise pour Soi**
-    *   **activityType**: `manage_business_operation`
-    *   **Description**: Implique de se rendre au bâtiment de l'entreprise, puis potentiellement de rencontrer les
-parties concernées ou de se rendre à un `courthouse`/`town_hall` (étude de notaire) pour officialiser le changement d'opérateur, ce qui peut entraîner des frais notariaux ou d'enregistrement.
+17.  **Déléguer une Entreprise / Demander ou Prendre une Entreprise pour Soi**
+    *   **activityType**: `change_business_manager`
+    *   **Description**: Implique de se rendre au bâtiment de l'entreprise, se rendre à un `courthouse`/`town_hall` (étude de notaire) pour officialiser le changement d'opérateur, ce qui peut entraîner des frais notariaux ou d'enregistrement.
     *   **Mécanisme Principal**: Séquence : `goto_location` (vers `businessBuildingId`), puis `goto_location` (vers la
 partie concernée ou `courthouse`/`town_hall`). À la destination finale, une activité `finalize_operator_change` est
 créée, et les frais associés sont payés.
