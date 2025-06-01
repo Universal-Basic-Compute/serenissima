@@ -576,22 +576,26 @@ Custom emoji entities can only be used by bots that purchased additional usernam
         if kinos_response_content:
             log.info(f"{LogColors.OKGREEN}Generated full thought process for {citizen_username}. Length: {len(kinos_response_content)}{LogColors.ENDC}")
             
-            # Remove <think>...</think> tags and their content
+            # Remove <think>...</think> tags and their content, including trailing whitespace
             thought_without_think_tags = re.sub(r'<think>.*?</think>\s*', '', kinos_response_content, flags=re.DOTALL).strip()
             if len(thought_without_think_tags) < len(kinos_response_content):
-                log.info(f"{LogColors.OKBLUE}Removed <think> tags. Original length: {len(kinos_response_content)}, New length: {len(thought_without_think_tags)}{LogColors.ENDC}")
+                log.info(f"{LogColors.OKBLUE}Removed <think> tags and trailing space. Original length: {len(kinos_response_content)}, New length: {len(thought_without_think_tags)}{LogColors.ENDC}")
 
             cleaned_thought = clean_thought_content(tables, thought_without_think_tags)
-            log.info(f"{LogColors.OKBLUE}Cleaned thought for {citizen_username}: {cleaned_thought[:150].replace(chr(10), ' ')}...{LogColors.ENDC}")
-
-            thoughts_summary["details"][citizen_username]["thought_generated"] = True
-            thoughts_summary["details"][citizen_username]["full_thought_content_preview"] = cleaned_thought[:150].replace('\n', ' ')
-            thoughts_summary["thoughts_generated_count"] += 1
             
-            if not dry_run:
-                create_self_thought_message(tables, citizen_username, cleaned_thought)
-            else: # This branch won't be hit due to outer dry_run check, but kept for logical structure
-                log.info(f"[DRY RUN] Would create self-thought message for {citizen_username} with cleaned content.")
+            if not cleaned_thought:
+                log.info(f"{LogColors.OKBLUE}Cleaned thought for {citizen_username} is empty after processing. No message will be persisted.{LogColors.ENDC}")
+                thoughts_summary["details"][citizen_username]["thought_generated"] = False # Mark as not generated if empty
+            else:
+                log.info(f"{LogColors.OKBLUE}Cleaned thought for {citizen_username}: {cleaned_thought[:150].replace(chr(10), ' ')}...{LogColors.ENDC}")
+                thoughts_summary["details"][citizen_username]["thought_generated"] = True
+                thoughts_summary["details"][citizen_username]["full_thought_content_preview"] = cleaned_thought[:150].replace('\n', ' ')
+                thoughts_summary["thoughts_generated_count"] += 1
+                
+                if not dry_run:
+                    create_self_thought_message(tables, citizen_username, cleaned_thought)
+                else: # This branch won't be hit due to outer dry_run check, but kept for logical structure
+                    log.info(f"[DRY RUN] Would create self-thought message for {citizen_username} with cleaned content.")
         else:
             log.warning(f"{LogColors.WARNING}Failed to generate thought for {citizen_username}.{LogColors.ENDC}")
         
