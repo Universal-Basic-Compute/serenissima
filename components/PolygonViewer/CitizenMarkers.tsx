@@ -794,17 +794,14 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className={`w-8 h-8 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative ${
+                className={`w-4 h-4 cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative ${
                   isCitizenInvolvedInBuildingHover ? 'scale-150' : '' // Apply scale if citizen is involved
-                } ${
-                  citizen.username === currentUsername ? 'ring-2 ring-purple-500 ring-opacity-80' : 
-                  citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
-                }`}
+                } `} // Removed rounded-full and ring classes
                 style={{ 
-                  // backgroundColor is removed, boxShadow remains for the container
+                  // backgroundColor is removed
                   // border: '1px solid white', // Removed white border
-                  boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
-                             citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)'
+                  // boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
+                  //            citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)' // Removed boxShadow
                 }}
                 title={`${firstName} ${lastName} (${socialClass})${
                   citizen.username === currentUsername ? ' - This is you' : 
@@ -824,8 +821,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   }}
                 />
                 <span
-                  className="absolute inset-0 flex items-center justify-center text-white text-[10px] font-bold pointer-events-none"
-                  style={{ textShadow: '0px 0px 3px rgba(0,0,0,0.7)' }}
+                  className="absolute inset-0 flex items-center justify-center text-white text-[8px] font-bold pointer-events-none" // Adjusted font size
+                  style={{ textShadow: '0px 0px 2px rgba(0,0,0,0.8)' }} // Slightly adjusted text shadow for smaller text
                 >
                   {firstName?.[0]?.toUpperCase() || ''}{lastName?.[0]?.toUpperCase() || ''}
                 </span>
@@ -884,16 +881,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className={`w-8 h-8 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative ${
+                className={`w-4 h-4 cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative ${
                   isCitizenInvolvedInBuildingHover ? 'scale-150' : ''
-                } ${
-                  citizen.username === currentUsername ? 'ring-2 ring-purple-500 ring-opacity-80' : 
-                  citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
-                }`}
+                } `} // Removed rounded-full and ring classes
                 style={{ 
                   // border: '1px solid white', // Removed white border
-                  boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
-                             citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)'
+                  // boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
+                  //            citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)' // Removed boxShadow
                 }}
                 title={`${firstName} ${lastName} (${socialClass})${
                   citizen.username === currentUsername ? ' - This is you' : 
@@ -913,8 +907,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   }}
                 />
                 <span
-                  className="absolute inset-0 flex items-center justify-center text-white text-[10px] font-bold pointer-events-none"
-                  style={{ textShadow: '0px 0px 3px rgba(0,0,0,0.7)' }}
+                  className="absolute inset-0 flex items-center justify-center text-white text-[8px] font-bold pointer-events-none" // Adjusted font size
+                  style={{ textShadow: '0px 0px 2px rgba(0,0,0,0.8)' }} // Slightly adjusted text shadow for smaller text
                 >
                   {firstName?.[0]?.toUpperCase() || ''}{lastName?.[0]?.toUpperCase() || ''}
                 </span>
