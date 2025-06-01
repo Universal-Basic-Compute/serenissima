@@ -35,7 +35,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
     land_id = activity_parameters.get('landId')
     price = activity_parameters.get('price')
     # sellerUsername is implicitly citizen_username for this activity type
-    target_office_building_id = activity_parameters.get('targetOfficeBuildingId', 'town_hall_default') # Default to a known Town Hall ID
+    user_specified_target_office_id = activity_parameters.get('targetOfficeBuildingId')
 
     if not land_id or price is None:
         log.error(f"{LogColors.FAIL}Missing landId or price for list_land_for_sale for citizen {citizen_username}. Params: {activity_parameters}{LogColors.ENDC}")
@@ -67,22 +67,40 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         return []
 
 
-    # 2. Find path to the target office building
-    # Ensure target_office_building_id is a valid building that exists
-    target_office_record = get_building_record(tables, target_office_building_id)
+    # 2. Determine the target office building
+    target_office_record = None
+    target_office_building_id = None
+
+    if user_specified_target_office_id:
+        log.info(f"{LogColors.ACTIVITY}User specified target office: {user_specified_target_office_id}. Attempting to use it.{LogColors.ENDC}")
+        target_office_record = get_building_record(tables, user_specified_target_office_id)
+        if target_office_record:
+            target_office_building_id = target_office_record['fields'].get('BuildingId')
+            log.info(f"{LogColors.ACTIVITY}Using user-specified target office: {target_office_building_id}{LogColors.ENDC}")
+        else:
+            log.warning(f"{LogColors.WARNING}User-specified target office {user_specified_target_office_id} not found. Proceeding to fallback search.{LogColors.ENDC}")
+
     if not target_office_record:
-        log.error(f"{LogColors.FAIL}Target office building {target_office_building_id} not found for list_land_for_sale.{LogColors.ENDC}")
-        # Fallback: try to find any town_hall
-        target_office_record = get_closest_building_of_type(tables, from_location_data, "town_hall", transport_api_url)
+        # Define preferred office types for listing land, in order of preference
+        preferred_office_types = ["town_hall", "public_archives"] # Example: add more types if relevant
+        log.info(f"{LogColors.ACTIVITY}No valid user-specified target office. Searching for closest appropriate office from types: {preferred_office_types}.{LogColors.ENDC}")
+        
+        for office_type in preferred_office_types:
+            log.debug(f"{LogColors.ACTIVITY}Searching for closest '{office_type}'...{LogColors.ENDC}")
+            found_office = get_closest_building_of_type(tables, from_location_data, office_type, transport_api_url)
+            if found_office:
+                target_office_record = found_office
+                target_office_building_id = target_office_record['fields'].get('BuildingId')
+                log.info(f"{LogColors.ACTIVITY}Found closest '{office_type}': {target_office_building_id}. Using as target office.{LogColors.ENDC}")
+                break # Found a suitable office
+        
         if not target_office_record:
-            log.error(f"{LogColors.FAIL}No town_hall found as fallback for list_land_for_sale.{LogColors.ENDC}")
+            log.error(f"{LogColors.FAIL}No suitable office (types: {preferred_office_types}) found for list_land_for_sale for citizen {citizen_username}.{LogColors.ENDC}")
             return []
-        target_office_building_id = target_office_record['fields'].get('BuildingId')
-        log.info(f"{LogColors.ACTIVITY}Using fallback target office: {target_office_building_id}{LogColors.ENDC}")
 
-
+    # 3. Find path to the determined target office building
     path_data = find_path_between_buildings_or_coords(
-        tables, 
+        tables,
         from_location_data, # Can be {"building_id": "bld_xxx"} or {"lat": y, "lng": x}
         {"building_id": target_office_building_id}, # Target is always a building
         transport_api_url
@@ -126,7 +144,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         log.info(f"{LogColors.ACTIVITY}Created goto_location activity {goto_activity_id} for {citizen_username} to {target_office_building_id}. Duration: {travel_duration_minutes} mins.{LogColors.ENDC}")
 
 
-    # 3. Create finalize_list_land_for_sale activity
+    # 4. Create finalize_list_land_for_sale activity
     finalize_activity_id = str(uuid.uuid4())
     finalize_duration_minutes = 15 # Example duration for paperwork
     finalize_start_time_utc = current_end_time_utc
