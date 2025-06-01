@@ -271,37 +271,27 @@ def create_or_update_public_sell_contract(
         })
     }
 
-    if dry_run:
-        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create/update public_sell contract {deterministic_contract_id} for {resource_name} from {building_custom_id} by {seller_username}. Price: {price_per_resource:.2f}, Amount: {target_amount:.2f}/hr.{LogColors.ENDC}")
-        return True
+    # TargetAmount is now 0.0 as per request, title/desc will be set by activity
+    title_for_activity = f"Public Sell: {target_amount:.0f}/hr {resource_name} from {building_custom_id}"
+    description_for_activity = f"Automated public sell offer for {resource_name} from building {building_custom_id} by {seller_username}."
 
-    try:
-        existing_contracts = tables["contracts"].all(formula=f"{{ContractId}}='{_escape_airtable_value(deterministic_contract_id)}'", max_records=1)
-        if existing_contracts:
-            tables["contracts"].update(existing_contracts[0]['id'], contract_fields)
-            log.info(f"{LogColors.OKGREEN}Updated public_sell contract {deterministic_contract_id} for {resource_name}.{LogColors.ENDC}")
-        else:
-            new_contract_data = {
-                "ContractId": deterministic_contract_id,
-                "Seller": seller_username,
-                "Buyer": "public",
-                "Type": "public_sell",
-                "ResourceType": resource_type_id,
-                "SellerBuilding": building_custom_id,
-                "BuyerBuilding": None,
-                "Priority": 5, # Default priority
-                "Status": "active", # Set status to active for new contracts
-                "CreatedAt": now_iso,
-                "TargetAmount": 0.0, # Ensure TargetAmount is 0.0 for new contracts
-                "PricePerResource": price_per_resource, # Keep other fields from contract_fields
-                "EndAt": end_date_iso,
-                "Notes": contract_fields["Notes"] # Keep notes from contract_fields
-            }
-            tables["contracts"].create(new_contract_data)
-            log.info(f"{LogColors.OKGREEN}Created new public_sell contract {deterministic_contract_id} for {resource_name}.{LogColors.ENDC}")
+    activity_params = {
+        "contractId_to_create_if_new": deterministic_contract_id,
+        "resourceType": resource_type_id,
+        "pricePerResource": price_per_resource,
+        "targetAmount": 0.0, # As per request, actual amount logic in activity
+        "sellerBuildingId": building_custom_id,
+        "title": title_for_activity,
+        "description": description_for_activity,
+        "notes": json.loads(contract_fields["Notes"]) # Pass notes as dict
+        # targetMarketBuildingId is optional for the activity
+    }
+
+    if call_try_create_activity_api(seller_username, "manage_public_sell_contract", activity_params, dry_run, log):
+        log.info(f"Successfully initiated 'manage_public_sell_contract' for {deterministic_contract_id} for {resource_name}.")
         return True
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error creating/updating public_sell contract {deterministic_contract_id}: {e}{LogColors.ENDC}")
+    else:
+        log.error(f"{LogColors.FAIL}Failed to initiate 'manage_public_sell_contract' for {deterministic_contract_id}.{LogColors.ENDC}")
         return False
 
 def create_admin_summary_notification(tables: Dict[str, Table], results: List[Dict[str, Any]], dry_run: bool):
@@ -330,6 +320,47 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
         log.info(f"{LogColors.OKGREEN}Admin summary notification for public sales created.{LogColors.ENDC}")
     except Exception as e:
         log.error(f"{LogColors.FAIL}Failed to create admin summary notification for public sales: {e}{LogColors.ENDC}")
+
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool,
+    log_ref: Any # Pass the script's logger
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        log_ref.info(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True # Simulate success for dry run
+
+    api_url = f"{API_BASE_URL}/api/activities/try-create" # API_BASE_URL is global
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 log_ref.info(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        log_ref.error(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
 
 # --- Main Processing Logic ---
 def process_automated_public_sales(strategy: str, dry_run: bool):

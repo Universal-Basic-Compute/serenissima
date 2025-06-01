@@ -105,6 +105,47 @@ def get_resource_name(resource_id: str, resource_type_defs: Dict[str, Dict]) -> 
     """Gets the human-readable name of a resource."""
     return resource_type_defs.get(resource_id, {}).get("name", resource_id)
 
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool,
+    log_ref: Any # Pass the script's logger
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        log_ref.info(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True # Simulate success for dry run
+
+    api_url = f"{API_BASE_URL}/api/activities/try-create" # API_BASE_URL is global
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 log_ref.info(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        log_ref.error(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
+
 # --- Main Processing Logic ---
 
 def process_public_storage_contracts(dry_run: bool = False, pricing_tiers_str: Optional[str] = None):
@@ -247,54 +288,32 @@ def process_public_storage_contracts(dry_run: bool = False, pricing_tiers_str: O
                     # Buyer, BuyerBuilding, Transporter are null for this offer type
                 }
 
-                try:
-                    existing_contract_record = tables["contracts"].all(formula=f"{{ContractId}}='{_escape_airtable_value(contract_id)}'", max_records=1)
-                    
-                    if dry_run:
-                        if existing_contract_record:
-                            log.info(f"    [DRY RUN] Would update existing contract {contract_id} for {resource_name_log} (using {tier_name} pricing). Price: {price_per_unit_capacity_daily}, Capacity: {capacity_per_resource_type}")
-                        else:
-                            log.info(f"    [DRY RUN] Would create new contract {contract_id} for {resource_name_log} (using {tier_name} pricing). Price: {price_per_unit_capacity_daily}, Capacity: {capacity_per_resource_type}")
-                        # In dry run, we don't increment total_contracts_managed per tier for the same contract_id,
-                        # but we need to ensure it's counted once if any tier would manage it.
-                        # This logic is tricky. Let's assume for dry_run, we log each tier's potential action.
-                        # The final total_contracts_managed will be an estimate of unique contracts touched.
-                        # For simplicity, let's increment per tier action in dry run, and the final log will reflect that.
-                        # Or, better, only increment if it's the first tier processed for this contract_id in this run.
-                        # This is complex to track here. The current dry_run log is per tier action.
-                        # Let's adjust total_contracts_managed logic for dry_run later if needed, or accept it as "actions simulated".
-                        # For now, let's keep it simple: if it's the first tier for this contract_id, count it.
-                        # This requires knowing if this contract_id was already "managed" in this dry run loop.
-                        # The simplest is to count each tier action as one managed item in dry run.
-                        if not existing_contract_record: # Count as managed if it would be a creation
-                             total_contracts_managed +=1
-                        elif existing_contract_record and tier_name == selected_tiers[0]: # Count as managed if updating and it's the first tier
-                             total_contracts_managed +=1
-                        continue
+                activity_params = {
+                    "contractId_to_create_if_new": contract_id, # For activity to find/create
+                    "sellerBuildingId": seller_building_id,
+                    "resourceType": resource_id,
+                    "capacityOffered": capacity_per_resource_type,
+                    "pricePerUnitPerDay": price_per_unit_capacity_daily,
+                    "pricingStrategy": tier_name,
+                    "title": title,
+                    "description": description,
+                    "notes": notes_payload # Pass as dict
+                    # durationDays can be derived by activity creator from CONTRACT_DURATION_WEEKS
+                }
+                
+                # Check if contract exists to adjust counting logic for total_contracts_managed
+                # This check is outside the dry_run block because it's needed for both.
+                existing_contract_record = tables["contracts"].all(formula=f"{{ContractId}}='{_escape_airtable_value(contract_id)}'", max_records=1)
 
-                    if existing_contract_record:
-                        record_to_update_id = existing_contract_record[0]['id']
-                        update_fields = {
-                            "PricePerResource": contract_payload["PricePerResource"],
-                            "TargetAmount": contract_payload["TargetAmount"],
-                            "EndAt": contract_payload["EndAt"],
-                            "Status": "active",
-                            "Title": contract_payload["Title"],
-                            "Description": contract_payload["Description"],
-                            "Notes": contract_payload["Notes"]
-                        }
-                        tables["contracts"].update(record_to_update_id, update_fields)
-                        log.info(f"    {LogColors.OKCYAN}Updated existing contract {contract_id} for {resource_name_log} (using {tier_name} pricing).{LogColors.ENDC}")
-                        if tier_name == selected_tiers[0]: # Count only for the first tier action on an existing contract
-                            total_contracts_managed +=1
-                    else:
-                        tables["contracts"].create(contract_payload)
-                        log.info(f"    {LogColors.OKGREEN}Created new contract {contract_id} for {resource_name_log} (using {tier_name} pricing).{LogColors.ENDC}")
-                        total_contracts_managed +=1 # A new contract is definitely one managed item
-
-                except Exception as e_contract:
-                    log.error(f"    {LogColors.FAIL}Error managing contract {contract_id} for {resource_name_log} (using {tier_name} pricing): {e_contract}{LogColors.ENDC}")
-                    log.error(traceback.format_exc())
+                if call_try_create_activity_api(seller_username, "manage_public_storage_offer", activity_params, dry_run, log):
+                    # Increment total_contracts_managed only once per unique contract_id managed in this run
+                    if not existing_contract_record: # If it was a creation
+                        total_contracts_managed += 1
+                    elif existing_contract_record and tier_name == selected_tiers[0]: # If it was an update, count only for the first tier processed
+                        total_contracts_managed += 1
+                    log.info(f"    Successfully initiated 'manage_public_storage_offer' for {contract_id} (Resource: {resource_name_log}, Tier: {tier_name}).")
+                else:
+                    log.error(f"    {LogColors.FAIL}Failed to initiate 'manage_public_storage_offer' for {contract_id} (Resource: {resource_name_log}, Tier: {tier_name}).{LogColors.ENDC}")
 
     log.info(f"{LogColors.OKGREEN}Public Storage Contract Adjustment process finished.{LogColors.ENDC}")
     log.info(f"Total contracts created or updated (or simulated): {total_contracts_managed}")
