@@ -64,6 +64,16 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log des paramètres spécifiques pour buy_available_land
+    if (activityType === 'buy_available_land') {
+      console.log(`[API /activities/try-create] Processing buy_available_land with parameters:`, 
+        `Land ID: ${activityParameters?.landId}`,
+        `Expected Price: ${activityParameters?.expectedPrice}`,
+        `From Building: ${activityParameters?.fromBuildingId || 'Current location'}`,
+        `Target Building: ${activityParameters?.targetBuildingId}`
+      );
+    }
+    
     // Endpoint générique sur le moteur Python pour initier des activités/actions
     let parsedPythonEngineUrl: URL;
     try {

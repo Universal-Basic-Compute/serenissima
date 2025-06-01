@@ -270,9 +270,9 @@ pour y finaliser l'achat direct d'une parcelle de terrain. La transaction (véri
 propriété), qui inclut le paiement du terrain ainsi que d'éventuels frais de transaction ou taxes foncières, est effectuée après cette interaction sur place.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `courthouse` ou `town_hall`). Une fois arrivé, une activité de finalisation d'achat (`activityType:
-finalize_land_purchase_transaction`, durée courte) est créée. Le processeur de cette dernière gérera la transaction et les paiements associés.
+finalize_land_purchase`, durée courte) est créée. Le processeur de cette dernière gérera la transaction et les paiements associés.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `expectedPrice`,
-`targetBuildingId` (optionnel, ID du `courthouse` ou `town_hall` pertinent).
+`fromBuildingId` (optionnel), `targetBuildingId` (ID du `courthouse` ou `town_hall` pertinent).
 
 3.  **Initier un Projet de Construction de Bâtiment**
     *   **activityType**: `initiate_building_project`
