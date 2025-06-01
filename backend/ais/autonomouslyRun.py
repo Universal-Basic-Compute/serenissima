@@ -583,7 +583,7 @@ def clean_thought_content(tables: Dict[str, Table], thought_content: str) -> str
 
     # Step 2: Remove sentences containing technical keywords
     technical_keywords = [
-        "api", "argument", "auth", "aws", "azure", "backend", "branch", "bug", "cache", "ci/cd",
+        "gemini ", "api", "argument", "auth", "aws", "azure", "backend", "branch", "bug", "cache", "ci/cd",
         "cli", "cloud", "code", "commit", "component", "container", "cookie", "cpu", "css",
         "data model", "database", "debug", "deployment", "devops", "dns", "docker", "endpoint",
         "error", "exception", "exploit", "firewall", "frontend", "function", "gcp", "git",
