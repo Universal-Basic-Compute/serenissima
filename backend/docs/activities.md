@@ -522,31 +522,22 @@ travail du destinataire).
 
 1.  **Mettre à Jour son Profil Citoyen**
     *   **activityType**: `update_citizen_profile`
-    *   **Description**: Le citoyen se rend à son domicile ou à un `public_archives` (bureau public) pour enregistrer
+    *   **Description**: Le citoyen se rend à un `public_archives` (bureau public) pour enregistrer
 les modifications. Des frais de dossier peuvent être demandés au `public_archives`.
-    *   **Mécanisme Principal**: Crée une activité `goto_location` (vers domicile ou `public_archives`). À l'arrivée,
-une activité `file_profile_update` est créée, et les frais sont payés si applicable.
+    *   **Mécanisme Principal**: Crée une activité `goto_location` (vers `public_archives`). À l'arrivée,
+une activité `file_profile_update` est créée, et les frais sont payés.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `citizenAirtableId`, `firstName`,
 `lastName`, `familyMotto`, `coatOfArmsImageUrl`, `telegramUserId` (tous optionnels), `targetOfficeBuildingId`
 (optionnel, ID du `public_archives`).
 
 1.  **Gérer son Appartenance à une Guilde**
     *   **activityType**: `manage_guild_membership`
-    *   **Description**: Le citoyen se rend au `guild_hall` de la guilde concernée pour effectuer une action liée à son
+    *   **Description**: Le citoyen se rend au `guild_hall` de la guilde concernée (ou à défaut un `town_hall`) pour effectuer une action liée à son
 appartenance (rejoindre, quitter, accepter une invitation). Des frais d'adhésion ou des cotisations peuvent être dus à la guilde.
     *   **Mécanisme Principal**: Crée une activité `goto_location` (vers le `guildHallBuildingId` qui est un
 `guild_hall`). À l'arrivée, une activité `perform_guild_membership_action` est créée, et les paiements à la guilde sont effectués si nécessaire.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `guildId`, `membershipAction` ("join",
 "leave", "accept_invite"), `guildHallBuildingId` (ID du `guild_hall` spécifique).
-
-1.  **Générer/Enregistrer une Pensée Stratégique**
-    *   **activityType**: `log_strategic_thought`
-    *   **Description**: Le citoyen prend un moment pour réfléchir, potentiellement dans un lieu privé (domicile,
-bureau) ou simplement sur place. La pensée est ensuite enregistrée.
-    *   **Mécanisme Principal**: Peut être une activité `ponder_at_location` (courte durée sur place) ou
-`goto_location` (vers domicile/bureau) suivie de `record_thought`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `context` (optionnel), `visibility`,
-`ponderLocationBuildingId` (optionnel, ID du lieu de réflexion).
 
 1.  **Marquer des Notifications comme Lues**
     *   **activityType**: `mark_notifications_read`
@@ -555,26 +546,6 @@ et marquer ses notifications.
     *   **Mécanisme Principal**: Crée une activité `review_notifications_at_location` (courte durée). Le processeur
 appellera `POST /api/notifications/mark-read`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `notificationIds`.
-
-### Personnalisation
-
-28. **Télécharger un Blason**
-    *   **activityType**: `upload_coat_of_arms`
-    *   **Description**: Le joueur se rend à une `art_academy` ou un `bottega` (atelier d'artiste/bureau héraldique)
-pour faire enregistrer son nouveau blason. Des frais pour le service de l'artiste ou pour l'enregistrement héraldique peuvent être demandés.
-    *   **Mécanisme Principal**: Crée une activité `goto_location` (vers `art_academy` ou `bottega`). À l'arrivée, une
-activité `submit_coat_of_arms_design` est créée, et les frais sont payés.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `imageData` ou `filename`,
-`targetOfficeBuildingId` (optionnel, ID de l'`art_academy`/`bottega`).
-
-29. **Mettre à Jour les Paramètres Citoyen**
-    *   **activityType**: `update_citizen_settings`
-    *   **Description**: Le joueur prend un moment (à son emplacement actuel ou à son domicile) pour ajuster ses
-paramètres personnels.
-    *   **Mécanisme Principal**: Crée une activité `access_personal_settings_at_location` (courte durée). Le processeur
-appellera `POST /api/citizen/settings`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `settingsObject`.
-
 
 ### Process:
 
