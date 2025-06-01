@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
 import PlayerProfile from '../UI/PlayerProfile';
-import LandPurchaseConfirmation from '../UI/LandPurchaseConfirmation';
+// LandPurchaseConfirmation is deprecated
 import ListLandForSaleModal from '../UI/ListLandForSaleModal';
 import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
@@ -941,19 +941,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         </div>
       </div>
       
-      {showPurchaseConfirmation && transaction && (
-        <LandPurchaseConfirmation
-          landId={selectedPolygonId || ''}
-          landName={selectedPolygon?.historicalName || selectedPolygon?.englishName}
-          price={transaction.price}
-          onConfirm={() => {
-            handleConfirmPurchase();
-            return null;
-          }}
-          onCancel={() => setShowPurchaseConfirmation(false)}
-          isLoading={isPurchasing}
-        />
-      )}
+      {/* LandPurchaseConfirmation modal has been removed as it's deprecated */}
       
       {/* List Land For Sale Modal */}
       {showListForSaleModal && selectedPolygonId && (
@@ -985,12 +973,5 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // that logic would be placed before the call.
   // The existing LandPurchaseConfirmation modal might need to be adapted or removed
   // if all purchases go through the new activity system.
-  function handleConfirmPurchase(): React.ReactNode {
-    console.log('Direct land purchase confirmation is being phased out. Use activity system.');
-    // This function might be removed or adapted if LandPurchaseConfirmation modal is removed/changed.
-    alert('Land purchases are now handled via the new market activity system.');
-    setIsPurchasing(false);
-    setShowPurchaseConfirmation(false);
-    return null;
-  }
+  // handleConfirmPurchase function has been removed as it's deprecated.
 }
