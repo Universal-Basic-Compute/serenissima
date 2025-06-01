@@ -1167,7 +1167,7 @@ if __name__ == "__main__":
         "--model",
         type=str,
         default="local", # Default to local model
-        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo'). Default: local."
+        help="Specify a Kinos model override (e.g., 'local', 'gemini-2.5-flash-preview-05-20', 'gpt-4-turbo'). Default: local."
     )
     parser.add_argument(
         "--local",

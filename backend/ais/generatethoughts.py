@@ -585,7 +585,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+        help="Specify a Kinos model override (e.g., 'local', 'gemini-2.5-flash-preview-05-20', 'gpt-4-turbo')."
     )
     args = parser.parse_args()
 
