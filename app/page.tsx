@@ -35,6 +35,7 @@ import {
   UnifiedCitizenModelArticle,
   CitizenActivitiesAndNeedsArticle // Import the new article
 } from '@/components/Articles';
+// LandDetailsPanel est déjà dans components/PolygonViewer, pas besoin d'importer ici s'il est utilisé par IsometricViewer
 
 // Import the 2D viewer component with no SSR
 const IsometricViewer = dynamic(() => import('@/components/PolygonViewer/IsometricViewer'), {
@@ -126,6 +127,13 @@ export default function TwoDPage() {
   // State for user login status
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
   const [loginStatusChecked, setLoginStatusChecked] = useState<boolean>(false);
+  const [currentUserUsername, setCurrentUserUsername] = useState<string | null>(null); // Pour stocker le nom d'utilisateur
+
+  // State for LandDetailsPanel (géré par IsometricViewer, mais nous devons savoir quand il est ouvert pour la logique de la page)
+  // const [showLandDetailPanel, setShowLandDetailPanel] = useState<boolean>(false); // Plus géré ici directement
+  // const [selectedLandId, setSelectedLandId] = useState<string | null>(null); // Plus géré ici directement
+  // const [selectedLandInitialData, setSelectedLandInitialData] = useState<any | null>(null); // Plus géré ici directement
+
 
   // const handleLoadingComplete = () => { // Supprimé car InitialLoadingScreen est retiré
   //   console.log('InitialLoadingScreen complete, showing Daily Update panel.');
@@ -149,6 +157,12 @@ export default function TwoDPage() {
     setShowCitizenDetailsPanelDirect(false);
     setCitizenForPanelDirect(null);
   }, []);
+
+  // const handleLandDetailPanelClose = useCallback(() => { // Plus géré ici directement
+  //   setShowLandDetailPanel(false);
+  //   setSelectedLandId(null);
+  //   setSelectedLandInitialData(null);
+  // }, []);
 
   // Effect to determine client-side initial status after mount
   useEffect(() => {
@@ -647,18 +661,34 @@ export default function TwoDPage() {
   
   // Event listener for showing CitizenDetailsPanel directly
   useEffect(() => {
-    const handleShowCitizenPanel = (citizenData: any) => {
-      console.log('Received showCitizenPanelEvent, citizen data:', citizenData);
-      setCitizenForPanelDirect(citizenData);
+    const handleShowCitizenPanel = (eventData: any) => { // eventData peut être l'objet citoyen ou un objet { citizen: ... }
+      const citizenProfile = eventData.citizen || eventData; // Gérer les deux formats
+      console.log('Received showCitizenPanelEvent, citizen profile:', citizenProfile);
+      setCitizenForPanelDirect(citizenProfile);
       setShowCitizenDetailsPanelDirect(true);
     };
+    
+    // L'ouverture du LandDetailsPanel est maintenant gérée par IsometricViewer
+    // via l'événement POLYGON_SELECTED. Nous n'avons plus besoin de le gérer ici.
+    // const handlePolygonSelected = (eventData: { polygonId: string, polygonData: any }) => {
+    //   if (activeView === 'land') {
+    //     console.log('Polygon selected in Land view:', eventData);
+    //     setSelectedLandId(eventData.polygonId);
+    //     setSelectedLandInitialData(eventData.polygonData); 
+    //     setShowLandDetailPanel(true);
+    //   } else {
+    //     console.log('Polygon selected, but not in Land view. Current view:', activeView);
+    //   }
+    // };
 
-    const subscription = eventBus.subscribe('showCitizenPanelEvent', handleShowCitizenPanel);
+    const citizenPanelSubscription = eventBus.subscribe(EventTypes.SHOW_CITIZEN_PANEL, handleShowCitizenPanel);
+    // const polygonSelectedSubscription = eventBus.subscribe(EventTypes.POLYGON_SELECTED, handlePolygonSelected);
 
     return () => {
-      subscription.unsubscribe();
+      citizenPanelSubscription.unsubscribe();
+      // polygonSelectedSubscription.unsubscribe();
     };
-  }, []);
+  }, [activeView]); // activeView reste une dépendance si d'autres logiques l'utilisent
 
   // Event listener for when the Daily Update Panel closes
   useEffect(() => {
@@ -680,13 +710,44 @@ export default function TwoDPage() {
     const handleWalletChange = (walletData?: { address?: string | null; publicKey?: any; [key: string]: any }) => {
       // Attempt to infer login status from common wallet connection event payloads
       const loggedIn = !!(walletData && (walletData.address || walletData.publicKey || walletData.isConnected === true));
-      
       setIsUserLoggedIn(loggedIn);
-      setLoginStatusChecked(true); // Mark that we've checked the login status at least once
+      setLoginStatusChecked(true);
+      
+      // Mettre à jour le nom d'utilisateur actuel
+      if (loggedIn && walletData?.profile?.username) {
+        setCurrentUserUsername(walletData.profile.username);
+        console.log(`User logged in: ${walletData.profile.username}`);
+      } else if (loggedIn && typeof localStorage !== 'undefined') {
+        // Essayer de récupérer depuis localStorage si non présent dans walletData
+        const profileStr = localStorage.getItem('citizenProfile');
+        if (profileStr) {
+          try {
+            const profile = JSON.parse(profileStr);
+            if (profile && profile.username) {
+              setCurrentUserUsername(profile.username);
+              console.log(`User logged in (from localStorage): ${profile.username}`);
+            } else {
+              setCurrentUserUsername(null);
+            }
+          } catch (e) {
+            console.error("Error parsing citizenProfile from localStorage", e);
+            setCurrentUserUsername(null);
+          }
+        } else {
+          setCurrentUserUsername(null);
+        }
+      } else {
+        setCurrentUserUsername(null);
+        console.log('User logged out or profile not available.');
+      }
       console.log(`Wallet status changed. User logged in: ${loggedIn}`, walletData);
     };
 
     const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, handleWalletChange);
+
+    // Émettre un événement pour demander l'état actuel du portefeuille au montage
+    // Cela permet de récupérer l'état initial si WalletButton est déjà monté et a déjà émis son état.
+    eventBus.emit(EventTypes.REQUEST_WALLET_STATUS);
 
     // It's assumed that WalletButton or a similar component will emit WALLET_CHANGED on its mount
     // to provide the initial status. If not, loginStatusChecked might remain false until a manual connect/disconnect.
@@ -1228,6 +1289,20 @@ export default function TwoDPage() {
       {canShowMainPanels && showLoanPanel && (
         <LoanPanel onClose={handleLoanPanelClose} />
       )}
+
+      {/* Land Detail Panel - Il est maintenant géré et rendu par IsometricViewer */}
+      {/* 
+      {canShowMainPanels && showLandDetailPanel && selectedLandId && (
+        <LandDetailsPanel // Assurez-vous que le nom du composant est correct
+          selectedPolygonId={selectedLandId} // Le prop attendu par LandDetailsPanel
+          onClose={handleLandDetailPanelClose}
+          polygons={polygons} // Passez les polygones si nécessaire
+          landOwners={{}} // Passez les propriétaires de terrains si nécessaire, ou laissez IsometricViewer gérer cela
+          visible={showLandDetailPanel}
+          // currentUser={currentUserUsername} // Passez currentUserUsername si LandDetailsPanel l'utilise
+        />
+      )}
+      */}
 
       {/* Version Indicator - Bottom Right */}
       <div className="absolute bottom-4 right-4 z-50">
