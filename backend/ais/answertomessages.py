@@ -452,9 +452,10 @@ def create_admin_notification(tables, ai_response_counts: Dict[str, int]) -> Non
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 
-def process_ai_messages(dry_run: bool = False):
+def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None): # Added kinos_model_override_arg
     """Main function to process AI messages."""
-    print(f"Starting AI message response process (dry_run={dry_run})")
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default" # Now kinos_model_override_arg is defined
+    print(f"Starting AI message response process (dry_run={dry_run}, kinos_model={model_status})")
     
     # Initialize Airtable connection
     tables = initialize_airtable()
@@ -597,27 +598,11 @@ def process_ai_messages(dry_run: bool = False):
     
     print("AI message response process completed")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process AI responses to messages using Kinos AI.")
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Run the script without making actual changes to Airtable or Kinos."
-    )
-    parser.add_argument(
-        "--model",
-        type=str,
-        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
-    )
-    args = parser.parse_args()
-    
-    # Run the process
-    process_ai_messages(dry_run=args.dry_run, kinos_model_override_arg=args.model)
-
-# Add kinos_model_override_arg to process_ai_messages definition
-def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
+# The main function definition that is actually called by the script's entry point.
+# This definition needs to accept kinos_model_override_arg.
+def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None): # Added kinos_model_override_arg
     """Main function to process AI messages."""
-    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default" # Now kinos_model_override_arg is defined
     print(f"Starting AI message response process (dry_run={dry_run}, kinos_model={model_status})")
     
     # Initialize Airtable connection

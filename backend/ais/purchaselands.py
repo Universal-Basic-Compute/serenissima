@@ -287,8 +287,6 @@ def process_ai_land_purchases(dry_run: bool = False):
                 print(f"{LogColors.FAIL}Failed to initiate 'buy_available_land' activity for AI {ai_username} for land {land_id}.{LogColors.ENDC}")
         else:
             print(f"AI {ai_username} cannot afford any available land")
-        else:
-            print(f"AI {ai_username} cannot afford any available land")
     
     # Create admin notification with summary
     if not dry_run and purchases:
