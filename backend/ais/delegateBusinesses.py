@@ -14,6 +14,7 @@ import logging
 import argparse
 from datetime import datetime
 from typing import Dict, List, Optional, Any
+import requests # Added for API calls
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
@@ -91,6 +92,47 @@ def create_notification(tables: Dict[str, Table], citizen_username: str, title: 
     except Exception as e:
         log.error(f"Error creating notification for {citizen_username}: {e}")
 
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str, # The citizen initiating the activity (e.g., current RunBy or system acting on their behalf)
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool,
+    log_ref: Any # Pass the script's logger
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        log_ref.info(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True # Simulate success for dry run
+
+    api_url = f"{API_BASE_URL}/api/activities/try-create"
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 log_ref.info(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        log_ref.error(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
+
 def delegate_businesses_logic(tables: Dict[str, Table], dry_run: bool = False):
     """Main logic for delegating businesses."""
     ai_citizens = get_all_ai_citizens(tables)
@@ -153,44 +195,39 @@ def delegate_businesses_logic(tables: Dict[str, Table], dry_run: bool = False):
                 if current_delegatee_business_count < BUSINESS_LIMIT_PER_AI:
                     log.info(f"Attempting to delegate business '{business_name}' (ID: {business_building_id}) from {original_owner_username} to {delegatee_username} (current businesses: {current_delegatee_business_count}).")
                     
-                    if not dry_run:
-                        try:
-                            tables['buildings'].update(business_id, {'RunBy': delegatee_username})
-                            log.info(f"Successfully delegated business '{business_name}' to {delegatee_username}.")
-                            
-                            # Create notifications
-                            create_notification(
-                                tables,
-                                original_owner_username,
-                                f"➡️ Business Delegated: {business_name}",
-                                f"Your business **{business_name}** (ID: {business_building_id}) has been delegated to **{delegatee_username}** as you were managing too many businesses.",
-                                {"delegated_to": delegatee_username, "business_id": business_building_id, "business_name": business_name}
-                            )
-                            create_notification(
-                                tables,
-                                delegatee_username,
-                                f"✨ New Business Assigned: {business_name}",
-                                f"You have been assigned to run the business **{business_name}** (ID: {business_building_id}), previously managed by **{original_owner_username}**.",
-                                {"delegated_from": original_owner_username, "business_id": business_building_id, "business_name": business_name}
-                            )
-                        except Exception as e:
-                            log.error(f"Failed to update RunBy for business {business_id} to {delegatee_username}: {e}")
-                            continue # Try next delegatee
-                    
-                    delegation_summary.append({
-                        "from_ai": original_owner_username,
-                        "to_ai": delegatee_username,
-                        "business_name": business_name,
-                        "business_id": business_building_id,
-                        "action": "delegated" if not dry_run else "would_delegate"
-                    })
-                    
-                    ai_business_counts[delegatee_username] = current_delegatee_business_count + 1
-                    delegated_successfully = True
-                    break # Move to the next business to delegate
+                    activity_params = {
+                        "businessBuildingId": business_building_id,
+                        "newOperatorUsername": delegatee_username,
+                        "ownerUsername": business_to_delegate['fields'].get('Owner'), # Actual owner of the building
+                        "reason": f"Delegation from {original_owner_username} (overburdened) to {delegatee_username}.",
+                        "operationType": "delegate"
+                        # notes can be added by the activity creator/processor if needed
+                    }
+
+                    # Initiator is the original_owner_username (current RunBy)
+                    if call_try_create_activity_api(original_owner_username, "change_business_manager", activity_params, dry_run, log):
+                        log.info(f"Successfully initiated delegation of business '{business_name}' to {delegatee_username}.")
+                        # Notifications will be handled by the activity processor.
+                        
+                        delegation_summary.append({
+                            "from_ai": original_owner_username,
+                            "to_ai": delegatee_username,
+                            "business_name": business_name,
+                            "business_id": business_building_id,
+                            "action": "delegation_initiated" if not dry_run else "would_initiate_delegation"
+                        })
+                        
+                        ai_business_counts[delegatee_username] = current_delegatee_business_count + 1
+                        delegated_successfully = True
+                        break # Move to the next business to delegate
+                    else:
+                        log.error(f"Failed to initiate delegation activity for business {business_id} to {delegatee_username}.")
+                        # No continue here, if API call fails, we might still try another delegatee if the loop structure allows,
+                        # but for now, this means this specific delegation attempt failed.
+                        # The outer loop will try other businesses for the overburdened AI.
             
             if not delegated_successfully:
-                log.warning(f"Could not find a suitable AI to delegate business '{business_name}' (ID: {business_building_id}) from {original_owner_username}.")
+                log.warning(f"Could not find a suitable AI or failed to initiate delegation for business '{business_name}' (ID: {business_building_id}) from {original_owner_username}.")
                 delegation_summary.append({
                     "from_ai": original_owner_username,
                     "to_ai": None,
