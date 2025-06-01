@@ -98,13 +98,10 @@ def process_list_land_for_sale_fn(tables: dict, activity_record: dict, building_
             "Description": f"Land parcel {land_name} (ID: {land_id_to_list}) offered for sale by {seller_username} for {price} ducats.",
             "CreatedAt": now_iso,
             "UpdatedAt": now_iso,
+            "SellerUsername": seller_username, # Store username as text for easier querying
             # Optional: EndAt for listing expiration
         }
         
-        # Add SellerUsername for easier querying if your schema supports it, or put in Notes
-        # For now, assuming Seller (linked record) is sufficient. If you add SellerUsername to CONTRACTS:
-        # contract_payload["SellerUsername"] = seller_username
-
         new_contract = tables['contracts'].create(contract_payload)
         log.info(f"{LogColors.SUCCESS}Successfully created land listing contract {new_contract['id']} (Custom ID: {contract_id}) for land {land_id_to_list} by {seller_username} at {price} ducats. Activity {activity_guid}.{LogColors.ENDC}")
         

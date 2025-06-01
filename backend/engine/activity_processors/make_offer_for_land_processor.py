@@ -94,13 +94,13 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
             "Description": f"{buyer_username} offers to buy land {land_name} (ID: {land_id_for_offer}) for {offer_price} ducats.",
             "CreatedAt": now_iso,
             "UpdatedAt": now_iso,
+            "BuyerUsername": buyer_username, # Store username as text for easier querying
             # Optional: EndAt for offer expiration
         }
         if seller_airtable_id_list:
             contract_payload["Seller"] = seller_airtable_id_list
-        
-        # Add BuyerUsername for easier querying if your schema supports it
-        # contract_payload["BuyerUsername"] = buyer_username 
+            if target_seller_username: # If we identified a target seller by username
+                 contract_payload["SellerUsername"] = target_seller_username
 
         new_contract = tables['contracts'].create(contract_payload)
         log.info(f"{LogColors.SUCCESS}Successfully created land offer contract {new_contract['id']} (Custom ID: {contract_id}) for land {land_id_for_offer} by {buyer_username} at {offer_price} ducats. Activity {activity_guid}.{LogColors.ENDC}")

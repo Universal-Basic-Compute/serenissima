@@ -123,6 +123,8 @@ Gère les accords commerciaux entre citoyens ou avec le public.
 -   `Notes` (Texte multiligne): Chaîne JSON ou texte pour des détails supplémentaires.
 -   `Asset` (Texte): Pour les contrats fonciers, stocke le `LandId`. Pour `building_bid`, stocke le `BuildingId` personnalisé du bâtiment concerné.
 -   `AssetType` (Texte): Pour les contrats fonciers, stocke `'land'`. Pour `building_bid`, stocke `'building'`.
+-   `SellerUsername` (Texte): Nom d'utilisateur du vendeur (redondant avec le lien `Seller` mais utile pour les requêtes).
+-   `BuyerUsername` (Texte): Nom d'utilisateur de l'acheteur (redondant avec le lien `Buyer` mais utile pour les requêtes).
 -   `LastExecutedAt` (Date/Heure): Horodatage de la dernière exécution partielle (ex: pour `fetch_from_galley`).
 -   `CreatedAt` (Date/Heure): Date de création du contrat.
 -   `EndAt` (Date/Heure): Date de fin de validité du contrat. Pour `building_bid`, peut être la date d'expiration de l'offre.
