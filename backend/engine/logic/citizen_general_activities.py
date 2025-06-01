@@ -330,16 +330,14 @@ def _handle_eat_from_inventory(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
-    citizen_social_class: str # Added social_class
-) -> bool:
+    citizen_social_class: str 
+) -> Optional[Dict]:
     """Prio 2: Handles eating from inventory if hungry and it's leisure time or a meal break."""
-    if not citizen_record['is_hungry']: return False
+    if not citizen_record['is_hungry']: return None
     if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
-        # Could add more nuanced checks, e.g., if it's a designated meal break within work hours
-        return False
+        return None
 
     log.info(f"{LogColors.OKCYAN}[Faim - Inventaire] Citoyen {citizen_name} ({citizen_social_class}): Est affamé et en période de loisirs. Vérification de l'inventaire.{LogColors.ENDC}")
-    # food_resource_types = ["bread", "fish", "preserved_fish"] # Replaced by constant
     for food_type_id in FOOD_RESOURCE_TYPES_FOR_EATING:
         food_name = _get_res_display_name_module(food_type_id, resource_defs)
         formula = (f"AND({{AssetType}}='citizen', {{Asset}}='{_escape_airtable_value(citizen_username)}', "
@@ -347,27 +345,34 @@ def _handle_eat_from_inventory(
         try:
             inventory_food = tables['resources'].all(formula=formula, max_records=1)
             if inventory_food and float(inventory_food[0]['fields'].get('Count', 0)) >= 1.0:
-                activity_record = try_create_eat_from_inventory_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, food_type_id, 1.0, current_time_utc=now_utc_dt, resource_defs=resource_defs)
+                # Pass now_utc_dt as current_time_utc, and None for start_time_utc_iso for immediate start
+                activity_record = try_create_eat_from_inventory_activity(
+                    tables, citizen_custom_id, citizen_username, citizen_airtable_id, 
+                    food_type_id, 1.0, 
+                    current_time_utc=now_utc_dt, 
+                    resource_defs=resource_defs,
+                    start_time_utc_iso=None # Explicitly None for immediate start
+                )
                 if activity_record:
                     log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_from_inventory' créée pour '{food_name}'.{LogColors.ENDC}")
-                    return activity_record # Return the activity record
+                    return activity_record
         except Exception as e_inv_food:
             log.error(f"{LogColors.FAIL}[Faim] Citoyen {citizen_name}: Erreur vérification inventaire pour '{food_name}': {e_inv_food}{LogColors.ENDC}")
-    return None # Changed from False
+    return None
 
 def _handle_eat_at_home_or_goto(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
-    citizen_social_class: str # Added social_class
-) -> bool:
+    citizen_social_class: str 
+) -> Optional[Dict]:
     """Prio 3: Handles eating at home or going home to eat if hungry and it's leisure time."""
-    if not citizen_record['is_hungry']: return None # Changed from False
+    if not citizen_record['is_hungry']: return None
     if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
-        return None # Changed from False
+        return None
 
     home_record = get_citizen_home(tables, citizen_username)
-    if not home_record: return None # Changed from False
+    if not home_record: return None
 
     log.info(f"{LogColors.OKCYAN}[Faim - Maison] Citoyen {citizen_name} ({citizen_social_class}): Affamé et en période de loisirs. Vérification domicile.{LogColors.ENDC}")
     home_name_display = _get_bldg_display_name_module(tables, home_record)
@@ -391,38 +396,63 @@ def _handle_eat_at_home_or_goto(
         except Exception as e_home_food:
             log.error(f"{LogColors.FAIL}[Faim] Citoyen {citizen_name}: Erreur vérification nourriture à {home_name_display}: {e_home_food}{LogColors.ENDC}")
 
-    if not food_type_at_home_id: return None # Changed from False; No food at home
+    if not food_type_at_home_id: return None # No food at home
 
-    path_data_for_eat = None
-    if not is_at_home:
-        if not citizen_position or not home_position: return None # Changed from False; Cannot pathfind
-        path_data_for_eat = get_path_between_points(citizen_position, home_position, transport_api_url)
-        if not (path_data_for_eat and path_data_for_eat.get('success')): return None # Changed from False; Pathfinding failed
+    if is_at_home:
+        # Create eat_at_home directly
+        eat_activity = try_create_eat_at_home_activity(
+            tables, citizen_custom_id, citizen_username, citizen_airtable_id,
+            home_building_id, food_type_at_home_id, 1.0,
+            current_time_utc=now_utc_dt, resource_defs=resource_defs,
+            start_time_utc_iso=None # Immediate start
+        )
+        if eat_activity:
+            log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_at_home' créée pour manger '{food_at_home_name}' à {home_name_display}.{LogColors.ENDC}")
+        return eat_activity
+    else:
+        # Create goto_home, then chain eat_at_home
+        if not citizen_position or not home_position: return None # Cannot pathfind
+        
+        path_to_home = get_path_between_points(citizen_position, home_position, transport_api_url)
+        if not (path_to_home and path_to_home.get('success')): return None # Pathfinding failed
 
-    activity_record = try_create_eat_at_home_activity( # Capture record
-        tables, citizen_custom_id, citizen_username, citizen_airtable_id,
-        home_building_id, food_type_at_home_id, 1.0, is_at_home, path_data_for_eat,
-        current_time_utc=now_utc_dt, resource_defs=resource_defs
-    )
-    if activity_record:
-        activity_type_created = "eat_at_home" if is_at_home else "goto_home"
-        log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité '{activity_type_created}' créée pour manger '{food_at_home_name}' à {home_name_display}.{LogColors.ENDC}")
-    return activity_record # Return record or None
+        goto_home_activity = try_create_goto_home_activity(
+            tables, citizen_custom_id, citizen_username, citizen_airtable_id,
+            home_building_id, path_to_home, current_time_utc=now_utc_dt
+            # start_time_utc_iso is None for immediate start of travel
+        )
+        if goto_home_activity:
+            log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'goto_home' créée vers {home_name_display} pour manger.{LogColors.ENDC}")
+            # Chain eat_at_home activity
+            next_start_time_iso = goto_home_activity['fields']['EndDate']
+            eat_activity_chained = try_create_eat_at_home_activity(
+                tables, citizen_custom_id, citizen_username, citizen_airtable_id,
+                home_building_id, food_type_at_home_id, 1.0,
+                current_time_utc=now_utc_dt, # current_time_utc is for fallback if start_time_utc_iso is None
+                resource_defs=resource_defs,
+                start_time_utc_iso=next_start_time_iso
+            )
+            if eat_activity_chained:
+                log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_at_home' chaînée après 'goto_home', début à {next_start_time_iso}.{LogColors.ENDC}")
+            else:
+                log.warning(f"{LogColors.WARNING}[Faim] Citoyen {citizen_name}: Échec de la création de 'eat_at_home' chaînée après 'goto_home'.{LogColors.ENDC}")
+            return goto_home_activity # Return the first activity of the chain
+        return None # Failed to create goto_home
 
 def _handle_eat_at_tavern_or_goto(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
-    citizen_social_class: str # Added social_class
-) -> bool:
+    citizen_social_class: str 
+) -> Optional[Dict]:
     """Prio 6: Handles eating at tavern or going to tavern to eat if hungry and it's leisure time."""
-    if not citizen_record['is_hungry']: return None # Changed from False
+    if not citizen_record['is_hungry']: return None
     if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
-        return None # Changed from False
-    if not citizen_position: return None # Changed from False
+        return None
+    if not citizen_position: return None
     
     citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
-    if citizen_ducats < TAVERN_MEAL_COST_ESTIMATE: return None # Changed from False
+    if citizen_ducats < TAVERN_MEAL_COST_ESTIMATE: return None
 
     log.info(f"{LogColors.OKCYAN}[Faim - Taverne] Citoyen {citizen_name} ({citizen_social_class}): Affamé et en période de loisirs. Recherche taverne.{LogColors.ENDC}")
     closest_tavern_record = get_closest_inn(tables, citizen_position) # Inn also serves as tavern
@@ -447,21 +477,42 @@ def _handle_eat_at_tavern_or_goto(
                 tavern_sells_food = True; break
         except Exception: pass # Ignore errors in this simplified check for now
     
-    if not tavern_sells_food: return None # Changed from False
+    if not tavern_sells_food: return None
 
     is_at_tavern = _calculate_distance_meters(citizen_position, tavern_pos) < 20
-    activity_record = None # Initialize
+    
     if is_at_tavern:
-        activity_record = try_create_eat_at_tavern_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, tavern_custom_id, current_time_utc=now_utc_dt, resource_defs=resource_defs)
-        if activity_record:
+        eat_activity = try_create_eat_at_tavern_activity(
+            tables, citizen_custom_id, citizen_username, citizen_airtable_id, 
+            tavern_custom_id, current_time_utc=now_utc_dt, resource_defs=resource_defs,
+            start_time_utc_iso=None # Immediate start
+        )
+        if eat_activity:
             log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_at_tavern' créée à {tavern_name_display}.{LogColors.ENDC}")
+        return eat_activity
     else:
         path_to_tavern = get_path_between_points(citizen_position, tavern_pos, transport_api_url)
-        if path_to_tavern and path_to_tavern.get('success'):
-            activity_record = try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, tavern_custom_id, path_to_tavern, current_time_utc=now_utc_dt)
-            if activity_record:
-                log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'travel_to_inn' (vers taverne) créée vers {tavern_name_display}.{LogColors.ENDC}")
-    return activity_record # Return record or None
+        if not (path_to_tavern and path_to_tavern.get('success')): return None
+
+        goto_tavern_activity = try_create_travel_to_inn_activity(
+            tables, citizen_custom_id, citizen_username, citizen_airtable_id, 
+            tavern_custom_id, path_to_tavern, current_time_utc=now_utc_dt
+            # start_time_utc_iso is None for immediate start of travel
+        )
+        if goto_tavern_activity:
+            log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'travel_to_inn' (vers taverne) créée vers {tavern_name_display}.{LogColors.ENDC}")
+            next_start_time_iso = goto_tavern_activity['fields']['EndDate']
+            eat_activity_chained = try_create_eat_at_tavern_activity(
+                tables, citizen_custom_id, citizen_username, citizen_airtable_id,
+                tavern_custom_id, current_time_utc=now_utc_dt, resource_defs=resource_defs,
+                start_time_utc_iso=next_start_time_iso
+            )
+            if eat_activity_chained:
+                log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_at_tavern' chaînée après 'travel_to_inn', début à {next_start_time_iso}.{LogColors.ENDC}")
+            else:
+                log.warning(f"{LogColors.WARNING}[Faim] Citoyen {citizen_name}: Échec de la création de 'eat_at_tavern' chaînée après 'travel_to_inn'.{LogColors.ENDC}")
+            return goto_tavern_activity # Return the first activity of the chain
+        return None # Failed to create travel_to_inn
 
 def _handle_deposit_inventory_at_work(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
@@ -601,12 +652,12 @@ def _handle_night_shelter(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
-    citizen_social_class: str # Added social_class
-) -> bool:
+    citizen_social_class: str 
+) -> Optional[Dict]:
     """Prio 15: Handles finding night shelter (home or inn) if it's rest time."""
     if not is_rest_time_for_class(citizen_social_class, now_venice_dt):
-        return False
-    if not citizen_position: return False
+        return None
+    if not citizen_position: return None
 
     log.info(f"{LogColors.OKCYAN}[Repos] Citoyen {citizen_name} ({citizen_social_class}): Période de repos. Évaluation abri.{LogColors.ENDC}")
     is_forestieri = citizen_social_class == "Forestieri"
@@ -696,41 +747,81 @@ def _handle_night_shelter(
             home_name_display = _get_bldg_display_name_module(tables, home_record)
             home_pos = _get_building_position_coords(home_record)
             home_custom_id_val = home_record['fields'].get('BuildingId', home_record['id'])
-            if not home_pos or not home_custom_id_val: return False
+            if not home_pos or not home_custom_id_val: return None
 
             if _calculate_distance_meters(citizen_position, home_pos) < 20: # Is at home
-                if try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, home_custom_id_val, "home", stay_end_time_utc_iso, now_utc_dt):
+                stay_activity = try_create_stay_activity(
+                    tables, citizen_custom_id, citizen_username, citizen_airtable_id, 
+                    home_custom_id_val, "home", stay_end_time_utc_iso, now_utc_dt, start_time_utc_iso=None
+                )
+                if stay_activity:
                     log.info(f"{LogColors.OKGREEN}[Repos] Citoyen {citizen_name} ({citizen_social_class}): Activité 'rest' (maison) créée à {home_name_display}.{LogColors.ENDC}")
-                    return True
-            else: # Not at home, go home
+                return stay_activity
+            else: # Not at home, go home then rest
                 path_to_home = get_path_between_points(citizen_position, home_pos, transport_api_url)
-                if path_to_home and path_to_home.get('success'):
-                    if try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, home_custom_id_val, path_to_home, now_utc_dt):
-                        log.info(f"{LogColors.OKGREEN}[Repos] Citoyen {citizen_name} ({citizen_social_class}): Activité 'goto_home' créée vers {home_name_display}.{LogColors.ENDC}")
-                        return True
-            return False # Failed to rest or go home for resident with home
+                if not (path_to_home and path_to_home.get('success')): return None
+                
+                goto_home_activity = try_create_goto_home_activity(
+                    tables, citizen_custom_id, citizen_username, citizen_airtable_id, 
+                    home_custom_id_val, path_to_home, now_utc_dt # start_time_utc_iso is None for goto_home
+                )
+                if goto_home_activity:
+                    log.info(f"{LogColors.OKGREEN}[Repos] Citoyen {citizen_name} ({citizen_social_class}): Activité 'goto_home' créée vers {home_name_display}.{LogColors.ENDC}")
+                    next_start_time_iso = goto_home_activity['fields']['EndDate']
+                    stay_activity_chained = try_create_stay_activity(
+                        tables, citizen_custom_id, citizen_username, citizen_airtable_id,
+                        home_custom_id_val, "home", stay_end_time_utc_iso, now_utc_dt, 
+                        start_time_utc_iso=next_start_time_iso
+                    )
+                    if stay_activity_chained:
+                        log.info(f"{LogColors.OKGREEN}[Repos] Citoyen {citizen_name}: Activité 'rest' (maison) chaînée après 'goto_home', début à {next_start_time_iso}.{LogColors.ENDC}")
+                    else:
+                        log.warning(f"{LogColors.WARNING}[Repos] Citoyen {citizen_name}: Échec de la création de 'rest' (maison) chaînée.{LogColors.ENDC}")
+                    return goto_home_activity # Return first activity of chain
+                return None # Failed to create goto_home
+            return None # Failed to rest or go home for resident with home
 
-    # Forestieri or Homeless Resident logic (Inn) - This part is reached if is_forestieri is true, OR if resident is homeless
+    # Forestieri or Homeless Resident logic (Inn)
     log.info(f"{LogColors.OKCYAN}[Repos] Citoyen {citizen_name} ({citizen_social_class} - {'Forestieri' if is_forestieri else 'Résident sans abri'}): Recherche d'une auberge.{LogColors.ENDC}")
     closest_inn_record = get_closest_inn(tables, citizen_position)
-    if not closest_inn_record: return False
+    if not closest_inn_record: return None
 
     inn_name_display = _get_bldg_display_name_module(tables, closest_inn_record)
     inn_pos = _get_building_position_coords(closest_inn_record)
     inn_custom_id_val = closest_inn_record['fields'].get('BuildingId', closest_inn_record['id'])
-    if not inn_pos or not inn_custom_id_val: return False
+    if not inn_pos or not inn_custom_id_val: return None
 
     if _calculate_distance_meters(citizen_position, inn_pos) < 20: # Is at inn
-        if try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, inn_custom_id_val, "inn", stay_end_time_utc_iso, now_utc_dt):
+        stay_activity_inn = try_create_stay_activity(
+            tables, citizen_custom_id, citizen_username, citizen_airtable_id, 
+            inn_custom_id_val, "inn", stay_end_time_utc_iso, now_utc_dt, start_time_utc_iso=None
+        )
+        if stay_activity_inn:
             log.info(f"{LogColors.OKGREEN}[Nuit] Citoyen {citizen_name}: Activité 'rest' (auberge) créée à {inn_name_display}.{LogColors.ENDC}")
-            return True
-    else: # Not at inn, go to inn
+        return stay_activity_inn
+    else: # Not at inn, go to inn then rest
         path_to_inn = get_path_between_points(citizen_position, inn_pos, transport_api_url)
-        if path_to_inn and path_to_inn.get('success'):
-            if try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_id, inn_custom_id_val, path_to_inn, now_utc_dt):
-                log.info(f"{LogColors.OKGREEN}[Nuit] Citoyen {citizen_name}: Activité 'travel_to_inn' créée vers {inn_name_display}.{LogColors.ENDC}")
-                return True
-    return False
+        if not (path_to_inn and path_to_inn.get('success')): return None
+        
+        goto_inn_activity = try_create_travel_to_inn_activity(
+            tables, citizen_custom_id, citizen_username, citizen_airtable_id, 
+            inn_custom_id_val, path_to_inn, now_utc_dt # start_time_utc_iso is None for travel_to_inn
+        )
+        if goto_inn_activity:
+            log.info(f"{LogColors.OKGREEN}[Nuit] Citoyen {citizen_name}: Activité 'travel_to_inn' créée vers {inn_name_display}.{LogColors.ENDC}")
+            next_start_time_iso = goto_inn_activity['fields']['EndDate']
+            stay_activity_inn_chained = try_create_stay_activity(
+                tables, citizen_custom_id, citizen_username, citizen_airtable_id,
+                inn_custom_id_val, "inn", stay_end_time_utc_iso, now_utc_dt,
+                start_time_utc_iso=next_start_time_iso
+            )
+            if stay_activity_inn_chained:
+                log.info(f"{LogColors.OKGREEN}[Nuit] Citoyen {citizen_name}: Activité 'rest' (auberge) chaînée après 'travel_to_inn', début à {next_start_time_iso}.{LogColors.ENDC}")
+            else:
+                log.warning(f"{LogColors.WARNING}[Nuit] Citoyen {citizen_name}: Échec de la création de 'rest' (auberge) chaînée.{LogColors.ENDC}")
+            return goto_inn_activity # Return first activity of chain
+        return None # Failed to create travel_to_inn
+    return None
 
 def _handle_shop_for_food_at_retail(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
@@ -1485,46 +1576,45 @@ def _handle_general_goto_work(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
-    citizen_social_class: str # Added social_class
-) -> bool:
+    citizen_social_class: str 
+) -> Optional[Dict]:
     """Prio 70: Handles general goto_work if it's work time, citizen has a workplace and is not there."""
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
-    if not workplace_record: return False # No workplace, so no goto_work
+    if not workplace_record: return None 
 
     workplace_type = workplace_record['fields'].get('Type')
     if not is_work_time(citizen_social_class, now_venice_dt, workplace_type=workplace_type):
-        return False # Not work time for this specific workplace or class
+        return None 
 
-    # Nobili check is handled by is_work_time if it falls back to class schedule.
-    # If a Nobili is an "employee" at a building with specific hours, is_work_time would use building hours.
-    # To be absolutely sure Nobili don't get a goto_work from this general handler:
     if citizen_social_class == "Nobili" and not BUILDING_TYPE_WORK_SCHEDULES.get(workplace_type):
-        return None # Changed from False
+        return None 
 
-    if not citizen_position: return None # Changed from False
+    if not citizen_position: return None 
     workplace_pos = _get_building_position_coords(workplace_record)
-    if not workplace_pos: return None # Changed from False
+    if not workplace_pos: return None 
 
     if _calculate_distance_meters(citizen_position, workplace_pos) < 20:
-        return None # Changed from False; already at workplace, no "goto" activity created by this handler
+        return None # Already at workplace
 
     log.info(f"{LogColors.OKCYAN}[Aller au Travail] Citoyen {citizen_name} ({citizen_social_class}) n'est pas à son lieu de travail. Création goto_work.{LogColors.ENDC}")
     path_to_work = get_path_between_points(citizen_position, workplace_pos, transport_api_url)
     if path_to_work and path_to_work.get('success'):
         workplace_custom_id_val = workplace_record['fields'].get('BuildingId')
-        home_record = get_citizen_home(tables, citizen_username) # For food pickup logic
-        is_at_home_val = False # Assume not at home unless checked
+        home_record = get_citizen_home(tables, citizen_username) 
+        is_at_home_val = False 
         if home_record and citizen_position:
             home_pos = _get_building_position_coords(home_record)
             if home_pos: is_at_home_val = _calculate_distance_meters(citizen_position, home_pos) < 20
         
-        activity_record = try_create_goto_work_activity( # Capture the record
+        # Create goto_work activity, no chaining from this handler.
+        # start_time_utc_iso is None for immediate start.
+        activity_record = try_create_goto_work_activity(
             tables, citizen_custom_id, citizen_username, citizen_airtable_id,
             workplace_custom_id_val, path_to_work, home_record, resource_defs,
-            is_at_home_val, citizen_position_str_val, now_utc_dt
+            is_at_home_val, citizen_position_str_val, now_utc_dt, start_time_utc_iso=None
         )
-        return activity_record # Return the record or None
-    return None # Changed from False
+        return activity_record 
+    return None 
 
 # --- Dispatcher for Specific Activity Requests ---
 def dispatch_specific_activity_request(
@@ -1538,10 +1628,11 @@ def dispatch_specific_activity_request(
     now_utc_dt: datetime.datetime,
     transport_api_url: str,
     api_base_url: str
-) -> Dict[str, Any]:
+) -> Dict[str, Any]: # Return type remains Dict, but content will change slightly
     """
     Attempts to create a specific activity for a citizen based on activity_type and parameters.
-    Returns a dictionary with success status, message, and optionally the created activity.
+    This will now orchestrate chains of activities if necessary.
+    Returns a dictionary with success status, message, and optionally the first activity of a chain.
     """
     # Extract common citizen details
     citizen_custom_id = citizen_record_full['fields'].get('CitizenId')
@@ -1578,59 +1669,94 @@ def dispatch_specific_activity_request(
 
     # Common arguments for handler functions
     handler_args = (
-        tables, citizen_record_full, False, resource_defs, building_type_defs,
+        tables, citizen_record_full, False, resource_defs, building_type_defs, # False for deprecated is_night
         now_venice_dt, now_utc_dt, transport_api_url, api_base_url,
         citizen_position, citizen_custom_id, citizen_username, citizen_airtable_id, 
         citizen_name, citizen_position_str, citizen_social_class
     )
     
-    activity_record = None
-    strategy_applied = "default_order"
+    first_activity_of_chain: Optional[Dict] = None # Will store the first activity created
+    strategy_applied = "default_order" # For logging/messaging
     params = activity_parameters or {}
 
+    # --- Handle specific activity_type requests ---
+    # Each block should set first_activity_of_chain if successful.
+
     if activity_type == "eat":
-        strategy = params.get("strategy")
-        strategy_applied = strategy if strategy else "default_order"
+        strategy = params.get("strategy", "default_order")
+        strategy_applied = strategy
 
         if not is_hungry:
              return {"success": False, "message": f"{citizen_name} is not hungry.", "activity": None, "reason": "not_hungry"}
 
         if strategy == "inventory":
-            activity_record = _handle_eat_from_inventory(*handler_args)
+            first_activity_of_chain = _handle_eat_from_inventory(*handler_args)
         elif strategy == "home":
-            activity_record = _handle_eat_at_home_or_goto(*handler_args)
+            first_activity_of_chain = _handle_eat_at_home_or_goto(*handler_args)
         elif strategy == "tavern":
-            activity_record = _handle_eat_at_tavern_or_goto(*handler_args)
-        else: # No specific strategy or unknown strategy, try all in order
-            activity_record = _handle_eat_from_inventory(*handler_args)
-            if not activity_record:
-                activity_record = _handle_eat_at_home_or_goto(*handler_args)
-            if not activity_record:
-                activity_record = _handle_eat_at_tavern_or_goto(*handler_args)
+            first_activity_of_chain = _handle_eat_at_tavern_or_goto(*handler_args)
+        else: # Default order if no specific strategy or unknown
+            first_activity_of_chain = _handle_eat_from_inventory(*handler_args)
+            if not first_activity_of_chain:
+                first_activity_of_chain = _handle_eat_at_home_or_goto(*handler_args)
+            if not first_activity_of_chain:
+                first_activity_of_chain = _handle_eat_at_tavern_or_goto(*handler_args)
         
-        if activity_record:
-            return {"success": True, "message": f"Activity '{activity_record['fields']['Type']}' created for {citizen_name} (strategy: {strategy_applied}).", "activity": activity_record['fields']}
+        if first_activity_of_chain:
+            return {"success": True, "message": f"Eating endeavor initiated for {citizen_name} (strategy: {strategy_applied}). First activity: {first_activity_of_chain['fields']['Type']}.", "activity": first_activity_of_chain['fields']}
         else:
-            return {"success": False, "message": f"Could not create 'eat' activity for {citizen_name} (strategy: {strategy_applied}).", "activity": None, "reason": "no_eating_option_found"}
+            return {"success": False, "message": f"Could not initiate eating endeavor for {citizen_name} (strategy: {strategy_applied}).", "activity": None, "reason": "no_eating_option_found"}
 
     elif activity_type == "leave_venice":
-        activity_record = _handle_leave_venice(*handler_args)
-        if activity_record:
-            return {"success": True, "message": f"Activity '{activity_record['fields']['Type']}' created for {citizen_name}.", "activity": activity_record['fields']}
+        # _handle_leave_venice should already create the necessary chain (e.g., goto_dock then leave_venice)
+        # and return the first activity of that chain.
+        first_activity_of_chain = _handle_leave_venice(*handler_args)
+        if first_activity_of_chain:
+            return {"success": True, "message": f"Leave Venice endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain['fields']['Type']}.", "activity": first_activity_of_chain['fields']}
         else:
-            return {"success": False, "message": f"Could not create 'leave_venice' activity for {citizen_name}.", "activity": None, "reason": "conditions_not_met_or_pathfinding_failed"}
-    
-    # Add other activity_type handlers here...
-    # Example for a hypothetical "seek_shelter"
-    # elif activity_type == "seek_shelter":
-    #     activity_record = _handle_night_shelter(*handler_args) # Assuming _handle_night_shelter is adapted
-    #     if activity_record:
-    #         return {"success": True, "message": "Seek shelter activity initiated.", "activity": activity_record['fields']}
-    #     else:
-    #         return {"success": False, "message": "Could not find shelter.", "activity": None, "reason": "no_shelter_found"}
+            return {"success": False, "message": f"Could not initiate 'leave_venice' endeavor for {citizen_name}.", "activity": None, "reason": "conditions_not_met_or_pathfinding_failed"}
 
-    else:
-        return {"success": False, "message": f"Activity type '{activity_type}' is not supported for direct creation by the Python engine yet.", "activity": None, "reason": "unsupported_activity_type"}
+    elif activity_type == "seek_shelter": # Example for a new high-level endeavor
+        # _handle_night_shelter creates chains (e.g. goto_home then rest)
+        first_activity_of_chain = _handle_night_shelter(*handler_args)
+        if first_activity_of_chain:
+            return {"success": True, "message": f"Seek shelter endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain['fields']['Type']}.", "activity": first_activity_of_chain['fields']}
+        else:
+            return {"success": False, "message": f"Could not find or initiate shelter endeavor for {citizen_name}.", "activity": None, "reason": "no_shelter_option_found"}
+
+    # TODO: Add more handlers for other high-level activityTypes like "work_at_business", "shop_for_item", etc.
+    # These would involve:
+    # 1. Checking prerequisites (e.g., has workplace, has money).
+    # 2. Determining if travel is needed.
+    # 3. Calling appropriate activity creators in sequence.
+    # Example: "work_at_business"
+    # elif activity_type == "work_at_business":
+    #     workplace_rec = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
+    #     if not workplace_rec:
+    #         return {"success": False, "message": f"{citizen_name} has no workplace.", "activity": None, "reason": "no_workplace"}
+    #     
+    #     workplace_pos = _get_building_position_coords(workplace_rec)
+    #     is_at_work = citizen_position and workplace_pos and _calculate_distance_meters(citizen_position, workplace_pos) < 20
+    #
+    #     if is_at_work:
+    #         # Directly try to create a production/work task
+    #         # This might call a sub-handler like _handle_production_and_general_work_tasks
+    #         # which itself needs to return the first activity of a potential chain.
+    #         first_activity_of_chain = _handle_production_and_general_work_tasks(*handler_args) # Assuming it's adapted
+    #     else:
+    #         # Create goto_work, then chain production/work
+    #         path_to_work = get_path_between_points(citizen_position, workplace_pos, transport_api_url)
+    #         if path_to_work and path_to_work.get('success'):
+    #             first_activity_of_chain = try_create_goto_work_activity(...) # Create goto_work
+    #             if first_activity_of_chain:
+    #                 # Chain the actual work activity (e.g., production)
+    #                 # next_work_start_time = first_activity_of_chain['fields']['EndDate']
+    #                 # Call try_create_production_activity with start_time_utc_iso = next_work_start_time
+    #                 pass # Placeholder for chaining logic
+    #     # ... return based on first_activity_of_chain ...
+
+    else: # Fallback for unsupported or not-yet-implemented high-level types
+        return {"success": False, "message": f"Activity type '{activity_type}' is not supported for orchestrated creation by the Python engine yet.", "activity": None, "reason": "unsupported_orchestrated_activity_type"}
 
 
 # --- Main Activity Processing Function ---
@@ -1645,7 +1771,7 @@ def process_citizen_activity(
     now_utc_dt: datetime.datetime,
     transport_api_url: str,
     api_base_url: str
-) -> bool:
+) -> Optional[Dict]:
     """Process activity creation for a single citizen based on prioritized handlers."""
     
     citizen_custom_id = citizen_record['fields'].get('CitizenId')
@@ -1673,11 +1799,18 @@ def process_citizen_activity(
     if not citizen_position:
         log.info(f"{LogColors.OKBLUE}Citizen {citizen_custom_id} has no position. Assigning random.{LogColors.ENDC}")
         citizen_position = _fetch_and_assign_random_starting_position(tables, citizen_record, api_base_url)
-        if citizen_position: # Update citizen_position_str if new position assigned
+        if citizen_position: 
             citizen_position_str = json.dumps(citizen_position)
-        else:
-            log.warning(f"{LogColors.WARNING}Failed to assign random position. Creating idle.{LogColors.ENDC}")
-            # (Idle creation moved to end of function)
+        else: # Failed to assign random position
+            log.warning(f"{LogColors.WARNING}Failed to assign random position for {citizen_name}. Cannot proceed with activity creation.{LogColors.ENDC}")
+            # Create an immediate idle activity if position assignment fails critically
+            idle_end_time_iso_critical = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+            return try_create_idle_activity(
+                tables, citizen_custom_id, citizen_username, citizen_airtable_id,
+                end_date_iso=idle_end_time_iso_critical,
+                reason_message="Critical: Failed to determine or assign citizen position.",
+                current_time_utc=now_utc_dt, start_time_utc_iso=None
+            )
 
     # Determine hunger state once
     is_hungry = False
@@ -1735,14 +1868,14 @@ def process_citizen_activity(
     for priority, handler_func, description in activity_handlers:
         log.info(f"{LogColors.OKBLUE}[Prio: {priority}] Citizen {citizen_name} ({citizen_social_class}): Evaluating '{description}'...{LogColors.ENDC}")
         try:
-            if handler_func(*handler_args):
-                log.info(f"{LogColors.OKGREEN}Citizen {citizen_name} ({citizen_social_class}): Activity created by '{description}'.{LogColors.ENDC}")
-                return True
+            created_activity_record = handler_func(*handler_args)
+            if created_activity_record: # Handler returns the activity record or None
+                log.info(f"{LogColors.OKGREEN}Citizen {citizen_name} ({citizen_social_class}): Activity/chain created by '{description}'. First activity: {created_activity_record['fields'].get('ActivityId', created_activity_record['id'])}{LogColors.ENDC}")
+                return created_activity_record # Return the first activity of the chain
         except Exception as e_handler:
             log.error(f"{LogColors.FAIL}Citizen {citizen_name} ({citizen_social_class}): ERREUR dans handler '{description}': {e_handler}{LogColors.ENDC}")
             import traceback
             log.error(traceback.format_exc())
-            # Continue to next handler if one fails, to not block all activity creation
 
     # Fallback logic if no activity was created by primary handlers
     log.info(f"{LogColors.OKBLUE}Citizen {citizen_name} ({citizen_social_class}): No specific activity from primary handlers. Evaluating fallback.{LogColors.ENDC}")
@@ -1757,19 +1890,20 @@ def process_citizen_activity(
     else: # Not work time AND not leisure time. "Consider it rest".
         log.info(f"{LogColors.OKBLUE}Fallback for {citizen_name}: Not work or leisure. Attempting 'rest' via _handle_night_shelter.{LogColors.ENDC}")
         # _handle_night_shelter itself checks is_rest_time_for_class.
-        # If it's not scheduled rest time, it will return False.
-        if _handle_night_shelter(*handler_args): # Pass the same handler_args
-            log.info(f"{LogColors.OKGREEN}Fallback for {citizen_name}: 'rest' activity successfully created by _handle_night_shelter.{LogColors.ENDC}")
-            return True # Activity created by the fallback rest attempt
+        # If it's not scheduled rest time, it will return None.
+        fallback_rest_activity = _handle_night_shelter(*handler_args) # Pass the same handler_args
+        if fallback_rest_activity:
+            log.info(f"{LogColors.OKGREEN}Fallback for {citizen_name}: 'rest' activity/chain successfully created by _handle_night_shelter.{LogColors.ENDC}")
+            return fallback_rest_activity # Activity/chain created by the fallback rest attempt
         else:
-            log.info(f"{LogColors.OKBLUE}Fallback for {citizen_name}: _handle_night_shelter did not create a rest activity. Creating 'idle'.{LogColors.ENDC}")
+            log.info(f"{LogColors.OKBLUE}Fallback for {citizen_name}: _handle_night_shelter did not create a rest activity/chain. Creating 'idle'.{LogColors.ENDC}")
     
     # If we reach here, it means we decided to create 'idle' or the fallback rest attempt failed.
     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-    try_create_idle_activity(
+    # Pass None for start_time_utc_iso for immediate start
+    return try_create_idle_activity(
         tables, citizen_custom_id, citizen_username, citizen_airtable_id,
         end_date_iso=idle_end_time_iso,
         reason_message="No specific tasks available after evaluating all priorities, or fallback rest attempt failed.",
-        current_time_utc=now_utc_dt
+        current_time_utc=now_utc_dt, start_time_utc_iso=None
     )
-    return True
