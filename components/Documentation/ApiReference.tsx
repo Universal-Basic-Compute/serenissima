@@ -143,6 +143,7 @@ export default function ApiReference() {
               <li><a href="#transport-post-water-points" className="text-amber-600 hover:underline text-sm">POST /api/water-points</a></li>
               <li><a href="#transport-get-water-graph" className="text-amber-600 hover:underline text-sm">GET /api/get-water-graph</a></li>
               <li><a href="#transport-get-activities" className="text-amber-600 hover:underline text-sm">GET /api/activities</a></li>
+              <li><a href="#activities-post-eat" className="text-amber-600 hover:underline text-sm">POST /api/activities/eat</a></li>
             </ul>
           </li>
           <li><a href="#economy" className="text-amber-700 hover:underline">Economy & Finance</a>
@@ -2434,6 +2435,69 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       // ... other fields from Airtable, camelCased
     }
   ]
+}`}
+            </pre>
+          </div>
+        </div>
+        
+        <div id="activities-post-eat" className="mb-8 scroll-mt-20">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/activities/eat</h3>
+          <p className="mb-2">
+            Attempts to have a citizen perform an eating activity. This endpoint delegates the decision-making logic 
+            to the Python backend engine, which will try various strategies (inventory, home, tavern).
+            The Python engine, upon deciding an action, will then call <code>POST /api/actions/create-activity</code> 
+            to persist the chosen activity. This endpoint returns the result from the Python engine.
+            If travel is required (e.g., to go home or to a tavern), the Python engine might instruct the creation of a travel activity first.
+          </p>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Request Body</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "citizenUsername": "string", // Required: Username of the citizen
+  "strategy": "inventory" | "home" | "tavern" // Optional: Suggest a specific strategy to the Python engine
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response (Success, Activity Created by Python Engine)</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "message": "Activity 'activity_type' created for citizenUsername via Python engine.", // Message from Python engine
+  "activity": { /* The created activity object, returned by /api/actions/create-activity via Python engine */ }
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response (Success, Python Engine Indicates Travel Needed)</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "message": "Python engine determined citizen citizenUsername needs to go to [location] to eat. '[travel_activity_type]' activity should be created.", // Message from Python engine
+  "activity": null,
+  "action_needed": "create_goto_home" | "create_travel_to_inn", // Suggestion from Python engine
+  "details": { /* Details for creating the travel activity, from Python engine */ }
+}`}
+            </pre>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response (Success, No Action by Python Engine)</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "message": "citizenUsername is not hungry. No eating activity created by Python engine.", // Or other reason from Python engine
+  "activity": null,
+  "reason": "All strategies exhausted or conditions not met by Python engine." // Reason from Python engine
+}`}
+            </pre>
+          </div>
+           <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Error Response (from this API or proxied from Python Engine)</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": false,
+  "error": "Description of the error (e.g., Python engine error, citizen not found)",
+  "details": { /* Optional error details */ }
 }`}
             </pre>
           </div>
