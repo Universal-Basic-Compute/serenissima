@@ -1,15 +1,17 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react'; // Added React and useCallback
 import * as THREE from 'three';
 import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
 import PlayerProfile from '../UI/PlayerProfile';
-// LandPurchaseConfirmation is deprecated
 import ListLandForSaleModal from '../UI/ListLandForSaleModal';
 import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
 import { eventBus, EventTypes } from '../../lib/utils/eventBus';
-import { getWalletAddress, getCurrentCitizenUsername } from '../../lib/utils/walletUtils'; // Added getCurrentCitizenUsername
+import { getWalletAddress, getCurrentCitizenUsername } from '../../lib/utils/walletUtils';
+import { FaMapMarkedAlt, FaBuilding, FaUserShield, FaLandmark, FaTimes, FaComments, FaExpand, FaCompress, FaSpinner } from 'react-icons/fa'; // Added icons
+import ReactMarkdown from 'react-markdown'; // Added import
+import remarkGfm from 'remark-gfm'; // Added import
 
 // Helper function to normalize identifiers for comparison
 const normalizeIdentifier = (id: string | null | undefined): string | null => {
@@ -122,7 +124,15 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [dynamicOwner, setDynamicOwner] = useState<string | null>(null);
   const [ownerDetails, setOwnerDetails] = useState<any>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  
+  const messagesEndRef = useRef<HTMLDivElement>(null); // For chat scrolling
+
+  // State for chat functionality (simplified for land panel)
+  const [messages, setMessages] = useState<any[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [isCorrespondanceFullScreen, setIsCorrespondanceFullScreen] = useState(false);
+  const [activeLeftTab, setActiveLeftTab] = useState<'info' | 'buildings'>('info'); // Tabs for left column
+
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
     ? polygons.find(p => p.id === selectedPolygonId)
@@ -601,39 +611,314 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     }
   };
   
+  const handleSendMessage = async (content: string) => {
+    if (!content.trim() || !currentCitizenUsername || !selectedPolygon?.id) return;
+
+    const userMessage = {
+      id: `temp-${Date.now()}`,
+      role: 'user',
+      content: content,
+      timestamp: new Date().toISOString()
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsTyping(true);
+
+    // Simulate AI response for land chat (placeholder)
+    setTimeout(() => {
+      const aiResponse = {
+        id: `ai-${Date.now()}`,
+        role: 'assistant',
+        content: `Regarding land parcel ${selectedPolygon?.historicalName || selectedPolygon?.id}, I acknowledge your message: "${content}". However, direct chat about land parcels is a feature under consideration.`,
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, aiResponse]);
+      setIsTyping(false);
+    }, 1500);
+  };
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
+  // Add global styles for custom scrollbar (similar to CitizenDetailsPanel)
+  useEffect(() => {
+    const scrollbarStyles = `
+      .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 248, 230, 0.1); }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(180, 120, 60, 0.3); border-radius: 20px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(180, 120, 60, 0.5); }
+    `;
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = scrollbarStyles;
+    document.head.appendChild(styleElement);
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
+
   return (
     <div 
-      className={`fixed top-0 right-0 h-full w-144 bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-40 border-l-4 border-amber-600 ${
-        isVisible ? 'translate-x-0' : 'translate-x-full'
+      className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[1200px] h-[75vh] max-h-[700px] bg-amber-50 border-2 border-amber-700 rounded-lg shadow-lg z-50 transition-all duration-300 pointer-events-auto flex flex-col ${
+        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
       }`}
       key={refreshKey}
+      style={{ pointerEvents: 'auto', cursor: 'default' }}
       onTransitionEnd={() => {
-        // Reset landRendered when panel becomes visible
         if (isVisible && !landRendered && selectedPolygonId) {
           setLandRendered(false);
         }
       }}
     >
-      <div className="p-6 h-full flex flex-col">
-        {/* Header with improved styling */}
-        <div className="flex justify-between items-center mb-6 border-b-2 border-amber-300 pb-3">
-          <h2 className="text-2xl font-serif font-semibold text-amber-800">
-            {selectedPolygon?.historicalName || 'Land Details'}
+      {/* Header */}
+      <div className="flex justify-between items-center p-4 border-b-2 border-amber-300 flex-shrink-0 bg-amber-600 text-white rounded-t-lg">
+        <div className="flex items-center">
+          <FaMapMarkedAlt className="mr-3 text-2xl" />
+          <h2 className="text-2xl font-serif">
+            {selectedPolygon?.historicalName || selectedPolygon?.englishName || 'Land Details'}
           </h2>
-          <button 
-            onClick={onClose}
-            className="text-amber-700 hover:text-amber-900 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
-        
-        <div className="space-y-6 overflow-y-auto flex-grow">
-          {/* 1. Top view representation of the land */}
-          <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200 mb-6">
-            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Land Overview</h3>
+        <button 
+          onClick={onClose}
+          className="text-amber-100 hover:text-white transition-colors p-2 rounded-full"
+          aria-label="Close"
+        >
+          <FaTimes size={20} />
+        </button>
+      </div>
+      
+      {/* Three-column layout */}
+      <div className={`flex flex-row gap-4 p-4 flex-grow min-h-0 ${isCorrespondanceFullScreen ? 'flex-grow' : ''}`}>
+        {/* First column - Land Info & Buildings */}
+        <div className={`${isCorrespondanceFullScreen ? 'hidden' : 'w-1/3'} flex flex-col`}>
+          {/* Tab Navigation */}
+          <div className="mb-3 border-b border-amber-300 flex-shrink-0">
+            <nav className="flex space-x-1" aria-label="Left Column Tabs">
+              <button
+                onClick={() => setActiveLeftTab('info')}
+                className={`px-3 py-2 font-medium text-xs rounded-t-md transition-colors
+                  ${activeLeftTab === 'info' 
+                    ? 'bg-amber-600 text-white' 
+                    : 'text-amber-600 hover:bg-amber-200 hover:text-amber-800'
+                  }`}
+              >
+                Info
+              </button>
+              <button
+                onClick={() => setActiveLeftTab('buildings')}
+                className={`px-3 py-2 font-medium text-xs rounded-t-md transition-colors
+                  ${activeLeftTab === 'buildings' 
+                    ? 'bg-amber-600 text-white' 
+                    : 'text-amber-600 hover:bg-amber-200 hover:text-amber-800'
+                  }`}
+              >
+                Buildings
+              </button>
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          <div className="flex-grow overflow-y-auto custom-scrollbar space-y-3 pr-1">
+            {activeLeftTab === 'info' && (
+              <>
+                {/* Land Overview (Top View) */}
+                <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Overview</h3>
+                  <div className="flex flex-col items-center">
+                    <canvas 
+                      ref={canvasRef} 
+                      className="w-[150px] h-[150px] border border-amber-100 rounded-lg mb-2" // Reduced size
+                      style={{ aspectRatio: '1/1' }}
+                    />
+                    {selectedPolygon?.buildingPoints && (
+                      <div className="text-center mt-1">
+                        <span className="text-xs text-amber-700">Buildable: </span>
+                        <span className="text-xs font-semibold text-amber-800">
+                          {selectedPolygon.buildingPoints.length}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Income information */}
+                {(selectedPolygon?.lastIncome !== undefined || 
+                  (selectedPolygonId && (() => {
+                    try {
+                      const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+                      return getIncomeDataService().getIncome(selectedPolygonId) !== undefined;
+                    } catch (error) { return false; }
+                  })())) && (
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
+                    <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Income</h3>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">Daily Income:</span>
+                      <span className="font-semibold text-amber-800">
+                        {(() => {
+                          try {
+                            const income = selectedPolygon?.lastIncome !== undefined 
+                              ? selectedPolygon.lastIncome 
+                              : (() => {
+                                  const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+                                  return getIncomeDataService().getIncome(selectedPolygonId!);
+                                })();
+                            return income !== undefined ? income.toLocaleString() : '0';
+                          } catch (error) {
+                            return selectedPolygon?.lastIncome !== undefined 
+                              ? selectedPolygon.lastIncome.toLocaleString() 
+                              : '0';
+                          }
+                        })()} ⚜️
+                      </span>
+                    </div>
+                    <div className="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full rounded-full" 
+                        style={{
+                          width: `${(() => {
+                            try {
+                              const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+                              const incomeService = getIncomeDataService();
+                              const income = selectedPolygon?.lastIncome !== undefined 
+                                ? selectedPolygon.lastIncome 
+                                : incomeService.getIncome(selectedPolygonId!);
+                              return Math.min(100, Math.max(5, ((income || 0) / incomeService.getMaxIncome()) * 100));
+                            } catch (error) {
+                              return selectedPolygon?.lastIncome !== undefined 
+                                ? Math.min(100, Math.max(5, (selectedPolygon.lastIncome / 1000) * 100))
+                                : 5;
+                            }
+                          })()}%`,
+                          background: 'linear-gradient(90deg, #33cc33 0%, #ffcc00 50%, #ff3300 100%)'
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Historical Info */}
+                {selectedPolygon?.historicalName && (
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
+                    <h3 className="text-sm uppercase font-medium text-amber-600 mb-1">Historical Name</h3>
+                    <p className="font-serif text-md font-semibold text-amber-800">{selectedPolygon.historicalName}</p>
+                    {selectedPolygon.englishName && (
+                      <p className="mt-0.5 text-xs italic text-amber-600">{selectedPolygon.englishName}</p>
+                    )}
+                  </div>
+                )}
+                {selectedPolygon?.historicalDescription && (
+                  <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
+                    <h3 className="text-sm uppercase font-medium text-amber-600 mb-1">Description</h3>
+                    <p className="text-xs text-gray-700 leading-relaxed custom-scrollbar max-h-24 overflow-y-auto">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedPolygon.historicalDescription}</ReactMarkdown>
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+            {activeLeftTab === 'buildings' && (
+              <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
+                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Buildings on this Land</h3>
+                {/* Placeholder for buildings list - TODO: Fetch and display buildings */}
+                <p className="text-xs text-gray-500 italic">Building list coming soon.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Second column - Chat/Correspondance (Simplified) */}
+        <div className={`${isCorrespondanceFullScreen ? 'w-full' : 'w-1/3'} flex flex-col`}>
+          <div className="flex items-center flex-shrink-0">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1 flex-grow">Notes & Discussion</h3>
+            <button 
+              onClick={() => setIsCorrespondanceFullScreen(!isCorrespondanceFullScreen)} 
+              className="text-amber-600 hover:text-amber-700 ml-2 p-1 flex-shrink-0"
+              title={isCorrespondanceFullScreen ? "Exit full screen" : "Full screen"}
+            >
+              {isCorrespondanceFullScreen ? <FaCompress size={16} /> : <FaExpand size={16} />}
+            </button>
+          </div>
+          
+          <div 
+            className="flex-grow overflow-y-auto p-3 bg-amber-50 bg-opacity-80 rounded-lg mb-3 custom-scrollbar min-h-[200px]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
+            }}
+          >
+            {messages.length === 0 && !isTyping && (
+              <div className="text-center py-8 text-amber-700 italic">
+                No discussion yet for this land parcel.
+              </div>
+            )}
+            {messages.map((message) => (
+              <div 
+                key={message.id} 
+                className={`mb-3 ${message.role === 'user' ? 'text-right' : 'text-left'}`}
+              >
+                <div 
+                  className={`inline-block p-2 rounded-lg max-w-[80%] text-sm ${
+                    message.role === 'user'
+                      ? 'bg-amber-100 text-amber-900 rounded-br-none'
+                      : 'bg-amber-700 text-white rounded-bl-none'
+                  }`}
+                >
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="text-left mb-3">
+                <div className="inline-block p-2 rounded-lg bg-yellow-500 text-white">
+                  <FaSpinner className="animate-spin" />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          
+          <form 
+            onSubmit={(e) => { e.preventDefault(); handleSendMessage(inputValue); }} 
+            className="flex flex-shrink-0 items-end"
+          >
+            <textarea
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder={`Discuss ${selectedPolygon?.historicalName || 'this land'}... (Shift+Enter for new line)`} 
+              className="flex-1 p-2 border border-amber-300 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none text-sm"
+              rows={2}
+              disabled={isTyping}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  if (!isTyping && inputValue.trim()) {
+                    handleSendMessage(inputValue);
+                  }
+                }
+              }}
+              style={{ maxHeight: '80px' }}
+            />
+            <button 
+              type="submit"
+              className={`px-3 py-2 rounded-r-lg transition-colors self-stretch text-sm ${
+                isTyping || !inputValue.trim()
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : 'bg-amber-700 text-white hover:bg-amber-600'
+              }`}
+              disabled={isTyping || !inputValue.trim()}
+            >
+              {isTyping ? <FaSpinner className="animate-spin" /> : 'Send'}
+            </button>
+          </form>
+        </div>
+
+        {/* Third column - Owner & Market Actions */}
+        <div className={isCorrespondanceFullScreen ? 'hidden' : 'w-1/3 flex flex-col space-y-3 overflow-y-auto custom-scrollbar pr-1'}>
+          {/* Owner information */}
+          <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
+            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
             <div className="flex flex-col items-center">
               <canvas 
                 ref={canvasRef} 
@@ -742,11 +1027,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             )}
           </div>
           
-          {/* 4. Land Market Information & Actions */}
-          <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200 space-y-4">
+          {/* Market Status & Actions */}
+          <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200 space-y-3">
             <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Market Status</h3>
 
-            {isLoading && <p className="text-amber-700">Loading market data...</p>}
+            {isLoading && <p className="text-xs text-amber-700">Loading market data...</p>}
 
             {/* Case 1: Land is listed for sale by the owner */}
             {landListingByOwner && (
@@ -898,47 +1183,16 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             )}
           </div>
 
-          {/* 5. Historical Name with enhanced styling */}
-          {selectedPolygon?.historicalName && (
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Historical Name</h3>
-              <p className="font-serif text-xl font-semibold text-amber-800">{selectedPolygon.historicalName}</p>
-              {selectedPolygon.englishName && (
-                <p className="mt-1 text-sm italic text-amber-600">{selectedPolygon.englishName}</p>
-              )}
-            </div>
-          )}
-          
-          {/* 6. Historical Description with enhanced styling */}
-          {selectedPolygon?.historicalDescription && (
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Historical Description</h3>
-              <p className="text-sm text-gray-700 leading-relaxed">{selectedPolygon.historicalDescription}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Action buttons at the bottom are now integrated above or removed if redundant */}
-        <div className="pt-4 mt-auto border-t-2 border-amber-300">
-           {/* This section can be used for general actions or kept empty if all actions are contextual above */}
-        </div>
-        
-        {/* Add a decorative Venetian footer */}
-        <div className="mt-4 text-center">
-          <div className="text-amber-600 text-xs italic">
-            La Serenissima Repubblica di Venezia
-          </div>
-          <div className="flex justify-center mt-1">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-            </svg>
           </div>
         </div>
       </div>
       
-      {/* LandPurchaseConfirmation modal has been removed as it's deprecated */}
+      {/* Footer (optional, can be removed or simplified) */}
+      <div className="p-2 text-xs text-amber-500 italic text-center flex-shrink-0 border-t border-amber-200">
+        La Serenissima Repubblica di Venezia
+      </div>
       
-      {/* List Land For Sale Modal */}
+      {/* Modals */}
       {showListForSaleModal && selectedPolygonId && (
         <ListLandForSaleModal
           landId={selectedPolygonId}
