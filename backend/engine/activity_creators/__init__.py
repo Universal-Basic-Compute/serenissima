@@ -35,3 +35,4 @@ from .adjust_building_rent_price_creator import try_create as try_create_adjust_
 from .adjust_business_wages_creator import try_create as try_create_adjust_business_wages_activity # New business wages adjustment activity
 from .change_business_manager_creator import try_create as try_create_change_business_manager_activity # New business manager change activity
 from .request_loan_creator import try_create as try_create_request_loan_activity # New loan request activity
+from .offer_loan_creator import try_create as try_create_offer_loan_activity # New loan offer activity

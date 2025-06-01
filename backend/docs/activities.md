@@ -499,7 +499,7 @@ déplacement).
 notariale (ex: `courthouse`, `town_hall`) pour y enregistrer une offre de prêt. Des frais d'enregistrement ou de publication de l'offre peuvent être perçus.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
 ID du `broker_s_office`/`mint` ou `courthouse`/`town_hall`). À l'arrivée, une activité d'enregistrement d'offre de prêt
-(`activityType: register_loan_offer_terms`, durée courte) est créée, les frais sont payés, et le processeur appellera `POST /api/loans`.
+(`activityType: register_loan_offer_terms`, durée courte) est créée, les frais sont payés, et un enregistrement est créé dans la table `LOANS` avec le statut "offered".
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `targetBorrowerUsername` (optionnel),
 `amount`, `interestRate`, `termDays`, `targetOfficeBuildingId` (ID de l'établissement pertinent).
 
