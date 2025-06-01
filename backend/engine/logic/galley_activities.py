@@ -22,6 +22,9 @@ from backend.engine.utils.activity_helpers import (
 from backend.engine.activity_creators import (
     try_create_fetch_from_galley_activity
 )
+# Import the specific activity creator for deliver_resource_batch
+from backend.engine.activity_creators.deliver_resource_batch_activity_creator import try_create as try_create_deliver_resource_batch_activity
+
 # Import other necessary functions if they were originally in createActivities.py and are specific to galley logic
 # For example, if get_building_record was defined in createActivities.py and not yet moved to a shared util
 # For now, assuming it's available or will be passed/imported appropriately.
@@ -45,8 +48,8 @@ def process_final_deliveries_from_galley(
     Modifies citizens_pool by removing citizens who are assigned a delivery.
     Returns the number of delivery activities created.
     """
-    # VENICE_TIMEZONE is imported from activity_helpers at the top of the file
-    current_time_venice = now_utc_dt.astimezone(VENICE_TIMEZONE) # Convert UTC to Venice time
+    # VENICE_TIMEZONE is imported from activity_helpers. now_utc_dt is already UTC.
+    # current_time_venice = now_utc_dt.astimezone(VENICE_TIMEZONE) # Not strictly needed if creator takes UTC
 
     activities_created_count = 0
     citizens_assigned_delivery = []
@@ -153,46 +156,36 @@ def process_final_deliveries_from_galley(
                     log.warning(f"{LogColors.WARNING}BuyerBuilding {buyer_building_custom_id} has no position. Skipping delivery for {citizen_username}.{LogColors.ENDC}")
                     continue
 
-                path_to_buyer = get_path_between_points(citizen_current_pos, buyer_building_pos, transport_api_url) 
+                path_to_buyer = get_path_between_points(citizen_current_pos, buyer_building_pos, transport_api_url)
                 if path_to_buyer and path_to_buyer.get('success'):
-                    activity_id_str_final = f"deliver_final_{citizen_custom_id}_{uuid.uuid4()}"
-                    start_date_iso = path_to_buyer.get('timing', {}).get('startDate', current_time_venice.isoformat())
-                    end_date_iso = path_to_buyer.get('timing', {}).get('endDate')
-                    if not end_date_iso:
-                        end_date_iso = (current_time_venice + datetime.timedelta(hours=1)).isoformat()
+                    notes_for_activity = f"🚢 Delivering resources from galley {current_galley_custom_id} to {buyer_building_custom_id} for contract {original_contract_id}."
+                    transport_mode_from_path = path_to_buyer.get('transporter', 'citizen_carry') # Default if not specified by path
 
-                    final_delivery_payload = {
-                        "ActivityId": activity_id_str_final,
-                        "Type": "deliver_resource_batch",
-                        "Citizen": citizen_username,
-                        "FromBuilding": current_galley_custom_id, 
-                        "ToBuilding": buyer_building_custom_id, 
-                        "Resources": json.dumps(resources_list),
-                        "ContractId": original_contract_id, 
-                        "Path": json.dumps(path_to_buyer.get('path', [])),
-                        "Transporter": path_to_buyer.get('transporter'),
-                        "CreatedAt": current_time_venice.isoformat(),
-                        "StartDate": start_date_iso, 
-                        "EndDate": end_date_iso,     
-                        "Priority": 9, 
-                        "Notes": f"🚢 Delivering resources from galley {current_galley_custom_id} to {buyer_building_custom_id} for contract {original_contract_id}.",
-                        "Status": "created"
-                    }
-                    try:
-                        created_activity = tables['activities'].create(final_delivery_payload)
-                        if created_activity and created_activity.get('id'):
-                            log.info(f"{LogColors.OKGREEN}Created final deliver_resource_batch activity {created_activity['id']} for {citizen_username} from galley {current_galley_custom_id} to {buyer_building_custom_id}.{LogColors.ENDC}")
-                            activities_created_count += 1
-                            citizens_assigned_delivery.append(citizen_record) 
-                            break 
-                        else:
-                            log.error(f"{LogColors.FAIL}Failed to create final deliver_resource_batch for {citizen_username}.{LogColors.ENDC}")
-                    except Exception as e_create_final:
-                        log.error(f"{LogColors.FAIL}Error creating final deliver_resource_batch for {citizen_username}: {e_create_final}{LogColors.ENDC}")
+                    created_activity = try_create_deliver_resource_batch_activity(
+                        tables=tables,
+                        citizen_username_actor=citizen_username,
+                        from_building_custom_id=current_galley_custom_id,
+                        to_building_custom_id=buyer_building_custom_id,
+                        resources_manifest=resources_list,
+                        contract_id_ref=original_contract_id,
+                        transport_mode=transport_mode_from_path,
+                        path_data=path_to_buyer,
+                        current_time_utc=now_utc_dt, # Pass UTC time
+                        notes=notes_for_activity,
+                        priority=9
+                    )
+
+                    if created_activity and created_activity.get('id'):
+                        log.info(f"{LogColors.OKGREEN}Created final deliver_resource_batch activity {created_activity['id']} for {citizen_username} from galley {current_galley_custom_id} to {buyer_building_custom_id} via new creator.{LogColors.ENDC}")
+                        activities_created_count += 1
+                        citizens_assigned_delivery.append(citizen_record)
+                        break # Citizen assigned, move to next citizen
+                    else:
+                        log.error(f"{LogColors.FAIL}Failed to create final deliver_resource_batch for {citizen_username} via new creator.{LogColors.ENDC}")
                 else:
                     log.warning(f"{LogColors.WARNING}Pathfinding from galley {current_galley_custom_id} to buyer building {buyer_building_custom_id} failed for {citizen_username}.{LogColors.ENDC}")
             
-            if citizen_record in citizens_assigned_delivery and citizen_record in citizens_pool : 
+            if citizen_record in citizens_assigned_delivery and citizen_record in citizens_pool:
                  citizens_pool.remove(citizen_record)
 
     except Exception as e:

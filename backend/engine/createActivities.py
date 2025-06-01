@@ -88,7 +88,7 @@ from backend.engine.logic.galley_activities import (
     process_galley_unloading_activities
 )
 # Import general citizen activity processing function
-from backend.engine.logic.citizen_general_activities import process_citizen_activity
+from backend.engine.logic.citizen_general_activities import process_citizen_activity # This import is fine
 
 # Set up logging
 logging.basicConfig(
@@ -301,22 +301,24 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
 
     # Then, attempt galley-related activities for citizens who are STILL idle
     if not dry_run:
-        if citizens_remaining_idle: 
+        if citizens_remaining_idle:
             log.info(f"{LogColors.OKBLUE}Processing galley tasks for {len(citizens_remaining_idle)} citizens who did not receive a general activity.{LogColors.ENDC}")
-            final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_remaining_idle, now_venice_dt, now_utc_dt, TRANSPORT_API_URL, resource_defs) 
+            # Pass now_utc_dt to process_final_deliveries_from_galley
+            final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_remaining_idle, now_utc_dt, TRANSPORT_API_URL, resource_defs)
             success_count += final_delivery_activities_created
             
-            if citizens_remaining_idle:
+            if citizens_remaining_idle: # Re-check as citizens_remaining_idle is modified in-place
                 if is_docks_open_time(now_venice_dt):
                     log.info(f"{LogColors.OKBLUE}Docks are open. Attempting galley unloading tasks for {len(citizens_remaining_idle)} remaining citizens.{LogColors.ENDC}")
-                    galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_remaining_idle, now_venice_dt, now_utc_dt, TRANSPORT_API_URL, resource_defs) 
+                    # Pass now_utc_dt to process_galley_unloading_activities
+                    galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_remaining_idle, now_utc_dt, TRANSPORT_API_URL, resource_defs)
                     success_count += galley_fetch_activities_created
                 else:
                     log.info(f"{LogColors.OKBLUE}Docks are closed. Skipping galley unloading tasks.{LogColors.ENDC}")
         else:
             log.info(f"{LogColors.OKBLUE}No citizens remaining idle after general activity processing for galley tasks.{LogColors.ENDC}")
     
-    elif dry_run and citizens_to_process_list: 
+    elif dry_run and citizens_to_process_list:
         log.info(f"{LogColors.OKCYAN}[DRY RUN] Would consider galley tasks for citizens not assigned a (simulated) general activity.{LogColors.ENDC}")
         log.info(f"{LogColors.OKCYAN}[DRY RUN]   - Would check for citizens at galleys ready for final delivery tasks.{LogColors.ENDC}")
         if is_docks_open_time(now_venice_dt):

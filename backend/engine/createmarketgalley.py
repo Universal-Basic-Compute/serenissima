@@ -37,6 +37,9 @@ from backend.engine.utils.activity_helpers import (
     calculate_haversine_distance_meters,
     get_citizen_record # For checking merchant/forestiero validity
 )
+# Import the specific activity creator
+from backend.engine.activity_creators.deliver_resource_batch_activity_creator import try_create as try_create_deliver_resource_batch_activity
+
 
 # Set up logging
 logging.basicConfig(
@@ -228,20 +231,19 @@ def create_galley_delivery_activity(
     start_position_override: Dict[str, float], # Randomized sea point
     galley_target_dock_point_str: str # The Point string of the galley (water_lat_lng_var)
 ) -> Optional[Dict]:
-    """Creates the deliver_resource_batch activity for the galley."""
+    """Creates the deliver_resource_batch activity for the galley using the new creator."""
     try:
-        galley_building_record = tables['buildings'].all(formula=f"{{BuildingId}}='{_escape_airtable_value(galley_building_id)}'", max_records=1)
-        if not galley_building_record:
+        galley_building_record_list = tables['buildings'].all(formula=f"{{BuildingId}}='{_escape_airtable_value(galley_building_id)}'", max_records=1)
+        if not galley_building_record_list:
             log.error(f"Galley building {galley_building_id} not found for activity.")
             return None
+        galley_building_record = galley_building_record_list[0]
 
-        # The galley's final destination is its own Point field.
-        end_position_str = galley_building_record[0]['fields'].get('Position') # Position JSON string
+        end_position_str = galley_building_record['fields'].get('Position')
         if not end_position_str:
             log.error(f"Galley {galley_building_id} has no Position field.")
             return None
         end_position = json.loads(end_position_str)
-
 
         path_data = None
         try:
@@ -254,51 +256,55 @@ def create_galley_delivery_activity(
                     "startDate": current_venice_time.isoformat(), "pathfindingMode": "water_only"
                 }, timeout=15
             )
-            if response.status_code == 200:
-                path_data = response.json()
-                if not path_data.get('success'): path_data = None
+            response.raise_for_status()
+            path_data = response.json()
+            if not path_data.get('success'):
+                log.warning(f"Transport API call for galley path was not successful: {path_data.get('error')}")
+                path_data = None
         except Exception as e_api:
             log.error(f"Error calling transport API for galley path: {e_api}")
 
         if not path_data or not path_data.get('path'):
-            log.warning(f"Path finding for galley to {galley_building_id} failed. Creating simple path.")
-            path_data = {
+            log.warning(f"Path finding for galley to {galley_building_id} failed. Using simplified path data for creator.")
+            # The creator might handle this better or require valid path_data.
+            # For now, we'll pass what we have, or a simplified version if pathfinding failed.
+            path_data = { # Simplified path_data if API failed
                 "path": [start_position_override, end_position],
                 "timing": {"startDate": current_venice_time.isoformat(),
-                           "endDate": (current_venice_time + timedelta(hours=random.uniform(1.5, 3.0))).isoformat()}
+                           "endDate": (current_venice_time + timedelta(hours=random.uniform(1.5, 3.0))).isoformat(),
+                           "durationSeconds": int(random.uniform(1.5, 3.0) * 3600)
+                          },
+                "success": False, # Indicate pathfinding might have failed
+                "transporter": "merchant_galley" # Default transporter
             }
-
-        activity_id_str = f"market_galley_delivery_{galley_building_id}_{uuid.uuid4()}"
+        
         resource_summary_note = ", ".join([f"{r['Amount']:.0f} {r['ResourceId']}" for r in galley_manifest_for_activity[:3]])
         if len(galley_manifest_for_activity) > 3: resource_summary_note += "..."
+        
+        notes_for_activity = f"Piloting market galley with various goods ({resource_summary_note}) to dock at {galley_target_dock_point_str}."
 
-        path_json_string = json.dumps(path_data.get('path', []))
-        MAX_PATH_LENGTH = 90000
-        if len(path_json_string) > MAX_PATH_LENGTH:
-            temp_path_list = list(path_data.get('path', []))
-            while len(json.dumps(temp_path_list)) > MAX_PATH_LENGTH and len(temp_path_list) > 2:
-                temp_path_list.pop(len(temp_path_list) // 2)
-            path_json_string = json.dumps(temp_path_list)
-            if len(path_json_string) > MAX_PATH_LENGTH: path_json_string = json.dumps([])
+        # Convert current_venice_time to UTC for the creator function
+        now_utc_dt = current_venice_time.astimezone(timezone.utc)
 
-        activity_payload = {
-            "ActivityId": activity_id_str, "Type": "deliver_resource_batch",
-            "Citizen": delivery_citizen_username,
-            "ContractId": galley_building_id, # Use galley's ID as a reference
-            "ToBuilding": galley_building_id, # Target is the galley itself (its final dock position)
-            "Resources": json.dumps(galley_manifest_for_activity),
-            "TransportMode": "merchant_galley",
-            "CreatedAt": current_venice_time.isoformat(),
-            "StartDate": path_data['timing'].get('startDate', current_venice_time.isoformat()),
-            "EndDate": path_data['timing'].get('endDate'),
-            "Path": path_json_string, "Status": "created",
-            "Notes": f"Piloting market galley with various goods ({resource_summary_note}) to dock at {galley_target_dock_point_str}."
-        }
-        activity = tables['activities'].create(activity_payload)
-        log.info(f"Created market galley delivery activity: {activity['id']} to {galley_building_id}")
-        return activity
+        activity_record = try_create_deliver_resource_batch_activity(
+            tables=tables,
+            citizen_username_actor=delivery_citizen_username,
+            from_building_custom_id=None, # From sea
+            to_building_custom_id=galley_building_id,
+            resources_manifest=galley_manifest_for_activity,
+            contract_id_ref=galley_building_id, # Using galley's ID as a reference
+            transport_mode="merchant_galley",
+            path_data=path_data, # Pass the obtained path_data
+            current_time_utc=now_utc_dt,
+            notes=notes_for_activity,
+            priority=9 # Default priority for such deliveries
+        )
+
+        if activity_record:
+            log.info(f"Created market galley delivery activity: {activity_record['id']} to {galley_building_id} via new creator.")
+        return activity_record
     except Exception as e:
-        log.error(f"Error creating market galley delivery activity for {galley_building_id}: {e}")
+        log.error(f"Error in create_galley_delivery_activity (refactored): {e}")
         return None
 
 def main_process_market_galley(args: argparse.Namespace):
