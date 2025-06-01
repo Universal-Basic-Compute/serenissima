@@ -153,6 +153,49 @@ def get_building_resource_stock(
         log.error(f"Error fetching stock for resource {resource_type_id} in building {building_custom_id} for owner {owner_username}: {e}")
         return 0.0
 
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool,
+    log_ref: Any # Pass the script's logger
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    # API_BASE_URL is defined globally in this script.
+    if dry_run:
+        log_ref.info(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True # Simulate success for dry run
+
+    api_url = f"{API_BASE_URL}/api/activities/try-create"
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        # This script already imports requests
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 log_ref.info(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        log_ref.error(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
+
 def check_existing_import_contract(
     tables: Dict[str, Table],
     buyer_username: str,
@@ -191,63 +234,64 @@ def create_automated_import_contract(
         # VENICE_TIMEZONE is already imported
         now_venice = datetime.now(VENICE_TIMEZONE)
         now_iso = now_venice.isoformat()
-        end_date_venice = now_venice + timedelta(weeks=1) # Contract ends in 1 week
-        end_date_iso = end_date_venice.isoformat()
+        # end_date_venice = now_venice + timedelta(weeks=1) # Contract ends in 1 week # Duration handled by activity
+        # end_date_iso = end_date_venice.isoformat()
 
         desired_total_stock_units = 0
         if import_price > 0:
-            # Use the passed-in dynamic desired_stock_value_for_this_resource
             desired_total_stock_units = math.ceil(desired_stock_value_for_this_resource / import_price)
         else:
             log.warning(f"Import price for {resource_type} is {import_price}. Setting desired total stock units to a default (e.g., 10 units).")
-            desired_total_stock_units = 10 # Default desired stock units if price is invalid
+            desired_total_stock_units = 10
 
         current_stock = get_building_resource_stock(tables, building_id, resource_type, ai_username)
         amount_to_request_in_contract = desired_total_stock_units - current_stock
-        amount_to_request_in_contract = round(amount_to_request_in_contract, 2) # Round to 2 decimal places
+        amount_to_request_in_contract = round(amount_to_request_in_contract, 2)
 
-        if amount_to_request_in_contract < 1.0: # If less than 1 (e.g. 0.5, or negative)
-            if amount_to_request_in_contract > 0: # If it was a small positive like 0.5
+        if amount_to_request_in_contract < 1.0:
+            if amount_to_request_in_contract > 0:
                 log.info(f"Calculated TargetAmount for {resource_type} in {building_id} for {ai_username} is {amount_to_request_in_contract:.2f} (less than 1). Setting to 0, skipping contract.")
-            amount_to_request_in_contract = 0.0 # Set to 0 to skip
+            amount_to_request_in_contract = 0.0
             
         if amount_to_request_in_contract <= 0:
             log.info(f"No import needed for {resource_type} in {building_id} for {ai_username}. Desired: {desired_total_stock_units}, Current: {current_stock}. Amount to request: {amount_to_request_in_contract}")
-            return False # Indicate no contract was created because none needed
+            return False
 
         log.info(f"For {resource_type} in {building_id} (Owner: {ai_username}): Desired total stock: {desired_total_stock_units:.2f} units (Target Value: ~{desired_stock_value_for_this_resource:.2f} Ducats). Current stock: {current_stock:.2f}. Amount to request in contract: {amount_to_request_in_contract:.2f}")
 
-        contract_data = {
-            "ContractId": custom_contract_id,
-            "Type": "import",
-            "Buyer": ai_username,
-            "Seller": None, # To be assigned by createimportactivities
-            "ResourceType": resource_type,
-            "Transporter": None, # To be assigned by createimportactivities
-            "BuyerBuilding": building_id,
-            "SellerBuilding": None, # Will be the galley, assigned by createimportactivities
-            "TargetAmount": amount_to_request_in_contract, # Use new field name and calculated difference
-            "PricePerResource": import_price,
-            "Priority": 5,  # Default priority for automated contracts
-            "CreatedAt": now_iso,
-            "EndAt": end_date_iso,
-            "Notes": json.dumps({
-                "reason": "Automated import contract creation for AI citizen.",
-                "created_by": "automated_adjust_imports.py",
-                "created_at": now_iso,
-                "ContractId_logic": "deterministic"
-            })
+        # Prepare activity parameters
+        activity_notes = {
+            "reason": "Automated import contract creation for AI citizen.",
+            "created_by": "automated_adjust_imports.py",
+            "created_at": now_iso,
+            "ContractId_logic": "deterministic"
+        }
+        activity_params = {
+            "contractId_to_create_if_new": custom_contract_id,
+            "resourceType": resource_type,
+            "targetAmount": amount_to_request_in_contract,
+            "pricePerResource": import_price,
+            "buyerBuildingId": building_id,
+            "title": f"Import {amount_to_request_in_contract:.0f} {resource_type} for {building_id}",
+            "description": f"Automated import contract for {resource_type} to building {building_id}.",
+            "notes": activity_notes
         }
 
         if dry_run:
-            log.info(f"[DRY RUN] Would create import contract: {custom_contract_id} for {ai_username}, building {building_id}, resource {resource_type}, TargetAmount (to import): {amount_to_request_in_contract}, price {import_price}")
-            return True # Simulate success for dry run if amount > 0
+            # Log what would be sent to call_try_create_activity_api
+            log.info(f"[DRY RUN] Would attempt to initiate 'manage_import_contract' for {ai_username} with params: {json.dumps(activity_params)}")
+            # Simulate the call for dry run logging consistency
+            return call_try_create_activity_api(ai_username, "manage_import_contract", activity_params, dry_run, log)
 
-        tables["contracts"].create(contract_data)
-        log.info(f"{LogColors.OKGREEN}Created import contract {custom_contract_id} for {ai_username}, building {building_id}, resource {resource_type}{LogColors.ENDC}")
-        return True
+        if call_try_create_activity_api(ai_username, "manage_import_contract", activity_params, dry_run, log):
+            log.info(f"{LogColors.OKGREEN}Successfully initiated 'manage_import_contract' for {custom_contract_id} for {ai_username}, building {building_id}, resource {resource_type}{LogColors.ENDC}")
+            return True
+        else:
+            log.error(f"{LogColors.FAIL}Failed to initiate 'manage_import_contract' for {custom_contract_id}.{LogColors.ENDC}")
+            return False
+            
     except Exception as e:
-        log.error(f"Error creating import contract for {building_id}, {resource_type}: {e}")
+        log.error(f"Error preparing to initiate import contract for {building_id}, {resource_type}: {e}")
         log.error(traceback.format_exc())
         return False
 

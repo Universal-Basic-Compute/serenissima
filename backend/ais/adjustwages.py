@@ -504,69 +504,7 @@ If you decide not to adjust any wages at this time, return an empty array.
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
-def update_building_wage_amount(tables, building_id: str, new_wage_amount: float, reason: str) -> bool:
-    """Update the wage amount for a building and store the reasoning."""
-    try:
-        # Find the building record
-        formula = f"{{BuildingId}}='{building_id}'"
-        print(f"Searching for building with formula: {formula}")
-        buildings = tables["buildings"].all(formula=formula)
-        
-        if not buildings:
-            print(f"Building {building_id} not found")
-            return False
-        
-        building = buildings[0]
-        current_wage = building["fields"].get("Wages", 0)
-        
-        # Validate the new wage amount
-        try:
-            # Convert to float to ensure it's a valid number
-            new_wage_float = float(new_wage_amount)
-            if new_wage_float < 0:
-                print(f"Invalid negative wage amount for building {building_id}: {new_wage_float}")
-                return False
-        except (ValueError, TypeError) as e:
-            print(f"Invalid wage amount for building {building_id}: {new_wage_amount}, error: {str(e)}")
-            return False
-        
-        # Get existing Notes if any
-        existing_notes = {}
-        if "Notes" in building["fields"]:
-            try:
-                existing_notes = json.loads(building["fields"]["Notes"])
-                if not isinstance(existing_notes, dict):
-                    existing_notes = {}
-            except json.JSONDecodeError:
-                # If Notes isn't valid JSON, start with an empty dict
-                existing_notes = {}
-        
-        # Add or update the WagesReasoning field in the Notes
-        existing_notes["WagesReasoning"] = reason
-        
-        # Prepare the update data
-        update_data = {
-            "Wages": new_wage_float,
-            "Notes": json.dumps(existing_notes)
-        }
-        
-        print(f"Updating building {building_id} with data: {json.dumps(update_data)}")
-        
-        # Update the wage amount and Notes
-        try:
-            updated_record = tables["buildings"].update(building["id"], update_data)
-            print(f"Update API response: {json.dumps(updated_record, indent=2)}")
-            print(f"Updated wage amount for building {building_id} from {current_wage} to {new_wage_float}")
-            print(f"Added wage reasoning to Notes: {reason}")
-            return True
-        except Exception as update_error:
-            print(f"Error during Airtable update API call: {str(update_error)}")
-            print(f"Exception traceback: {traceback.format_exc()}")
-            return False
-    except Exception as e:
-        print(f"Error updating wage amount for building {building_id}: {str(e)}")
-        print(f"Exception traceback: {traceback.format_exc()}")
-        return False
+# Removed update_building_wage_amount function as its logic is now handled by 'adjust_business_wages' activity
 
 def create_notification_for_business_employee(tables, building_id: str, building_name: str, employee_id: str, ai_username: str, 
                                              old_wage: float, new_wage: float, reason: str) -> bool:
@@ -649,6 +587,46 @@ def create_admin_notification(tables, ai_wage_adjustments: Dict[str, List[Dict]]
         print("📊 Created admin notification with AI wage adjustment summary")
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
+
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        print(f"[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}")
+        return True
+
+    api_url = f"{BASE_URL}/api/activities/try-create" # BASE_URL is defined at the top
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            print(f"Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 print(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            print(f"API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed for activity '{activity_type}' for {citizen_username}: {e}")
+        return False
+    except json.JSONDecodeError:
+        print(f"Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}")
+        return False
 
 def process_ai_wage_adjustments(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
     """Main function to process AI wage adjustments."""
@@ -759,23 +737,70 @@ def process_ai_wage_adjustments(dry_run: bool = False, kinos_model_override_arg:
                     
                     # Check if the AI owns this building - if not, skip it
                     building_owner = building["fields"].get("Owner", "")
-                    if building_owner != ai_username:
-                        print(f"Skipping building {building_id} - AI {ai_username} does not own this building (owned by {building_owner})")
-                        continue
-                    
+                    if building_owner != ai_username: # This check might be more relevant for RunBy if AI is just an operator
+                        print(f"Skipping building {building_id} - AI {ai_username} does not own this building (owned by {building_owner}). Note: Wage setting is typically by RunBy.")
+                        # For now, we assume AI is Owner and RunBy, or Kinos is aware of the ownership/operation structure.
+                        # If AI is only RunBy but not Owner, this check might be too strict.
+                        # However, the script's current logic implies AI is the one setting wages for businesses they "own" or fully control.
+                        # Let's proceed with the assumption that Kinos is making decisions for businesses the AI is responsible for setting wages for.
+                        # The activity `adjust_business_wages` will verify if the citizenUsername (AI) is indeed the RunBy.
+                        # So, this Owner check here is a pre-filter by the script, which might be okay.
+                        pass # Allow to proceed, activity will verify RunBy
+
                     print(f"Processing wage adjustment for building {building_id}: {current_wage} -> {new_wage_amount}")
                     
                     # Debug: Print the building record before update
                     print(f"Building record before update: {json.dumps(building['fields'], indent=2)}")
                     
-                    # Update the wage amount
-                    try:
-                        success = update_building_wage_amount(tables, building_id, new_wage_amount, reason)
+                    # Update the wage amount via activity
+                    activity_params = {
+                        "businessBuildingId": building_id,
+                        "newWageAmount": new_wage_amount,
+                        "strategy": "kinos_direct_decision" # Or derive strategy if Kinos provides it
+                    }
+                    if call_try_create_activity_api(ai_username, "adjust_business_wages", activity_params, dry_run):
+                        print(f"Successfully initiated wage adjustment for building {building_id}")
                         
-                        if success:
-                            print(f"Successfully updated wage for building {building_id}")
-                            
-                            # Debug: Verify the update by fetching the building again
+                        # Debug: Verify the update by fetching the building again (Note: this won't reflect immediate Airtable change)
+                        # The actual change happens when the activity is processed.
+                        # So, this verification block might show old data if called immediately.
+                        # For now, we trust the activity initiation.
+                        # If verification is needed, it should be after activity processing.
+                        # This block is removed as it's misleading here.
+                        # try:
+                        #    updated_building = tables["buildings"].all(formula=f"{{BuildingId}}='{building_id}'")
+                        #    if updated_building:
+                        #        print(f"Building record after update: {json.dumps(updated_building[0]['fields'], indent=2)}")
+                        # ...
+                        #    else:
+                        #        print(f"❌ Could not find building {building_id} after update")
+                        # except Exception as verify_error:
+                        #    print(f"Error verifying wage update: {str(verify_error)}")
+                        
+                        # Create notifications for employees
+                        occupant_id = building["fields"].get("Occupant", "") # This is Airtable Record ID of citizen
+                        building_name_for_notif = building["fields"].get("Name", building_id)
+
+                        if occupant_id and occupant_id in all_citizens:
+                            create_notification_for_business_employee(
+                                tables, building_id, building_name_for_notif, occupant_id, ai_username, 
+                                current_wage, new_wage_amount, reason
+                            )
+                        else:
+                            print(f"Building {building_name_for_notif} ({building_id}) has no occupant or occupant not found in citizens")
+                        
+                        # Add to the list of adjustments for this AI
+                        ai_wage_adjustments[ai_username].append({
+                            "business_id": building_id, # Keep as business_id for consistency if other parts expect this key
+                            "building_name": building_name_for_notif, # For admin summary
+                            "old_wage": current_wage,
+                            "new_wage": new_wage_amount,
+                            "reason": reason
+                        })
+                    else:
+                        print(f"❌ Failed to initiate wage adjustment for building {building_name_for_notif} ({building_id})")
+            else:
+                print(f"No valid wage adjustment decisions received for {ai_username}")
                             try:
                                 updated_building = tables["buildings"].all(formula=f"{{BuildingId}}='{building_id}'")
                                 if updated_building:

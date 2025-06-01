@@ -116,6 +116,59 @@ def get_citizen_home_coords(citizen_username: str, all_citizens_records: List[Di
                 log.debug(f"Could not parse position for citizen {citizen_username}: {pos_str}. Error: {e}")
     return None
 
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str, # The citizen initiating the activity (e.g., building owner)
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool,
+    log_ref: Any # Pass the script's logger
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    # API_BASE_URL needs to be defined globally or passed. Assuming it's global for now.
+    # If not, it should be loaded from os.getenv("API_BASE_URL", "http://localhost:3000")
+    # For this script, API_BASE_URL is not defined. Let's define it.
+    # This should ideally be at the top of the file.
+    current_api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+
+    if dry_run:
+        log_ref.info(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True # Simulate success for dry run
+
+    api_url = f"{current_api_base_url}/api/activities/try-create"
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        # This script uses 'requests' which is not imported. It needs to be imported.
+        # import requests # Should be at the top of the file.
+        # For now, assuming requests is available in the environment this helper is pasted into.
+        # If this script is run standalone, it will fail without `import requests`.
+        # Let's add the import within the function for now, though it's not best practice.
+        import requests 
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 log_ref.info(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        log_ref.error(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
+
 # --- Main Logic ---
 def assign_runby_to_buildings(tables: Dict[str, Table], dry_run: bool = False):
     log.info(f"{LogColors.HEADER}Starting Assign RunBy to Buildings process (dry_run={dry_run})...{LogColors.ENDC}")
@@ -336,94 +389,50 @@ def assign_runby_to_buildings(tables: Dict[str, Table], dry_run: bool = False):
                 current_notes_json = {"previousNotes": current_notes_str} # Preserve non-JSON notes
             
             current_notes_json["runByAssignment"] = reasoning_details
-            updated_notes_str = json.dumps(current_notes_json)
+            # updated_notes_str = json.dumps(current_notes_json) # Notes will be handled by activity if needed
 
-            updates_to_batch.append({
-                "id": building_id,
-                "fields": {
-                    "RunBy": best_candidate_username,
-                    "Notes": updated_notes_str
-                }
-            })
-            # Increment business count for the chosen candidate for subsequent iterations in this run
-            citizen_business_counts[best_candidate_username] = citizen_business_counts.get(best_candidate_username, 0) + 1
-            assignments_made += 1
+            # Initiate activity instead of direct update
+            operation_type = "claim_management" if best_candidate_username == building_owner_username else "delegate"
+            activity_params = {
+                "businessBuildingId": building_to_assign['fields'].get('BuildingId', building_id), # Use custom BuildingId
+                "newOperatorUsername": best_candidate_username,
+                "ownerUsername": building_owner_username, # Pass owner for verification/context in activity
+                "reason": f"System assignment: {best_candidate_username} chosen for {building_name} based on scoring. Score: {highest_score:.2f}",
+                "operationType": operation_type,
+                "notes": current_notes_json # Pass the full notes dict to be handled by the activity
+            }
+
+            # The initiator of this activity is the building_owner_username
+            if call_try_create_activity_api(building_owner_username, "change_business_manager", activity_params, dry_run, log):
+                # Increment business count for the chosen candidate for subsequent iterations in this run
+                citizen_business_counts[best_candidate_username] = citizen_business_counts.get(best_candidate_username, 0) + 1
+                assignments_made += 1
+                # Add to a list for admin summary if needed, but direct updates_to_batch is removed
+            else:
+                log.error(f"Failed to initiate 'change_business_manager' activity for building {building_name}, owner {building_owner_username}, new operator {best_candidate_username}.")
         else:
             log.warning(f"No suitable candidate found to run building {building_name} (Owner: {building_owner_username}).")
 
-    if updates_to_batch:
-        log.info(f"Attempting to update {len(updates_to_batch)} buildings with new RunBy assignments.")
-        if not dry_run:
-            try:
-                for i in range(0, len(updates_to_batch), 10):
-                    batch = updates_to_batch[i:i+10]
-                    tables["buildings"].batch_update(batch)
-                    log.info(f"  Successfully updated batch of {len(batch)} buildings.")
-
-                # Send notifications to owners and new RunBy citizens
-                notifications_to_create = []
-                for assigned_building_update in updates_to_batch:
-                    assigned_building_id = assigned_building_update['id']
-                    new_runby_username = assigned_building_update['fields']['RunBy']
-                    
-                    # Find the building record again to get owner and name for notification
-                    # This is a bit inefficient but ensures we have the latest data if it was in memory
-                    original_building_record = next((b for b in buildings_needing_runby if b['id'] == assigned_building_id), None)
-                    if original_building_record:
-                        owner_username = original_building_record['fields'].get('Owner')
-                        b_name = original_building_record['fields'].get('Name', assigned_building_id)
-
-                        # Notification to Owner
-                        if owner_username:
-                            owner_notification_content = f"Your building '{b_name}' now has a new operator: {new_runby_username}."
-                            notifications_to_create.append({
-                                "Citizen": owner_username,
-                                "Type": "building_operator_assigned_owner",
-                                "Content": owner_notification_content,
-                                "Asset": assigned_building_id,
-                                "AssetType": "building",
-                                "Status": "unread",
-                                "CreatedAt": datetime.utcnow().isoformat() + "Z"
-                            })
-                        
-                        # Notification to new RunBy
-                        runby_notification_content = f"You have been assigned to operate the building: '{b_name}' (Owner: {owner_username or 'Unknown'})."
-                        notifications_to_create.append({
-                            "Citizen": new_runby_username,
-                            "Type": "building_operator_assigned_self",
-                            "Content": runby_notification_content,
-                            "Asset": assigned_building_id,
-                            "AssetType": "building",
-                            "Status": "unread",
-                            "CreatedAt": datetime.utcnow().isoformat() + "Z"
-                        })
-                
-                if notifications_to_create:
-                    for i in range(0, len(notifications_to_create), 10): # Batch create notifications
-                        batch_notifs = notifications_to_create[i:i+10]
-                        tables["notifications"].batch_create(batch_notifs)
-                    log.info(f"Sent {len(notifications_to_create)} notifications to owners and new operators.")
-
-                # Admin notification
-                admin_notification_content = f"Assign RunBy Script: {assignments_made} buildings were assigned a new RunBy operator."
-                tables["notifications"].create({
-                    "Citizen": "ConsiglioDeiDieci",
-                    "Type": "admin_report_assign_runby",
-                    "Content": admin_notification_content,
-                    "Status": "unread",
-                    "CreatedAt": datetime.utcnow().isoformat() + "Z"
-                })
-            except Exception as e:
-                log.error(f"{LogColors.FAIL}Error during Airtable batch update or notification creation: {e}{LogColors.ENDC}")
-        else:
-            log.info(f"{LogColors.OKBLUE}[DRY RUN] Would have updated {len(updates_to_batch)} buildings.{LogColors.ENDC}")
-            for upd in updates_to_batch:
-                log.info(f"  [DRY RUN] Building {upd['id']} -> RunBy: {upd['fields']['RunBy']}")
-            log.info(f"[DRY RUN] Would have sent {len(updates_to_batch)*2} notifications (owner and new operator).") # Rough estimate
+    # Admin notification for the script's run can remain, summarizing assignments_made
+    if assignments_made > 0 and not dry_run:
+        try:
+            admin_notification_content = f"Assign RunBy Script: {assignments_made} 'change_business_manager' activities were initiated."
+            tables["notifications"].create({
+                "Citizen": "ConsiglioDeiDieci",
+                "Type": "admin_report_assign_runby",
+                "Content": admin_notification_content,
+                "Status": "unread",
+                "CreatedAt": datetime.utcnow().isoformat() + "Z"
+            })
+            log.info(f"Admin notification created for {assignments_made} initiated assignments.")
+        except Exception as e:
+            log.error(f"{LogColors.FAIL}Error during admin notification creation: {e}{LogColors.ENDC}")
+    elif assignments_made > 0 and dry_run:
+        log.info(f"{LogColors.OKBLUE}[DRY RUN] Would have initiated {assignments_made} 'change_business_manager' activities and sent an admin notification.{LogColors.ENDC}")
     else:
-        log.info("No RunBy assignments were made in this run.")
+        log.info("No RunBy assignments were made or initiated in this run.")
 
-    log.info(f"{LogColors.HEADER}Assign RunBy to Buildings process finished. {assignments_made} assignments made.{LogColors.ENDC}")
+    log.info(f"{LogColors.HEADER}Assign RunBy to Buildings process finished. {assignments_made} assignments initiated/simulated.{LogColors.ENDC}")
 
 # --- CLI Argument Parsing ---
 if __name__ == "__main__":
