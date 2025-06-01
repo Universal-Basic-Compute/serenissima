@@ -576,7 +576,12 @@ Custom emoji entities can only be used by bots that purchased additional usernam
         if kinos_response_content:
             log.info(f"{LogColors.OKGREEN}Generated full thought process for {citizen_username}. Length: {len(kinos_response_content)}{LogColors.ENDC}")
             
-            cleaned_thought = clean_thought_content(tables, kinos_response_content)
+            # Remove <think>...</think> tags and their content
+            thought_without_think_tags = re.sub(r'<think>.*?</think>\s*', '', kinos_response_content, flags=re.DOTALL).strip()
+            if len(thought_without_think_tags) < len(kinos_response_content):
+                log.info(f"{LogColors.OKBLUE}Removed <think> tags. Original length: {len(kinos_response_content)}, New length: {len(thought_without_think_tags)}{LogColors.ENDC}")
+
+            cleaned_thought = clean_thought_content(tables, thought_without_think_tags)
             log.info(f"{LogColors.OKBLUE}Cleaned thought for {citizen_username}: {cleaned_thought[:150].replace(chr(10), ' ')}...{LogColors.ENDC}")
 
             thoughts_summary["details"][citizen_username]["thought_generated"] = True
