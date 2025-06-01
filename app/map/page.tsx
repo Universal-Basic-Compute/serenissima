@@ -613,6 +613,14 @@ export default function MapPage() {
     setSelectedMapPolygonData(null);
   };
 
+  const clearEditingState = useCallback(() => {
+    setEditingOverlayId(null);
+    if (editingOverlayRef.current) editingOverlayRef.current = null;
+    if (editingOverlayInitialBoundsRef.current) editingOverlayInitialBoundsRef.current = null;
+    editingHandlesRef.current.forEach(marker => marker.setMap(null));
+    editingHandlesRef.current = [];
+  }, [setEditingOverlayId]); // setEditingOverlayId is stable
+
   const handlePreviewOverlayBoundsOnMap = useCallback((polygonId: string, bounds: google.maps.LatLngBoundsLiteral) => {
     const overlay = groundOverlaysMapRef.current[polygonId];
     if (overlay && mapRef.current) {
