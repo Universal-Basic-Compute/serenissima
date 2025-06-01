@@ -916,8 +916,7 @@ export default function TwoDPage() {
     }
   }, [transportPath, activeView, calculateDistance]);
 
-  // State for land images
-  const [landImages, setLandImages] = useState<Record<string, HTMLImageElement>>({});
+  // Land images are now handled by LandService
   
   // State for loan panel
   const [showLoanPanel, setShowLoanPanel] = useState<boolean>(false);

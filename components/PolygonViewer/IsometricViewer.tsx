@@ -9,13 +9,15 @@ import { citizenService } from '@/lib/services/CitizenService'; // Added import
 import { interactionService } from '@/lib/services/InteractionService';
 import { hoverStateService, HOVER_STATE_CHANGED, HoverState } from '@/lib/services/HoverStateService';
 import { CitizenRenderService } from '@/lib/services/CitizenRenderService';
+import { landService } from '@/lib/services/LandService'; // Import LandService
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
-import CoatOfArmsMarkers from './CoatOfArmsMarkers'; // AJOUTER CET IMPORT
+import CoatOfArmsMarkers from './CoatOfArmsMarkers';
+import LandMarkers from './LandMarkers'; // Import the new LandMarkers component
 import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
-import BuildingMarkers from './BuildingMarkers'; // Import the new component
+import BuildingMarkers from './BuildingMarkers';
 import ContractMarkers from '@/components/PolygonViewer/ContractMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 import TransportDebugPanel from '../UI/TransportDebugPanel';
@@ -24,7 +26,7 @@ import ProblemMarkers from './ProblemMarkers';
 import ProblemDetailsPanel from '../UI/ProblemDetailsPanel';
 import BuildingCreationPanel from './BuildingCreationPanel';
 import { renderService } from '@/lib/services/RenderService';
-import { CoordinateService } from '@/lib/services/CoordinateService'; // Import CoordinateService
+import { CoordinateService } from '@/lib/services/CoordinateService';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -1776,91 +1778,7 @@ number => {
     return () => clearInterval(intervalId);
   }, [isNight]); // Re-run if isNight changes (e.g. manual toggle in future)
   
-  // Effect to preload land images when polygons change
-  useEffect(() => {
-    if (!polygons || polygons.length === 0) return;
-    
-    console.log('Starting to preload land images for', polygons.length, 'polygons');
-    
-    // Initialize with empty object to ensure landImages is defined
-    setLandImages({});
-    
-    const newLandImages: Record<string, HTMLImageElement> = {};
-    let loadedCount = 0;
-    let totalPolygons = 0;
-    
-    // Count valid polygons with IDs first
-    for (let i = 0; i < polygons.length; i++) {
-      const polygon = polygons[i];
-      if (polygon && polygon.id) {
-        totalPolygons++;
-      }
-    }
-    
-    if (totalPolygons === 0) {
-      console.log('No valid polygons with IDs found for image loading');
-      return;
-    }
-    
-    console.log(`Attempting to load ${totalPolygons} land images`);
-    
-    // Use a safer approach with for loop instead of forEach
-    for (let i = 0; i < polygons.length; i++) {
-      const polygon = polygons[i];
-      if (!polygon || !polygon.id) continue;
-      
-      try {
-        const img = new Image();
-        const handleLoad = () => {
-          try {
-            console.log(`Successfully loaded image for polygon ${polygon.id}`);
-            newLandImages[polygon.id] = img;
-            loadedCount++;
-            if (loadedCount === totalPolygons) {
-              console.log(`Loaded ${Object.keys(newLandImages).length} land images`);
-              setLandImages(newLandImages);
-            }
-          } catch (innerError) {
-            console.error(`Error in image onload handler for polygon ${polygon.id}:`, innerError);
-            loadedCount++;
-          }
-        };
-        
-        const handleError = () => {
-          try {
-            console.warn(`Failed to load image for polygon ${polygon.id}`);
-            loadedCount++;
-            if (loadedCount === totalPolygons) {
-              console.log(`Loaded ${Object.keys(newLandImages).length} land images (${loadedCount - Object.keys(newLandImages).length} failed)`);
-              setLandImages(newLandImages);
-            }
-          } catch (innerError) {
-            console.error(`Error in image onerror handler for polygon ${polygon.id}:`, innerError);
-          }
-        };
-        
-        img.onload = handleLoad;
-        img.onerror = handleError;
-        img.crossOrigin = "anonymous"; // Add cross-origin attribute to prevent CORS issues
-        img.src = `/images/lands/${polygon.id}.png`;
-      } catch (error) {
-        console.error(`Error loading image for polygon ${polygon.id}:`, error);
-        loadedCount++;
-      }
-    }
-    
-    return () => {
-      // Cancel image loading if component unmounts
-      try {
-        Object.values(newLandImages).forEach(img => {
-          img.onload = null;
-          img.onerror = null;
-        });
-      } catch (error) {
-        console.error('Error cleaning up image event handlers:', error);
-      }
-    };
-  }, [polygons]);
+  // Land images are now handled by LandService and LandMarkers component
   
   // Handle the ensureBuildingsVisible event
   useEffect(() => {
@@ -2928,28 +2846,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     // Don't try to load images directly in the render loop - use preloaded images only
     // The preloaded images are handled in the next section
     
-    // Draw land images first - this is the first pass to ensure they're drawn under everything else
-    if (typeof landImages !== 'undefined' && landImages && Object.keys(landImages).length > 0) {
-      for (let i = 0; i < polygonsToRender.length; i++) {
-        const { polygon, coords, centerX, centerY } = polygonsToRender[i];
-        // Skip if no coordinates
-        if (!coords || coords.length < 3 || !polygon || !polygon.id) continue;
-        
-        // Get the preloaded image
-        const img = landImages[polygon.id];
-        if (img) {
-          try {
-            // Calculate image size based on polygon size
-            const size = Math.min(300, Math.max(150, Math.floor(scale * 80))); // Increased size for better visibility
-            
-            // Draw the image centered on the polygon
-            ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
-          } catch (error) {
-            console.error(`Error drawing image for polygon ${polygon.id}:`, error);
-          }
-        }
-      }
-    }
+    // Land images are now rendered by the LandMarkers component
     
     // Draw polygons using RenderService, incorporating currentHoverState
     // This handles the primary drawing of polygons, including their fill color,
@@ -3562,8 +3459,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     waterRoutePath, transportPath, currentHoverState, 
     buildingPositionsCache, canvasDims, // Added canvasDims to ensure re-draw if it changes
     occupantLine, latLngToScreen, // Added occupantLine and latLngToScreen
-    isNight, // Added isNight
-    landImages // Add landImages to the dependency array
+    isNight // Added isNight
   ]);
   
 
@@ -4119,6 +4015,13 @@ const darkenColor = (colorStr: string, percent: number): string => {
         ref={canvasRef} 
         className="w-full h-full"
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      />
+      
+      {/* Land Markers - Display land images */}
+      <LandMarkers
+        isVisible={true}
+        polygonsToRender={polygonsToRender}
+        isNight={isNight}
       />
       
       {/* Coat of Arms Markers - Affiche les blasons par-dessus le canvas */}
