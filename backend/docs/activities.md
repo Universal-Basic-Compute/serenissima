@@ -283,44 +283,6 @@ This endpoint internally calls the relevant GET API and returns its response, wr
 
 Refer to the API Reference (`components/Documentation/ApiReference.tsx`) for the detailed payload structure of the `POST /api/actions/create-activity` endpoint (for direct creation of a single activity when all details are known) and `POST /api/activities/try-create` (for AI-initiated endeavors where the engine will build the necessary activity chain).
 
-## API-Driven Activity Creation
-
-In addition to the engine-driven activity creation (`createActivities.py`), activities can also be created directly via the `POST /api/actions/create-activity` endpoint. This method is primarily intended for AI agents (like those managed by `autonomouslyRun.py` in unguided mode) or other external systems that require precise control over activity generation.
-
-### Process:
-
-1.  **Client-Side Decision**: The client (e.g., Kinos AI) determines the full details of the activity to be created. This includes:
-    *   `citizenUsername`: The target citizen.
-    *   `activityType`: The specific type of activity.
-    *   `title`: A concise title for the activity.
-    *   `description`: A brief description of what the activity entails.
-    *   `thought`: A first-person narrative from the citizen about this activity.
-    *   `activityDetails`: A JSON object containing all necessary parameters for that activity type.
-        *   For travel-related activities (e.g., `goto_work`, `goto_home`, `fetch_resource` from a specific building), the client should provide `toBuildingId` and `fromBuildingId` (if applicable) within `activityDetails`. The `/api/actions/create-activity` endpoint will then internally call `/api/transport` to determine the path and timing. The client no longer needs to provide `pathData`.
-    *   `notes` (optional): Internal notes or non-displayed information.
-2.  **API Request**: The client sends a POST request to `/api/actions/create-activity` with the composed payload.
-3.  **Server Validation & Pathfinding**: The API endpoint validates the payload. If it's a travel activity requiring pathfinding between specified buildings, the server attempts to find a path. If pathfinding fails, an error is returned.
-4.  **Airtable Record Creation**: If validation and any necessary internal pathfinding succeed, a new activity record is created in the `ACTIVITIES` table with `Status: "created"`. The `Path`, `StartDate`, and `EndDate` fields are populated based on the pathfinding results. `Title`, `Description`, `Thought`, and `Notes` are also saved.
-5.  **Engine Processing**: The standard `processActivities.py` script will eventually pick up this "created" activity and execute its corresponding processor logic.
-
-### Use Cases:
-
--   **Unguided AI**: Allows AI agents to have fine-grained control over their actions, enabling more complex or emergent behaviors.
--   **External Tools**: Could allow other tools or game masters to inject specific activities into the simulation.
--   **Player-Initiated Complex Actions (Future)**: Could potentially be used by the UI to initiate complex, multi-step actions that are best defined as a specific activity.
-
-### Considerations:
-
--   The client (AI) is responsible for providing correct building IDs for travel. The server handles the pathfinding.
--   This method bypasses the prioritized decision logic of `citizen_general_activities.py`.
--   Care must be taken to avoid conflicts if both engine-driven and API-driven activity creation are active for the same citizen.
-
-Refer to the API Reference (`components/Documentation/ApiReference.tsx`) for the detailed payload structure of the `POST /api/actions/create-activity` endpoint.
-
-## API-Driven Activity Creation
-
-In addition to the engine-driven activity creation (`createActivities.py`), activities can also be created directly via the `POST /api/actions/create-activity` endpoint. This method is primarily intended for AI agents (like those managed by `autonomouslyRun.py` in unguided mode) or other external systems that require precise control over activity generation.
-
 ### Process:
 
 1.  **Client-Side Decision**: The client (e.g., Kinos AI) determines the full details of the activity to be created. This includes:
