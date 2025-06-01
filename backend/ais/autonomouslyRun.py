@@ -831,25 +831,20 @@ def load_api_reference_content():
         API_REFERENCE_EXTRACTED_TEXT = "Error loading API Reference."
 
 def load_activity_reference_content():
-    """Loads and extracts text from ActivityReference.tsx."""
+    """Loads content from backend/docs/activities.md."""
     global ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT
     try:
-        ref_file_path = os.path.join(PROJECT_ROOT, "components", "Documentation", "ActivityReference.tsx")
+        ref_file_path = os.path.join(PROJECT_ROOT, "backend", "docs", "activities.md")
         if os.path.exists(ref_file_path):
             with open(ref_file_path, "r", encoding="utf-8") as f:
-                raw_content = f.read()
-            log.info(f"{LogColors.OKGREEN}Successfully loaded raw Activity Creation Reference content.{LogColors.ENDC}")
-            ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = extract_text_from_activity_reference(raw_content)
-            if "Could not extract" not in ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT and ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT != "Activity Reference content not available.":
-                 log.info(f"{LogColors.OKGREEN}Successfully extracted text from Activity Creation Reference. Length: {len(ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT)}{LogColors.ENDC}")
-            else:
-                 log.warning(f"{LogColors.WARNING}Extraction from Activity Creation Reference might have issues: {ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT[:100]}...{LogColors.ENDC}")
+                ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = f.read()
+            log.info(f"{LogColors.OKGREEN}Successfully loaded Activity Creation Reference (activities.md). Length: {len(ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT)}{LogColors.ENDC}")
         else:
-            log.warning(f"{LogColors.WARNING}Activity Creation Reference file not found at {ref_file_path}. Proceeding without it.{LogColors.ENDC}")
-            ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = "Activity Creation Reference file not found."
+            log.warning(f"{LogColors.WARNING}Activity Creation Reference file (activities.md) not found at {ref_file_path}. Proceeding without it.{LogColors.ENDC}")
+            ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = "Activity Creation Reference file (activities.md) not found."
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error loading or extracting Activity Creation Reference content: {e}{LogColors.ENDC}", exc_info=True)
-        ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = "Error loading Activity Creation Reference."
+        log.error(f"{LogColors.FAIL}Error loading Activity Creation Reference content (activities.md): {e}{LogColors.ENDC}", exc_info=True)
+        ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = "Error loading Activity Creation Reference (activities.md)."
 
 def extract_text_from_reads_reference(tsx_content: str) -> str:
     """
