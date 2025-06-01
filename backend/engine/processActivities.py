@@ -125,7 +125,8 @@ from backend.engine.activity_processors import (
         process_fetch_for_logistics_client as process_fetch_for_logistics_client_fn, # Already present
         process_check_business_status as process_check_business_status_fn,
         process_fishing_activity as process_fishing_activity_fn, # Import new processor
-        process_goto_location as process_goto_location_fn # Import goto_location processor
+        process_goto_location as process_goto_location_fn, # Import goto_location processor
+        process_manage_guild_membership as process_manage_guild_membership_fn # Import guild membership processor
 )
 from backend.engine.activity_processors.manage_public_import_contract_processor import process_manage_public_import_contract_fn
 from backend.engine.activity_processors.bid_on_land_activity_processor import process_bid_on_land_fn
@@ -396,6 +397,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "register_loan_offer_terms": process_offer_loan_fn, # Final step in offer_loan chain
         "deliver_message_interaction": process_send_message_fn, # Final step in send_message chain
         "reply_to_message": process_reply_to_message_fn, # Automatically created after receiving a message
+        "perform_guild_membership_action": process_manage_guild_membership_fn, # Final step in manage_guild_membership chain
     }
 
     tables = initialize_airtable()

@@ -538,6 +538,7 @@ appartenance (rejoindre, quitter, accepter une invitation). Des frais d'adhésio
 `guild_hall`). À l'arrivée, une activité `perform_guild_membership_action` est créée, et les paiements à la guilde sont effectués si nécessaire.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `guildId`, `membershipAction` ("join",
 "leave", "accept_invite"), `guildHallBuildingId` (ID du `guild_hall` spécifique).
+    *   **Implémentation**: Complète. Le processeur gère les trois types d'actions d'adhésion, les frais d'entrée pour "join", et les notifications appropriées.
 
 1.  **Marquer des Notifications comme Lues**
     *   **activityType**: `mark_notifications_read`

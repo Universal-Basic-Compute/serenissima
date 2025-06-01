@@ -117,6 +117,15 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log des paramètres spécifiques pour manage_guild_membership
+    if (activityType === 'manage_guild_membership') {
+      console.log(`[API /activities/try-create] Processing manage_guild_membership with parameters:`, 
+        `Guild ID: ${activityParameters?.guildId}`,
+        `Membership Action: ${activityParameters?.membershipAction}`,
+        `Guild Hall Building ID: ${activityParameters?.guildHallBuildingId || 'Auto-detect'}`
+      );
+    }
+    
     // Log des paramètres spécifiques pour initiate_building_project
     if (activityType === 'initiate_building_project') {
       console.log(`[API /activities/try-create] Processing initiate_building_project with parameters:`, 

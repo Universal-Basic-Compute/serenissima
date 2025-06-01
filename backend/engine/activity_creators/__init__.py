@@ -38,3 +38,4 @@ from .change_business_manager_creator import try_create as try_create_change_bus
 from .request_loan_creator import try_create as try_create_request_loan_activity # New loan request activity
 from .offer_loan_creator import try_create as try_create_offer_loan_activity # New loan offer activity
 from .send_message_creator import try_create as try_create_send_message_activity # New message sending activity
+from .manage_guild_membership_creator import try_create as try_create_manage_guild_membership_activity # New guild membership activity
