@@ -1311,13 +1311,45 @@ def autonomously_run_ai_citizen_unguided(
                 if action_method == "GET":
                     action_response_data = make_api_get_request(action_endpoint, action_params)
                 elif action_method == "POST":
-                    action_response_data = make_api_post_request(action_endpoint, action_body)
+                    # Check if this POST is intended for /api/activities/try-create
+                    if action_endpoint == "/api/activities/try-create" and action_body and "citizenUsername" in action_body and "activityType" in action_body:
+                        log.info(f"{LogColors.OKBLUE}AI chose to use /api/activities/try-create. Routing through dedicated helper.{LogColors.ENDC}")
+                        # Ensure citizenUsername from body matches current AI, or log warning
+                        if action_body["citizenUsername"] != ai_username:
+                            log.warning(f"{LogColors.WARNING}AI {ai_username} requested try-create for {action_body['citizenUsername']}. Proceeding, but this might be unintended.{LogColors.ENDC}")
+                        
+                        action_response_data = call_try_create_activity_api(
+                            action_body["citizenUsername"], # Use username from AI's decision
+                            action_body["activityType"],
+                            action_body.get("activityParameters", {}),
+                            dry_run, # Will be false here
+                            log 
+                        )
+                    elif action_endpoint == "/api/actions/create-activity" and action_body and "citizenUsername" in action_body and "activityType" in action_body:
+                        # This is a direct creation of a single activity.
+                        # For now, let it pass through make_api_post_request.
+                        # Future: Could also be routed if we want more control/logging.
+                        log.info(f"{LogColors.OKBLUE}AI chose to use /api/actions/create-activity. Proceeding with direct POST.{LogColors.ENDC}")
+                        action_response_data = make_api_post_request(action_endpoint, action_body)
+                    else:
+                        # For other POST endpoints, use the generic make_api_post_request
+                        action_response_data = make_api_post_request(action_endpoint, action_body)
                 else:
                     log.warning(f"{LogColors.WARNING}Unsupported action method '{action_method}' from Kinos for {ai_username}.{LogColors.ENDC}")
                     action_response_data = {"error": f"Unsupported method: {action_method}", "success": False}
-            else:
-                log.info(f"{Fore.YELLOW}[DRY RUN] Would make {action_method} request to {action_endpoint} for {ai_username}.{Style.RESET_ALL}")
-                action_response_data = {"dry_run_response": f"Simulated response from {action_method} {action_endpoint}", "success": True}
+            else: # dry_run is true
+                if action_endpoint == "/api/activities/try-create" and action_body and "citizenUsername" in action_body and "activityType" in action_body:
+                    # Simulate call_try_create_activity_api for dry run consistency
+                    action_response_data = call_try_create_activity_api(
+                        action_body["citizenUsername"],
+                        action_body["activityType"],
+                        action_body.get("activityParameters", {}),
+                        dry_run, # Will be true here
+                        log
+                    )
+                else:
+                    log.info(f"{Fore.YELLOW}[DRY RUN] Would make {action_method} request to {action_endpoint} for {ai_username}.{Style.RESET_ALL}")
+                    action_response_data = {"dry_run_response": f"Simulated response from {action_method} {action_endpoint}", "success": True}
             
             # Store a summary and the full response for the AI's next context
             current_iteration_results.append({
