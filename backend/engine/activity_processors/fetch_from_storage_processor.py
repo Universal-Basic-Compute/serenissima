@@ -316,6 +316,7 @@ def process(
 
     # This processor only handles the resource transfer.
     # Any follow-up activities should have been created by the activity creator.
+    # In the new architecture, processors should ONLY process the current activity and NOT create follow-up activities.
 
     log.info(f"{LogColors.OKGREEN}Successfully processed 'fetch_from_storage' activity {activity_guid}.{LogColors.ENDC}")
     return True

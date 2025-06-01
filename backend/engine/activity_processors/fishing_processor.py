@@ -97,4 +97,6 @@ def process_fishing_activity(
     else:
         log.warning(f"No Path found for activity {activity_guid}. Cannot update citizen position to fishing spot.")
 
+    # Note: This processor only handles the current activity and does not create follow-up activities.
+    # Any subsequent activities should be created by activity creators, not processors.
     return True

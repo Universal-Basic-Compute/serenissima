@@ -321,5 +321,7 @@ def process(
     if porter_username and ultimate_buyer_username:
         update_trust_score_for_activity(tables, porter_username, ultimate_buyer_username, TRUST_SCORE_MINOR_POSITIVE, "logistics_task_completion", True)
 
+    # Note: This processor only handles the current activity and does not create follow-up activities.
+    # Any subsequent activities should be created by activity creators, not processors.
     log.info(f"{LogColors.OKGREEN}Successfully processed 'fetch_for_logistics_client' activity {activity_guid}.{LogColors.ENDC}")
     return True

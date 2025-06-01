@@ -150,7 +150,14 @@ def process(
     
     log.info(f"Adjusted resources for subsequent fetch_from_storage for {citizen_username}: {adjusted_resources_for_fetch_activity}. Remaining capacity was {remaining_capacity:.2f}.")
 
-    # Create the fetch_from_storage activity
+    # IMPORTANT: In the new architecture, processors should NOT create follow-up activities.
+    # This is a legacy pattern that should be refactored.
+    # The activity creator should have created both activities in the chain:
+    # 1. goto_building_for_storage_fetch (this activity)
+    # 2. fetch_from_storage (the follow-up activity)
+    
+    # For backward compatibility, we still create the fetch_from_storage activity here,
+    # but this should be moved to an activity creator in the future.
     fetch_activity_created = try_create_fetch_from_storage_activity(
         tables,
         citizen_record,
@@ -163,6 +170,7 @@ def process(
 
     if fetch_activity_created:
         log.info(f"{LogColors.OKGREEN}Successfully created 'fetch_from_storage' activity {fetch_activity_created['id']} for citizen {citizen_username}.{LogColors.ENDC}")
+        log.warning(f"{LogColors.WARNING}Note: This processor is creating a follow-up activity, which is not aligned with the new architecture. This should be refactored to use activity creators for the entire chain.{LogColors.ENDC}")
         # The 'goto_building_for_storage_fetch' activity is now considered processed.
         # The citizen's position will be updated by the main loop in processActivities.py to the storage facility.
         # The new 'fetch_from_storage' activity will then take them back to their workplace.
