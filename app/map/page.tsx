@@ -48,7 +48,7 @@ export default function MapPage() {
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({}); // State for data, not direct map objects for clearing
   const drawnMapPolygonsRef = useRef<google.maps.Polygon[]>([]); // Ref to hold actual google.maps.Polygon objects
-  const drawnGroundOverlaysRef = useRef<google.maps.GroundOverlay[]>([]); // Ref to hold actual ground overlays for images
+  const groundOverlaysMapRef = useRef<Record<string, google.maps.GroundOverlay>>({}); // Use this for overlays by ID
   const [centroidMarkers, setCentroidMarkers] = useState<{[id: string]: google.maps.Marker}>({});
   const [isDraggingCentroid, setIsDraggingCentroid] = useState(false);
   const [centroidDragMode, setCentroidDragMode] = useState(false);
@@ -333,8 +333,8 @@ export default function MapPage() {
     drawnMapPolygonsRef.current = []; // Reset the ref array
 
     // Clear existing ground overlays from the map using the ref
-    drawnGroundOverlaysRef.current.forEach(overlay => overlay.setMap(null));
-    drawnGroundOverlaysRef.current = []; // Reset the ref array
+    Object.values(groundOverlaysMapRef.current).forEach(overlay => overlay.setMap(null));
+    groundOverlaysMapRef.current = {}; // Reset the map of overlays
 
     const newActivePolygonsState: Record<string, google.maps.Polygon> = {}; // For React state update
     
@@ -402,7 +402,7 @@ export default function MapPage() {
                   zIndex: 1 // Ensure images are drawn on top of polygons (default zIndex for polygons is often 0)
                 }
               );
-              drawnGroundOverlaysRef.current.push(groundOverlay);
+              groundOverlaysMapRef.current[polygon.id] = groundOverlay; // Store in the map
             } else {
               console.warn(`Could not calculate bounds or mapRef not ready for polygon ${polygon.id}, skipping image overlay.`);
             }
@@ -449,7 +449,7 @@ export default function MapPage() {
       .catch(error => {
         console.error('loadPolygonsOnMap: Error fetching or processing polygons:', error);
       });
-  }, [isGoogleLoaded, setActiveLandPolygons, setSelectedMapPolygonData, setShowMapPolygonDisplayPanel]);
+  }, [isGoogleLoaded, setActiveLandPolygons, setSelectedMapPolygonData, setShowMapPolygonDisplayPanel, editingOverlayId, clearEditingState, setRawPolygonsData]); // Added editingOverlayId, clearEditingState, setRawPolygonsData
   
   // Add useEffect to load polygons when map is ready
   useEffect(() => {
