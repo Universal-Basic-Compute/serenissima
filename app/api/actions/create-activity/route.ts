@@ -132,6 +132,14 @@ const RestActivityDetailsSchema = BaseActivityDetailsSchema.extend({
   notes: z.string().optional(),
 });
 
+const BidOnLandActivityDetailsSchema = BaseActivityDetailsSchema.extend({
+  landId: z.string(),
+  bidAmount: z.number().positive(),
+  targetBuildingId: z.string(), // e.g., ID of a courthouse or town_hall
+  fromBuildingId: z.string(),   // Starting point for travel
+  notes: z.string().optional(),
+});
+
 const IdleActivityDetailsSchema = BaseActivityDetailsSchema.extend({
   durationHours: z.number().min(0.5).max(4),
   reason: z.string().optional(),
@@ -426,6 +434,56 @@ export async function POST(request: Request) {
         } else {
             return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: fetchDetailsResult.error.format() }, { status: 400 });
         }
+    } else if (activityType === "bid_on_land") {
+      const bidDetailsResult = BidOnLandActivityDetailsSchema.safeParse(activityDetails);
+      if (bidDetailsResult.success) {
+        const bidData = bidDetailsResult.data;
+        airtablePayload.ToBuilding = bidData.targetBuildingId; // Travel to the target building
+        airtablePayload.FromBuilding = bidData.fromBuildingId;
+        
+        // Store landId and bidAmount in Details for the processor
+        airtablePayload.Details = JSON.stringify({ 
+          landId: bidData.landId, 
+          bidAmount: bidData.bidAmount,
+          // The subsequent activity upon arrival will be 'submit_land_bid_offer'
+          // This can be implicitly handled by processActivities.py based on Type and current location
+          // or explicitly set here if needed by the processor.
+          // For now, let's assume the processor for 'bid_on_land' when at 'ToBuilding' handles the bid submission.
+        });
+
+        const fromPos = await getBuildingPosition(bidData.fromBuildingId);
+        const toPos = await getBuildingPosition(bidData.targetBuildingId);
+
+        if (!fromPos || !toPos) {
+            return NextResponse.json({ success: false, error: "Could not determine start or end position for bid_on_land pathfinding." }, { status: 400 });
+        }
+
+        const transportApiUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/transport`;
+        const transportResponse = await fetch(transportApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ startPoint: fromPos, endPoint: toPos, startDate: new Date().toISOString() })
+        });
+
+        if (!transportResponse.ok) {
+            const errorBody = await transportResponse.text();
+            return NextResponse.json({ success: false, error: `Pathfinding for bid_on_land failed: ${transportResponse.status} ${errorBody}` }, { status: 400 });
+        }
+        internalPathData = await transportResponse.json();
+        if (!internalPathData.success || !internalPathData.path || !internalPathData.timing) {
+            return NextResponse.json({ success: false, error: "Pathfinding for bid_on_land did not return a valid path or timing.", details: internalPathData.error }, { status: 400 });
+        }
+
+        airtablePayload.Path = JSON.stringify(internalPathData.path);
+        startDate = new Date(internalPathData.timing.startDate);
+        endDate = new Date(internalPathData.timing.endDate); // EndDate is arrival at targetBuildingId
+        if (internalPathData.transporter) airtablePayload.Transporter = internalPathData.transporter;
+        
+        if (bidData.notes) airtablePayload.Notes = `${airtablePayload.Notes ? airtablePayload.Notes + '\n' : ''}Details: ${bidData.notes}`.trim();
+        specificDetailsValid = true;
+      } else {
+        return NextResponse.json({ success: false, error: `Invalid details for activity type ${activityType}`, details: bidDetailsResult.error.format() }, { status: 400 });
+      }
     }
     // ... Add more else if blocks for other activity types with their specific Zod schemas and payload mapping ...
     else {

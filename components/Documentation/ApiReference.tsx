@@ -2472,7 +2472,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
 }`}
             </pre>
             <p className="mt-2 text-sm">
-              Refer to <code>backend/docs/activities.md</code> (for traditional activities) and <code>backend/docs/actions.md</code> (for strategic actions now modeled as activities) for defined <code>activityType</code> values and their expected parameters.
+              Refer to <code>backend/docs/activities.md</code> for defined <code>activityType</code> values (including traditional activities and strategic actions now modeled as activities) and their expected parameters.
             </p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
