@@ -347,7 +347,7 @@ enregistrer la modification du loyer, potentiellement en payant des frais d'enre
 
 ### Commerce et Contrats
 
-7.  **Créer/Modifier un Contrat de Vente Publique**
+8.  **Créer/Modifier un Contrat de Vente Publique**
     *   **activityType**: `manage_public_sell_contract`
     *   **Description**: Le citoyen se rend à son bâtiment de vente (`sellerBuildingId`) pour préparer les
 marchandises, puis se déplace vers un lieu de marché (ex: `market_stall`, `merceria`, `weighing_station`) pour y
@@ -361,7 +361,7 @@ register_public_sell_offer`, durée courte) est créée, durant laquelle les fra
 `resourceType`, `pricePerResource`, `targetAmount`, `sellerBuildingId`, `targetMarketBuildingId` (ID du `market_stall`,
 `merceria`, ou `weighing_station`).
 
-8.  **Modifier le Prix d'une Vente Publique**
+9.  **Modifier le Prix d'une Vente Publique**
     *   **activityType**: `modify_public_sell_price` (Note: `manage_public_sell_contract` avec un `contractId` existant
 est la méthode préférée.)
     *   **Description**: Le citoyen se rend à un lieu de marché (ex: `market_stall`, `weighing_station`) ou à son
@@ -372,7 +372,7 @@ submit_price_modification`, durée courte) est créée, les frais sont payés, e
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId`, `newPricePerResource`,
 `targetBuildingId` (ID du lieu de modification).
 
-9.  **Terminer un Contrat de Vente Publique**
+10. **Terminer un Contrat de Vente Publique**
     *   **activityType**: `end_public_sell_contract`
     *   **Description**: Le citoyen se rend à un lieu de marché (ex: `market_stall`, `weighing_station`) ou à son
 bâtiment de vente pour y notifier la fin de son offre de vente publique. Des frais de résiliation anticipée ou de dossier peuvent être perçus.
@@ -382,19 +382,19 @@ submit_contract_termination`, durée courte) est créée, les frais sont payés,
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId`, `targetBuildingId` (ID du
 lieu de notification).
 
-10. **Créer/Modifier un Contrat d'Importation**
+11. **Créer/Modifier un Contrat d'Importation**
     *   **activityType**: `manage_import_contract`
     *   **Description**: Le citoyen se déplace vers un bureau de commerce (ex: `customs_house`, `broker_s_office`) pour y enregistrer ou modifier un contrat d'importation. L'enregistrement du contrat peut impliquer des frais de courtage ou des droits de douane anticipés.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`: ID du `customs_house` ou `broker_s_office`). À l'arrivée, une activité d'enregistrement de contrat (`activityType: register_import_agreement`, durée courte) est créée, durant laquelle les frais sont payés, et le processeur appellera `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `resourceType`, `targetAmount`, `pricePerResource`, `buyerBuildingId` (optionnel, si non fourni, le système recherchera des contrats d'importation publics correspondants), `targetOfficeBuildingId` (ID du `customs_house` ou `broker_s_office`).
 
-11. **Créer/Modifier un Contrat d'Importation Public**
+12. **Créer/Modifier un Contrat d'Importation Public**
     *   **activityType**: `manage_public_import_contract`
     *   **Description**: Le citoyen se déplace vers un bureau de commerce (ex: `customs_house`, `broker_s_office`) pour y enregistrer ou modifier une offre publique d'importation. Cette offre permet à n'importe quel marchand de vendre les ressources spécifiées au citoyen. L'enregistrement du contrat implique des frais de courtage.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`: ID du `customs_house` ou `broker_s_office`). À l'arrivée, une activité d'enregistrement d'offre publique (`activityType: register_public_import_agreement`, durée courte) est créée, durant laquelle les frais sont payés, et le processeur appellera `POST /api/contracts`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `resourceType`, `targetAmount`, `pricePerResource`, `targetOfficeBuildingId` (ID du `customs_house` ou `broker_s_office`).
 
-12. **Créer/Modifier une Offre de Stockage Public**
+13. **Créer/Modifier une Offre de Stockage Public**
     *   **activityType**: `manage_public_storage_offer`
     *   **Description**: Le citoyen se rend à son bâtiment de stockage (`sellerBuildingId`, ex: `small_warehouse`,
 `granary`) pour évaluer la capacité, puis se déplace vers un lieu de marché (ex: `weighing_station`) pour y
