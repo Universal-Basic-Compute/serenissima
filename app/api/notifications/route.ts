@@ -28,7 +28,8 @@ const initAirtable = () => {
   }
   
   Airtable.configure({
-    apiKey: AIRTABLE_API_KEY
+    apiKey: AIRTABLE_API_KEY,
+    requestTimeout: 60000 // 60 seconds timeout
   });
   
   return Airtable.base(AIRTABLE_BASE_ID);
