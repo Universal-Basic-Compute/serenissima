@@ -122,7 +122,12 @@ export async function GET(request: Request) {
       }
     }
     
-    const filterByFormula = filterByFormulaParts.length > 0 ? `AND(${filterByFormulaParts.join(', ')})` : '';
+    let filterByFormula = '';
+    if (filterByFormulaParts.length === 1) {
+      filterByFormula = filterByFormulaParts[0];
+    } else if (filterByFormulaParts.length > 1) {
+      filterByFormula = `AND(${filterByFormulaParts.join(', ')})`;
+    }
     
     console.log('%c GET /api/activities request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     console.log('Query parameters (filters):', loggableFilters);
