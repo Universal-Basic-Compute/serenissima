@@ -25,6 +25,7 @@ interface Citizen {
   coatOfArmsImageUrl: string | null;
   lastMessageTimestamp?: string | null; // For sorting correspondence
   unreadMessagesFromCitizenCount?: number; // For unread badge per citizen
+  distance?: number | null; // Added distance
 }
 
 interface Message {
@@ -1629,6 +1630,9 @@ Your response:`;
                               </div>
                               <div className="text-xs text-gray-500">
                                 {citizen.username === 'compagno' ? 'Virtual Assistant' : citizen.username}
+                                {citizen.distance !== null && citizen.distance !== undefined && citizen.username !== 'compagno' && (
+                                  <span className="ml-2 text-amber-600">({citizen.distance}m)</span>
+                                )}
                               </div>
                             </div>
                           </button>
