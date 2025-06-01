@@ -606,7 +606,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   
   return (
     <div 
-      className={`fixed top-0 right-0 h-full w-144 bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-[21] border-l-4 border-amber-600 ${
+      className={`fixed top-0 right-0 h-full w-144 bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-40 border-l-4 border-amber-600 ${
         isVisible ? 'translate-x-0' : 'translate-x-full'
       }`}
       key={refreshKey}
