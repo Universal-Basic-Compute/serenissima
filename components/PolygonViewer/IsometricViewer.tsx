@@ -4022,6 +4022,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
         isVisible={true}
         polygonsToRender={polygonsToRender}
         isNight={isNight}
+        scale={scale}
       />
       
       {/* Coat of Arms Markers - Affiche les blasons par-dessus le canvas */}

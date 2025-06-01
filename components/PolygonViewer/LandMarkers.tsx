@@ -16,9 +16,10 @@ interface LandMarkersProps {
     hasPublicDock?: boolean;
   }[];
   isNight: boolean;
+  scale?: number; // Add scale prop
 }
 
-const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, isNight }) => {
+const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, isNight, scale = 1 }) => {
   // Add state for land images
   const [landImages, setLandImages] = useState<Record<string, HTMLImageElement>>({});
 
@@ -48,8 +49,9 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
         const img = landImages[polygon.id];
         if (!img) return null;
 
-        // Calculate image size based on scale to zoom with the map
-        const size = Math.min(300, Math.max(150, Math.floor(150 * (window.innerWidth / 1920)))); // Base size adjusted by window ratio
+        // Calculate image size based on the map scale
+        const baseSize = 150; // Base size for the image
+        const size = Math.min(300, Math.max(150, Math.floor(baseSize * scale / 3))); // Scale with map zoom
 
         // Apply night effect if needed
         const nightFilter = isNight ? 'brightness(0.6) saturate(0.8)' : '';
@@ -70,7 +72,8 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
               zIndex: 5, // Above polygons but below other markers
               filter: nightFilter,
               opacity: 1, // Full opacity as requested
-              transform: `scale(${Math.max(0.5, Math.min(2, window.innerWidth / 1920))})`, // Scale based on window size
+              transformOrigin: 'center center',
+              // No transform scale here - the positioning will handle the zoom
             }}
             onMouseEnter={() => {
               hoverStateService.setHoverState('polygon', polygon.id, polygon);
