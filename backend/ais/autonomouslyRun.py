@@ -332,8 +332,9 @@ def _get_latest_activity_api(citizen_username: str) -> Optional[Dict]:
         # or just completed. The `ongoing=true` param in /api/activities handles complex time-based filtering.
         # However, for "latest", we might just want the one with the most recent EndDate or StartDate if EndDate is null.
         # The /api/activities endpoint sorts by EndDate desc by default.
+        # Changed "citizenId" to "Citizen" to match user preference/correction.
         params = {
-            "citizenId": citizen_username,
+            "Citizen": citizen_username,
             "limit": 1,
             # No specific status filter here, let the default sorting by EndDate give the "latest"
             # The API sorts by EndDate desc, so this should give the most recently ended or current one.
