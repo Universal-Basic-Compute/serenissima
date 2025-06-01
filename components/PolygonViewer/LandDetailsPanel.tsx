@@ -9,7 +9,7 @@ import ListLandForSaleModal from '../UI/ListLandForSaleModal';
 import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
 import { eventBus, EventTypes } from '../../lib/utils/eventBus';
-import { getWalletAddress } from '../../lib/utils/walletUtils';
+import { getWalletAddress, getCurrentCitizenUsername } from '../../lib/utils/walletUtils'; // Added getCurrentCitizenUsername
 
 // Helper function to normalize identifiers for comparison
 const normalizeIdentifier = (id: string | null | undefined): string | null => {
@@ -109,11 +109,12 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const router = useRouter();
   const [refreshKey, setRefreshKey] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [transaction, setTransaction] = useState<any>(null);
+  // Combined state for all relevant land contracts (listings and offers)
+  const [activeLandContracts, setActiveLandContracts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [offerAmount, setOfferAmount] = useState<number>(10000000); // Default offer of 10M COMPUTE
+  const [offerAmount, setOfferAmount] = useState<number>(100000); // Default offer amount
   const [showOfferInput, setShowOfferInput] = useState<boolean>(false);
-  const [offers, setOffers] = useState<any[]>([]);
+  // showPurchaseConfirmation and isPurchasing might be reused or adapted if direct purchase confirmation is kept for some flow
   const [showPurchaseConfirmation, setShowPurchaseConfirmation] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [justCompletedTransaction, setJustCompletedTransaction] = useState<boolean>(false);
@@ -474,143 +475,66 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     };
   }, [selectedPolygonId]);
 
-  // Add this effect to fetch transaction data when a polygon is selected
+  // Effect to fetch active land contracts (listings and offers) when a polygon is selected
   useEffect(() => {
     if (selectedPolygonId) {
       setIsLoading(true);
-      console.log(`Fetching transaction data for land ${selectedPolygonId}`);
+      setActiveLandContracts([]); // Clear previous contracts
+      console.log(`Fetching active land contracts for land ${selectedPolygonId}`);
 
-      // Function to fetch transaction with retry logic
-      const fetchTransactionWithRetry = async (retries = 3, delay = 1000) => {
+      const fetchActiveLandContractsWithRetry = async (retries = 3, delay = 1000) => {
         try {
           const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-          const apiUrl = `${API_BASE_URL}/api/contracts?Type=land_sell&AssetType=land&Asset=${selectedPolygonId}`;
-          console.log(`Fetching transaction from URL: ${apiUrl}`); // Log the exact URL
-          // Use the new Next.js API route
+          // Fetch all active contracts (listings and offers) for this land asset
+          // Ensure 'Status' is part of the query, and consider if other types like 'land_offer' are needed.
+          const apiUrl = `${API_BASE_URL}/api/contracts?AssetType=land&Asset=${selectedPolygonId}&Status=active`;
+          console.log(`Fetching land contracts from URL: ${apiUrl}`);
+          
           const response = await fetch(apiUrl);
 
           if (!response.ok) {
-            // If status is 404, it could mean the /api/contracts endpoint itself is not found,
-            // or it's configured to return 404 for "no results" (less common for query-based endpoints).
             if (response.status === 404) {
-              console.log(`No transaction found for land ${selectedPolygonId} (API returned 404).`);
-              setTransaction(null);
-              return null;
+              console.log(`No active contracts found for land ${selectedPolygonId} (API returned 404).`);
+              setActiveLandContracts([]);
+              return; // Explicitly return to avoid proceeding to .finally() too early in this path
             }
-            throw new Error(`Failed to fetch transaction: ${response.status} ${response.statusText}`);
+            throw new Error(`Failed to fetch land contracts: ${response.status} ${response.statusText}`);
           }
 
-          const responseData = await response.json(); // Expected: { success: boolean, contracts: Array<any> }
+          const responseData = await response.json();
           
-          if (responseData.success && responseData.contracts) {
-            if (responseData.contracts.length > 0) {
-              // Assuming the first contract is the relevant "for sale" listing.
-              const currentLandSaleContract = responseData.contracts[0];
-              console.log(`Transaction data for land ${selectedPolygonId}:`, currentLandSaleContract);
-              setTransaction(currentLandSaleContract);
-              return currentLandSaleContract;
-            } else {
-              console.log(`No 'land_sell' contract found for land ${selectedPolygonId} (empty contracts array).`);
-              setTransaction(null);
-              return null;
-            }
+          if (responseData.success && Array.isArray(responseData.contracts)) {
+            console.log(`Found ${responseData.contracts.length} active contract(s) for land ${selectedPolygonId}:`, responseData.contracts);
+            setActiveLandContracts(responseData.contracts);
           } else {
-            console.log(`API request for contracts was not successful or data format is unexpected for land ${selectedPolygonId}:`, responseData);
+            console.log(`No active contracts or unexpected data format for land ${selectedPolygonId}:`, responseData);
+            setActiveLandContracts([]);
             if (responseData.error) {
-                console.error(`API error message: ${responseData.error}`);
+              console.error(`API error message: ${responseData.error}`);
             }
-            setTransaction(null);
-            return null;
           }
         } catch (error) {
-          console.error(`Error fetching transaction (attempt ${4-retries}/3):`, error);
+          console.error(`Error fetching land contracts (attempt ${4 - retries}/3):`, error);
           if (retries > 1) {
             console.log(`Retrying in ${delay}ms...`);
             await new Promise(resolve => setTimeout(resolve, delay));
-            return fetchTransactionWithRetry(retries - 1, delay * 2);
+            return fetchActiveLandContractsWithRetry(retries - 1, delay * 2);
           } else {
-            // Last attempt failed, continue without a transaction
-            console.warn('All retry attempts failed, continuing without transaction data');
-            setTransaction(null);
-            return null;
+            console.warn('All retry attempts for land contracts failed.');
+            setActiveLandContracts([]);
           }
         }
       };
 
-      // Start the fetch with retries
-      fetchTransactionWithRetry()
-        .finally(() => {
-          setIsLoading(false);
-        });
+      fetchActiveLandContractsWithRetry().finally(() => {
+        setIsLoading(false);
+      });
     } else {
-      setTransaction(null);
+      setActiveLandContracts([]);
       setIsLoading(false);
     }
   }, [selectedPolygonId, refreshKey]);
-  
-  // Add this useEffect to fetch offers when a polygon is selected
-  useEffect(() => {
-    if (selectedPolygonId) {
-      console.log(`Fetching offers for land ${selectedPolygonId}`);
-      
-      // Function to fetch offers with retry logic
-      const fetchOffersWithRetry = async (retries = 3, delay = 1000) => {
-        try {
-          const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-          const apiUrl = `${API_BASE_URL}/api/transactions/land-offers/${selectedPolygonId}`;
-          console.log(`Fetching offers from URL: ${apiUrl}`); // Log the exact URL
-          // Use the new Next.js API route for land offers
-          const response = await fetch(apiUrl);
-          
-          if (!response.ok) {
-            if (response.status === 404) {
-              // No offers found, that's okay
-              console.log(`No offers found for land ${selectedPolygonId}`);
-              return [];
-            }
-            throw new Error(`Failed to fetch offers: ${response.status} ${response.statusText}`);
-          }
-          
-          const data = await response.json();
-          if (data && Array.isArray(data)) {
-            console.log(`Found ${data.length} offers for land ${selectedPolygonId}:`, data);
-            
-            // Filter out offers from the same seller as the main transaction
-            // This prevents showing the same transaction as both "For Sale" and an "Incoming offer"
-            const filteredOffers = transaction ? 
-              data.filter(offer => offer.id !== transaction.id) : 
-              data;
-              
-            console.log(`After filtering, ${filteredOffers.length} offers remain`);
-            return filteredOffers;
-          } else {
-            console.log(`Invalid offers data format for land ${selectedPolygonId}:`, data);
-            return [];
-          }
-        } catch (error) {
-          console.error(`Error fetching offers (attempt ${4-retries}/3):`, error);
-          if (retries > 1) {
-            console.log(`Retrying in ${delay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            return fetchOffersWithRetry(retries - 1, delay * 2);
-          } else {
-            // Last attempt failed, return empty array
-            console.warn('All retry attempts failed, continuing without offers data');
-            return [];
-          }
-        }
-      };
-      
-      // Start the fetch with retries
-      fetchOffersWithRetry()
-        .then(filteredOffers => {
-          setOffers(filteredOffers);
-        });
-    } else {
-      setOffers([]);
-    }
-  }, [selectedPolygonId, transaction, refreshKey]); // Add refreshKey as a dependency to refresh offers when an offer is created
-  
+
   // Show panel with animation when a polygon is selected
   useEffect(() => {
     if (selectedPolygonId) {
@@ -623,6 +547,64 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   
   // Early return if not visible or no selected polygon
   if (!visible || !selectedPolygonId) return null;
+
+  const currentCitizenUsername = getCurrentCitizenUsername();
+  // isOwner needs to be determined based on dynamicOwner and currentCitizenUsername
+  const isOwner = dynamicOwner && currentCitizenUsername && normalizeIdentifier(dynamicOwner) === normalizeIdentifier(currentCitizenUsername);
+
+  // Derive specific contracts from activeLandContracts
+  const landListingByOwner = activeLandContracts.find(
+    c => c.Type === 'land_listing' && c.Seller && dynamicOwner && normalizeIdentifier(c.Seller) === normalizeIdentifier(dynamicOwner)
+  );
+
+  const myLandListing = activeLandContracts.find(
+    c => c.Type === 'land_listing' && c.Seller && currentCitizenUsername && normalizeIdentifier(c.Seller) === normalizeIdentifier(currentCitizenUsername)
+  );
+  
+  const incomingBuyOffers = activeLandContracts.filter(
+    c => c.Type === 'land_offer' && c.Buyer && (!currentCitizenUsername || normalizeIdentifier(c.Buyer) !== normalizeIdentifier(currentCitizenUsername))
+  );
+
+  const myBuyOffer = activeLandContracts.find(
+    c => c.Type === 'land_offer' && c.Buyer && currentCitizenUsername && normalizeIdentifier(c.Buyer) === normalizeIdentifier(currentCitizenUsername)
+  );
+  
+  // Determine if the land is "Available for Purchase" (unowned and no specific listing)
+  const isAvailableFromState = !dynamicOwner && !landListingByOwner;
+
+  const handleGenericActivity = async (activityType: string, parameters: Record<string, any>) => {
+    if (!currentCitizenUsername) {
+      alert('Citizen username not found. Please ensure you are logged in.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const response = await fetch(`${API_BASE_URL}/api/activities/try-create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          citizenUsername: currentCitizenUsername,
+          activityType,
+          activityParameters: parameters,
+        }),
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        alert(`Action "${activityType}" initiated successfully! Activity ID: ${result.activityId || 'N/A'}`);
+        setRefreshKey(prev => prev + 1); // Refresh panel data
+        setShowOfferInput(false); // Close offer input if open
+        // Potentially close modals or navigate if needed
+      } else {
+        throw new Error(result.error || `Failed to initiate "${activityType}"`);
+      }
+    } catch (error: any) {
+      console.error(`Error initiating activity "${activityType}":`, error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   return (
     <div 

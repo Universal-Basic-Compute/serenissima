@@ -268,25 +268,33 @@ pour cet endpoint devront contenir les informations spécifiques à chaque actio
 ### Gestion Foncière et Immobilière
 
 1.  **Faire une Offre sur un Terrain**
-    *   **activityType**: `bid_on_land`
-    *   **Description**: Le citoyen se déplace physiquement vers un lieu officiel (ex: `courthouse` ou `town_hall`)
-pour y soumettre formellement une offre sur une parcelle de terrain. L'enregistrement de l'offre, potentiellement soumis à des frais d'enregistrement ou à une petite taxe, se fait après cette interaction sur place (pour calibrer la taxe/frais, le salaire moyen est à 2000 Ducats/jour dans le jeu).
-    *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
-ID du `courthouse` ou `town_hall`). Une fois arrivé, une activité de soumission d'offre (`activityType:
-submit_land_bid_offer`, durée courte) est créée. Le processeur de `submit_land_bid_offer` appellera `POST
-/api/contracts` pour enregistrer l'enchère et déduira les frais applicables du citoyen.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId` (ID du terrain), `bidAmount` (montant de l'offre), `targetBuildingId` (ID du `courthouse` ou `town_hall` pertinent, requis pour l'enregistrement de l'offre), `fromBuildingId` (optionnel, point de départ pour le voyage vers `targetBuildingId`; si non fourni et que l'action est initiée via `try-create`, le moteur utilisera la position actuelle du citoyen).
+    *   **activityType**: `bid_on_land` (Ancien système, peut être déprécié ou adapté pour des enchères complexes)
+    *   **Description**: Le citoyen se déplace physiquement vers un lieu officiel pour soumettre une offre.
+    *   **Nouveau Système d'Offres Foncières**:
+        *   **`list_land_for_sale`**: Le propriétaire liste son terrain à vendre.
+            *   **Paramètres**: `landId`, `price`, `sellerUsername`.
+            *   **Mécanisme**: Crée une activité `goto_location` (ex: `town_hall`), puis `finalize_list_land_for_sale` qui crée un contrat `land_listing`.
+        *   **`make_offer_for_land`**: Un citoyen fait une offre pour un terrain.
+            *   **Paramètres**: `landId`, `offerPrice`, `sellerUsername` (propriétaire actuel, peut être null si offre spéculative).
+            *   **Mécanisme**: Crée `goto_location`, puis `finalize_make_offer_for_land` qui crée un contrat `land_offer`.
+        *   **`accept_land_offer`**: Le propriétaire accepte une offre d'achat.
+            *   **Paramètres**: `contractId` (de l'offre `land_offer`), `landId`.
+            *   **Mécanisme**: Crée `goto_location`, puis `execute_accept_land_offer` qui met à jour le contrat, transfère la propriété et les fonds.
+        *   **`buy_listed_land`**: Un acheteur achète un terrain au prix listé.
+            *   **Paramètres**: `contractId` (de l'annonce `land_listing`), `landId`, `price`.
+            *   **Mécanisme**: Crée `goto_location`, puis `execute_buy_listed_land` qui met à jour le contrat, transfère la propriété et les fonds.
+        *   **`cancel_land_listing`**: Le propriétaire annule son annonce de vente.
+            *   **Paramètres**: `contractId`, `landId`.
+            *   **Mécanisme**: Crée `goto_location`, puis `execute_cancel_land_listing` qui annule le contrat.
+        *   **`cancel_land_offer`**: L'offrant annule son offre d'achat.
+            *   **Paramètres**: `contractId`, `landId`.
+            *   **Mécanisme**: Crée `goto_location`, puis `execute_cancel_land_offer` qui annule le contrat.
 
-2.  **Acheter un Terrain Disponible**
+2.  **Acheter un Terrain Disponible (de l'État)**
     *   **activityType**: `buy_available_land`
-    *   **Description**: Le citoyen se déplace physiquement vers un lieu officiel (ex: `courthouse` ou `town_hall`)
-pour y finaliser l'achat direct d'une parcelle de terrain. La transaction (vérification des fonds, transfert de
-propriété), qui inclut le paiement du terrain ainsi que d'éventuels frais de transaction ou taxes foncières, est effectuée après cette interaction sur place.
-    *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`, `targetBuildingId`:
-ID du `courthouse` ou `town_hall`). Une fois arrivé, une activité de finalisation d'achat (`activityType:
-finalize_land_purchase`, durée courte) est créée. Le processeur de cette dernière gérera la transaction et les paiements associés.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `expectedPrice`,
-`fromBuildingId` (optionnel), `targetBuildingId` (ID du `courthouse` ou `town_hall` pertinent).
+    *   **Description**: Le citoyen se déplace vers un lieu officiel (ex: `town_hall`) pour acheter un terrain non possédé.
+    *   **Mécanisme Principal**: Crée `goto_location` (vers `town_hall`), puis `finalize_land_purchase` qui gère la transaction.
+    *   **Paramètres Attendus**: `landId`, `expectedPrice`, `targetBuildingId` (ID du `town_hall`).
 
 3.  **Initier un Projet de Construction de Bâtiment**
     *   **activityType**: `initiate_building_project`

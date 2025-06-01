@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
-import { getWalletAddress } from '../../lib/utils/walletUtils';
+// import { getBackendBaseUrl } from '@/lib/utils/apiUtils'; // No longer needed for direct API call
+import { getWalletAddress } from '../../lib/utils/walletUtils'; // Still needed for user context
 import NextImage from 'next/image';
 
 interface ListLandForSaleModalProps {
@@ -9,7 +9,8 @@ interface ListLandForSaleModalProps {
   landDescription?: string;
   englishName?: string;
   onClose: () => void;
-  onComplete: () => void;
+  onComplete: (price: number) => void; // Keep onComplete for UI feedback if needed
+  onInitiateListForSale: (landId: string, price: number) => void; // New prop
 }
 
 const ListLandForSaleModal: React.FC<ListLandForSaleModalProps> = ({
@@ -18,9 +19,10 @@ const ListLandForSaleModal: React.FC<ListLandForSaleModalProps> = ({
   landDescription,
   englishName,
   onClose,
-  onComplete
+  onComplete,
+  onInitiateListForSale // New prop
 }) => {
-  const [price, setPrice] = useState<number>(10000000); // Default price of 10M COMPUTE
+  const [price, setPrice] = useState<number>(100000); // Adjusted default price
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -42,43 +44,28 @@ const ListLandForSaleModal: React.FC<ListLandForSaleModalProps> = ({
     
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
-      const response = await fetch(`${getBackendBaseUrl()}/api/transaction`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: 'land',
-          asset: landId,
-          seller: walletAddress,
-          price: price,
-          historical_name: landName,
-          english_name: englishName,
-          description: landDescription
-        }),
-      });
+      // Call the new prop to initiate the activity
+      onInitiateListForSale(landId, price);
       
-      if (!response.ok) {
-        throw new Error(`Failed to create listing: ${response.status} ${response.statusText}`);
-      }
+      // Assuming success if onInitiateListForSale doesn't throw.
+      // The actual success/failure will be handled by the activity system and reflected by data refresh.
+      // alert(`Listing activity for land "${landName || landId}" at ${price.toLocaleString()} ⚜️ ducats has been initiated.`);
       
-      const data = await response.json();
+      // Call onComplete callback, which might close the modal or give further UI feedback
+      onComplete(price);
+      // onClose(); // It's better if onComplete handles closing, or LandDetailsPanel does after activity.
       
-      // Show success message
-      alert(`Your land has been listed for ${price.toLocaleString()} ⚜️ ducats!`);
-      
-      // Call onComplete callback
-      onComplete();
-      
-      // Close the modal
-      onClose();
     } catch (err) {
-      console.error('Error creating listing:', err);
-      setError(err instanceof Error ? err.message : String(err));
+      // This catch block might not be reached if onInitiateListForSale itself handles errors with alerts.
+      // However, it's good practice to keep it.
+      console.error('Error initiating land listing activity:', err);
+      setError(err instanceof Error ? err.message : 'Failed to initiate listing activity.');
     } finally {
       setIsSubmitting(false);
+      // Do not call onClose() here directly if onComplete is expected to handle it or if LandDetailsPanel should.
+      // If onInitiateListForSale is synchronous and successful, LandDetailsPanel will refresh and might close this modal via its state.
     }
   };
   

@@ -144,6 +144,15 @@ from backend.engine.activity_processors.request_loan_processor import process_re
 from backend.engine.activity_processors.offer_loan_processor import process_offer_loan_fn
 from backend.engine.activity_processors.send_message_processor import process_send_message_fn
 from backend.engine.activity_processors.reply_to_message_processor import process_reply_to_message_fn
+
+# Import new land management processors (these files will need to be created)
+from backend.engine.activity_processors.list_land_for_sale_processor import process_list_land_for_sale_fn
+from backend.engine.activity_processors.make_offer_for_land_processor import process_make_offer_for_land_fn
+from backend.engine.activity_processors.accept_land_offer_processor import process_accept_land_offer_fn
+from backend.engine.activity_processors.buy_listed_land_processor import process_buy_listed_land_fn
+from backend.engine.activity_processors.cancel_land_listing_processor import process_cancel_land_listing_fn
+from backend.engine.activity_processors.cancel_land_offer_processor import process_cancel_land_offer_fn
+
 # Load environment variables
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
@@ -400,6 +409,15 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "deliver_message_interaction": process_send_message_fn, # Final step in send_message chain
         "reply_to_message": process_reply_to_message_fn, # Automatically created after receiving a message
         "perform_guild_membership_action": process_manage_guild_membership_fn, # Final step in manage_guild_membership chain
+
+        # Land Management Processors
+        "finalize_list_land_for_sale": process_list_land_for_sale_fn,
+        "finalize_make_offer_for_land": process_make_offer_for_land_fn,
+        "execute_accept_land_offer": process_accept_land_offer_fn,
+        "execute_buy_listed_land": process_buy_listed_land_fn,
+        "execute_cancel_land_listing": process_cancel_land_listing_fn,
+        "execute_cancel_land_offer": process_cancel_land_offer_fn,
+        # process_buy_available_land_fn is already in the dict for "finalize_land_purchase"
     }
 
     tables = initialize_airtable()
