@@ -358,7 +358,8 @@ def make_kinos_call(
     kinos_model_override: Optional[str] = None
 ) -> Optional[Dict]:
     """Generic function to make a call to the Kinos Engine."""
-    kinos_url = f"https://api.kinos-engine.ai/v2/blueprints/{KINOS_BLUEPRINT_ID}/kins/{ai_username}/channels/{KINOS_CHANNEL_AUTONOMOUS_RUN}/messages"
+    # Updated to send to the main kin channel, not a specific sub-channel
+    kinos_url = f"https://api.kinos-engine.ai/v2/blueprints/{KINOS_BLUEPRINT_ID}/kins/{ai_username}/messages"
     headers = {"Authorization": f"Bearer {kinos_api_key}", "Content-Type": "application/json"}
     
     payload: Dict[str, Any] = {
@@ -381,7 +382,7 @@ def make_kinos_call(
         log.info(f"{LogColors.OKBLUE}Using Kinos model override '{kinos_model_override}' for {ai_username}.{LogColors.ENDC}")
 
     try:
-        log.info(f"{LogColors.OKBLUE}Sending request to Kinos for {LogColors.BOLD}{ai_username}{LogColors.ENDC}{LogColors.OKBLUE} on channel {KINOS_CHANNEL_AUTONOMOUS_RUN}...{LogColors.ENDC}")
+        log.info(f"{LogColors.OKBLUE}Sending request to Kinos for {LogColors.BOLD}{ai_username}{LogColors.ENDC}{LogColors.OKBLUE} on main channel...{LogColors.ENDC}")
         log.debug(f"{LogColors.LIGHTBLUE}Kinos Prompt for {ai_username}: {prompt[:200]}...{LogColors.ENDC}")
         if add_system_data:
             log.debug(f"{LogColors.LIGHTBLUE}Kinos addSystem keys for {ai_username}: {list(add_system_data.keys())}{LogColors.ENDC}")
