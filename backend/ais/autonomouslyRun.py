@@ -975,7 +975,7 @@ def autonomously_run_ai_citizen_unguided(
 
     previous_api_results: List[Dict] = []
     iteration_count = 0
-    max_iterations = 5 # Max 5 API calls per citizen per unguided run cycle
+    max_iterations = 10 # Max 10 API calls per citizen per unguided run cycle
 
     while iteration_count < max_iterations:
         iteration_count += 1
