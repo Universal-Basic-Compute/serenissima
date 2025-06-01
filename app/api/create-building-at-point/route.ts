@@ -428,7 +428,14 @@ export async function POST(request: Request) {
         if (workshopsForPayment.length > 0) {
             const workshopForPayment = await (async () => { // IIFE async pour permettre await dans find
                 for (const w of workshopsForPayment) {
-                    const contractRecords = await (base!('CONTRACTS') as unknown as AirtableTable).select({filterByFormula: `{ContractId} = 'construct-${buildingId}-${(w.fields.BuildingId as string).replace(/[^a-zA-Z0-9-]/g, '')}'`}).firstPage();
+                    const contractRecords = await new Promise<AirtableRecord[]>((resolve, reject) => {
+                        (base!('CONTRACTS') as unknown as AirtableTable).select({
+                            filterByFormula: `{ContractId} = 'construct-${buildingId}-${(w.fields.BuildingId as string).replace(/[^a-zA-Z0-9-]/g, '')}'`
+                        }).firstPage((err, records) => {
+                            if (err) reject(err);
+                            else resolve(records || []);
+                        });
+                    });
                     if (contractRecords?.[0]?.fields.SellerBuilding === w.fields.BuildingId) {
                         return w;
                     }

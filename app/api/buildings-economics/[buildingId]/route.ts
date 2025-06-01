@@ -57,7 +57,7 @@ export async function GET(
       filterByFormula: filterFormula,
       fields: ['Type', 'Seller', 'Buyer', 'Price', 'ExecutedAt'],
       sort: [{ field: 'ExecutedAt', direction: 'desc' }],
-    }).all() as TransactionRecord[];
+    }).all() as unknown as TransactionRecord[];
 
     console.log(`[API buildings-economics] Found ${records.length} transactions for building ${buildingId}`);
 

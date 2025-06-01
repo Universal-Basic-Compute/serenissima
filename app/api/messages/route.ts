@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import Airtable from 'airtable';
+import Airtable, { FieldSet } from 'airtable'; // Ajout de FieldSet
 
 // Helper to convert a string to PascalCase
 // Handles snake_case, camelCase, and kebab-case
