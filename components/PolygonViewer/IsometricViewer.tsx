@@ -2842,9 +2842,12 @@ const darkenColor = (colorStr: string, percent: number): string => {
     // Draw polygons using RenderService, incorporating currentHoverState
     // This handles the primary drawing of polygons, including their fill color,
     // selection, and hover states.
+    // Set fillOpacity to 0 to hide polygons and show land images instead
     renderService.drawPolygons(ctx, polygonsToRender, {
       selectedPolygonId,
       hoveredPolygonId: currentHoverState.type === 'polygon' ? currentHoverState.id : null,
+      fillOpacity: 0, // Set opacity to 0 to make polygons invisible
+      strokeOpacity: 0.5 // Keep borders visible but more subtle
     });
 
     // Second pass: Draw all polygon names (only in land view)
