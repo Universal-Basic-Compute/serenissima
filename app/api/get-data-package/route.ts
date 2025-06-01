@@ -152,6 +152,59 @@ async function fetchPolygonDataForLand(landId: string): Promise<PolygonData | nu
   }
 }
 
+async function fetchOwnedBuildings(username: string): Promise<AirtableRecord<FieldSet>[]> {
+  try {
+    return await airtable('BUILDINGS').select({
+      filterByFormula: `{Owner} = '${escapeAirtableValue(username)}'`,
+    }).all();
+  } catch (error) {
+    console.error(`Error fetching buildings for ${username}:`, error);
+    return [];
+  }
+}
+
+interface BuildingResourceDetails {
+  // Define structure based on /api/building-resources/:buildingId response
+  // This is a simplified version, expand as needed
+  success: boolean;
+  buildingId?: string;
+  buildingType?: string;
+  buildingName?: string;
+  owner?: string;
+  category?: string | null;
+  subCategory?: string | null;
+  canImport?: boolean;
+  resources?: {
+    stored?: any[];
+    publiclySold?: any[];
+    bought?: any[];
+    sellable?: any[];
+    storable?: any[];
+    transformationRecipes?: any[];
+  };
+  storage?: {
+    used?: number;
+    capacity?: number;
+  };
+  error?: string;
+}
+
+async function fetchBuildingResourceDetails(buildingId: string): Promise<BuildingResourceDetails | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/building-resources/${encodeURIComponent(buildingId)}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch resource details for building ${buildingId}: ${response.status}`);
+      return { success: false, error: `Failed to fetch resource details: ${response.status}` };
+    }
+    const data = await response.json();
+    return data as BuildingResourceDetails; // Assuming data matches the interface
+  } catch (error) {
+    console.error(`Error fetching resource details for building ${buildingId}:`, error);
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const citizenUsername = searchParams.get('citizenUsername');
@@ -168,6 +221,7 @@ export async function GET(request: Request) {
 
     const lastActivityRecord = await fetchLastActivity(citizenUsername);
     const ownedLandsRecords = await fetchOwnedLands(citizenUsername);
+    const ownedBuildingsRecords = await fetchOwnedBuildings(citizenUsername); // Fetch owned buildings
 
     const ownedLandsData = [];
     for (const landRecord of ownedLandsRecords) {
@@ -238,7 +292,22 @@ export async function GET(request: Request) {
       citizen: {...normalizeKeysCamelCaseShallow(citizenRecord.fields), airtableId: citizenRecord.id},
       lastActivity: lastActivityRecord ? {...normalizeKeysCamelCaseShallow(lastActivityRecord.fields), airtableId: lastActivityRecord.id} : null,
       ownedLands: ownedLandsData,
+      ownedBuildings: [] as any[], // Initialize ownedBuildings array
     };
+
+    for (const buildingRecord of ownedBuildingsRecords) {
+      const buildingId = buildingRecord.fields.BuildingId as string;
+      if (!buildingId) continue;
+
+      const resourceDetails = await fetchBuildingResourceDetails(buildingId);
+      const normalizedBuildingFields = normalizeKeysCamelCaseShallow(buildingRecord.fields);
+      
+      dataPackage.ownedBuildings.push({
+        ...normalizedBuildingFields,
+        airtableId: buildingRecord.id,
+        resourceDetails: resourceDetails // Add resource details
+      });
+    }
 
     return NextResponse.json({ success: true, data: dataPackage });
 
