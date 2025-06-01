@@ -175,7 +175,7 @@ export class AssetService {
     
     try {
       // Try the direct flat path for .png first
-      const pngImagePath = `https://backend.serenissima.ai/public_assetshttps://backend.serenissima.ai/public_assets/images/buildings/${buildingType}.png`;
+      const pngImagePath = `https://backend.serenissima.ai/public_assets/images/buildings/${buildingType}.png`;
       
       // Check if the .png image exists
       try {
