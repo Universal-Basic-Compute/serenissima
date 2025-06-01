@@ -1607,7 +1607,17 @@ Your response:`;
                   {citizen.firstName} {citizen.lastName} 
                 </h3>
                 <div className="flex justify-between items-center">
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium inline-block ${socialClassStyle}`}>
+                  <div className={`px-3 py-1 rounded-full text-sm font-medium inline-flex items-center ${socialClassStyle}`}>
+                    {citizen.socialClass && (
+                      <img
+                        src={`/images/${citizen.socialClass.toLowerCase()}.png`}
+                        alt="" // Alt vide car le nom de la classe est déjà affiché
+                        className="w-4 h-4 mr-1.5 object-contain" // Taille plus petite pour l'icône dans le badge
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    )}
                     {citizen.socialClass} 
                   </div>
                 </div>
