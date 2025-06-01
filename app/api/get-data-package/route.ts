@@ -231,6 +231,59 @@ async function fetchGuildDetails(guildId: string): Promise<AirtableRecord<FieldS
   }
 }
 
+async function fetchCitizenLoans(username: string): Promise<AirtableRecord<FieldSet>[]> {
+  try {
+    const escapedUsername = escapeAirtableValue(username);
+    return await airtable('LOANS').select({
+      filterByFormula: `OR({Lender} = '${escapedUsername}', {Borrower} = '${escapedUsername}')`,
+      sort: [{ field: 'CreatedAt', direction: 'desc' }], // Optional: sort by creation date
+    }).all();
+  } catch (error) {
+    console.error(`Error fetching loans for ${username}:`, error);
+    return [];
+  }
+}
+
+async function fetchCitizenRelationships(username: string): Promise<AirtableRecord<FieldSet>[]> {
+  try {
+    const escapedUsername = escapeAirtableValue(username);
+    // Fetch all relationships involving the citizen
+    const records = await airtable('RELATIONSHIPS').select({
+      filterByFormula: `OR({Citizen1} = '${escapedUsername}', {Citizen2} = '${escapedUsername}')`,
+    }).all();
+
+    // Calculate combined score and sort
+    const scoredRecords = records.map(record => {
+      const strengthScore = Number(record.fields.StrengthScore) || 0;
+      const trustScore = Number(record.fields.TrustScore) || 0;
+      return { ...record, combinedScore: strengthScore + trustScore };
+    });
+
+    scoredRecords.sort((a, b) => b.combinedScore - a.combinedScore);
+    
+    return scoredRecords.slice(0, 20);
+  } catch (error) {
+    console.error(`Error fetching relationships for ${username}:`, error);
+    return [];
+  }
+}
+
+async function fetchCitizenProblems(username: string): Promise<AirtableRecord<FieldSet>[]> {
+  try {
+    const escapedUsername = escapeAirtableValue(username);
+    return await airtable('PROBLEMS').select({
+      filterByFormula: `{Citizen} = '${escapedUsername}'`,
+      sort: [{ field: 'CreatedAt', direction: 'desc' }],
+      maxRecords: 20,
+    }).all(); // .all() is fine here as maxRecords will limit it server-side if possible, or client-side after fetching all.
+              // For strict 20, firstPage() might be better if the table is huge.
+  } catch (error) {
+    console.error(`Error fetching problems for ${username}:`, error);
+    return [];
+  }
+}
+
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const citizenUsername = searchParams.get('citizenUsername');
@@ -321,6 +374,9 @@ export async function GET(request: Request) {
       ownedBuildings: [] as any[], // Initialize ownedBuildings array
       activeContracts: [] as any[], // Initialize activeContracts array
       guildDetails: null as any | null, // Initialize guildDetails
+      citizenLoans: [] as any[], // Initialize citizenLoans array
+      strongestRelationships: [] as any[], // Initialize strongestRelationships array
+      recentProblems: [] as any[], // Initialize recentProblems array
     };
 
     // Fetch and add active contracts
@@ -335,6 +391,25 @@ export async function GET(request: Request) {
         dataPackage.guildDetails = {...normalizeKeysCamelCaseShallow(guildRecord.fields), airtableId: guildRecord.id};
       }
     }
+
+    // Fetch and add citizen loans
+    const citizenLoansRecords = await fetchCitizenLoans(citizenUsername);
+    dataPackage.citizenLoans = citizenLoansRecords.map(l => ({...normalizeKeysCamelCaseShallow(l.fields), airtableId: l.id}));
+
+    // Fetch and add strongest relationships
+    const strongestRelationshipsRecords = await fetchCitizenRelationships(citizenUsername);
+    dataPackage.strongestRelationships = strongestRelationshipsRecords.map(r => {
+      const normalized = normalizeKeysCamelCaseShallow(r.fields);
+      // combinedScore was added temporarily for sorting, remove if not needed in final package
+      // or keep if useful client-side. For now, let's assume it's not part of the final schema.
+      // delete (r as any).combinedScore; // This would modify the original if not careful
+      const { combinedScore, ...fieldsWithoutCombinedScore } = normalized; // Exclude combinedScore from final object
+      return {...fieldsWithoutCombinedScore, airtableId: r.id};
+    });
+    
+    // Fetch and add recent problems
+    const recentProblemsRecords = await fetchCitizenProblems(citizenUsername);
+    dataPackage.recentProblems = recentProblemsRecords.map(p => ({...normalizeKeysCamelCaseShallow(p.fields), airtableId: p.id}));
 
     for (const buildingRecord of ownedBuildingsRecords) {
       const buildingId = buildingRecord.fields.BuildingId as string;
