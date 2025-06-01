@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 // --- Configuration ---
 // URL de base de votre moteur Python interne. Ceci devrait être une variable d'environnement.
-const PYTHON_ENGINE_BASE_URL = process.env.PYTHON_ENGINE_BASE_URL || 'http://localhost:8000'; // Exemple de port pour un serveur Python
+const PYTHON_ENGINE_BASE_URL = process.env.DEFAULT_FASTAPI_URL || 'http://localhost:8000'; // Fallback si DEFAULT_FASTAPI_URL n'est pas défini
 
 // --- Zod Schema for Request Body ---
 const EatActivityRequestSchema = z.object({
