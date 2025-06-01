@@ -126,27 +126,33 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
         if (dragRef.current.isResizing && dragRef.current.resizeHandle) {
           // Handle resizing
           const settings = { ...customImageSettings[selectedImageId] };
+          const originalWidth = dragRef.current.originalX; // Width is stored in originalX for resize
+          const originalHeight = dragRef.current.originalY; // Height is stored in originalY for resize
           
           switch (dragRef.current.resizeHandle) {
             case 'top-left':
-              settings.x = dragRef.current.originalX + dx;
-              settings.y = dragRef.current.originalY + dy;
-              settings.width = Math.max(20, settings.width - dx);
-              settings.height = Math.max(20, settings.height - dy);
+              // Move top-left corner while resizing
+              settings.x += dx;
+              settings.y += dy;
+              settings.width = Math.max(20, originalWidth - dx);
+              settings.height = Math.max(20, originalHeight - dy);
               break;
             case 'top-right':
-              settings.y = dragRef.current.originalY + dy;
-              settings.width = Math.max(20, dragRef.current.originalX + dx);
-              settings.height = Math.max(20, settings.height - dy);
+              // Move top-right corner while resizing
+              settings.y += dy;
+              settings.width = Math.max(20, originalWidth + dx);
+              settings.height = Math.max(20, originalHeight - dy);
               break;
             case 'bottom-left':
-              settings.x = dragRef.current.originalX + dx;
-              settings.width = Math.max(20, settings.width - dx);
-              settings.height = Math.max(20, dragRef.current.originalY + dy);
+              // Move bottom-left corner while resizing
+              settings.x += dx;
+              settings.width = Math.max(20, originalWidth - dx);
+              settings.height = Math.max(20, originalHeight + dy);
               break;
             case 'bottom-right':
-              settings.width = Math.max(20, dragRef.current.originalX + dx);
-              settings.height = Math.max(20, dragRef.current.originalY + dy);
+              // Move bottom-right corner while resizing
+              settings.width = Math.max(20, originalWidth + dx);
+              settings.height = Math.max(20, originalHeight + dy);
               break;
           }
           
@@ -155,7 +161,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
             [selectedImageId]: settings
           }));
         } else {
-          // Handle moving
+          // Handle moving (not resizing)
           setCustomImageSettings(prev => ({
             ...prev,
             [selectedImageId]: {
@@ -196,20 +202,28 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
     e.stopPropagation();
     setSelectedImageId(polygonId);
     
-    dragRef.current = {
-      isDragging: true,
-      startX: e.clientX,
-      startY: e.clientY,
-      originalX: customImageSettings[polygonId].x,
-      originalY: customImageSettings[polygonId].y,
-      isResizing: isResizeHandle,
-      resizeHandle: handlePosition
-    };
-
     if (isResizeHandle) {
-      // For resize handles, we need to store the original width/height
-      dragRef.current.originalX = customImageSettings[polygonId].width;
-      dragRef.current.originalY = customImageSettings[polygonId].height;
+      // For resize handles, store both position and dimensions
+      dragRef.current = {
+        isDragging: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        originalX: customImageSettings[polygonId].width, // Store width for resize
+        originalY: customImageSettings[polygonId].height, // Store height for resize
+        isResizing: true, // Always true for resize handles
+        resizeHandle: handlePosition
+      };
+    } else {
+      // For moving the entire image
+      dragRef.current = {
+        isDragging: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        originalX: customImageSettings[polygonId].x, // Store position for moving
+        originalY: customImageSettings[polygonId].y, // Store position for moving
+        isResizing: false, // Always false for moving
+        resizeHandle: null
+      };
     }
   };
 
@@ -301,20 +315,24 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
               <>
                 {/* Resize handles */}
                 <div 
-                  className="absolute top-0 left-0 w-4 h-4 bg-yellow-400 rounded-full cursor-nw-resize z-20"
+                  className="absolute top-0 left-0 w-5 h-5 bg-yellow-400 rounded-full cursor-nw-resize z-20"
                   onMouseDown={(e) => handleMouseDown(e, polygon.id, true, 'top-left')}
+                  style={{ transform: 'translate(-50%, -50%)' }} // Center the handle on the corner
                 />
                 <div 
-                  className="absolute top-0 right-0 w-4 h-4 bg-yellow-400 rounded-full cursor-ne-resize z-20"
+                  className="absolute top-0 right-0 w-5 h-5 bg-yellow-400 rounded-full cursor-ne-resize z-20"
                   onMouseDown={(e) => handleMouseDown(e, polygon.id, true, 'top-right')}
+                  style={{ transform: 'translate(50%, -50%)' }} // Center the handle on the corner
                 />
                 <div 
-                  className="absolute bottom-0 left-0 w-4 h-4 bg-yellow-400 rounded-full cursor-sw-resize z-20"
+                  className="absolute bottom-0 left-0 w-5 h-5 bg-yellow-400 rounded-full cursor-sw-resize z-20"
                   onMouseDown={(e) => handleMouseDown(e, polygon.id, true, 'bottom-left')}
+                  style={{ transform: 'translate(-50%, 50%)' }} // Center the handle on the corner
                 />
                 <div 
-                  className="absolute bottom-0 right-0 w-4 h-4 bg-yellow-400 rounded-full cursor-se-resize z-20"
+                  className="absolute bottom-0 right-0 w-5 h-5 bg-yellow-400 rounded-full cursor-se-resize z-20"
                   onMouseDown={(e) => handleMouseDown(e, polygon.id, true, 'bottom-right')}
+                  style={{ transform: 'translate(50%, 50%)' }} // Center the handle on the corner
                 />
               </>
             )}
