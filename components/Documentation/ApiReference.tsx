@@ -2594,7 +2594,10 @@ fetch('/api/resources/counts?buildingId=building-123456789')
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/actions/create-activity</h3>
           <p className="mb-2">
             Allows direct creation of a specific activity for a citizen. This endpoint is intended for AI agents or advanced tools
-            that can pre-determine all necessary activity parameters, including pathfinding for travel.
+            that can pre-determine all necessary activity parameters. For travel activities, the server handles pathfinding.
+            This endpoint should be used when the AI has a fully formed activity, including all specific details for its execution (like target, amount, etc.),
+            rather than asking the engine to decide on the specifics (which is what <code>POST /api/activities/try-create</code> is for).
+            All `activityType` values, including those that represent strategic actions, can be created via this endpoint if all details are known.
           </p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
@@ -2605,48 +2608,28 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "citizenUsername": "string", // Required: Username of the citizen
-  "activityType": "string", // Required: Type of activity (e.g., "rest", "goto_work", "production", "fetch_resource")
-  "title": "string", // Required: A concise title for the activity (e.g., "Resting at home", "Working at the forge")
+  "activityType": "string", // Required: Type of activity (e.g., "rest", "goto_work", "production", "fetch_resource", "bid_on_land")
+  "title": "string", // Required: A concise title for the activity (e.g., "Resting at home", "Bidding on Campo San Polo")
   "description": "string", // Required: A brief description of what the activity entails.
-  "thought": "string", // Required: First-person narrative from the citizen about this activity (reasoning, goals, comments).
+  "thought": "string", // Optional: First-person narrative from the citizen about this activity. If omitted, server attempts to use a recent thought.
   "activityDetails": {
     // --- Example for "rest" ---
-    // "buildingId": "string", // ID of home or inn
-    // "locationType": "home" | "inn",
-    // "durationHours": number, // e.g., 8
-    // "notes": "string" // Optional
-
-    // --- Example for "goto_work" (or other travel) ---
-    // "toBuildingId": "string", // Required
-    // "fromBuildingId": "string", // Required if travel is from a specific building (server will pathfind)
-    // // "pathData" is NO LONGER provided by client; server handles pathfinding.
-    // "notes": "string" // Optional
-
-    // --- Example for "production" ---
-    // "buildingId": "string", // Workshop where production occurs
-    // "recipe": {
-    //   "inputs": { "resource_id_1": amount1, "resource_id_2": amount2 }, // Optional if no inputs
-    //   "outputs": { "output_resource_id": amount_produced },
-    //   "craftMinutes": number
-    // },
-    // "notes": "string" // Optional
-
-    // --- Example for "fetch_resource" ---
-    // "contractId": "string", // Optional, if fetching against a specific contract
-    // "fromBuildingId": "string", // Optional, if fetching from a specific building (requires pathData)
-    // "toBuildingId": "string", // Destination (e.g., citizen's home or workshop)
-    // "resourceId": "string", // Type of resource to fetch
-    // "amount": number,
-    // // "pathData" is NO LONGER provided by client; server handles pathfinding if fromBuildingId is specified.
-    // "notes": "string" // Optional
+    // "buildingId": "string", "locationType": "home" | "inn", "durationHours": number
     
-    // ... other activity types will have different 'activityDetails' structures
+    // --- Example for "goto_work" (or other travel) ---
+    // "toBuildingId": "string", "fromBuildingId": "string" // Server handles pathfinding
+
+    // --- Example for "bid_on_land" (now an activity) ---
+    // "landId": "string", "bidAmount": number, 
+    // "targetCitizenUsername": "string" // Optional, if the bid involves interaction or travel to a specific citizen (e.g., land owner)
+    
+    // ... other activity types (including former "actions") will have different 'activityDetails' structures
   },
   "notes": "string" // Optional: Internal notes, IDs, or non-displayed information.
 }`}
             </pre>
             <p className="mt-2 text-sm">
-              Refer to the server-side Zod schemas in <code>app/api/actions/create-activity/route.ts</code> for the precise expected structure of <code>activityDetails</code> for each <code>activityType</code>.
+              Refer to <code>components/Documentation/ActivityReference.tsx</code> and server-side Zod schemas in <code>app/api/actions/create-activity/route.ts</code> for the precise expected structure of <code>activityDetails</code> for each <code>activityType</code>.
             </p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
