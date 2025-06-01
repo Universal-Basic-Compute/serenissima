@@ -126,7 +126,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
 
         goto_activity = {
             "ActivityId": goto_activity_id,
-            "Citizen": citizen_id, # Link to citizen record ID
+            "Citizen": citizen_username, # Use username string
             "Type": "goto_location",
             "Status": "created",
             "StartDate": goto_start_time_utc.isoformat(),
@@ -158,7 +158,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
 
     finalize_activity = {
         "ActivityId": finalize_activity_id,
-        "Citizen": citizen_id, # Link to citizen record ID
+        "Citizen": citizen_username, # Use username string
         "Type": "finalize_list_land_for_sale",
         "Status": "created",
         "StartDate": finalize_start_time_utc.isoformat(),

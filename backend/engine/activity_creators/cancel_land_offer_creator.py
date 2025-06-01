@@ -102,7 +102,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         goto_end_time_utc = goto_start_time_utc + timedelta(minutes=travel_duration_minutes)
         current_end_time_utc = goto_end_time_utc
         goto_activity = {
-            "ActivityId": goto_activity_id, "Citizen": citizen_id, "Type": "goto_location", "Status": "created",
+            "ActivityId": goto_activity_id, "Citizen": citizen_username, "Type": "goto_location", "Status": "created", # Use username
             "StartDate": goto_start_time_utc.isoformat(), "EndDate": goto_end_time_utc.isoformat(),
             "ToBuilding": target_office_building_id, "Path": path_json,
             "TransportMode": path_data.get("transport_mode", "walk"),
@@ -129,7 +129,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
     })
 
     execute_activity = {
-        "ActivityId": execute_activity_id, "Citizen": citizen_id, "Type": "execute_cancel_land_offer", "Status": "created",
+        "ActivityId": execute_activity_id, "Citizen": citizen_username, "Type": "execute_cancel_land_offer", "Status": "created", # Use username
         "StartDate": execute_start_time_utc.isoformat(), "EndDate": execute_end_time_utc.isoformat(),
         "FromBuilding": target_office_building_id,
         "Details": execute_activity_details,
