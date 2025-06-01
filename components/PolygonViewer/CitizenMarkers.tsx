@@ -806,13 +806,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className={`w-5 h-5 cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative shadow-md ${
+                className={`w-5 h-5 cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative ${
                   isCitizenInvolvedInBuildingHover ? 'scale-150' : '' // Apply scale if citizen is involved
-                } `} // Removed rounded-full and ring classes, added shadow-md
+                } `} // Removed rounded-full, ring classes, and shadow-md
                 style={{ 
                   // backgroundColor is removed
                   // border: '1px solid white', // Removed white border
-                  // boxShadow is now handled by Tailwind's shadow-md, or could be customized here if needed
+                  // boxShadow is removed, will be handled by filter on img
                 }}
                 title={`${firstName} ${lastName} (${socialClass})${
                   citizen.username === currentUsername ? ' - This is you' : 
@@ -823,6 +823,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   src={iconSrc}
                   alt={`${socialClassForIcon} icon`}
                   className="w-full h-full object-contain" // Use object-contain to maintain aspect ratio
+                  style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))' }} // Added drop-shadow to the image
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (target.src !== fallbackIconSrc) { // Avoid infinite loop if default also fails
@@ -904,12 +905,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className={`w-5 h-5 cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative shadow-md ${
+                className={`w-5 h-5 cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative ${
                   isCitizenInvolvedInBuildingHover ? 'scale-150' : ''
-                } `} // Removed rounded-full and ring classes, added shadow-md
+                } `} // Removed rounded-full, ring classes, and shadow-md
                 style={{ 
                   // border: '1px solid white', // Removed white border
-                  // boxShadow is now handled by Tailwind's shadow-md, or could be customized here if needed
+                  // boxShadow is removed, will be handled by filter on img
                 }}
                 title={`${firstName} ${lastName} (${socialClass})${
                   citizen.username === currentUsername ? ' - This is you' : 
@@ -920,6 +921,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   src={iconSrc}
                   alt={`${socialClassForIcon} icon`}
                   className="w-full h-full object-contain"
+                  style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))' }} // Added drop-shadow to the image
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (target.src !== fallbackIconSrc) {
