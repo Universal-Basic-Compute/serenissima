@@ -2900,24 +2900,26 @@ const darkenColor = (colorStr: string, percent: number): string => {
     });
     
     // Draw land images first
-    polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
-      // Skip if no coordinates
-      if (!coords || coords.length < 3 || !polygon.id) return;
-      
-      // Get the preloaded image
-      const img = landImages[polygon.id];
-      if (img) {
-        try {
-          // Calculate image size based on polygon size
-          const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
-          
-          // Draw the image centered on the polygon
-          ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
-        } catch (error) {
-          console.error(`Error drawing image for polygon ${polygon.id}:`, error);
+    if (landImages && Object.keys(landImages).length > 0) {
+      polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
+        // Skip if no coordinates
+        if (!coords || coords.length < 3 || !polygon.id) return;
+        
+        // Get the preloaded image
+        const img = landImages[polygon.id];
+        if (img) {
+          try {
+            // Calculate image size based on polygon size
+            const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
+            
+            // Draw the image centered on the polygon
+            ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
+          } catch (error) {
+            console.error(`Error drawing image for polygon ${polygon.id}:`, error);
+          }
         }
-      }
-    });
+      });
+    }
     
     // Draw polygons using RenderService, incorporating currentHoverState
     // This handles the primary drawing of polygons, including their fill color,
@@ -2930,25 +2932,23 @@ const darkenColor = (colorStr: string, percent: number): string => {
       strokeOpacity: 0.5 // Keep borders visible but more subtle
     });
     
-    // Draw land images on top of the polygons
-    polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
-      // Skip if no coordinates
-      if (!coords || coords.length < 3) return;
-      
-      // Draw the land image if available
-      const imageUrl = `/images/lands/${polygon.id}.png`;
-      const img = new Image();
-      img.src = imageUrl;
-      
-      // Only draw if the image is loaded
-      if (img.complete && img.naturalWidth !== 0) {
-        // Calculate image size based on polygon size
-        const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
+    // Draw land images on top of the polygons - using preloaded images
+    if (landImages && Object.keys(landImages).length > 0) {
+      polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
+        // Skip if no coordinates
+        if (!coords || coords.length < 3 || !polygon.id) return;
         
-        // Draw the image centered on the polygon
-        ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
-      }
-    });
+        // Get the preloaded image
+        const img = landImages[polygon.id];
+        if (img && img.complete && img.naturalWidth !== 0) {
+          // Calculate image size based on polygon size
+          const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
+          
+          // Draw the image centered on the polygon
+          ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
+        }
+      });
+    }
 
     // Second pass: Draw all polygon names (only in land view)
     // This is drawn on top of the polygons rendered by renderService.drawPolygons

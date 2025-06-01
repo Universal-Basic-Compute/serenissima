@@ -602,18 +602,41 @@ export class RenderService {
   public drawPolygons(
     ctx: CanvasRenderingContext2D,
     polygonsToRender: any[],
-    interactionState: any
+    options: {
+      selectedPolygonId?: string | null;
+      hoveredPolygonId?: string | null;
+      fillOpacity?: number;
+      strokeOpacity?: number;
+    } = {}
   ): void {
     // Get current hover state
     const hoverState = hoverStateService.getState();
     
     polygonsToRender.forEach(({ polygon, coords, fillColor }) => {
       // Determine if this polygon is selected or hovered
-      const isSelected = interactionState.selectedPolygonId === polygon.id;
-      const isHovered = hoverState.type === 'polygon' && hoverState.id === polygon.id;
+      const isSelected = options.selectedPolygonId === polygon.id;
+      const isHovered = options.hoveredPolygonId !== undefined 
+        ? options.hoveredPolygonId === polygon.id 
+        : (hoverState.type === 'polygon' && hoverState.id === polygon.id);
+      
+      // Save current global alpha
+      const currentGlobalAlpha = ctx.globalAlpha;
+      
+      // Apply custom fill opacity if provided
+      if (options.fillOpacity !== undefined) {
+        ctx.globalAlpha = options.fillOpacity;
+      }
       
       // Draw the polygon
       this.drawPolygon(ctx, coords, fillColor, isSelected, isHovered);
+      
+      // Apply custom stroke opacity if provided
+      if (options.strokeOpacity !== undefined) {
+        ctx.globalAlpha = options.strokeOpacity;
+      }
+      
+      // Restore original global alpha
+      ctx.globalAlpha = currentGlobalAlpha;
     });
   }
 
