@@ -283,7 +283,7 @@ def get_ai_citizens_for_autonomous_run(tables: Dict[str, Table], specific_userna
 
 # --- API Interaction Helpers ---
 
-DEFAULT_TIMEOUT_GET = 30  # seconds
+DEFAULT_TIMEOUT_GET = 300  # seconds (5 minutes)
 DEFAULT_TIMEOUT_POST = 45 # seconds
 MAX_RETRIES = 2 # Number of retries (so 2 retries means 3 attempts total)
 RETRY_DELAY_SECONDS = 3
