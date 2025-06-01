@@ -142,20 +142,51 @@ const IdleActivityDetailsSchema = BaseActivityDetailsSchema.extend({
 const CreateActivityPayloadSchema = z.object({
   citizenUsername: z.string(),
   activityType: z.enum([
-    "goto_work", "goto_home", "travel_to_inn", // Travel
+    // Traditional Activities
+    "goto_work", "goto_home", "travel_to_inn", 
     "production", 
     "fetch_resource", 
     "rest", 
     "idle",
-    "deliver_resource_batch", // Could be complex, requires careful definition
+    "deliver_resource_batch",
     "eat_from_inventory", "eat_at_home", "eat_at_tavern",
     "secure_warehouse", "deliver_to_storage", "fetch_from_storage",
     "check_business_status", "fishing", "emergency_fishing",
     "goto_construction_site", "deliver_construction_materials", "construct_building",
-    "leave_venice"
-    // Add other valid activity types here
+    "leave_venice",
+    // Strategic Actions as Activities
+    "bid_on_land",
+    "buy_available_land",
+    "initiate_building_project",
+    "adjust_land_lease_price",
+    "adjust_building_rent_price",
+    "manage_public_sell_contract",
+    "modify_public_sell_price",
+    "end_public_sell_contract",
+    "manage_import_contract",
+    "manage_public_storage_offer",
+    "bid_on_building",
+    "respond_to_building_bid",
+    "withdraw_building_bid",
+    "manage_markup_buy_contract",
+    "manage_storage_query_contract",
+    "adjust_business_wages",
+    "manage_business_operation",
+    "request_loan",
+    "offer_loan",
+    "withdraw_compute_tokens",
+    "inject_compute_tokens",
+    "send_message",
+    "reply_to_message",
+    "update_citizen_profile",
+    "manage_guild_membership",
+    "log_strategic_thought",
+    "mark_notifications_read",
+    "upload_coat_of_arms",
+    "update_citizen_settings"
+    // Add other valid activity/action types here
   ]),
-  activityDetails: z.any(), // We'll validate this based on activityType
+  activityDetails: z.any(), // We'll validate this based on activityType. For actions, this will contain their specific parameters.
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   thought: z.string().optional(), // Made thought optional

@@ -15,181 +15,179 @@ Les `Type` listés ci-dessous sont les `activityType` à utiliser avec `POST /ap
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `bidAmount`.
 
 2.  **Acheter un Terrain Disponible**
-    *   **Type**: `buy_available_land`
-    *   **Description**: Un citoyen achète directement une parcelle de terrain qui est disponible à la vente à un prix fixe, sans passer par un système d'enchères.
-    *   **Mécanisme Principal**: Vérification des fonds, transfert de propriété du terrain et des Ducats.
-    *   **API Pertinente (Exemple)**: `POST /api/transactions/land/purchase` (endpoint hypothétique).
+    *   **activityType**: `buy_available_land`
+    *   **Description**: Un citoyen initie le processus d'achat direct d'une parcelle de terrain disponible à un prix fixe.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur de cette activité gérera la vérification des fonds, le transfert de propriété et des Ducats, potentiellement via un appel interne à un service de transaction.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `expectedPrice`.
 
 3.  **Initier un Projet de Construction de Bâtiment**
-    *   **Type**: `initiate_building_project`
-    *   **Description**: Un citoyen décide de construire un nouveau bâtiment sur un terrain qu'il possède ou pour lequel il a les droits. Cela inclut la sélection du type de bâtiment, le paiement des coûts initiaux (placement du plan via `/api/create-building-at-point`), et le lancement effectif du projet de construction (via `/api/actions/construct-building` qui peut impliquer la création d'un contrat de construction avec un atelier).
-    *   **Mécanisme Principal**: Déduction des coûts, création d'un enregistrement de bâtiment avec un statut "en construction", et potentiellement création d'un contrat de construction.
-    *   **APIs Pertinentes**: `POST /api/create-building-at-point`, `POST /api/actions/construct-building`.
+    *   **activityType**: `initiate_building_project`
+    *   **Description**: Un citoyen initie le processus de construction d'un nouveau bâtiment. Cela peut impliquer le placement du plan, le paiement des coûts initiaux et la création d'un contrat de construction.
+    *   **Mécanisme Principal**: Crée une activité (ou une série d'activités). Les processeurs géreront la déduction des coûts, la création de l'enregistrement du bâtiment (non construit), et la création du contrat de construction. Pourrait utiliser en interne `/api/create-building-at-point` et `/api/actions/construct-building` ou leur logique.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `buildingType` (identifiant du type de bâtiment), `pointDetails` (si placement précis), `builderContractDetails` (optionnel).
 
 4.  **Ajuster le Prix de Location d'un Terrain**
-    *   **Type**: `adjust_land_lease_price`
-    *   **Description**: Un propriétaire foncier modifie le montant du bail (`LeasePrice`) demandé aux propriétaires des bâtiments construits sur ses terrains.
-    *   **Mécanisme Principal**: Mise à jour du champ `LeasePrice` sur les enregistrements des bâtiments concernés.
-    *   **API Pertinente (Exemple)**: `PATCH /api/buildings/{buildingId}` (pour modifier le `LeasePrice` d'un bâtiment spécifique) ou un endpoint dédié pour les ajustements de baux par l'IA (`backend/ais/adjustleases.py`).
+    *   **activityType**: `adjust_land_lease_price`
+    *   **Description**: Un propriétaire foncier initie le processus de modification du bail (`LeasePrice`) pour les bâtiments sur ses terrains.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur de cette activité mettra à jour le `LeasePrice` sur les bâtiments concernés, potentiellement via un appel interne à `PATCH /api/buildings/{buildingId}` ou une logique similaire à `backend/ais/adjustleases.py`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId` (du bâtiment dont le bail est ajusté) OU `landId` (pour ajuster tous les baux sur ce terrain), `newLeasePrice`.
 
 5.  **Ajuster le Prix de Loyer d'un Bâtiment**
-    *   **Type**: `adjust_building_rent_price`
-    *   **Description**: Un propriétaire de bâtiment modifie le loyer (`RentPrice`) demandé aux citoyens ou entreprises qui occupent ses propriétés.
-    *   **Mécanisme Principal**: Mise à jour du champ `RentPrice` sur l'enregistrement du bâtiment.
-    *   **API Pertinente (Exemple)**: `PATCH /api/buildings/{buildingId}` ou un endpoint dédié pour les ajustements de loyers par l'IA (`backend/ais/adjustrents.py`).
+    *   **activityType**: `adjust_building_rent_price`
+    *   **Description**: Un propriétaire de bâtiment initie la modification du loyer (`RentPrice`) pour sa propriété.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le `RentPrice` du bâtiment, potentiellement via `PATCH /api/buildings/{buildingId}` ou une logique similaire à `backend/ais/adjustrents.py`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId`, `newRentPrice`.
 
 ## Commerce et Contrats
 
 6.  **Créer/Modifier un Contrat de Vente Publique**
-    *   **Type**: `manage_public_sell_contract`
-    *   **Description**: Un citoyen met en vente des ressources qu'il possède en créant une offre publique (`public_sell`). Il peut définir le type de ressource, la quantité, et le prix.
-    *   **Mécanisme Principal**: Création ou mise à jour d'un enregistrement dans la table `CONTRACTS`.
-    *   **API Pertinente**: `POST /api/contracts`.
+    *   **activityType**: `manage_public_sell_contract`
+    *   **Description**: Un citoyen initie la création ou la modification d'une offre de vente publique (`public_sell`).
+    *   **Mécanisme Principal**: Crée une activité. Le processeur gérera la création/mise à jour du contrat via un appel interne à `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel, pour modification), `resourceType`, `pricePerResource`, `targetAmount`, `sellerBuildingId`.
 
 7.  **Modifier le Prix d'une Vente Publique**
-    *   **Type**: `modify_public_sell_price`
-    *   **Description**: Un citoyen ajuste le prix d'une ressource qu'il a déjà mise en vente via un contrat `public_sell`.
-    *   **Mécanisme Principal**: Mise à jour du champ `PricePerResource` d'un contrat existant. Souvent géré via la même logique que la création/modification de contrat.
-    *   **API Pertinente**: `POST /api/contracts` (en utilisant l'ID de contrat existant pour mettre à jour).
+    *   **activityType**: `modify_public_sell_price` (ou utiliser `manage_public_sell_contract` avec `contractId`)
+    *   **Description**: Un citoyen initie l'ajustement du prix d'un contrat `public_sell` existant.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le contrat via `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId`, `newPricePerResource`.
 
 8.  **Terminer un Contrat de Vente Publique**
-    *   **Type**: `end_public_sell_contract`
-    *   **Description**: Un citoyen retire du marché une offre de vente publique qu'il avait créée.
-    *   **Mécanisme Principal**: Modification du statut du contrat (par exemple, en `ended_by_ai` ou `cancelled`) ou mise à jour de sa date de fin (`EndAt`).
-    *   **API Pertinente**: `POST /api/contracts` (pour mettre à jour le statut/date de fin).
+    *   **activityType**: `end_public_sell_contract`
+    *   **Description**: Un citoyen initie la clôture d'une offre de vente publique.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le statut/date de fin du contrat via `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId`.
 
 9.  **Créer/Modifier un Contrat d'Importation**
-    *   **Type**: `manage_import_contract`
-    *   **Description**: Un citoyen (souvent une IA gérant une entreprise) initie un contrat pour importer des ressources nécessaires à son activité.
-    *   **Mécanisme Principal**: Création ou mise à jour d'un contrat de type `import`.
-    *   **API Pertinente**: `POST /api/contracts`.
+    *   **activityType**: `manage_import_contract`
+    *   **Description**: Un citoyen initie la création ou modification d'un contrat d'importation.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur gérera la création/mise à jour du contrat via `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `resourceType`, `targetAmount`, `pricePerResource`, `buyerBuildingId`.
 
 10. **Créer/Modifier une Offre de Stockage Public**
-    *   **Type**: `manage_public_storage_offer`
-    *   **Description**: Un citoyen possédant un bâtiment avec capacité de stockage (ex: entrepôt) offre cet espace à la location à d'autres citoyens pour leurs ressources.
-    *   **Mécanisme Principal**: Création ou mise à jour d'un contrat de type `public_storage`.
-    *   **API Pertinente**: `POST /api/contracts`.
+    *   **activityType**: `manage_public_storage_offer`
+    *   **Description**: Un citoyen initie la création/modification d'une offre de stockage public.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur gérera la création/mise à jour du contrat `public_storage` via `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `sellerBuildingId` (l'entrepôt), `resourceType` (ou "any"), `capacityOffered`, `pricePerUnitPerDay`.
 
 11. **Faire une Offre d'Achat sur un Bâtiment Existant**
-    *   **Type**: `bid_on_building`
-    *   **Description**: Un citoyen propose d'acheter un bâtiment appartenant à un autre citoyen en soumettant une offre.
-    *   **Mécanisme Principal**: Création d'un contrat de type `building_bid` avec le citoyen comme `Buyer` et le propriétaire actuel comme `Seller`.
-    *   **API Pertinente**: `POST /api/contracts`.
+    *   **activityType**: `bid_on_building`
+    *   **Description**: Un citoyen initie une offre d'achat pour un bâtiment existant.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur créera un contrat `building_bid` via `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingIdToBidOn`, `bidAmount`.
 
 12. **Accepter/Refuser une Offre sur un Bâtiment Possédé**
-    *   **Type**: `respond_to_building_bid`
-    *   **Description**: Un propriétaire de bâtiment répond à une offre d'achat (`building_bid`) reçue pour l'une de ses propriétés.
-    *   **Mécanisme Principal**: Mise à jour du statut du contrat `building_bid` en `accepted` ou `refused`. Si acceptée, cela déclenchera le transfert de propriété et de fonds.
-    *   **API Pertinente**: `POST /api/contracts` (pour mettre à jour le statut du contrat).
+    *   **activityType**: `respond_to_building_bid`
+    *   **Description**: Un propriétaire de bâtiment initie une réponse à une offre d'achat.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le statut du contrat `building_bid` via `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingBidContractId`, `response` ("accepted" ou "refused").
 
 13. **Retirer une Offre d'Achat sur un Bâtiment**
-    *   **Type**: `withdraw_building_bid`
-    *   **Description**: Un citoyen annule une offre (`building_bid`) qu'il avait précédemment faite pour acheter un bâtiment.
-    *   **Mécanisme Principal**: Mise à jour du statut du contrat `building_bid` en `withdrawn`.
-    *   **API Pertinente**: `POST /api/contracts` (pour mettre à jour le statut du contrat).
+    *   **activityType**: `withdraw_building_bid`
+    *   **Description**: Un citoyen initie le retrait d'une offre d'achat qu'il a faite.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le statut du contrat `building_bid` via `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingBidContractId`.
 
 14. **Créer/Gérer un Contrat d'Achat avec Majoration (Markup Buy Contract)**
-    *   **Type**: `manage_markup_buy_contract`
-    *   **Description**: Un citoyen établit un contrat pour acheter des biens à un prix majoré, souvent pour un besoin urgent ou une revente rapide. Cela indique une volonté de payer plus cher pour un accès immédiat ou garanti à des ressources.
-    *   **Mécanisme Principal**: Création ou mise à jour d'un contrat de type `markup_buy` (ou un type similaire) où l'acheteur spécifie la ressource, la quantité, et le prix maximum qu'il est prêt à payer.
-    *   **API Pertinente**: `POST /api/contracts`.
+    *   **activityType**: `manage_markup_buy_contract`
+    *   **Description**: Un citoyen initie la création/modification d'un contrat d'achat avec majoration.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur gérera la création/mise à jour du contrat `markup_buy` via `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `resourceType`, `targetAmount`, `maxPricePerResource`, `buyerBuildingId`.
 
 15. **Créer/Gérer un Contrat de Demande de Stockage (Storage Query Contract)**
-    *   **Type**: `manage_storage_query_contract`
-    *   **Description**: Un citoyen ou une entreprise cherchant activement de l'espace de stockage pour ses biens crée un contrat pour solliciter des offres de stockage. Ceci est distinct de l'offre de stockage publique (où un propriétaire propose son espace).
-    *   **Mécanisme Principal**: Création ou mise à jour d'un contrat de type `storage_query` (ou un type similaire) détaillant les besoins en stockage (type de ressource, quantité, durée souhaitée).
-    *   **API Pertinente**: `POST /api/contracts`.
+    *   **activityType**: `manage_storage_query_contract`
+    *   **Description**: Un citoyen initie la création/modification d'un contrat de demande de stockage.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur gérera la création/mise à jour du contrat `storage_query` via `POST /api/contracts`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `contractId` (optionnel), `resourceType`, `amountNeeded`, `durationDays`, `buyerBuildingId`.
 
 ## Gestion du Travail et des Entreprises
 
 16. **Ajuster les Salaires d'une Entreprise**
-    *   **Type**: `adjust_business_wages`
-    *   **Description**: Un citoyen qui gère une entreprise (`RunBy`) modifie le montant des salaires (`Wages`) offerts aux employés de cette entreprise.
-    *   **Mécanisme Principal**: Mise à jour du champ `Wages` sur l'enregistrement du bâtiment de l'entreprise.
-    *   **API Pertinente (Exemple)**: `PATCH /api/buildings/{buildingId}` ou un endpoint dédié pour les ajustements de salaires par l'IA (`backend/ais/adjustwages.py`).
+    *   **activityType**: `adjust_business_wages`
+    *   **Description**: Un gestionnaire d'entreprise (`RunBy`) initie la modification des salaires.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le champ `Wages` du bâtiment, potentiellement via `PATCH /api/buildings/{buildingId}` ou une logique similaire à `backend/ais/adjustwages.py`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `businessBuildingId`, `newWageAmount`.
 
 17. **Déléguer une Entreprise / Demander ou Prendre une Entreprise pour Soi**
-    *   **Type**: `manage_business_operation`
-    *   **Description**:
-        *   **Déléguer**: Un citoyen IA qui gère trop d'entreprises peut en transférer la gestion (`RunBy`) à une autre IA.
-        *   **Demander/Prendre**: Un citoyen (IA ou joueur) pourrait chercher à devenir l'opérateur (`RunBy`) d'une entreprise existante, potentiellement en négociant avec le propriétaire ou en répondant à une "offre d'emploi" pour un gestionnaire.
-    *   **Mécanisme Principal**: Mise à jour du champ `RunBy` sur l'enregistrement du bâtiment de l'entreprise.
-    *   **API Pertinente (Exemple)**: `PATCH /api/buildings/{buildingId}`.
+    *   **activityType**: `manage_business_operation`
+    *   **Description**: Un citoyen initie un changement dans la gestion (`RunBy`) d'une entreprise.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le champ `RunBy` du bâtiment, potentiellement via `PATCH /api/buildings/{buildingId}`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `businessBuildingId`, `newOperatorUsername` (pour déléguer/prendre), `reason` (optionnel).
 
 ## Finance
 
 18. **Demander un Prêt**
-    *   **Type**: `request_loan`
-    *   **Description**: Un citoyen sollicite un emprunt financier, spécifiant le montant, et potentiellement le but ou les garanties.
-    *   **Mécanisme Principal**: Création d'un enregistrement de prêt avec un statut "en attente d'approbation".
-    *   **API Pertinente**: `POST /api/loans/apply`.
+    *   **activityType**: `request_loan`
+    *   **Description**: Un citoyen initie une demande de prêt.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur créera un enregistrement de prêt via `POST /api/loans/apply`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `amount`, `purpose`, `collateralDetails` (optionnel).
 
 19. **Offrir un Prêt**
-    *   **Type**: `offer_loan`
-    *   **Description**: Un citoyen ou une institution disposant de fonds excédentaires propose des prêts à d'autres.
-    *   **Mécanisme Principal**: Pourrait impliquer la création de "modèles de prêt" ou la réponse à des demandes de prêt.
-    *   **API Pertinente (Exemple)**: `POST /api/loans` (pour créer une offre de prêt) ou gestion des demandes via l'interface.
+    *   **activityType**: `offer_loan`
+    *   **Description**: Un citoyen initie une offre de prêt à un autre citoyen ou au public.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur créera une offre de prêt via `POST /api/loans`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `targetBorrowerUsername` (optionnel, si prêt direct), `amount`, `interestRate`, `termDays`.
 
 20. **Retirer des Jetons COMPUTE**
-    *   **Type**: `withdraw_compute_tokens`
-    *   **Description**: Un joueur convertit ses Ducats en jeu en jetons $COMPUTE sur la blockchain.
-    *   **Mécanisme Principal**: Interaction avec un service de portefeuille ou un smart contract pour initier le processus de retrait des Ducats du jeu vers des jetons $COMPUTE externes.
-    *   **API Pertinente (Exemple)**: `POST /api/withdraw-compute`.
+    *   **activityType**: `withdraw_compute_tokens`
+    *   **Description**: Un joueur initie le processus de conversion de Ducats en jetons $COMPUTE.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur interagira avec `POST /api/withdraw-compute`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `ducatsAmount`, `walletAddress`.
 
 21. **Injecter des Jetons COMPUTE**
-    *   **Type**: `inject_compute_tokens`
-    *   **Description**: Un joueur convertit des jetons $COMPUTE externes (blockchain) en Ducats utilisables dans le jeu.
-    *   **Mécanisme Principal**: Implique généralement un dépôt de jetons $COMPUTE sur un compte blockchain désigné, suivi d'un processus de vérification et de crédit des Ducats équivalents sur le compte du joueur en jeu. Ce processus peut être partiellement externe au jeu lui-même.
-    *   **API Pertinente (Exemple)**: L'API `/api/transfer-compute` (non documentée publiquement pour les joueurs mais utilisée en interne) peut être appelée par des systèmes backend pour enregistrer et finaliser l'injection de Ducats après qu'une transaction blockchain externe a été confirmée. Du point de vue du joueur, cela se manifeste par une augmentation de son solde de Ducats.
+    *   **activityType**: `inject_compute_tokens`
+    *   **Description**: Un joueur initie le processus de conversion de jetons $COMPUTE en Ducats.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur gérera la logique de vérification et de crédit, potentiellement via un appel interne à `/api/transfer-compute`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `computeTokenAmount`, `transactionProof` (détails de la transaction blockchain).
 
 ## Social et Communication
 
 22. **Envoyer un Message**
-    *   **Type**: `send_message`
-    *   **Description**: Un citoyen rédige et envoie une communication textuelle à un autre citoyen.
-    *   **Mécanisme Principal**: Création d'un enregistrement dans la table `MESSAGES`.
-    *   **API Pertinente**: `POST /api/messages/send`.
+    *   **activityType**: `send_message`
+    *   **Description**: Un citoyen initie l'envoi d'un message.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur créera l'enregistrement du message via `POST /api/messages/send`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `receiverUsername`, `content`, `messageType` (optionnel).
 
 23. **Répondre à un Message**
-    *   **Type**: `reply_to_message`
-    *   **Description**: Un citoyen formule et envoie une réponse à un message qu'il a reçu.
-    *   **Mécanisme Principal**: Similaire à l'envoi d'un message, mais souvent dans le contexte d'une conversation existante.
-    *   **API Pertinente**: `POST /api/messages/send`.
+    *   **activityType**: `reply_to_message`
+    *   **Description**: Un citoyen initie une réponse à un message reçu.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur enverra la réponse via `POST /api/messages/send`, potentiellement en liant au message d'origine.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `originalMessageId`, `receiverUsername` (de l'expéditeur original), `content`, `messageType` (optionnel).
 
 24. **Mettre à Jour son Profil Citoyen**
-    *   **Type**: `update_citizen_profile`
-    *   **Description**: Un citoyen modifie des informations personnelles de son profil, comme sa devise familiale, son blason, ou son ID Telegram.
-    *   **Mécanisme Principal**: Mise à jour des champs correspondants dans l'enregistrement du citoyen.
-    *   **API Pertinente**: `POST /api/citizens/update`.
+    *   **activityType**: `update_citizen_profile`
+    *   **Description**: Un citoyen initie la mise à jour de son profil.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur mettra à jour le profil via `POST /api/citizens/update`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `firstName`, `lastName`, `familyMotto`, `coatOfArmsImageUrl`, `telegramUserId` (tous optionnels).
 
 25. **Gérer son Appartenance à une Guilde**
-    *   **Type**: `manage_guild_membership`
-    *   **Description**: Un citoyen postule pour rejoindre une guilde, accepte une invitation, quitte une guilde, ou participe aux activités de gouvernance de sa guilde.
-    *   **Mécanisme Principal**: Mise à jour du champ `GuildId` du citoyen et potentiellement interaction avec des systèmes de gestion de guilde.
-    *   **API Pertinente**: `POST /api/citizens/update-guild`.
+    *   **activityType**: `manage_guild_membership`
+    *   **Description**: Un citoyen initie une action liée à sa guilde (rejoindre, quitter, etc.).
+    *   **Mécanisme Principal**: Crée une activité. Le processeur interagira avec `POST /api/citizens/update-guild` ou des API de guilde spécifiques.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `guildId`, `membershipAction` ("join", "leave", "accept_invite").
 
 26. **Générer/Enregistrer une Pensée Stratégique**
-    *   **Type**: `log_strategic_thought`
-    *   **Description**: Une IA citoyen réfléchit à sa situation actuelle, à ses objectifs, et formule une pensée ou une stratégie. Cette réflexion est ensuite enregistrée.
-    *   **Mécanisme Principal**: Appel à un moteur d'IA (Kinos) pour générer la pensée, puis création d'un message de type `thought_log` ou `unguided_run_log` du citoyen à lui-même.
-    *   **Scripts Pertinents**: `backend/ais/generatethoughts.py`, `backend/ais/autonomouslyRun.py`.
+    *   **activityType**: `log_strategic_thought`
+    *   **Description**: Une IA citoyen initie le processus de génération et d'enregistrement d'une pensée stratégique.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur appellera Kinos (ou une logique interne) pour générer la pensée, puis créera un message `thought_log`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `context` (optionnel, pour guider la pensée), `visibility` ("private", "public_short").
 
 27. **Marquer des Notifications comme Lues**
-    *   **Type**: `mark_notifications_read`
-    *   **Description**: Un citoyen consulte ses notifications et les marque comme ayant été lues.
-    *   **Mécanisme Principal**: Mise à jour du champ `ReadAt` des enregistrements de notification.
-    *   **API Pertinente**: `POST /api/notifications/mark-read`.
+    *   **activityType**: `mark_notifications_read`
+    *   **Description**: Un citoyen initie le marquage de notifications comme lues.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur appellera `POST /api/notifications/mark-read`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `notificationIds` (tableau d'IDs ou "all_unread").
 
 ## Personnalisation
 
 28. **Télécharger un Blason**
-    *   **Type**: `upload_coat_of_arms`
-    *   **Description**: Un joueur télécharge une image personnalisée pour servir de blason à son citoyen.
-    *   **Mécanisme Principal**: Envoi d'un fichier image au serveur, qui le stocke et met à jour l'URL du blason du citoyen.
-    *   **API Pertinente**: `POST /api/upload-coat-of-arms`.
+    *   **activityType**: `upload_coat_of_arms`
+    *   **Description**: Un joueur initie le téléchargement d'un blason.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur gérera l'upload via `POST /api/upload-coat-of-arms`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `imageData` (ou URL de l'image à récupérer).
 
 29. **Mettre à Jour les Paramètres Citoyen**
-    *   **Type**: `update_citizen_settings`
-    *   **Description**: Un joueur modifie des paramètres de jeu personnels, comme le volume de la musique, les effets sonores, la qualité graphique, etc.
-    *   **Mécanisme Principal**: Enregistrement des préférences du joueur, souvent associées à son compte ou portefeuille.
-    *   **API Pertinente**: `POST /api/citizen/settings`.
+    *   **activityType**: `update_citizen_settings`
+    *   **Description**: Un joueur initie la mise à jour de ses paramètres de jeu.
+    *   **Mécanisme Principal**: Crée une activité. Le processeur enregistrera les paramètres via `POST /api/citizen/settings`.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `settingsObject` (contenant les paires clé-valeur des paramètres).
