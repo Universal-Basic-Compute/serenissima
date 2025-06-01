@@ -531,7 +531,7 @@ activité `initiate_token_injection` est créée, et les frais de transaction so
 
 22. **Envoyer un Message**
     *   **activityType**: `send_message`
-    *   **Description**: Le citoyen se déplace physiquement vers la dernière position connue du destinataire
+    *   **Description**: Le citoyen se déplace physiquement vers la position du destinataire
 (`receiverUsername`), son domicile, ou son lieu de travail (`targetBuildingId`) pour lui remettre un message en
 personne.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`,
@@ -542,7 +542,7 @@ dernière appellera `POST /api/messages/send` pour enregistrer le message.
 `messageType` (optionnel), `targetBuildingId` (optionnel, lieu de rencontre privilégié comme le domicile ou lieu de
 travail du destinataire).
 
-23. **Répondre à un Message**
+1.  **Répondre à un Message**
     *   **activityType**: `reply_to_message`
     *   **Description**: Similaire à `send_message`, le citoyen se déplace physiquement vers l'expéditeur original du
 message (`receiverUsername`) pour lui remettre sa réponse en personne.
@@ -554,7 +554,7 @@ dernière appellera `POST /api/messages/send`.
 (l'expéditeur du message original), `content`, `messageType` (optionnel), `targetBuildingId` (optionnel, lieu de
 rencontre privilégié).
 
-24. **Mettre à Jour son Profil Citoyen**
+1.  **Mettre à Jour son Profil Citoyen**
     *   **activityType**: `update_citizen_profile`
     *   **Description**: Le citoyen se rend à son domicile ou à un `public_archives` (bureau public) pour enregistrer
 les modifications. Des frais de dossier peuvent être demandés au `public_archives`.
@@ -564,7 +564,7 @@ une activité `file_profile_update` est créée, et les frais sont payés si app
 `lastName`, `familyMotto`, `coatOfArmsImageUrl`, `telegramUserId` (tous optionnels), `targetOfficeBuildingId`
 (optionnel, ID du `public_archives`).
 
-25. **Gérer son Appartenance à une Guilde**
+1.  **Gérer son Appartenance à une Guilde**
     *   **activityType**: `manage_guild_membership`
     *   **Description**: Le citoyen se rend au `guild_hall` de la guilde concernée pour effectuer une action liée à son
 appartenance (rejoindre, quitter, accepter une invitation). Des frais d'adhésion ou des cotisations peuvent être dus à la guilde.
@@ -573,7 +573,7 @@ appartenance (rejoindre, quitter, accepter une invitation). Des frais d'adhésio
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `guildId`, `membershipAction` ("join",
 "leave", "accept_invite"), `guildHallBuildingId` (ID du `guild_hall` spécifique).
 
-26. **Générer/Enregistrer une Pensée Stratégique**
+1.  **Générer/Enregistrer une Pensée Stratégique**
     *   **activityType**: `log_strategic_thought`
     *   **Description**: Le citoyen prend un moment pour réfléchir, potentiellement dans un lieu privé (domicile,
 bureau) ou simplement sur place. La pensée est ensuite enregistrée.
@@ -582,7 +582,7 @@ bureau) ou simplement sur place. La pensée est ensuite enregistrée.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `context` (optionnel), `visibility`,
 `ponderLocationBuildingId` (optionnel, ID du lieu de réflexion).
 
-27. **Marquer des Notifications comme Lues**
+1.  **Marquer des Notifications comme Lues**
     *   **activityType**: `mark_notifications_read`
     *   **Description**: Le citoyen prend un moment (à son emplacement actuel ou à son domicile/bureau) pour examiner
 et marquer ses notifications.
