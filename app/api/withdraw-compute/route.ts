@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     
     // Check if citizen has any active loans
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000'}/api/loans/citizen/${wallet_address}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:5000'}/api/loans/citizen/${wallet_address}`);
       
       if (response.ok) {
         const citizenLoans = await response.json();
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     }
     
     // Call the backend API to withdraw compute
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000'}/api/withdraw-compute`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:5000'}/api/withdraw-compute`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

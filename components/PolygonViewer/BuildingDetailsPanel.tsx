@@ -14,7 +14,8 @@ import {
   RecipeList,
   ContractList,
   ChatCitizenDisplay,
-  BuildingBidsList // Added import
+  BuildingBidsList, // Added import
+  BuildingLedger // Added import for Ledger
 } from './BuildingDetails/'; // Added trailing slash to ensure directory import
 import ContractNegotiationPanel from './BuildingDetails/ContractNegotiationPanel'; // Import the new panel
 import BuildingRelevanciesList from './BuildingDetails/BuildingRelevanciesList'; // Import the new component
@@ -126,7 +127,8 @@ export default function BuildingDetailsPanel({
   type ChatTabType = 'builtBy' | 'runBy' | 'owner' | 'occupant';
   const [activeChatTab, setActiveChatTab] = useState<ChatTabType>('runBy');
   // Default to 'construction' if not constructed, then 'production' if storage, then 'market' if business, else 'production'
-  const [activeContentTab, setActiveContentTab] = useState<'construction' | 'production' | 'market' | 'real-estate'>(
+  type ContentTabType = 'construction' | 'production' | 'market' | 'real-estate' | 'ledger'; // Added 'ledger'
+  const [activeContentTab, setActiveContentTab] = useState<ContentTabType>(
     (building && building.isConstructed === false) ? 'construction' : 
     (building?.subCategory === 'storage') ? 'production' : 
     (building?.category === 'business' ? 'market' : 'production')
@@ -1477,8 +1479,8 @@ Your response:`;
             <div className="w-1/3 h-full flex flex-col">
               <div className="mb-3 border-b border-amber-300 flex-shrink-0">
                 <nav className="flex space-x-1" aria-label="Content Tabs">
-                  {((): ('construction' | 'production' | 'market' | 'real-estate')[] => {
-                    const tabs: ('construction' | 'production' | 'market' | 'real-estate')[] = [];
+                  {((): ContentTabType[] => {
+                    const tabs: ContentTabType[] = [];
                     if (building && building.isConstructed === false) {
                       tabs.push('construction');
                     }
@@ -1487,6 +1489,7 @@ Your response:`;
                     }
                     tabs.push('production');
                     tabs.push('real-estate');
+                    tabs.push('ledger'); // Added Ledger tab
                     return tabs;
                   })().map((tabName) => (
                     <button
@@ -1500,8 +1503,9 @@ Your response:`;
                     >
                       {tabName === 'construction' ? 'Construction' : 
                        tabName === 'production' ? (building?.subCategory === 'storage' ? 'Storage' : 'Production') : 
-                       tabName === 'market' ? 'Market' : 
-                       'Real-estate'}
+                       tabName === 'market' ? 'Market' :
+                       tabName === 'real-estate' ? 'Real-estate' :
+                       'Ledger'} {/* Label for Ledger tab */}
                     </button>
                   ))}
                 </nav>
@@ -1638,6 +1642,12 @@ Your response:`;
                       <p className="text-amber-700 italic text-sm text-center py-4">{emptyTabMessage}</p>
                     }
                   </>
+                )}
+                {activeContentTab === 'ledger' && building && (
+                  <BuildingLedger 
+                    buildingId={building.buildingId || building.id} 
+                    buildingName={building.name || formatBuildingType(building.type)} 
+                  />
                 )}
                 {activeContentTab === 'market' && building?.category === 'business' && (
                   <>

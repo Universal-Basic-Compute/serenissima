@@ -14,3 +14,4 @@ export { default as BuildingRelevanciesList } from './BuildingRelevanciesList'; 
 export { default as ConstructionServicePanel } from './ConstructionServicePanel'; // Added export for ConstructionServicePanel
 export { default as BuildingBidsList } from './BuildingBidsList'; // Added export for BuildingBidsList
 export { default as BidPlacementPanel } from './BidPlacementPanel'; // Added export for BidPlacementPanel
+export { default as BuildingLedger } from './BuildingLedger'; // Added export for BuildingLedger
