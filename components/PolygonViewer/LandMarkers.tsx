@@ -50,7 +50,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
         if (!img) return null;
 
         // Calculate base size that will be scaled with the map
-        const baseSize = 150;
+        const baseSize = 75; // Reduced from 150 to 75 (by factor of 2)
         
         // Apply night effect if needed
         const nightFilter = isNight ? 'brightness(0.6) saturate(0.8)' : '';
