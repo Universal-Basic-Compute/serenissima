@@ -627,6 +627,10 @@ API_REFERENCE_EXTRACTED_TEXT = ""
 # Global variable to store Activity Creation Reference content
 ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = ""
 
+# Global variable to store Reads Reference content
+RAW_READS_REFERENCE_CONTENT = ""
+READS_REFERENCE_EXTRACTED_TEXT = ""
+
 
 def extract_text_from_activity_reference(tsx_content: str) -> str:
     """
@@ -788,6 +792,86 @@ def load_activity_reference_content():
         log.error(f"{LogColors.FAIL}Error loading or extracting Activity Creation Reference content: {e}{LogColors.ENDC}", exc_info=True)
         ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = "Error loading Activity Creation Reference."
 
+def extract_text_from_reads_reference(tsx_content: str) -> str:
+    """
+    Extracts key textual information from the ReadsReference.tsx content.
+    Focuses on request types, descriptions, parameters, and underlying APIs.
+    """
+    if not tsx_content:
+        return "Reads Reference content not available."
+
+    extracted_sections = []
+
+    # General intro for /api/try-read
+    intro_match = re.search(r'<h1.*?Reads Reference.*?</h1>\s*<p.*?>(.*?)</p>\s*<p.*?Note for AI Agents:(.*?)</p>', tsx_content, re.DOTALL | re.IGNORECASE)
+    if intro_match:
+        intro_desc = re.sub(r'<[^>]+>', '', intro_match.group(1)).strip()
+        intro_note = re.sub(r'<[^>]+>', '', intro_match.group(2)).strip()
+        extracted_sections.append(f"Simplified Reads Endpoint (POST /api/try-read):\nDescription: {intro_desc}\nNote for AI Agents: {intro_note}\n")
+
+    # Regex to find sections for each request type
+    request_type_pattern = re.compile(
+        r'<section key="([^"]+)"[^>]*>.*?<h3[^>]*><code>(.*?)</code>(?:.*?<span[^>]*>alias: <code>(.*?)</code></span>)?</h3>.*?<p[^>]*class="text-sm mb-3">(.*?)</p>.*?<p[^>]*class="text-xs text-gray-500 mb-3">.*?Calls: <code>(.*?)</code>.*?</p>(.*?)<\/section>',
+        re.DOTALL | re.IGNORECASE
+    )
+
+    for match in request_type_pattern.finditer(tsx_content):
+        req_type_key = match.group(1).strip() # key attribute, e.g., get_my_profile
+        req_type_name = match.group(2).strip() # name in <code>
+        alias = match.group(3).strip() if match.group(3) else None
+        description = re.sub(r'<[^>]+>', '', match.group(4).strip())
+        underlying_api = match.group(5).strip()
+        parameters_html_content = match.group(6)
+
+        section_text = f"Request Type: `{req_type_name}`\n"
+        if alias:
+            section_text += f"Alias: `{alias}`\n"
+        section_text += f"Description: {description}\n"
+        section_text += f"Underlying API Call: `{underlying_api}`\n"
+
+        params_list_match = re.search(r'<ul.*?>(.*?)</ul>', parameters_html_content, re.DOTALL | re.IGNORECASE)
+        if params_list_match:
+            params_list_html = params_list_match.group(1)
+            params = re.findall(r'<li><code>(.*?)</code>\s*\(<code>(.*?)</code>\)\s*-\s*(<strong>Required</strong>|Optional)\.\s*(.*?)</li>', params_list_html, re.DOTALL | re.IGNORECASE)
+            if params:
+                section_text += "Parameters:\n"
+                for param_name, param_type, param_req, param_desc in params:
+                    section_text += f"  - `{param_name.strip()}` ({param_type.strip()}): {param_req.strip()}. {param_desc.strip()}\n"
+            else: # No parameters listed in <ul>
+                 no_params_text_match = re.search(r'<p[^>]*>No parameters required.*?</p>', parameters_html_content, re.DOTALL | re.IGNORECASE)
+                 if no_params_text_match:
+                     section_text += "Parameters: None required.\n"
+
+        extracted_sections.append(section_text)
+    
+    if not extracted_sections:
+        return "Could not extract structured Reads Reference details. Raw content might be too complex for simple regex."
+
+    return "\n\n---\n\n".join(extracted_sections)
+
+def load_reads_reference_content():
+    """Loads and extracts text from ReadsReference.tsx."""
+    global RAW_READS_REFERENCE_CONTENT, READS_REFERENCE_EXTRACTED_TEXT
+    try:
+        ref_file_path = os.path.join(PROJECT_ROOT, "components", "Documentation", "ReadsReference.tsx")
+        if os.path.exists(ref_file_path):
+            with open(ref_file_path, "r", encoding="utf-8") as f:
+                RAW_READS_REFERENCE_CONTENT = f.read()
+            log.info(f"{LogColors.OKGREEN}Successfully loaded raw Reads Reference content.{LogColors.ENDC}")
+            READS_REFERENCE_EXTRACTED_TEXT = extract_text_from_reads_reference(RAW_READS_REFERENCE_CONTENT)
+            if "Could not extract" not in READS_REFERENCE_EXTRACTED_TEXT and READS_REFERENCE_EXTRACTED_TEXT != "Reads Reference content not available.":
+                 log.info(f"{LogColors.OKGREEN}Successfully extracted text from Reads Reference. Length: {len(READS_REFERENCE_EXTRACTED_TEXT)}{LogColors.ENDC}")
+            else:
+                 log.warning(f"{LogColors.WARNING}Extraction from Reads Reference might have issues: {READS_REFERENCE_EXTRACTED_TEXT[:100]}...{LogColors.ENDC}")
+        else:
+            log.warning(f"{LogColors.WARNING}Reads Reference file not found at {ref_file_path}. Proceeding without it.{LogColors.ENDC}")
+            RAW_READS_REFERENCE_CONTENT = "Reads Reference file not found."
+            READS_REFERENCE_EXTRACTED_TEXT = "Reads Reference file not found."
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error loading or extracting Reads Reference content: {e}{LogColors.ENDC}", exc_info=True)
+        RAW_READS_REFERENCE_CONTENT = "Error loading Reads Reference."
+        READS_REFERENCE_EXTRACTED_TEXT = "Error loading Reads Reference."
+
 def load_airtable_schema_content():
     """Loads the content of airtable_schema.md."""
     global AIRTABLE_SCHEMA_CONTENT
@@ -812,17 +896,15 @@ API_DOCUMENTATION_SUMMARY = {
     "base_url": API_BASE_URL,
     "notes": (
         "You are an AI citizen interacting with the La Serenissima API. Key guidelines:\n"
-        "1.  **Dynamic GET Filtering**: For most GET endpoints that return lists (e.g., /api/buildings, /api/citizens, /api/contracts, /api/resources, /api/lands, /api/problems, /api/relevancies, /api/loans, /api/guilds, /api/decrees, /api/activities, /api/transactions/history), you can filter results by providing Airtable field names as query parameters. For example, to get buildings owned by 'NLR' of category 'business', use: `/api/buildings?Owner=NLR&Category=business`. The server is flexible with query key casing (e.g., `Owner` or `owner`), but Airtable fields are PascalCase (see `backend/docs/airtable_schema.md`).\n"
-        "2.  **POST/PATCH Request Body Keys**: When sending JSON data in POST or PATCH requests (e.g., creating a building, sending a message), use `camelCase` for keys in the request body (e.g., `{\"landId\": \"polygon-123\", \"buildingType\": \"house\"}`). The server will convert these to `PascalCase` for Airtable.\n"
-        "3.  **Airtable Schema**: Refer to `backend/docs/airtable_schema.md` for exact Airtable table and field names (they are PascalCase).\n"
-        "4.  **Specific Endpoints**: Some endpoints have fixed parameters or unique behaviors (e.g., /api/resources/counts, /api/thoughts, /api/messages?type=...). If dynamic filtering doesn't yield expected results, consult their specific documentation or use their defined parameters.\n"
-        "5.  **Focus**: Your goal is to make informed decisions. Choose API calls that provide the most relevant data for your current objectives.\n"
-        "6.  **Airtable Schema**: A summary of the Airtable schema (field names, types) may be available in `addSystem.airtable_schema_summary` (typically for non-local models) to help you understand data structures and construct precise filters for GET requests.\n"
-        "7.  **Latest Activity**: Your most recent or current activity details are available in `addSystem.latest_activity`.\n"
-        "8.  **Utility `try-read` Endpoint**: For common information gathering, you can use `POST /api/try-read` with a `requestType` (e.g., 'get_my_profile', 'get_lands_for_sale') and necessary `parameters` (e.g., `{\"username\": \"YourUsername\"}`). This simplifies accessing frequently needed data."
+        "1.  **Simplified GETs via `/api/try-read`**: For common information gathering, use `POST /api/try-read`. Consult the `compendium_of_missive_details` (ReadsReference.tsx extract) in `addSystem` for available `requestType` values and their `parameters`.\n"
+        "2.  **Dynamic GET Filtering**: For direct GET requests to list endpoints (e.g., /api/buildings, /api/citizens, /api/contracts), you can filter results by providing Airtable field names as query parameters (e.g., `/api/buildings?Owner=NLR&Category=business`). Airtable fields are PascalCase (see `backend/docs/airtable_schema.md`).\n"
+        "3.  **POST/PATCH Request Body Keys**: Use `camelCase` for keys in JSON request bodies (e.g., `{\"landId\": \"polygon-123\", \"buildingType\": \"house\"}`). The server converts them to `PascalCase`.\n"
+        "4.  **Airtable Schema**: Refer to `backend/docs/airtable_schema.md` (available in `addSystem.overview_of_city_records_structure` for non-local models) for exact Airtable field names.\n"
+        "5.  **Focus**: Make informed decisions. Choose API calls that provide relevant data for your objectives.\n"
+        "6.  **Latest Activity**: Your most recent activity details are in `addSystem.intelligence_briefing.lastActivity`."
     ),
-    "example_get_endpoints": [
-        "/api/citizens/{username}", # Specific citizen by username
+    "example_get_endpoints": [ # These are examples of direct GETs, distinct from /api/try-read
+        "/api/citizens/{YourUsername}", 
         "/api/citizens?SocialClass=Popolani&IsAI=true", # Filtered list of AI Popolani citizens
         "/api/buildings?Owner={YourUsername}&Category=business", # Your business buildings
         "/api/buildings?Type=market_stall&IsConstructed=true", # All constructed market stalls
@@ -1104,8 +1186,8 @@ def autonomously_run_ai_citizen_unguided(
         
         prompt_context_elements = [
             "your intelligence briefing (`addSystem.intelligence_briefing`), which contains your personal details, recent undertakings, owned lands and buildings, and available construction sites",
-            "a summary of available missives (API endpoints, `addSystem.summary_of_available_missives`)",
-            "the compendium of missive details (API Reference, `addSystem.compendium_of_missive_details`)",
+            "a summary of available missives (API endpoints, `addSystem.summary_of_available_missives`)", # General API structure notes
+            "the compendium of simplified read missives (`POST /api/try-read` details, `addSystem.compendium_of_simplified_reads`)", # Specifics for /api/try-read
             "the guide to decreeing undertakings (Activity Creation Reference, `addSystem.guide_to_decreeing_undertakings`)",
         ]
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
@@ -1137,8 +1219,8 @@ def autonomously_run_ai_citizen_unguided(
 
         add_system_data = {
             "intelligence_briefing": initial_data_package.get("data") if initial_data_package and initial_data_package.get("success") else initial_data_package,
-            "summary_of_available_missives": API_DOCUMENTATION_SUMMARY,
-            "compendium_of_missive_details": API_REFERENCE_EXTRACTED_TEXT,
+            "summary_of_available_missives": API_DOCUMENTATION_SUMMARY, # General API notes
+            "compendium_of_simplified_reads": READS_REFERENCE_EXTRACTED_TEXT, # Specifics for /api/try-read
             "guide_to_decreeing_undertakings": ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT, 
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
             "outcomes_of_prior_actions": previous_api_results
@@ -1258,8 +1340,9 @@ def process_all_ai_autonomously(
 
     load_airtable_schema_content()
     if unguided_mode:
-        load_api_reference_content()
-        load_activity_reference_content() # Load the new reference
+        # load_api_reference_content() # No longer primary for unguided's compendium
+        load_reads_reference_content() # Load the ReadsReference content
+        load_activity_reference_content() 
 
     tables = initialize_airtable()
     kinos_api_key = get_kinos_api_key()
