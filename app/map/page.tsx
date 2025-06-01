@@ -369,7 +369,7 @@ export default function MapPage() {
     if (mapRef.current && isGoogleLoaded) {
       loadPolygonsOnMap();
     }
-  }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap, centroidDragMode]);
+  }, [mapRef.current, isGoogleLoaded, loadPolygonsOnMap]); // centroidDragMode retiré des dépendances
   
   
   // Function to load WaterPoints
