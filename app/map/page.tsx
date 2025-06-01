@@ -48,6 +48,7 @@ export default function MapPage() {
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const [activeLandPolygons, setActiveLandPolygons] = useState<{[id: string]: google.maps.Polygon}>({}); // State for data, not direct map objects for clearing
   const drawnMapPolygonsRef = useRef<google.maps.Polygon[]>([]); // Ref to hold actual google.maps.Polygon objects
+  const drawnGroundOverlaysRef = useRef<google.maps.GroundOverlay[]>([]); // Ref to hold actual ground overlays for images
   const [centroidMarkers, setCentroidMarkers] = useState<{[id: string]: google.maps.Marker}>({});
   const [isDraggingCentroid, setIsDraggingCentroid] = useState(false);
   const [centroidDragMode, setCentroidDragMode] = useState(false);
@@ -331,6 +332,10 @@ export default function MapPage() {
     drawnMapPolygonsRef.current.forEach(p => p.setMap(null));
     drawnMapPolygonsRef.current = []; // Reset the ref array
 
+    // Clear existing ground overlays from the map using the ref
+    drawnGroundOverlaysRef.current.forEach(overlay => overlay.setMap(null));
+    drawnGroundOverlaysRef.current = []; // Reset the ref array
+
     const newActivePolygonsState: Record<string, google.maps.Polygon> = {}; // For React state update
     
     // Fetch polygons from API
@@ -358,6 +363,28 @@ export default function MapPage() {
             // Store reference to polygon for state, and in ref for direct manipulation
             drawnMapPolygonsRef.current.push(mapPolygon);
             newActivePolygonsState[polygon.id] = mapPolygon;
+
+            // Create and add GroundOverlay for the land image
+            const imageUrl = `/images/lands/${polygon.id}.png`;
+            const pathForBounds = mapPolygon.getPath();
+            const imageBounds = new google.maps.LatLngBounds();
+            for (let k = 0; k < pathForBounds.getLength(); k++) {
+              imageBounds.extend(pathForBounds.getAt(k));
+            }
+
+            if (!imageBounds.isEmpty() && mapRef.current) {
+              const groundOverlay = new google.maps.GroundOverlay(
+                imageUrl,
+                imageBounds,
+                {
+                  opacity: 0.5,
+                  map: mapRef.current
+                }
+              );
+              drawnGroundOverlaysRef.current.push(groundOverlay);
+            } else {
+              console.warn(`Could not calculate bounds or mapRef not ready for polygon ${polygon.id}, skipping image overlay.`);
+            }
 
             // Add click listener to this mapPolygon
             mapPolygon.addListener('click', () => {
