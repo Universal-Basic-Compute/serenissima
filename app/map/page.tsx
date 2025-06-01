@@ -6,6 +6,7 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 import { findClosestPointOnPolygonEdge } from '@/lib/utils/fileUtils';
+import PolygonDisplayPanel from '@/components/PolygonViewer/PolygonDisplayPanel'; // Import the new panel
 
 // Venice coordinates
 const center = {
@@ -54,6 +55,10 @@ export default function MapPage() {
   const [waterPoints, setWaterPoints] = useState<any[]>([]);
   const [waterPointMarkers, setWaterPointMarkers] = useState<{[id: string]: google.maps.Marker}>({});
   const [waterPointConnections, setWaterPointConnections] = useState<google.maps.Polyline[]>([]);
+
+  // State for PolygonDisplayPanel on map page
+  const [selectedMapPolygonData, setSelectedMapPolygonData] = useState<any | null>(null);
+  const [showMapPolygonDisplayPanel, setShowMapPolygonDisplayPanel] = useState<boolean>(false);
   
   // Initialize wallet adapter
   useEffect(() => {
@@ -339,6 +344,16 @@ export default function MapPage() {
             
             // Store reference to polygon
             newActiveLandPolygons[polygon.id] = mapPolygon;
+
+            // Add click listener to this mapPolygon
+            mapPolygon.addListener('click', () => {
+              setSelectedMapPolygonData({
+                id: polygon.id,
+                coordinates: polygon.coordinates, // Ensure this is in {lat, lng} format
+                historicalName: polygon.historicalName // Pass historicalName if available
+              });
+              setShowMapPolygonDisplayPanel(true);
+            });
           }
         });
         
@@ -500,6 +515,11 @@ export default function MapPage() {
     setIsGoogleLoaded(true);
   };
   
+  // Handler to close the map polygon display panel
+  const handleCloseMapPolygonDisplayPanel = () => {
+    setShowMapPolygonDisplayPanel(false);
+    setSelectedMapPolygonData(null);
+  };
   
   // Set cursor to crosshair on initial load if waterPointMode is active
   useEffect(() => {
@@ -626,6 +646,14 @@ export default function MapPage() {
           )}
         </GoogleMap>
       </LoadScript>
+
+      {/* Polygon Display Panel for the map */}
+      {showMapPolygonDisplayPanel && selectedMapPolygonData && (
+        <PolygonDisplayPanel
+          polygon={selectedMapPolygonData}
+          onClose={handleCloseMapPolygonDisplayPanel}
+        />
+      )}
     </div>
   );
 }
