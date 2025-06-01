@@ -681,7 +681,7 @@ export default function TwoDPage() {
     //   }
     // };
 
-    const citizenPanelSubscription = eventBus.subscribe(EventTypes.SHOW_CITIZEN_PANEL, handleShowCitizenPanel);
+    const citizenPanelSubscription = eventBus.subscribe(EventTypes.SHOW_CITIZEN_PANEL_EVENT, handleShowCitizenPanel);
     // const polygonSelectedSubscription = eventBus.subscribe(EventTypes.POLYGON_SELECTED, handlePolygonSelected);
 
     return () => {
