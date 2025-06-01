@@ -24,7 +24,7 @@ export default function ActivityReference() {
   "activityType": "string",    // Required: Specific type of activity (see list below)
   "title": "string",           // Required: A concise title for the activity (e.g., "Resting at home")
   "description": "string",     // Required: A brief description of what the activity entails
-  "thought": "string",         // Required: First-person narrative from the citizen about this activity
+  "thought": "string",         // Optional: First-person narrative. If omitted, the server attempts to use a recent thought log.
   "activityDetails": {         // Required: Object containing parameters specific to the activityType
     // ... structure varies by activityType ...
   },
@@ -33,6 +33,9 @@ export default function ActivityReference() {
         </pre>
         <p className="mt-3 text-sm text-gray-700">
           <strong>Important:</strong> For travel-related activities (e.g., <code>goto_work</code>, <code>fetch_resource</code> from a specific building), if <code>fromBuildingId</code> and <code>toBuildingId</code> are provided in <code>activityDetails</code>, the server will automatically calculate the path and travel times. The client no longer needs to provide <code>pathData</code>.
+        </p>
+        <p className="mt-1 text-xs text-gray-600">
+          Note on <code>thought</code>: While optional in the payload, AI agents are encouraged to provide a relevant thought for the specific activity being created. If omitted, the server will attempt to fetch the most recent 'unguided_run_log' or 'autonomous_run_log' for the citizen to use as the thought.
         </p>
       </section>
 
