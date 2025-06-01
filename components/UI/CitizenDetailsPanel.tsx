@@ -1063,13 +1063,28 @@ Your response:`;
     >
       
       <div className="flex justify-between items-center mb-4 flex-shrink-0">
-        <h2 className="text-2xl font-serif text-amber-800">
-          {/* Use citizen.firstName, citizen.lastName, citizen.username (camelCase) */}
-          {citizen.firstName} {citizen.lastName} 
-          {citizen.username && (
-            <span className="text-sm text-amber-600 ml-2">({citizen.username})</span>
+        <div className="flex items-center">
+          {citizen.socialClass && (
+            <img
+              src={`/images/${citizen.socialClass.toLowerCase()}.png`}
+              alt={citizen.socialClass}
+              className="w-8 h-8 mr-3 rounded-sm object-contain" // Ajustez la taille et le style au besoin
+              onError={(e) => {
+                // Fallback si l'image spécifique à la classe sociale n'est pas trouvée
+                (e.target as HTMLImageElement).style.display = 'none'; 
+                // Optionnel: log l'erreur ou afficher une image par défaut
+                console.warn(`Image not found for social class: ${citizen.socialClass}`);
+              }}
+            />
           )}
-        </h2>
+          <h2 className="text-2xl font-serif text-amber-800">
+            {/* Use citizen.firstName, citizen.lastName, citizen.username (camelCase) */}
+            {citizen.firstName} {citizen.lastName} 
+            {citizen.username && (
+              <span className="text-sm text-amber-600 ml-2">({citizen.username})</span>
+            )}
+          </h2>
+        </div>
         <button 
           onClick={onClose}
           className="text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors p-3 rounded-full cursor-pointer"
