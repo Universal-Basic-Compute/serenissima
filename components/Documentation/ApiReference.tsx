@@ -258,7 +258,11 @@ export default function ApiReference() {
               <li><Link href="/activity-reference#general-payload" className="text-amber-600 hover:underline text-sm">POST /api/actions/create-activity</Link></li>
             </ul>
           </li>
-          <li><a href="#utilities-post-try-read" className="text-amber-700 hover:underline">Utility: Try Read (Simplified GETs)</a></li>
+          <li><a href="#utilities-post-try-read" className="text-amber-700 hover:underline">Utility: Try Read (Simplified GETs)</a>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+                <li><Link href="/reads-reference" className="text-amber-500 hover:underline text-xs">Full /api/try-read Request Type Reference</Link></li>
+            </ul>
+          </li>
         </ul>
       </div>
       
