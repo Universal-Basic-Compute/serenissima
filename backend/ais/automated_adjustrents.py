@@ -17,6 +17,8 @@ from typing import Dict, List, Optional, Any
 import requests
 import pytz # For timezone handling if needed for notifications
 import statistics # Importer le module statistics
+import requests # Added for API calls
+# import json # json is already imported
 
 # Add the project root to sys.path
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -46,6 +48,9 @@ class LogColors:
     WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
+
+# Import VENICE_TIMEZONE from shared utils
+from backend.engine.utils.activity_helpers import VENICE_TIMEZONE
 
 # --- Airtable Initialization ---
 def initialize_airtable() -> Optional[Dict[str, Table]]:
@@ -250,17 +255,7 @@ def calculate_new_rent_price(
 
     return float(new_rent)
 
-def update_building_rent(tables: Dict[str, Table], building_airtable_id: str, new_rent: float, dry_run: bool) -> bool:
-    if dry_run:
-        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would update building {building_airtable_id} RentPrice to {new_rent:.2f}{LogColors.ENDC}")
-        return True
-    try:
-        tables["buildings"].update(building_airtable_id, {"RentPrice": new_rent})
-        log.info(f"{LogColors.OKGREEN}Updated RentPrice for building {building_airtable_id} to {new_rent:.2f}{LogColors.ENDC}")
-        return True
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Failed to update RentPrice for {building_airtable_id}: {e}{LogColors.ENDC}")
-        return False
+# Removed update_building_rent function as its logic is now handled by 'adjust_building_rent_price' activity
 
 def notify_occupant(
     tables: Dict[str, Table], 
@@ -326,6 +321,47 @@ def create_admin_summary_notification(tables: Dict[str, Table], results: List[Di
     except Exception as e:
         log.error(f"{LogColors.FAIL}Failed to create admin summary notification: {e}{LogColors.ENDC}")
 
+# --- API Call Helper ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool,
+    log_ref: Any # Pass the script's logger
+) -> bool:
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        log_ref.info(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return True
+
+    api_url = f"{API_BASE_URL}/api/activities/try-create"
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        if response_data.get("success"):
+            log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_data.get('message', 'OK')}{LogColors.ENDC}")
+            activity_info = response_data.get("activity") or (response_data.get("activities")[0] if isinstance(response_data.get("activities"), list) and response_data.get("activities") else None)
+            if activity_info and activity_info.get("id"):
+                 log_ref.info(f"  Activity ID: {activity_info['id']}")
+            return True
+        else:
+            log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_data.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return False
+    except requests.exceptions.RequestException as e:
+        log_ref.error(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
+        return False
+    except json.JSONDecodeError:
+        log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return False
+
 # --- Main Processing Logic ---
 def process_automated_rent_adjustments(strategy: str, dry_run: bool):
     log.info(f"{LogColors.HEADER}Starting Automated Rent Adjustment Process (Strategy: {strategy}, Dry Run: {dry_run}){LogColors.ENDC}")
@@ -381,7 +417,14 @@ def process_automated_rent_adjustments(strategy: str, dry_run: bool):
             if new_rent is not None:
                 # Only update if new rent is different by a meaningful amount (e.g., > 1 Ducat)
                 if abs(new_rent - current_rent_price) > 1.0:
-                    if update_building_rent(tables, building_airtable_id, new_rent, dry_run):
+                    # Replace direct update with try-create activity
+                    activity_params = {
+                        "buildingId": building_id_custom,
+                        "newRentPrice": new_rent,
+                        "strategy": strategy
+                        # targetOfficeBuildingId is optional and not determined here
+                    }
+                    if call_try_create_activity_api(ai_username, "adjust_building_rent_price", activity_params, dry_run, log):
                         rent_adjustment_results.append({
                             "ai_owner": ai_username,
                             "building_id": building_id_custom,
