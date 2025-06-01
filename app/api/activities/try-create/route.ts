@@ -53,6 +53,17 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log des paramètres spécifiques pour manage_logistics_service_contract
+    if (activityType === 'manage_logistics_service_contract') {
+      console.log(`[API /activities/try-create] Processing manage_logistics_service_contract with parameters:`, 
+        activityParameters?.contractId ? `Modifying contract: ${activityParameters.contractId}` : 'Creating new contract',
+        `Resource Type: ${activityParameters?.resourceType || 'General logistics'}`,
+        `Service Fee: ${activityParameters?.serviceFeePerUnit}`,
+        `Client Building: ${activityParameters?.clientBuildingId}`,
+        `Guild Hall: ${activityParameters?.targetGuildHallId}`
+      );
+    }
+    
     // Endpoint générique sur le moteur Python pour initier des activités/actions
     let parsedPythonEngineUrl: URL;
     try {
