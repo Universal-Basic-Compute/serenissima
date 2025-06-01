@@ -49,9 +49,9 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
         const img = landImages[polygon.id];
         if (!img) return null;
 
-        // Calculate image size based directly on polygon size to match polygon scaling exactly
-        const size = Math.min(300, Math.max(150, Math.floor(150 * scale))); // Scale directly with map zoom
-
+        // Calculate base size that will be scaled with the map
+        const baseSize = 150;
+        
         // Apply night effect if needed
         const nightFilter = isNight ? 'brightness(0.6) saturate(0.8)' : '';
 
@@ -60,10 +60,10 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
             key={`land-image-${polygon.id}`}
             style={{
               position: 'absolute',
-              left: `${centerX - size / 2}px`,
-              top: `${centerY - size / 2}px`,
-              width: `${size}px`,
-              height: `${size}px`,
+              left: `${centerX - (baseSize * scale) / 2}px`,
+              top: `${centerY - (baseSize * scale) / 2}px`,
+              width: `${baseSize * scale}px`,
+              height: `${baseSize * scale}px`,
               backgroundImage: `url(${img.src})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -71,9 +71,6 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
               zIndex: 5, // Above polygons but below other markers
               filter: nightFilter,
               opacity: 1, // Full opacity as requested
-              transformOrigin: 'center center',
-              transform: `scale(${scale / 3})`, // Apply additional scaling to match polygon scaling exactly
-              // This transform scale combined with the size calculation ensures exact polygon matching
             }}
             onMouseEnter={() => {
               hoverStateService.setHoverState('polygon', polygon.id, polygon);
