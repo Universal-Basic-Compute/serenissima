@@ -517,6 +517,62 @@ def make_kinos_call(
         log.error(f"{LogColors.FAIL}Error in make_kinos_call for {ai_username}: {e}{LogColors.ENDC}", exc_info=True)
         return None
 
+# --- API Call Helper for try-create ---
+def call_try_create_activity_api(
+    citizen_username: str,
+    activity_type: str,
+    activity_parameters: Dict[str, Any],
+    dry_run: bool,
+    log_ref: Any # Pass the script's logger
+) -> Optional[Dict]: # Returns the API response or None on failure
+    """Calls the /api/activities/try-create endpoint."""
+    if dry_run:
+        log_ref.info(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
+        return {"success": True, "message": "[DRY RUN] Simulated try-create activity success."}
+
+    api_url = f"{API_BASE_URL}/api/activities/try-create" # API_BASE_URL is global
+    payload = {
+        "citizenUsername": citizen_username,
+        "activityType": activity_type,
+        "activityParameters": activity_parameters
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    last_exception_try_create = None
+    for attempt in range(MAX_RETRIES + 1): # MAX_RETRIES is global
+        try:
+            log_ref.info(f"{LogColors.OKBLUE}Making API POST request to: {LogColors.BOLD}{api_url}{LogColors.ENDC}{LogColors.OKBLUE} for try-create (Attempt {attempt + 1}/{MAX_RETRIES + 1}){LogColors.ENDC}")
+            log_ref.debug(f"{LogColors.LIGHTBLUE}Payload for try-create: {json.dumps(payload, indent=2)}{LogColors.ENDC}")
+            
+            response = requests.post(api_url, headers=headers, json=payload, timeout=DEFAULT_TIMEOUT_POST) # DEFAULT_TIMEOUT_POST is global
+            response.raise_for_status()
+            response_json = response.json()
+            
+            if response_json.get("success"):
+                log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_json.get('message', 'OK')}{LogColors.ENDC}")
+                activity_info = response_json.get("activity") or (response_json.get("activities")[0] if isinstance(response_json.get("activities"), list) and response_json.get("activities") else None)
+                if activity_info and activity_info.get("id"):
+                    log_ref.info(f"  Activity ID: {activity_info['id']}")
+            else:
+                log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_json.get('error', 'Unknown error')}{LogColors.ENDC}")
+            return response_json # Return the full response
+
+        except requests.exceptions.RequestException as e:
+            last_exception_try_create = e
+            log_ref.warning(f"{LogColors.WARNING}API POST request to {api_url} (try-create) failed on attempt {attempt + 1}: {e}{LogColors.ENDC}")
+            if attempt < MAX_RETRIES:
+                log_ref.info(f"Retrying in {RETRY_DELAY_SECONDS} seconds...")
+                time.sleep(RETRY_DELAY_SECONDS) # RETRY_DELAY_SECONDS is global
+            else:
+                log_ref.error(f"{LogColors.FAIL}API POST request to {api_url} (try-create) failed after {MAX_RETRIES + 1} attempts: {last_exception_try_create}{LogColors.ENDC}", exc_info=True)
+        except json.JSONDecodeError as e_json:
+            last_exception_try_create = e_json
+            log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response from POST {api_url} (try-create) on attempt {attempt + 1}: {e_json}{LogColors.ENDC}", exc_info=True)
+            break
+            
+    return {"success": False, "error": str(last_exception_try_create) if last_exception_try_create else "Unknown error after retries for try-create"}
+
+
 # --- Thought Cleaning Function (adapted from generatethoughts.py) ---
 
 def clean_thought_content(tables: Dict[str, Table], thought_content: str) -> str:
