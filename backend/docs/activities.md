@@ -276,8 +276,7 @@ finalize_land_purchase`, durée courte) est créée. Le processeur de cette dern
 
 3.  **Initier un Projet de Construction de Bâtiment**
     *   **activityType**: `initiate_building_project`
-    *   **Description**: Le citoyen se rend sur le terrain (`landId`), puis potentiellement à un `town_hall` (bureau
-d'urbanisme) pour obtenir un permis de construire (moyennant des frais), ou à un `masons_lodge` / `master_builders_workshop` (atelier de constructeur) pour soumettre les plans et
+    *   **Description**: Le citoyen se rend sur le terrain (`landId`), pour obtenir un permis de construire (moyennant des frais), ou à un `masons_lodge` / `master_builders_workshop` (atelier de constructeur) pour soumettre les plans et
 lancer le projet, ce qui peut impliquer des frais de dossier ou un acompte.
     *   **Mécanisme Principal**: Séquence d'activités : `goto_land_plot` (pour inspection), puis `goto_location` (vers
 `town_hall` ou l'atelier du constructeur si `builderContractDetails` fourni). À la destination finale, une activité
@@ -286,7 +285,7 @@ lancer le projet, ce qui peut impliquer des frais de dossier ou un acompte.
 `pointDetails`, `builderContractDetails` (optionnel, incluant `sellerBuildingId` qui pourrait être un `masons_lodge` ou
 `master_builders_workshop`), `targetOfficeBuildingId` (optionnel, ID du `town_hall` ou de l'atelier).
 
-4.  **Ajuster le Prix de Location d'un Terrain**
+1.  **Ajuster le Prix de Location d'un Terrain**
     *   **activityType**: `adjust_land_lease_price`
     *   **Description**: Le propriétaire foncier se rend à son domicile, à un bureau qu'il gère, ou à un
 `public_archives` (bureau du cadastre) pour enregistrer la modification du bail, ce qui peut entraîner des frais de dépôt.
@@ -295,7 +294,7 @@ lancer le projet, ce qui peut impliquer des frais de dossier ou un acompte.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `buildingId` ou `landId`,
 `newLeasePrice`, `strategy`, `targetOfficeBuildingId` (optionnel, ID du `public_archives`).
 
-5.  **Ajuster le Prix de Loyer d'un Bâtiment**
+1.  **Ajuster le Prix de Loyer d'un Bâtiment**
     *   **activityType**: `adjust_building_rent_price`
     *   **Description**: Le propriétaire du bâtiment se rend à son domicile, bureau, ou un `public_archives` pour
 enregistrer la modification du loyer, potentiellement en payant des frais d'enregistrement.
