@@ -205,6 +205,32 @@ async function fetchBuildingResourceDetails(buildingId: string): Promise<Buildin
   }
 }
 
+async function fetchCitizenContracts(username: string): Promise<AirtableRecord<FieldSet>[]> {
+  try {
+    const escapedUsername = escapeAirtableValue(username);
+    return await airtable('CONTRACTS').select({
+      filterByFormula: `AND(OR({Buyer} = '${escapedUsername}', {Seller} = '${escapedUsername}'), {Status} = 'active')`,
+    }).all();
+  } catch (error) {
+    console.error(`Error fetching contracts for ${username}:`, error);
+    return [];
+  }
+}
+
+async function fetchGuildDetails(guildId: string): Promise<AirtableRecord<FieldSet> | null> {
+  if (!guildId) return null;
+  try {
+    const records = await airtable('GUILDS').select({
+      filterByFormula: `{GuildId} = '${escapeAirtableValue(guildId)}'`,
+      maxRecords: 1,
+    }).firstPage();
+    return records.length > 0 ? records[0] : null;
+  } catch (error) {
+    console.error(`Error fetching guild details for GuildId ${guildId}:`, error);
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const citizenUsername = searchParams.get('citizenUsername');
@@ -293,7 +319,22 @@ export async function GET(request: Request) {
       lastActivity: lastActivityRecord ? {...normalizeKeysCamelCaseShallow(lastActivityRecord.fields), airtableId: lastActivityRecord.id} : null,
       ownedLands: ownedLandsData,
       ownedBuildings: [] as any[], // Initialize ownedBuildings array
+      activeContracts: [] as any[], // Initialize activeContracts array
+      guildDetails: null as any | null, // Initialize guildDetails
     };
+
+    // Fetch and add active contracts
+    const activeContractsRecords = await fetchCitizenContracts(citizenUsername);
+    dataPackage.activeContracts = activeContractsRecords.map(c => ({...normalizeKeysCamelCaseShallow(c.fields), airtableId: c.id}));
+
+    // Fetch and add guild details if GuildId exists
+    const guildId = citizenRecord.fields.GuildId as string;
+    if (guildId) {
+      const guildRecord = await fetchGuildDetails(guildId);
+      if (guildRecord) {
+        dataPackage.guildDetails = {...normalizeKeysCamelCaseShallow(guildRecord.fields), airtableId: guildRecord.id};
+      }
+    }
 
     for (const buildingRecord of ownedBuildingsRecords) {
       const buildingId = buildingRecord.fields.BuildingId as string;
