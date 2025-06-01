@@ -463,23 +463,30 @@ def process_automated_markup_buys(dry_run: bool = False):
                         "calculated_score": round(source_info['score'],2),
                         "created_by_script": "automated_adjustmarkupbuys.py"
                     })
+                } # This is the end of the payload dict definition
+
+                activity_params = {
+                    "contractId_to_create_if_new": new_contract_id,
+                    "resourceType": resource_type_needed,
+                    "targetAmount": DEFAULT_MARKUP_BUY_TARGET_AMOUNT,
+                    "maxPricePerResource": source_info['price'],
+                    "buyerBuildingId": biz_building_id,
+                    "sellerBuildingId": source_seller_building_record['fields'].get('BuildingId'),
+                    "sellerUsername": seller_username,
+                    "title": payload["Title"], # Use title from original payload
+                    "description": payload["Description"], # Use description from original payload
+                    "notes": json.loads(payload["Notes"]) # Pass notes_payload dict directly
                 }
 
-                if not dry_run:
-                    try:
-                        tables['contracts'].create(payload)
-                        log.info(f"    {LogColors.OKGREEN}Created 'markup_buy' contract: {new_contract_id} (Rank {rank}, Score: {source_info['score']:.2f}).{LogColors.ENDC}")
-                        total_new_contracts_created += 1
-                        contracts_this_resource_created +=1
-                    except Exception as e_create:
-                        log.error(f"    {LogColors.FAIL}Failed to create 'markup_buy' contract {new_contract_id}: {e_create}{LogColors.ENDC}")
-                else:
-                    log.info(f"{LogColors.OKCYAN}    [DRY RUN] Would create 'markup_buy' contract: {new_contract_id} (Rank {rank}, Score: {source_info['score']:.2f}). Buyer: {biz_runner_username}, Seller: {seller_username}, Price: {source_info['price']}.{LogColors.ENDC}")
-                    total_new_contracts_created += 1 # Count simulated creations
+                if call_try_create_activity_api(biz_runner_username, "manage_markup_buy_contract", activity_params, dry_run, log):
+                    log.info(f"    Successfully initiated 'manage_markup_buy_contract' for {new_contract_id} (Rank {rank}, Score: {source_info['score']:.2f}).")
+                    total_new_contracts_created += 1
                     contracts_this_resource_created +=1
-            
+                else:
+                    log.error(f"    {LogColors.FAIL}Failed to initiate 'manage_markup_buy_contract' for {new_contract_id}.{LogColors.ENDC}")
+
             if contracts_this_resource_created < 3 and contracts_this_resource_created > 0:
-                 log.info(f"{LogColors.OKBLUE}  Only created {contracts_this_resource_created} markup_buy contracts for {resource_type_needed} for {biz_building_id} (fewer than 3 sources available).{LogColors.ENDC}")
+                 log.info(f"{LogColors.OKBLUE}  Only initiated {contracts_this_resource_created} markup_buy contracts for {resource_type_needed} for {biz_building_id} (fewer than 3 sources available).{LogColors.ENDC}")
             elif contracts_this_resource_created == 0 and potential_source_contracts : # Had potential sources but failed to create any
                  log.warning(f"{LogColors.WARNING}  No markup_buy contracts were created for {resource_type_needed} for {biz_building_id} despite potential sources.{LogColors.ENDC}")
 
