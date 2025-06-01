@@ -1,17 +1,3 @@
-import React, { useRef } from 'react';
-
-interface Point {
-  lat: number;
-  lng: number;
-}
-
-interface Polygon {
-  id: string;
-  coordinates: Point[];
-  // Add other polygon properties if needed, e.g., name, color
-  [key: string]: any; // Allow other properties
-}
-
 import React, { useRef, useState, useEffect } from 'react';
 
 interface Point {
