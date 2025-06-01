@@ -70,7 +70,10 @@ export async function GET(request: Request) {
       if (reservedParams.includes(key.toLowerCase())) {
         continue;
       }
-      const airtableField = key; // Assuming query param key IS the Airtable field name
+      let airtableField = key; // Assuming query param key IS the Airtable field name
+      if (key.toLowerCase() === 'assetid') {
+        airtableField = 'Asset'; // Map assetId query param to Asset Airtable field
+      }
       loggableFilters[airtableField] = value;
 
       const numValue = parseFloat(value);
