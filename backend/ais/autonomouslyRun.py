@@ -562,6 +562,55 @@ def clean_thought_content(tables: Dict[str, Table], thought_content: str) -> str
         except Exception as e:
             log.error(f"Error looking up ID {full_id} for reflection cleaning: {e}")
             id_cache[full_id] = None
+
+    # Step 2: Remove sentences containing technical keywords
+    technical_keywords = [
+        "server", "error", "log", "api", "backend", "endpoint", "payload", "json", "http", 
+        "request", "response", "database", "query", "code", "script", "python", "javascript", 
+        "typescript", "html", "css", "react", "next.js", "node.js", "docker", "kubernetes", 
+        "aws", "azure", "gcp", "lambda", "function", "module", "class", "object", "method", 
+        "parameter", "argument", "variable", "constant", "debug", "test", "exception", 
+        "stacktrace", "token", "key", "auth", "jwt", "oauth", "sdk", "cli", "gui", "ui", "ux", 
+        "frontend", "backend", "devops", "sysadmin", "network", "protocol", "ip", "dns", "ssl", 
+        "tls", "ssh", "ftp", "smtp", "tcp", "udp", "http", "https", "rest", "graphql", 
+        "websocket", "git", "github", "gitlab", "jira", "agile", "scrum", "kanban", "sprint", 
+        "ci/cd", "vm", "container", "microservice", "monolith", "serverless", "cloud", "data", 
+        "analytics", "machine learning", "ai", "deep learning", "nlp", "computer vision", 
+        "algorithm", "model", "training", "inference", "tensor", "gpu", "cpu", "ram", "ssd", 
+        "hdd", "os", "windows", "linux", "macos", "android", "ios", "kernel", "shell", 
+        "terminal", "command", "scripting", "automation", "security", "encryption", "decryption", 
+        "firewall", "vpn", "malware", "virus", "phishing", "ddos", "exploit", "vulnerability", 
+        "patch", "update", "backup", "restore", "disaster recovery", "scalability", "performance", 
+        "optimization", "latency", "bandwidth", "throughput", "monitoring", "alerting", "logging", 
+        "tracing", "metrics", "dashboard", "kpi", "sla", "slo", "sre", "devrel", 
+        "product manager", "project manager", "qa", "tester", "bug", "issue", "feature", 
+        "release", "version", "deployment", "staging", "production", "development", "testing", 
+        "uat", "local", "remote", "virtualization", "emulation", "simulation", "api key", 
+        "database query", "error message", "log file", "server response", "network request", 
+        "backend service", "frontend component", "user interface", "user experience", "data model", 
+        "machine learning model", "software development", "web development", "mobile development", 
+        "game development", "data science", "cybersecurity", "cloud computing", "it support", 
+        "technical support", "customer support", "help desk", "ticket", "incident", "problem", 
+        "change", "release management", "version control", "source code", "repository", "branch", 
+        "merge", "commit", "pull request", "code review", "unit test", "integration test", 
+        "end-to-end test", "acceptance test", "performance test", "load test", "stress test", 
+        "security test", "penetration test", "vulnerability assessment", "risk assessment", 
+        "threat modeling", "incident response", "forensics", "compliance", "regulation", "gdpr", 
+        "hipaa", "pci dss", "iso 27001", "soc 2", "audit", "governance", "risk", "grc"
+    ]
+    
+    # Split content into sentences. This regex tries to handle various sentence terminators.
+    sentences = re.split(r'(?<=[.!?])\s+', cleaned_content)
+    
+    filtered_sentences = []
+    for sentence in sentences:
+        if not any(keyword.lower() in sentence.lower() for keyword in technical_keywords):
+            filtered_sentences.append(sentence)
+        else:
+            log.debug(f"Removing sentence due to technical keyword: '{sentence[:50]}...'")
+            
+    cleaned_content = " ".join(filtered_sentences)
+
     return cleaned_content
 
 # Global variable to store Airtable schema content
