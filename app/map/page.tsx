@@ -22,7 +22,7 @@ const mapContainerStyle = {
 // Polygon styling options
 const polygonOptions = {
   fillColor: '#FFF5D0', // Sand color like on the main page during the day
-  fillOpacity: 0.6,
+  fillOpacity: 0.1,
   strokeWeight: 1,      // Black stroke, 1px weight like on the main page
   strokeColor: '#000000',
   strokeOpacity: 0.8,
@@ -382,7 +382,7 @@ export default function MapPage() {
               strokeOpacity: 0.8,
               strokeWeight: 1,        // 1px weight
               fillColor: '#FFF5D0',   // Sand color
-              fillOpacity: 0.6,       // Adjusted opacity for lighter color
+              fillOpacity: 0.1,       // Reduced opacity as requested
               map: mapRef.current
             });
             
