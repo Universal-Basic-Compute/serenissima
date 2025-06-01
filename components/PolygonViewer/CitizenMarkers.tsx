@@ -794,15 +794,15 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className={`w-8 h-8 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center ${
+                className={`w-8 h-8 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative ${
                   isCitizenInvolvedInBuildingHover ? 'scale-150' : '' // Apply scale if citizen is involved
                 } ${
                   citizen.username === currentUsername ? 'ring-2 ring-purple-500 ring-opacity-80' : 
                   citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
                 }`}
                 style={{ 
-                  // backgroundColor is removed, border and boxShadow remain for the container
-                  border: '1px solid white', // Optional: if you want a border around the icon container
+                  // backgroundColor is removed, boxShadow remains for the container
+                  // border: '1px solid white', // Removed white border
                   boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
                              citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
@@ -823,6 +823,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                     }
                   }}
                 />
+                <span
+                  className="absolute inset-0 flex items-center justify-center text-white text-[10px] font-bold pointer-events-none"
+                  style={{ textShadow: '0px 0px 3px rgba(0,0,0,0.7)' }}
+                >
+                  {firstName?.[0]?.toUpperCase() || ''}{lastName?.[0]?.toUpperCase() || ''}
+                </span>
               </div>
             </div>
           );
@@ -878,14 +884,14 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className={`w-8 h-8 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center ${
+                className={`w-8 h-8 rounded-full cursor-pointer hover:scale-200 transition-transform flex items-center justify-center relative ${
                   isCitizenInvolvedInBuildingHover ? 'scale-150' : ''
                 } ${
                   citizen.username === currentUsername ? 'ring-2 ring-purple-500 ring-opacity-80' : 
                   citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
                 }`}
                 style={{ 
-                  border: '1px solid white', // Optional
+                  // border: '1px solid white', // Removed white border
                   boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
                              citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
@@ -906,6 +912,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                     }
                   }}
                 />
+                <span
+                  className="absolute inset-0 flex items-center justify-center text-white text-[10px] font-bold pointer-events-none"
+                  style={{ textShadow: '0px 0px 3px rgba(0,0,0,0.7)' }}
+                >
+                  {firstName?.[0]?.toUpperCase() || ''}{lastName?.[0]?.toUpperCase() || ''}
+                </span>
               </div>
             </div>
           );
