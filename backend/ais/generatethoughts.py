@@ -576,10 +576,14 @@ Custom emoji entities can only be used by bots that purchased additional usernam
         if kinos_response_content:
             log.info(f"{LogColors.OKGREEN}Generated full thought process for {citizen_username}. Length: {len(kinos_response_content)}{LogColors.ENDC}")
             
-            # Remove <think>...</think> tags and their content, including trailing whitespace
-            thought_without_think_tags = re.sub(r'<think>.*?</think>\s*', '', kinos_response_content, flags=re.DOTALL).strip()
-            if len(thought_without_think_tags) < len(kinos_response_content):
-                log.info(f"{LogColors.OKBLUE}Removed <think> tags and trailing space. Original length: {len(kinos_response_content)}, New length: {len(thought_without_think_tags)}{LogColors.ENDC}")
+            # Remove <think>...</think> tags and their content.
+            # The .strip() call later will handle overall leading/trailing whitespace.
+            thought_after_tag_removal = re.sub(r'<think>.*?</think>', '', kinos_response_content, flags=re.DOTALL)
+            thought_without_think_tags = thought_after_tag_removal.strip() # Now strip the result
+
+            # Log if the tag removal itself changed the string length
+            if len(thought_after_tag_removal) < len(kinos_response_content):
+                log.info(f"{LogColors.OKBLUE}Removed <think> tags. Original length: {len(kinos_response_content)}, After tag removal: {len(thought_after_tag_removal)}, Final after strip: {len(thought_without_think_tags)}{LogColors.ENDC}")
 
             cleaned_thought = clean_thought_content(tables, thought_without_think_tags)
             
