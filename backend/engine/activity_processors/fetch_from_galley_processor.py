@@ -312,4 +312,7 @@ def process(
         return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
             
     log.info(f"{LogColors.OKGREEN}Successfully processed 'fetch_from_galley' activity {activity_guid}. Picked up {actual_amount_to_pickup} of {resource_id_to_fetch}.{LogColors.ENDC}")
+    
+    # Note: In the new architecture, we don't create follow-up activities here.
+    # The activity creator should have already created the entire chain.
     return True

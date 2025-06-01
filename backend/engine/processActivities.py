@@ -40,6 +40,13 @@ This script:
 7. Updates the activity status to "processed" or "failed". If processed successfully:
    - For most activities with a `ToBuilding` destination, the citizen's `Position` (coordinates) and `UpdatedAt` fields are updated to reflect their new location.
    - For `fetch_resource` activities, the processor itself handles updating the citizen's position to the `FromBuilding` (pickup location), so the generic update is skipped.
+
+IMPORTANT: In the new architecture, activity processors should ONLY process the current activity and NOT create follow-up activities.
+Follow-up activities should be created by activity creators in the activity_creators directory.
+Processors should focus on:
+1. Executing the effects of the current activity (e.g., transferring resources, updating citizen state)
+2. Returning success/failure status
+3. NOT creating new activities (this is the responsibility of activity creators)
 """
 
 import os

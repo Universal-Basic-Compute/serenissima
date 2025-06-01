@@ -5,6 +5,13 @@
 # 1. Executing the effects of the current activity (e.g., transferring resources, updating citizen state)
 # 2. Returning success/failure status
 # 3. NOT creating new activities (this is the responsibility of activity creators)
+#
+# In the new architecture:
+# - Activity creators are responsible for creating chains of activities
+# - Each activity in the chain is processed independently by its processor
+# - Processors should not create new activities, even in response to failures
+# - If an activity in a chain fails, the processor should mark it as failed
+#   and the processActivities.py script will handle marking dependent activities as failed
 
 from .deliver_resource_batch_processor import process as process_deliver_resource_batch
 from .goto_home_processor import process as process_goto_home

@@ -293,6 +293,9 @@ def process(
                 update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_pickup", False, "nothing_to_pickup")
             if effective_buyer_username and effective_seller_username: # Buyer couldn't get from seller
                 update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_purchase", False, "nothing_to_pickup")
+        
+        # Note: In the new architecture, we don't create follow-up activities here.
+        # The activity creator should have already created the entire chain.
         return True
 
     # 4. Perform Transactions
@@ -409,5 +412,7 @@ def process(
             
     log.info(f"{LogColors.OKGREEN}Successfully processed 'fetch_resource' activity {activity_guid}. Fetched {amount_to_purchase} of {resource_id_to_fetch}.{LogColors.ENDC}")
     
+    # Note: In the new architecture, we don't create follow-up activities here.
+    # The activity creator should have already created the entire chain.
     # Building UpdatedAt is handled by Airtable
     return True
