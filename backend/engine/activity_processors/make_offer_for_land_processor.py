@@ -85,7 +85,7 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
         contract_payload = {
             "ContractId": contract_id,
             "Type": "land_offer",
-            "Buyer": [citizen_airtable_id], # Link to buyer's citizen record ID
+            "Buyer": buyer_username, # Directly use the username string
             "Asset": land_id_for_offer,
             "AssetType": "land",
             "PricePerResource": float(offer_price),
@@ -95,12 +95,9 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
             "Description": f"{buyer_username} offers to buy land {land_name} (ID: {land_id_for_offer}) for {offer_price} ducats.",
             "CreatedAt": now_iso,
             "UpdatedAt": now_iso,
-            # Buyer field will store the username directly
+            # Buyer field stores the username directly
             # Optional: EndAt for offer expiration
         }
-        # Ensure the 'Buyer' field in contract_payload is the username string
-        contract_payload["Buyer"] = buyer_username
-
         if target_seller_username: # If a specific seller is targeted
             # Assuming 'Seller' field also stores username directly
             contract_payload["Seller"] = target_seller_username

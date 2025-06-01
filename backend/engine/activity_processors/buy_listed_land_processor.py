@@ -74,17 +74,18 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
             log.error(f"{LogColors.FAIL}Price mismatch for listing {listing_contract_custom_id}. Activity price: {purchase_price}, Contract price: {contract_price}. Activity {activity_guid}.{LogColors.ENDC}")
             return False
 
-        # Get seller details from contract
-        seller_airtable_id_list = listing_contract_fields.get('Seller')
-        if not seller_airtable_id_list or not isinstance(seller_airtable_id_list, list) or len(seller_airtable_id_list) == 0:
-            log.error(f"{LogColors.FAIL}Listing contract {listing_contract_custom_id} has no Seller. Activity {activity_guid}.{LogColors.ENDC}")
+        # Get seller details from contract (assuming 'Seller' field stores username string)
+        seller_username_from_contract = listing_contract_fields.get('Seller')
+        if not seller_username_from_contract:
+            log.error(f"{LogColors.FAIL}Listing contract {listing_contract_custom_id} has no Seller username. Activity {activity_guid}.{LogColors.ENDC}")
             return False
-        seller_airtable_id = seller_airtable_id_list[0]
-        seller_citizen_record = tables['citizens'].get(seller_airtable_id)
+
+        seller_citizen_record = get_citizen_record(tables, seller_username_from_contract)
         if not seller_citizen_record:
-            log.error(f"{LogColors.FAIL}Seller citizen (Airtable ID: {seller_airtable_id}) from listing contract {listing_contract_custom_id} not found. Activity {activity_guid}.{LogColors.ENDC}")
+            log.error(f"{LogColors.FAIL}Seller citizen '{seller_username_from_contract}' from listing contract {listing_contract_custom_id} not found. Activity {activity_guid}.{LogColors.ENDC}")
             return False
-        seller_username = seller_citizen_record['fields'].get('Username')
+        seller_airtable_id = seller_citizen_record['id'] # Get Airtable ID for updates
+        seller_username = seller_citizen_record['fields'].get('Username') # Confirm username
         
         # Verify land exists (owner check is implicit as seller listed it)
         land_record = get_land_record(tables, land_id_being_bought)
@@ -111,7 +112,7 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
 
         # Update listing contract status
         now_iso = datetime.now(timezone.utc).isoformat()
-        tables['contracts'].update(listing_contract_record['id'], {"Status": "completed", "Buyer": [buyer_airtable_id], "UpdatedAt": now_iso, "Notes": f"Completed: Land bought by {buyer_username} on {now_iso}."})
+        tables['contracts'].update(listing_contract_record['id'], {"Status": "completed", "Buyer": buyer_username, "UpdatedAt": now_iso, "Notes": f"Completed: Land bought by {buyer_username} on {now_iso}."})
         log.info(f"{LogColors.PROCESS}Listing contract {listing_contract_custom_id} status updated to 'completed'. Activity {activity_guid}.{LogColors.ENDC}")
 
         # Create transaction record

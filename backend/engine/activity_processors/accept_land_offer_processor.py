@@ -68,18 +68,19 @@ def process_accept_land_offer_fn(tables: dict, activity_record: dict, building_t
             log.error(f"{LogColors.FAIL}Offer contract {offer_contract_custom_id} is for asset {offer_contract_fields.get('Asset')}, not {land_id_being_sold}. Activity {activity_guid}.{LogColors.ENDC}")
             return False
 
-        # Get buyer details from contract
-        buyer_airtable_id_list = offer_contract_fields.get('Buyer')
-        if not buyer_airtable_id_list or not isinstance(buyer_airtable_id_list, list) or len(buyer_airtable_id_list) == 0:
-            log.error(f"{LogColors.FAIL}Offer contract {offer_contract_custom_id} has no Buyer. Activity {activity_guid}.{LogColors.ENDC}")
+        # Get buyer details from contract (assuming 'Buyer' field stores username string)
+        buyer_username_from_contract = offer_contract_fields.get('Buyer')
+        if not buyer_username_from_contract:
+            log.error(f"{LogColors.FAIL}Offer contract {offer_contract_custom_id} has no Buyer username. Activity {activity_guid}.{LogColors.ENDC}")
             return False
-        buyer_airtable_id = buyer_airtable_id_list[0]
-        buyer_citizen_record = tables['citizens'].get(buyer_airtable_id)
-        if not buyer_citizen_record:
-            log.error(f"{LogColors.FAIL}Buyer citizen (Airtable ID: {buyer_airtable_id}) from offer contract {offer_contract_custom_id} not found. Activity {activity_guid}.{LogColors.ENDC}")
-            return False
-        buyer_username = buyer_citizen_record['fields'].get('Username')
         
+        buyer_citizen_record = get_citizen_record(tables, buyer_username_from_contract)
+        if not buyer_citizen_record:
+            log.error(f"{LogColors.FAIL}Buyer citizen '{buyer_username_from_contract}' from offer contract {offer_contract_custom_id} not found. Activity {activity_guid}.{LogColors.ENDC}")
+            return False
+        buyer_airtable_id = buyer_citizen_record['id'] # Get Airtable ID for updates
+        buyer_username = buyer_citizen_record['fields'].get('Username') # Confirm username
+
         # Verify land ownership
         land_record = get_land_record(tables, land_id_being_sold)
         if not land_record:

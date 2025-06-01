@@ -44,9 +44,10 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         log.error(f"{LogColors.FAIL}Contract {listing_contract_id} is not an active land_listing. Cannot cancel. Activity for {citizen_username}.{LogColors.ENDC}")
         return []
     
-    seller_link_ids = listing_fields.get('Seller')
-    if not seller_link_ids or citizen_id not in seller_link_ids:
-        log.error(f"{LogColors.FAIL}Citizen {citizen_username} (ID: {citizen_id}) is not the seller of listing {listing_contract_id}. Seller IDs: {seller_link_ids}. Cannot cancel.{LogColors.ENDC}")
+    # Assuming 'Seller' field in CONTRACTS stores the username directly
+    contract_seller_username = listing_fields.get('Seller')
+    if not contract_seller_username or citizen_username != contract_seller_username:
+        log.error(f"{LogColors.FAIL}Citizen {citizen_username} is not the seller ('{contract_seller_username}') of listing {listing_contract_id}. Cannot cancel.{LogColors.ENDC}")
         return []
 
 

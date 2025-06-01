@@ -88,7 +88,7 @@ def process_list_land_for_sale_fn(tables: dict, activity_record: dict, building_
         contract_payload = {
             "ContractId": contract_id,
             "Type": "land_listing",
-            "Seller": [citizen_airtable_id], # Link to citizen record ID
+            "Seller": seller_username, # Directly use the username string
             # Buyer is null for listings
             "Asset": land_id_to_list, # Custom LandId
             "AssetType": "land",
@@ -99,13 +99,10 @@ def process_list_land_for_sale_fn(tables: dict, activity_record: dict, building_
             "Description": f"Land parcel {land_name} (ID: {land_id_to_list}) offered for sale by {seller_username} for {price} ducats.",
             "CreatedAt": now_iso,
             "UpdatedAt": now_iso,
-            # Seller field will store the username directly as per clarification
+            # Seller field stores the username directly as per clarification
             # Optional: EndAt for listing expiration
         }
         
-        # Ensure the 'Seller' field in contract_payload is the username string, not a list
-        contract_payload["Seller"] = seller_username 
-
         new_contract = tables['contracts'].create(contract_payload)
         log.info(f"{LogColors.SUCCESS}Successfully created land listing contract {new_contract['id']} (Custom ID: {contract_id}) for land {land_id_to_list} by {seller_username} at {price} ducats. Activity {activity_guid}.{LogColors.ENDC}")
         

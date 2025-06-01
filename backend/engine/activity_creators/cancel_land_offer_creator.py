@@ -44,9 +44,10 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         log.error(f"{LogColors.FAIL}Contract {offer_contract_id} is not an active land_offer. Cannot cancel. Activity for {citizen_username}.{LogColors.ENDC}")
         return []
     
-    buyer_link_ids = offer_fields.get('Buyer')
-    if not buyer_link_ids or citizen_id not in buyer_link_ids:
-        log.error(f"{LogColors.FAIL}Citizen {citizen_username} (ID: {citizen_id}) is not the buyer/offerer of offer {offer_contract_id}. Buyer IDs: {buyer_link_ids}. Cannot cancel.{LogColors.ENDC}")
+    # Assuming 'Buyer' field in CONTRACTS stores the username directly
+    contract_buyer_username = offer_fields.get('Buyer')
+    if not contract_buyer_username or citizen_username != contract_buyer_username:
+        log.error(f"{LogColors.FAIL}Citizen {citizen_username} is not the buyer/offerer ('{contract_buyer_username}') of offer {offer_contract_id}. Cannot cancel.{LogColors.ENDC}")
         return []
 
     log.info(f"{LogColors.ACTIVITY}Attempting to create 'cancel_land_offer' activity chain for {citizen_username} for offer {offer_contract_id} on land {land_id}.{LogColors.ENDC}")
