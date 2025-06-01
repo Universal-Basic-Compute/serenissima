@@ -1778,52 +1778,73 @@ number => {
   
   // Effect to preload land images when polygons change
   useEffect(() => {
-    if (polygons.length === 0) return;
+    if (!polygons || polygons.length === 0) return;
     
     const newLandImages: Record<string, HTMLImageElement> = {};
     let loadedCount = 0;
     let totalPolygons = 0;
     
     // Count valid polygons with IDs first
-    polygons.forEach(polygon => {
+    for (let i = 0; i < polygons.length; i++) {
+      const polygon = polygons[i];
       if (polygon && polygon.id) {
         totalPolygons++;
       }
-    });
+    }
     
     if (totalPolygons === 0) {
       console.log('No valid polygons with IDs found for image loading');
       return;
     }
     
-    polygons.forEach(polygon => {
-      if (!polygon || !polygon.id) return;
+    // Use a safer approach with for loop instead of forEach
+    for (let i = 0; i < polygons.length; i++) {
+      const polygon = polygons[i];
+      if (!polygon || !polygon.id) continue;
       
-      const img = new Image();
-      img.onload = () => {
-        newLandImages[polygon.id] = img;
+      try {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            newLandImages[polygon.id] = img;
+            loadedCount++;
+            if (loadedCount === totalPolygons) {
+              console.log(`Loaded ${Object.keys(newLandImages).length} land images`);
+              setLandImages(newLandImages);
+            }
+          } catch (innerError) {
+            console.error(`Error in image onload handler for polygon ${polygon.id}:`, innerError);
+            loadedCount++;
+          }
+        };
+        img.onerror = () => {
+          try {
+            loadedCount++;
+            if (loadedCount === totalPolygons) {
+              console.log(`Loaded ${Object.keys(newLandImages).length} land images (${loadedCount - Object.keys(newLandImages).length} failed)`);
+              setLandImages(newLandImages);
+            }
+          } catch (innerError) {
+            console.error(`Error in image onerror handler for polygon ${polygon.id}:`, innerError);
+          }
+        };
+        img.src = `/images/lands/${polygon.id}.png`;
+      } catch (error) {
+        console.error(`Error loading image for polygon ${polygon.id}:`, error);
         loadedCount++;
-        if (loadedCount === totalPolygons) {
-          console.log(`Loaded ${Object.keys(newLandImages).length} land images`);
-          setLandImages(newLandImages);
-        }
-      };
-      img.onerror = () => {
-        loadedCount++;
-        if (loadedCount === totalPolygons) {
-          console.log(`Loaded ${Object.keys(newLandImages).length} land images (${loadedCount - Object.keys(newLandImages).length} failed)`);
-          setLandImages(newLandImages);
-        }
-      };
-      img.src = `/images/lands/${polygon.id}.png`;
-    });
+      }
+    }
     
     return () => {
       // Cancel image loading if component unmounts
-      Object.values(newLandImages).forEach(img => {
-        img.onload = null;
-        img.onerror = null;
-      });
+      try {
+        Object.values(newLandImages).forEach(img => {
+          img.onload = null;
+          img.onerror = null;
+        });
+      } catch (error) {
+        console.error('Error cleaning up image event handlers:', error);
+      }
     };
   }, [polygons]);
   
