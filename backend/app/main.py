@@ -20,7 +20,7 @@ from typing import Optional, List, Dict, Any # Added Dict, Any
 import logging
 import pytz
 from urllib3.util.retry import Retry
-from colorama import Fore # For log_header color
+from colorama import Fore, Style # For log_header color
 
 # Import helpers
 from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors # LogColors will be used as Fore
