@@ -1807,7 +1807,7 @@ number => {
       
       try {
         const img = new Image();
-        img.onload = () => {
+        const handleLoad = () => {
           try {
             newLandImages[polygon.id] = img;
             loadedCount++;
@@ -1820,7 +1820,8 @@ number => {
             loadedCount++;
           }
         };
-        img.onerror = () => {
+        
+        const handleError = () => {
           try {
             loadedCount++;
             if (loadedCount === totalPolygons) {
@@ -1831,6 +1832,9 @@ number => {
             console.error(`Error in image onerror handler for polygon ${polygon.id}:`, innerError);
           }
         };
+        
+        img.onload = handleLoad;
+        img.onerror = handleError;
         img.src = `/images/lands/${polygon.id}.png`;
       } catch (error) {
         console.error(`Error loading image for polygon ${polygon.id}:`, error);
