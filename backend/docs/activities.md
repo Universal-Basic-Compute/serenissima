@@ -540,14 +540,6 @@ appartenance (rejoindre, quitter, accepter une invitation). Des frais d'adhésio
 "leave", "accept_invite"), `guildHallBuildingId` (ID du `guild_hall` spécifique).
     *   **Implémentation**: Complète. Le processeur gère les trois types d'actions d'adhésion, les frais d'entrée pour "join", et les notifications appropriées.
 
-1.  **Marquer des Notifications comme Lues**
-    *   **activityType**: `mark_notifications_read`
-    *   **Description**: Le citoyen prend un moment (à son emplacement actuel ou à son domicile/bureau) pour examiner
-et marquer ses notifications.
-    *   **Mécanisme Principal**: Crée une activité `review_notifications_at_location` (courte durée). Le processeur
-appellera `POST /api/notifications/mark-read`.
-    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `notificationIds`.
-
 ### Process:
 
 1.  **Client-Side Decision**: The client (e.g., Kinos AI) determines the full details of the activity to be created. This includes:
