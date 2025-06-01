@@ -248,6 +248,14 @@ export default function ApiReference() {
           </li>
           <li><a href="#error-handling" className="text-amber-700 hover:underline">Error Handling</a></li>
           <li><a href="#pagination" className="text-amber-700 hover:underline">Pagination</a></li>
+          <li>
+            <Link href="/activity-reference" className="text-amber-700 hover:underline">
+              Activity Creation Reference
+            </Link>
+            <ul className="list-circle pl-6 space-y-1 mt-1">
+              <li><Link href="/activity-reference#general-payload" className="text-amber-600 hover:underline text-sm">POST /api/actions/create-activity</Link></li>
+            </ul>
+          </li>
         </ul>
       </div>
       
