@@ -2877,27 +2877,8 @@ const darkenColor = (colorStr: string, percent: number): string => {
       }
     }
 
-    // Draw land images first
-    polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
-      // Skip if no coordinates
-      if (!coords || coords.length < 3) return;
-      
-      try {
-        // Draw the land image if available
-        const imageUrl = `/images/lands/${polygon.id}.png`;
-        const img = new Image();
-        img.onload = () => {
-          // Calculate image size based on polygon size
-          const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
-          
-          // Draw the image centered on the polygon
-          ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
-        };
-        img.src = imageUrl;
-      } catch (error) {
-        console.error(`Error loading image for polygon ${polygon.id}:`, error);
-      }
-    });
+    // Don't try to load images directly in the render loop - use preloaded images only
+    // The preloaded images are handled in the next section
     
     // Draw land images first
     if (landImages && Object.keys(landImages).length > 0) {
@@ -2932,20 +2913,24 @@ const darkenColor = (colorStr: string, percent: number): string => {
       strokeOpacity: 0.5 // Keep borders visible but more subtle
     });
     
-    // Draw land images on top of the polygons - using preloaded images
+    // Draw land images using preloaded images
     if (landImages && Object.keys(landImages).length > 0) {
       polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
-        // Skip if no coordinates
-        if (!coords || coords.length < 3 || !polygon.id) return;
+        // Skip if no coordinates or no polygon ID
+        if (!coords || coords.length < 3 || !polygon || !polygon.id) return;
         
         // Get the preloaded image
         const img = landImages[polygon.id];
         if (img && img.complete && img.naturalWidth !== 0) {
-          // Calculate image size based on polygon size
-          const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
-          
-          // Draw the image centered on the polygon
-          ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
+          try {
+            // Calculate image size based on polygon size
+            const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
+            
+            // Draw the image centered on the polygon
+            ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
+          } catch (error) {
+            console.error(`Error drawing image for polygon ${polygon.id}:`, error);
+          }
         }
       });
     }
