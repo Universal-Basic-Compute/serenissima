@@ -861,33 +861,33 @@ def autonomously_run_ai_citizen(
     latest_activity_data = _get_latest_activity_api(ai_username)
 
     prompt_step1_context_elements_guided = [
-        "your own citizen data (`addSystem.citizen_data`)",
-        "the list of key API endpoints (`addSystem.concise_api_endpoints`)",
-        "a list of Airtable fields (`addSystem.airtable_schema_fields`)",
-        "your latest activity (`addSystem.latest_activity`)"
+        "your personal ledger (`addSystem.personal_ledger`)",
+        "the registry of available missives (API endpoints, `addSystem.available_missives_summary`)",
+        "the structure of the city's records (Airtable fields, `addSystem.city_records_structure`)",
+        "your most recent undertaking (`addSystem.latest_undertaking`)"
     ]
     if user_message:
-        prompt_step1_context_elements_guided.append(f"an additional message ('{user_message}')")
+        prompt_step1_context_elements_guided.append(f"a missive requiring your attention (`{user_message}`)")
 
-    prompt_step1_context_mention_guided = f"Review {', '.join(prompt_step1_context_elements_guided[:-1])}{' and ' if len(prompt_step1_context_elements_guided) > 1 else ''}{prompt_step1_context_elements_guided[-1]}."
+    prompt_step1_context_mention_guided = f"Consult {', '.join(prompt_step1_context_elements_guided[:-1])}{' and ' if len(prompt_step1_context_elements_guided) > 1 else ''}{prompt_step1_context_elements_guided[-1]}."
 
     prompt_step1_base = (
-        f"You are {ai_display_name}, an AI citizen in La Serenissima. Your current goal is to understand your situation and identify opportunities. "
-        f"The base API URL is {API_BASE_URL}. {prompt_step1_context_mention_guided} "
+        f"You are {ai_display_name}, a discerning citizen of La Serenissima. Your current objective is to assess your standing and identify emerging prospects. "
+        f"Official channels for information are accessible via {API_BASE_URL}. {prompt_step1_context_mention_guided} "
     )
     
     prompt_step1 = prompt_step1_base + (
-        "Decide which single GET API endpoint you want to call to gather initial data relevant to your goals (e.g., your assets, market conditions, problems). "
-        "For query parameters, you can use camelCase (e.g., `owner`, `resourceType`). "
-        "Respond with a JSON object like: `{\"endpoint\": \"/api/your/choice\", \"params\": {\"paramName\": \"value\"}}` or `{\"endpoint\": \"/api/your/choice\"}` if no params. "
-        "Choose an endpoint that provides a good overview or addresses a potential immediate concern."
+        "Determine which single official channel (GET API endpoint) you wish to consult to gather initial intelligence pertinent to your ambitions (e.g., your holdings, market conditions, current predicaments). "
+        "For inquiries (query parameters), you may use `camelCase` (e.g., `owner`, `resourceType`). "
+        "Respond with your directive in JSON format: `{\"endpoint\": \"/api/your/choice\", \"params\": {\"paramName\": \"value\"}}` or `{\"endpoint\": \"/api/your/choice\"}` if no specific inquiry. "
+        "Select a channel that offers a comprehensive overview or addresses an immediate concern."
     )
     add_system_step1 = {
-        "concise_api_endpoints": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
-        "airtable_schema_fields": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
+        "available_missives_summary": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
+        "city_records_structure": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
         "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
-        "citizen_data": ai_citizen_record["fields"],
-        "latest_activity": latest_activity_data or {}
+        "personal_ledger": ai_citizen_record["fields"],
+        "latest_undertaking": latest_activity_data or {}
     }
     if user_message:
         add_system_step1["user_provided_message"] = user_message
@@ -929,21 +929,21 @@ def autonomously_run_ai_citizen(
 
     # Step 2: Elaborate Strategy & Define Actions
     log.info(f"{LogColors.OKCYAN}--- Step 2: Elaborate Strategy & Define Actions for {ai_username} ---{LogColors.ENDC}")
-    prompt_step2_context_mention_guided = "Based on this data, your citizen data (`addSystem.citizen_data`), your overall goals, the list of key API endpoints (`addSystem.concise_api_endpoints`), and the Airtable field list (`addSystem.airtable_schema_fields`),"
+    prompt_step2_context_mention_guided = "Based on these reports, your personal ledger (`addSystem.personal_ledger`), your overarching ambitions, the registry of available missives (API endpoints, `addSystem.available_missives_summary`), and the structure of the city's records (Airtable fields, `addSystem.city_records_structure`),"
         
     prompt_step2 = (
-        f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. You previously requested data via GET API. "
-        f"The response was (or simulated/error response if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
-        f"{prompt_step2_context_mention_guided} define your strategy and the next actions. "
-        "When specifying the `body` for POST requests, you can use camelCase for keys (e.g., `sender`, `resourceType`, `targetAmount`). The server will map them to the correct Airtable fields. "
-        "Respond with a JSON object: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {\"fieldName\": \"value\"}}, ...]}`. "
-        "If no actions are needed now, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`."
+        f"You are {ai_display_name}. Your personal ledger is in `addSystem.personal_ledger`. You previously requested reports via official channels (GET API). "
+        f"The findings were (or simulated/error report if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
+        f"{prompt_step2_context_mention_guided} devise your strategy and decree your next actions. "
+        "When specifying the `body` for issuing decrees (POST requests), you may use `camelCase` for keys (e.g., `sender`, `resourceType`, `targetAmount`). The Doge's scribes (the server) will transcribe them appropriately for the city's records. "
+        "Respond with your directives in JSON format: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {\"fieldName\": \"value\"}}, ...]}`. "
+        "If no actions are warranted at this time, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`."
     )
     add_system_step2 = {
-        "concise_api_endpoints": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
-        "airtable_schema_fields": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
-        "previous_get_response": api_get_response_data,
-        "citizen_data": ai_citizen_record["fields"],
+        "available_missives_summary": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
+        "city_records_structure": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
+        "previous_get_response": api_get_response_data, # "previous_reports" might be better
+        "personal_ledger": ai_citizen_record["fields"],
     }
 
     kinos_response_step2 = None
@@ -1003,19 +1003,19 @@ def autonomously_run_ai_citizen(
 
     # Step 3: Note Results & Plan Next Steps
     log.info(f"{LogColors.OKCYAN}--- Step 3: Note Results & Plan Next Steps for {ai_username} ---{LogColors.ENDC}")
-    prompt_step3_context_mention_guided = "Reflect on these outcomes, considering your citizen data (`addSystem.citizen_data`), the list of key API endpoints (`addSystem.concise_api_endpoints`), and the Airtable field list (`addSystem.airtable_schema_fields`) (all in `addSystem`)"
+    prompt_step3_context_mention_guided = "Reflect on these outcomes, considering your personal ledger (`addSystem.personal_ledger`), the registry of available missives (API endpoints, `addSystem.available_missives_summary`), and the structure of the city's records (Airtable fields, `addSystem.city_records_structure`) (all in `addSystem`)"
 
     prompt_step3 = (
-        f"You are {ai_display_name}. Your citizen data is in `addSystem.citizen_data`. Your strategy was: '{strategy_summary}'. "
-        f"Your POST actions resulted in (or simulated results if dry_run/failed): \n```json\n{json.dumps(api_post_responses_summary, indent=2)}\n```\n"
-        f"{prompt_step3_context_mention_guided}. What did you learn? What are your key observations or plans for your next autonomous run? "
-        "Respond with a concise text summary (max 3-4 sentences)."
+        f"You are {ai_display_name}. Your personal ledger is in `addSystem.personal_ledger`. Your strategy was: '{strategy_summary}'. "
+        f"Your decreed actions (POST requests) resulted in (or simulated results if dry_run/failed): \n```json\n{json.dumps(api_post_responses_summary, indent=2)}\n```\n"
+        f"{prompt_step3_context_mention_guided}. What wisdom have you gained? What are your key observations or intentions for your next period of independent endeavor? "
+        "Respond with a concise summary for your records (max 3-4 sentences)."
     )
     add_system_step3 = {
-        "concise_api_endpoints": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
-        "airtable_schema_fields": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
-        "post_actions_summary": api_post_responses_summary,
-        "citizen_data": ai_citizen_record["fields"],
+        "available_missives_summary": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
+        "city_records_structure": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
+        "post_actions_summary": api_post_responses_summary, # "outcomes_of_decrees" might be better
+        "personal_ledger": ai_citizen_record["fields"],
     }
 
     kinos_response_step3 = None
@@ -1095,55 +1095,53 @@ def autonomously_run_ai_citizen_unguided(
         
         # latest_activity_data_unguided = _get_latest_activity_api(ai_username) # Now part of initial_data_package
 
-        prompt_intro = f"You are {ai_display_name}, an AI citizen in La Serenissima. Your goal is to act autonomously and strategically. "
+        prompt_intro = f"You are {ai_display_name}, a citizen of La Serenissima, navigating the complexities of 15th-century Venetian life. Your objective is to act autonomously and strategically to advance your interests. "
         
         prompt_context_elements = [
-            "your data package (`addSystem.data_package`) which includes your citizen details, last activity, owned lands, buildings on them, and unoccupied building points",
-            "API docs summary (`addSystem.api_docs_summary`)", 
-            "extracted API Reference text (`addSystem.api_reference_extracted_text`)",
-            "Activity Creation Reference text (`addSystem.activity_creation_reference_text`)",
+            "your intelligence briefing (`addSystem.intelligence_briefing`), which contains your personal details, recent undertakings, owned lands and buildings, and available construction sites",
+            "a summary of available missives (API endpoints, `addSystem.summary_of_available_missives`)",
+            "the compendium of missive details (API Reference, `addSystem.compendium_of_missive_details`)",
+            "the guide to decreeing undertakings (Activity Creation Reference, `addSystem.guide_to_decreeing_undertakings`)",
         ]
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-            prompt_context_elements.append("Airtable schema (`addSystem.airtable_schema_summary`)")
+            prompt_context_elements.append("an overview of the city's records structure (Airtable schema, `addSystem.overview_of_city_records_structure`)")
         if previous_api_results:
-            prompt_context_elements.append("previous API results (`addSystem.previous_api_results`)")
+            prompt_context_elements.append("the outcomes of your prior actions (`addSystem.outcomes_of_prior_actions`)")
         if user_message and iteration_count == 1:
-            prompt_context_elements.append("the user_provided_message (`addSystem.user_provided_message`)")
+            prompt_context_elements.append("a missive requiring your attention (`addSystem.user_missive`)")
             
-        prompt_context_review = f"Review your current context in `addSystem` ({', '.join(prompt_context_elements)}). "
+        prompt_context_review = f"Consult your current intelligence in `addSystem` ({', '.join(prompt_context_elements)}). "
 
         prompt_action_guidance = (
-            "Decide on a sequence of actions. Actions can be:\n"
-            "1. Generic GET requests to any API endpoint to gather information.\n"
-            "2. Generic POST requests to any API endpoint to perform general actions.\n"
-            "3. Specific POST requests to `/api/actions/create-activity` to directly create a new activity for yourself. For travel activities, provide `fromBuildingId` (if applicable) and `toBuildingId`; the server will handle pathfinding.\n"
-            "If no further actions are needed now, respond with an empty 'actions' list. "
-            "Provide your overall reasoning or reflection on this iteration in the 'reflection' field. "
-            "Respond with a JSON object: "
-            "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your overall thoughts on this iteration...\"}`\n"
-            "For `/api/actions/create-activity`, the 'body' of your action should be the payload for that endpoint, including `citizenUsername`, `activityType`, `title`, `description`, `thought` (first-person narrative for the activity), and `activityDetails` (without `pathData` for travel). The 'reflection' field in the main Kinos response is for your overall iteration reflection, while the 'thought' field within the create-activity body is specific to that activity."
+            "Determine your course of action. Your actions may include:\n"
+            "1. Dispatching couriers (GET requests) to any official channel (API endpoint) to gather further intelligence.\n"
+            "2. Issuing decrees (POST requests) to any official channel (API endpoint) to enact general measures.\n"
+            "3. Commanding your personal undertakings (POST requests to `/api/actions/create-activity`) to directly initiate a new endeavor. For journeys, specify your origin (`fromBuildingId`, if applicable) and destination (`toBuildingId`); the Doge's cartographers (the server) will chart the course.\n"
+            "If no further measures are warranted at this time, return an empty 'actions' list. "
+            "Record your overall reasoning or reflections on this period of activity in the 'reflection' field for your private annals. "
+            "Respond with your directives in JSON format: " # Retained JSON for clarity
+            "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your reflections on this period...\"}`\n"
+            "When commanding personal undertakings via `/api/actions/create-activity`, the 'body' of your directive should contain the necessary details: `citizenUsername`, `activityType`, `title`, `description`, `thought` (your first-person perspective for the endeavor), and `activityDetails` (excluding `pathData` for journeys). The 'reflection' in your main Kinos response is for your overarching thoughts on this period, while the 'thought' for an undertaking is specific to that endeavor."
         )
         
         current_prompt = prompt_intro + prompt_context_review
-        if previous_api_results: # This condition is now part of prompt_context_elements
-             current_prompt += f"Based on the previous results and your overall context, what do you want to do next? "
+        if previous_api_results: 
+             current_prompt += f"Considering the outcomes of your prior actions and your current intelligence, what is your next decree or inquiry? "
         current_prompt += prompt_action_guidance
 
 
         add_system_data = {
-            "data_package": initial_data_package.get("data") if initial_data_package and initial_data_package.get("success") else initial_data_package, # Pass the 'data' part or the error/dry_run object
-            "api_docs_summary": API_DOCUMENTATION_SUMMARY,
-            "api_reference_extracted_text": API_REFERENCE_EXTRACTED_TEXT,
-            "activity_creation_reference_text": ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT, 
+            "intelligence_briefing": initial_data_package.get("data") if initial_data_package and initial_data_package.get("success") else initial_data_package,
+            "summary_of_available_missives": API_DOCUMENTATION_SUMMARY,
+            "compendium_of_missive_details": API_REFERENCE_EXTRACTED_TEXT,
+            "guide_to_decreeing_undertakings": ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT, 
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
-            # "citizen_data": ai_citizen_record["fields"], # Now part of data_package
-            # "latest_activity": latest_activity_data_unguided or {}, # Now part of data_package
-            "previous_api_results": previous_api_results
+            "outcomes_of_prior_actions": previous_api_results
         }
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
-            add_system_data["airtable_schema_summary"] = AIRTABLE_SCHEMA_CONTENT
+            add_system_data["overview_of_city_records_structure"] = AIRTABLE_SCHEMA_CONTENT
         if user_message and iteration_count == 1:
-            add_system_data["user_provided_message"] = user_message
+            add_system_data["user_missive"] = user_message
 
         kinos_response = None
         if not dry_run:
@@ -1351,13 +1349,12 @@ def process_all_ai_autonomously(
         log.info(f"{LogColors.OKBLUE}Waiting for 60 seconds before starting next main loop iteration...{LogColors.ENDC}")
         time.sleep(60) # Wait before starting the next full loop
     
-    # This part is now unreachable due to the infinite loop if no specific citizen is provided.
-    # The admin notification logic has been moved inside the specific citizen processing block
-    # and inside the main loop for iterative processing.
-
+    # Admin notification logic for the overall process (if specific citizen was run)
+    # is handled after the specific citizen processing block.
+    # For the infinite loop, notifications are per-iteration.
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run autonomous decision-making cycles for AI citizens.")
+    parser = argparse.ArgumentParser(description="Run autonomous decision-making cycles for AI citizens in La Serenissima.")
     parser.add_argument(
         "--dry-run",
         action="store_true",
