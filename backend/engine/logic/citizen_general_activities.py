@@ -1121,7 +1121,14 @@ def _handle_production_and_general_work_tasks(
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
     citizen_social_class: str 
 ) -> Optional[Dict]:
-    """Prio 31: Handles production, restocking for general workplaces if it's work time."""
+    """
+    Prio 31: Handles production, restocking for general workplaces if it's work time.
+    Phases à implémenter :
+    1. Production directe : créer et retourner l’activité production si possible.
+    2. Réapprovisionnement : si ressources manquantes, créer une activité de fetch (storage_fetch ou fetch_resource),
+       puis chaîner la production en lui passant son EndDate à start_time_utc_iso.
+    3. Livraison surplus : si stockage plein et contrat storage_query, créer deliver_to_storage et retourner l’activité.
+    """
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
     if not workplace_record:
         return None
