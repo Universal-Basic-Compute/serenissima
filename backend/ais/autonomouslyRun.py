@@ -521,6 +521,65 @@ AIRTABLE_SCHEMA_CONTENT = ""
 RAW_API_REFERENCE_CONTENT = ""
 API_REFERENCE_EXTRACTED_TEXT = ""
 
+# Global variable to store Activity Creation Reference content
+ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = ""
+
+
+def extract_text_from_activity_reference(tsx_content: str) -> str:
+    """
+    Extracts key textual information from the ActivityReference.tsx content.
+    Focuses on activity types, descriptions, activityDetails structure, and prerequisites.
+    """
+    if not tsx_content:
+        return "Activity Reference content not available."
+
+    extracted_activities = []
+    
+    # Regex to find sections for each activity type
+    # It looks for <section ... id="<some_id>"> blocks
+    section_pattern = re.compile(
+        r'<section id="([^"]+)"[^>]*>.*?<h3[^>]*><code>(.*?)</code></h3>.*?<p[^>]*>(.*?)</p>.*?<h4[^>]*><code>activityDetails</code> Structure:</h4>.*?<pre[^>]*>(\{.*?\})</pre>(.*?)<\/section>',
+        re.DOTALL | re.IGNORECASE
+    )
+
+    for match in section_pattern.finditer(tsx_content):
+        # section_id = match.group(1).strip() # e.g., "rest", "idle"
+        activity_type = match.group(2).strip() # e.g., "rest"
+        description = match.group(3).strip()
+        activity_details_json_str = match.group(4).strip()
+        remaining_section_content = match.group(5)
+
+        # Clean up description and details_json_str from any HTML tags if necessary (basic cleaning)
+        description = re.sub(r'<[^>]+>', '', description)
+        # The pre block content is already a string literal of JSON, so direct use is fine.
+
+        prerequisites_text = ""
+        prereq_match = re.search(r'<p[^>]*><strong>Prerequisites:</strong>(.*?)</p>', remaining_section_content, re.DOTALL | re.IGNORECASE)
+        if prereq_match:
+            prerequisites_text = re.sub(r'<[^>]+>', '', prereq_match.group(1)).strip()
+
+        activity_info = (
+            f"Activity Type: `{activity_type}`\n"
+            f"Description: {description}\n"
+            f"ActivityDetails Structure:\n```json\n{activity_details_json_str}\n```\n"
+        )
+        if prerequisites_text:
+            activity_info += f"Prerequisites: {prerequisites_text}\n"
+        
+        extracted_activities.append(activity_info)
+
+    if not extracted_activities:
+        # Fallback for general payload if specific activities not extracted
+        general_payload_match = re.search(r'<section id="general-payload".*?<pre[^>]*>(\{.*?\})</pre>', tsx_content, re.DOTALL | re.IGNORECASE)
+        if general_payload_match:
+            general_payload_json = general_payload_match.group(1).strip()
+            extracted_activities.append(f"General Request Payload for POST /api/actions/create-activity:\n```json\n{general_payload_json}\n```\n")
+        else:
+            return "Could not extract structured Activity Reference details. Raw content might be too complex."
+
+    return "\n\n---\n\n".join(extracted_activities)
+
+
 def extract_text_from_api_reference(html_content: str) -> str:
     """
     Extracts key textual information from the ApiReference.tsx content.
@@ -604,6 +663,27 @@ def load_api_reference_content():
         log.error(f"{LogColors.FAIL}Error loading or extracting API Reference content: {e}{LogColors.ENDC}", exc_info=True)
         RAW_API_REFERENCE_CONTENT = "Error loading API Reference."
         API_REFERENCE_EXTRACTED_TEXT = "Error loading API Reference."
+
+def load_activity_reference_content():
+    """Loads and extracts text from ActivityReference.tsx."""
+    global ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT
+    try:
+        ref_file_path = os.path.join(PROJECT_ROOT, "components", "Documentation", "ActivityReference.tsx")
+        if os.path.exists(ref_file_path):
+            with open(ref_file_path, "r", encoding="utf-8") as f:
+                raw_content = f.read()
+            log.info(f"{LogColors.OKGREEN}Successfully loaded raw Activity Creation Reference content.{LogColors.ENDC}")
+            ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = extract_text_from_activity_reference(raw_content)
+            if "Could not extract" not in ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT and ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT != "Activity Reference content not available.":
+                 log.info(f"{LogColors.OKGREEN}Successfully extracted text from Activity Creation Reference. Length: {len(ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT)}{LogColors.ENDC}")
+            else:
+                 log.warning(f"{LogColors.WARNING}Extraction from Activity Creation Reference might have issues: {ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT[:100]}...{LogColors.ENDC}")
+        else:
+            log.warning(f"{LogColors.WARNING}Activity Creation Reference file not found at {ref_file_path}. Proceeding without it.{LogColors.ENDC}")
+            ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = "Activity Creation Reference file not found."
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error loading or extracting Activity Creation Reference content: {e}{LogColors.ENDC}", exc_info=True)
+        ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT = "Error loading Activity Creation Reference."
 
 def load_airtable_schema_content():
     """Loads the content of airtable_schema.md."""
@@ -909,6 +989,7 @@ def autonomously_run_ai_citizen_unguided(
             "citizen data (`addSystem.citizen_data`)", 
             "API docs summary (`addSystem.api_docs_summary`)", 
             "extracted API Reference text (`addSystem.api_reference_extracted_text`)",
+            "Activity Creation Reference text (`addSystem.activity_creation_reference_text`)", # Added new context
             "your latest activity (`addSystem.latest_activity`)"
         ]
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
@@ -940,7 +1021,8 @@ def autonomously_run_ai_citizen_unguided(
 
         add_system_data = {
             "api_docs_summary": API_DOCUMENTATION_SUMMARY,
-            "api_reference_extracted_text": API_REFERENCE_EXTRACTED_TEXT, 
+            "api_reference_extracted_text": API_REFERENCE_EXTRACTED_TEXT,
+            "activity_creation_reference_text": ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT, # Added new context
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
             "citizen_data": ai_citizen_record["fields"],
             "latest_activity": latest_activity_data_unguided or {}, # Add latest activity
@@ -1052,6 +1134,7 @@ def process_all_ai_autonomously(
     load_airtable_schema_content()
     if unguided_mode:
         load_api_reference_content()
+        load_activity_reference_content() # Load the new reference
 
     tables = initialize_airtable()
     kinos_api_key = get_kinos_api_key()
