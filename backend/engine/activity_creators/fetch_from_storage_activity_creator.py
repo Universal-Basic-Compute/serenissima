@@ -27,7 +27,8 @@ def try_create(
     resources_to_fetch: List[Dict[str, Any]], # [{"ResourceId": "wood", "Amount": 10}, ...]
     storage_query_contract_custom_id: str, # Custom ContractId string of the storage_query contract
     path_data: Dict,                       # Path from from_building (storage) to to_building (workplace)
-    current_time_utc: datetime.datetime    # Added current_time_utc
+    current_time_utc: datetime.datetime,   # Added current_time_utc
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """Creates a 'fetch_from_storage' activity."""
 
@@ -42,7 +43,7 @@ def try_create(
         log.error("Missing crucial data for creating fetch_from_storage activity.")
         return None
 
-    log.info(f"Attempting to create 'fetch_from_storage' for {citizen_username} from {from_building_custom_id} to {to_building_custom_id} for contract {storage_query_contract_custom_id}.")
+    log.info(f"Attempting to create 'fetch_from_storage' for {citizen_username} from {from_building_custom_id} to {to_building_custom_id} for contract {storage_query_contract_custom_id} with explicit start: {start_time_utc_iso}.")
 
     try:
         # Calculate current load and adjust resources_to_fetch
@@ -87,17 +88,26 @@ def try_create(
         final_resources_to_fetch_list = adjusted_resources_to_fetch
         log.info(f"Adjusted resources for {citizen_username} due to carry capacity: {final_resources_to_fetch_list}. Remaining capacity was {remaining_capacity:.2f}.")
 
-        # now_venice = datetime.datetime.now(VENICE_TIMEZONE) # Replaced by current_time_utc
-        
-        start_date_iso_to_use = path_data.get('timing', {}).get('startDate', current_time_utc.isoformat())
-        end_date_iso_to_use = path_data.get('timing', {}).get('endDate')
-        if not end_date_iso_to_use:
-            travel_duration_seconds = path_data.get('timing', {}).get('durationSeconds', 3600) 
-            start_datetime_obj_for_calc = datetime.datetime.fromisoformat(start_date_iso_to_use.replace("Z", "+00:00")) if isinstance(start_date_iso_to_use, str) else start_date_iso_to_use
-            if start_datetime_obj_for_calc.tzinfo is None: # Ensure timezone aware
-                 start_datetime_obj_for_calc = pytz.UTC.localize(start_datetime_obj_for_calc)
-            end_datetime_obj = start_datetime_obj_for_calc + datetime.timedelta(seconds=travel_duration_seconds)
-            end_date_iso_to_use = end_datetime_obj.isoformat()
+        effective_start_date_iso: str
+        effective_end_date_iso: str
+
+        if start_time_utc_iso:
+            effective_start_date_iso = start_time_utc_iso
+            if path_data and path_data.get('timing', {}).get('durationSeconds') is not None:
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                duration_seconds = path_data['timing']['durationSeconds']
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(seconds=duration_seconds)).isoformat()
+            else: # Default duration if no path data or duration in path data
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
+        elif path_data and path_data.get('timing', {}).get('startDate') and path_data.get('timing', {}).get('endDate'):
+            effective_start_date_iso = path_data['timing']['startDate']
+            effective_end_date_iso = path_data['timing']['endDate']
+        else: # Fallback to current_time_utc and default duration
+            effective_start_date_iso = current_time_utc.isoformat()
+            effective_end_date_iso = (current_time_utc + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
 
         path_points_json = json.dumps(path_data.get('path', []))
         transporter = path_data.get('transporter')
@@ -114,12 +124,12 @@ def try_create(
             "FromBuilding": from_building_custom_id, # Storage facility
             "ToBuilding": to_building_custom_id,     # Workplace
             "ContractId": storage_query_contract_custom_id, # Use custom ContractId string
-            "Resources": resources_json, # Using 'Resources' field for the batch
+            "Resources": resources_json, 
             "Path": path_points_json,
             "Transporter": transporter,
-            "CreatedAt": current_time_utc.isoformat(), # Use current_time_utc
-            "StartDate": start_date_iso_to_use,      # Use determined start date
-            "EndDate": end_date_iso_to_use,          # Use determined end date
+            "CreatedAt": effective_start_date_iso, 
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Status": "created",
             "Priority": DEFAULT_PRIORITY_FETCH_FROM_STORAGE,
             "Notes": f"📦 Fetching {resource_summary} from storage at {from_building_custom_id} to {to_building_custom_id} (Contract: {storage_query_contract_custom_id}).",

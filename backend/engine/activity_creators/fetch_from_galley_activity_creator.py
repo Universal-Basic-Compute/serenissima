@@ -23,26 +23,33 @@ def try_create(
     amount_to_fetch: float, # Amount for this specific part of the original contract
     path_data_to_galley: Dict, # Path data from transport API to the galley
     current_time_utc: datetime.datetime, # Added current_time_utc
-    resource_defs: Dict[str, Any] # Added resource_defs
-    # tables: Dict[str, Any] # Removed duplicate tables argument
+    resource_defs: Dict[str, Any], # Added resource_defs
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """Creates a fetch_from_galley activity."""
-    log.info(f"Attempting to create 'fetch_from_galley' for {citizen_username} to galley {galley_custom_id} for contract {original_contract_custom_id}")
+    log.info(f"Attempting to create 'fetch_from_galley' for {citizen_username} to galley {galley_custom_id} for contract {original_contract_custom_id} with explicit start: {start_time_utc_iso}")
 
     try:
-        # from backend.engine.utils.activity_helpers import VENICE_TIMEZONE # Not needed if using current_time_utc
-        # now_venice = datetime.datetime.now(VENICE_TIMEZONE) # Replaced by current_time_utc
-        
-        start_date_iso_to_use = path_data_to_galley.get('timing', {}).get('startDate', current_time_utc.isoformat())
-        end_date_iso_to_use = path_data_to_galley.get('timing', {}).get('endDate')
-        
-        if not end_date_iso_to_use: 
-            travel_duration_default_hours = 1 
-            start_datetime_obj_for_calc = datetime.datetime.fromisoformat(start_date_iso_to_use.replace("Z", "+00:00")) if isinstance(start_date_iso_to_use, str) else start_date_iso_to_use
-            if start_datetime_obj_for_calc.tzinfo is None: # Ensure timezone aware
-                 start_datetime_obj_for_calc = pytz.UTC.localize(start_datetime_obj_for_calc)
-            end_time_calc = start_datetime_obj_for_calc + datetime.timedelta(hours=travel_duration_default_hours)
-            end_date_iso_to_use = end_time_calc.isoformat()
+        effective_start_date_iso: str
+        effective_end_date_iso: str
+
+        if start_time_utc_iso:
+            effective_start_date_iso = start_time_utc_iso
+            if path_data_to_galley and path_data_to_galley.get('timing', {}).get('durationSeconds') is not None:
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                duration_seconds = path_data_to_galley['timing']['durationSeconds']
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(seconds=duration_seconds)).isoformat()
+            else: # Default duration if no path data or duration in path data
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
+        elif path_data_to_galley and path_data_to_galley.get('timing', {}).get('startDate') and path_data_to_galley.get('timing', {}).get('endDate'):
+            effective_start_date_iso = path_data_to_galley['timing']['startDate']
+            effective_end_date_iso = path_data_to_galley['timing']['endDate']
+        else: # Fallback to current_time_utc and default duration
+            effective_start_date_iso = current_time_utc.isoformat()
+            effective_end_date_iso = (current_time_utc + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
         
         path_json_str = json.dumps(path_data_to_galley.get('path', []))
         
@@ -59,13 +66,13 @@ def try_create(
             "Type": "fetch_from_galley",
             "Citizen": citizen_username,
             "FromBuilding": galley_custom_id, # Use custom BuildingId of the galley
-            "ContractId": original_contract_custom_id, # Store original contract's custom ID in ContractId field
-            "Resources": json.dumps([{"ResourceId": resource_id_to_fetch, "Amount": amount_to_fetch}]), # Store as JSON array
-            "CreatedAt": current_time_utc.isoformat(), # Use current_time_utc
-            "StartDate": start_date_iso_to_use,      # Use determined start date
-            "EndDate": end_date_iso_to_use,          # Use determined end date
+            "ContractId": original_contract_custom_id, 
+            "Resources": json.dumps([{"ResourceId": resource_id_to_fetch, "Amount": amount_to_fetch}]), 
+            "CreatedAt": effective_start_date_iso, 
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Path": path_json_str,
-            "Transporter": transporter, # Add Transporter field
+            "Transporter": transporter, 
             "Notes": notes,
         }
         resource_name = resource_defs.get(resource_id_to_fetch, {}).get('name', resource_id_to_fetch)

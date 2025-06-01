@@ -19,7 +19,8 @@ def try_create_construct_building_activity(
     work_duration_minutes: int,             # How long this specific activity will last
     contract_custom_id_or_airtable_id: str, # Can be custom ContractId or Airtable ID depending on context
     path_data: Optional[Dict],               # Path from citizen's current location to site (if not already there)
-    current_time_utc: datetime.datetime     # Added current_time_utc
+    current_time_utc: datetime.datetime,     # Added current_time_utc
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """
     Creates a 'construct_building' activity.
@@ -43,22 +44,42 @@ def try_create_construct_building_activity(
         
         activity_payload: Dict[str, Any] = {
             "Citizen": citizen_username,
-            # ContractId will be set differently for goto_construction_site vs construct_building
-            # "BuildingToConstruct": target_building_custom_id, # Removed, use ToBuilding/FromBuilding
-            "CreatedAt": current_time_utc.isoformat(),
             "Status": "created",
         }
-
-        # Determine start_date based on path_data or current_time_utc
-        start_date_iso_to_use = current_time_utc.isoformat()
         
         details_payload: Dict[str, Any] = {}
+        effective_start_date_iso: str
+        effective_end_date_iso: str
+
+        if start_time_utc_iso: # Explicit start time provided
+            effective_start_date_iso = start_time_utc_iso
+            if path_data and path_data.get('success') and path_data.get('timing', {}).get('durationSeconds', 0) > 30:
+                # Travel involved, EndDate is StartDate + travel_duration + work_duration
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                travel_duration_seconds = path_data['timing']['durationSeconds']
+                arrival_dt = start_dt_obj + datetime.timedelta(seconds=travel_duration_seconds)
+                effective_end_date_iso = (arrival_dt + datetime.timedelta(minutes=work_duration_minutes)).isoformat()
+            else: # No travel or path_data missing duration, EndDate is StartDate + work_duration
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(minutes=work_duration_minutes)).isoformat()
+        
+        elif path_data and path_data.get('success') and path_data.get('timing', {}).get('durationSeconds', 0) > 30:
+            # Path data exists, use its timing for travel, then add work duration
+            effective_start_date_iso = path_data.get('timing', {}).get('startDate', current_time_utc.isoformat())
+            arrival_at_business_iso = path_data.get('timing', {}).get('endDate', (current_time_utc + datetime.timedelta(minutes=30)).isoformat())
+            arrival_dt = datetime.datetime.fromisoformat(arrival_at_business_iso.replace("Z", "+00:00"))
+            if arrival_dt.tzinfo is None: arrival_dt = pytz.UTC.localize(arrival_dt)
+            effective_end_date_iso = (arrival_dt + datetime.timedelta(minutes=work_duration_minutes)).isoformat()
+        else: # No explicit start, no path data: direct work activity
+            effective_start_date_iso = current_time_utc.isoformat()
+            effective_end_date_iso = (current_time_utc + datetime.timedelta(minutes=work_duration_minutes)).isoformat()
+
+        activity_payload["CreatedAt"] = effective_start_date_iso # Use effective start for CreatedAt
 
         if path_data and path_data.get('success') and path_data.get('timing', {}).get('durationSeconds', 0) > 30:
-            start_date_iso_to_use = path_data.get('timing', {}).get('startDate', start_date_iso_to_use)
-            
-            # For goto_construction_site, we want the custom ContractId string.
-            # The contract_custom_id_or_airtable_id passed to this function should be the custom ID if coming from construction_logic.
+            # This means travel is involved, so it's a 'goto_construction_site'
             # If it were an Airtable ID, we'd need to fetch the contract to get its custom ID.
             # Assuming contract_custom_id_or_airtable_id is already the custom string ID here for goto_construction_site.
             custom_contract_id_str_for_goto = contract_custom_id_or_airtable_id
@@ -106,8 +127,9 @@ def try_create_construct_building_activity(
             activity_payload["Resources"] = json.dumps(resources_being_carried) if resources_being_carried else "[]"
 
             activity_payload["Path"] = json.dumps(path_data.get('path', []))
-            activity_payload["StartDate"] = start_date_iso_to_use
-            activity_payload["EndDate"] = path_data.get('timing', {}).get('endDate', (current_time_utc + datetime.timedelta(minutes=30)).isoformat()) # Fallback EndDate
+            activity_payload["StartDate"] = effective_start_date_iso # Was start_date_iso_to_use
+            # EndDate for goto_construction_site is arrival time, not including work_duration
+            activity_payload["EndDate"] = path_data.get('timing', {}).get('endDate', (datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00")) + datetime.timedelta(minutes=30)).isoformat())
             activity_payload["Notes"] = f"🚶 Traveling to construction site {target_building_custom_id} to work. Contract: {custom_contract_id_str_for_goto}. Work will be {work_duration_minutes} mins."
             target_bldg_name = target_building_record['fields'].get('Name', target_building_record['fields'].get('Type', target_building_custom_id))
             activity_payload["Description"] = f"Traveling to construction site: {target_bldg_name}"
@@ -126,8 +148,8 @@ def try_create_construct_building_activity(
             activity_payload["FromBuilding"] = target_building_custom_id 
             activity_payload["ToBuilding"] = target_building_custom_id   
             activity_payload["Path"] = "[]" 
-            activity_payload["StartDate"] = start_date_iso_to_use 
-            activity_payload["EndDate"] = (current_time_utc + datetime.timedelta(minutes=work_duration_minutes)).isoformat()
+            activity_payload["StartDate"] = effective_start_date_iso # Was start_date_iso_to_use
+            activity_payload["EndDate"] = effective_end_date_iso # Was calculated based on current_time_utc
             activity_payload["Notes"] = f"🛠️ Working on construction at site {target_building_custom_id} for {work_duration_minutes} minutes. Contract: {contract_custom_id_or_airtable_id}."
             target_bldg_name = target_building_record['fields'].get('Name', target_building_record['fields'].get('Type', target_building_custom_id))
             activity_payload["Description"] = f"Working on construction: {target_bldg_name}"

@@ -22,38 +22,50 @@ def try_create(
     citizen_airtable_id: str,
     business_building_custom_id: str, # The business building to check
     path_data: Optional[Dict], # Path from citizen's current location to the business
-    current_time_utc: datetime.datetime
+    current_time_utc: datetime.datetime,
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """
     Creates a 'check_business_status' activity.
     If path_data is None, citizen is assumed to be at the business.
     """
-    log.info(f"Attempting to create 'check_business_status' for {citizen_username} at business {business_building_custom_id}")
+    log.info(f"Attempting to create 'check_business_status' for {citizen_username} at business {business_building_custom_id} with explicit start: {start_time_utc_iso}")
 
     try:
         activity_id_str = f"chk_biz_{citizen_custom_id}_{uuid.uuid4()}"
         
-        start_date_iso_to_use = current_time_utc.isoformat()
-        # Default duration for the check itself if no travel
-        end_date_iso_to_use = (current_time_utc + datetime.timedelta(minutes=15)).isoformat() 
+        effective_start_date_iso: str
+        effective_end_date_iso: str
+        path_json = "[]"
+        transporter = None
+        
+        check_duration_minutes = 15 # Duration of the check itself
 
-        if path_data and path_data.get('success'):
-            start_date_iso_to_use = path_data.get('timing', {}).get('startDate', start_date_iso_to_use)
-            # Path's endDate is arrival time at business
-            arrival_at_business_iso = path_data.get('timing', {}).get('endDate', end_date_iso_to_use) 
-            
+        if start_time_utc_iso:
+            effective_start_date_iso = start_time_utc_iso
+            start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+            if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+
+            if path_data and path_data.get('success') and path_data.get('timing', {}).get('durationSeconds') is not None:
+                travel_duration_seconds = path_data['timing']['durationSeconds']
+                arrival_dt = start_dt_obj + datetime.timedelta(seconds=travel_duration_seconds)
+                effective_end_date_iso = (arrival_dt + datetime.timedelta(minutes=check_duration_minutes)).isoformat()
+                path_json = json.dumps(path_data.get('path', []))
+                transporter = path_data.get('transporter')
+            else: # No travel or path_data missing duration
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(minutes=check_duration_minutes)).isoformat()
+        
+        elif path_data and path_data.get('success') and path_data.get('timing', {}).get('startDate') and path_data.get('timing', {}).get('endDate'):
+            effective_start_date_iso = path_data['timing']['startDate']
+            arrival_at_business_iso = path_data['timing']['endDate']
             arrival_dt = datetime.datetime.fromisoformat(arrival_at_business_iso.replace("Z", "+00:00"))
-            if arrival_dt.tzinfo is None:
-                 arrival_dt = pytz.UTC.localize(arrival_dt)
-            
-            # Add a small duration for the check itself after arrival
-            end_date_iso_to_use = (arrival_dt + datetime.timedelta(minutes=15)).isoformat()
+            if arrival_dt.tzinfo is None: arrival_dt = pytz.UTC.localize(arrival_dt)
+            effective_end_date_iso = (arrival_dt + datetime.timedelta(minutes=check_duration_minutes)).isoformat()
             path_json = json.dumps(path_data.get('path', []))
             transporter = path_data.get('transporter')
-        else: # No path or path failed, assume at location or very short travel
-            path_json = "[]"
-            transporter = None
-            # EndDate already set for a short duration from current_time_utc
+        else: # Fallback to current_time_utc and default duration for check only
+            effective_start_date_iso = current_time_utc.isoformat()
+            effective_end_date_iso = (current_time_utc + datetime.timedelta(minutes=check_duration_minutes)).isoformat()
 
         business_record = get_building_record(tables, business_building_custom_id)
         business_name_desc = business_record['fields'].get('Name', business_record['fields'].get('Type', business_building_custom_id)) if business_record else business_building_custom_id
@@ -66,9 +78,9 @@ def try_create(
             "ToBuilding": business_building_custom_id,   # This is the business to check
             "Path": path_json,
             "Transporter": transporter,
-            "CreatedAt": current_time_utc.isoformat(),
-            "StartDate": start_date_iso_to_use,
-            "EndDate": end_date_iso_to_use,
+            "CreatedAt": effective_start_date_iso,
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Status": "created",
             "Priority": DEFAULT_PRIORITY_CHECK_BUSINESS,
             "Notes": f"💼 Checking status of business: {business_name_desc}",

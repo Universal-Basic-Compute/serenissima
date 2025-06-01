@@ -32,7 +32,8 @@ def try_create(
     amount: float,
     path_data: Optional[Dict], # Path data from transport API
     current_time_utc: datetime.datetime, # Added current_time_utc
-    resource_defs: Dict[str, Any] # Added resource_defs
+    resource_defs: Dict[str, Any], # Added resource_defs
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """Creates a resource fetching activity based on a contract."""
     
@@ -108,32 +109,32 @@ def try_create(
     
     # If to_building_custom_id is None, it implies the citizen is fetching for their own inventory (e.g., homeless)
     destination_log_name = to_building_custom_id if to_building_custom_id else "inventaire personnel"
-    log.info(f"Attempting to create resource fetching activity for {citizen_username} from {final_from_building_custom_id or 'unknown source'} to {destination_log_name}")
+    log.info(f"Attempting to create resource fetching activity for {citizen_username} from {final_from_building_custom_id or 'unknown source'} to {destination_log_name} with explicit start: {start_time_utc_iso}")
 
     try:
-        # VENICE_TIMEZONE is imported at the top of the file now, but current_time_utc is preferred for timestamps
-        # now_venice = datetime.datetime.now(VENICE_TIMEZONE) # Replaced by current_time_utc
-        
-        travel_time_minutes = 30  # Default
+        effective_start_dt: datetime.datetime
+        effective_end_dt: datetime.datetime
         current_path_points = []
         current_transporter = None
 
+        if start_time_utc_iso:
+            effective_start_dt = datetime.datetime.fromisoformat(start_time_utc_iso.replace("Z", "+00:00"))
+            if effective_start_dt.tzinfo is None: effective_start_dt = pytz.UTC.localize(effective_start_dt)
+        else:
+            effective_start_dt = current_time_utc # Default to now if no explicit start
+
         if final_from_building_custom_id and to_building_custom_id and final_from_building_custom_id == to_building_custom_id:
             log.info(f"FromBuilding and ToBuilding are the same ({final_from_building_custom_id}). Setting travel time to 1 minute for {citizen_username}.")
-            travel_time_minutes = 1
-            current_path_points = [] # No path if buildings are the same
-        elif path_data: # Check if path_data is not None and buildings are different
-            if 'timing' in path_data and 'durationSeconds' in path_data['timing']:
-                travel_time_minutes = path_data['timing']['durationSeconds'] / 60
+            effective_end_dt = effective_start_dt + datetime.timedelta(minutes=1)
+        elif path_data and path_data.get('timing', {}).get('durationSeconds') is not None:
+            duration_seconds = path_data['timing']['durationSeconds']
+            effective_end_dt = effective_start_dt + datetime.timedelta(seconds=duration_seconds)
             current_path_points = path_data.get('path', [])
             current_transporter = path_data.get('transporter')
-        else: # path_data is None and buildings are different (or final_from_building_custom_id is None after dynamic check)
-            # If final_from_building_custom_id is None here, it means original was provided but path_data was not.
-            # This case should be rare if dynamic determination already returned None for invalid sources.
-            log.warning(f"Path data is None for fetch_resource activity for {citizen_username} from {final_from_building_custom_id or 'unknown source'} to {to_building_custom_id}. Using default travel time and empty path.")
-            # travel_time_minutes remains default 30
-        
-        end_time_utc = current_time_utc + datetime.timedelta(minutes=travel_time_minutes)
+        else: # No path_data or no duration, use default travel time
+            log.warning(f"Path data is None or lacks duration for fetch_resource activity for {citizen_username}. Using default travel time.")
+            effective_end_dt = effective_start_dt + datetime.timedelta(minutes=30) # Default 30 mins
+
         activity_id_str = f"fetch_{citizen_custom_id}_{uuid.uuid4()}"
         
         from_building_name = final_from_building_custom_id if final_from_building_custom_id else "an unknown location"
@@ -146,15 +147,13 @@ def try_create(
             "Type": "fetch_resource",
             "Citizen": citizen_username,
             # "ContractId": contract_custom_id, # Will be set conditionally below
-            "FromBuilding": final_from_building_custom_id, # Use custom BuildingId, can be None
-            "ToBuilding": to_building_custom_id,   # Use custom BuildingId
-            # "ResourceId": resource_type_id, # Removed as it's not in Airtable ACTIVITIES schema for fetch_resource
-            # "Amount": amount,           # Removed as it's not in Airtable ACTIVITIES schema for fetch_resource
-            "CreatedAt": current_time_utc.isoformat(), # Use current_time_utc
-            "StartDate": current_time_utc.isoformat(), # Start immediately in UTC time
-            "EndDate": end_time_utc.isoformat(),
-            "Path": json.dumps(current_path_points), # current_path_points is always a list
-            "Transporter": current_transporter, # current_transporter can be None
+            "FromBuilding": final_from_building_custom_id, 
+            "ToBuilding": to_building_custom_id,   
+            "CreatedAt": effective_start_dt.isoformat(),
+            "StartDate": effective_start_dt.isoformat(),
+            "EndDate": effective_end_dt.isoformat(),
+            "Path": json.dumps(current_path_points), 
+            "Transporter": current_transporter, 
         }
         resource_name_display = resource_defs.get(resource_type_id, {}).get('name', resource_type_id)
         from_bldg_rec = get_building_record(tables, final_from_building_custom_id) if final_from_building_custom_id else None

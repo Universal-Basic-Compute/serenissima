@@ -21,25 +21,33 @@ def try_create(
     exit_point_custom_id: str, # Custom BuildingId of the exit point (e.g., a public_dock)
     path_data_to_exit: Dict,
     galley_to_delete_custom_id: Optional[str], # Custom BuildingId of the galley, if any
-    current_time_utc: datetime.datetime    # Added current_time_utc
+    current_time_utc: datetime.datetime,    # Added current_time_utc
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """Creates a 'leave_venice' activity."""
-    log.info(f"Attempting to create 'leave_venice' for {citizen_username} via {exit_point_custom_id}")
+    log.info(f"Attempting to create 'leave_venice' for {citizen_username} via {exit_point_custom_id} with explicit start: {start_time_utc_iso}")
 
     try:
-        # from backend.engine.utils.activity_helpers import VENICE_TIMEZONE # Not needed if using current_time_utc
-        # now_venice = datetime.datetime.now(VENICE_TIMEZONE) # Replaced by current_time_utc
-        
-        start_date_iso_to_use = path_data_to_exit.get('timing', {}).get('startDate', current_time_utc.isoformat())
-        end_date_iso_to_use = path_data_to_exit.get('timing', {}).get('endDate')
-        
-        if not end_date_iso_to_use: 
-            travel_duration_default_hours = 1 
-            start_datetime_obj_for_calc = datetime.datetime.fromisoformat(start_date_iso_to_use.replace("Z", "+00:00")) if isinstance(start_date_iso_to_use, str) else start_date_iso_to_use
-            if start_datetime_obj_for_calc.tzinfo is None: # Ensure timezone aware
-                 start_datetime_obj_for_calc = pytz.UTC.localize(start_datetime_obj_for_calc)
-            end_time_calc = start_datetime_obj_for_calc + datetime.timedelta(hours=travel_duration_default_hours)
-            end_date_iso_to_use = end_time_calc.isoformat()
+        effective_start_date_iso: str
+        effective_end_date_iso: str
+
+        if start_time_utc_iso:
+            effective_start_date_iso = start_time_utc_iso
+            if path_data_to_exit and path_data_to_exit.get('timing', {}).get('durationSeconds') is not None:
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                duration_seconds = path_data_to_exit['timing']['durationSeconds']
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(seconds=duration_seconds)).isoformat()
+            else: # Default duration if no path data or duration in path data
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
+        elif path_data_to_exit and path_data_to_exit.get('timing', {}).get('startDate') and path_data_to_exit.get('timing', {}).get('endDate'):
+            effective_start_date_iso = path_data_to_exit['timing']['startDate']
+            effective_end_date_iso = path_data_to_exit['timing']['endDate']
+        else: # Fallback to current_time_utc and default duration
+            effective_start_date_iso = current_time_utc.isoformat()
+            effective_end_date_iso = (current_time_utc + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
         
         path_json_str = json.dumps(path_data_to_exit.get('path', []))
         transporter = path_data_to_exit.get('transporter')
@@ -77,12 +85,11 @@ def try_create(
             "TransportMode": transport_mode,
             "Path": path_json_str,
             "Transporter": transporter,
-            "Resources": resources_json, # Citizen takes their inventory
+            "Resources": resources_json, 
             "Notes": notes,
-            # "Details": json.dumps(details_payload) if details_payload else None, # Removed Details field
-            "CreatedAt": current_time_utc.isoformat(), # Use current_time_utc
-            "StartDate": start_date_iso_to_use,      # Use determined start date
-            "EndDate": end_date_iso_to_use,          # Use determined end date
+            "CreatedAt": effective_start_date_iso, 
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Status": "created",
         }
         exit_point_record = get_building_record(tables, exit_point_custom_id)

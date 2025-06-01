@@ -25,7 +25,8 @@ def try_create(
     path_data: Dict,                       # Path from current location to to_building
     current_time_utc: datetime.datetime,   # Added current_time_utc
     source_is_citizen_inventory: bool = False, # New flag
-    intended_owner_username_for_storage: Optional[str] = None # New: For specifying final owner
+    intended_owner_username_for_storage: Optional[str] = None, # New: For specifying final owner
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """
     Creates a 'deliver_to_storage' activity.
@@ -65,20 +66,29 @@ def try_create(
             return None
         log_info_source = from_building_custom_id
 
-    log.info(f"Attempting to create 'deliver_to_storage' for {citizen_username} from {log_info_source} to {to_building_custom_id} (Contract: {storage_query_contract_id or 'N/A'}).")
+    log.info(f"Attempting to create 'deliver_to_storage' for {citizen_username} from {log_info_source} to {to_building_custom_id} (Contract: {storage_query_contract_id or 'N/A'}) with explicit start: {start_time_utc_iso}.")
 
     try:
-        # now_venice = datetime.datetime.now(VENICE_TIMEZONE) # Replaced by current_time_utc
-        
-        start_date_iso_to_use = path_data.get('timing', {}).get('startDate', current_time_utc.isoformat())
-        end_date_iso_to_use = path_data.get('timing', {}).get('endDate')
-        if not end_date_iso_to_use:
-            travel_duration_seconds = path_data.get('timing', {}).get('durationSeconds', 3600) 
-            start_datetime_obj_for_calc = datetime.datetime.fromisoformat(start_date_iso_to_use.replace("Z", "+00:00")) if isinstance(start_date_iso_to_use, str) else start_date_iso_to_use
-            if start_datetime_obj_for_calc.tzinfo is None: # Ensure timezone aware
-                 start_datetime_obj_for_calc = pytz.UTC.localize(start_datetime_obj_for_calc)
-            end_datetime_obj = start_datetime_obj_for_calc + datetime.timedelta(seconds=travel_duration_seconds)
-            end_date_iso_to_use = end_datetime_obj.isoformat()
+        effective_start_date_iso: str
+        effective_end_date_iso: str
+
+        if start_time_utc_iso:
+            effective_start_date_iso = start_time_utc_iso
+            if path_data and path_data.get('timing', {}).get('durationSeconds') is not None:
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                duration_seconds = path_data['timing']['durationSeconds']
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(seconds=duration_seconds)).isoformat()
+            else: # Default duration if no path data or duration in path data
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
+        elif path_data and path_data.get('timing', {}).get('startDate') and path_data.get('timing', {}).get('endDate'):
+            effective_start_date_iso = path_data['timing']['startDate']
+            effective_end_date_iso = path_data['timing']['endDate']
+        else: # Fallback to current_time_utc and default duration
+            effective_start_date_iso = current_time_utc.isoformat()
+            effective_end_date_iso = (current_time_utc + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
 
         path_points_json = json.dumps(path_data.get('path', []))
         transporter = path_data.get('transporter') # Get transporter from path_data
@@ -114,9 +124,9 @@ def try_create(
             "Resources": resources_json, 
             "Path": path_points_json,
             "Transporter": transporter,
-            "CreatedAt": current_time_utc.isoformat(), 
-            "StartDate": start_date_iso_to_use,      
-            "EndDate": end_date_iso_to_use,          
+            "CreatedAt": effective_start_date_iso, 
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Status": "created",
             "Priority": DEFAULT_PRIORITY_DELIVER_TO_STORAGE,
             "Notes": final_notes, 

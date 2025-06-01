@@ -28,10 +28,11 @@ def try_create(
     current_time_utc: datetime.datetime,    # Added current_time_utc
     custom_notes: Optional[str] = None, # For custom notes
     activity_type: str = "goto_work", # Default to "goto_work", can be overridden
-    details_payload: Optional[Dict] = None # For structured details
+    details_payload: Optional[Dict] = None, # For structured details
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """Creates a travel activity (e.g., goto_work, goto_building_for_storage_fetch) for a citizen. If at home and going to work, may pick up food."""
-    log.info(f"Attempting to create '{activity_type}' activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to destination {workplace_custom_id}")
+    log.info(f"Attempting to create '{activity_type}' activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to destination {workplace_custom_id} with explicit start: {start_time_utc_iso}")
 
     # Logic to pick up food if at home (only if it's a standard 'goto_work')
     if activity_type == "goto_work" and is_at_home and citizen_home_record and resource_definitions:
@@ -161,18 +162,29 @@ def try_create(
     from backend.engine.utils.activity_helpers import get_building_record
 
     try:
-        # VENICE_TIMEZONE is imported at the top of the file, but current_time_utc is preferred for timestamps
-        # now_venice = datetime.datetime.now(VENICE_TIMEZONE) # Replaced by current_time_utc logic
-        
-        start_date_iso_to_use = path_data.get('timing', {}).get('startDate', current_time_utc.isoformat())
-        end_date_iso_to_use = path_data.get('timing', {}).get('endDate')
-        
-        if not end_date_iso_to_use:
-            start_datetime_obj_for_calc = datetime.datetime.fromisoformat(start_date_iso_to_use.replace("Z", "+00:00")) if isinstance(start_date_iso_to_use, str) else start_date_iso_to_use
-            if start_datetime_obj_for_calc.tzinfo is None: # Ensure timezone aware
-                 start_datetime_obj_for_calc = pytz.UTC.localize(start_datetime_obj_for_calc)
-            end_time_calc = start_datetime_obj_for_calc + datetime.timedelta(hours=1) # Default 1 hour travel
-            end_date_iso_to_use = end_time_calc.isoformat()
+        # Determine effective StartDate and EndDate
+        effective_start_date_iso: str
+        effective_end_date_iso: str
+
+        if start_time_utc_iso:
+            effective_start_date_iso = start_time_utc_iso
+            # If path_data exists and has duration, EndDate is StartDate + duration
+            # Otherwise, it's a fixed duration from StartDate (e.g., if no travel, or travel time unknown)
+            if path_data and path_data.get('timing', {}).get('durationSeconds') is not None:
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                duration_seconds = path_data['timing']['durationSeconds']
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(seconds=duration_seconds)).isoformat()
+            else: # No path_data or no duration, assume a default travel/activity time (e.g. 1 hour)
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(hours=1)).isoformat()
+        elif path_data and path_data.get('timing', {}).get('startDate') and path_data.get('timing', {}).get('endDate'):
+            effective_start_date_iso = path_data['timing']['startDate']
+            effective_end_date_iso = path_data['timing']['endDate']
+        else: # Fallback to current_time_utc and default duration
+            effective_start_date_iso = current_time_utc.isoformat()
+            effective_end_date_iso = (current_time_utc + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
         
         path_json = json.dumps(path_points) # Use path_points determined above
         
@@ -223,12 +235,12 @@ def try_create(
             "FromBuilding": from_building_custom_id,
             "ToBuilding": workplace_custom_id, 
             "TransportMode": transport_mode,
-            "CreatedAt": current_time_utc.isoformat(), # Use current_time_utc
-            "StartDate": start_date_iso_to_use,      # Use determined start date
-            "EndDate": end_date_iso_to_use,          # Use determined end date
+            "CreatedAt": effective_start_date_iso, # Use effective start date for CreatedAt as well
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Path": path_json,
             "Transporter": transporter, 
-            "Notes": current_notes_content.strip(), # Updated notes content, strip whitespace
+            "Notes": current_notes_content.strip(),
             "Description": activity_description, # Added user-friendly description
             "Priority": selected_priority, # Set the priority
             "Status": "created"

@@ -19,24 +19,34 @@ def try_create(
     citizen_airtable_id: str, 
     inn_custom_id: str, # Changed to custom BuildingId
     path_data: Dict,
-    current_time_utc: datetime.datetime # Added current_time_utc
+    current_time_utc: datetime.datetime, # Added current_time_utc
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """Creates a travel_to_inn activity for a citizen."""
-    log.info(f"Attempting to create travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_custom_id}")
+    log.info(f"Attempting to create travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_custom_id} with explicit start: {start_time_utc_iso}")
     
     try:
-        # VENICE_TIMEZONE = pytz.timezone('Europe/Rome') # Not needed if using current_time_utc
-        # now_venice = datetime.datetime.now(VENICE_TIMEZONE) # Replaced by current_time_utc
-        
-        start_date_iso_to_use = path_data.get('timing', {}).get('startDate', current_time_utc.isoformat())
-        end_date_iso_to_use = path_data.get('timing', {}).get('endDate')
-        
-        if not end_date_iso_to_use:
-            start_datetime_obj_for_calc = datetime.datetime.fromisoformat(start_date_iso_to_use.replace("Z", "+00:00")) if isinstance(start_date_iso_to_use, str) else start_date_iso_to_use
-            if start_datetime_obj_for_calc.tzinfo is None: # Ensure timezone aware
-                 start_datetime_obj_for_calc = pytz.UTC.localize(start_datetime_obj_for_calc)
-            end_time_calc = start_datetime_obj_for_calc + datetime.timedelta(hours=1) # Default 1 hour travel
-            end_date_iso_to_use = end_time_calc.isoformat()
+        # Determine effective StartDate and EndDate
+        effective_start_date_iso: str
+        effective_end_date_iso: str
+
+        if start_time_utc_iso:
+            effective_start_date_iso = start_time_utc_iso
+            if path_data and path_data.get('timing', {}).get('durationSeconds') is not None:
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                duration_seconds = path_data['timing']['durationSeconds']
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(seconds=duration_seconds)).isoformat()
+            else:
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
+        elif path_data and path_data.get('timing', {}).get('startDate') and path_data.get('timing', {}).get('endDate'):
+            effective_start_date_iso = path_data['timing']['startDate']
+            effective_end_date_iso = path_data['timing']['endDate']
+        else:
+            effective_start_date_iso = current_time_utc.isoformat()
+            effective_end_date_iso = (current_time_utc + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
         
         path_json = json.dumps(path_data.get('path', []))
         
@@ -46,12 +56,12 @@ def try_create(
             "ActivityId": f"goto_inn_{citizen_custom_id}_{int(time.time())}",
             "Type": "goto_inn",
             "Citizen": citizen_username,
-            "ToBuilding": inn_custom_id, # Use custom BuildingId
-            "CreatedAt": current_time_utc.isoformat(), # Use current_time_utc
-            "StartDate": start_date_iso_to_use,      # Use determined start date
-            "EndDate": end_date_iso_to_use,          # Use determined end date
+            "ToBuilding": inn_custom_id, 
+            "CreatedAt": effective_start_date_iso, 
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Path": path_json,
-            "Transporter": transporter, # Add Transporter field
+            "Transporter": transporter, 
             "Notes": "🏨 **Going to an inn** for the night",
         }
         inn_record = get_building_record(tables, inn_custom_id)

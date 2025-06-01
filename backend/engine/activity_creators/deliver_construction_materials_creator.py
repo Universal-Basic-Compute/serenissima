@@ -19,7 +19,8 @@ def try_create_deliver_construction_materials_activity(
     resources_to_deliver: List[Dict[str, Any]], # [{"type": "wood", "amount": 10}, ...]
     contract_custom_id: str,             # Custom ContractId string of the construction_project contract
     path_data: Dict,                      # Path from citizen's current location to construction site
-    current_time_utc: datetime.datetime  # Added current_time_utc
+    current_time_utc: datetime.datetime,  # Added current_time_utc
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """
     Creates a 'deliver_construction_materials' activity.
@@ -47,20 +48,26 @@ def try_create_deliver_construction_materials_activity(
     log.info(f"Attempting to create deliver_construction_materials for {citizen_username} from {from_building_custom_id} to {to_building_custom_id} for contract {contract_custom_id}.")
 
     try:
-        # Determine start and end times from path_data or current_time_utc
-        # from backend.engine.utils.activity_helpers import VENICE_TIMEZONE # Not needed if using current_time_utc
-        
-        start_date_iso_to_use = path_data.get('timing', {}).get('startDate', current_time_utc.isoformat())
-        end_date_iso_to_use = path_data.get('timing', {}).get('endDate')
-        if not end_date_iso_to_use: 
-            travel_duration_seconds = path_data.get('timing', {}).get('durationSeconds', 3600) 
-            # Ensure start_date_iso_to_use is a datetime object for timedelta if it came from current_time_utc
-            start_datetime_obj_for_calc = datetime.datetime.fromisoformat(start_date_iso_to_use.replace("Z", "+00:00")) if isinstance(start_date_iso_to_use, str) else start_date_iso_to_use
-            if start_datetime_obj_for_calc.tzinfo is None: # Ensure timezone aware
-                 start_datetime_obj_for_calc = pytz.UTC.localize(start_datetime_obj_for_calc)
+        effective_start_date_iso: str
+        effective_end_date_iso: str
 
-            end_datetime_obj = start_datetime_obj_for_calc + datetime.timedelta(seconds=travel_duration_seconds)
-            end_date_iso_to_use = end_datetime_obj.isoformat()
+        if start_time_utc_iso:
+            effective_start_date_iso = start_time_utc_iso
+            if path_data and path_data.get('timing', {}).get('durationSeconds') is not None:
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                duration_seconds = path_data['timing']['durationSeconds']
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(seconds=duration_seconds)).isoformat()
+            else: # Default duration if no path data or duration in path data
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
+        elif path_data and path_data.get('timing', {}).get('startDate') and path_data.get('timing', {}).get('endDate'):
+            effective_start_date_iso = path_data['timing']['startDate']
+            effective_end_date_iso = path_data['timing']['endDate']
+        else: # Fallback to current_time_utc and default duration
+            effective_start_date_iso = current_time_utc.isoformat()
+            effective_end_date_iso = (current_time_utc + datetime.timedelta(hours=1)).isoformat() # Default 1 hour
 
         path_points_json = json.dumps(path_data.get('path', []))
         transport_mode = "walk" # Default, can be enhanced from path_data if available
@@ -83,10 +90,10 @@ def try_create_deliver_construction_materials_activity(
             "ResourcesToDeliver": resources_json,     # Specific field for these resources
             "TransportMode": transport_mode,
             "Path": path_points_json,
-            "Transporter": path_data.get('transporter'), # If applicable from path_data
-            "CreatedAt": current_time_utc.isoformat(), # Use current_time_utc
-            "StartDate": start_date_iso_to_use,      # Use determined start date
-            "EndDate": end_date_iso_to_use,          # Use determined end date
+            "Transporter": path_data.get('transporter'), 
+            "CreatedAt": effective_start_date_iso, 
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Status": "created",
             "Notes": f"🚚 Delivering construction materials ({resource_summary}) to site {to_building_custom_id}.",
         }

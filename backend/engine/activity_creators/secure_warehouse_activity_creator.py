@@ -18,10 +18,11 @@ def try_create(
     citizen_username: str,
     citizen_airtable_record_id: str, # Not directly used in payload but good for consistency
     warehouse_building_custom_id: str,
-    current_time_utc: datetime.datetime # Changed from now_venice_dt to current_time_utc
+    current_time_utc: datetime.datetime, # Changed from now_venice_dt to current_time_utc
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """Creates a 'secure_warehouse' activity for one hour."""
-    log.info(f"Attempting to create 'secure_warehouse' for {citizen_username} at {warehouse_building_custom_id}")
+    log.info(f"Attempting to create 'secure_warehouse' for {citizen_username} at {warehouse_building_custom_id} with explicit start: {start_time_utc_iso}")
 
     try:
         activity_id_str = f"secure_wh_{citizen_custom_id}_{uuid.uuid4()}"
@@ -33,13 +34,13 @@ def try_create(
             "ActivityId": activity_id_str,
             "Type": "secure_warehouse",
             "Citizen": citizen_username,
-            "FromBuilding": warehouse_building_custom_id, # Citizen is at the warehouse
-            "ToBuilding": warehouse_building_custom_id,   # Stays at the warehouse
-            "CreatedAt": start_date_iso_to_use, # Use current_time_utc
-            "StartDate": start_date_iso_to_use, # Use current_time_utc
-            "EndDate": end_date_iso_to_use,
+            "FromBuilding": warehouse_building_custom_id, 
+            "ToBuilding": warehouse_building_custom_id,   
+            "CreatedAt": effective_start_date_iso,
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Status": "created",
-            "Priority": 5, # Default priority
+            "Priority": 5, 
             "Notes": f"🛡️ Securing warehouse {warehouse_building_custom_id}.",
         }
         warehouse_record = get_building_record(tables, warehouse_building_custom_id)
