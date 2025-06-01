@@ -380,6 +380,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "register_public_sell_offer": process_manage_public_sell_contract_fn, # Final step in manage_public_sell_contract chain
         "assess_import_needs": process_manage_import_contract_fn, # First step in manage_import_contract chain
         "register_import_agreement": process_manage_import_contract_fn, # Final step in manage_import_contract chain
+        "register_public_import_agreement": process_manage_public_import_contract_fn, # Final step in manage_public_import_contract chain
         "assess_logistics_needs": process_manage_logistics_service_contract_fn, # First step in manage_logistics_service_contract chain
         "register_logistics_service_contract": process_manage_logistics_service_contract_fn, # Final step in manage_logistics_service_contract chain
         "finalize_land_purchase": process_buy_available_land_fn, # Final step in buy_available_land chain

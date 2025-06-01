@@ -560,6 +560,23 @@ export default function ActivityReference() {
         </div>
         
         <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>manage_public_import_contract</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for manage_public_import_contract:
+{
+  "contractId": "string",              // Optional: ID of existing contract to modify
+  "resourceType": "string",            // Type of resource to import
+  "targetAmount": number,              // Amount to import
+  "pricePerResource": number,          // Price willing to pay per unit
+  "targetOfficeBuildingId": "string"   // Office building to register the contract
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> Creates a public import offer that any merchant can fulfill. Creates a chain: travel to customs/broker office to register the public import offer. No specific buyer building is needed as this is a public offer.
+          </p>
+        </div>
+        
+        <div className="mt-4">
           <h4 className="font-semibold text-amber-800 mb-1"><code>manage_logistics_service_contract</code></h4>
           <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`// activityDetails for manage_logistics_service_contract:
