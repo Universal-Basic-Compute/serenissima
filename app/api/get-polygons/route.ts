@@ -58,7 +58,13 @@ export async function GET(request: Request) {
               center: data.center,
               // bridgePoints: data.bridgePoints || [], // Removed as per request
               // canalPoints: data.canalPoints || [], // Removed as per request
-              // buildingPoints: data.buildingPoints || [] // Removed as per request
+              // buildingPoints: data.buildingPoints || [], // Removed as per request
+              // Include historical information as requested
+              historicalName: data.historicalName,
+              englishName: data.englishName,
+              historicalDescription: data.historicalDescription,
+              nameConfidence: data.nameConfidence,
+              areaInSquareMeters: data.areaInSquareMeters
             };
           }
           
