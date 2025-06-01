@@ -80,13 +80,52 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
       const baseSize = 75; // Default base size
       
       if (!customImageSettings[polygon.id]) {
-        // Initialize settings for new polygons
-        newSettings[polygon.id] = {
-          x: centerX - (baseSize * scale) / 2,
-          y: centerY - (baseSize * scale) / 2,
-          width: baseSize * scale,
-          height: baseSize * scale
-        };
+        // Check if polygon has imageOverlayBounds
+        if (polygon.imageOverlayBounds) {
+          // Calculate position and size based on stored bounds
+          // This is a simplified approach - in a real implementation, you'd need to
+          // convert the geo bounds to screen coordinates based on the current view
+          try {
+            // Use the center of the polygon as a reference point
+            const aspectRatio = 
+              (polygon.imageOverlayBounds.east - polygon.imageOverlayBounds.west) / 
+              (polygon.imageOverlayBounds.north - polygon.imageOverlayBounds.south);
+            
+            // Adjust size based on aspect ratio
+            let width = baseSize * scale;
+            let height = width / aspectRatio;
+            
+            // If height is too large, scale down
+            if (height > baseSize * scale * 1.5) {
+              height = baseSize * scale;
+              width = height * aspectRatio;
+            }
+            
+            newSettings[polygon.id] = {
+              x: centerX - width / 2,
+              y: centerY - height / 2,
+              width: width,
+              height: height
+            };
+          } catch (error) {
+            console.warn(`Error calculating image position for polygon ${polygon.id}:`, error);
+            // Fall back to default sizing
+            newSettings[polygon.id] = {
+              x: centerX - (baseSize * scale) / 2,
+              y: centerY - (baseSize * scale) / 2,
+              width: baseSize * scale,
+              height: baseSize * scale
+            };
+          }
+        } else {
+          // Initialize settings for new polygons without bounds
+          newSettings[polygon.id] = {
+            x: centerX - (baseSize * scale) / 2,
+            y: centerY - (baseSize * scale) / 2,
+            width: baseSize * scale,
+            height: baseSize * scale
+          };
+        }
         hasChanges = true;
       } else if (!resizeMode) {
         // Update position for existing polygons when not in resize mode

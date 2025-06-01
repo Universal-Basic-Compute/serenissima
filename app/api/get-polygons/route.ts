@@ -85,7 +85,7 @@ export async function GET(request: Request) {
             historicalDescription: data.historicalDescription,
             nameConfidence: data.nameConfidence,
             areaInSquareMeters: data.areaInSquareMeters,
-            imageOverlayBounds: data.imageOverlayBounds || null // Add this line
+            imageOverlayBounds: data.imageOverlayBounds || null // Include image overlay bounds
           };
         } else {
           console.warn(`Invalid data format in ${file}`);

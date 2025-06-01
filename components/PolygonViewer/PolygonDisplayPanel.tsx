@@ -40,6 +40,7 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({
 
   useEffect(() => {
     if (isMapContext && polygon.imageOverlayBounds) {
+      console.log(`PolygonDisplayPanel: Using stored imageOverlayBounds for polygon ${polygon.id}:`, polygon.imageOverlayBounds);
       setNorthBound(polygon.imageOverlayBounds.north.toString());
       setSouthBound(polygon.imageOverlayBounds.south.toString());
       setEastBound(polygon.imageOverlayBounds.east.toString());
@@ -55,13 +56,25 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({
                 if (coord.lat < minLat) minLat = coord.lat;
                 if (coord.lat > maxLat) maxLat = coord.lat;
             });
-            setNorthBound(maxLat.toString());
-            setSouthBound(minLat.toString());
-            setEastBound(maxLng.toString());
-            setWestBound(minLng.toString());
+            
+            // Add a small padding (5%) to the bounds for better visual appearance
+            const latPadding = (maxLat - minLat) * 0.05;
+            const lngPadding = (maxLng - minLng) * 0.05;
+            
+            setNorthBound((maxLat + latPadding).toString());
+            setSouthBound((minLat - latPadding).toString());
+            setEastBound((maxLng + lngPadding).toString());
+            setWestBound((minLng - lngPadding).toString());
+            
+            console.log(`PolygonDisplayPanel: Calculated bounds for polygon ${polygon.id}:`, {
+                north: maxLat + latPadding,
+                south: minLat - latPadding,
+                east: maxLng + lngPadding,
+                west: minLng - lngPadding
+            });
         }
     }
-  }, [polygon.imageOverlayBounds, polygon.coordinates, isMapContext]);
+  }, [polygon.imageOverlayBounds, polygon.coordinates, isMapContext, polygon.id]);
 
   if (!polygon || (!polygon.coordinates && !isMapContext) || (polygon.coordinates && polygon.coordinates.length === 0 && !isMapContext)) {
     return null;

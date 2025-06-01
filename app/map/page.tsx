@@ -401,7 +401,7 @@ export default function MapPage() {
                 typeof polygon.imageOverlayBounds.west === 'number') {
               // Use stored bounds if available and valid
               finalImageBounds = polygon.imageOverlayBounds;
-              console.log(`Using stored imageOverlayBounds for polygon ${polygon.id}`);
+              console.log(`Using stored imageOverlayBounds for polygon ${polygon.id}:`, polygon.imageOverlayBounds);
             } else {
               // Calculate bounds from polygon path as fallback
               const pathForBounds = mapPolygon.getPath();
@@ -410,6 +410,7 @@ export default function MapPage() {
                 calculatedBounds.extend(pathForBounds.getAt(k));
               }
               finalImageBounds = calculatedBounds;
+              console.log(`No stored imageOverlayBounds for polygon ${polygon.id}, using calculated bounds:`, calculatedBounds.toJSON());
             }
             
             // Ensure finalImageBounds is not empty before creating overlay

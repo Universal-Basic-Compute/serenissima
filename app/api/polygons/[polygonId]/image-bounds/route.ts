@@ -40,11 +40,20 @@ export async function POST(
     const fileContent = fs.readFileSync(filePath, 'utf-8');
     const polygonData = JSON.parse(fileContent);
 
-    polygonData.imageOverlayBounds = bounds; // Add or update the bounds
+    // Add or update the bounds
+    polygonData.imageOverlayBounds = bounds;
+    
+    // Log the update for debugging
+    console.log(`Updating image bounds for polygon ${polygonId}:`, bounds);
 
+    // Write the updated data back to the file with pretty formatting
     fs.writeFileSync(filePath, JSON.stringify(polygonData, null, 2));
 
-    return NextResponse.json({ success: true, message: `Image bounds for ${polygonId} updated successfully.` });
+    return NextResponse.json({ 
+      success: true, 
+      message: `Image bounds for ${polygonId} updated successfully.`,
+      bounds: bounds // Return the bounds in the response for confirmation
+    });
   } catch (error: any) {
     console.error(`Error updating image bounds for ${polygonId}:`, error);
     return NextResponse.json({ success: false, error: error.message || 'Failed to update image bounds' }, { status: 500 });
