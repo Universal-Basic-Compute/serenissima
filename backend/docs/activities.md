@@ -467,7 +467,7 @@ activité `update_wage_ledger` est créée.
 
 17.  **Déléguer une Entreprise / Demander ou Prendre une Entreprise pour Soi**
     *   **activityType**: `change_business_manager`
-    *   **Description**: Implique de se rendre au bâtiment de l'entreprise, se rendre à un `courthouse`/`town_hall` (étude de notaire) pour officialiser le changement d'opérateur, ce qui peut entraîner des frais notariaux ou d'enregistrement.
+    *   **Description**: Implique de se rendre au bâtiment de l'entreprise, puis se rendre à un `courthouse`/`town_hall` (étude de notaire) pour officialiser le changement d'opérateur, ce qui peut entraîner des frais notariaux ou d'enregistrement.
     *   **Mécanisme Principal**: Séquence : `goto_location` (vers `businessBuildingId`), puis `goto_location` (vers la
 partie concernée ou `courthouse`/`town_hall`). À la destination finale, une activité `finalize_operator_change` est
 créée, et les frais associés sont payés.
@@ -475,6 +475,10 @@ créée, et les frais associés sont payés.
 `newOperatorUsername` (si applicable), `currentOperatorUsername` (si applicable), `ownerUsername` (si applicable),
 `reason`, `targetOfficeBuildingId` (optionnel, ID du `courthouse`/`town_hall`), `operationType` ("delegate",
 "request_management", "claim_management").
+    *   **Types d'Opérations**:
+        * **delegate**: Le gestionnaire actuel délègue la gestion à un autre citoyen.
+        * **request_management**: Un citoyen demande à devenir gestionnaire d'une entreprise.
+        * **claim_management**: Le propriétaire reprend la gestion de son entreprise.
 
 ### Finance
 

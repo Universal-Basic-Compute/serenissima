@@ -486,6 +486,25 @@ export default function ActivityReference() {
         </div>
         
         <div className="mt-4">
+          <h4 className="font-semibold text-amber-800 mb-1"><code>change_business_manager</code></h4>
+          <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// activityDetails for change_business_manager:
+{
+  "businessBuildingId": "string",      // ID of the business to change manager for
+  "newOperatorUsername": "string",     // Required for 'delegate': Username of the new operator
+  "currentOperatorUsername": "string", // Optional: Username of the current operator (auto-detected if not provided)
+  "ownerUsername": "string",           // Optional: Username of the owner (auto-detected if not provided)
+  "reason": "string",                  // Optional: Reason for the management change
+  "targetOfficeBuildingId": "string",  // Optional: Specific building to use (e.g., courthouse, town_hall)
+  "operationType": "string"            // Required: "delegate", "request_management", or "claim_management"
+}`}
+          </pre>
+          <p className="text-xs mt-1 text-gray-600">
+            <strong>Prerequisites:</strong> For 'delegate', citizen must be the current operator. For 'request_management', anyone can request (approval simulated for AI operators). For 'claim_management', citizen must be the owner. Creates a chain: travel to business, travel to office/meeting, finalize change. A filing fee of 50 Ducats is charged. All relevant parties are notified.
+          </p>
+        </div>
+        
+        <div className="mt-4">
           <h4 className="font-semibold text-amber-800 mb-1"><code>check_business_status</code></h4>
           <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`// activityDetails for check_business_status:
