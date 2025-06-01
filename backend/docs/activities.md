@@ -509,8 +509,7 @@ ID du `broker_s_office`/`mint` ou `courthouse`/`town_hall`). À l'arrivée, une 
 personne.
     *   **Mécanisme Principal**: Crée une activité de déplacement (`activityType: goto_location`,
 `targetCitizenUsername`: `receiverUsername` ou `targetBuildingId`). Une fois à proximité ou à destination, une activité
-de remise de message (`activityType: deliver_message_interaction`, durée courte) est créée. Le processeur de cette
-dernière appellera `POST /api/messages/send` pour enregistrer le message.
+de remise de message (`activityType: deliver_message_interaction`, durée courte) est créée. Le processeur crée un enregistrement dans la table `MESSAGES` et met à jour ou crée une relation dans la table `RELATIONSHIPS`.
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `receiverUsername`, `content`,
 `messageType` (optionnel), `targetBuildingId` (optionnel, lieu de rencontre privilégié comme le domicile ou lieu de
 travail du destinataire).

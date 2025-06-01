@@ -107,6 +107,16 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log des paramètres spécifiques pour send_message
+    if (activityType === 'send_message') {
+      console.log(`[API /activities/try-create] Processing send_message with parameters:`, 
+        `Receiver: ${activityParameters?.receiverUsername}`,
+        `Message Type: ${activityParameters?.messageType || 'personal'}`,
+        `Content Length: ${activityParameters?.content ? activityParameters.content.length : 0} characters`,
+        `Target Building: ${activityParameters?.targetBuildingId || 'Receiver location'}`
+      );
+    }
+    
     // Log des paramètres spécifiques pour initiate_building_project
     if (activityType === 'initiate_building_project') {
       console.log(`[API /activities/try-create] Processing initiate_building_project with parameters:`, 

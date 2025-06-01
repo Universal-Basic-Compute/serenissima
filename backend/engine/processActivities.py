@@ -140,6 +140,7 @@ from backend.engine.activity_processors.adjust_business_wages_processor import p
 from backend.engine.activity_processors.change_business_manager_processor import process_change_business_manager_fn
 from backend.engine.activity_processors.request_loan_processor import process_request_loan_fn
 from backend.engine.activity_processors.offer_loan_processor import process_offer_loan_fn
+from backend.engine.activity_processors.send_message_processor import process_send_message_fn
 # Load environment variables
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
@@ -392,6 +393,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "finalize_operator_change": process_change_business_manager_fn, # Final step in change_business_manager chain
         "submit_loan_application_form": process_request_loan_fn, # Final step in request_loan chain
         "register_loan_offer_terms": process_offer_loan_fn, # Final step in offer_loan chain
+        "deliver_message_interaction": process_send_message_fn, # Final step in send_message chain
     }
 
     tables = initialize_airtable()
