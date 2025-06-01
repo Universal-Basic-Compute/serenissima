@@ -29,6 +29,8 @@ Les activités principales (liste non exhaustive, incluant maintenant des "actio
 - **Business Activity & `CheckedAt` Updates**: La gestion active d'une entreprise par son `RunBy` met à jour `CheckedAt`.
 - **`goto_construction_site`**, **`deliver_construction_materials`**, **`construct_building`**: Activités liées à la construction.
 - **`leave_venice`**: Un Forestiero quitte Venise.
+- **`inspect_building_for_purchase`**: Un citoyen inspecte un bâtiment avant de faire une offre d'achat.
+- **`submit_building_purchase_offer`**: Un citoyen soumet formellement une offre d'achat pour un bâtiment dans un lieu officiel, créant un contrat `building_bid`.
 
 Activities are managed by the `createActivities.py` script (pour les activités routinières générées par le moteur) and initiated by AI agents via `POST /api/activities/try-create` (pour les activités et actions décidées par l'IA). Ces systèmes sont maintenant responsables de la création de **chaînes complètes d'activités** si nécessaire. Par exemple, une demande pour "manger à la maison" alors que le citoyen n'y est pas générera une activité `goto_home` suivie d'une activité `eat_at_home`. Tous ces enregistrements sont stockés dans la table `ACTIVITIES` et sont ensuite traités individuellement par `processActivities.py` lorsque leur `EndDate` est atteinte. Ce système s'applique de manière égale aux citoyens IA et humains.
 
@@ -431,7 +433,7 @@ via `POST /api/contracts`.
 `targetOwnerUsername` (optionnel, pour le déplacement), `targetOfficeBuildingId` (optionnel, ID du
 `courthouse`/`town_hall`).
 
-16. **Créer/Gérer un Contrat d'Achat avec Majoration (Markup Buy Contract)**
+9. **Créer/Gérer un Contrat d'Achat avec Majoration (Markup Buy Contract)**
     *   **activityType**: `manage_markup_buy_contract`
     *   **Description**: Le citoyen se rend à son bâtiment (`buyerBuildingId`) pour évaluer un besoin urgent, puis se
 déplace vers un lieu de marché (ex: `market_stall`, `weighing_station`) pour y enregistrer un contrat d'achat avec
@@ -492,7 +494,7 @@ créée, et les frais associés sont payés.
 
 ### Finance
 
-21. **Demander un Prêt**
+14. **Demander un Prêt**
     *   **activityType**: `request_loan`
     *   **Description**: Le citoyen se déplace physiquement vers un établissement financier (ex: `broker_s_office`,
 `mint`) ou rencontre un prêteur connu pour y soumettre une demande de prêt. Des frais de dossier ou d'évaluation peuvent être exigés par l'établissement.
@@ -515,7 +517,7 @@ ID du `broker_s_office`/`mint` ou `courthouse`/`town_hall`). À l'arrivée, une 
 
 ### Social et Communication
 
-23. **Envoyer un Message**
+16. **Envoyer un Message**
     *   **activityType**: `send_message`
     *   **Description**: Le citoyen se déplace physiquement vers la position du destinataire
 (`receiverUsername`), son domicile, ou son lieu de travail (`targetBuildingId`) pour lui remettre un message en
@@ -527,7 +529,7 @@ de remise de message (`activityType: deliver_message_interaction`, durée courte
 `messageType` (optionnel), `targetBuildingId` (optionnel, lieu de rencontre privilégié comme le domicile ou lieu de
 travail du destinataire).
 
-24. **Répondre à un Message**
+17. **Répondre à un Message**
     *   **activityType**: `reply_to_message`
     *   **Description**: Activité créée automatiquement lorsqu'un citoyen reçoit un message. Le citoyen est déjà à l'emplacement où il a reçu le message original, donc aucun déplacement n'est nécessaire.
     *   **Mécanisme Principal**: Cette activité est automatiquement créée par le processeur de `deliver_message_interaction` et programmée pour commencer 10 minutes après la réception du message. Le processeur crée un message de réponse, met à jour la relation entre les citoyens, et envoie une notification à l'expéditeur original.
@@ -543,7 +545,7 @@ une activité `file_profile_update` est créée, et les frais sont payés.
 `lastName`, `familyMotto`, `coatOfArmsImageUrl`, `telegramUserId` (tous optionnels), `targetOfficeBuildingId`
 (optionnel, ID du `public_archives`).
 
-26. **Gérer son Appartenance à une Guilde**
+19. **Gérer son Appartenance à une Guilde**
     *   **activityType**: `manage_guild_membership`
     *   **Description**: Le citoyen se rend au `guild_hall` de la guilde concernée (ou à défaut un `town_hall`) pour effectuer une action liée à son
 appartenance (rejoindre, quitter, accepter une invitation). Des frais d'adhésion ou des cotisations peuvent être dus à la guilde.
