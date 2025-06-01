@@ -474,23 +474,33 @@ def make_kinos_call(
             log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username}: {json.dumps(parsed_response, indent=2)[:500]}...{LogColors.ENDC}")
             return parsed_response
         except json.JSONDecodeError:
-            log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. Full response: {LogColors.LIGHTBLUE}{latest_ai_response_content}{LogColors.ENDC}")
+            log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. Full response preview: {LogColors.LIGHTBLUE}{latest_ai_response_content[:500]}...{LogColors.ENDC}")
             # Attempt to extract JSON from markdown-like code blocks
-            import re
+            # import re # re is already imported at the module level
             json_match = re.search(r"```json\s*([\s\S]*?)\s*```", latest_ai_response_content, re.MULTILINE)
             if json_match:
-                json_str = json_match.group(1)
+                json_str = json_match.group(1).strip() # Ensure leading/trailing whitespace is removed from the block
                 try:
                     parsed_json_from_text = json.loads(json_str)
                     log.info(f"{LogColors.OKGREEN}Successfully extracted and parsed JSON from Kinos text response for {ai_username}.{LogColors.ENDC}")
                     log.debug(f"{LogColors.LIGHTBLUE}Extracted JSON: {json.dumps(parsed_json_from_text, indent=2)[:500]}...{LogColors.ENDC}")
                     return parsed_json_from_text
                 except json.JSONDecodeError as e_inner:
-                    log.warning(f"{LogColors.WARNING}Failed to parse extracted JSON from Kinos response for {ai_username}. Error: {e_inner}. Extracted string: {json_str[:200]}...{LogColors.ENDC}")
-            
-            # If not direct JSON and no extractable JSON found, treat as reflection text
-            log.debug(f"{LogColors.OKBLUE}Treating Kinos response for {ai_username} as reflection text and providing empty actions list.{LogColors.ENDC}") # Changed from log.info
-            return {"actions": [], "reflection": latest_ai_response_content}
+                    log.warning(f"{LogColors.WARNING}Failed to parse extracted JSON block from Kinos response for {ai_username}. Error: {e_inner}. Extracted block preview: {json_str[:200]}...{LogColors.ENDC}")
+                    # Attempt to extract reflection directly from the malformed JSON string
+                    reflection_match = re.search(r'"reflection"\s*:\s*"((?:[^"\\]|\\.)*)"', json_str, re.DOTALL)
+                    if reflection_match:
+                        extracted_reflection = reflection_match.group(1)
+                        # Basic unescaping for common sequences if needed, though usually the raw string is fine for logging.
+                        # extracted_reflection = extracted_reflection.replace('\\n', '\n').replace('\\"', '"').replace("\\'", "'").replace('\\\\', '\\')
+                        log.info(f"{LogColors.OKGREEN}Successfully extracted 'reflection' field directly from malformed JSON block for {ai_username}.{LogColors.ENDC}")
+                        return {"actions": [], "reflection": extracted_reflection}
+                    else:
+                        log.warning(f"{LogColors.WARNING}Could not find 'reflection' field in malformed JSON block for {ai_username}. Using the block content as reflection.{LogColors.ENDC}")
+                        return {"actions": [], "reflection": json_str} # Use the content of the JSON block
+            else: # No json_match (no ```json ... ``` block found)
+                log.debug(f"{LogColors.OKBLUE}Kinos response for {ai_username} is not JSON and no JSON block found. Treating entire response as reflection.{LogColors.ENDC}")
+                return {"actions": [], "reflection": latest_ai_response_content}
 
     except requests.exceptions.RequestException as e:
         log.error(f"{LogColors.FAIL}Kinos API request error for {ai_username}: {e}{LogColors.ENDC}", exc_info=True)
@@ -1150,12 +1160,18 @@ def autonomously_run_ai_citizen_unguided(
             break
 
         ai_reflection = kinos_response.get("reflection", "No reflection provided.")
-        log.info(f"{LogColors.OKGREEN}AI {ai_username} (Unguided Iteration {iteration_count}) Raw Reflection: {LogColors.BOLD}{ai_reflection}{LogColors.ENDC}")
+        # Log snippet at INFO level
+        log.info(f"{LogColors.OKGREEN}AI {ai_username} (Unguided Iteration {iteration_count}) Raw Reflection: {LogColors.BOLD}{ai_reflection[:200]}{'...' if len(ai_reflection) > 200 else ''}{LogColors.ENDC}")
+        # Log full content at DEBUG level
+        log.debug(f"{LogColors.LIGHTBLUE}AI {ai_username} (Unguided Iteration {iteration_count}) Full Raw Reflection: {ai_reflection}{LogColors.ENDC}")
         
         cleaned_reflection_unguided = ai_reflection # Default to raw
         if tables: # Ensure tables object is available
             cleaned_reflection_unguided = clean_thought_content(tables, ai_reflection)
-            log.info(f"{LogColors.OKBLUE}AI {ai_username} (Unguided Iteration {iteration_count}) Cleaned Reflection: {LogColors.BOLD}{cleaned_reflection_unguided}{LogColors.ENDC}")
+            # Log snippet of cleaned reflection at INFO level
+            log.info(f"{LogColors.OKBLUE}AI {ai_username} (Unguided Iteration {iteration_count}) Cleaned Reflection: {LogColors.BOLD}{cleaned_reflection_unguided[:200]}{'...' if len(cleaned_reflection_unguided) > 200 else ''}{LogColors.ENDC}")
+            # Log full cleaned reflection at DEBUG level
+            log.debug(f"{LogColors.LIGHTBLUE}AI {ai_username} (Unguided Iteration {iteration_count}) Full Cleaned Reflection: {cleaned_reflection_unguided}{LogColors.ENDC}")
 
         if not dry_run and tables and cleaned_reflection_unguided.strip().lower() != "no reflection provided.":
              try:
