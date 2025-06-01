@@ -90,6 +90,7 @@ def process_placeholder_activity_fn(tables, activity_record, building_type_defs,
     activity_guid = activity_record['fields'].get('ActivityId', activity_record['id'])
     activity_type = activity_record['fields'].get('Type')
     log.info(f"{LogColors.OKCYAN}Activity {activity_guid} (type: {activity_type}) processed by placeholder (e.g., expired or simple state change).{LogColors.ENDC}")
+    # Note: Processors should only handle the current activity, not create follow-up activities
     return True
 
 # Import helper functions from activity_helpers
