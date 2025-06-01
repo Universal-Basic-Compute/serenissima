@@ -57,28 +57,24 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
 
   let scale = 1;
   if (polyDataWidth > 0 && polyDataHeight > 0) {
-    // Scale is determined by the original dimensions to fit the container
-    scale = Math.min(drawableWidth / polyDataWidth, drawableHeight / polyDataHeight);
+    // Scale must account for the height adjustment to ensure the final polygon fits.
+    // The effective data height that needs to fit into drawableHeight is (polyDataHeight / HEIGHT_ADJUST_FACTOR).
+    scale = Math.min(
+      drawableWidth / polyDataWidth,
+      drawableHeight / (polyDataHeight / HEIGHT_ADJUST_FACTOR)
+    );
   } else if (polyDataWidth > 0) { // Polygon is a horizontal line
     scale = drawableWidth / polyDataWidth;
   } else if (polyDataHeight > 0) { // Polygon is a vertical line
-    // If it's a vertical line, scale is based on its height,
-    // but we want its displayed height to be drawableHeight * HEIGHT_ADJUST_FACTOR.
-    // So, the scale should make polyDataHeight * HEIGHT_ADJUST_FACTOR * scale = drawableHeight.
-    // This means scale = drawableHeight / (polyDataHeight * HEIGHT_ADJUST_FACTOR)
-    // However, to maintain consistency with how scale is used later for points,
-    // it's better to calculate scale based on original polyDataHeight and apply factor during point transformation.
-    // For a pure vertical line, polyDataHeight is the main dimension.
-    // The scale should make polyDataHeight fit drawableHeight.
-    // The 0.7 factor will then be applied to its apparent height.
-    scale = drawableHeight / polyDataHeight;
+    // Effective data height is (polyDataHeight / HEIGHT_ADJUST_FACTOR).
+    scale = drawableHeight / (polyDataHeight / HEIGHT_ADJUST_FACTOR);
   }
 
 
   // 4. Calculate scaled dimensions and offsets for centering
   const scaledWidth = polyDataWidth * scale;
   // The actual height the polygon will take on screen after adjustment
-  const adjustedScaledHeight = polyDataHeight * scale * HEIGHT_ADJUST_FACTOR;
+  const adjustedScaledHeight = (polyDataHeight / HEIGHT_ADJUST_FACTOR) * scale;
 
   const offsetX = (SVG_SIZE - scaledWidth) / 2;
   // Center based on the adjusted height
@@ -87,10 +83,9 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
   // 5. Transform points
   const pointsString = coordinates.map(coord => {
     const svgX = (coord.lng - minLng) * scale + offsetX;
-    // Apply HEIGHT_ADJUST_FACTOR to the y-component of the point before scaling by the overall 'scale'.
+    // Divide by HEIGHT_ADJUST_FACTOR to expand the y-component before scaling by the overall 'scale'.
     // (maxLat - coord.lat) is the y-distance from the top of the bounding box, in original data units.
-    // We scale this distance by HEIGHT_ADJUST_FACTOR, then by the overall 'scale'.
-    const svgY = (maxLat - coord.lat) * HEIGHT_ADJUST_FACTOR * scale + offsetY;
+    const svgY = ((maxLat - coord.lat) / HEIGHT_ADJUST_FACTOR) * scale + offsetY;
     return `${svgX},${svgY}`;
   }).join(' ');
 
@@ -117,7 +112,7 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
                     fillOpacity="0.6"
                     stroke="#000000"
                     strokeOpacity="0.8"
-                    strokeWidth="1.5" // Changed to a fixed value for consistent stroke appearance
+                    strokeWidth="1" // Adjusted to match map's stroke weight more closely
                  />
             )}
           </svg>
