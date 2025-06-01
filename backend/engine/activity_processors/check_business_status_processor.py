@@ -43,6 +43,8 @@ def process(
         log.info(f"{LogColors.OKGREEN}Business **{business_name_log}** ({business_building_custom_id}) status checked by **{citizen_username}**. Updated 'CheckedAt' to {now_iso_venice}.{LogColors.ENDC}")
         
         # Citizen's position is updated by the main processActivities loop to ToBuilding.
+        # Note: This processor only updates the CheckedAt timestamp and does not create follow-up activities.
+        # Any subsequent activities should be created by activity creators, not processors.
         return True
 
     except Exception as e:

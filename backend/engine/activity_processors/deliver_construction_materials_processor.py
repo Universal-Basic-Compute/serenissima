@@ -156,7 +156,7 @@ def process(
     if materials_actually_delivered_summary:
         delivery_summary_str = ", ".join(materials_actually_delivered_summary)
         now_iso = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
-        
+            
         # Handle contract notes
         current_notes_str = contract_record['fields'].get('Notes', '{}')
         notes_data = {}
@@ -167,27 +167,27 @@ def process(
         except json.JSONDecodeError:
             # If notes are not valid JSON, preserve them and start a new structure
             notes_data = {"previous_notes_raw": current_notes_str}
-        
+            
         if "delivery_log" not in notes_data or not isinstance(notes_data.get("delivery_log"), list):
             notes_data["delivery_log"] = []
-        
+            
         new_log_entry = f"[{now_iso}] Delivered by {citizen_username}: {delivery_summary_str}."
         notes_data["delivery_log"].append(new_log_entry)
-        
+            
         updated_notes_json = json.dumps(notes_data, indent=2) # Store with indentation for readability
-        
+            
         contract_update_payload = {'Notes': updated_notes_json}
-        
+            
         # Check if all materials are now on site
         # constructionCosts should be stored in notes_data by the contract creator
         construction_costs_from_notes = notes_data.get('constructionCosts') 
-        
+            
         if construction_costs_from_notes and isinstance(construction_costs_from_notes, dict):
             required_materials_for_project = {
                 k: float(v) for k, v in construction_costs_from_notes.items() if k != 'ducats' and isinstance(v, (int, float))
             }
             site_inventory_after_delivery = get_building_resources(tables, to_building_custom_id) # Re-fetch inventory
-            
+                
             all_materials_now_on_site = True
             if not required_materials_for_project: # If constructionCosts is empty (e.g. only ducats)
                  log.info(f"Contract {contract_custom_id_from_activity} has no material costs defined in notes. Assuming materials delivered.")
@@ -197,13 +197,15 @@ def process(
                         all_materials_now_on_site = False
                         log.info(f"Site {to_building_custom_id} still needs {needed_qty - site_inventory_after_delivery.get(material_type, 0.0):.2f} of {material_type}.")
                         break
-            
+                
             if all_materials_now_on_site:
                 log.info(f"{LogColors.OKGREEN}All required materials for contract {contract_custom_id_from_activity} are now on site {to_building_custom_id}.{LogColors.ENDC}")
                 current_contract_status = contract_record['fields'].get('Status')
                 if current_contract_status == 'pending_materials':
                     contract_update_payload['Status'] = 'materials_delivered' 
                     log.info(f"Updating contract {contract_custom_id_from_activity} status from '{current_contract_status}' to 'materials_delivered'.")
+                    # Note: This processor only updates the contract status and does not create follow-up activities.
+                    # Any subsequent construction activities should be created by activity creators, not processors.
                 elif current_contract_status != 'materials_delivered' and current_contract_status != 'completed' and current_contract_status != 'construction_in_progress':
                     # If it's some other status but all materials are there, maybe it should also be materials_delivered
                     log.info(f"Contract {contract_custom_id_from_activity} status is '{current_contract_status}'. All materials delivered. Consider if status update is needed.")

@@ -72,6 +72,9 @@ def process(
 
         # Citizen's position is updated by the main processActivities loop to ToBuilding,
         # which is the construction site for this activity type.
+        
+        # Note: This processor only updates the construction progress and does not create follow-up activities.
+        # Any subsequent construction activities should be created by activity creators, not processors.
 
         # Trust score updates
         # contract_airtable_id is the Airtable Record ID. We need the contract to get the Buyer.
