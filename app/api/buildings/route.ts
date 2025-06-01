@@ -127,10 +127,10 @@ export async function POST(request: Request) {
       Position: position // Use the potentially parsed position
     }, null, 2));
     
-    // Normalize the building type from rawData.type
+    // Normalize the building type from rawData.type to snake_case
     const normalizedType = rawData.type.toLowerCase()
-      .replace(/'/g, '-') // Replace apostrophes with hyphens
-      .replace(/\s+/g, '-'); // Replace spaces with hyphens
+      .replace(/[\s'-]+/g, '_') // Replace spaces, apostrophes, hyphens with a single underscore
+      .replace(/_+/g, '_');    // Collapse multiple underscores to one
     
     // Create a record in Airtable using keys from pascalData
     const buildingData: any = {
@@ -270,16 +270,14 @@ export async function GET(request: Request) {
       loggableFilters[airtableField] = value;
 
       let processedValue = value;
-      // Normalize the 'Type' field value to match storage format
+      // Normalize the 'Type' field value to match snake_case storage format
       if (airtableField === 'Type') {
         processedValue = value.toLowerCase()
-          .replace(/'/g, '-') // Replace apostrophes with hyphens
-          .replace(/\s+/g, '-'); // Replace spaces with hyphens
-        // Note: This does not convert underscores to hyphens, matching POST logic.
-        // If "retail_food" is queried, it remains "retail_food".
-        // If "retail food" is queried, it becomes "retail-food".
+          .replace(/[\s'-]+/g, '_') // Replace spaces, apostrophes, hyphens with a single underscore
+          .replace(/_+/g, '_');    // Collapse multiple underscores to one
+        
         if (value !== processedValue) {
-          console.log(`Normalized 'Type' query value from '${value}' to '${processedValue}'`);
+          console.log(`Normalized 'Type' query value from '${value}' to '${processedValue}' (snake_case)`);
         }
       }
 
