@@ -19,7 +19,7 @@ interface LandMarkersProps {
 }
 
 const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, isNight }) => {
-  const [landImages, setLandImages] = useState<Record<string, HTMLImageElement>>({});
+  // Land images are now handled by LandService
 
   // Load land images when component mounts or polygons change
   useEffect(() => {
