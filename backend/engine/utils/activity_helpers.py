@@ -498,6 +498,53 @@ def get_closest_inn(tables: Dict[str, Table], citizen_position: Dict[str, float]
         log.error(f"{LogColors.FAIL}Error finding closest inn: {e}{LogColors.ENDC}")
         return None
 
+def get_closest_building_of_type(
+    tables: Dict[str, Table], 
+    reference_position: Dict[str, float], 
+    building_type: str,
+    max_distance_meters: Optional[float] = None # Optional max distance
+) -> Optional[Dict]:
+    """
+    Finds the closest building of a specific type to the reference_position.
+    Optionally filters by maximum distance.
+    """
+    log.info(f"{LogColors.OKBLUE}Searching for the closest '{building_type}' to position: {reference_position}{LogColors.ENDC}")
+    try:
+        # Filter by type directly in the formula for efficiency
+        formula = f"{{Type}}='{_escape_airtable_value(building_type)}'"
+        buildings_of_type = tables['buildings'].all(formula=formula)
+        
+        if not buildings_of_type:
+            log.info(f"{LogColors.OKBLUE}No buildings of type '{building_type}' found.{LogColors.ENDC}")
+            return None
+
+        closest_building = None
+        min_distance = float('inf')
+
+        for building_record in buildings_of_type:
+            building_position = _get_building_position_coords(building_record)
+            if building_position:
+                distance = _calculate_distance_meters(reference_position, building_position)
+                if distance < min_distance:
+                    if max_distance_meters is None or distance <= max_distance_meters:
+                        min_distance = distance
+                        closest_building = building_record
+            else:
+                log.warning(f"{LogColors.WARNING}Building {building_record.get('id')} of type '{building_type}' has no valid position data.{LogColors.ENDC}")
+        
+        if closest_building:
+            building_id_log = closest_building['fields'].get('BuildingId', closest_building['id'])
+            log.info(f"{LogColors.OKGREEN}Closest '{building_type}' found: {building_id_log} at distance {min_distance:.2f}m.{LogColors.ENDC}")
+            if max_distance_meters is not None and min_distance > max_distance_meters:
+                log.info(f"{LogColors.OKBLUE}However, it exceeds the max distance of {max_distance_meters}m.{LogColors.ENDC}")
+                return None # Exceeds max distance
+        else:
+            log.info(f"{LogColors.OKBLUE}No buildings of type '{building_type}' with valid positions found (or none within max_distance if specified).{LogColors.ENDC}")
+        return closest_building
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error finding closest building of type '{building_type}': {e}{LogColors.ENDC}")
+        return None
+
 def get_citizen_workplace(tables: Dict[str, Table], citizen_custom_id: str, citizen_username: str) -> Optional[Dict]:
     """Find the workplace building for a citizen."""
     log.info(f"{LogColors.OKBLUE}Finding workplace for citizen {citizen_custom_id} (Username: {citizen_username}){LogColors.ENDC}")
