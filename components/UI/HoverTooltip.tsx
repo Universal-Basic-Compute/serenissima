@@ -214,10 +214,10 @@ export const HoverTooltip: React.FC = () => {
         <div className="w-96 h-80 mb-2 overflow-hidden rounded">
           <img 
             src={
-              // Check if buildingImagePath contains a double URL prefix and fix it
-              buildingImagePath && buildingImagePath.includes('https://backend.serenissima.ai/public_assetshttps://') 
+              // Check if buildingImagePath starts with a double URL prefix and fix it
+              buildingImagePath && buildingImagePath.startsWith('https://backend.serenissima.ai/public_assetshttps://') 
                 ? buildingImagePath.replace('https://backend.serenissima.ai/public_assetshttps://', 'https://') 
-                : buildingImagePath || `https://backend.serenissima.ai/public_assets/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.png`
+                : buildingImagePath || `https://backend.serenissima.ai/public_assets/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_') || 'default'}.png`
             }
             alt={tooltipData.name || 'Building'}
             className="w-full h-full object-cover"
