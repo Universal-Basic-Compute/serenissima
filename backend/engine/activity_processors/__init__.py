@@ -1,4 +1,11 @@
 # This file makes the 'activity_processors' directory a Python package.
+# IMPORTANT: Activity processors should ONLY process the current activity and NOT create follow-up activities.
+# Follow-up activities should be created by activity creators in the activity_creators directory.
+# Processors should focus on:
+# 1. Executing the effects of the current activity (e.g., transferring resources, updating citizen state)
+# 2. Returning success/failure status
+# 3. NOT creating new activities (this is the responsibility of activity creators)
+
 from .deliver_resource_batch_processor import process as process_deliver_resource_batch
 from .goto_home_processor import process as process_goto_home
 from .goto_work_processor import process as process_goto_work
