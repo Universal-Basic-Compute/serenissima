@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-// import Airtable from 'airtable'; // No longer directly using Airtable
+import Airtable from 'airtable'; // No longer directly using Airtable
 
 // Helper to escape single quotes for Airtable formulas (still needed if constructing formulas for try-create, but less likely)
 function escapeAirtableValue(value: string): string {
