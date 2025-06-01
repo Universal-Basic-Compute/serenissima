@@ -1776,6 +1776,44 @@ number => {
     return () => clearInterval(intervalId);
   }, [isNight]); // Re-run if isNight changes (e.g. manual toggle in future)
   
+  // Effect to preload land images when polygons change
+  useEffect(() => {
+    if (polygons.length === 0) return;
+    
+    const newLandImages: Record<string, HTMLImageElement> = {};
+    let loadedCount = 0;
+    
+    polygons.forEach(polygon => {
+      if (!polygon.id) return;
+      
+      const img = new Image();
+      img.onload = () => {
+        newLandImages[polygon.id] = img;
+        loadedCount++;
+        if (loadedCount === polygons.length) {
+          console.log(`Loaded ${loadedCount} land images`);
+          setLandImages(newLandImages);
+        }
+      };
+      img.onerror = () => {
+        loadedCount++;
+        if (loadedCount === polygons.length) {
+          console.log(`Loaded ${Object.keys(newLandImages).length} land images (${loadedCount - Object.keys(newLandImages).length} failed)`);
+          setLandImages(newLandImages);
+        }
+      };
+      img.src = `/images/lands/${polygon.id}.png`;
+    });
+    
+    return () => {
+      // Cancel image loading if component unmounts
+      Object.values(newLandImages).forEach(img => {
+        img.onload = null;
+        img.onerror = null;
+      });
+    };
+  }, [polygons]);
+  
   // Handle the ensureBuildingsVisible event
   useEffect(() => {
     const handleEnsureBuildingsVisible = () => {
@@ -2839,6 +2877,48 @@ const darkenColor = (colorStr: string, percent: number): string => {
       }
     }
 
+    // Draw land images first
+    polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
+      // Skip if no coordinates
+      if (!coords || coords.length < 3) return;
+      
+      try {
+        // Draw the land image if available
+        const imageUrl = `/images/lands/${polygon.id}.png`;
+        const img = new Image();
+        img.onload = () => {
+          // Calculate image size based on polygon size
+          const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
+          
+          // Draw the image centered on the polygon
+          ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
+        };
+        img.src = imageUrl;
+      } catch (error) {
+        console.error(`Error loading image for polygon ${polygon.id}:`, error);
+      }
+    });
+    
+    // Draw land images first
+    polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
+      // Skip if no coordinates
+      if (!coords || coords.length < 3 || !polygon.id) return;
+      
+      // Get the preloaded image
+      const img = landImages[polygon.id];
+      if (img) {
+        try {
+          // Calculate image size based on polygon size
+          const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
+          
+          // Draw the image centered on the polygon
+          ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
+        } catch (error) {
+          console.error(`Error drawing image for polygon ${polygon.id}:`, error);
+        }
+      }
+    });
+    
     // Draw polygons using RenderService, incorporating currentHoverState
     // This handles the primary drawing of polygons, including their fill color,
     // selection, and hover states.
@@ -2848,6 +2928,26 @@ const darkenColor = (colorStr: string, percent: number): string => {
       hoveredPolygonId: currentHoverState.type === 'polygon' ? currentHoverState.id : null,
       fillOpacity: 0, // Set opacity to 0 to make polygons invisible
       strokeOpacity: 0.5 // Keep borders visible but more subtle
+    });
+    
+    // Draw land images on top of the polygons
+    polygonsToRender.forEach(({ polygon, coords, centerX, centerY }) => {
+      // Skip if no coordinates
+      if (!coords || coords.length < 3) return;
+      
+      // Draw the land image if available
+      const imageUrl = `/images/lands/${polygon.id}.png`;
+      const img = new Image();
+      img.src = imageUrl;
+      
+      // Only draw if the image is loaded
+      if (img.complete && img.naturalWidth !== 0) {
+        // Calculate image size based on polygon size
+        const size = Math.min(200, Math.max(100, Math.floor(scale * 50)));
+        
+        // Draw the image centered on the polygon
+        ctx.drawImage(img, centerX - size/2, centerY - size/2, size, size);
+      }
     });
 
     // Second pass: Draw all polygon names (only in land view)
