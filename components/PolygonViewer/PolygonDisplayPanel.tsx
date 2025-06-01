@@ -131,6 +131,8 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({
   const HEIGHT_ADJUST_FACTOR_SVG = 0.7; // Renamed for clarity, used for polygon and image y-transform
 
   if (polygon.coordinates && polygon.coordinates.length > 0) {
+    polygon.coordinates.forEach(coord => {
+        if (coord.lng < minLngSvg) minLngSvg = coord.lng;
         if (coord.lng > maxLngSvg) maxLngSvg = coord.lng;
         if (coord.lat < minLatSvg) minLatSvg = coord.lat;
         if (coord.lat > maxLatSvg) maxLatSvg = coord.lat;
