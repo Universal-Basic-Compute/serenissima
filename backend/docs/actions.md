@@ -1,14 +1,18 @@
-# Actions des Citoyens dans La Serenissima
+# Actions Stratégiques des Citoyens (en tant qu'Activités)
 
-Ce document détaille les actions stratégiques et économiques que les citoyens peuvent entreprendre dans La Serenissima. Ces actions sont distinctes des activités quotidiennes (comme le repos, le travail à un poste) et représentent des décisions actives ayant un impact sur le patrimoine, les finances ou les relations du citoyen.
+Ce document détaille les actions stratégiques et économiques que les citoyens peuvent entreprendre dans La Serenissima. Conformément au modèle unifié, **ces "actions" sont initiées en tant qu'"activités" via l'endpoint `POST /api/activities/try-create`**. Chaque action listée ci-dessous correspondra à un `activityType` spécifique.
+
+L'initiation via `try-create` permettra au moteur Python de déterminer la séquence d'activités nécessaire. Par exemple, une action `bid_on_land` pourrait d'abord générer une activité `goto_citizen` pour se rendre auprès du vendeur ou d'un notaire, avant que l'enchère elle-même ne soit traitée. Chaque étape pertinente de ce processus aura un enregistrement dans la table `ACTIVITIES`.
+
+Les `Type` listés ci-dessous sont les `activityType` à utiliser avec `POST /api/activities/try-create`. Les `actionParameters` (qui deviendront `activityParameters` dans le corps de la requête à `/api/activities/try-create`) pour cet endpoint devront contenir les informations spécifiques à chaque action.
 
 ## Gestion Foncière et Immobilière
 
 1.  **Faire une Offre sur un Terrain**
-    *   **Type**: `bid_on_land`
-    *   **Description**: Un citoyen place une enchère pour acquérir une parcelle de terrain mise en vente. Si son offre est la plus élevée à la clôture des enchères, il remporte le terrain.
-    *   **Mécanisme Principal**: Implique généralement une interaction avec le système d'enchères de terrains, vérifiant les fonds du citoyen et enregistrant l'offre.
-    *   **API Pertinente (Exemple)**: `POST /api/contracts` (avec `Type: "building_bid"` si les terrains sont traités comme des actifs via des contrats d'enchères, ou un endpoint spécifique pour les enchères foncières).
+    *   **activityType**: `bid_on_land`
+    *   **Description**: Un citoyen initie le processus pour placer une enchère sur une parcelle de terrain. Cela peut impliquer des étapes préliminaires (ex: se rendre à un lieu spécifique) avant que l'enchère ne soit formellement enregistrée.
+    *   **Mécanisme Principal**: Crée une activité (ou une série d'activités) dans la table `ACTIVITIES`. Le processeur de cette activité gérera la logique de l'enchère, potentiellement après des étapes intermédiaires. L'enregistrement final de l'enchère se fera probablement via un appel interne à `POST /api/contracts` par le processeur d'activité.
+    *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**: `landId`, `bidAmount`.
 
 2.  **Acheter un Terrain Disponible**
     *   **Type**: `buy_available_land`

@@ -2448,31 +2448,35 @@ fetch('/api/resources/counts?buildingId=building-123456789')
         <div id="activities-post-try-create" className="mb-8 scroll-mt-20">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/activities/try-create</h3>
           <p className="mb-2">
-            Attempts to have a citizen perform a specified type of activity (e.g., "eat", "leave_venice", "seek_shelter"). 
+            Attempts to have a citizen perform a specified type of endeavor, which can be a traditional activity (e.g., "eat", "rest", "production") or a strategic action (e.g., "bid_on_land", "send_message", "manage_public_sell_contract").
             This endpoint delegates the decision-making logic to the Python backend engine.
-            The Python engine, based on the <code>activityType</code> and <code>activityParameters</code>, will determine the best course of action 
-            and may call <code>POST /api/actions/create-activity</code> to persist the chosen activity.
-            This endpoint returns the result from the Python engine.
-            If travel is required, the Python engine might instruct the creation of a travel activity first.
+            The Python engine, based on the <code>activityType</code> and <code>activityParameters</code>, will determine the best course of action.
+            This will result in the creation of one or more records in the `ACTIVITIES` table, potentially including preliminary steps like travel.
+            The endpoint returns the result from the Python engine, indicating the outcome of the attempt to initiate the endeavor.
           </p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "citizenUsername": "string",      // Required: Username of the citizen
-  "activityType": "string",         // Required: The type of activity to attempt (e.g., "eat", "leave_venice", "emergency_fishing")
+  "activityType": "string",         // Required: The type of activity/action to attempt (e.g., "eat", "bid_on_land", "send_message")
   "activityParameters": {           // Optional: An object containing parameters specific to the activityType
     // Example for "eat":
     // "strategy": "inventory" | "home" | "tavern",
-    // Example for "seek_shelter":
-    // "preferredShelterType": "home" | "inn" 
-    // ... other parameters as needed by the Python engine for different activity types
+    // Example for "bid_on_land":
+    // "landId": "string", "bidAmount": number
+    // Example for "send_message":
+    // "receiverUsername": "string", "content": "string", "messageType": "personal"
+    // ... other parameters as needed by the Python engine for different activity/action types
   }
 }`}
             </pre>
+            <p className="mt-2 text-sm">
+              Refer to <code>backend/docs/activities.md</code> (for traditional activities) and <code>backend/docs/actions.md</code> (for strategic actions now modeled as activities) for defined <code>activityType</code> values and their expected parameters.
+            </p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response (Success, Activity Created or Action Determined by Python Engine)</h4>
+            <h4 className="font-bold mb-2">Response (Success, Endeavor Initiated or Processed by Python Engine)</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,

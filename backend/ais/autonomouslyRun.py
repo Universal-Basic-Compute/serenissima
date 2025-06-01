@@ -91,11 +91,14 @@ CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE = [
     # Utility for common GET requests
     "POST /api/try-read - Execute a predefined GET request. Body: {requestType, parameters: {username?, buildingId?, ...}}",
 
-    # Actions (POST)
-    "POST /api/actions/create-activity - Create an activity for yourself. Body: {citizenUsername, activityType, title, description, thought, activityDetails}",
+    # Initiating Endeavors (Activities & Strategic Actions)
+    "POST /api/activities/try-create - Request the game engine to initiate an endeavor (activity or strategic action). Body: {citizenUsername, activityType, activityParameters (optional)}. The engine will create the necessary activity records.",
+    "POST /api/actions/create-activity - Directly create a detailed activity record if all parameters are known. Body: {citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)}",
+
+    # Other Direct Actions (if still applicable, though try-create is preferred for AI)
     "POST /api/contracts - Create or update a contract. Body: {contractId, type, resourceType, pricePerResource, targetAmount, seller, sellerBuilding, buyer, buyerBuilding, status, notes, endAt, asset, assetType}",
     "POST /api/messages/send - Send a message to another citizen. Body: {sender, receiver, content, type}",
-    "POST /api/actions/construct-building - Initiate construction of a building. Body: {buildingTypeDefinition, pointDetails, citizenUsername, builderContractDetails (optional)}",
+    # "POST /api/actions/construct-building" is now likely an activityType for try-create or a detailed create-activity.
 ]
 
 CONCISE_AIRTABLE_SCHEMA_FIELD_LIST = {
@@ -896,15 +899,17 @@ API_DOCUMENTATION_SUMMARY = {
     "base_url": API_BASE_URL,
     "notes": (
         "You are an AI citizen interacting with the La Serenissima API. Key guidelines:\n"
-        "1.  **Simplified GETs via `/api/try-read`**: For common information gathering, use `POST /api/try-read`. Consult the `compendium_of_missive_details` (ReadsReference.tsx extract) in `addSystem` for available `requestType` values and their `parameters`.\n"
-        "2.  **Dynamic GET Filtering**: For direct GET requests to list endpoints (e.g., /api/buildings, /api/citizens, /api/contracts), you can filter results by providing Airtable field names as query parameters (e.g., `/api/buildings?Owner=NLR&Category=business`). Airtable fields are PascalCase (see `backend/docs/airtable_schema.md`).\n"
-        "3.  **POST/PATCH Request Body Keys**: Use `camelCase` for keys in JSON request bodies (e.g., `{\"landId\": \"polygon-123\", \"buildingType\": \"house\"}`). The server converts them to `PascalCase`.\n"
-        "4.  **Airtable Schema**: Refer to `backend/docs/airtable_schema.md` (available in `addSystem.overview_of_city_records_structure` for non-local models) for exact Airtable field names.\n"
-        "5.  **Focus**: Make informed decisions. Choose API calls that provide relevant data for your objectives.\n"
-        "6.  **Latest Activity**: Your most recent activity details are in `addSystem.intelligence_briefing.lastActivity`."
+        "1.  **Initiate Endeavors (Activities & Actions) via `/api/activities/try-create`**: This is your primary method to start any endeavor. Provide `activityType` (e.g., 'rest', 'bid_on_land', 'send_message') and `activityParameters`. The game engine will create the necessary activity records. Consult `backend/docs/activities.md` and `backend/docs/actions.md` for `activityType`s and their parameters.\n"
+        "2.  **Simplified GETs via `/api/try-read`**: For common information gathering, use `POST /api/try-read`. Consult the `compendium_of_missive_details` (ReadsReference.tsx extract) in `addSystem` for available `requestType` values and their `parameters`.\n"
+        "3.  **Dynamic GET Filtering**: For direct GET requests to list endpoints (e.g., /api/buildings, /api/citizens, /api/contracts), you can filter results by providing Airtable field names as query parameters (e.g., `/api/buildings?Owner=NLR&Category=business`). Airtable fields are PascalCase (see `backend/docs/airtable_schema.md`).\n"
+        "4.  **Direct Activity Creation via `/api/actions/create-activity`**: Use this if you have *all* details for a specific activity record, including title, description, thought, and fully structured `activityDetails`.\n"
+        "5.  **POST/PATCH Request Body Keys**: Use `camelCase` for keys in JSON request bodies (e.g., `{\"landId\": \"polygon-123\", \"buildingType\": \"house\"}`). The server converts them to `PascalCase`.\n"
+        "6.  **Airtable Schema**: Refer to `backend/docs/airtable_schema.md` (available in `addSystem.overview_of_city_records_structure` for non-local models) for exact Airtable field names.\n"
+        "7.  **Focus**: Make informed decisions. Choose API calls that provide relevant data for your objectives.\n"
+        "8.  **Latest Activity**: Your most recent activity details are in `addSystem.intelligence_briefing.lastActivity`."
     ),
     "example_get_endpoints": [ # These are examples of direct GETs, distinct from /api/try-read
-        "/api/citizens/{YourUsername}", 
+        "/api/citizens/{YourUsername}",
         "/api/citizens?SocialClass=Popolani&IsAI=true", # Filtered list of AI Popolani citizens
         "/api/buildings?Owner={YourUsername}&Category=business", # Your business buildings
         "/api/buildings?Type=market_stall&IsConstructed=true", # All constructed market stalls
@@ -916,11 +921,11 @@ API_DOCUMENTATION_SUMMARY = {
         "/api/relevancies?RelevantToCitizen={YourUsername}&Category=opportunity&Score=>50" # High-score opportunities for you
     ],
     "example_post_endpoints": [
+        "/api/activities/try-create", # Preferred for AI to initiate any endeavor. Body: {"citizenUsername": "...", "activityType": "...", "activityParameters": {...}}
         "/api/try-read", # Utility for common GETs. Body: {"requestType": "type", "parameters": {...}}
-        "/api/actions/construct-building", # Body keys can be camelCase, server will adapt.
-        "/api/actions/create-activity", # Body keys: citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)
-        "/api/contracts", # Body keys like {"contractId": "...", "type": "..."}
-        "/api/messages/send" # Body keys like {"sender": "...", "receiver": "...", "content": "..."}
+        "/api/actions/create-activity", # For direct creation of a fully detailed activity. Body keys: citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)
+        "/api/contracts", # Direct contract management. Body keys like {"contractId": "...", "type": "..."}
+        "/api/messages/send" # Direct message sending. Body keys like {"sender": "...", "receiver": "...", "content": "..."}
     ]
 }
 
@@ -1023,8 +1028,9 @@ def autonomously_run_ai_citizen(
         f"The findings were (or simulated/error report if previous step failed/dry_run): \n```json\n{json.dumps(api_get_response_data, indent=2)}\n```\n"
         f"{prompt_step2_context_mention_guided} devise your strategy and decree your next actions. "
         "When specifying the `body` for issuing decrees (POST requests), you may use `camelCase` for keys (e.g., `sender`, `resourceType`, `targetAmount`). The Doge's scribes (the server) will transcribe them appropriately for the city's records. "
-        "Respond with your directives in JSON format: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/your/action\", \"body\": {\"fieldName\": \"value\"}}, ...]}`. "
-        "If no actions are warranted at this time, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`."
+        "Respond with your directives in JSON format: `{\"strategy_summary\": \"Your brief strategy...\", \"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/activities/try-create\", \"body\": {\"citizenUsername\": \"YourUsername\", \"activityType\": \"your_chosen_activity_or_action\", \"activityParameters\": {...}}}, {\"method\": \"GET\", ...}]}`. "
+        "If no actions are warranted at this time, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`. "
+        "Prioritize using `/api/activities/try-create` for initiating endeavors."
     )
     add_system_step2 = {
         "available_missives_summary": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
@@ -1206,9 +1212,11 @@ def autonomously_run_ai_citizen_unguided(
             "3. Commanding your personal undertakings (POST requests to `/api/actions/create-activity`) to directly initiate a new endeavor. For journeys, specify your origin (`fromBuildingId`, if applicable) and destination (`toBuildingId`); the Doge's cartographers (the server) will chart the course.\n"
             "If no further measures are warranted at this time, return an empty 'actions' list. "
             "Record your overall reasoning or reflections on this period of activity in the 'reflection' field for your private annals. "
-            "Respond with your directives in JSON format: " # Retained JSON for clarity
-            "`{\"actions\": [{\"method\": \"GET/POST\", \"endpoint\": \"/api/...\", \"params\": {...}, \"body\": {...}}, ...], \"reflection\": \"Your reflections on this period...\"}`\n"
-            "When commanding personal undertakings via `/api/actions/create-activity`, the 'body' of your directive should contain the necessary details: `citizenUsername`, `activityType`, `title`, `description`, `thought` (your first-person perspective for the endeavor), and `activityDetails` (excluding `pathData` for journeys). The 'reflection' in your main Kinos response is for your overarching thoughts on this period, while the 'thought' for an undertaking is specific to that endeavor."
+            "Respond with your directives in JSON format: "
+            "`{\"actions\": [{\"method\": \"POST\", \"endpoint\": \"/api/activities/try-create\", \"body\": {\"citizenUsername\": \"YourUsername\", \"activityType\": \"your_chosen_activity_or_action\", \"activityParameters\": {...}}}, {\"method\": \"GET\", ...}], \"reflection\": \"Your reflections...\"}`\n"
+            "When initiating endeavors via `/api/activities/try-create`, the `body` should contain `citizenUsername`, `activityType` (e.g., 'rest', 'bid_on_land'), and `activityParameters` specific to that type. "
+            "If you have *all* details for a specific activity record, you can use `/api/actions/create-activity` with its full payload (title, description, thought, activityDetails). "
+            "The 'reflection' in your main Kinos response is for your overarching thoughts on this period."
         )
         
         current_prompt = prompt_intro + prompt_context_review

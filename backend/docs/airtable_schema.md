@@ -125,11 +125,11 @@ Gère les accords commerciaux entre citoyens ou avec le public.
 
 ## Table: ACTIVITIES
 
-Suit les actions en cours et terminées des citoyens.
+Suit les activités et actions en cours et terminées des citoyens. Avec l'unification du système, cette table enregistre toutes les entreprises initiées par les citoyens, qu'il s'agisse d'activités de longue durée ou d'actions stratégiques discrètes.
 
--   `ActivityId` (Texte): Identifiant personnalisé unique (ex: `goto_work_username_timestamp`).
--   `Type` (Texte): Type d'activité (ex: `rest`, `goto_home`, `production`, `deliver_resource_batch`, `fetch_resource`, `secure_warehouse`, `deliver_to_storage`, `fetch_from_storage`, `goto_building_for_storage_fetch`, `check_business_status`).
--   `Citizen` (Lien vers `CITIZENS` via `Username`): Citoyen effectuant l'activité.
+-   `ActivityId` (Texte): Identifiant personnalisé unique (ex: `goto_work_username_timestamp`, `bid_on_land_username_timestamp`).
+-   `Type` (Texte): Type d'activité ou d'action (ex: `rest`, `goto_home`, `production`, `bid_on_land`, `send_message`, `manage_public_sell_contract`).
+-   `Citizen` (Lien vers `CITIZENS` via `Username`): Citoyen effectuant l'activité/action.
 -   `FromBuilding` (Texte): `BuildingId` personnalisé du lieu de départ/actuel.
 -   `ToBuilding` (Texte): `BuildingId` personnalisé de la destination.
 -   `ContractId` (Texte): `ContractId` personnalisé ou ID d'enregistrement Airtable du contrat lié (pour `fetch_resource`, `fetch_from_galley`, `deliver_resource_batch`, `deliver_to_storage`, `fetch_from_storage`).

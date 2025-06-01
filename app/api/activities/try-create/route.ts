@@ -5,8 +5,8 @@ const PYTHON_ENGINE_BASE_URL = process.env.DEFAULT_FASTAPI_URL || 'http://localh
 
 const TryCreateActivityRequestSchema = z.object({
   citizenUsername: z.string().min(1, "citizenUsername is required"),
-  activityType: z.string().min(1, "activityType is required"),
-  activityParameters: z.record(z.any()).optional(), // Permet un objet flexible pour les paramètres
+  activityType: z.string().min(1, "activityType is required"), // Can be a traditional activity or a strategic action
+  activityParameters: z.record(z.any()).optional(), // Flexible object for activity/action-specific parameters
 });
 
 export async function POST(request: Request) {
@@ -20,16 +20,16 @@ export async function POST(request: Request) {
     }
     const { citizenUsername, activityType, activityParameters } = validationResult.data;
 
-    console.log(`[API /activities/try-create] Received request for citizen: ${citizenUsername}, activityType: ${activityType}, params:`, activityParameters || {});
+    console.log(`[API /activities/try-create] Received request for citizen: ${citizenUsername}, endeavor (activity/action) type: ${activityType}, params:`, activityParameters || {});
 
     // Préparer le payload pour l'appel à l'API interne Python
     const pythonPayload: any = {
       citizenUsername: citizenUsername,
-      activityType: activityType, // Le moteur Python utilisera ceci pour router vers la bonne logique
+      activityType: activityType, // Le moteur Python utilisera ceci pour router vers la bonne logique (activité ou action)
       ...(activityParameters && { activityParameters: activityParameters }), // Inclure les paramètres s'ils existent
     };
     
-    // Endpoint générique sur le moteur Python
+    // Endpoint générique sur le moteur Python pour initier des activités/actions
     let parsedPythonEngineUrl: URL;
     try {
       let base = PYTHON_ENGINE_BASE_URL;
@@ -38,14 +38,15 @@ export async function POST(request: Request) {
         console.warn(`[API /activities/try-create] PYTHON_ENGINE_BASE_URL (${base}) is missing scheme, prepending http://`);
         base = 'http://' + base;
       }
-      parsedPythonEngineUrl = new URL('/api/v1/engine/try-create-activity', base);
+      // This Python endpoint will now handle both traditional activities and strategic actions
+      parsedPythonEngineUrl = new URL('/api/v1/engine/try-create-activity', base); 
     } catch (e: any) {
       console.error(`[API /activities/try-create] Invalid PYTHON_ENGINE_BASE_URL: ${PYTHON_ENGINE_BASE_URL}. Error: ${e.message}`);
       return NextResponse.json({ success: false, error: 'Internal server configuration error: Python engine URL is invalid.' }, { status: 500 });
     }
     const pythonEngineUrlValidated = parsedPythonEngineUrl.toString();
     
-    console.log(`[API /activities/try-create] Calling Python engine at: ${pythonEngineUrlValidated} with payload:`, pythonPayload);
+    console.log(`[API /activities/try-create] Calling Python engine at: ${pythonEngineUrlValidated} with payload for endeavor type ${activityType}:`, pythonPayload);
 
     const engineResponse = await fetch(pythonEngineUrlValidated, {
       method: 'POST',

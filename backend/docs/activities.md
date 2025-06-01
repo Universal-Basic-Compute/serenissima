@@ -4,64 +4,33 @@ This document explains the citizen activity system that simulates the daily live
 
 ## Overview
 
-The activity system tracks what citizens are doing at any given time, creating a living simulation of Venetian life. Both AI and human citizens can engage in various activities. While the core mechanics apply to all, social class influences activity patterns:
--   **Nobili**: Do not seek "jobs" as `Occupant`. Their daytime activities revolve around managing their affairs, political engagements, social interactions, and leisure, including shopping. This makes them active consumers and potential patrons for various businesses.
--   **Cittadini, Popolani, Facchini**: Engage in work, rest, and other daily life activities as described below.
--   **Forestieri**: Primarily engage in visitor-specific activities like lodging at inns and eventually leaving Venice.
+The activity system tracks what citizens are doing at any given time, creating a living simulation of Venetian life. Both AI and human citizens can engage in various activities. This system now encompasses not only long-duration tasks (like work or rest) but also strategic "actions" (like bidding on land or sending a message), which are now modeled as activities with corresponding records in the `ACTIVITIES` table. This unified approach allows for more complex, multi-step processes even for seemingly discrete actions.
 
-Core activities include:
+Social class influences activity patterns:
+-   **Nobili**: Do not seek "jobs" as `Occupant`. Their daytime activities revolve around managing their affairs, political engagements, social interactions, and leisure, including shopping. This makes them active consumers and potential patrons for various businesses. Their strategic "actions" (now activities) reflect their high-level management.
+-   **Cittadini, Popolani, Facchini**: Engage in work, rest, and other daily life activities, including strategic actions modeled as activities.
+-   **Forestieri**: Primarily engage in visitor-specific activities like lodging at inns and eventually leaving Venice. Their "actions" might include specific trade interactions.
 
-- **Repos (`rest`)**: Périodes de sommeil et de repos, généralement au domicile du citoyen ou dans une auberge pour les visiteurs. Les horaires varient considérablement selon la classe sociale.
-- **Travail (`production`, `fetch_resource`, etc.)**: Activités productives réalisées pendant les heures de travail désignées pour chaque classe sociale. Cela inclut le travail dans les ateliers, la pêche pour les Facchini, la gestion des affaires pour les Cittadini, etc. Les Nobili n'ont pas de blocs de "travail" formels ; leurs activités de gestion et d'influence se déroulent pendant leurs longues périodes de loisirs.
-- **Consommation/Activités de Loisirs**: Périodes dédiées aux repas, aux achats, à la socialisation, et à d'autres activités non liées directement au repos ou au travail productif. Les achats sont une activité principale pendant ces périodes si les besoins et les moyens le permettent.
-- **Voyage (`goto_home`, `goto_work`, `goto_inn`, etc.)**: Déplacement entre les lieux. Les horaires de ces voyages sont déterminés par la nécessité d'atteindre un lieu pour la prochaine période d'activité (repos, travail, loisir).
+Core activity categories include:
 
-Les activités principales incluent :
-- **Production**: Un citoyen à son lieu de travail transforme des ressources. Se produit pendant les heures de travail.
-- **Fetch Resource**: Un citoyen se déplace pour récupérer des ressources. Se produit généralement pendant les heures de travail ou de loisirs si cela concerne des besoins personnels.
-    - *Processeur (à l'arrivée à `FromBuilding`)*:
-        - Calcule la quantité réelle de `ResourceId` à récupérer, limitée par le contrat, le stock du vendeur, la capacité de transport du citoyen, et les fonds de l'acheteur effectif.
-        - L'acheteur effectif paie le vendeur.
-        - La ressource est retirée du stock de `FromBuilding` et ajoutée à l'inventaire du citoyen (appartenant à l'acheteur effectif).
-- **Fetch From Galley**: Un citoyen récupère des marchandises d'une galère marchande.
-- **Activités de Repas (`eat_from_inventory`, `eat_at_home`, `eat_at_tavern`)**: Déclenchées par la faim, généralement pendant les périodes de loisirs/consommation.
-- **Idle**: Attente ou activité non spécifique, généralement lorsque aucune tâche prioritaire n'est disponible pendant une période d'activité donnée (travail ou loisir).
-- **Business Activity & `CheckedAt` Updates**: La gestion active d'une entreprise par son `RunBy` (par exemple, être présent pendant les heures de travail, lancer une production) met à jour `CheckedAt`. Une absence de gestion simulée pendant plus de 24h entraîne une pénalité de productivité.
-- **`goto_construction_site`**: Un ouvrier se déplace vers un site de construction pendant ses heures de travail.
-    - *Champs*: `ToBuilding` (site de construction), `ContractId`, `BuildingToConstruct` (ID du bâtiment cible), `WorkDurationMinutes` (durée de travail prévue après arrivée).
-    - *Processeur (à l'arrivée sur `ToBuilding`)*:
-        - Crée une activité `construct_building` pour commencer le travail.
-- **`deliver_construction_materials`**: Un ouvrier d'un atelier de construction transporte des matériaux de l'atelier (`FromBuilding`) vers un site de construction (`ToBuilding`).
-    - *Créateur (dans `construction_logic.py`)*:
-        - Avant de créer l'activité, l'ouvrier prend les `ResourcesToDeliver` de l'inventaire de l'atelier.
-        - Ces ressources sont ajoutées à l'inventaire de l'ouvrier, mais leur `Owner` reste l'opérateur de l'atelier (`RunBy` de `FromBuilding`).
-        - La quantité est limitée par la capacité de transport de l'ouvrier.
-    - *Champs*: `FromBuilding` (atelier), `ToBuilding` (site de construction), `ResourcesToDeliver` (JSON: `[{"type": "timber", "amount": 50}, ...]`, reflète ce que l'ouvrier transporte réellement), `ContractId` (ID du `construction_project`).
-    - *Processeur (à l'arrivée sur `ToBuilding`)*:
-        - Transfère les `ResourcesToDeliver` de l'inventaire du citoyen (celles appartenant à l'opérateur de l'atelier) vers l'inventaire du `ToBuilding`.
-        - Les ressources dans `ToBuilding` deviennent la propriété du `Buyer` du contrat de construction.
-        - Met à jour le contrat `construction_project` (statut, notes sur les matériaux livrés). Si tous les matériaux sont livrés, le statut du contrat passe à `materials_delivered`.
-- **`construct_building`**: Un ouvrier travaille sur un site de construction.
-    - *Champs*: `Citizen`, `BuildingToConstruct` (ID du site, qui est aussi `FromBuilding` et `ToBuilding` pour cette activité), `WorkDurationMinutes`, `ContractId`.
-    - *Processeur (à la fin de l'activité)*:
-        - Soustrait `WorkDurationMinutes` du champ `ConstructionMinutesRemaining` du `BuildingToConstruct`.
-        - Si `ConstructionMinutesRemaining` <= 0:
-            - Met à jour `BuildingToConstruct`: `IsConstructed = True`, `ConstructionDate = now()`, `ConstructionMinutesRemaining = 0`.
-            - Met à jour le contrat `construction_project`: `Status = 'completed'`.
-- **`leave_venice`**: A Forestiero (visitor) travels to an exit point (e.g., a public dock) to leave Venice.
-    - *Processor (executes upon arrival at exit point)*:
-        - Deletes any `merchant_galley` building owned by the Forestiero.
-        - Liquidates all resources owned by the Forestiero:
-            - Calculates value based on `importPrice`.
-            - Adds total value to Forestiero's Ducats.
-            - Subtracts total value from "Italia" citizen's Ducats.
-            - Deletes resource records.
-            - Creates transaction records for the "sale" to Italia.
-        - Updates the Forestiero's citizen record: `InVenice` set to `FALSE`, `Position` cleared.
+- **Repos (`rest`)**: Périodes de sommeil et de repos.
+- **Travail (`production`, `fetch_resource`, etc.)**: Activités productives.
+- **Consommation/Activités de Loisirs**: Repas, achats, socialisation.
+- **Voyage (`goto_home`, `goto_work`, `goto_inn`, etc.)**: Déplacement entre les lieux.
+- **Actions Stratégiques (maintenant modélisées comme des activités)**: Des `activityType` comme `bid_on_land`, `send_message`, `manage_public_sell_contract`, etc. Celles-ci sont initiées via `POST /api/activities/try-create`. Le moteur Python peut alors créer une ou plusieurs activités séquentielles. Par exemple, un `activityType: "bid_on_land"` pourrait d'abord générer une activité `goto_citizen` (pour rencontrer le vendeur ou l'officiel), et seulement après la complétion de celle-ci, une autre activité (ou une logique directe) pour finaliser l'enchère. Chaque étape pertinente aura un enregistrement dans la table `ACTIVITIES`.
 
-Activities are managed by the `createActivities.py` script, which runs periodically to ensure citizens always have something to do. This system applies equally to both AI and human citizens, creating a unified simulation where all citizens follow the same daily patterns and routines.
+Les activités principales (liste non exhaustive, incluant maintenant des "actions") :
+- **Production**: Un citoyen à son lieu de travail transforme des ressources.
+- **Fetch Resource**: Un citoyen se déplace pour récupérer des ressources.
+- **Activités de Repas (`eat_from_inventory`, `eat_at_home`, `eat_at_tavern`)**.
+- **Idle**: Attente ou activité non spécifique.
+- **`bid_on_land` (en tant qu'activité)**: Peut impliquer un déplacement (`goto_citizen` ou `goto_notary`), suivi par la logique de l'enchère.
+- **`send_message` (en tant qu'activité)**: Pourrait impliquer une courte activité de "rédaction" ou être traitée rapidement, mais aura toujours un enregistrement.
+- **Business Activity & `CheckedAt` Updates**: La gestion active d'une entreprise par son `RunBy` met à jour `CheckedAt`.
+- **`goto_construction_site`**, **`deliver_construction_materials`**, **`construct_building`**: Activités liées à la construction.
+- **`leave_venice`**: Un Forestiero quitte Venise.
 
-The `createActivities.py` script also handles the creation of `fetch_from_galley` activities. When a `merchant_galley` arrives (its `deliver_resource_batch` activity concludes and `IsConstructed` becomes `True`), its resources (owned by the galley's merchant owner) become available. `createActivities.py` will assign idle citizens to go to these galleys, pick up the specified resources (as per the original import contracts now linked to the galley merchant), and then subsequently create `deliver_resource_batch` activities (this time for citizens, not galleys) to take these resources to their final buyer destinations.
+Activities are managed by the `createActivities.py` script (pour les activités routinières générées par le moteur) and initiated by AI agents via `POST /api/activities/try-create` (pour les activités et actions décidées par l'IA). All these result in records in the `ACTIVITIES` table and are processed by `processActivities.py`. This system applies equally to both AI and human citizens.
 
 ### Unified Citizen Activity Model
 
