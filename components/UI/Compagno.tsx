@@ -1635,7 +1635,11 @@ Your response:`;
                                     citizen.distance < 100 ? 'text-green-600' :
                                     citizen.distance < 500 ? 'text-yellow-600' :
                                     'text-amber-600'
-                                  }`}>(~{citizen.distance}m)</span>
+                                  }`}>(~{
+                                    citizen.distance >= 1000 
+                                      ? `${(citizen.distance / 1000).toFixed(1)}km` 
+                                      : `${citizen.distance}m`
+                                  })</span>
                                 )}
                               </div>
                             </div>
