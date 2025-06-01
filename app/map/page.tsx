@@ -644,6 +644,139 @@ export default function MapPage() {
     editingHandlesRef.current = [];
   }, [setEditingOverlayId]); // setEditingOverlayId is stable
 
+  const createHandlesForOverlay = (overlay: google.maps.GroundOverlay, overlayId: string) => {
+    clearEditingState(); // Clear any existing handles first
+
+    const bounds = overlay.getBounds();
+    if (!bounds || !mapRef.current) return;
+
+    editingOverlayRef.current = overlay;
+    setEditingOverlayId(overlayId);
+    editingOverlayInitialBoundsRef.current = bounds;
+
+    const ne = bounds.getNorthEast();
+    const sw = bounds.getSouthWest();
+    const nw = new google.maps.LatLng(ne.lat(), sw.lng());
+    const se = new google.maps.LatLng(sw.lat(), ne.lng());
+    const center = bounds.getCenter();
+
+    const handlePositions = {
+      center: center,
+      ne: ne,
+      sw: sw,
+      nw: nw,
+      se: se,
+    };
+
+    const newHandles: google.maps.Marker[] = [];
+
+    Object.entries(handlePositions).forEach(([key, pos]) => {
+      const handleMarker = new google.maps.Marker({
+        position: pos,
+        map: mapRef.current,
+        draggable: true,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: key === 'center' ? '#FF0000' : '#FFFF00', // Red for move, Yellow for resize
+          fillOpacity: 0.8,
+          strokeColor: '#000000',
+          strokeWeight: 1,
+        },
+        zIndex: 100 // Ensure handles are on top
+      });
+
+      handleMarker.addListener('dragstart', () => {
+        isDraggingHandleRef.current = true;
+      });
+
+      handleMarker.addListener('drag', () => {
+        if (!editingOverlayRef.current || !editingOverlayInitialBoundsRef.current) return;
+        
+        const currentOverlay = editingOverlayRef.current;
+        const initialBounds = editingOverlayInitialBoundsRef.current;
+        const newPos = handleMarker.getPosition();
+        if (!newPos) return;
+
+        let newBounds = currentOverlay.getBounds();
+        if (!newBounds) newBounds = initialBounds;
+
+
+        if (key === 'center') {
+          const oldCenter = initialBounds.getCenter();
+          const latDiff = newPos.lat() - oldCenter.lat();
+          const lngDiff = newPos.lng() - oldCenter.lng();
+
+          const currentSW = newBounds.getSouthWest();
+          const currentNE = newBounds.getNorthEast();
+          
+          newBounds = new google.maps.LatLngBounds(
+            new google.maps.LatLng(currentSW.lat() + latDiff, currentSW.lng() + lngDiff),
+            new google.maps.LatLng(currentNE.lat() + latDiff, currentNE.lng() + lngDiff)
+          );
+        } else { // Resize handle
+          // Basic resize logic (aspect ratio preservation needs more work)
+          let newNELat = newBounds.getNorthEast().lat();
+          let newNELng = newBounds.getNorthEast().lng();
+          let newSWLat = newBounds.getSouthWest().lat();
+          let newSWLng = newBounds.getSouthWest().lng();
+
+          if (key === 'ne') { newNELat = newPos.lat(); newNELng = newPos.lng(); }
+          else if (key === 'sw') { newSWLat = newPos.lat(); newSWLng = newPos.lng(); }
+          else if (key === 'nw') { newNELat = newPos.lat(); newSWLng = newPos.lng(); } 
+          else if (key === 'se') { newSWLat = newPos.lat(); newNELng = newPos.lng(); } 
+
+          if (newNELat < newSWLat) { const temp = newNELat; newNELat = newSWLat; newSWLat = temp;}
+          // Longitude check is more complex with antimeridian, simplified here
+          // if (newNELng < newSWLng) { const temp = newNELng; newNELng = newSWLng; newSWLng = temp;}
+
+          newBounds = new google.maps.LatLngBounds(
+            new google.maps.LatLng(newSWLat, newSWLng),
+            new google.maps.LatLng(newNELat, newNELng)
+          );
+           // TODO: Implement aspect ratio preservation here
+        }
+        
+        currentOverlay.setBounds(newBounds);
+      });
+
+      handleMarker.addListener('dragend', () => {
+        isDraggingHandleRef.current = false;
+        if (editingOverlayRef.current) {
+            const currentBounds = editingOverlayRef.current.getBounds();
+            if (currentBounds) {
+                editingOverlayInitialBoundsRef.current = currentBounds; 
+                // Refresh all handle positions based on new overlay bounds
+                const newNe = currentBounds.getNorthEast();
+                const newSw = currentBounds.getSouthWest();
+                editingHandlesRef.current.forEach(h => {
+                    const title = h.getTitle(); 
+                    if (title === 'center') h.setPosition(currentBounds.getCenter());
+                    else if (title === 'ne') h.setPosition(newNe);
+                    else if (title === 'sw') h.setPosition(newSw);
+                    else if (title === 'nw') h.setPosition(new google.maps.LatLng(newNe.lat(), newSw.lng()));
+                    else if (title === 'se') h.setPosition(new google.maps.LatLng(newSw.lat(), newNe.lng()));
+                });
+            }
+        }
+      });
+      handleMarker.setTitle(key); 
+      newHandles.push(handleMarker);
+    });
+    editingHandlesRef.current = newHandles;
+  };
+
+  const handleOverlayClick = (polygonId: string, overlay: google.maps.GroundOverlay) => {
+    if (mapRef.current) {
+      // If already editing this overlay, optionally deselect or do nothing
+      if (editingOverlayId === polygonId) {
+        // clearEditingState(); // Uncomment to deselect on second click
+        return;
+      }
+      createHandlesForOverlay(overlay, polygonId);
+    }
+  };
+
   const handlePreviewOverlayBoundsOnMap = useCallback((polygonId: string, bounds: google.maps.LatLngBoundsLiteral) => {
     const overlay = groundOverlaysMapRef.current[polygonId];
     if (overlay && mapRef.current) {
