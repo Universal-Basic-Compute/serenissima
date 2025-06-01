@@ -63,26 +63,19 @@ export async function POST(request: NextRequest) {
       return null;
     };
 
-    // Helper function to calculate Euclidean distance
+    // Helper function to calculate geographic distance using equirectangular approximation
     const calculateDistance = (pos1: Coordinates, pos2: Coordinates): number => {
-      const R = 6371e3; // Earth radius in meters - for a more realistic scale if lat/lng are degrees
-      // For simple game map units, R = 1 or can be adjusted.
-      // Using a simplified approach assuming lat/lng are planar coordinates for game distance
-      const dx = pos1.lng - pos2.lng;
-      const dy = pos1.lat - pos2.lat;
-      // This will give distance in "degrees" units if not scaled.
-      // To make it more like meters if these are small changes in lat/lng:
-      // const dLat = (pos2.lat - pos1.lat) * Math.PI / 180;
-      // const dLng = (pos2.lng - pos1.lng) * Math.PI / 180;
-      // const avgLat = (pos1.lat + pos2.lat) * Math.PI / 180 / 2;
-      // const x = dLng * Math.cos(avgLat);
-      // const y = dLat;
-      // return Math.sqrt(x*x + y*y) * R; // Distance in meters
+      const R = 6371e3; // Earth's radius in meters
+      const lat1Rad = pos1.lat * Math.PI / 180;
+      const lat2Rad = pos2.lat * Math.PI / 180;
+      const deltaLatRad = (pos2.lat - pos1.lat) * Math.PI / 180;
+      const deltaLngRad = (pos2.lng - pos1.lng) * Math.PI / 180;
 
-      // Simpler Euclidean distance for game map units (assuming lat/lng are x/y)
-      // The scale of this distance will depend on how lat/lng are used in your game.
-      // Let's assume 1 unit of lat/lng difference is roughly 1 "game meter" for display.
-      return Math.sqrt(dx * dx + dy * dy) * 1; // Adjusted scaling factor
+      const x = deltaLngRad * Math.cos((lat1Rad + lat2Rad) / 2);
+      const y = deltaLatRad;
+      const distance = Math.sqrt(x * x + y * y) * R;
+
+      return distance; // Distance is now in meters
     };
 
     // 1. Fetch all citizens from the CITIZENS table, including their positions
