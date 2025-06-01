@@ -550,6 +550,21 @@ def get_citizen_home(tables: Dict[str, Table], citizen_username_for_occupant: st
         log.error(f"{LogColors.FAIL}Error finding home for citizen {citizen_username_for_occupant}: {e}{LogColors.ENDC}")
         return None
 
+def get_citizen_businesses_run(tables: Dict[str, Table], citizen_username: str) -> List[Dict]:
+    """Fetches all business buildings run by a specific citizen."""
+    log.info(f"{LogColors.OKBLUE}Finding businesses run by citizen {citizen_username}{LogColors.ENDC}")
+    try:
+        formula = f"AND({{RunBy}}='{_escape_airtable_value(citizen_username)}', {{Category}}='business')"
+        businesses = tables['buildings'].all(formula=formula)
+        if businesses:
+            log.info(f"{LogColors.OKGREEN}Found {len(businesses)} businesses run by {citizen_username}.{LogColors.ENDC}")
+        else:
+            log.info(f"{LogColors.OKBLUE}No businesses found run by {citizen_username}.{LogColors.ENDC}")
+        return businesses
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error finding businesses run by citizen {citizen_username}: {e}{LogColors.ENDC}")
+        return []
+
 def get_building_type_info(building_type: str, building_type_definitions: Dict) -> Optional[Dict]:
     """Get building type information from a pre-fetched dictionary of definitions."""
     log.debug(f"Looking up building type info for '{building_type}' in pre-fetched definitions.")
