@@ -21,10 +21,11 @@ def try_create(
     citizen_airtable_id: str,
     end_date_iso: str = None, # Expecting ISO format string for EndDate (UTC)
     reason_message: Optional[str] = None,
-    current_time_utc: Optional[datetime.datetime] = None # Added current_time_utc, optional for backward compatibility if called elsewhere
+    current_time_utc: Optional[datetime.datetime] = None, # Added current_time_utc, optional for backward compatibility if called elsewhere
+    start_time_utc_iso: Optional[str] = None # New parameter for explicit start time
 ) -> Optional[Dict]:
     """Creates an idle activity for a citizen."""
-    log.info(f"Attempting to create idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id})")
+    log.info(f"Attempting to create idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) with explicit start: {start_time_utc_iso}")
     
     try:
         # VENICE_TIMEZONE = pytz.timezone('Europe/Rome') # Not needed if using current_time_utc
@@ -34,14 +35,36 @@ def try_create(
             log.warning("current_time_utc not provided to try_create_idle_activity, using real time UTC.")
             current_time_utc = datetime.datetime.now(pytz.UTC)
 
-        start_date_to_use = current_time_utc.isoformat()
-        end_date_to_use = end_date_iso # This is already calculated based on now_utc_dt by the caller
+        # Determine effective StartDate
+        effective_start_date_iso: str
+        if start_time_utc_iso:
+            effective_start_date_iso = start_time_utc_iso
+            # Ensure current_time_utc (used for fallback end_date calculation) is aligned if start_time is provided
+            # This is tricky because end_date_iso is passed in. The caller should ensure end_date_iso is correct
+            # relative to the start_time_utc_iso if provided.
+            # For idle, the duration is fixed, so we can recalculate EndDate if start_time_utc_iso is given.
+        else:
+            effective_start_date_iso = current_time_utc.isoformat()
 
-        if not end_date_to_use: # Fallback if end_date_iso was somehow None
+        # Determine effective EndDate
+        effective_end_date_iso: str
+        if end_date_iso: # If caller provides a specific end date
+            if start_time_utc_iso:
+                # If start_time_utc_iso is provided, we assume end_date_iso is ALREADY relative to it.
+                # Or, if idle always has a fixed duration, we recalculate. Let's assume fixed duration.
+                IDLE_ACTIVITY_DURATION_HOURS = 1 
+                start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+                if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+                effective_end_date_iso = (start_dt_obj + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                log.info(f"Recalculated idle EndDate to {effective_end_date_iso} based on provided start_time_utc_iso and fixed duration.")
+            else:
+                effective_end_date_iso = end_date_iso # Use caller-provided end_date_iso
+        else: # Fallback if end_date_iso was not provided
             IDLE_ACTIVITY_DURATION_HOURS = 1 
-            end_time_calc = current_time_utc + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)
-            end_date_to_use = end_time_calc.isoformat()
-            log.warning(f"end_date_iso for idle activity was not provided, calculated fallback (UTC): {end_date_to_use}")
+            start_dt_obj = datetime.datetime.fromisoformat(effective_start_date_iso.replace("Z", "+00:00"))
+            if start_dt_obj.tzinfo is None: start_dt_obj = pytz.UTC.localize(start_dt_obj)
+            effective_end_date_iso = (start_dt_obj + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+            log.warning(f"end_date_iso for idle activity was not provided, calculated fallback (UTC): {effective_end_date_iso} based on StartDate: {effective_start_date_iso}")
 
         default_note = "⏳ **Idle activity**"
         if reason_message:
@@ -53,9 +76,9 @@ def try_create(
             "ActivityId": f"idle_{citizen_custom_id}_{int(time.time())}",
             "Type": "idle",
             "Citizen": citizen_username,
-            "CreatedAt": start_date_to_use, # Use current_time_utc
-            "StartDate": start_date_to_use, # Use current_time_utc
-            "EndDate": end_date_to_use,     # Use provided or calculated UTC end date
+            "CreatedAt": effective_start_date_iso, 
+            "StartDate": effective_start_date_iso, 
+            "EndDate": effective_end_date_iso,
             "Notes": notes,
             "Status": "created"
         }

@@ -18,19 +18,26 @@ def try_create(
     citizen_username: str,    # Username
     building_custom_id: str,  # Custom BuildingId of the building
     recipe: Dict,
-    current_time_utc: datetime.datetime # Added current_time_utc
+    current_time_utc: datetime.datetime, # Added current_time_utc
+    start_time_utc_iso: Optional[str] = None # New parameter
 ) -> Optional[Dict]:
     """Creates a production activity based on a recipe."""
-    log.info(f"Attempting to create production activity for {citizen_username} at building {building_custom_id}")
+    log.info(f"Attempting to create production activity for {citizen_username} at building {building_custom_id} with explicit start: {start_time_utc_iso}")
     
     try:
         inputs = recipe.get('inputs', {})
         outputs = recipe.get('outputs', {})
         craft_minutes = recipe.get('craftMinutes', 60)
+
+        effective_start_dt: datetime.datetime
+        if start_time_utc_iso:
+            effective_start_dt = datetime.datetime.fromisoformat(start_time_utc_iso.replace("Z", "+00:00"))
+            if effective_start_dt.tzinfo is None: effective_start_dt = pytz.UTC.localize(effective_start_dt)
+        else:
+            effective_start_dt = current_time_utc
         
-        # VENICE_TIMEZONE = pytz.timezone('Europe/Rome') # Not needed if using current_time_utc
-        # now_venice = datetime.datetime.now(VENICE_TIMEZONE) # Replaced by current_time_utc
-        end_time_utc = current_time_utc + datetime.timedelta(minutes=craft_minutes)
+        effective_start_date_iso = effective_start_dt.isoformat()
+        effective_end_date_iso = (effective_start_dt + datetime.timedelta(minutes=craft_minutes)).isoformat()
         
         input_desc = ", ".join([f"**{amount:,.0f}** **{resource}**" for resource, amount in inputs.items()])
         output_desc = ", ".join([f"**{amount:,.0f}** **{resource}**" for resource, amount in outputs.items()])
@@ -41,11 +48,11 @@ def try_create(
             "ActivityId": activity_id_str,
             "Type": "production",
             "Citizen": citizen_username,
-            "FromBuilding": building_custom_id, # Use custom BuildingId
-            "ToBuilding": building_custom_id,   # Same building for production
-            "CreatedAt": current_time_utc.isoformat(), # Use current_time_utc
-            "StartDate": current_time_utc.isoformat(), # Use current_time_utc
-            "EndDate": end_time_utc.isoformat(),
+            "FromBuilding": building_custom_id, 
+            "ToBuilding": building_custom_id,   
+            "CreatedAt": effective_start_date_iso,
+            "StartDate": effective_start_date_iso,
+            "EndDate": effective_end_date_iso,
             "Notes": f"⚒️ Producing {output_desc} from {input_desc}",
             "Description": f"Producing {output_desc}",
             "RecipeInputs": json.dumps(inputs),
