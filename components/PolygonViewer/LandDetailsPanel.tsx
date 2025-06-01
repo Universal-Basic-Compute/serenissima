@@ -484,7 +484,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       const fetchTransactionWithRetry = async (retries = 3, delay = 1000) => {
         try {
           // Use the new Next.js API route
-          const response = await fetch(`/api/transaction/land/${selectedPolygonId}`);
+          const response = await fetch(`${getBackendBaseUrl()}/api/transaction/land/${selectedPolygonId}`);
 
           if (!response.ok) {
             if (response.status === 404) {
@@ -540,7 +540,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       const fetchOffersWithRetry = async (retries = 3, delay = 1000) => {
         try {
           // Use the new Next.js API route for land offers
-          const response = await fetch(`/api/transactions/land-offers/${selectedPolygonId}`);
+          const response = await fetch(`${getBackendBaseUrl()}/api/transactions/land-offers/${selectedPolygonId}`);
           
           if (!response.ok) {
             if (response.status === 404) {
