@@ -116,7 +116,8 @@ from backend.engine.activity_processors import (
         process_goto_building_for_storage_fetch as process_goto_building_for_storage_fetch_fn,
         process_fetch_for_logistics_client as process_fetch_for_logistics_client_fn, # Already present
         process_check_business_status as process_check_business_status_fn,
-        process_fishing_activity as process_fishing_activity_fn # Import new processor
+        process_fishing_activity as process_fishing_activity_fn, # Import new processor
+        process_goto_location as process_goto_location_fn # Import goto_location processor
 )
 from backend.engine.activity_processors.bid_on_land_activity_processor import process_bid_on_land_fn
 # Load environment variables
@@ -353,7 +354,8 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "idle": process_placeholder_activity_fn,
         "rest": process_placeholder_activity_fn,
         "bid_on_land": process_bid_on_land_fn,
-        "bid_on_land": process_bid_on_land_fn,
+        "goto_location": process_goto_location_fn, # New processor for multi-activity chains
+        "submit_land_bid": process_bid_on_land_fn, # Second step in bid_on_land chain
     }
 
     tables = initialize_airtable()
