@@ -102,17 +102,17 @@ const PolygonDisplayPanel: React.FC<PolygonDisplayPanelProps> = ({ polygon, onCl
             &times;
           </button>
         </div>
-        <div className="w-full aspect-square bg-lightblue rounded">
+        <div className="w-full aspect-square bg-[#F5E8C0] rounded"> {/* Changed background class for Tailwind, though SVG fill is dominant */}
           <svg viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} width="100%" height="100%">
-            <rect width="100%" height="100%" fill="lightblue" />
+            <rect width="100%" height="100%" fill="#F5E8C0" /> {/* Old parchment background for SVG */}
             {pointsString && polyDataWidth >= 0 && polyDataHeight >= 0 && ( // Ensure valid polygon data
                  <polygon
                     points={pointsString}
-                    fill="#FFF5D0"
-                    fillOpacity="0.6"
-                    stroke="#000000"
+                    fill="#E0C9A6" // A slightly darker parchment/aged paper color for the polygon itself
+                    fillOpacity="0.7" // Adjusted opacity
+                    stroke="#5D4037" // A dark brown stroke, like old ink
                     strokeOpacity="0.8"
-                    strokeWidth="1" // Adjusted to match map's stroke weight more closely
+                    strokeWidth="1" 
                  />
             )}
           </svg>
