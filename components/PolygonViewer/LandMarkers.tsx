@@ -214,7 +214,8 @@ export default function LandMarkers({
     if (currentSettings && typeof currentSettings.lat === 'number' && typeof currentSettings.lng === 'number') {
       // New format: lat, lng are absolute world coordinates for the marker's center
       const markerMapWorldX = (currentSettings.lng - 12.3326) * 20000;
-      const markerMapWorldY = (currentSettings.lat - 45.4371) * 20000;
+      // Appliquer le facteur 0.7 à la coordonnée Y du monde du marqueur
+      const markerMapWorldY = (currentSettings.lat - 45.4371) * 20000 * 0.7; 
       
       initialScreenX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
       initialScreenY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
@@ -369,11 +370,15 @@ export default function LandMarkers({
 
     // Convert new screen coordinates (newX, newY) to absolute world coordinates
     const newMarkerWorldX = screenToWorldX(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-    const newMarkerWorldY = screenToWorldY(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+    // newMarkerWorldY_projected est la coordonnée Y du monde qui a été utilisée pour la projection (incluant potentiellement le facteur 0.7 implicitement via screenToWorldY si la logique était inversée là)
+    // Cependant, screenToWorldY retourne la coordonnée Y du monde "réelle" (avant le facteur 0.7) car elle divise par 1.4.
+    // Pour être cohérent, si markerMapWorldY_effective = markerMapWorldY_true * 0.7, alors markerMapWorldY_true = markerMapWorldY_effective / 0.7
+    const newMarkerWorldY_projected_for_screen = screenToWorldY(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+    const newMarkerWorldY_actual = newMarkerWorldY_projected_for_screen / 0.7; // Inverser le facteur 0.7
 
-    // Convert absolute world coordinates to lat/lng
+    // Convert absolute actual world coordinates to lat/lng
     const newLng = newMarkerWorldX / 20000 + 12.3326;
-    const newLat = newMarkerWorldY / 20000 + 45.4371;
+    const newLat = newMarkerWorldY_actual / 20000 + 45.4371;
       
     setImageSettings(prev => ({
       ...prev,
@@ -464,10 +469,12 @@ export default function LandMarkers({
 
       // Convert new screen center to absolute world coordinates
       const resizedMarkerWorldX = screenToWorldX(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-      const resizedMarkerWorldY = screenToWorldY(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      // resizedMarkerWorldY_projected est la coordonnée Y du monde qui a été utilisée pour la projection
+      const resizedMarkerWorldY_projected_for_screen = screenToWorldY(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      const resizedMarkerWorldY_actual = resizedMarkerWorldY_projected_for_screen / 0.7; // Inverser le facteur 0.7
 
-      // Convert absolute world coordinates to lat/lng
-      const newLat = resizedMarkerWorldY / 20000 + 45.4371;
+      // Convert absolute actual world coordinates to lat/lng
+      const newLat = resizedMarkerWorldY_actual / 20000 + 45.4371;
       const newLng = resizedMarkerWorldX / 20000 + 12.3326;
       
       // For width/height, we store the "base" dimensions, and referenceScale is the current scale.
@@ -705,7 +712,8 @@ export default function LandMarkers({
         // Use new lat/lng settings if available
         if (settings && typeof settings.lat === 'number' && typeof settings.lng === 'number') {
           const markerMapWorldX = (settings.lng - 12.3326) * 20000;
-          const markerMapWorldY = (settings.lat - 45.4371) * 20000;
+          // Appliquer le facteur 0.7 à la coordonnée Y du monde du marqueur avant la projection
+          const markerMapWorldY = (settings.lat - 45.4371) * 20000 * 0.7;
 
           finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
           finalY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
