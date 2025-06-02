@@ -469,7 +469,7 @@ def call_try_create_activity_api(
         print(f"{LogColors.FAIL}API request failed for activity '{activity_type}' for {citizen_username}: {e}{LogColors.ENDC}")
         return False
     except json.JSONDecodeError:
-        print(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        print(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}.{LogColors.ENDC}")
         return False
 
 def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_used: str = "local") -> None:
