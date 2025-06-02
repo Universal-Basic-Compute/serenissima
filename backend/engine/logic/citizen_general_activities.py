@@ -222,12 +222,12 @@ def _handle_emergency_fishing(
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
-) -> bool:
+) -> Optional[Dict]:
     """Prio 4: Handles emergency fishing if citizen is Facchini, starving, and it's not rest time."""
     if citizen_social_class != "Facchini": # Only Facchini do emergency fishing for now
-        return False
+        return None
     if is_rest_time_for_class(citizen_social_class, now_venice_dt): # No fishing during rest
-        return False
+        return None
 
     ate_at_str = citizen_record['fields'].get('AteAt')
     is_starving = True # Assume starving if no AteAt or very old
@@ -240,24 +240,25 @@ def _handle_emergency_fishing(
         except ValueError: pass # Invalid date format, assume starving
     
     if not is_starving:
-        return False
+        return None
 
     if not citizen_position:
         log.warning(f"{LogColors.WARNING}[Pêche Urgence] {citizen_name} n'a pas de position. Impossible de pêcher.{LogColors.ENDC}")
-        return False
+        return None
 
     log.info(f"{LogColors.OKCYAN}[Pêche Urgence] {citizen_name} est affamé(e) et vit dans un fisherman_s_cottage. Recherche d'un lieu de pêche.{LogColors.ENDC}")
     
     target_wp_id, target_wp_pos, path_data = _find_closest_fishable_water_point(citizen_position, api_base_url, transport_api_url)
 
     if target_wp_id and path_data:
-        if try_create_fishing_activity(
+        activity_record = try_create_fishing_activity(
             tables, citizen_custom_id, citizen_username, citizen_airtable_id,
             target_wp_id, path_data, now_utc_dt, activity_type="emergency_fishing"
-        ):
+        )
+        if activity_record:
             log.info(f"{LogColors.OKGREEN}[Pêche Urgence] {citizen_name}: Activité 'emergency_fishing' créée vers {target_wp_id}.{LogColors.ENDC}")
-            return True
-    return False
+            return activity_record
+    return None
 
 def _handle_leave_venice(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
@@ -1041,43 +1042,44 @@ def _handle_fishing(
     now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
-) -> bool:
+) -> Optional[Dict]:
     """Prio 32: Handles regular fishing if citizen is Facchini, it's work time, and they are a fisherman."""
     if citizen_social_class != "Facchini":
-        return False
+        return None
     # Fishing is a generic Facchini task, not tied to a specific building type's hours, so use class schedule.
     if not is_work_time(citizen_social_class, now_venice_dt): # Pass no workplace_type
-        return False
+        return None
         
     home_record = get_citizen_home(tables, citizen_username) # Fishermen live in fisherman's cottages
     if not (home_record and home_record['fields'].get('Type') == 'fisherman_s_cottage'):
-        return False # Not a fisherman (based on home type)
+        return None # Not a fisherman (based on home type)
 
     # Check if they have a formal "Workplace" record. If so, they should do that job.
     # This fishing is for those Facchini in fisherman's cottages without other assigned work.
     workplace_record = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
     if workplace_record:
-        return False # Has other work
+        return None # Has other work
 
     if not citizen_position:
         log.warning(f"{LogColors.WARNING}[Pêche Régulière] {citizen_name} n'a pas de position. Impossible de pêcher.{LogColors.ENDC}")
-        return False
+        return None
 
     log.info(f"{LogColors.OKCYAN}[Pêche Régulière] {citizen_name} (Facchini pêcheur sans autre travail) en période de travail. Recherche lieu de pêche.{LogColors.ENDC}")
     
     target_wp_id, target_wp_pos, path_data = _find_closest_fishable_water_point(citizen_position, api_base_url, transport_api_url)
 
     if target_wp_id and path_data:
-        if try_create_fishing_activity(
+        activity_record = try_create_fishing_activity(
             tables, citizen_custom_id, citizen_username, citizen_airtable_id,
             target_wp_id, path_data, now_utc_dt, activity_type="fishing"
-        ):
+        )
+        if activity_record:
             log.info(f"{LogColors.OKGREEN}[Pêche] {citizen_name}: Activité 'fishing' créée vers {target_wp_id}.{LogColors.ENDC}")
-            return True
+            return activity_record
     else:
         log.info(f"{LogColors.OKBLUE}[Pêche] {citizen_name}: Aucun lieu de pêche accessible trouvé.{LogColors.ENDC}")
         
-    return False
+    return None
 
 
 # --- Placeholder for new handler functions ---
@@ -1926,7 +1928,8 @@ def process_citizen_activity(
         try:
             created_activity_record = handler_func(*handler_args)
             if created_activity_record: # Handler returns the activity record or None
-                log.info(f"{LogColors.OKGREEN}Citizen {citizen_name} ({citizen_social_class}): Activity/chain created by '{description}'. First activity: {created_activity_record['fields'].get('ActivityId', created_activity_record['id'])}{LogColors.ENDC}")
+                activity_id = created_activity_record['fields'].get('ActivityId', created_activity_record['id']) if isinstance(created_activity_record, dict) else "unknown"
+                log.info(f"{LogColors.OKGREEN}Citizen {citizen_name} ({citizen_social_class}): Activity/chain created by '{description}'. First activity: {activity_id}{LogColors.ENDC}")
                 return created_activity_record # Return the first activity of the chain
         except Exception as e_handler:
             log.error(f"{LogColors.FAIL}Citizen {citizen_name} ({citizen_social_class}): ERREUR dans handler '{description}': {e_handler}{LogColors.ENDC}")
