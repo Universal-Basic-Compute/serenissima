@@ -199,9 +199,24 @@ export default function LandMarkers({
     
     // Get existing settings or create defaults
     const existingSettings = imageSettings[selectedLandId] || {};
-    const width = existingSettings.width || 75 * scale;
-    const height = existingSettings.height || 75 * scale;
+    const width = existingSettings.width || 75 * scale; // This is the base width or default base * current scale
+    const height = existingSettings.height || 75 * scale; // This is the base height or default base * current scale
     
+    // Calculate display width/height for DOM update, consistent with main render logic
+    let displayWidth, displayHeight;
+    const sDrag = imageSettings[selectedLandId] || {};
+
+    if (sDrag.referenceScale && sDrag.width !== undefined && sDrag.height !== undefined) {
+        const scaleFactor = scale / sDrag.referenceScale;
+        displayWidth = sDrag.width * scaleFactor;
+        displayHeight = sDrag.height * scaleFactor;
+    } else {
+        // If no referenceScale, or width/height are undefined in settings,
+        // use sDrag.width (if defined, assumed to be screen pixels) or default to (75 * scale)
+        displayWidth = sDrag.width !== undefined ? sDrag.width : (75 * scale);
+        displayHeight = sDrag.height !== undefined ? sDrag.height : (75 * scale);
+    }
+
     // Mettre à jour le DOM directement pour un glissement fluide
     const landElement = document.querySelector(`[data-land-id="${selectedLandId}"]`);
     if (landElement) {
@@ -209,8 +224,8 @@ export default function LandMarkers({
         position: absolute;
         left: ${newX}px;
         top: ${newY}px;
-        width: ${width}px;
-        height: ${height}px;
+        width: ${displayWidth}px;
+        height: ${displayHeight}px;
         z-index: 15;
         transform: translate(-50%, -50%);
         border: 2px dashed red;
@@ -240,27 +255,27 @@ export default function LandMarkers({
       setImageSettings(prev => ({
         ...prev,
         [selectedLandId]: {
-          ...existingSettings,
-          width,
-          height,
-          referenceScale: scale,
-          x: mapWorldOffsetX, // Store world offset X
-          y: mapWorldOffsetY  // Store world offset Y
+          // ...currentSettings, // Spread current settings to preserve any other fields
+          width: baseWidthToStore,    // Store base width
+          height: baseHeightToStore,   // Store base height
+          referenceScale: refScaleToStore, // Store reference scale
+          x: mapWorldOffsetX,         // Store new world offset X
+          y: mapWorldOffsetY          // Store new world offset Y
         }
       }));
     } else {
       console.warn(`Cannot update imageSettings for ${selectedLandId}: missing polygon world center data.`);
-      // Fallback: store screen coordinates if world center is not available, though this is not ideal.
-      // This path should ideally not be taken if polygonWorldMapCenterX/Y are always provided.
+      // Fallback: store screen coordinates if world center is not available.
+      // Also store base width/height and ref scale with defaults.
       setImageSettings(prev => ({
         ...prev,
         [selectedLandId]: {
-          ...existingSettings,
-          width,
-          height,
-          referenceScale: scale,
-          x: newX, // Storing screenX as fallback
-          y: newY  // Storing screenY as fallback
+          // ...currentSettings,
+          width: baseWidthToStore,
+          height: baseHeightToStore,
+          referenceScale: refScaleToStore,
+          x: newX, // Storing screenX as fallback for position
+          y: newY  // Storing screenY as fallback for position
         }
       }));
     }
@@ -439,23 +454,52 @@ export default function LandMarkers({
         // Get custom settings or use defaults
         const settings = imageSettings[polygon.id];
         
-        // If we have settings with a referenceScale, adjust dimensions based on current scale
         let width, height;
         
-        if (settings) {
-          // If we have settings with a referenceScale, adjust dimensions proportionally
+        if (settings && settings.width !== undefined && settings.height !== undefined) {
+          const baseWidth = settings.width;
+          const baseHeight = settings.height;
           if (settings.referenceScale) {
             const scaleFactor = scale / settings.referenceScale;
-            width = settings.width * scaleFactor;
-            height = settings.height * scaleFactor;
+            width = baseWidth * scaleFactor;
+            height = baseHeight * scaleFactor;
           } else {
-            width = settings.width || 75 * scale;
-            height = settings.height || 75 * scale;
+            // If no referenceScale, but width/height are defined, assume they are screen pixel values
+            // OR they are base values that should be scaled by current map scale.
+            // To match the drag logic, let's assume:
+            // if settings.width is defined, it's used as is (screen pixels). Otherwise, 75 * scale.
+            width = settings.width; // Use as is if defined
+            height = settings.height; // Use as is if defined
+            // The || 75 * scale was in the original, let's re-evaluate.
+            // The most consistent is: settings.width/height are ALWAYS base.
+            // If referenceScale is missing, it implies it was the scale at which these base values were set.
+            // For now, to match the refined drag logic:
+            // width = settings.width !== undefined ? settings.width : (75 * scale);
+            // height = settings.height !== undefined ? settings.height : (75 * scale);
+            // Let's use the version that assumes settings.width/height are base and scale by current `scale` if no refScale
+            width = baseWidth * scale;
+            height = baseHeight * scale;
           }
         } else {
-          // Default values if no settings
+          // Default values if no settings or settings are incomplete
           width = 75 * scale;
           height = 75 * scale;
+        }
+
+        // Correction based on the refined logic for displayWidth/displayHeight in handleDrag:
+        // This should exactly mirror that logic.
+        if (settings) {
+            if (settings.referenceScale && settings.width !== undefined && settings.height !== undefined) {
+                const scaleFactor = scale / settings.referenceScale;
+                width = settings.width * scaleFactor;
+                height = settings.height * scaleFactor;
+            } else { // No referenceScale, or width/height are undefined in settings
+                width = (settings.width !== undefined ? settings.width : 75 * scale);
+                height = (settings.height !== undefined ? settings.height : 75 * scale);
+            }
+        } else {
+            width = 75 * scale;
+            height = 75 * scale;
         }
         
         // Screen coordinates of the polygon's center
