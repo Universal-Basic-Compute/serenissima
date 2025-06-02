@@ -51,8 +51,9 @@ def initialize_airtable() -> Optional[Dict[str, AirtableTable]]:
         tables = {
             "citizens": api.table(airtable_base_id, "CITIZENS"),
             "messages": api.table(airtable_base_id, "MESSAGES"),
+            "relationships": api.table(airtable_base_id, "RELATIONSHIPS"),
         }
-        print(f"{LogColors.OKGREEN}Airtable connection initialized.{LogColors.ENDC}")
+        print(f"{LogColors.OKGREEN}Airtable connection initialized (Citizens, Messages, Relationships).{LogColors.ENDC}")
         return tables
     except Exception as e:
         print(f"{LogColors.FAIL}Error initializing Airtable: {e}{LogColors.ENDC}")
@@ -70,6 +71,30 @@ def _escape_airtable_value(value: Any) -> str:
     if isinstance(value, str):
         return value.replace("'", "\\'")
     return str(value)
+
+def _get_relationship_data(tables: Dict[str, AirtableTable], username1: str, username2: str) -> Optional[Dict[str, Any]]:
+    """Fetches relationship data between two citizens from Airtable."""
+    # Ensure usernames are ordered alphabetically for consistent querying
+    # Airtable stores Citizen1 as the alphabetically first username.
+    c1_escaped, c2_escaped = sorted([_escape_airtable_value(username1), _escape_airtable_value(username2)])
+    
+    formula = f"AND({{Citizen1}}='{c1_escaped}', {{Citizen2}}='{c2_escaped}')"
+    try:
+        records = tables["relationships"].all(formula=formula, max_records=1)
+        if records:
+            fields = records[0]['fields']
+            # Return a dictionary with the relevant relationship fields
+            return {
+                "Citizen1": fields.get("Citizen1"), # This will be c1_escaped
+                "Citizen2": fields.get("Citizen2"), # This will be c2_escaped
+                "Title": fields.get("Title"),
+                "StrengthScore": fields.get("StrengthScore"),
+                "TrustScore": fields.get("TrustScore")
+            }
+        return None # No relationship record found
+    except Exception as e:
+        print(f"  {LogColors.FAIL}Error fetching relationship between {username1} and {username2}: {e}{LogColors.ENDC}")
+        return None
 
 def get_signoria_members(tables: Dict[str, AirtableTable], nlr_username: str = "NLR") -> List[Dict]:
     """Fetches citizens, determines Signoria (top 9 by influence + NLR), sorted by influence."""
@@ -176,6 +201,7 @@ def send_message_to_kin_channel(
     kin_id: str,
     prompt_content: str,
     model: str = DEFAULT_KINOS_MODEL,
+    add_system_content: Optional[str] = None, # New parameter for system context
     kinos_api_base_url: str = DEFAULT_KINOS_API_BASE_URL,
     blueprint_id: str = DEFAULT_KINOS_BLUEPRINT_ID
 ) -> Optional[str]:
@@ -188,10 +214,17 @@ def send_message_to_kin_channel(
     payload = {
         "content": prompt_content,
         "model": model,
-        # "addSystem": "You are a member of the Signoria of Venice. Speak formally and thoughtfully." # Optional
     }
+    if add_system_content:
+        payload["addSystem"] = add_system_content
+        print(f"  {LogColors.OKCYAN}Sending prompt to {kin_id} with system context (Model: {model})...{LogColors.ENDC}")
+    else:
+        print(f"  {LogColors.OKCYAN}Sending prompt to {kin_id} (Model: {model})...{LogColors.ENDC}")
+    
+    # For debugging the payload being sent
+    # print(f"Payload for Kinos: {json.dumps(payload, indent=2)}")
+
     try:
-        print(f"  {LogColors.OKCYAN}Sending prompt to {kin_id} in '{SIGNORIA_CHANNEL_ID}' channel (Model: {model})...{LogColors.ENDC}")
         response = requests.post(url, headers=headers, json=payload, timeout=300) # 5 min timeout for AI response
         response.raise_for_status()
         resp_data = response.json()
@@ -283,13 +316,54 @@ def main(kinos_model: str, kinos_api_url: str, kinos_blueprint: str):
 
         # Speaker's Turn
         prompt = (
-            f"Signore/Signora {speaker_display_name}, la Signoria attende la vostra parola. "
-            f"Qual è il vostro pensiero sulla situazione attuale di Venezia e quali priorità suggerite per il futuro della Repubblica?"
+            f"Signore/Signora {speaker_display_name}, the Signoria awaits your words. "
+            f"What are your thoughts on the current situation in Venice, and what priorities do you suggest for the Republic's future?"
         )
+
+        # Prepare system context for the Kinos API
+        other_members_details = [
+            {
+                "username": m["username"], 
+                "display_name": f"{m.get('first_name', '')} {m.get('last_name', '')}".strip() or m['username'],
+                "influence": m["influence"]
+            } for m in signoria_members if m["username"] != speaker_username
+        ]
+
+        signoria_relationships_list = []
+        member_usernames_for_rels = [m['username'] for m in signoria_members]
+        for i in range(len(member_usernames_for_rels)):
+            for j in range(i + 1, len(member_usernames_for_rels)):
+                user1 = member_usernames_for_rels[i]
+                user2 = member_usernames_for_rels[j]
+                rel_data = _get_relationship_data(airtable_tables, user1, user2)
+                if rel_data:
+                    signoria_relationships_list.append(rel_data)
+        
+        system_context_data = {
+            "discussion_context": (
+                "You are a member of the Signoria, Venice's highest council, composed of 10 influential figures including yourself. "
+                "You are currently in a formal discussion session. The Doge (human user) may provide comments between speakers. "
+                "You are expected to speak thoughtfully on matters of state, considering your relationships with other members and the overall political climate. "
+                "Your response should be concise and directly address the Doge's prompt."
+            ),
+            "current_speaker_details": {
+                "username": speaker_username,
+                "display_name": speaker_display_name,
+                "influence": speaker_info["influence"]
+            },
+            "other_signoria_members_present": other_members_details,
+            "signoria_relationships": signoria_relationships_list
+        }
+        add_system_json = json.dumps(system_context_data)
         
         ai_response = send_message_to_kin_channel(
-            kinos_key, speaker_username, prompt, model=kinos_model,
-            kinos_api_base_url=kinos_api_url, blueprint_id=kinos_blueprint
+            kinos_key, 
+            speaker_username, 
+            prompt, 
+            model=kinos_model,
+            add_system_content=add_system_json, # Pass the system context
+            kinos_api_base_url=kinos_api_url, 
+            blueprint_id=kinos_blueprint
         )
 
         if ai_response:
