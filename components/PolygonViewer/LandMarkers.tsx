@@ -113,7 +113,7 @@ export default function LandMarkers({
               width: `${75 * scale}px`, // Scale width directly with zoom level, no minimum size
               height: `${75 * scale}px`, // Scale height directly with zoom level, no minimum size
               zIndex: isHovered ? 12 : 10, // Below buildings (z-index 16-18) but above water
-              transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
+              transition: 'transform 0.1s ease-out, opacity 0.2s ease-out, width 0s, height 0s',
               transform: `translate(-50%, -50%) scale(${isHovered ? 1.05 : 1})`,
               cursor: 'default',
               opacity: isHovered ? opacity + 0.1 : opacity, // Slightly more visible when hovered
