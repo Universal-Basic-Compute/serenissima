@@ -1682,8 +1682,6 @@ def dispatch_specific_activity_request(
     activity_parameters: Optional[Dict[str, Any]],
     resource_defs: Dict,
     building_type_defs: Dict,
-    now_venice_dt: datetime,
-    now_utc_dt: datetime,
     transport_api_url: str,
     api_base_url: str
 ) -> Dict[str, Any]: # Return type remains Dict, but content will change slightly
@@ -1862,7 +1860,7 @@ def process_citizen_activity(
         else: # Failed to assign random position
             log.warning(f"{LogColors.WARNING}Failed to assign random position for {citizen_name}. Cannot proceed with activity creation.{LogColors.ENDC}")
             # Create an immediate idle activity if position assignment fails critically
-            idle_end_time_iso_critical = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+            idle_end_time_iso_critical = (now_utc_dt + timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
             return try_create_idle_activity(
                 tables, citizen_custom_id, citizen_username, citizen_airtable_id,
                 end_date_iso=idle_end_time_iso_critical,
@@ -1877,7 +1875,7 @@ def process_citizen_activity(
         try:
             ate_at_dt = datetime.fromisoformat(ate_at_str.replace('Z', '+00:00'))
             if ate_at_dt.tzinfo is None: ate_at_dt = pytz.UTC.localize(ate_at_dt)
-            if (now_utc_dt - ate_at_dt) > datetime.timedelta(hours=12): is_hungry = True
+            if (now_utc_dt - ate_at_dt) > timedelta(hours=12): is_hungry = True
         except ValueError: is_hungry = True 
     else: is_hungry = True
     citizen_record['is_hungry'] = is_hungry # Add to record for handlers
