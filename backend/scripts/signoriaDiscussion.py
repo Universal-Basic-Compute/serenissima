@@ -381,18 +381,16 @@ def main(kinos_model: str, kinos_api_url: str, kinos_blueprint: str):
             "username": speaker_info["username"],
             "influence": speaker_info["influence"],
             "profile_fields": speaker_info["fields"], # Full profile fields
-            "data_package": speaker_data_package # Add data package
+            "data_package": speaker_data_package # Data package for the current speaker
         }
 
         all_member_profiles_data = []
         for m in signoria_members:
-            member_username = m["username"]
-            member_data_package = _get_data_package_for_citizen(member_username)
+            # Only include full profile fields, not the detailed data_package for non-speakers
             all_member_profiles_data.append({
-                "username": member_username,
+                "username": m["username"],
                 "influence": m["influence"],
-                "profile_fields": m["fields"], # Full profile fields for all members
-                "data_package": member_data_package # Add data package for each member
+                "profile_fields": m["fields"] # Full profile fields for all members
             })
 
         signoria_relationships_list = []
@@ -410,10 +408,14 @@ def main(kinos_model: str, kinos_api_url: str, kinos_blueprint: str):
                 "You are a member of the Signoria, Venice's highest council, composed of 10 influential figures including yourself. "
                 "You are currently in a formal discussion session. The Doge (human user) may provide comments between speakers. "
                 "You are expected to speak thoughtfully on matters of state, considering your relationships with other members and the overall political climate. "
-                "Your response should be concise and directly address the Doge's prompt."
+                "Your response should be concise and directly address the Doge's prompt.\n"
+                "Contextual Data Guide:\n"
+                "- 'current_speaker_profile': Your detailed profile, including your 'data_package' (inventory, buildings, etc.).\n"
+                "- 'all_signoria_member_profiles': Profiles of all Signoria members present (does NOT include their detailed 'data_package' unless they are the current speaker).\n"
+                "- 'signoria_relationships': Details on relationships between Signoria members."
             ),
-            "current_speaker_profile": current_speaker_profile_data,
-            "all_signoria_member_profiles": all_member_profiles_data,
+            "current_speaker_profile": current_speaker_profile_data, # Includes data_package
+            "all_signoria_member_profiles": all_member_profiles_data, # Does not include data_package for non-speakers
             "signoria_relationships": signoria_relationships_list
         }
         add_system_json = json.dumps(system_context_data)
