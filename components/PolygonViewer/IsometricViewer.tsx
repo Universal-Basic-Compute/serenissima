@@ -14,7 +14,7 @@ import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
 import CoatOfArmsMarkers from './CoatOfArmsMarkers';
-import LandMarkers from './LandMarkers'; // Import the new LandMarkers component
+import LandMarkers2 from './LandMarkers2'; // MODIFIED: Import LandMarkers2
 import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
 import BuildingMarkers from './BuildingMarkers';
@@ -4064,16 +4064,16 @@ const darkenColor = (colorStr: string, percent: number): string => {
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       />
       
-      {/* Land Markers - Display land images */}
-      <LandMarkers
+      {/* Land Markers 2 - Display land images (simplified version) */}
+      <LandMarkers2
         isVisible={true}
         polygonsToRender={polygonsToRender}
         isNight={isNight}
         scale={scale}
-        activeView={activeView}
+        // activeView={activeView} // activeView n'est plus nécessaire pour LandMarkers2
         canvasWidth={canvasDims.width}
         canvasHeight={canvasDims.height}
-        mapTransformOffset={offset} // Pass the map's transformation offset
+        mapTransformOffset={offset}
       />
       
       {/* Coat of Arms Markers - Affiche les blasons par-dessus le canvas */}
