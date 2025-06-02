@@ -410,11 +410,9 @@ def process_relationships(tables, limit=None, min_strength=None, max_per_run=Non
             else:
                 error_count += 1
             
-            # Pause entre les requêtes pour éviter de surcharger l'API
+            # No pause between requests - process relationships as quickly as possible
             if i < total:
-                sleep_time = random.uniform(2, 5)  # Entre 2 et 5 secondes
-                print(f"{LogColors.OKCYAN}Pause de {sleep_time:.1f} secondes avant la prochaine relation...{LogColors.ENDC}")
-                time.sleep(sleep_time)
+                print(f"{LogColors.OKCYAN}Traitement de la relation suivante sans pause...{LogColors.ENDC}")
         
         # Afficher les statistiques finales
         print(f"\n{LogColors.HEADER}=== Résumé de l'exécution ==={LogColors.ENDC}")
