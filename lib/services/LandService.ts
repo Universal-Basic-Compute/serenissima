@@ -138,7 +138,15 @@ export class LandService {
    */
   public async saveImageSettings(
     polygonId: string, 
-    settings: { x: number, y: number, width: number, height: number, referenceScale?: number }
+    settings: { 
+      x: number, 
+      y: number, 
+      width: number, 
+      height: number, 
+      referenceScale?: number,
+      originalCenterX?: number,
+      originalCenterY?: number
+    }
   ): Promise<boolean> {
     try {
       // Always include the current scale as referenceScale if not provided

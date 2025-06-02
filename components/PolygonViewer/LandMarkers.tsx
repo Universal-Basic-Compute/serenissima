@@ -136,6 +136,10 @@ export default function LandMarkers({
     const newX = positionRef.current.x + dx;
     const newY = positionRef.current.y + dy;
     
+    // Find the polygon data for this land
+    const polygonData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
+    if (!polygonData) return;
+    
     // Get existing settings or create defaults
     const existingSettings = imageSettings[selectedLandId] || {};
     const width = existingSettings.width || 75 * scale;
@@ -149,19 +153,31 @@ export default function LandMarkers({
         height,
         referenceScale: scale,
         x: newX,
-        y: newY
+        y: newY,
+        originalCenterX: polygonData.centerX,
+        originalCenterY: polygonData.centerY
       }
     }));
-  }, [isDragging, selectedLandId, scale, imageSettings]);
+  }, [isDragging, selectedLandId, scale, imageSettings, polygonsToRender]);
 
   const handleDragEnd = useCallback(() => {
     if (isDragging && selectedLandId) {
       setIsDragging(false);
       
+      // Find the polygon data for this land
+      const polygonData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
+      
       // Save the settings to the server
       const settings = imageSettings[selectedLandId];
-      if (settings) {
-        landService.saveImageSettings(selectedLandId, settings)
+      if (settings && polygonData) {
+        // Store the original center coordinates to calculate relative position
+        const updatedSettings = {
+          ...settings,
+          originalCenterX: polygonData.centerX,
+          originalCenterY: polygonData.centerY
+        };
+        
+        landService.saveImageSettings(selectedLandId, updatedSettings)
           .then(success => {
             if (success) {
               console.log(`Saved image settings for ${selectedLandId}`);
@@ -171,7 +187,7 @@ export default function LandMarkers({
           });
       }
     }
-  }, [isDragging, selectedLandId, imageSettings]);
+  }, [isDragging, selectedLandId, imageSettings, polygonsToRender]);
 
   const handleResize = useCallback((e: any, direction: any, ref: any, d: any, polygonId: string) => {
     if (!editMode || selectedLandId !== polygonId) return;
@@ -215,6 +231,22 @@ export default function LandMarkers({
       };
     }
   }, [editMode, handleDrag, handleDragEnd]);
+
+  // Effect to update positions when map is transformed
+  useEffect(() => {
+    const handleMapTransform = (event: CustomEvent) => {
+      if (event.detail && event.detail.offset) {
+        // Force re-render when map is transformed
+        setImageSettings(prev => ({...prev}));
+      }
+    };
+    
+    window.addEventListener('mapTransformed', handleMapTransform as EventListener);
+    
+    return () => {
+      window.removeEventListener('mapTransformed', handleMapTransform as EventListener);
+    };
+  }, []);
 
   // If the component is not visible, don't render anything
   if (!isVisible) {
@@ -277,9 +309,20 @@ export default function LandMarkers({
             height = settings.height || 75 * scale;
           }
           
-          // Use saved position if available
-          posX = settings.x || polygonData.centerX;
-          posY = settings.y || polygonData.centerY;
+          // Calculate position based on the current center of the polygon
+          // This ensures the image moves with the map
+          if (settings.x && settings.y) {
+            // Calculate offset from center
+            const offsetX = settings.x - (settings.originalCenterX || polygonData.centerX);
+            const offsetY = settings.y - (settings.originalCenterY || polygonData.centerY);
+            
+            // Apply offset to current center
+            posX = polygonData.centerX + offsetX;
+            posY = polygonData.centerY + offsetY;
+          } else {
+            posX = polygonData.centerX;
+            posY = polygonData.centerY;
+          }
         } else {
           // Default values if no settings
           width = 75 * scale;
