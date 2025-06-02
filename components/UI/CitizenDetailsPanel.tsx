@@ -1156,20 +1156,11 @@ Your response:`;
                     ) : (
                       <>
                         <div className="mb-3">
-                          <div className="inline-block px-3 py-1 bg-gray-200 text-gray-800 rounded-full mb-2">
-                            {relationship.title || "Relationship Details"}
+                          <div className="text-center mb-2">
+                            <span className="inline-block px-3 py-1 bg-gray-200 text-gray-800 rounded-full font-bold">
+                              {relationship.title || "Relationship Details"}
+                            </span>
                           </div>
-                          <details className="mt-2">
-                            <summary className="text-sm text-amber-800 font-medium cursor-pointer hover:text-amber-600 flex items-center">
-                              <span>View relationship description</span>
-                              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </summary>
-                            {relationship.description && (
-                              <p className="text-xs text-amber-700 mt-2 pl-2 border-l-2 border-amber-300">{relationship.description}</p>
-                            )}
-                          </details>
                         </div>
                         <div className="flex justify-around text-center">
                           <div title="Entwinement (Strength Score): Quantifies the relationship's strength based on shared relevancies and common interests. A higher score indicates more shared ground or potential for mutual benefit. Useful for understanding alignment and potential for collaboration.">
@@ -1195,6 +1186,13 @@ Your response:`;
                             </div>
                           )}
                         </div>
+                        {relationship.description && (
+                          <div className="mt-3 text-center">
+                            <p className="text-xs font-serif italic text-amber-700">
+                              {relationship.description.split('.').slice(0, 2).join('.') + (relationship.description.split('.').length > 2 ? '.' : '')}
+                            </p>
+                          </div>
+                        )}
                         {relationship.tier && (
                           <div className="text-center mt-3">
                             <p className="text-xs text-amber-600">Tier</p>
