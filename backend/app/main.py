@@ -1446,7 +1446,7 @@ async def execute_transaction(transaction_id: str, data: dict):
                     "seller_before": seller_compute,
                     "buyer_after": buyer_compute - price,
                     "seller_after": seller_compute + price,
-                    "timestamp": datetime.datetime.now().isoformat(),
+                    "timestamp": datetime.now().isoformat(),
                     "status": "pending"
                 }
                 
@@ -1466,8 +1466,8 @@ async def execute_transaction(transaction_id: str, data: dict):
                         "Seller": seller_username, # Person receiving ducats
                         "Buyer": buyer_username, # Person paying ducats
                         "Price": price,
-                        "CreatedAt": datetime.datetime.now().isoformat(),
-                        "ExecutedAt": datetime.datetime.now().isoformat(),
+                        "CreatedAt": datetime.now().isoformat(),
+                        "ExecutedAt": datetime.now().isoformat(),
                         "Notes": json.dumps(transaction_log)
                     })
                 except Exception as tx_log_error:
@@ -2826,9 +2826,9 @@ async def inject_compute_complete(data: dict):
                     "Seller": data["wallet_address"],
                     "Buyer": "Treasury",
                     "Price": transfer_amount,
-                    "CreatedAt": datetime.datetime.now().isoformat(),
-                    "UpdatedAt": datetime.datetime.now().isoformat(),
-                    "ExecutedAt": datetime.datetime.now().isoformat(),
+                    "CreatedAt": datetime.now().isoformat(),
+                    "UpdatedAt": datetime.now().isoformat(),
+                    "ExecutedAt": datetime.now().isoformat(),
                     "Notes": json.dumps({
                         "operation": "inject",
                         "method": "solana",
