@@ -1,0 +1,396 @@
+#!/usr/bin/env python3
+import os
+import sys
+import json
+import random
+import requests
+import time
+from datetime import datetime
+from dotenv import load_dotenv
+from pyairtable import Api, Table
+
+# Ajouter le répertoire parent au chemin Python
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Importer les fonctions utilitaires si disponibles
+try:
+    from backend.engine.utils.activity_helpers import LogColors
+except ImportError:
+    class LogColors:
+        HEADER = '\033[95m'
+        FAIL = '\033[91m'
+        OKGREEN = '\033[92m'
+        WARNING = '\033[93m'
+        OKBLUE = '\033[94m'
+        OKCYAN = '\033[96m'
+        ENDC = '\033[0m'
+
+# Charger les variables d'environnement
+load_dotenv()
+
+# Configuration
+AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
+AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
+KINOS_API_KEY = os.getenv("KINOS_API_KEY")
+KINOS_BLUEPRINT = os.getenv("KINOS_BLUEPRINT", "serenissima-ai")
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
+
+def initialize_airtable():
+    """Initialiser la connexion à Airtable."""
+    if not AIRTABLE_API_KEY or not AIRTABLE_BASE_ID:
+        print(f"{LogColors.FAIL}Erreur: Identifiants Airtable manquants. Définissez AIRTABLE_API_KEY et AIRTABLE_BASE_ID.{LogColors.ENDC}")
+        sys.exit(1)
+    
+    try:
+        api = Api(AIRTABLE_API_KEY)
+        tables = {
+            "citizens": api.table(AIRTABLE_BASE_ID, "CITIZENS"),
+            "relationships": api.table(AIRTABLE_BASE_ID, "RELATIONSHIPS"),
+            "relevancies": api.table(AIRTABLE_BASE_ID, "RELEVANCIES"),
+            "problems": api.table(AIRTABLE_BASE_ID, "PROBLEMS")
+        }
+        print(f"{LogColors.OKGREEN}Connexion à Airtable initialisée avec succès.{LogColors.ENDC}")
+        return tables
+    except Exception as e:
+        print(f"{LogColors.FAIL}Erreur lors de l'initialisation d'Airtable: {e}{LogColors.ENDC}")
+        sys.exit(1)
+
+def _escape_airtable_value(value):
+    """Échappe les apostrophes et les guillemets pour les formules Airtable."""
+    if not isinstance(value, str):
+        value = str(value)
+    return value.replace("'", "\\'").replace('"', '\\"')
+
+def get_citizen_data(tables, username):
+    """Récupérer les données d'un citoyen."""
+    try:
+        safe_username = _escape_airtable_value(username)
+        records = tables["citizens"].all(formula=f"{{Username}} = '{safe_username}'", max_records=1)
+        if records:
+            return records[0]
+        return None
+    except Exception as e:
+        print(f"{LogColors.FAIL}Erreur lors de la récupération des données du citoyen {username}: {e}{LogColors.ENDC}")
+        return None
+
+def get_relevancies_data(tables, username1, username2):
+    """Récupérer les pertinences entre deux citoyens via l'API."""
+    try:
+        params = {
+            "relevantToCitizen": username1,
+            "targetCitizen": username2,
+            "limit": "50"
+        }
+        api_url = f"{BASE_URL}/api/relevancies"
+        response = requests.get(api_url, params=params, timeout=15)
+        response.raise_for_status()
+        
+        data = response.json()
+        if data.get("success") and "relevancies" in data:
+            print(f"Récupéré {len(data['relevancies'])} pertinences pour {username1} -> {username2} via API.")
+            return data["relevancies"]
+        else:
+            print(f"L'API a échoué à récupérer les pertinences pour {username1} -> {username2}: {data.get('error', 'Erreur inconnue')}")
+            return []
+    except Exception as e:
+        print(f"{LogColors.FAIL}Erreur lors de la récupération des pertinences pour {username1} -> {username2}: {e}{LogColors.ENDC}")
+        return []
+
+def get_problems_data(tables, username1, username2):
+    """Récupérer les problèmes pour deux citoyens via l'API."""
+    problems_list = []
+    try:
+        # Récupérer les problèmes pour username1
+        params1 = {"citizen": username1, "status": "active", "limit": "50"}
+        api_url = f"{BASE_URL}/api/problems"
+        response1 = requests.get(api_url, params=params1, timeout=15)
+        response1.raise_for_status()
+        data1 = response1.json()
+        if data1.get("success") and "problems" in data1:
+            problems_list.extend(data1["problems"])
+        
+        # Récupérer les problèmes pour username2
+        if username1 != username2:
+            params2 = {"citizen": username2, "status": "active", "limit": "50"}
+            response2 = requests.get(api_url, params=params2, timeout=15)
+            response2.raise_for_status()
+            data2 = response2.json()
+            if data2.get("success") and "problems" in data2:
+                # Éviter les doublons
+                existing_problem_ids = {p.get('problemId') or p.get('id') for p in problems_list}
+                for problem in data2["problems"]:
+                    problem_id = problem.get('problemId') or problem.get('id')
+                    if problem_id not in existing_problem_ids:
+                        problems_list.append(problem)
+        
+        # Trier par date de création (plus récent d'abord)
+        problems_list.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+        
+        print(f"Récupéré {len(problems_list)} problèmes pour {username1} ou {username2} via API.")
+        return problems_list[:50]  # Limiter à 50 problèmes
+    except Exception as e:
+        print(f"{LogColors.FAIL}Erreur lors de la récupération des problèmes: {e}{LogColors.ENDC}")
+        return problems_list
+
+def assess_relationship_with_kinos(tables, relationship_record):
+    """Évaluer une relation en utilisant KinOS."""
+    if not KINOS_API_KEY:
+        print(f"{LogColors.FAIL}Erreur: Clé API KinOS manquante. Définissez KINOS_API_KEY.{LogColors.ENDC}")
+        return None
+    
+    fields = relationship_record.get('fields', {})
+    citizen1 = fields.get('Citizen1')
+    citizen2 = fields.get('Citizen2')
+    
+    if not citizen1 or not citizen2:
+        print(f"{LogColors.FAIL}Erreur: Relation sans citoyens valides: {relationship_record.get('id')}{LogColors.ENDC}")
+        return None
+    
+    # Récupérer les données des citoyens
+    citizen1_data = get_citizen_data(tables, citizen1)
+    citizen2_data = get_citizen_data(tables, citizen2)
+    
+    if not citizen1_data or not citizen2_data:
+        print(f"{LogColors.FAIL}Erreur: Impossible de récupérer les données des citoyens pour la relation.{LogColors.ENDC}")
+        return None
+    
+    # Vérifier si au moins un des citoyens est une IA
+    citizen1_is_ai = citizen1_data.get('fields', {}).get('IsAI', False)
+    citizen2_is_ai = citizen2_data.get('fields', {}).get('IsAI', False)
+    
+    if not citizen1_is_ai and not citizen2_is_ai:
+        print(f"{LogColors.WARNING}Relation entre deux humains, ignorée: {citizen1} et {citizen2}{LogColors.ENDC}")
+        return None
+    
+    # Choisir aléatoirement quel citoyen IA va évaluer la relation
+    if citizen1_is_ai and citizen2_is_ai:
+        # Si les deux sont des IA, choisir aléatoirement
+        evaluator, target = random.choice([(citizen1, citizen2), (citizen2, citizen1)])
+    elif citizen1_is_ai:
+        evaluator, target = citizen1, citizen2
+    else:
+        evaluator, target = citizen2, citizen1
+    
+    print(f"{LogColors.HEADER}Évaluation de la relation entre {citizen1} et {citizen2} par {evaluator}{LogColors.ENDC}")
+    
+    # Récupérer les pertinences et problèmes
+    relevancies_evaluator_to_target = get_relevancies_data(tables, evaluator, target)
+    relevancies_target_to_evaluator = get_relevancies_data(tables, target, evaluator)
+    problems = get_problems_data(tables, evaluator, target)
+    
+    # Construire le contexte pour KinOS
+    system_context = {
+        "evaluator_citizen": citizen1_data if evaluator == citizen1 else citizen2_data,
+        "target_citizen": citizen2_data if target == citizen2 else citizen1_data,
+        "relationship": relationship_record,
+        "relevancies_evaluator_to_target": relevancies_evaluator_to_target,
+        "relevancies_target_to_evaluator": relevancies_target_to_evaluator,
+        "problems_involving_both": problems
+    }
+    
+    # Construire le prompt pour KinOS
+    prompt = (
+        f"[SYSTEM] Tu es {evaluator}, un citoyen de Venise. Je te demande d'évaluer ta relation avec {target}. "
+        f"Analyse les données fournies dans le contexte système (addSystem) pour comprendre votre relation actuelle. "
+        f"Ces données incluent:\n"
+        f"- Vos profils respectifs\n"
+        f"- Les détails de votre relation existante (force, confiance, etc.)\n"
+        f"- Les pertinences mutuelles entre vous\n"
+        f"- Les problèmes qui vous concernent tous les deux\n\n"
+        f"Réponds UNIQUEMENT avec un objet JSON contenant deux champs:\n"
+        f"1. 'title': Un titre court (1-3 mots) décrivant votre relation (ex: 'Ami proche', 'Rival commercial', 'Connaissance distante')\n"
+        f"2. 'description': Une description détaillée (2-3 phrases) expliquant la nature de votre relation\n\n"
+        f"Exemple de réponse valide:\n"
+        f"```json\n"
+        f"{{\n"
+        f"  \"title\": \"Partenaires commerciaux\",\n"
+        f"  \"description\": \"Nous avons établi une relation commerciale basée sur la confiance mutuelle. Nos échanges réguliers de ressources ont été bénéfiques pour nos entreprises respectives, bien que nous restions prudents dans nos négociations.\"\n"
+        f"}}\n"
+        f"```\n\n"
+        f"IMPORTANT: Ta réponse doit être UNIQUEMENT un objet JSON valide, sans texte avant ou après. "
+        f"Assure-toi que le titre et la description reflètent fidèlement la relation telle qu'elle apparaît dans les données. "
+        f"Prends en compte la force de la relation ({fields.get('StrengthScore', 0)}/100) et le niveau de confiance ({fields.get('TrustScore', 0)}/100)."
+    )
+    
+    # Appeler l'API KinOS
+    url = f"https://api.kinos-engine.ai/v2/blueprints/{KINOS_BLUEPRINT}/kins/{evaluator}/channels/{target}/messages"
+    headers = {
+        "Authorization": f"Bearer {KINOS_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "message": prompt,
+        "addSystem": json.dumps(system_context)
+    }
+    
+    try:
+        print(f"{LogColors.OKCYAN}Envoi de la requête à KinOS pour évaluer la relation...{LogColors.ENDC}")
+        response = requests.post(url, headers=headers, json=payload, timeout=120)
+        
+        if response.status_code == 200 or response.status_code == 201:
+            # Récupérer le dernier message de l'assistant
+            messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{KINOS_BLUEPRINT}/kins/{evaluator}/channels/{target}/messages"
+            messages_response = requests.get(messages_url, headers=headers, timeout=60)
+            
+            if messages_response.status_code == 200:
+                messages_data = messages_response.json()
+                assistant_messages = [
+                    msg for msg in messages_data.get("messages", [])
+                    if msg.get("role") == "assistant"
+                ]
+                
+                if assistant_messages:
+                    assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+                    content = assistant_messages[0].get("content", "")
+                    
+                    # Extraire le JSON de la réponse
+                    try:
+                        # Nettoyer la réponse pour extraire uniquement le JSON
+                        content = content.strip()
+                        if "```json" in content:
+                            content = content.split("```json")[1].split("```")[0].strip()
+                        elif "```" in content:
+                            content = content.split("```")[1].split("```")[0].strip()
+                        
+                        # Analyser le JSON
+                        relationship_assessment = json.loads(content)
+                        
+                        # Vérifier que les champs requis sont présents
+                        if "title" in relationship_assessment and "description" in relationship_assessment:
+                            print(f"{LogColors.OKGREEN}Évaluation de la relation réussie:{LogColors.ENDC}")
+                            print(f"Titre: {relationship_assessment['title']}")
+                            print(f"Description: {relationship_assessment['description']}")
+                            return relationship_assessment
+                        else:
+                            print(f"{LogColors.FAIL}Réponse JSON incomplète: {relationship_assessment}{LogColors.ENDC}")
+                    except json.JSONDecodeError as e:
+                        print(f"{LogColors.FAIL}Erreur lors de l'analyse du JSON: {e}{LogColors.ENDC}")
+                        print(f"Contenu reçu: {content}")
+                else:
+                    print(f"{LogColors.FAIL}Aucun message de l'assistant trouvé dans l'historique.{LogColors.ENDC}")
+            else:
+                print(f"{LogColors.FAIL}Erreur lors de la récupération des messages: {messages_response.status_code} - {messages_response.text}{LogColors.ENDC}")
+        else:
+            print(f"{LogColors.FAIL}Erreur de l'API KinOS: {response.status_code} - {response.text}{LogColors.ENDC}")
+        
+        return None
+    except Exception as e:
+        print(f"{LogColors.FAIL}Erreur lors de l'appel à KinOS: {e}{LogColors.ENDC}")
+        return None
+
+def update_relationship(tables, relationship_id, assessment):
+    """Mettre à jour la relation avec l'évaluation de KinOS."""
+    try:
+        # Mettre à jour les champs Title et Description
+        update_data = {
+            "Title": assessment["title"],
+            "Description": assessment["description"],
+            "UpdatedAt": datetime.now().isoformat()
+        }
+        
+        tables["relationships"].update(relationship_id, update_data)
+        print(f"{LogColors.OKGREEN}Relation {relationship_id} mise à jour avec succès.{LogColors.ENDC}")
+        return True
+    except Exception as e:
+        print(f"{LogColors.FAIL}Erreur lors de la mise à jour de la relation {relationship_id}: {e}{LogColors.ENDC}")
+        return False
+
+def process_relationships(tables, limit=None, min_strength=None, max_per_run=None):
+    """Traiter les relations pour les qualifier avec KinOS."""
+    try:
+        # Construire la formule pour filtrer les relations
+        formula_parts = []
+        
+        if min_strength is not None:
+            formula_parts.append(f"{{StrengthScore}} >= {min_strength}")
+        
+        formula = " AND ".join(formula_parts) if formula_parts else ""
+        
+        # Récupérer les relations, triées par force décroissante
+        print(f"{LogColors.HEADER}Récupération des relations depuis Airtable...{LogColors.ENDC}")
+        if formula:
+            relationships = tables["relationships"].all(formula=formula, sort=["-StrengthScore"])
+        else:
+            relationships = tables["relationships"].all(sort=["-StrengthScore"])
+        
+        print(f"{LogColors.OKBLUE}Trouvé {len(relationships)} relations à évaluer.{LogColors.ENDC}")
+        
+        # Limiter le nombre de relations à traiter si spécifié
+        if limit is not None and limit > 0:
+            relationships = relationships[:limit]
+            print(f"{LogColors.OKBLUE}Limité à {limit} relations.{LogColors.ENDC}")
+        
+        if max_per_run is not None and max_per_run > 0:
+            relationships = relationships[:max_per_run]
+            print(f"{LogColors.OKBLUE}Limité à {max_per_run} relations par exécution.{LogColors.ENDC}")
+        
+        # Compteurs pour les statistiques
+        total = len(relationships)
+        success_count = 0
+        error_count = 0
+        
+        # Traiter chaque relation
+        for i, relationship in enumerate(relationships, 1):
+            relationship_id = relationship.get('id')
+            fields = relationship.get('fields', {})
+            citizen1 = fields.get('Citizen1')
+            citizen2 = fields.get('Citizen2')
+            strength = fields.get('StrengthScore', 0)
+            trust = fields.get('TrustScore', 0)
+            
+            print(f"\n{LogColors.HEADER}[{i}/{total}] Traitement de la relation {relationship_id} entre {citizen1} et {citizen2} (Force: {strength}, Confiance: {trust}){LogColors.ENDC}")
+            
+            # Évaluer la relation avec KinOS
+            assessment = assess_relationship_with_kinos(tables, relationship)
+            
+            if assessment:
+                # Mettre à jour la relation avec l'évaluation
+                if update_relationship(tables, relationship_id, assessment):
+                    success_count += 1
+                else:
+                    error_count += 1
+            else:
+                error_count += 1
+            
+            # Pause entre les requêtes pour éviter de surcharger l'API
+            if i < total:
+                sleep_time = random.uniform(2, 5)  # Entre 2 et 5 secondes
+                print(f"{LogColors.OKCYAN}Pause de {sleep_time:.1f} secondes avant la prochaine relation...{LogColors.ENDC}")
+                time.sleep(sleep_time)
+        
+        # Afficher les statistiques finales
+        print(f"\n{LogColors.HEADER}=== Résumé de l'exécution ==={LogColors.ENDC}")
+        print(f"Total des relations traitées: {total}")
+        print(f"Succès: {success_count}")
+        print(f"Erreurs: {error_count}")
+        print(f"Taux de réussite: {(success_count / total * 100) if total > 0 else 0:.1f}%")
+        
+    except Exception as e:
+        print(f"{LogColors.FAIL}Erreur lors du traitement des relations: {e}{LogColors.ENDC}")
+        import traceback
+        traceback.print_exc()
+
+def main():
+    """Point d'entrée principal du script."""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Qualifier les relations entre citoyens en utilisant KinOS.")
+    parser.add_argument("--limit", type=int, help="Nombre maximum de relations à traiter")
+    parser.add_argument("--min-strength", type=int, help="Force minimale de la relation pour être traitée")
+    parser.add_argument("--max-per-run", type=int, default=10, help="Nombre maximum de relations à traiter par exécution (défaut: 10)")
+    args = parser.parse_args()
+    
+    print(f"{LogColors.HEADER}=== Qualification des Relations avec KinOS ==={LogColors.ENDC}")
+    print(f"Démarrage à {datetime.now().isoformat()}")
+    
+    # Initialiser la connexion à Airtable
+    tables = initialize_airtable()
+    
+    # Traiter les relations
+    process_relationships(tables, args.limit, args.min_strength, args.max_per_run)
+    
+    print(f"{LogColors.HEADER}=== Fin de l'exécution ==={LogColors.ENDC}")
+    print(f"Terminé à {datetime.now().isoformat()}")
+
+if __name__ == "__main__":
+    main()
