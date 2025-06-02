@@ -13,11 +13,12 @@ from datetime import datetime
 from backend.engine.utils.activity_helpers import (
     get_building_record,
     get_citizen_record,
-    update_citizen_ducats,
+    # update_citizen_ducats, # Retiré d'ici
     create_notification_record,
     LogColors,
     VENICE_TIMEZONE
 )
+from backend.engine.utils.financial_helpers import update_citizen_ducats # Ajouté depuis l'emplacement supposé
 
 log = logging.getLogger(__name__)
 
