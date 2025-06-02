@@ -2,9 +2,9 @@ import os
 import sys
 import json
 import random
-import argparse # Added argparse
+import argparse
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any # Added Any
+from typing import Dict, List, Optional, Any, Literal
 import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Base, Table # Import Base
@@ -422,13 +422,13 @@ def call_try_create_activity_api(
         print(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
         return False
 
-def create_admin_notification(tables, ai_response_counts: Dict[str, int]) -> None:
+def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_used: str = "default") -> None:
     """Create a notification for admins with the AI response summary."""
     try:
         now = datetime.now().isoformat()
         
         # Create a summary message
-        message = "💬 **AI Message Response Summary** 💬\n\n"
+        message = f"💬 **AI Message Response Summary** 💬\n\nModel utilisé: **{model_used}**\n\n"
         
         for ai_name, response_count in ai_response_counts.items():
             message += f"- 👤 **{ai_name}**: {response_count} responses\n"
@@ -443,6 +443,7 @@ def create_admin_notification(tables, ai_response_counts: Dict[str, int]) -> Non
             "Status": "read", # Set status to read
             "Details": json.dumps({
                 "ai_response_counts": ai_response_counts,
+                "model_used": model_used,
                 "timestamp": now
             })
         }
@@ -452,9 +453,9 @@ def create_admin_notification(tables, ai_response_counts: Dict[str, int]) -> Non
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 
-def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None): # Added kinos_model_override_arg
+def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
     """Main function to process AI messages."""
-    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default" # Now kinos_model_override_arg is defined
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
     print(f"Starting AI message response process (dry_run={dry_run}, kinos_model={model_status})")
     
     # Initialize Airtable connection
@@ -590,9 +591,9 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
     # Create admin notification with summary
     total_responses = sum(ai_response_counts.values())
     if not dry_run and total_responses > 0:
-        create_admin_notification(tables, ai_response_counts)
+        create_admin_notification(tables, ai_response_counts, kinos_model_override_arg or "default")
     elif dry_run and total_responses > 0 : # Also show for dry run if responses would have been made
-        print(f"[DRY RUN] Would create admin notification with response counts: {ai_response_counts}")
+        print(f"[DRY RUN] Would create admin notification with response counts: {ai_response_counts}, model: {kinos_model_override_arg or 'default'}")
     elif total_responses == 0:
         print("No responses were made by any AI.")
     
