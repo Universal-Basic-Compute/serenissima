@@ -1062,7 +1062,7 @@ async def create_transaction(transaction_data: TransactionRequest):
             else:
                 print(f"Could not find username for wallet {transaction_data.seller}, using wallet as username")
 
-        now = datetime.datetime.now().isoformat()
+        now = datetime.now().isoformat()
         land_details_json = None
         if transaction_data.type == "land":
             land_details = {}
