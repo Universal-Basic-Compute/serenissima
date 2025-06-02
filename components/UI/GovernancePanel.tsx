@@ -5,6 +5,17 @@ interface GovernancePanelProps {
   standalone?: boolean;
 }
 
+interface SenatePlayer {
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  influence: number;
+  socialClass?: string;
+  coatOfArmsImageUrl?: string | null;
+  familyMotto?: string;
+  isCurrentUser?: boolean;
+}
+
 interface SignoriaPlayer {
   username: string;
   firstName?: string;
@@ -119,13 +130,16 @@ const mockDecrees: Decree[] = [
 ];
 
 const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone = false }) => {
-  const [governanceTab, setGovernanceTab] = useState<'council' | 'laws' | 'signoria'>('laws');
+  const [governanceTab, setGovernanceTab] = useState<'council' | 'laws' | 'signoria' | 'senate'>('laws');
   const [decrees, setDecrees] = useState<Decree[]>(mockDecrees);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [signoriaPlayers, setSignoriaPlayers] = useState<SignoriaPlayer[]>([]);
   const [isLoadingSignoria, setIsLoadingSignoria] = useState<boolean>(false);
   const [signoriaError, setSignoriaError] = useState<string | null>(null);
+  const [senatePlayers, setSenatePlayers] = useState<SenatePlayer[]>([]);
+  const [isLoadingSenate, setIsLoadingSenate] = useState<boolean>(false);
+  const [senateError, setSenateError] = useState<string | null>(null);
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
 
   // Function to fetch decrees from Airtable
@@ -196,6 +210,52 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
     }
   };
 
+  // Function to fetch top 50 players by influence for the Senate
+  const fetchSenatePlayers = async () => {
+    setIsLoadingSenate(true);
+    setSenateError(null);
+    
+    try {
+      // Fetch top 50 citizens by influence from our API
+      // For now, we'll use the same endpoint but will need a dedicated one in the future
+      const response = await fetch('/api/citizens/top-influence');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch senate citizens: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.citizens)) {
+        console.log(`Loaded ${data.citizens.length} citizens for the Senate`);
+        
+        // Transform the API response to match our SenatePlayer interface
+        // In a real implementation, we would fetch 50 citizens instead of 10
+        const senatePlayers: SenatePlayer[] = data.citizens.map((citizen: any) => ({
+          username: citizen.username,
+          firstName: citizen.firstName,
+          lastName: citizen.lastName,
+          influence: citizen.influence || 0,
+          socialClass: citizen.socialClass,
+          coatOfArmsImageUrl: citizen.coatOfArmsImageUrl || 
+            `https://backend.serenissima.ai/public/assets/images/coat-of-arms/${citizen.username}.png`,
+          familyMotto: citizen.familyMotto || '',
+          isCurrentUser: citizen.username === currentUsername
+        }));
+        
+        setSenatePlayers(senatePlayers);
+      } else {
+        throw new Error('Invalid response format from API');
+      }
+    } catch (err) {
+      console.error('Error fetching senate players:', err);
+      setSenateError(err instanceof Error ? err.message : 'Failed to fetch senate players');
+      setSenatePlayers([]);
+    } finally {
+      setIsLoadingSenate(false);
+    }
+  };
+
   // Get current username from localStorage
   useEffect(() => {
     try {
@@ -213,11 +273,14 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
 
   // Fetch decrees when the component mounts or when the tab changes to 'laws'
   // Fetch signoria players when the tab changes to 'signoria'
+  // Fetch senate players when the tab changes to 'senate'
   useEffect(() => {
     if (governanceTab === 'laws') {
       fetchDecrees();
     } else if (governanceTab === 'signoria') {
       fetchSignoriaPlayers();
+    } else if (governanceTab === 'senate') {
+      fetchSenatePlayers();
     }
   }, [governanceTab]);
 
@@ -271,6 +334,16 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
               onClick={() => setGovernanceTab('signoria')}
             >
               The Signoria
+            </button>
+            <button
+              className={`pb-4 px-1 border-b-2 font-medium text-sm ${
+                governanceTab === 'senate' 
+                  ? 'border-amber-600 text-amber-800' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setGovernanceTab('senate')}
+            >
+              The Senate
             </button>
           </nav>
         </div>
@@ -739,6 +812,139 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                 <li>Successfully propose and support beneficial decrees</li>
                 <li>Maintain strong relationships with other influential citizens</li>
               </ul>
+            </div>
+          </div>
+        )}
+        
+        {governanceTab === 'senate' && (
+          <div className="py-4">
+            <h3 className="text-xl font-serif text-amber-800 mb-4 text-center">
+              The Senate - Top 50 Citizens by Influence
+            </h3>
+            
+            <div className="mb-6 bg-amber-100 p-4 rounded-lg border border-amber-300">
+              <p className="text-amber-800 font-serif">
+                <span className="font-bold">Coming Soon:</span> The Senate of La Serenissima is currently under construction. When completed, it will represent the 50 most influential citizens who will debate and vote on major economic and political matters affecting the Republic.
+              </p>
+              <p className="text-amber-800 font-serif mt-2">
+                The Senate will provide a forum for citizens to propose and discuss policies, trade agreements, and diplomatic relations with other states. Membership will be determined by influence ranking, with the top 50 citizens automatically granted a seat.
+              </p>
+            </div>
+            
+            {isLoadingSenate && (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-600"></div>
+                <p className="mt-2 text-amber-800">Assembling the Senate...</p>
+              </div>
+            )}
+            
+            {senateError && (
+              <div className="bg-red-50 border border-red-300 text-red-800 p-4 rounded-lg mb-6">
+                <p className="font-medium">Failed to retrieve Senate members</p>
+                <p className="text-sm mt-1">{senateError}</p>
+              </div>
+            )}
+            
+            {!isLoadingSenate && senatePlayers.length > 0 && (
+              <div>
+                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg mb-6">
+                  <table className="min-w-full divide-y divide-amber-300">
+                    <thead className="bg-amber-100">
+                      <tr>
+                        <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-amber-900 sm:pl-6">Rank</th>
+                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-amber-900">Citizen</th>
+                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-amber-900">Social Class</th>
+                        <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-amber-900">Influence</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-amber-200 bg-white">
+                      {senatePlayers.map((player, index) => {
+                        // Get social class color
+                        const getSocialClassColor = (socialClass: string = ''): string => {
+                          const baseClass = socialClass.toLowerCase();
+                          
+                          if (baseClass.includes('nobili')) {
+                            return 'text-amber-700'; // Gold for nobility
+                          } else if (baseClass.includes('cittadini')) {
+                            return 'text-blue-700'; // Blue for citizens
+                          } else if (baseClass.includes('popolani')) {
+                            return 'text-amber-600'; // Brown/amber for common people
+                          } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
+                            return 'text-gray-700'; // Gray for laborers
+                          }
+                          
+                          return 'text-gray-700'; // Default color
+                        };
+                        
+                        // Format influence number with commas
+                        const formattedInfluence = player.influence.toLocaleString();
+                        
+                        return (
+                          <tr key={player.username} className={player.isCurrentUser ? "bg-purple-50" : (index % 2 === 0 ? "bg-amber-50" : "bg-white")}>
+                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-amber-900 sm:pl-6">
+                              {index + 1}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm">
+                              <div className="flex items-center">
+                                <div className="h-10 w-10 flex-shrink-0">
+                                  <img 
+                                    className="h-10 w-10 rounded-full border border-amber-300"
+                                    src={`https://backend.serenissima.ai/public_assets/images/citizens/${player.username || 'default'}.jpg`}
+                                    alt={`${player.firstName} ${player.lastName}`}
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
+                                    }}
+                                  />
+                                </div>
+                                <div className="ml-4">
+                                  <div className="font-medium text-gray-900">{player.firstName} {player.lastName}</div>
+                                  <div className="text-gray-500">{player.username}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className={`whitespace-nowrap px-3 py-4 text-sm ${getSocialClassColor(player.socialClass)}`}>
+                              {player.socialClass}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-right font-medium">
+                              {formattedInfluence}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="text-center text-sm text-amber-700 italic">
+                  Note: The Senate is currently in development. When launched, it will include all 50 top citizens.
+                </div>
+              </div>
+            )}
+            
+            {!isLoadingSenate && senatePlayers.length === 0 && !senateError && (
+              <div className="text-center py-8 text-amber-700 italic">
+                No citizens found for the Senate. The institution is still being established.
+              </div>
+            )}
+            
+            <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <h4 className="text-lg font-serif text-amber-800 mb-2">The Role of the Senate</h4>
+              <p className="text-amber-700 mb-4">
+                When fully operational, the Senate of La Serenissima will:
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-amber-800">
+                <li>Debate and vote on major economic policies affecting the Republic</li>
+                <li>Approve or reject significant trade agreements with foreign powers</li>
+                <li>Oversee the Republic's finances and taxation systems</li>
+                <li>Regulate commerce and industry throughout Venetian territories</li>
+                <li>Appoint ambassadors and maintain diplomatic relations</li>
+              </ul>
+              
+              <div className="mt-4 bg-amber-100 p-3 rounded border border-amber-200">
+                <p className="italic text-amber-800">
+                  <span className="font-bold">Historical Note:</span> The historical Venetian Senate (Consiglio dei Pregadi) was one of the most important political bodies in the Republic, responsible for commerce, finance, and foreign policy. It consisted of 60 ordinary members elected annually, plus additional ex-officio members from other councils.
+                </p>
+              </div>
             </div>
           </div>
         )}
