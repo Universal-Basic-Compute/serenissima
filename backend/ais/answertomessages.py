@@ -639,7 +639,10 @@ def process_ai_messages(kinos_model_override_arg: Optional[str] = None, instant_
                                 "receiverUsername": sender_username,
                                 "content": cleaned_response,
                                 "messageType": "reply", # Indicate it's a reply
-                                "inReplyToMessageId": message_record.get("fields", {}).get("MessageId", message_id) # Pass original MessageId if available
+                                "targetBuildingId": None, # Explicitly None, creator will use receiverUsername
+                                "details": {
+                                    "inReplyToMessageId": message_record.get("fields", {}).get("MessageId", message_id)
+                                }
                             }
                             print(f"{LogColors.OKGREEN}RESPONSE CONTENT:{LogColors.ENDC}")
                             print(f"{cleaned_response}")
