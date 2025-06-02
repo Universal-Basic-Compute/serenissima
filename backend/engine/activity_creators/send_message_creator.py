@@ -1,8 +1,7 @@
 import json
 import uuid
 import logging
-import datetime
-from datetime import timezone, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 from backend.engine.utils.activity_helpers import (
     _escape_airtable_value, 
@@ -46,7 +45,7 @@ def try_create(
         conversation_length = 3
 
     sender = citizen_record['fields'].get('Username')
-    ts = int(datetime.datetime.now(VENICE_TIMEZONE).timestamp())
+    ts = int(datetime.now(VENICE_TIMEZONE).timestamp())
     
     # Get current citizen position to determine path
     sender_position_str = citizen_record['fields'].get('Position')
