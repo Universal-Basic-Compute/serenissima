@@ -226,6 +226,14 @@ export default function LandMarkers({
         >
           {editMode ? 'Exit Land Edit Mode' : 'Edit Land Markers'}
         </button>
+        
+        {editMode && (
+          <div className="mt-2 bg-black/70 text-white p-2 rounded text-sm text-center">
+            <p>Cliquez sur une terre pour la sélectionner</p>
+            <p>Utilisez les poignées pour redimensionner</p>
+            <p>Glissez-déposez pour repositionner</p>
+          </div>
+        )}
       </div>
 
       {/* Land Markers */}
@@ -276,38 +284,95 @@ export default function LandMarkers({
               onMouseEnter={() => handleMouseEnter(polygon)}
               onMouseLeave={handleMouseLeave}
               onResizeStop={(e, direction, ref, d) => handleResize(e, direction, ref, d, polygon.id)}
-              enable={isSelected}
+              enable={{
+                top: isSelected,
+                right: isSelected,
+                bottom: isSelected,
+                left: isSelected,
+                topRight: isSelected,
+                bottomRight: isSelected,
+                bottomLeft: isSelected,
+                topLeft: isSelected
+              }}
               handleStyles={{
+                topRight: { 
+                  right: '-8px', 
+                  top: '-8px', 
+                  cursor: 'ne-resize',
+                  width: '16px',
+                  height: '16px',
+                  background: 'white',
+                  border: '2px solid red',
+                  borderRadius: '50%',
+                  zIndex: 20
+                },
                 bottomRight: { 
-                  right: '-4px', 
-                  bottom: '-4px', 
-                  cursor: 'nwse-resize',
-                  width: '10px',
-                  height: '10px',
-                  background: 'red',
-                  borderRadius: '50%'
+                  right: '-8px', 
+                  bottom: '-8px', 
+                  cursor: 'se-resize',
+                  width: '16px',
+                  height: '16px',
+                  background: 'white',
+                  border: '2px solid red',
+                  borderRadius: '50%',
+                  zIndex: 20
+                },
+                bottomLeft: { 
+                  left: '-8px', 
+                  bottom: '-8px', 
+                  cursor: 'sw-resize',
+                  width: '16px',
+                  height: '16px',
+                  background: 'white',
+                  border: '2px solid red',
+                  borderRadius: '50%',
+                  zIndex: 20
+                },
+                topLeft: { 
+                  left: '-8px', 
+                  top: '-8px', 
+                  cursor: 'nw-resize',
+                  width: '16px',
+                  height: '16px',
+                  background: 'white',
+                  border: '2px solid red',
+                  borderRadius: '50%',
+                  zIndex: 20
                 }
               }}
+              handleComponent={{
+                right: <div className="h-full w-2 bg-red-500 opacity-70 hover:opacity-100 transition-opacity" />,
+                left: <div className="h-full w-2 bg-red-500 opacity-70 hover:opacity-100 transition-opacity" />,
+                top: <div className="h-2 w-full bg-red-500 opacity-70 hover:opacity-100 transition-opacity" />,
+                bottom: <div className="h-2 w-full bg-red-500 opacity-70 hover:opacity-100 transition-opacity" />
+              }}
             >
-              <img
-                src={imageUrl}
-                alt={polygon.historicalName || polygon.id}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  filter: isNight ? 'brightness(0.7) saturate(0.8)' : 'none',
-                  pointerEvents: 'none'
-                }}
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
-              {isSelected && (
-                <div className="absolute top-0 left-0 bg-black/70 text-white text-xs p-1 rounded">
-                  {polygon.historicalName || polygon.id}
-                </div>
-              )}
+              <div className="relative w-full h-full">
+                <img
+                  src={imageUrl}
+                  alt={polygon.historicalName || polygon.id}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    filter: isNight ? 'brightness(0.7) saturate(0.8)' : 'none',
+                    pointerEvents: 'none'
+                  }}
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+                {isSelected && (
+                  <>
+                    <div className="absolute top-0 left-0 bg-black/70 text-white text-xs p-1 rounded">
+                      {polygon.historicalName || polygon.id}
+                    </div>
+                    <div className="absolute bottom-0 right-0 bg-black/70 text-white text-xs p-1 rounded">
+                      {Math.round(width)}×{Math.round(height)}
+                    </div>
+                  </>
+                )}
+              </div>
             </Resizable>
           );
         } else {
