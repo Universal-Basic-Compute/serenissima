@@ -158,120 +158,35 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
     setSignoriaError(null);
     
     try {
-      // In a real implementation, this would fetch from an API endpoint
-      // For now, we'll use mock data
-      const mockSignoriaPlayers: SignoriaPlayer[] = [
-        {
-          username: "doge_andrea",
-          firstName: "Andrea",
-          lastName: "Gritti",
-          influence: 25000,
-          socialClass: "Nobili",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/doge_andrea.png",
-          familyMotto: "Fortitudine et Prudentia",
-          isCurrentUser: false
-        },
-        {
-          username: "lorenzo_medici",
-          firstName: "Lorenzo",
-          lastName: "de' Medici",
-          influence: 22500,
-          socialClass: "Nobili",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/lorenzo_medici.png",
-          familyMotto: "Arte et Ingenio",
-          isCurrentUser: false
-        },
-        {
-          username: "caterina_cornaro",
-          firstName: "Caterina",
-          lastName: "Cornaro",
-          influence: 19800,
-          socialClass: "Nobili",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/caterina_cornaro.png",
-          familyMotto: "Regina et Domina",
-          isCurrentUser: false
-        },
-        {
-          username: "marco_polo",
-          firstName: "Marco",
-          lastName: "Polo",
-          influence: 18200,
-          socialClass: "Cittadini",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/marco_polo.png",
-          familyMotto: "Mundus Patet",
-          isCurrentUser: false
-        },
-        {
-          username: "antonio_vivaldi",
-          firstName: "Antonio",
-          lastName: "Vivaldi",
-          influence: 16500,
-          socialClass: "Cittadini",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/antonio_vivaldi.png",
-          familyMotto: "Musica Aeterna",
-          isCurrentUser: false
-        },
-        {
-          username: "veronica_franco",
-          firstName: "Veronica",
-          lastName: "Franco",
-          influence: 15300,
-          socialClass: "Cittadini",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/veronica_franco.png",
-          familyMotto: "Veritas in Carmine",
-          isCurrentUser: false
-        },
-        {
-          username: "titian_vecellio",
-          firstName: "Tiziano",
-          lastName: "Vecellio",
-          influence: 14200,
-          socialClass: "Cittadini",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/titian_vecellio.png",
-          familyMotto: "Ars Longa, Vita Brevis",
-          isCurrentUser: false
-        },
-        {
-          username: "elena_cornaro",
-          firstName: "Elena",
-          lastName: "Cornaro Piscopia",
-          influence: 13100,
-          socialClass: "Nobili",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/elena_cornaro.png",
-          familyMotto: "Sapientia et Virtus",
-          isCurrentUser: false
-        },
-        {
-          username: "giacomo_casanova",
-          firstName: "Giacomo",
-          lastName: "Casanova",
-          influence: 12400,
-          socialClass: "Cittadini",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/giacomo_casanova.png",
-          familyMotto: "Carpe Diem",
-          isCurrentUser: false
-        },
-        {
-          username: "francesco_morosini",
-          firstName: "Francesco",
-          lastName: "Morosini",
-          influence: 11800,
-          socialClass: "Nobili",
-          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/francesco_morosini.png",
-          familyMotto: "Fortiter et Fideliter",
-          isCurrentUser: false
-        }
-      ];
+      // Fetch top 10 citizens by influence from our API
+      const response = await fetch('/api/citizens/top-influence');
       
-      // In a real implementation, you would mark the current user
-      // For now, we'll just set the first player as the current user for demonstration
-      if (currentUsername) {
-        mockSignoriaPlayers.forEach(player => {
-          player.isCurrentUser = player.username === currentUsername;
-        });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch top citizens: ${response.status} ${response.statusText}`);
       }
       
-      setSignoriaPlayers(mockSignoriaPlayers);
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.citizens)) {
+        console.log(`Loaded ${data.citizens.length} top citizens by influence`);
+        
+        // Transform the API response to match our SignoriaPlayer interface
+        const signoriaPlayers: SignoriaPlayer[] = data.citizens.map((citizen: any) => ({
+          username: citizen.username,
+          firstName: citizen.firstName,
+          lastName: citizen.lastName,
+          influence: citizen.influence || 0,
+          socialClass: citizen.socialClass,
+          coatOfArmsImageUrl: citizen.coatOfArmsImageUrl || 
+            `https://backend.serenissima.ai/public/assets/images/coat-of-arms/${citizen.username}.png`,
+          familyMotto: citizen.familyMotto || '',
+          isCurrentUser: citizen.username === currentUsername
+        }));
+        
+        setSignoriaPlayers(signoriaPlayers);
+      } else {
+        throw new Error('Invalid response format from API');
+      }
     } catch (err) {
       console.error('Error fetching signoria players:', err);
       setSignoriaError(err instanceof Error ? err.message : 'Failed to fetch signoria players');
