@@ -92,13 +92,23 @@ export default function LandMarkers({
       }
       
       setLandImages(images);
-      setImageSettings(settings);
+      // Merge newSettingsFromFile with existing imageSettings.
+      // If in editMode and a specific land is selected, preserve its current settings from state
+      // to avoid clobbering optimistic updates made by handleResize or handleDrag.
+      setImageSettings(prevSettings => {
+        const mergedSettings = { ...settings }; // Start with settings from polygon props
+        if (editMode && selectedLandId && prevSettings[selectedLandId]) {
+          // If editing a land, its current state (potentially with unsaved changes) takes precedence
+          mergedSettings[selectedLandId] = prevSettings[selectedLandId];
+        }
+        return mergedSettings;
+      });
     };
     
     if (isVisible && polygonsToRender.length > 0) {
       loadLandImagesAndSettings();
     }
-  }, [isVisible, polygonsToRender]);
+  }, [isVisible, polygonsToRender, editMode, selectedLandId]);
 
   const handleMouseEnter = useCallback((polygon: any) => {
     if (!polygon || !polygon.id || editMode) return;
