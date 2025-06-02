@@ -1,6 +1,6 @@
 import logging
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import requests # Should be used by helpers, not directly here unless for specific API calls not in helpers
 import pytz
@@ -235,7 +235,7 @@ def _handle_emergency_fishing(
         try:
             ate_at_dt = dateutil_parser.isoparse(ate_at_str.replace('Z', '+00:00'))
             if ate_at_dt.tzinfo is None: ate_at_dt = pytz.UTC.localize(ate_at_dt)
-            if (now_utc_dt - ate_at_dt) <= datetime.timedelta(hours=24): # More than 24 hours
+            if (now_utc_dt - ate_at_dt) <= timedelta(hours=24): # More than 24 hours
                 is_starving = False
         except ValueError: pass # Invalid date format, assume starving
     
@@ -674,7 +674,7 @@ def _handle_night_shelter(
         if venice_now_for_rest_fallback.hour < NIGHT_END_HOUR_FOR_STAY:
              end_time_venice_rest = venice_now_for_rest_fallback.replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
         else:
-             end_time_venice_rest = (venice_now_for_rest_fallback + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
+             end_time_venice_rest = (venice_now_for_rest_fallback + timedelta(days=1)).replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
     else:
         # Determine the end of the current or upcoming rest period
         # This logic assumes rest periods are sorted and handles overnight.
@@ -697,7 +697,7 @@ def _handle_night_shelter(
         
         if end_hour_of_current_rest_period == -1: # Should not happen if is_rest_time_for_class was true
             log.warning(f"Could not determine current rest period end for {citizen_name}. Defaulting end time.")
-            end_time_venice_rest = (now_venice_dt + datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0) # Default 1h rest
+            end_time_venice_rest = (now_venice_dt + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0) # Default 1h rest
         else:
             # If the end_hour is for "next day" (e.g. rest is 22-06, current is 23, end_hour is 6)
             # or if current_hour is already past the start of a period that ends on the same day.
@@ -730,13 +730,13 @@ def _handle_night_shelter(
             if chosen_rest_block_end_hour != -1:
                 end_time_venice_rest = now_venice_dt.replace(hour=chosen_rest_block_end_hour, minute=0, second=0, microsecond=0)
                 if is_overnight_block_ending_next_day and chosen_rest_block_end_hour <= current_hour_venice : # e.g. current 23, end_hour 06
-                    end_time_venice_rest += datetime.timedelta(days=1)
+                    end_time_venice_rest += timedelta(days=1)
                 # If current time is already past the calculated end time for today (e.g. current 07:00, end_hour 06:00 from a 22-06 block)
                 # this means we are past the rest period. This case should ideally be caught by is_rest_time_for_class.
                 # However, if is_rest_time_for_class was true, and we are here, it means we are *in* a rest period.
             else: # Fallback, should not be reached if is_rest_time_for_class is accurate
                 log.error(f"Logic error determining rest end time for {citizen_name}. Defaulting.")
-                end_time_venice_rest = (now_venice_dt + datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+                end_time_venice_rest = (now_venice_dt + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
 
     stay_end_time_utc_iso = end_time_venice_rest.astimezone(pytz.UTC).isoformat()
 
@@ -1720,7 +1720,7 @@ def dispatch_specific_activity_request(
         try:
             ate_at_dt = dateutil_parser.isoparse(ate_at_str.replace('Z', '+00:00'))
             if ate_at_dt.tzinfo is None: ate_at_dt = pytz.UTC.localize(ate_at_dt)
-            if (now_utc_dt - ate_at_dt) > datetime.timedelta(hours=12): is_hungry = True
+            if (now_utc_dt - ate_at_dt) > timedelta(hours=12): is_hungry = True
         except ValueError: is_hungry = True 
     else: is_hungry = True
     citizen_record_full['is_hungry'] = is_hungry # Modify a copy if concerned about side effects, or pass as arg
@@ -1958,7 +1958,7 @@ def process_citizen_activity(
             log.info(f"{LogColors.OKBLUE}Fallback for {citizen_name}: _handle_night_shelter did not create a rest activity/chain. Creating 'idle'.{LogColors.ENDC}")
     
     # If we reach here, it means we decided to create 'idle' or the fallback rest attempt failed.
-    idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+    idle_end_time_iso = (now_utc_dt + timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
     # Pass None for start_time_utc_iso for immediate start
     return try_create_idle_activity(
         tables, citizen_custom_id, citizen_username, citizen_airtable_id,
