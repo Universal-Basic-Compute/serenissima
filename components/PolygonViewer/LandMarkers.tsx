@@ -111,7 +111,8 @@ export default function LandMarkers({
   const handleDragStart = useCallback((e: React.MouseEvent, polygonId: string, centerX: number, centerY: number) => {
     if (!editMode || selectedLandId !== polygonId) return;
     
-    e.stopPropagation();
+    e.preventDefault(); // Empêcher le comportement par défaut
+    e.stopPropagation(); // Empêcher la propagation aux éléments parents
     setIsDragging(true);
     
     dragStartRef.current = { 
@@ -122,16 +123,9 @@ export default function LandMarkers({
     // Use current position from settings or default to center
     const currentSettings = imageSettings[polygonId];
     
-    // Toujours utiliser la position actuelle du centre du polygone comme point de référence
-    // et ajouter l'offset si des paramètres existent
-    let posX = centerX;
-    let posY = centerY;
-    
-    // Si nous avons des paramètres, calculer la position absolue actuelle
-    if (currentSettings && currentSettings.x !== undefined && currentSettings.y !== undefined) {
-      posX = currentSettings.x;
-      posY = currentSettings.y;
-    }
+    // Si nous avons des paramètres, utiliser la position sauvegardée
+    let posX = currentSettings?.x || centerX;
+    let posY = currentSettings?.y || centerY;
     
     positionRef.current = { x: posX, y: posY };
     console.log(`Drag start for ${polygonId} at position:`, positionRef.current);
@@ -179,24 +173,18 @@ export default function LandMarkers({
       landElement.setAttribute('style', styleString);
     }
     
-    // Mettre à jour l'état moins fréquemment pour éviter les re-renders excessifs
-    // Utiliser un debounce pour limiter les mises à jour d'état
-    if (!window.landDragUpdateTimeout) {
-      window.landDragUpdateTimeout = setTimeout(() => {
-        setImageSettings(prev => ({
-          ...prev,
-          [selectedLandId]: {
-            ...existingSettings,
-            width,
-            height,
-            referenceScale: scale,
-            x: newX,
-            y: newY
-          }
-        }));
-        window.landDragUpdateTimeout = null;
-      }, 50); // Mettre à jour l'état toutes les 50ms au maximum
-    }
+    // Mettre à jour l'état immédiatement pour un meilleur suivi
+    setImageSettings(prev => ({
+      ...prev,
+      [selectedLandId]: {
+        ...existingSettings,
+        width,
+        height,
+        referenceScale: scale,
+        x: newX,
+        y: newY
+      }
+    }));
     
     // Update drag start position for continuous dragging
     dragStartRef.current = { x: e.clientX, y: e.clientY };
@@ -206,83 +194,21 @@ export default function LandMarkers({
     if (isDragging && selectedLandId) {
       setIsDragging(false);
       
-      // Annuler tout timeout en cours
-      if (window.landDragUpdateTimeout) {
-        clearTimeout(window.landDragUpdateTimeout);
-        window.landDragUpdateTimeout = null;
-      }
-      
-      // Récupérer la position finale depuis le DOM
-      const landElement = document.querySelector(`[data-land-id="${selectedLandId}"]`);
-      let finalX, finalY;
-      
-      if (landElement) {
-        const style = window.getComputedStyle(landElement);
-        const left = parseFloat(style.left);
-        const top = parseFloat(style.top);
-        
-        if (!isNaN(left) && !isNaN(top)) {
-          finalX = left;
-          finalY = top;
-          
-          // Mettre à jour l'état avec la position finale
-          const existingSettings = imageSettings[selectedLandId] || {};
-          const width = existingSettings.width || 75 * scale;
-          const height = existingSettings.height || 75 * scale;
-          
-          const updatedSettings = {
-            ...existingSettings,
-            width,
-            height,
-            referenceScale: scale,
-            x: finalX,
-            y: finalY
-          };
-          
-          setImageSettings(prev => ({
-            ...prev,
-            [selectedLandId]: updatedSettings
-          }));
-          
-          // Save the settings to the server
-          landService.saveImageSettings(selectedLandId, updatedSettings)
-            .then(success => {
-              if (success) {
-                console.log(`Saved image settings for ${selectedLandId}`);
-              } else {
-                console.error(`Failed to save image settings for ${selectedLandId}`);
-              }
-            });
-        } else {
-          // Fallback to using the state if DOM values are invalid
-          const settings = imageSettings[selectedLandId];
-          if (settings) {
-            landService.saveImageSettings(selectedLandId, settings)
-              .then(success => {
-                if (success) {
-                  console.log(`Saved image settings for ${selectedLandId}`);
-                } else {
-                  console.error(`Failed to save image settings for ${selectedLandId}`);
-                }
-              });
-          }
-        }
-      } else {
-        // Fallback to using the state if DOM element not found
-        const settings = imageSettings[selectedLandId];
-        if (settings) {
-          landService.saveImageSettings(selectedLandId, settings)
-            .then(success => {
-              if (success) {
-                console.log(`Saved image settings for ${selectedLandId}`);
-              } else {
-                console.error(`Failed to save image settings for ${selectedLandId}`);
-              }
-            });
-        }
+      // Récupérer les paramètres actuels
+      const settings = imageSettings[selectedLandId];
+      if (settings) {
+        // Save the settings to the server
+        landService.saveImageSettings(selectedLandId, settings)
+          .then(success => {
+            if (success) {
+              console.log(`Saved image settings for ${selectedLandId}`);
+            } else {
+              console.error(`Failed to save image settings for ${selectedLandId}`);
+            }
+          });
       }
     }
-  }, [isDragging, selectedLandId, imageSettings, scale]);
+  }, [isDragging, selectedLandId, imageSettings]);
 
   const handleResize = useCallback((e: any, direction: any, ref: any, d: any, polygonId: string) => {
     if (!editMode || selectedLandId !== polygonId) return;
@@ -323,39 +249,41 @@ export default function LandMarkers({
 
   // Set up global mouse event listeners for drag
   useEffect(() => {
+    // Définir les gestionnaires d'événements
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && selectedLandId) {
+        e.preventDefault(); // Empêcher le comportement par défaut
+        handleDrag(e);
+      }
+    };
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      if (isDragging && selectedLandId) {
+        e.preventDefault(); // Empêcher le comportement par défaut
+        handleDragEnd();
+      }
+    };
+    
+    // Désactiver le comportement de glisser-déposer natif du navigateur
+    const preventDragStart = (e: DragEvent) => {
+      if (isDragging) {
+        e.preventDefault();
+      }
+    };
+    
+    // Ajouter les écouteurs d'événements si en mode édition
     if (editMode) {
-      const handleMouseMove = (e: MouseEvent) => {
-        if (isDragging && selectedLandId) {
-          e.preventDefault(); // Empêcher le comportement par défaut
-          handleDrag(e);
-        }
-      };
-      
-      const handleMouseUp = (e: MouseEvent) => {
-        if (isDragging && selectedLandId) {
-          e.preventDefault(); // Empêcher le comportement par défaut
-          handleDragEnd();
-        }
-      };
-      
-      // Utiliser la capture pour s'assurer que nos gestionnaires sont appelés en premier
       window.addEventListener('mousemove', handleMouseMove, { capture: true });
       window.addEventListener('mouseup', handleMouseUp, { capture: true });
-      
-      // Désactiver le comportement de glisser-déposer natif du navigateur
-      const preventDragStart = (e: DragEvent) => {
-        if (isDragging) {
-          e.preventDefault();
-        }
-      };
       window.addEventListener('dragstart', preventDragStart, { capture: true });
-      
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove, { capture: true });
-        window.removeEventListener('mouseup', handleMouseUp, { capture: true });
-        window.removeEventListener('dragstart', preventDragStart, { capture: true });
-      };
     }
+    
+    // Nettoyer les écouteurs d'événements
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove, { capture: true });
+      window.removeEventListener('mouseup', handleMouseUp, { capture: true });
+      window.removeEventListener('dragstart', preventDragStart, { capture: true });
+    };
   }, [editMode, isDragging, selectedLandId, handleDrag, handleDragEnd]);
 
   // Effect to update positions when map is transformed
@@ -451,9 +379,9 @@ export default function LandMarkers({
         const posX = polygonData.centerX;
         const posY = polygonData.centerY;
         
-        // Always use the current polygon center position
-        let finalX = posX;
-        let finalY = posY;
+        // Use the saved position if available, otherwise use the polygon center
+        let finalX = settings?.x || posX;
+        let finalY = settings?.y || posY;
         
         if (editMode) {
           // In edit mode, use Resizable component
@@ -465,8 +393,8 @@ export default function LandMarkers({
               size={{ width, height }}
               style={{
                 position: 'absolute',
-                left: `${settings?.x || posX}px`,
-                top: `${settings?.y || posY}px`,
+                left: `${finalX}px`,
+                top: `${finalY}px`,
                 zIndex: isSelected ? 15 : (isHovered ? 12 : 10),
                 transform: 'translate(-50%, -50%)',
                 border: isSelected 
@@ -588,8 +516,8 @@ export default function LandMarkers({
               style={{
                 pointerEvents: 'none',
                 position: 'absolute',
-                left: `${posX}px`,
-                top: `${posY}px`,
+                left: `${finalX}px`,
+                top: `${finalY}px`,
                 width: `${width}px`,
                 height: `${height}px`,
                 zIndex: isHovered ? 12 : 10,
