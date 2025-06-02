@@ -81,8 +81,8 @@ export default function LandMarkers({
 
   // Calculate base size for land images based on scale
   const getImageSize = (scale: number) => {
-    // Base size increases with zoom level, more directly proportional to scale
-    return Math.max(100, 300 * scale / 1.5);
+    // Base size directly proportional to scale to match polygon scaling exactly
+    return 300 * scale;
   };
 
   return (
