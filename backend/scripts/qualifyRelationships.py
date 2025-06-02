@@ -264,25 +264,62 @@ def assess_relationship_with_kinos(tables, relationship_record, kinos_model="loc
                     try:
                         # Nettoyer la réponse pour extraire uniquement le JSON
                         content = content.strip()
-                        if "```json" in content:
-                            content = content.split("```json")[1].split("```")[0].strip()
-                        elif "```" in content:
-                            content = content.split("```")[1].split("```")[0].strip()
                         
-                        # Analyser le JSON
-                        relationship_assessment = json.loads(content)
+                        # Supprimer les balises <think>...</think> et leur contenu
+                        import re
+                        content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
+                        content = content.strip()
                         
-                        # Vérifier que les champs requis sont présents
-                        if "title" in relationship_assessment and "description" in relationship_assessment:
-                            print(f"{LogColors.OKGREEN}Évaluation de la relation réussie:{LogColors.ENDC}")
-                            print(f"Titre: {relationship_assessment['title']}")
-                            print(f"Description: {relationship_assessment['description']}")
-                            return relationship_assessment
+                        # Extraire le JSON entre les premières accolades { et }
+                        json_match = re.search(r'({.*})', content, re.DOTALL)
+                        if json_match:
+                            json_content = json_match.group(1)
+                            # Analyser le JSON
+                            relationship_assessment = json.loads(json_content)
+                            
+                            # Vérifier que les champs requis sont présents
+                            if "title" in relationship_assessment and "description" in relationship_assessment:
+                                print(f"{LogColors.OKGREEN}Évaluation de la relation réussie:{LogColors.ENDC}")
+                                print(f"Titre: {relationship_assessment['title']}")
+                                print(f"Description: {relationship_assessment['description']}")
+                                return relationship_assessment
+                            else:
+                                print(f"{LogColors.FAIL}Réponse JSON incomplète: {relationship_assessment}{LogColors.ENDC}")
                         else:
-                            print(f"{LogColors.FAIL}Réponse JSON incomplète: {relationship_assessment}{LogColors.ENDC}")
+                            # Si aucun JSON n'est trouvé avec la regex, essayer les méthodes précédentes
+                            if "```json" in content:
+                                content = content.split("```json")[1].split("```")[0].strip()
+                            elif "```" in content:
+                                content = content.split("```")[1].split("```")[0].strip()
+                            
+                            # Analyser le JSON
+                            relationship_assessment = json.loads(content)
+                            
+                            # Vérifier que les champs requis sont présents
+                            if "title" in relationship_assessment and "description" in relationship_assessment:
+                                print(f"{LogColors.OKGREEN}Évaluation de la relation réussie:{LogColors.ENDC}")
+                                print(f"Titre: {relationship_assessment['title']}")
+                                print(f"Description: {relationship_assessment['description']}")
+                                return relationship_assessment
+                            else:
+                                print(f"{LogColors.FAIL}Réponse JSON incomplète: {relationship_assessment}{LogColors.ENDC}")
                     except json.JSONDecodeError as e:
                         print(f"{LogColors.FAIL}Erreur lors de l'analyse du JSON: {e}{LogColors.ENDC}")
                         print(f"Contenu reçu: {content}")
+                        # Tenter une dernière approche en cherchant juste le JSON entre accolades
+                        try:
+                            import re
+                            json_match = re.search(r'({.*})', content, re.DOTALL)
+                            if json_match:
+                                json_content = json_match.group(1)
+                                relationship_assessment = json.loads(json_content)
+                                if "title" in relationship_assessment and "description" in relationship_assessment:
+                                    print(f"{LogColors.OKGREEN}Évaluation de la relation réussie (après récupération):{LogColors.ENDC}")
+                                    print(f"Titre: {relationship_assessment['title']}")
+                                    print(f"Description: {relationship_assessment['description']}")
+                                    return relationship_assessment
+                        except Exception as inner_e:
+                            print(f"{LogColors.FAIL}Échec de la récupération de secours: {inner_e}{LogColors.ENDC}")
                 else:
                     print(f"{LogColors.FAIL}Aucun message de l'assistant trouvé dans l'historique.{LogColors.ENDC}")
             else:
