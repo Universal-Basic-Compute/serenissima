@@ -79,7 +79,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
 
   // Add a separate effect to handle scale changes
   useEffect(() => {
-    if (!isVisible || polygonsToRender.length === 0 || resizeMode) return;
+    if (!isVisible || polygonsToRender.length === 0) return;
     
     // When scale changes, update positions AND sizes
     const updatedSettings: Record<string, { x: number, y: number, width: number, height: number }> = {};
@@ -119,11 +119,9 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
             height: scaledHeight
           };
           hasUpdates = true;
-        } else {
+        } else if (!resizeMode) {
           // For other settings, maintain the position relative to the polygon
-          // Calculate the position relative to the polygon center
-          const centerOffsetX = (currentSettings.x + currentSettings.width/2) - centerX;
-          const centerOffsetY = (currentSettings.y + currentSettings.height/2) - centerY;
+          // But always update position to follow the polygon center
           
           // Calculate the size relative to the polygon size
           const widthRatio = currentSettings.width / polygonWidth;
@@ -133,13 +131,10 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           const newWidth = polygonWidth * widthRatio;
           const newHeight = polygonHeight * heightRatio;
           
-          // Apply the same center offset to the new center
-          const newX = centerX - (newWidth / 2);
-          const newY = centerY - (newHeight / 2);
-          
+          // Always center on the polygon's center
           updatedSettings[polygon.id] = {
-            x: newX,
-            y: newY,
+            x: centerX - (newWidth / 2),
+            y: centerY - (newHeight / 2),
             width: newWidth,
             height: newHeight
           };
@@ -244,32 +239,17 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           };
         }
         hasChanges = true;
-      } else if (!resizeMode) {
-        // Update position and size for existing polygons when not in resize mode
-        // For polygons that already have settings, we need to maintain their position relative to the polygon
+      } else {
+        // Always update position for existing polygons, even in resize mode
+        // This ensures images move with the map
         const currentSettings = customImageSettings[polygon.id];
         
-        // Calculate the position relative to the polygon center
-        const centerOffsetX = (currentSettings.x + currentSettings.width/2) - centerX;
-        const centerOffsetY = (currentSettings.y + currentSettings.height/2) - centerY;
-        
-        // Calculate the size relative to the polygon size
-        const widthRatio = currentSettings.width / polygonWidth;
-        const heightRatio = currentSettings.height / polygonHeight;
-        
-        // Apply the same ratios to the new polygon dimensions
-        const newWidth = polygonWidth * widthRatio;
-        const newHeight = polygonHeight * heightRatio;
-        
-        // Apply the same center offset to the new center
-        const newX = centerX + centerOffsetX - (newWidth / 2);
-        const newY = centerY + centerOffsetY - (newHeight / 2);
-        
+        // Always update position based on the current center point
         newSettings[polygon.id] = {
-          x: newX,
-          y: newY,
-          width: newWidth,
-          height: newHeight
+          x: centerX - (currentSettings.width / 2),
+          y: centerY - (currentSettings.height / 2),
+          width: currentSettings.width,
+          height: currentSettings.height
         };
         hasChanges = true;
       }
@@ -460,6 +440,11 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           )}
         </div>
       )}
+
+      {/* Debug info */}
+      <div className="absolute bottom-4 left-4 bg-black/50 text-white text-xs p-2 rounded z-50 pointer-events-none">
+        Polygons: {polygonsToRender.length} | Scale: {scale.toFixed(2)}
+      </div>
 
       {polygonsToRender.map(({ polygon, centerX, centerY }) => {
         if (!polygon || !polygon.id) return null;
