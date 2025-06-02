@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import re # Ajout de l'import re
 import requests
 import argparse
 from datetime import datetime, timezone
@@ -230,7 +231,22 @@ def send_message_to_kin_channel(
         resp_data = response.json()
         if resp_data.get("status") == "completed" and "content" in resp_data:
             print(f"  {LogColors.OKGREEN}Received response from {kin_id}.{LogColors.ENDC}")
-            return resp_data["content"]
+            content = resp_data["content"]
+            
+            # Supprimer les balises <think>...</think>
+            content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
+            
+            # Remplacer les \\n littéraux par de vrais sauts de ligne
+            content = content.replace('\\n', '\n')
+            
+            # Nettoyer les espaces en début/fin
+            content = content.strip()
+            
+            # Supprimer les guillemets en début/fin si présents
+            if content.startswith('"') and content.endswith('"'):
+                content = content[1:-1].strip()
+            
+            return content
         else:
             print(f"  {LogColors.FAIL}Kinos API did not return a successful response or content for {kin_id}: {resp_data}{LogColors.ENDC}")
             return None

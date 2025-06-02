@@ -364,8 +364,11 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
                     
                     # Remove quotes at the beginning and end if present
                     if content.startswith('"') and content.endswith('"'):
-                        content = content[1:-1].strip()
+                        content = content[1:-1].strip() # Strip again after quote removal
                     
+                    # Maintenant, convertir les \\n littéraux en vrais sauts de ligne
+                    content = content.replace('\\n', '\n')
+                                        
                     return content
             
             # Fallback if history retrieval fails or no assistant message found
