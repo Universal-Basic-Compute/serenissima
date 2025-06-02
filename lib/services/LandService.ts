@@ -127,11 +127,11 @@ export class LandService {
   /**
    * Save custom image settings for a land
    * @param polygonId The ID of the polygon
-   * @param settings The custom settings to save (position, size)
+   * @param settings The custom settings to save (position, size, and reference scale)
    */
   public async saveImageSettings(
     polygonId: string, 
-    settings: { x: number, y: number, width: number, height: number }
+    settings: { x: number, y: number, width: number, height: number, referenceScale?: number }
   ): Promise<boolean> {
     try {
       const response = await fetch(`/api/lands/${polygonId}/image-settings`, {

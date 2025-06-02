@@ -102,19 +102,14 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
         const newX = centerX - (newWidth / 2);
         const newY = centerY - (newHeight / 2);
         
-        // Update if position or size has changed significantly
-        if (Math.abs(currentSettings.x - newX) > 1 || 
-            Math.abs(currentSettings.y - newY) > 1 ||
-            Math.abs(currentSettings.width - newWidth) > 1 ||
-            Math.abs(currentSettings.height - newHeight) > 1) {
-          updatedSettings[polygon.id] = {
-            x: newX,
-            y: newY,
-            width: newWidth,
-            height: newHeight
-          };
-          hasUpdates = true;
-        }
+        // Always update when scale changes to ensure proper scaling
+        updatedSettings[polygon.id] = {
+          x: newX,
+          y: newY,
+          width: newWidth,
+          height: newHeight
+        };
+        hasUpdates = true;
       }
     });
     
@@ -146,12 +141,15 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           const savedCenterX = savedSettings.x + (savedSettings.width / 2);
           const savedCenterY = savedSettings.y + (savedSettings.height / 2);
           
-          // Apply the same offset to the current center
+          // Apply the same offset to the current center and scale appropriately
+          const scaledWidth = savedSettings.width * (scale / prevScale.current);
+          const scaledHeight = savedSettings.height * (scale / prevScale.current);
+          
           newSettings[polygon.id] = {
-            x: centerX - (savedSettings.width / 2),
-            y: centerY - (savedSettings.height / 2),
-            width: savedSettings.width,
-            height: savedSettings.height
+            x: centerX - (scaledWidth / 2),
+            y: centerY - (scaledHeight / 2),
+            width: scaledWidth,
+            height: scaledHeight
           };
         }
         // If no imageSettings, check if polygon has imageOverlayBounds
@@ -200,25 +198,31 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
         }
         hasChanges = true;
       } else if (!resizeMode) {
-        // Update position for existing polygons when not in resize mode
+        // Update position and size for existing polygons when not in resize mode
         const currentSettings = customImageSettings[polygon.id];
-        const newX = centerX - (currentSettings.width / 2);
-        const newY = centerY - (currentSettings.height / 2);
         
-        // Only update if position has changed significantly
-        if (Math.abs(currentSettings.x - newX) > 1 || Math.abs(currentSettings.y - newY) > 1) {
-          newSettings[polygon.id] = {
-            ...currentSettings,
-            x: newX,
-            y: newY
-          };
-          hasChanges = true;
-        }
+        // Scale the width and height based on the current scale
+        const scaledWidth = currentSettings.width * (scale / prevScale.current);
+        const scaledHeight = currentSettings.height * (scale / prevScale.current);
+        
+        // Calculate new position based on center point
+        const newX = centerX - (scaledWidth / 2);
+        const newY = centerY - (scaledHeight / 2);
+        
+        // Always update when position or scale changes
+        newSettings[polygon.id] = {
+          x: newX,
+          y: newY,
+          width: scaledWidth,
+          height: scaledHeight
+        };
+        hasChanges = true;
       }
     });
 
     if (hasChanges) {
       setCustomImageSettings(prev => ({ ...prev, ...newSettings }));
+      prevScale.current = scale; // Update previous scale reference
     }
   }, [isVisible, polygonsToRender, scale, customImageSettings, resizeMode]);
 
@@ -375,9 +379,15 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
             <button
               onClick={() => {
                 if (selectedImageId) {
+                  // Store the current scale with the settings to use as a reference
                   const settings = customImageSettings[selectedImageId];
                   if (settings) {
-                    landService.saveImageSettings(selectedImageId, settings)
+                    // Save the settings with a reference scale
+                    const settingsToSave = {
+                      ...settings,
+                      referenceScale: scale // Save the current scale as reference
+                    };
+                    landService.saveImageSettings(selectedImageId, settingsToSave)
                       .then(success => {
                         if (success) {
                           alert(`Saved image settings for ${selectedImageId}`);
