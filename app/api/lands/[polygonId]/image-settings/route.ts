@@ -16,15 +16,16 @@ export async function POST(
   try {
     const { settings } = await request.json();
 
-    // Validate settings structure
+    // Validate settings structure for new lat/lng format
     if (!settings || 
-        typeof settings.x !== 'number' || 
-        typeof settings.y !== 'number' || 
+        typeof settings.lat !== 'number' || 
+        typeof settings.lng !== 'number' || 
         typeof settings.width !== 'number' || 
         typeof settings.height !== 'number') {
+      // referenceScale is optional, width and height are essential.
       return NextResponse.json({ 
         success: false, 
-        error: 'Invalid settings data provided. Expected {x, y, width, height}.' 
+        error: 'Invalid settings data provided. Expected {lat, lng, width, height} and optionally {referenceScale}.' 
       }, { status: 400 });
     }
 

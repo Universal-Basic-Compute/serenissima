@@ -139,21 +139,37 @@ export class LandService {
   public async saveImageSettings(
     polygonId: string, 
     settings: { 
-      x: number, 
-      y: number, 
+      lat?: number, // Now expects lat
+      lng?: number, // Now expects lng
+      x?: number, // Old field, might be present from spread
+      y?: number, // Old field, might be present from spread
       width: number, 
       height: number, 
       referenceScale?: number
     }
   ): Promise<boolean> {
     try {
-      // Always include the current scale as referenceScale if not provided
-      const settingsToSave = {
-        ...settings,
-        referenceScale: settings.referenceScale || settings.referenceScale === 0 ? settings.referenceScale : window.currentScale || 3
+      // Ensure we are saving the new lat/lng format and removing old x/y if they exist from a spread.
+      const settingsToSave: {
+        lat: number,
+        lng: number,
+        width: number,
+        height: number,
+        referenceScale?: number
+      } = {
+        lat: settings.lat!, // Asserting lat/lng will be present
+        lng: settings.lng!,
+        width: settings.width,
+        height: settings.height,
+        referenceScale: settings.referenceScale !== undefined ? settings.referenceScale : window.currentScale || 3
       };
+
+      if (settings.lat === undefined || settings.lng === undefined) {
+        console.error(`Attempted to save imageSettings for ${polygonId} without lat/lng. Settings:`, settings);
+        return false;
+      }
       
-      console.log(`Saving image settings for polygon ${polygonId}:`, settingsToSave);
+      console.log(`Saving image settings for polygon ${polygonId} (lat/lng format):`, settingsToSave);
       const response = await fetch(`/api/lands/${polygonId}/image-settings`, {
         method: 'POST',
         headers: {

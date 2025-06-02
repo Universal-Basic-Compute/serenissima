@@ -26,8 +26,10 @@ interface LandMarkersProps {
 }
 
 interface LandImageSettings {
-  x: number;
-  y: number;
+  lat?: number; // Latitude absolue du centre de l'image
+  lng?: number; // Longitude absolue du centre de l'image
+  x?: number; // Ancien offset X (pour la migration)
+  y?: number; // Ancien offset Y (pour la migration)
   width: number;
   height: number;
   referenceScale?: number;
@@ -99,21 +101,55 @@ export default function LandMarkers({
           
           // Load image settings if available
           if (polygonData.polygon.imageSettings) {
-            console.log(`Loaded image settings for ${polygonData.polygon.id}:`, polygonData.polygon.imageSettings);
-            settings[polygonData.polygon.id] = polygonData.polygon.imageSettings;
+            const loadedSettings = polygonData.polygon.imageSettings as LandImageSettings;
+            // console.log(`Loaded image settings for ${polygonData.polygon.id}:`, loadedSettings);
+
+            // On-the-fly migration from old x,y offset format to new lat,lng absolute format
+            if (typeof loadedSettings.x === 'number' && typeof loadedSettings.y === 'number' &&
+                loadedSettings.lat === undefined && loadedSettings.lng === undefined &&
+                typeof polygonData.polygonWorldMapCenterX === 'number' &&
+                typeof polygonData.polygonWorldMapCenterY === 'number') {
+              
+              const pWorldMapCenterX = polygonData.polygonWorldMapCenterX;
+              const pWorldMapCenterY = polygonData.polygonWorldMapCenterY;
+              const markerWorldX = pWorldMapCenterX + loadedSettings.x;
+              const markerWorldY = pWorldMapCenterY + loadedSettings.y;
+
+              // Convert absolute world coordinates back to lat/lng
+              // These are simplified inverse of the projection math in IsometricViewer
+              // lng = worldX / 20000 + 12.3326
+              // lat = worldY / 20000 + 45.4371 
+              // (assuming worldY is positive for south, which is consistent with screenToWorldY's inversion)
+              const newLng = markerWorldX / 20000 + 12.3326;
+              const newLat = markerWorldY / 20000 + 45.4371;
+              
+              settings[polygonData.polygon.id] = {
+                lat: newLat,
+                lng: newLng,
+                width: loadedSettings.width,
+                height: loadedSettings.height,
+                referenceScale: loadedSettings.referenceScale
+              };
+              console.log(`CONVERTED old imageSettings for ${polygonData.polygon.id} from offset (x:${loadedSettings.x}, y:${loadedSettings.y}) to lat/lng (lat:${newLat.toFixed(6)}, lng:${newLng.toFixed(6)})`);
+            } else {
+              settings[polygonData.polygon.id] = loadedSettings;
+            }
           }
         }
       }
       
       setLandImages(images);
-      // Merge newSettingsFromFile with existing imageSettings.
-      // If in editMode and a specific land is selected, preserve its current settings from state
-      // to avoid clobbering optimistic updates made by handleResize or handleDrag.
       setImageSettings(prevSettings => {
-        const mergedSettings = { ...settings }; // Start with settings from polygon props
-        if (editMode && selectedLandId && prevSettings[selectedLandId]) {
-          // If editing a land, its current state (potentially with unsaved changes) takes precedence
-          mergedSettings[selectedLandId] = prevSettings[selectedLandId];
+        const mergedSettings = { ...settings }; 
+        for (const polyId in prevSettings) {
+          if (Object.prototype.hasOwnProperty.call(prevSettings, polyId)) {
+            // If editing this land, or if it's already in new format, keep existing state
+            if ((editMode && selectedLandId === polyId) || (prevSettings[polyId].lat !== undefined)) {
+               if (!mergedSettings[polyId] || (editMode && selectedLandId === polyId)) {
+                mergedSettings[polyId] = prevSettings[polyId];
+              }
+            }
+          }
         }
         return mergedSettings;
       });
@@ -171,34 +207,28 @@ export default function LandMarkers({
       return;
     }
 
-    const pWorldMapCenterX = polyData.polygonWorldMapCenterX;
-    const pWorldMapCenterY = polyData.polygonWorldMapCenterY;
     const currentSettings = imageSettings[polygonId];
     
     let initialScreenX, initialScreenY;
 
-    if (currentSettings && typeof currentSettings.x === 'number' && typeof currentSettings.y === 'number' && typeof pWorldMapCenterX === 'number' && typeof pWorldMapCenterY === 'number') {
-      // settings.x and .y are world offsets
-      const markerMapWorldX = pWorldMapCenterX + currentSettings.x;
-      // initialScreenX est basé sur la coordonnée X du monde du marqueur.
-      // L'argument Y de worldToScreenX n'est pas utilisé pour le calcul de X, donc 0 ou markerMapWorldY est indifférent.
-      initialScreenX = worldToScreenX(markerMapWorldX, 0, scale, mapTransformOffset, canvasWidth, canvasHeight);
-
-      // Calcul de initialScreenY en utilisant la coordonnée Y du monde complète du marqueur.
-      const markerMapWorldY = pWorldMapCenterY + currentSettings.y;
+    if (currentSettings && typeof currentSettings.lat === 'number' && typeof currentSettings.lng === 'number') {
+      // New format: lat, lng are absolute world coordinates for the marker's center
+      const markerMapWorldX = (currentSettings.lng - 12.3326) * 20000;
+      const markerMapWorldY = (currentSettings.lat - 45.4371) * 20000;
+      
+      initialScreenX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
       initialScreenY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
     } else {
       // Fallback to polygon's screen center (passed as centerX, centerY to this handler)
+      // This might happen if settings are missing or in an unexpected old format not yet converted
       initialScreenX = centerX;
       initialScreenY = centerY;
-      if (typeof pWorldMapCenterX !== 'number' || typeof pWorldMapCenterY !== 'number') {
-        console.warn(`DragStart: Missing world center for ${polygonId}. Custom position may not work correctly if saved.`);
-      }
+      console.warn(`DragStart: Missing lat/lng in imageSettings for ${polygonId} or using fallback. Position will be relative to polygon screen center.`);
     }
     
     positionRef.current = { x: initialScreenX, y: initialScreenY };
     dragStartRef.current = { x: e.clientX, y: e.clientY };
-    console.log(`Drag start for ${polygonId} at screen position:`, positionRef.current, "world center:", {pWorldMapCenterX, pWorldMapCenterY});
+    // console.log(`Drag start for ${polygonId} at screen position:`, positionRef.current);
   }, [editMode, selectedLandId, imageSettings, polygonsToRender, scale, mapTransformOffset, canvasWidth, canvasHeight, isResizing]);
 
   const handleResizeStart = useCallback((e: ReactMouseEvent<HTMLDivElement>, handleName: string) => {
@@ -255,10 +285,13 @@ export default function LandMarkers({
       elementY: currentScreenY - currentScreenHeight / 2, // Assuming translate(-50%, -50%)
       width: currentScreenWidth,
       height: currentScreenHeight,
-      worldOffsetX: currentSettings.x, // world offset
-      worldOffsetY: currentSettings.y, // world offset
-      baseWidth: currentSettings.width, // base width
-      baseHeight: currentSettings.height, // base height
+      worldOffsetX: currentSettings.x, // Keep for potential reference, but lat/lng is primary
+      worldOffsetY: currentSettings.y, // Keep for potential reference
+      // Store lat/lng if available, otherwise it will be undefined
+      lat: currentSettings.lat, 
+      lng: currentSettings.lng,
+      baseWidth: currentSettings.width, 
+      baseHeight: currentSettings.height, 
       referenceScale: currentSettings.referenceScale,
     };
 
@@ -333,46 +366,34 @@ export default function LandMarkers({
     const baseWidthToStore = currentSettings.width !== undefined ? currentSettings.width : 75;
     const baseHeightToStore = currentSettings.height !== undefined ? currentSettings.height : 75;
     const refScaleToStore = currentSettings.referenceScale !== undefined ? currentSettings.referenceScale : scale;
-    if (polyData && typeof polyData.polygonWorldMapCenterX === 'number' && typeof polyData.polygonWorldMapCenterY === 'number') {
-      const pWorldMapCenterX = polyData.polygonWorldMapCenterX;
-      const pWorldMapCenterY = polyData.polygonWorldMapCenterY;
 
-      // Conversion pour X (inchangée et correcte)
-      // newY n'est pas utilisé par screenToWorldX pour le calcul de X monde.
-      const markerMapWorldX_drag = screenToWorldX(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-      const mapWorldOffsetX = markerMapWorldX_drag - pWorldMapCenterX;
+    // Convert new screen coordinates (newX, newY) to absolute world coordinates
+    const newMarkerWorldX = screenToWorldX(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+    const newMarkerWorldY = screenToWorldY(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
 
-      // Conversion pour Y en utilisant la transformation inverse complète.
-      // newX n'est pas utilisé par screenToWorldY pour le calcul de Y monde.
-      const markerMapWorldY_drag = screenToWorldY(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-      const mapWorldOffsetY = markerMapWorldY_drag - pWorldMapCenterY;
+    // Convert absolute world coordinates to lat/lng
+    const newLng = newMarkerWorldX / 20000 + 12.3326;
+    const newLat = newMarkerWorldY / 20000 + 45.4371;
       
-      setImageSettings(prev => ({
-        ...prev,
-        [selectedLandId]: {
-          // ...currentSettings, // Spread current settings to preserve any other fields
-          width: baseWidthToStore,    // Store base width
-          height: baseHeightToStore,   // Store base height
-          referenceScale: refScaleToStore, // Store reference scale
-          x: mapWorldOffsetX,         // Store new world offset X
-          y: mapWorldOffsetY          // Store new world offset Y (revenu à la logique standard)
-        }
-      }));
-    } else {
-      console.warn(`Cannot update imageSettings for ${selectedLandId}: missing polygon world center data.`);
-      // Fallback: store screen coordinates if world center is not available.
-      // Also store base width/height and ref scale with defaults.
-      setImageSettings(prev => ({
-        ...prev,
-        [selectedLandId]: {
-          // ...currentSettings,
-          width: baseWidthToStore,
-          height: baseHeightToStore,
-          referenceScale: refScaleToStore,
-          x: newX, // Storing screenX as fallback for position
-          y: newY  // Storing screenY as fallback for position
-        }
-      }));
+    setImageSettings(prev => ({
+      ...prev,
+      [selectedLandId]: {
+        // Spread current settings to preserve any other fields like old x,y if they existed
+        ...currentSettings, 
+        width: baseWidthToStore,
+        height: baseHeightToStore,
+        referenceScale: refScaleToStore,
+        lat: newLat, // Store new absolute latitude
+        lng: newLng  // Store new absolute longitude
+        // x and y (offsets) are no longer the primary way to store position, but might be kept if currentSettings had them
+      }
+    }));
+    
+    // Fallback logic for missing polygon world center data is no longer needed in the same way,
+    // as we are now directly converting screen to world lat/lng.
+    // The console.warn for missing polyData might still be relevant if other operations depend on it.
+    if (!polyData) {
+        console.warn(`Cannot update imageSettings for ${selectedLandId}: polyData is missing. This might affect other operations.`);
     }
     
     // dragStartRef.current should hold the initial mouse position for the entire drag operation
@@ -441,14 +462,21 @@ export default function LandMarkers({
       const newScreenCenterX = newX + newWidth / 2;
       const newScreenCenterY = newY + newHeight / 2;
 
-      const markerMapWorldX = screenToWorldX(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-      const markerMapWorldY = screenToWorldY(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      // Convert new screen center to absolute world coordinates
+      const resizedMarkerWorldX = screenToWorldX(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      const resizedMarkerWorldY = screenToWorldY(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
 
-      const mapWorldOffsetX = markerMapWorldX - pWorldMapCenterX;
-      const mapWorldOffsetY = markerMapWorldY - pWorldMapCenterY;
+      // Convert absolute world coordinates to lat/lng
+      const newLat = resizedMarkerWorldY / 20000 + 45.4371;
+      const newLng = resizedMarkerWorldX / 20000 + 12.3326;
       
-      const baseWidthToStore = newWidth; // Screen width at current scale
-      const baseHeightToStore = newHeight; // Screen height at current scale
+      // For width/height, we store the "base" dimensions, and referenceScale is the current scale.
+      // newWidth and newHeight are screen dimensions at the current scale.
+      // So, baseWidth = newWidth / scale, baseHeight = newHeight / scale.
+      // However, the existing logic stores newWidth/newHeight directly as baseWidth/Height and current scale as refScale.
+      // Let's stick to that for consistency with how width/height are handled elsewhere.
+      const baseWidthToStore = newWidth; 
+      const baseHeightToStore = newHeight; 
       const refScaleToStore = scale; // Current map scale is the reference
 
       setImageSettings(prev => ({
@@ -457,9 +485,10 @@ export default function LandMarkers({
           ...prev[selectedLandId],
           width: baseWidthToStore,
           height: baseHeightToStore,
-          referenceScale: refScaleToStore,
-          x: mapWorldOffsetX,
-          y: mapWorldOffsetY,
+          referenceScale: refScaleToStore, // Current map scale is the reference for these new base dimensions
+          lat: newLat, // Store new absolute latitude
+          lng: newLng  // Store new absolute longitude
+          // x and y (offsets) are no longer the primary way to store position
         }
       }));
 
@@ -673,36 +702,22 @@ export default function LandMarkers({
         
         let finalX, finalY;
 
-        // Check if world map center coordinates are available for this polygon
-        if (typeof polygonData.polygonWorldMapCenterX === 'number' && typeof polygonData.polygonWorldMapCenterY === 'number') {
-          const pWorldMapCenterX = polygonData.polygonWorldMapCenterX;
-          const pWorldMapCenterY = polygonData.polygonWorldMapCenterY;
+        // Use new lat/lng settings if available
+        if (settings && typeof settings.lat === 'number' && typeof settings.lng === 'number') {
+          const markerMapWorldX = (settings.lng - 12.3326) * 20000;
+          const markerMapWorldY = (settings.lat - 45.4371) * 20000;
 
-          if (settings && typeof settings.x === 'number' && typeof settings.y === 'number') {
-            // settings.x and .y are world offsets
-            const markerMapWorldX = pWorldMapCenterX + settings.x;
-            // La coordonnée Y du monde pour le marqueur est toujours pWorldMapCenterY + settings.y
-            const markerMapWorldY = pWorldMapCenterY + settings.y;
-
-            // markerMapWorldX et markerMapWorldY sont les coordonnées du monde absolues du marqueur.
-            // worldToScreenX n'utilise que markerMapWorldX.
-            // worldToScreenY n'utilise que markerMapWorldY.
-            finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-            finalY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-          } else {
-            // No custom settings, use polygon's screen center
-            finalX = pScreenCenterX;
-            finalY = pScreenCenterY;
-          }
+          finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+          finalY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
         } else {
-          // Fallback if world map center is not available (e.g., polygon.center was missing in source data)
-          // In this case, custom positioning won't work correctly with map transforms.
-          // Use screen center, and if settings.x/y exist, they might be screen coords (old data) or invalid.
-          // For simplicity, just use screen center. A warning will be logged during drag if this happens.
+          // Fallback if no lat/lng settings (e.g., old data not yet converted or no settings at all)
+          // Use polygon's screen center.
           finalX = pScreenCenterX;
           finalY = pScreenCenterY;
-          if (settings && (typeof settings.x === 'number' || typeof settings.y === 'number')) {
-             console.warn(`LandMarker ${polygon.id}: Missing world center. Custom position from settings may be incorrect.`);
+          if (settings && (settings.x !== undefined || settings.y !== undefined)) {
+            // This case should ideally be handled by the on-the-fly migration.
+            // If we reach here with old x/y, it means migration might have failed or polygonWorldMapCenterX/Y was missing.
+            console.warn(`LandMarker ${polygon.id}: Using fallback screen center. imageSettings might be in old format or incomplete. Lat/Lng: ${settings?.lat}/${settings?.lng}, X/Y: ${settings?.x}/${settings?.y}`);
           }
         }
         
