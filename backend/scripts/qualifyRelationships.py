@@ -68,9 +68,25 @@ def get_citizen_data(tables, username):
         records = tables["citizens"].all(formula=f"{{Username}} = '{safe_username}'", max_records=1)
         if records:
             return records[0]
+        
+        # Si non trouvé par Username, essayer par CitizenId comme fallback
+        records = tables["citizens"].all(formula=f"{{CitizenId}} = '{safe_username}'", max_records=1)
+        if records:
+            print(f"Citoyen {username} trouvé par CitizenId au lieu de Username")
+            return records[0]
+            
+        # Essayer par Wallet comme dernier recours
+        records = tables["citizens"].all(formula=f"{{Wallet}} = '{safe_username}'", max_records=1)
+        if records:
+            print(f"Citoyen {username} trouvé par Wallet au lieu de Username")
+            return records[0]
+            
+        print(f"Citoyen non trouvé: {username}")
         return None
     except Exception as e:
         print(f"{LogColors.FAIL}Erreur lors de la récupération des données du citoyen {username}: {e}{LogColors.ENDC}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def get_relevancies_data(tables, username1, username2):
