@@ -216,13 +216,19 @@ def try_create(
 
     try:
         # Create both activities in sequence
-        tables["activities"].create(goto_payload)
+        goto_activity_record = tables["activities"].create(goto_payload)
+        # Ensure the second activity is also created before considering it a full success for the chain.
+        # If message_payload creation fails, we might have a partial chain.
+        # For now, we return the first activity if it's created.
+        # A more robust solution might involve transactions or cleanup if the second part fails.
         tables["activities"].create(message_payload)
         
         log.info(f"Created complete send_message activity chain for citizen {sender} to {receiver_username}:")
-        log.info(f"  1. goto_location activity {goto_activity_id}")
+        log.info(f"  1. goto_location activity {goto_activity_id} (Airtable ID: {goto_activity_record['id']})")
         log.info(f"  2. deliver_message_interaction activity {message_activity_id}")
-        return True
+        return goto_activity_record # Return the first created activity record
     except Exception as e:
         log.error(f"Failed to create send_message activity chain: {e}")
-        return False
+        import traceback
+        log.error(traceback.format_exc())
+        return None # Return None on failure

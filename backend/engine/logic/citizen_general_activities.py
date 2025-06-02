@@ -65,6 +65,8 @@ from backend.engine.activity_creators import (
     try_create_fishing_activity, # Import new creator
     # try_create_fetch_from_galley_activity is not used by process_citizen_activity
 )
+from backend.engine.activity_creators.send_message_creator import try_create as try_create_send_message_chain # Import for send_message
+
 # Import the specific processor function
 from backend.engine.activity_processors import process_goto_work as process_goto_work_fn
 from backend.engine.logic.porter_activities import process_porter_activity # Added import
