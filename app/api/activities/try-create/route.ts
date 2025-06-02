@@ -221,11 +221,38 @@ export async function POST(request: Request) {
     // If we reached here, responseData is valid JSON
     if (!engineResponse.ok) {
       console.error(`[API /activities/try-create] Error from Python engine (${engineResponse.status}) for ${activityType}:`, responseData);
-      // Try to extract a meaningful error message from Python's response
-      const pythonError = responseData?.error || responseData?.detail || (typeof responseData === 'string' ? responseData : engineResponse.statusText) || 'Unknown Python engine error';
-      const pythonDetails = responseData?.details || responseData; // Send back the whole responseData as details if specific fields not found
+      
+      // Try to extract a meaningful error message from Python's response for the primary 'error' field
+      let extractedPythonMessage: string;
+      if (responseData && typeof responseData.error === 'string') {
+        extractedPythonMessage = responseData.error;
+      } else if (responseData && typeof responseData.detail === 'string') {
+        extractedPythonMessage = responseData.detail;
+      } else if (responseData && Array.isArray(responseData.detail)) {
+        // FastAPI validation errors often in responseData.detail as an array
+        const detailStr = JSON.stringify(responseData.detail);
+        extractedPythonMessage = detailStr.length > 200 ? detailStr.substring(0, 197) + "..." : detailStr;
+      } else if (responseData && typeof (responseData as any).message === 'string') {
+        extractedPythonMessage = (responseData as any).message;
+      } else if (responseData && typeof (responseData as any).msg === 'string') {
+        extractedPythonMessage = (responseData as any).msg;
+      } else if (typeof responseData === 'string') {
+        extractedPythonMessage = responseData;
+      } else if (responseData && typeof responseData === 'object' && responseData !== null) {
+        // Fallback: stringify the whole object if it's not too large and no specific message field found
+        const responseStr = JSON.stringify(responseData);
+        extractedPythonMessage = responseStr.length > 200 ? responseStr.substring(0, 197) + "..." : responseStr;
+      } else {
+        extractedPythonMessage = engineResponse.statusText || 'Unknown Python engine error';
+      }
+
+      const pythonErrorString = extractedPythonMessage;
+      // pythonDetails should still be the full responseData for complete context,
+      // or responseData.details if that specific sub-field exists.
+      const pythonDetails = responseData?.details || responseData; 
+
       return NextResponse.json(
-        { success: false, error: `Python engine error for ${activityType}: ${pythonError}`, details: pythonDetails },
+        { success: false, error: `Python engine error for ${activityType}: ${pythonErrorString}`, details: pythonDetails },
         { status: engineResponse.status }
       );
     }
