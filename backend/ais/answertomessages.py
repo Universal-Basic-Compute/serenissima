@@ -273,13 +273,15 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
         notifications_data = _get_notifications_data(tables, ai_username, limit=50)
         relevancies_data = _get_relevancies_data(tables, ai_username, sender_username, limit=50)
         problems_data = _get_problems_data(tables, ai_username, sender_username, limit=50)
+        ai_data_package = _get_data_package_for_citizen(ai_username) # Récupérer uniquement pour l'IA
 
         # 2. Construct the addSystem JSON object with limited data
         system_context_data = {
             "ai_citizen_profile": ai_citizen_data,
             "sender_citizen_profile": sender_citizen_data,
-            "relationship_with_sender": relationship_data,  # Oui, la RELATIONSHIP est envoyée dans le contexte système
-            "recent_notifications_for_ai": notifications_data[:50],  # Limit to max 50 notifications
+            "ai_citizen_data_package": ai_data_package, # Data package de l'IA (celui qui reçoit)
+            "relationship_with_sender": relationship_data,
+            "recent_notifications_for_ai": notifications_data[:50],
             "recent_relevancies_ai_to_sender": relevancies_data,
             "recent_problems_involving_ai_or_sender": problems_data
         }
@@ -310,6 +312,7 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
             f"Guide to 'addSystem' content (use this to make your message relevant and gameplay-focused):\n"
             f"- 'ai_citizen_profile': Your own detailed profile (status, wealth, etc.).\n"
             f"- 'sender_citizen_profile': The profile of {sender_display_name}.\n"
+            f"- 'ai_citizen_data_package': A comprehensive data package about YOUR (the AI citizen's) current state, including inventory, buildings, contracts, etc. Use this to understand your own situation.\n"
             f"- 'relationship_with_sender': Your existing relationship status with {sender_display_name}.\n"
             f"- 'recent_notifications_for_ai': Recent news/events you've received that might be relevant to your conversation.\n"
             f"- 'recent_relevancies_ai_to_sender': Why {sender_display_name} (or things related to them) are specifically relevant to you. This is key for a relevant response!\n"
