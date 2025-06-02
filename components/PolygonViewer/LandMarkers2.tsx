@@ -49,7 +49,8 @@ export default function LandMarkers2({
   };
 
   const worldToScreenY = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasHeight: number): number => {
-    return (-mapWorldY) * currentScale * 1.4 + currentCanvasHeight / 2 + currentMapTransformOffset.y;
+    // Modification : Suppression du facteur 1.4 pour tester
+    return (-mapWorldY) * currentScale + currentCanvasHeight / 2 + currentMapTransformOffset.y;
   };
 
   useEffect(() => {
