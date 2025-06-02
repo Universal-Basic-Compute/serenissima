@@ -88,11 +88,26 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
       const baseSize = 75; // Default base size
       
       if (!customImageSettings[polygon.id]) {
-        // Check if polygon has imageOverlayBounds
-        if (polygon.imageOverlayBounds) {
+        // First check if polygon has saved imageSettings
+        if (polygon.imageSettings) {
+          // Use the saved settings, but adjust position based on current center
+          const savedSettings = polygon.imageSettings;
+          
+          // Calculate the offset from center in the saved settings
+          const savedCenterX = savedSettings.x + (savedSettings.width / 2);
+          const savedCenterY = savedSettings.y + (savedSettings.height / 2);
+          
+          // Apply the same offset to the current center
+          newSettings[polygon.id] = {
+            x: centerX - (savedSettings.width / 2),
+            y: centerY - (savedSettings.height / 2),
+            width: savedSettings.width,
+            height: savedSettings.height
+          };
+        }
+        // If no imageSettings, check if polygon has imageOverlayBounds
+        else if (polygon.imageOverlayBounds) {
           // Calculate position and size based on stored bounds
-          // This is a simplified approach - in a real implementation, you'd need to
-          // convert the geo bounds to screen coordinates based on the current view
           try {
             // Use the center of the polygon as a reference point
             const aspectRatio = 
@@ -126,7 +141,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
             };
           }
         } else {
-          // Initialize settings for new polygons without bounds
+          // Initialize settings for new polygons without bounds or saved settings
           newSettings[polygon.id] = {
             x: centerX - (baseSize * scale) / 2,
             y: centerY - (baseSize * scale) / 2,
@@ -222,6 +237,20 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
     };
 
     const handleMouseUp = () => {
+      // Save settings when mouse is released
+      if (dragRef.current.isDragging && selectedImageId) {
+        const settings = customImageSettings[selectedImageId];
+        if (settings) {
+          // Save the settings to the server
+          landService.saveImageSettings(selectedImageId, settings)
+            .then(success => {
+              if (success) {
+                console.log(`Saved image settings for ${selectedImageId}`);
+              }
+            });
+        }
+      }
+      
       dragRef.current.isDragging = false;
       dragRef.current.isResizing = false;
       dragRef.current.resizeHandle = null;
@@ -284,7 +313,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
   return (
     <>
       {showResizeToggle && (
-        <div className="absolute top-20 right-4 z-40">
+        <div className="absolute top-20 right-4 z-40 flex flex-col space-y-2">
           <button
             onClick={toggleResizeMode}
             className={`px-3 py-2 rounded text-white text-sm ${
@@ -293,6 +322,29 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           >
             {resizeMode ? 'Exit Resize Mode' : 'Resize Land Images'}
           </button>
+          
+          {resizeMode && selectedImageId && (
+            <button
+              onClick={() => {
+                if (selectedImageId) {
+                  const settings = customImageSettings[selectedImageId];
+                  if (settings) {
+                    landService.saveImageSettings(selectedImageId, settings)
+                      .then(success => {
+                        if (success) {
+                          alert(`Saved image settings for ${selectedImageId}`);
+                        } else {
+                          alert(`Failed to save image settings for ${selectedImageId}`);
+                        }
+                      });
+                  }
+                }
+              }}
+              className="px-3 py-2 rounded text-white text-sm bg-green-600 hover:bg-green-500"
+            >
+              Save Current Position
+            </button>
+          )}
         </div>
       )}
 

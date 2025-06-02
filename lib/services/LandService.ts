@@ -123,6 +123,38 @@ export class LandService {
   public clearLandImages(): void {
     this.landImages = {};
   }
+
+  /**
+   * Save custom image settings for a land
+   * @param polygonId The ID of the polygon
+   * @param settings The custom settings to save (position, size)
+   */
+  public async saveImageSettings(
+    polygonId: string, 
+    settings: { x: number, y: number, width: number, height: number }
+  ): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/lands/${polygonId}/image-settings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ settings }),
+      });
+      
+      if (response.ok) {
+        console.log(`Successfully saved image settings for polygon ${polygonId}`);
+        return true;
+      } else {
+        console.error(`Failed to save image settings for polygon ${polygonId}:`, 
+          await response.text());
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error saving image settings for polygon ${polygonId}:`, error);
+      return false;
+    }
+  }
 }
 
 // Export a singleton instance
