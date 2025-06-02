@@ -180,8 +180,6 @@ export default function LandMarkers({
     if (currentSettings && typeof currentSettings.x === 'number' && typeof currentSettings.y === 'number' && typeof pWorldMapCenterX === 'number' && typeof pWorldMapCenterY === 'number') {
       // settings.x and .y are world offsets
       const markerMapWorldX = pWorldMapCenterX + currentSettings.x;
-      // settings.x and .y are world offsets
-      const markerMapWorldX = pWorldMapCenterX + currentSettings.x;
       const markerMapWorldY = pWorldMapCenterY + currentSettings.y; 
       
       initialScreenX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
