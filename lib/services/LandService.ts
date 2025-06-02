@@ -143,11 +143,7 @@ export class LandService {
       y: number, 
       width: number, 
       height: number, 
-      referenceScale?: number,
-      centerX?: number,
-      centerY?: number,
-      originalCenterX?: number,
-      originalCenterY?: number
+      referenceScale?: number
     }
   ): Promise<boolean> {
     try {

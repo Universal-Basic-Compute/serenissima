@@ -145,7 +145,7 @@ export default function LandMarkers({
     const width = existingSettings.width || 75 * scale;
     const height = existingSettings.height || 75 * scale;
     
-    // Store position and current polygon center for reference
+    // Store the absolute position - we'll calculate the offset when rendering
     setImageSettings(prev => ({
       ...prev,
       [selectedLandId]: {
@@ -154,9 +154,7 @@ export default function LandMarkers({
         height,
         referenceScale: scale,
         x: newX,
-        y: newY,
-        originalCenterX: polygonData.centerX,
-        originalCenterY: polygonData.centerY
+        y: newY
       }
     }));
     
@@ -324,22 +322,19 @@ export default function LandMarkers({
         const posY = polygonData.centerY;
         
         // Calculate position based on settings and current polygon position
+        // The position is the current polygon center plus any offset defined in settings
         let finalX = posX;
         let finalY = posY;
         
         if (settings && settings.x !== undefined && settings.y !== undefined) {
-          // Calculate the offset from the original position when settings were saved
-          // This ensures the image moves with the map
-          const originalCenterX = settings.originalCenterX || posX;
-          const originalCenterY = settings.originalCenterY || posY;
+          // Calculate the offset from center that was saved in settings
+          // This is a simple relative offset that will move with the map
+          const offsetX = settings.x - polygonData.centerX;
+          const offsetY = settings.y - polygonData.centerY;
           
-          // Calculate how much the center has moved since the settings were saved
-          const deltaX = posX - originalCenterX;
-          const deltaY = posY - originalCenterY;
-          
-          // Apply the delta to the saved position
-          finalX = settings.x + deltaX;
-          finalY = settings.y + deltaY;
+          // Apply the offset to the current center position
+          finalX = posX + offsetX;
+          finalY = posY + offsetY;
         }
         
         if (editMode) {
