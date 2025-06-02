@@ -436,7 +436,7 @@ def call_try_create_activity_api(
             return {k: convert_datetime_to_iso(v) for k, v in obj.items()}
         elif isinstance(obj, list):
             return [convert_datetime_to_iso(item) for item in obj]
-        elif isinstance(obj, datetime.datetime):
+        elif isinstance(obj, datetime):
             return obj.isoformat()
         else:
             return obj
