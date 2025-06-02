@@ -104,9 +104,8 @@ def get_signoria_members(tables: Dict[str, AirtableTable], nlr_username: str = "
             {
                 "id": rec["id"],
                 "username": rec["fields"].get("Username"),
-                "first_name": rec["fields"].get("FirstName"),
-                "last_name": rec["fields"].get("LastName"),
-                "influence": float(rec["fields"].get("Influence", 0.0) or 0.0) # Ensure float, default 0
+                "influence": float(rec["fields"].get("Influence", 0.0) or 0.0), # Ensure float, default 0
+                "fields": rec["fields"]  # Store all fields from Airtable
             }
             for rec in all_citizens_raw if rec["fields"].get("Username")
         ]
@@ -155,7 +154,8 @@ def get_signoria_members(tables: Dict[str, AirtableTable], nlr_username: str = "
 
         print(f"{LogColors.OKCYAN}Signoria Members ({len(final_signoria)}):{LogColors.ENDC}")
         for i, member in enumerate(final_signoria):
-            display_name = f"{member.get('first_name', '')} {member.get('last_name', '')}".strip() or member['username']
+            # Access FirstName and LastName from the 'fields' dictionary
+            display_name = f"{member['fields'].get('FirstName', '')} {member['fields'].get('LastName', '')}".strip() or member['username']
             print(f"  {i+1}. {display_name} (Influence: {member['influence']})")
         return final_signoria
 
@@ -291,7 +291,8 @@ def main(kinos_model: str, kinos_api_url: str, kinos_blueprint: str):
 
     for speaker_info in signoria_members:
         speaker_username = speaker_info["username"]
-        speaker_display_name = f"{speaker_info.get('first_name', '')} {speaker_info.get('last_name', '')}".strip() or speaker_username
+        # Construct display_name from fields within speaker_info
+        speaker_display_name = f"{speaker_info['fields'].get('FirstName', '')} {speaker_info['fields'].get('LastName', '')}".strip() or speaker_username
         
         print(f"\n{LogColors.HEADER}--- Next Speaker: {speaker_display_name} ({speaker_username}) ---{LogColors.ENDC}")
 
@@ -321,12 +322,18 @@ def main(kinos_model: str, kinos_api_url: str, kinos_blueprint: str):
         )
 
         # Prepare system context for the Kinos API
-        other_members_details = [
+        current_speaker_profile_data = {
+            "username": speaker_info["username"],
+            "influence": speaker_info["influence"],
+            "profile_fields": speaker_info["fields"] # Full profile fields
+        }
+
+        all_member_profiles_data = [
             {
-                "username": m["username"], 
-                "display_name": f"{m.get('first_name', '')} {m.get('last_name', '')}".strip() or m['username'],
-                "influence": m["influence"]
-            } for m in signoria_members if m["username"] != speaker_username
+                "username": m["username"],
+                "influence": m["influence"],
+                "profile_fields": m["fields"] # Full profile fields for all members
+            } for m in signoria_members
         ]
 
         signoria_relationships_list = []
@@ -346,12 +353,8 @@ def main(kinos_model: str, kinos_api_url: str, kinos_blueprint: str):
                 "You are expected to speak thoughtfully on matters of state, considering your relationships with other members and the overall political climate. "
                 "Your response should be concise and directly address the Doge's prompt."
             ),
-            "current_speaker_details": {
-                "username": speaker_username,
-                "display_name": speaker_display_name,
-                "influence": speaker_info["influence"]
-            },
-            "other_signoria_members_present": other_members_details,
+            "current_speaker_profile": current_speaker_profile_data,
+            "all_signoria_member_profiles": all_member_profiles_data,
             "signoria_relationships": signoria_relationships_list
         }
         add_system_json = json.dumps(system_context_data)
