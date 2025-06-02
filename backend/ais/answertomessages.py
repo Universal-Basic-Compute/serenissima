@@ -348,7 +348,7 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
                     assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
                     content = assistant_messages[0].get("content", "")
                     
-                    # Parse and remove <think></think> tags
+                    # Remove <think></think> tags completely
                     import re
                     content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
                     content = content.strip()
@@ -379,14 +379,10 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
 def create_response_message_api(sender_username: str, receiver_username: str, content: str, message_type: str = "message") -> bool:
     """Create a response message using the API."""
     try:
-        # Parse and remove <think></think> tags from content
+        # Remove <think></think> tags completely
         import re
         content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
         content = content.strip()
-        
-        # Remove quotes at the beginning and end if present
-        if content.startswith('"') and content.endswith('"'):
-            content = content[1:-1].strip()
         
         # Remove quotes at the beginning and end if present
         if content.startswith('"') and content.endswith('"'):
@@ -621,7 +617,7 @@ def process_ai_messages(kinos_model_override_arg: Optional[str] = None, instant_
                                 print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
                         else:
                             # Use the activity system
-                            # Parse and remove <think></think> tags from response_content
+                            # Remove <think></think> tags completely
                             import re
                             cleaned_response = re.sub(r'<think>.*?</think>', '', response_content, flags=re.DOTALL)
                             cleaned_response = cleaned_response.strip()
@@ -774,7 +770,7 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
 def main():
     """Entry point for the script with command-line argument handling."""
     parser = argparse.ArgumentParser(description="Process unread messages for AI citizens and generate responses.")
-    parser.add_argument("--model", type=str, help="Override the default Kinos model with a specific model")
+    parser.add_argument("--model", type=str, default='local', help="Override the default Kinos model with a specific model (default: 'local')")
     parser.add_argument("--instant", action="store_true", help="Create messages directly in Airtable without using activities")
     parser.add_argument("--addMessage", type=str, help="Add a suggestion or topic to the AI prompt")
     args = parser.parse_args()
