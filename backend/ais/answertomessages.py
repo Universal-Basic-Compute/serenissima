@@ -18,6 +18,7 @@ try:
     from backend.engine.utils.activity_helpers import LogColors
 except ImportError:
     class LogColors:
+        HEADER = '\033[95m'
         FAIL = '\033[91m'
         OKGREEN = '\033[92m'
         WARNING = '\033[93m'
@@ -536,7 +537,11 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
     # Track response counts for each AI
     ai_response_counts = {}
 
-    # Process each AI citizen who has messages
+    # Randomize the order of AI citizens to process
+    import random
+    random.shuffle(ai_citizens_with_messages)
+    
+    # Process each AI citizen who has messages (now in random order)
     for ai_data in ai_citizens_with_messages:
         ai_username = ai_data["username"]
         unread_messages = ai_data["messages"]
