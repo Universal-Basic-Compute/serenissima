@@ -87,7 +87,7 @@ export default function LandMarkers({
 
   return (
     <div className="absolute inset-0 pointer-events-none">
-      {/* The container is pointer-events-none, but individual markers are pointer-events-auto */}
+      {/* The container is pointer-events-none, individual markers need careful event handling */}
       {polygonsToRender.map((polygonData) => {
         const polygon = polygonData.polygon;
         if (!polygon || !polygon.id || !landImages[polygon.id]) return null;
@@ -107,7 +107,9 @@ export default function LandMarkers({
         return (
           <div
             key={polygon.id}
-            className="absolute pointer-events-auto"
+            className="absolute"
+            style={{
+              pointerEvents: 'auto', // Only enable pointer events on the div itself
             style={{
               left: `${polygonData.centerX}px`,
               top: `${polygonData.centerY}px`,
@@ -123,6 +125,9 @@ export default function LandMarkers({
             onClick={(e) => {
               e.stopPropagation(); // Prevent click from reaching canvas
               handleClick(polygon);
+            }}
+            onWheel={(e) => {
+              e.stopPropagation(); // Don't capture wheel events
             }}
             title={polygon.historicalName || polygon.id}
           >
