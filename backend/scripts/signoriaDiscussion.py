@@ -33,7 +33,7 @@ except ImportError:
 DEFAULT_KINOS_API_BASE_URL = "https://api.kinos-engine.ai"
 DEFAULT_KINOS_BLUEPRINT_ID = "serenissima-ai"
 SIGNORIA_CHANNEL_ID = "signoria"
-DEFAULT_KINOS_MODEL = "local/nous-hermes-2-solar-10.7b" # Or another suitable default
+DEFAULT_KINOS_MODEL = "local"
 
 # --- Helper Functions ---
 
