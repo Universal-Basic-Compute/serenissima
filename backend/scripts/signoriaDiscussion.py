@@ -261,8 +261,8 @@ def create_airtable_message_record(
             "Content": content,
             "Type": message_type,
             "CreatedAt": created_at_iso,
-            "UpdatedAt": created_at_iso,
-            # "ReadAt": created_at_iso # Optional: mark as read immediately for council messages
+            "ReadAt": created_at_iso # Mark as read immediately for council messages
+            # "UpdatedAt" is typically handled automatically by Airtable and should not be set manually.
         }
         tables["messages"].create(payload)
         print(f"  {LogColors.OKGREEN}Recorded message from {sender_username} to {receiver_username} in Airtable (ID: {message_id}).{LogColors.ENDC}")
