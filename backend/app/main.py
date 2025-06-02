@@ -10,7 +10,7 @@ from datetime import datetime
 import json
 import requests
 import time
-from datetime
+from datetime import datetime
 from fastapi.responses import JSONResponse, FileResponse
 from dotenv import load_dotenv
 import pathlib
