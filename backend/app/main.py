@@ -1751,9 +1751,9 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                     "Seller": "Treasury",
                     "Buyer": wallet_data.wallet_address,
                     "Price": transfer_amount,
-                    "CreatedAt": datetime.datetime.now().isoformat(),
-                    "UpdatedAt": datetime.datetime.now().isoformat(),
-                    "ExecutedAt": datetime.datetime.now().isoformat(),
+                    "CreatedAt": datetime.now().isoformat(),
+                    "UpdatedAt": datetime.now().isoformat(),
+                    "ExecutedAt": datetime.now().isoformat(),
                     "Notes": json.dumps({
                         "signature": signature,
                         "blockchain": "solana",
