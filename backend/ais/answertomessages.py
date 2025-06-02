@@ -323,14 +323,14 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
             print(f"Using Kinos model override '{kinos_model_override}' for {ai_username} (answering message).")
         
         # Make the API request
-        response = requests.post(url, headers=headers, json=payload, timeout=30) # Increased timeout
+        response = requests.post(url, headers=headers, json=payload, timeout=300) # Increased timeout to 5 minutes
         
         if response.status_code == 200 or response.status_code == 201:
             # Attempt to get the latest assistant message from the conversation history
             # TODO: Check if Kinos API POST response already contains the assistant's message,
             # to avoid the subsequent GET call for messages. This is still a valid TODO.
             messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/{sender_username}/messages"
-            messages_response = requests.get(messages_url, headers=headers, timeout=15)
+            messages_response = requests.get(messages_url, headers=headers, timeout=60) # Increased timeout to 1 minute
             
             if messages_response.status_code == 200:
                 messages_data = messages_response.json()
