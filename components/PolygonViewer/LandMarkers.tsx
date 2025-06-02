@@ -109,26 +109,17 @@ export default function LandMarkers({
             key={polygon.id}
             className="absolute"
             style={{
-              pointerEvents: 'auto', // Only enable pointer events on the div itself
-            style={{
+              pointerEvents: 'none', // Make lands completely non-interactive
               left: `${polygonData.centerX}px`,
               top: `${polygonData.centerY}px`,
               zIndex: isHovered ? 12 : 10, // Below buildings (z-index 16-18) but above water
               transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
               transform: `translate(-50%, -50%) scale(${isHovered ? 1.05 : 1})`,
-              cursor: 'pointer',
+              cursor: 'default',
               opacity: isHovered ? opacity + 0.1 : opacity, // Slightly more visible when hovered
               border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none', // Orange border for lands with docks in transport view
             }}
-            onMouseEnter={() => handleMouseEnter(polygon)}
-            onMouseLeave={handleMouseLeave}
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent click from reaching canvas
-              handleClick(polygon);
-            }}
-            onWheel={(e) => {
-              e.stopPropagation(); // Don't capture wheel events
-            }}
+            // Removed all mouse event handlers to make lands non-interactive
             title={polygon.historicalName || polygon.id}
           >
             <img
