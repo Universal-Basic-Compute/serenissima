@@ -186,8 +186,9 @@ export default function LandMarkers({
       }
     }));
     
-    // Update drag start position for continuous dragging
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    // dragStartRef.current should hold the initial mouse position for the entire drag operation
+    // when using positionRef for the initial element position.
+    // dragStartRef.current = { x: e.clientX, y: e.clientY }; 
   }, [isDragging, selectedLandId, scale, imageSettings]);
 
   const handleDragEnd = useCallback(() => {
@@ -522,9 +523,9 @@ export default function LandMarkers({
                 height: `${height}px`,
                 zIndex: isHovered ? 12 : 10,
                 transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
-                transform: `scale(${isHovered ? 1.05 : 1})`,
-                left: `${posX}px`,
-                top: `${posY}px`,
+                transform: `translate(-50%, -50%) scale(${isHovered ? 1.05 : 1})`,
+                left: `${finalX}px`,
+                top: `${finalY}px`,
                 cursor: 'default',
                 opacity: isHovered ? opacity + 0.1 : opacity,
                 border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none',
