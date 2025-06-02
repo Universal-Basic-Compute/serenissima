@@ -37,6 +37,14 @@ import {
 } from '@/components/Articles';
 // LandDetailsPanel est déjà dans components/PolygonViewer, pas besoin d'importer ici s'il est utilisé par IsometricViewer
 
+// Declare global window type
+declare global {
+  interface Window {
+    landDragUpdateTimeout: NodeJS.Timeout | null;
+    currentScale: number;
+  }
+}
+
 // Import the 2D viewer component with no SSR
 const IsometricViewer = dynamic(() => import('@/components/PolygonViewer/IsometricViewer'), {
   ssr: false

@@ -146,25 +146,53 @@ export default function LandMarkers({
     const newX = positionRef.current.x + dx;
     const newY = positionRef.current.y + dy;
     
-    console.log(`Dragging ${selectedLandId} to position:`, { x: newX, y: newY });
+    // Stocker la position dans une référence pour éviter les re-renders excessifs
+    // qui pourraient interférer avec le glissement fluide
+    const updatedPosition = { x: newX, y: newY };
     
     // Get existing settings or create defaults
     const existingSettings = imageSettings[selectedLandId] || {};
     const width = existingSettings.width || 75 * scale;
     const height = existingSettings.height || 75 * scale;
     
-    // Store the absolute position - we'll calculate the offset when rendering
-    setImageSettings(prev => ({
-      ...prev,
-      [selectedLandId]: {
-        ...existingSettings,
-        width,
-        height,
-        referenceScale: scale,
-        x: newX,
-        y: newY
-      }
-    }));
+    // Mettre à jour le DOM directement pour un glissement fluide
+    const landElement = document.querySelector(`[data-land-id="${selectedLandId}"]`);
+    if (landElement) {
+      landElement.setAttribute('style', `
+        position: absolute;
+        left: ${newX}px;
+        top: ${newY}px;
+        width: ${width}px;
+        height: ${height}px;
+        z-index: 15;
+        transform: translate(-50%, -50%);
+        border: 2px dashed red;
+        opacity: 0.9;
+        cursor: move;
+        pointer-events: auto;
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+      `);
+    }
+    
+    // Mettre à jour l'état moins fréquemment pour éviter les re-renders excessifs
+    // Utiliser un debounce pour limiter les mises à jour d'état
+    if (!window.landDragUpdateTimeout) {
+      window.landDragUpdateTimeout = setTimeout(() => {
+        setImageSettings(prev => ({
+          ...prev,
+          [selectedLandId]: {
+            ...existingSettings,
+            width,
+            height,
+            referenceScale: scale,
+            x: newX,
+            y: newY
+          }
+        }));
+        window.landDragUpdateTimeout = null;
+      }, 50); // Mettre à jour l'état toutes les 50ms au maximum
+    }
     
     // Update drag start position for continuous dragging
     dragStartRef.current = { x: e.clientX, y: e.clientY };
@@ -174,20 +202,83 @@ export default function LandMarkers({
     if (isDragging && selectedLandId) {
       setIsDragging(false);
       
-      // Save the settings to the server
-      const settings = imageSettings[selectedLandId];
-      if (settings) {
-        landService.saveImageSettings(selectedLandId, settings)
-          .then(success => {
-            if (success) {
-              console.log(`Saved image settings for ${selectedLandId}`);
-            } else {
-              console.error(`Failed to save image settings for ${selectedLandId}`);
-            }
-          });
+      // Annuler tout timeout en cours
+      if (window.landDragUpdateTimeout) {
+        clearTimeout(window.landDragUpdateTimeout);
+        window.landDragUpdateTimeout = null;
+      }
+      
+      // Récupérer la position finale depuis le DOM
+      const landElement = document.querySelector(`[data-land-id="${selectedLandId}"]`);
+      let finalX, finalY;
+      
+      if (landElement) {
+        const style = window.getComputedStyle(landElement);
+        const left = parseFloat(style.left);
+        const top = parseFloat(style.top);
+        
+        if (!isNaN(left) && !isNaN(top)) {
+          finalX = left;
+          finalY = top;
+          
+          // Mettre à jour l'état avec la position finale
+          const existingSettings = imageSettings[selectedLandId] || {};
+          const width = existingSettings.width || 75 * scale;
+          const height = existingSettings.height || 75 * scale;
+          
+          const updatedSettings = {
+            ...existingSettings,
+            width,
+            height,
+            referenceScale: scale,
+            x: finalX,
+            y: finalY
+          };
+          
+          setImageSettings(prev => ({
+            ...prev,
+            [selectedLandId]: updatedSettings
+          }));
+          
+          // Save the settings to the server
+          landService.saveImageSettings(selectedLandId, updatedSettings)
+            .then(success => {
+              if (success) {
+                console.log(`Saved image settings for ${selectedLandId}`);
+              } else {
+                console.error(`Failed to save image settings for ${selectedLandId}`);
+              }
+            });
+        } else {
+          // Fallback to using the state if DOM values are invalid
+          const settings = imageSettings[selectedLandId];
+          if (settings) {
+            landService.saveImageSettings(selectedLandId, settings)
+              .then(success => {
+                if (success) {
+                  console.log(`Saved image settings for ${selectedLandId}`);
+                } else {
+                  console.error(`Failed to save image settings for ${selectedLandId}`);
+                }
+              });
+          }
+        }
+      } else {
+        // Fallback to using the state if DOM element not found
+        const settings = imageSettings[selectedLandId];
+        if (settings) {
+          landService.saveImageSettings(selectedLandId, settings)
+            .then(success => {
+              if (success) {
+                console.log(`Saved image settings for ${selectedLandId}`);
+              } else {
+                console.error(`Failed to save image settings for ${selectedLandId}`);
+              }
+            });
+        }
       }
     }
-  }, [isDragging, selectedLandId, imageSettings]);
+  }, [isDragging, selectedLandId, imageSettings, scale]);
 
   const handleResize = useCallback((e: any, direction: any, ref: any, d: any, polygonId: string) => {
     if (!editMode || selectedLandId !== polygonId) return;
@@ -255,11 +346,14 @@ export default function LandMarkers({
   useEffect(() => {
     const handleMapTransform = (event: CustomEvent) => {
       if (event.detail && event.detail.offset) {
-        // Force re-render when map is transformed
-        setImageSettings(prev => {
-          // Create a new object to trigger re-render
-          return {...prev};
-        });
+        // Ne pas forcer de re-render pendant le glissement
+        if (!isDragging) {
+          // Force re-render when map is transformed
+          setImageSettings(prev => {
+            // Create a new object to trigger re-render
+            return {...prev};
+          });
+        }
       }
     };
     
@@ -268,7 +362,7 @@ export default function LandMarkers({
     return () => {
       window.removeEventListener('mapTransformed', handleMapTransform as EventListener);
     };
-  }, []);
+  }, [isDragging]);
 
   // If the component is not visible, don't render anything
   if (!isVisible) {
@@ -350,6 +444,7 @@ export default function LandMarkers({
           return (
             <Resizable
               key={polygon.id}
+              data-land-id={polygon.id}
               className={`absolute ${isSelected ? 'cursor-move' : 'cursor-pointer'}`}
               size={{ width, height }}
               style={{
