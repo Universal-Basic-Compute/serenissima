@@ -159,8 +159,7 @@ def assess_relationship_with_kinos(tables, relationship_record):
     citizen2_is_ai = citizen2_data.get('fields', {}).get('IsAI', False)
     
     if not citizen1_is_ai and not citizen2_is_ai:
-        print(f"{LogColors.WARNING}Relation entre deux humains, ignorée: {citizen1} et {citizen2}{LogColors.ENDC}")
-        return None
+        print(f"{LogColors.OKCYAN}Relation entre deux humains, acceptée: {citizen1} et {citizen2}{LogColors.ENDC}")
     
     # Choisir aléatoirement quel citoyen IA va évaluer la relation
     if citizen1_is_ai and citizen2_is_ai:
@@ -197,19 +196,19 @@ def assess_relationship_with_kinos(tables, relationship_record):
         f"- The details of your existing relationship (strength, trust, etc.)\n"
         f"- The mutual relevancies between you\n"
         f"- The problems that concern both of you\n\n"
-        f"Respond ONLY with a JSON object containing two fields:\n"
-        f"1. 'title': A short title (1-3 words) describing your relationship (e.g., 'Close Friend', 'Business Rival', 'Distant Acquaintance')\n"
-        f"2. 'description': A detailed description (2-3 sentences) explaining the nature of your relationship\n\n"
+        f"Respond with only a JSON object containing two fields:\n"
+        f"1. 'title': A short title (2-4 words) describing your relationship (e.g., 'Trusted Business Partners', 'Suspicious Competitors', 'Reluctant Political Allies')\n"
+        f"2. 'description': A detailed description (2-3 sentences) explaining the nature of your relationship (don't invent facts, use the discussion/data)\n\n"
         f"Example of a valid response:\n"
         f"```json\n"
         f"{{\n"
-        f"  \"title\": \"Business Partners\",\n"
-        f"  \"description\": \"We have established a business relationship based on mutual trust. Our regular exchanges of resources have been beneficial for our respective businesses, although we remain cautious in our negotiations.\"\n"
+        f"  \"title\": \"Trusted Business Partners\",\n"
+        f"  \"description\": \"They have proven their reliability through years of successful ventures together, never failing to deliver quality goods on time or honor their agreements. When your bottega ran short of Murano glass during Carnival season, they diverted their own shipment to keep your workshop running, knowing you'd do the same. They extend credit during your cash shortages, share valuable market intelligence that has saved you from bad deals, and keep your business secrets as carefully as their own. Their word is their bond—you conduct thousand-ducat transactions on a handshake, and they have keys to your warehouse for after-hours deliveries when their goods arrive late from the mainland. In Venice's treacherous commercial waters, they are the one merchant you can count on completely, whether for emergency supplies of silk and dyes, honest warnings about the Silk Guild's new regulations, or introductions to their trusted suppliers in Constantinople.\"\n"
         f"}}\n"
         f"```\n\n"
         f"IMPORTANT: Your response must be ONLY a valid JSON object, with no text before or after. "
         f"Make sure the title and description accurately reflect the relationship as it appears in the data. "
-        f"Take into account the strength of the relationship ({fields.get('StrengthScore', 0)}/100) and the level of trust ({fields.get('TrustScore', 0)}/100)."
+        f"Take into account the strength of the relationship ({fields.get('StrengthScore', 0)}) and the level of trust ({fields.get('TrustScore', 0)}).[/SYSTEM]"
     )
     
     # Appeler l'API KinOS
@@ -220,7 +219,8 @@ def assess_relationship_with_kinos(tables, relationship_record):
     }
     payload = {
         "message": prompt,
-        "addSystem": json.dumps(system_context)
+        "addSystem": json.dumps(system_context),
+        "history_length": 75
     }
     
     try:
@@ -284,8 +284,7 @@ def update_relationship(tables, relationship_id, assessment):
         # Mettre à jour les champs Title et Description
         update_data = {
             "Title": assessment["title"],
-            "Description": assessment["description"],
-            "UpdatedAt": datetime.now().isoformat()
+            "Description": assessment["description"]
         }
         
         tables["relationships"].update(relationship_id, update_data)
