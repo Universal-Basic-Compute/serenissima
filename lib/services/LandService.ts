@@ -118,6 +118,13 @@ export class LandService {
   }
 
   /**
+   * Get land image URL for a specific polygon
+   */
+  public getLandImageUrl(polygonId: string): Promise<string> {
+    return Promise.resolve(`/images/lands/${polygonId}.png`);
+  }
+
+  /**
    * Clear all loaded land images
    */
   public clearLandImages(): void {
