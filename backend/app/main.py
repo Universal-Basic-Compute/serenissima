@@ -6,7 +6,6 @@ import shutil
 import os
 import sys
 import traceback
-from datetime import datetime
 import json
 import requests
 import time
@@ -627,9 +626,9 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
                     "Seller": "Treasury",
                     "Buyer": wallet_data.wallet_address,
                     "Price": transfer_amount,
-                    "CreatedAt": datetime.datetime.now().toISOString(),
-                    "UpdatedAt": datetime.datetime.now().toISOString(),
-                    "ExecutedAt": datetime.datetime.now().toISOString(),
+                    "CreatedAt": datetime.now().isoformat(),
+                    "UpdatedAt": datetime.now().isoformat(),
+                    "ExecutedAt": datetime.now().isoformat(),
                     "Notes": json.dumps({
                         "operation": "deposit",
                         "method": "direct",
@@ -1792,9 +1791,9 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                     "Seller": "Treasury",
                     "Buyer": wallet_data.wallet_address,
                     "Price": transfer_amount,
-                    "CreatedAt": datetime.datetime.now().isoformat(),
-                    "UpdatedAt": datetime.datetime.now().isoformat(),
-                    "ExecutedAt": datetime.datetime.now().isoformat(),
+                    "CreatedAt": datetime.now().isoformat(),
+                    "UpdatedAt": datetime.now().isoformat(),
+                    "ExecutedAt": datetime.now().isoformat(),
                     "Notes": json.dumps({
                         "signature": signature,
                         "blockchain": "solana",
