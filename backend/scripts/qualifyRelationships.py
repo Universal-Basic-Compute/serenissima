@@ -295,7 +295,7 @@ def update_relationship(tables, relationship_id, assessment):
         print(f"{LogColors.FAIL}Erreur lors de la mise à jour de la relation {relationship_id}: {e}{LogColors.ENDC}")
         return False
 
-def process_relationships(tables, limit=None, min_strength=None, max_per_run=None, kinos_model="local"):
+def process_relationships(tables, limit=None, min_strength=None, max_per_run=None, kinos_model="local", new_only=False):
     """Traiter les relations pour les qualifier avec KinOS."""
     try:
         # Construire la formule pour filtrer les relations
@@ -303,6 +303,9 @@ def process_relationships(tables, limit=None, min_strength=None, max_per_run=Non
         
         if min_strength is not None:
             formula_parts.append(f"{{StrengthScore}} >= {min_strength}")
+        
+        if new_only:
+            formula_parts.append("OR({Title}='', {Title}=BLANK())")
         
         formula = " AND ".join(formula_parts) if formula_parts else ""
         
@@ -314,6 +317,8 @@ def process_relationships(tables, limit=None, min_strength=None, max_per_run=Non
             relationships = tables["relationships"].all(sort=["-StrengthScore"])
         
         print(f"{LogColors.OKBLUE}Trouvé {len(relationships)} relations à évaluer.{LogColors.ENDC}")
+        if new_only:
+            print(f"{LogColors.OKBLUE}Mode 'newOnly': Seules les relations sans titre seront traitées.{LogColors.ENDC}")
         
         # Limiter le nombre de relations à traiter si spécifié
         if limit is not None and limit > 0:
@@ -379,17 +384,20 @@ def main():
     parser.add_argument("--min-strength", type=int, help="Force minimale de la relation pour être traitée")
     parser.add_argument("--max-per-run", type=int, help="Nombre maximum de relations à traiter par exécution")
     parser.add_argument("--model", type=str, default="local", help="Modèle KinOS à utiliser (défaut: 'local')")
+    parser.add_argument("--newOnly", action="store_true", help="Traiter uniquement les relations sans titre")
     args = parser.parse_args()
     
     print(f"{LogColors.HEADER}=== Qualification des Relations avec KinOS ==={LogColors.ENDC}")
     print(f"Démarrage à {datetime.now().isoformat()}")
     print(f"Modèle KinOS: {args.model}")
+    if args.newOnly:
+        print(f"{LogColors.OKBLUE}Mode: Traitement uniquement des relations sans titre{LogColors.ENDC}")
     
     # Initialiser la connexion à Airtable
     tables = initialize_airtable()
     
     # Traiter les relations
-    process_relationships(tables, args.limit, args.min_strength, args.max_per_run, args.model)
+    process_relationships(tables, args.limit, args.min_strength, args.max_per_run, args.model, args.newOnly)
     
     print(f"{LogColors.HEADER}=== Fin de l'exécution ==={LogColors.ENDC}")
     print(f"Terminé à {datetime.now().isoformat()}")
