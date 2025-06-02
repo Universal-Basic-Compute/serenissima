@@ -415,13 +415,9 @@ def create_response_message_api(sender_username: str, receiver_username: str, co
 def call_try_create_activity_api(
     citizen_username: str,
     activity_type: str,
-    activity_parameters: Dict[str, Any],
-    dry_run: bool
+    activity_parameters: Dict[str, Any]
 ) -> bool:
     """Calls the /api/activities/try-create endpoint."""
-    if dry_run:
-        print(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
-        return True
 
     # Convert any datetime objects to ISO format strings for JSON serialization
     def convert_datetime_to_iso(obj):
@@ -496,11 +492,11 @@ def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 
-def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None, instant_mode: bool = False, add_message: Optional[str] = None):
+def process_ai_messages(kinos_model_override_arg: Optional[str] = None, instant_mode: bool = False, add_message: Optional[str] = None):
     """Main function to process AI messages."""
     model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
     add_message_status = f"with suggestion: '{add_message}'" if add_message else "no suggestion"
-    print(f"Starting AI message response process (dry_run={dry_run}, kinos_model={model_status}, instant_mode={instant_mode}, {add_message_status})")
+    print(f"Starting AI message response process (kinos_model={model_status}, instant_mode={instant_mode}, {add_message_status})")
     
     # Initialize Airtable connection
     tables = initialize_airtable()
@@ -567,10 +563,9 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
             print(f"{message_content}")
             print(f"{LogColors.HEADER}{'-'*80}{LogColors.ENDC}")
             
-            if not dry_run:
-                # Mark the message as read using API
-                # The API expects the receiver of the original message (the AI)
-                marked_read = mark_messages_as_read_api(receiver_username=ai_username, message_ids=[message_id])
+            # Mark the message as read using API
+            # The API expects the receiver of the original message (the AI)
+            marked_read = mark_messages_as_read_api(receiver_username=ai_username, message_ids=[message_id])
                 
                 if marked_read:
                     # Check if the sender is an AI
@@ -625,7 +620,7 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                                 print(f"{LogColors.OKGREEN}RESPONSE CONTENT:{LogColors.ENDC}")
                                 print(f"{cleaned_response}")
                                 
-                                if call_try_create_activity_api(ai_username, "send_message", activity_params, dry_run):
+                                if call_try_create_activity_api(ai_username, "send_message", activity_params):
                                     ai_response_counts[ai_username] += 1
                                     print(f"{LogColors.OKGREEN}RESPONSE SENT: Activity created for {ai_username} to reply to {sender_username}.{LogColors.ENDC}")
                                     print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
@@ -640,61 +635,15 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                 else:
                     print(f"{LogColors.FAIL}ERROR: Failed to mark message {message_id} as read for {ai_username}, skipping response generation.{LogColors.ENDC}")
                     print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
-            else:
-                # In dry run mode, just log what would happen
-                # Simulate the AI sender check for dry run as well
-                sender_citizen_data = _get_citizen_data(tables, sender_username) # This call is safe in dry_run
-                sender_is_ai = False
-                if sender_citizen_data and sender_citizen_data.get('fields', {}).get('IsAI', False):
-                    sender_is_ai = True
-                print(f"\n{LogColors.HEADER}{'='*80}{LogColors.ENDC}")
-                print(f"{LogColors.OKBLUE}MESSAGE ID: {message_id} [DRY RUN]{LogColors.ENDC}")
-                print(f"{LogColors.OKBLUE}FROM: {sender_username} → TO: {ai_username}{LogColors.ENDC}")
-                print(f"{LogColors.HEADER}{'-'*80}{LogColors.ENDC}")
-                print(f"{LogColors.OKCYAN}MESSAGE CONTENT:{LogColors.ENDC}")
-                print(f"{message_content}")
-                print(f"{LogColors.HEADER}{'-'*80}{LogColors.ENDC}")
-                print(f"{LogColors.OKCYAN}[DRY RUN] Would mark message {message_id} as read for {ai_username} (receiver) via API{LogColors.ENDC}")
-                
-                dry_run_should_respond = True
-                if sender_is_ai:
-                    # Simulate the 25% chance for dry run logging consistency
-                    if random.random() > 0.25: # Using a new random roll for dry run simulation
-                        dry_run_should_respond = False
-                        print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have chosen not to respond (75% chance).")
-                    else:
-                        print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have responded (25% chance).")
-
-                if dry_run_should_respond:
-                    print(f"{LogColors.OKCYAN}[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos (Model: {kinos_model_override_arg or 'default'}){LogColors.ENDC}")
-                    # Simulate response generation for counting purposes
-                    if instant_mode:
-                        print(f"{LogColors.OKCYAN}[DRY RUN] Would create direct message from {ai_username} to {sender_username} (instant mode){LogColors.ENDC}")
-                        print(f"{LogColors.OKCYAN}[DRY RUN] SIMULATED RESPONSE: (Content would appear here){LogColors.ENDC}")
-                        print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
-                    else:
-                        # In dry run, call_try_create_activity_api will log and return True
-                        activity_params_dry_run = {
-                            "receiverUsername": sender_username,
-                            "content": "[DRY RUN Simulated Response]",
-                            "messageType": "reply",
-                            "inReplyToMessageId": message_record.get("fields", {}).get("MessageId", message_id)
-                        }
-                        print(f"{LogColors.OKCYAN}[DRY RUN] SIMULATED RESPONSE: (Content would appear here){LogColors.ENDC}")
-                        if call_try_create_activity_api(ai_username, "send_message", activity_params_dry_run, dry_run):
-                            ai_response_counts[ai_username] += 1
-                            print(f"{LogColors.OKCYAN}[DRY RUN] Would create activity for {ai_username} to reply to {sender_username}{LogColors.ENDC}")
-                            print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
-                        # print(f"[DRY RUN] Would send response from {ai_username} (sender) to {sender_username} (receiver) via API")
-                # else: # No action if dry_run_should_respond is False
+                else:
+                    print(f"{LogColors.FAIL}ERROR: Failed to mark message {message_id} as read for {ai_username}, skipping response generation.{LogColors.ENDC}")
+                    print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
     
     # Create admin notification with summary
     total_responses = sum(ai_response_counts.values())
-    if not dry_run and total_responses > 0:
+    if total_responses > 0:
         create_admin_notification(tables, ai_response_counts, kinos_model_override_arg or "default")
-    elif dry_run and total_responses > 0 : # Also show for dry run if responses would have been made
-        print(f"[DRY RUN] Would create admin notification with response counts: {ai_response_counts}, model: {kinos_model_override_arg or 'default'}")
-    elif total_responses == 0:
+    else:
         print("No responses were made by any AI.")
     
     print("AI message response process completed")
@@ -809,7 +758,6 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
 def main():
     """Entry point for the script with command-line argument handling."""
     parser = argparse.ArgumentParser(description="Process unread messages for AI citizens and generate responses.")
-    parser.add_argument("--dry-run", action="store_true", help="Run in dry-run mode without making actual changes")
     parser.add_argument("--model", type=str, help="Override the default Kinos model with a specific model")
     parser.add_argument("--instant", action="store_true", help="Create messages directly in Airtable without using activities")
     parser.add_argument("--addMessage", type=str, help="Add a suggestion or topic to the AI prompt")
@@ -817,7 +765,6 @@ def main():
     
     # Call the main processing function with command-line arguments
     process_ai_messages(
-        dry_run=args.dry_run, 
         kinos_model_override_arg=args.model, 
         instant_mode=args.instant,
         add_message=args.addMessage

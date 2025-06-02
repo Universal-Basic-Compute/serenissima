@@ -174,12 +174,12 @@ def initialize_airtable():
 
 # Function process_citizen_activity has been moved to backend.engine.logic.citizen_general_activities
 
-def create_activities(dry_run: bool = False, target_citizen_username: Optional[str] = None, forced_hour_override: Optional[int] = None):
+def create_activities(target_citizen_username: Optional[str] = None, forced_hour_override: Optional[int] = None):
     """Main function to create activities for idle citizens."""
     if target_citizen_username:
-        log.info(f"{LogColors.HEADER}Starting activity creation process for citizen '{target_citizen_username}' (dry_run: {dry_run}){LogColors.ENDC}")
+        log.info(f"{LogColors.HEADER}Starting activity creation process for citizen '{target_citizen_username}'{LogColors.ENDC}")
     else:
-        log.info(f"{LogColors.HEADER}Starting activity creation process for all idle citizens (dry_run: {dry_run}){LogColors.ENDC}")
+        log.info(f"{LogColors.HEADER}Starting activity creation process for all idle citizens{LogColors.ENDC}")
     
     tables = initialize_airtable()
     # VENICE_TIMEZONE is imported from activity_helpers
@@ -251,10 +251,7 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
     # Start with the full list of citizens to process. This list will be modified by the processing functions.
     citizens_remaining_idle = list(citizens_to_process_list)
     
-    # First, process general activities for any citizens still idle
-    # If dry_run, citizens_remaining_idle will be the original list unless target_citizen_username was handled by a (simulated) galley task.
-    # If not dry_run, it will be those not assigned galley tasks.
-    
+    # Process general activities for any citizens still idle
     citizens_processed_general_activity = set() # Keep track of citizens who got a general activity
 
     if citizens_remaining_idle:
@@ -262,16 +259,11 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
         if target_citizen_username:
             # Check if the target citizen is still in the list of idle citizens
             target_still_idle = any(c['fields'].get('Username') == target_citizen_username for c in citizens_remaining_idle)
-            if dry_run:
-                if target_still_idle:
-                    log.info(f"{LogColors.OKCYAN}[DRY RUN] Target citizen {target_citizen_username} would be considered for general activity.{LogColors.ENDC}")
-                    citizens_to_process_general = [c for c in citizens_remaining_idle if c['fields'].get('Username') == target_citizen_username]
-            elif not dry_run: # Actual run
-                if target_still_idle:
-                    log.info(f"{LogColors.OKBLUE}Processing general activity for target citizen: {target_citizen_username}.{LogColors.ENDC}")
-                    citizens_to_process_general = [c for c in citizens_remaining_idle if c['fields'].get('Username') == target_citizen_username]
-                else: 
-                    log.info(f"{LogColors.OKBLUE}Target citizen {target_citizen_username} is no longer idle. Skipping general activity processing for them.{LogColors.ENDC}")
+            if target_still_idle:
+                log.info(f"{LogColors.OKBLUE}Processing general activity for target citizen: {target_citizen_username}.{LogColors.ENDC}")
+                citizens_to_process_general = [c for c in citizens_remaining_idle if c['fields'].get('Username') == target_citizen_username]
+            else: 
+                log.info(f"{LogColors.OKBLUE}Target citizen {target_citizen_username} is no longer idle. Skipping general activity processing for them.{LogColors.ENDC}")
         else: # General run (not targeted)
             log.info(f"{LogColors.OKBLUE}Processing general activities for {len(citizens_remaining_idle)} idle citizens.{LogColors.ENDC}")
             citizens_to_process_general = list(citizens_remaining_idle) 
@@ -281,16 +273,12 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
             citizen_username_log = citizen_record['fields'].get('Username', citizen_record['id'])
 
             # General citizen activity processing (includes Porter logic if applicable)
-            if dry_run:
-                log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create general activity for citizen {citizen_username_log}{LogColors.ENDC}")
-                activity_created_for_this_citizen = True # Simulate
-            else:
-                # Pass now_venice_dt and now_utc_dt. The is_night flag is no longer passed.
-                activity_created_for_this_citizen = process_citizen_activity(
-                    tables, citizen_record, resource_defs, # Removed night_time
-                    building_type_defs,
-                    now_venice_dt, now_utc_dt, TRANSPORT_API_URL, API_BASE_URL
-                )
+            # Pass now_venice_dt and now_utc_dt. The is_night flag is no longer passed.
+            activity_created_for_this_citizen = process_citizen_activity(
+                tables, citizen_record, resource_defs, # Removed night_time
+                building_type_defs,
+                now_venice_dt, now_utc_dt, TRANSPORT_API_URL, API_BASE_URL
+            )
             
             if activity_created_for_this_citizen:
                 success_count += 1
@@ -300,31 +288,22 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
 
 
     # Then, attempt galley-related activities for citizens who are STILL idle
-    if not dry_run:
-        if citizens_remaining_idle:
-            log.info(f"{LogColors.OKBLUE}Processing galley tasks for {len(citizens_remaining_idle)} citizens who did not receive a general activity.{LogColors.ENDC}")
-            # Pass now_utc_dt to process_final_deliveries_from_galley
-            final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_remaining_idle, now_utc_dt, TRANSPORT_API_URL, resource_defs)
-            success_count += final_delivery_activities_created
-            
-            if citizens_remaining_idle: # Re-check as citizens_remaining_idle is modified in-place
-                if is_docks_open_time(now_venice_dt):
-                    log.info(f"{LogColors.OKBLUE}Docks are open. Attempting galley unloading tasks for {len(citizens_remaining_idle)} remaining citizens.{LogColors.ENDC}")
-                    # Pass now_utc_dt to process_galley_unloading_activities
-                    galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_remaining_idle, now_utc_dt, TRANSPORT_API_URL, resource_defs)
-                    success_count += galley_fetch_activities_created
-                else:
-                    log.info(f"{LogColors.OKBLUE}Docks are closed. Skipping galley unloading tasks.{LogColors.ENDC}")
-        else:
-            log.info(f"{LogColors.OKBLUE}No citizens remaining idle after general activity processing for galley tasks.{LogColors.ENDC}")
-    
-    elif dry_run and citizens_to_process_list:
-        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would consider galley tasks for citizens not assigned a (simulated) general activity.{LogColors.ENDC}")
-        log.info(f"{LogColors.OKCYAN}[DRY RUN]   - Would check for citizens at galleys ready for final delivery tasks.{LogColors.ENDC}")
-        if is_docks_open_time(now_venice_dt):
-            log.info(f"{LogColors.OKCYAN}[DRY RUN]   - Docks are open. Would check for merchant galleys with pending deliveries (fetch tasks).{LogColors.ENDC}")
-        else:
-            log.info(f"{LogColors.OKCYAN}[DRY RUN]   - Docks are closed. Would skip checking for merchant galleys with pending deliveries.{LogColors.ENDC}")
+    if citizens_remaining_idle:
+        log.info(f"{LogColors.OKBLUE}Processing galley tasks for {len(citizens_remaining_idle)} citizens who did not receive a general activity.{LogColors.ENDC}")
+        # Pass now_utc_dt to process_final_deliveries_from_galley
+        final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_remaining_idle, now_utc_dt, TRANSPORT_API_URL, resource_defs)
+        success_count += final_delivery_activities_created
+        
+        if citizens_remaining_idle: # Re-check as citizens_remaining_idle is modified in-place
+            if is_docks_open_time(now_venice_dt):
+                log.info(f"{LogColors.OKBLUE}Docks are open. Attempting galley unloading tasks for {len(citizens_remaining_idle)} remaining citizens.{LogColors.ENDC}")
+                # Pass now_utc_dt to process_galley_unloading_activities
+                galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_remaining_idle, now_utc_dt, TRANSPORT_API_URL, resource_defs)
+                success_count += galley_fetch_activities_created
+            else:
+                log.info(f"{LogColors.OKBLUE}Docks are closed. Skipping galley unloading tasks.{LogColors.ENDC}")
+    else:
+        log.info(f"{LogColors.OKBLUE}No citizens remaining idle after general activity processing for galley tasks.{LogColors.ENDC}")
 
     total_citizens_considered = len(citizens_to_process_list)
     summary_color = LogColors.OKGREEN if success_count >= total_citizens_considered and total_citizens_considered > 0 else LogColors.WARNING if success_count > 0 else LogColors.FAIL
@@ -337,7 +316,6 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create activities for idle citizens.")
-    parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
     parser.add_argument("--citizen", type=str, help="Process activities for a specific citizen by username.")
     parser.add_argument(
@@ -353,4 +331,4 @@ if __name__ == "__main__":
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
-    create_activities(dry_run=args.dry_run, target_citizen_username=args.citizen, forced_hour_override=args.hour)
+    create_activities(target_citizen_username=args.citizen, forced_hour_override=args.hour)
