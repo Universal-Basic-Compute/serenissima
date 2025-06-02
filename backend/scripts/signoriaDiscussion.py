@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import re # Ajout de l'import re
+import random # Ajout de l'import random
 import requests
 import argparse
 from datetime import datetime, timezone
@@ -185,7 +186,16 @@ def get_signoria_members(tables: Dict[str, AirtableTable], nlr_username: str = "
         for i, member in enumerate(final_signoria):
             # Access FirstName and LastName from the 'fields' dictionary
             display_name = f"{member['fields'].get('FirstName', '')} {member['fields'].get('LastName', '')}".strip() or member['username']
+            # Initial log before shuffling will show NLR first then by influence
+            # print(f"  {i+1}. {display_name} (Influence: {member['influence']}) - Pre-shuffle order")
+
+        # Randomize the talking order of the final list
+        random.shuffle(final_signoria)
+        print(f"{LogColors.OKCYAN}Signoria Members (Order of Speech Randomized - {len(final_signoria)}):{LogColors.ENDC}")
+        for i, member in enumerate(final_signoria):
+            display_name = f"{member['fields'].get('FirstName', '')} {member['fields'].get('LastName', '')}".strip() or member['username']
             print(f"  {i+1}. {display_name} (Influence: {member['influence']})")
+            
         return final_signoria
 
     except Exception as e:
