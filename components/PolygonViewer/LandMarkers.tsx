@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, MouseEvent as ReactMouseEvent } from 'react';
 import { landService } from '@/lib/services/LandService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
-import { Resizable } from 're-resizable';
 
 interface LandMarkersProps {
   isVisible: boolean;
@@ -50,8 +49,23 @@ export default function LandMarkers({
   const [selectedLandId, setSelectedLandId] = useState<string | null>(null);
   const [imageSettings, setImageSettings] = useState<Record<string, LandImageSettings>>({});
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const dragStartRef = useRef<{x: number, y: number}>({ x: 0, y: 0 });
-  const positionRef = useRef<{x: number, y: number}>({ x: 0, y: 0 });
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+  const [activeHandle, setActiveHandle] = useState<string | null>(null);
+  const operationStartRef = useRef<{
+    mouseX: number;
+    mouseY: number;
+    elementX: number;
+    elementY: number;
+    width: number;
+    height: number;
+    worldOffsetX?: number;
+    worldOffsetY?: number;
+    baseWidth?: number;
+    baseHeight?: number;
+    referenceScale?: number;
+  } | null>(null);
+  const dragStartRef = useRef<{x: number, y: number}>({ x: 0, y: 0 }); // For original drag logic
+  const positionRef = useRef<{x: number, y: number}>({ x: 0, y: 0 }); // For original drag logic
 
   // Coordinate transformation utilities
   const worldToScreenX = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasWidth: number): number => {
@@ -143,11 +157,11 @@ export default function LandMarkers({
     setSelectedLandId(null);
   }, [editMode]);
 
-  const handleDragStart = useCallback((e: React.MouseEvent, polygonId: string, centerX: number, centerY: number) => {
-    if (!editMode || selectedLandId !== polygonId) return;
+  const handleDragStart = useCallback((e: ReactMouseEvent<HTMLDivElement>, polygonId: string, centerX: number, centerY: number) => {
+    if (!editMode || selectedLandId !== polygonId || isResizing) return; // Do not start drag if resizing
     
-    e.preventDefault(); // Empêcher le comportement par défaut
-    e.stopPropagation(); // Empêcher la propagation aux éléments parents
+    e.preventDefault();
+    e.stopPropagation();
     setIsDragging(true);
     
     const polyData = polygonsToRender.find(p => p.polygon.id === polygonId);
@@ -181,13 +195,77 @@ export default function LandMarkers({
     positionRef.current = { x: initialScreenX, y: initialScreenY };
     dragStartRef.current = { x: e.clientX, y: e.clientY };
     console.log(`Drag start for ${polygonId} at screen position:`, positionRef.current, "world center:", {pWorldMapCenterX, pWorldMapCenterY});
-  }, [editMode, selectedLandId, imageSettings, polygonsToRender, scale, mapTransformOffset, canvasWidth, canvasHeight]);
+  }, [editMode, selectedLandId, imageSettings, polygonsToRender, scale, mapTransformOffset, canvasWidth, canvasHeight, isResizing]);
+
+  const handleResizeStart = useCallback((e: ReactMouseEvent<HTMLDivElement>, handleName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!editMode || !selectedLandId) return;
+
+    setIsResizing(true);
+    setActiveHandle(handleName);
+
+    const landElement = document.querySelector(`[data-land-id="${selectedLandId}"]`) as HTMLElement;
+    if (!landElement) return;
+
+    const rect = landElement.getBoundingClientRect();
+    const currentSettings = imageSettings[selectedLandId] || {};
+    
+    // finalX, finalY, width, height are screen values at current scale
+    // Need to calculate them as they are in the render function
+    const polygonData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
+    if (!polygonData) return;
+
+    let currentScreenX, currentScreenY, currentScreenWidth, currentScreenHeight;
+
+    if (typeof polygonData.polygonWorldMapCenterX === 'number' && typeof polygonData.polygonWorldMapCenterY === 'number') {
+      const pWorldMapCenterX = polygonData.polygonWorldMapCenterX;
+      const pWorldMapCenterY = polygonData.polygonWorldMapCenterY;
+      if (currentSettings && typeof currentSettings.x === 'number' && typeof currentSettings.y === 'number') {
+        const markerMapWorldX = pWorldMapCenterX + currentSettings.x;
+        const markerMapWorldY = pWorldMapCenterY + currentSettings.y;
+        currentScreenX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+        currentScreenY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      } else {
+        currentScreenX = polygonData.centerX;
+        currentScreenY = polygonData.centerY;
+      }
+    } else {
+      currentScreenX = polygonData.centerX;
+      currentScreenY = polygonData.centerY;
+    }
+    
+    if (currentSettings.referenceScale && currentSettings.width !== undefined && currentSettings.height !== undefined) {
+        const scaleFactor = scale / currentSettings.referenceScale;
+        currentScreenWidth = currentSettings.width * scaleFactor;
+        currentScreenHeight = currentSettings.height * scaleFactor;
+    } else {
+        currentScreenWidth = (currentSettings.width !== undefined ? currentSettings.width : 75 * scale);
+        currentScreenHeight = (currentSettings.height !== undefined ? currentSettings.height : 75 * scale);
+    }
+
+    operationStartRef.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      elementX: currentScreenX - currentScreenWidth / 2, // Assuming translate(-50%, -50%)
+      elementY: currentScreenY - currentScreenHeight / 2, // Assuming translate(-50%, -50%)
+      width: currentScreenWidth,
+      height: currentScreenHeight,
+      worldOffsetX: currentSettings.x, // world offset
+      worldOffsetY: currentSettings.y, // world offset
+      baseWidth: currentSettings.width, // base width
+      baseHeight: currentSettings.height, // base height
+      referenceScale: currentSettings.referenceScale,
+    };
+
+  }, [editMode, selectedLandId, imageSettings, scale, mapTransformOffset, canvasWidth, canvasHeight, polygonsToRender]);
+
 
   const handleDrag = useCallback((e: MouseEvent) => {
     if (!isDragging || !selectedLandId) return;
     
-    e.preventDefault(); // Empêcher le comportement par défaut
-    e.stopPropagation(); // Empêcher la propagation aux éléments parents
+    e.preventDefault(); 
+    e.stopPropagation(); 
     
     const dx = e.clientX - dragStartRef.current.x;
     const dy = e.clientY - dragStartRef.current.y;
@@ -294,7 +372,118 @@ export default function LandMarkers({
     // dragStartRef.current = { x: e.clientX, y: e.clientY }; 
   }, [isDragging, selectedLandId, scale, imageSettings, polygonsToRender, mapTransformOffset, canvasWidth, canvasHeight]);
 
-  const handleDragEnd = useCallback(() => {
+
+  const handleGlobalMouseMove = useCallback((e: MouseEvent) => {
+    if (isResizing && activeHandle && operationStartRef.current && selectedLandId) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const { mouseX, mouseY, elementX, elementY, width, height } = operationStartRef.current;
+      const deltaX = e.clientX - mouseX;
+      const deltaY = e.clientY - mouseY;
+
+      let newX = elementX;
+      let newY = elementY;
+      let newWidth = width;
+      let newHeight = height;
+
+      // Apply resizing logic based on the active handle
+      if (activeHandle.includes('left')) {
+        newWidth = width - deltaX;
+        newX = elementX + deltaX;
+      }
+      if (activeHandle.includes('right')) {
+        newWidth = width + deltaX;
+      }
+      if (activeHandle.includes('top')) {
+        newHeight = height - deltaY;
+        newY = elementY + deltaY;
+      }
+      if (activeHandle.includes('bottom')) {
+        newHeight = height + deltaY;
+      }
+
+      // Ensure minimum size
+      newWidth = Math.max(newWidth, 20); // Min width 20px
+      newHeight = Math.max(newHeight, 20); // Min height 20px
+      
+      // If width/height changed from top/left, adjust X/Y so the opposite side stays put
+      if (activeHandle.includes('left') && newWidth < 20) newX = elementX + width - 20;
+      if (activeHandle.includes('top') && newHeight < 20) newY = elementY + height - 20;
+
+
+      const landElement = document.querySelector(`[data-land-id="${selectedLandId}"]`) as HTMLElement;
+      if (landElement) {
+        landElement.style.width = `${newWidth}px`;
+        landElement.style.height = `${newHeight}px`;
+        landElement.style.left = `${newX + newWidth / 2}px`; // Center X
+        landElement.style.top = `${newY + newHeight / 2}px`;  // Center Y
+      }
+      
+      // Update imageSettings state
+      const polyData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
+      if (!polyData || typeof polyData.polygonWorldMapCenterX !== 'number' || typeof polyData.polygonWorldMapCenterY !== 'number') {
+        console.warn("Cannot update imageSettings during resize: missing polygon world center data.");
+        return;
+      }
+      const pWorldMapCenterX = polyData.polygonWorldMapCenterX;
+      const pWorldMapCenterY = polyData.polygonWorldMapCenterY;
+
+      // New screen center after resize
+      const newScreenCenterX = newX + newWidth / 2;
+      const newScreenCenterY = newY + newHeight / 2;
+
+      const markerMapWorldX = screenToWorldX(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      const markerMapWorldY = screenToWorldY(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+
+      const mapWorldOffsetX = markerMapWorldX - pWorldMapCenterX;
+      const mapWorldOffsetY = markerMapWorldY - pWorldMapCenterY;
+      
+      const baseWidthToStore = newWidth; // Screen width at current scale
+      const baseHeightToStore = newHeight; // Screen height at current scale
+      const refScaleToStore = scale; // Current map scale is the reference
+
+      setImageSettings(prev => ({
+        ...prev,
+        [selectedLandId]: {
+          ...prev[selectedLandId],
+          width: baseWidthToStore,
+          height: baseHeightToStore,
+          referenceScale: refScaleToStore,
+          x: mapWorldOffsetX,
+          y: mapWorldOffsetY,
+        }
+      }));
+
+    } else if (isDragging) {
+      handleDrag(e); // Call original drag handler
+    }
+  }, [isResizing, activeHandle, selectedLandId, scale, imageSettings, polygonsToRender, mapTransformOffset, canvasWidth, canvasHeight, handleDrag, isDragging]);
+
+  const handleGlobalMouseUp = useCallback(() => {
+    if (isDragging && selectedLandId) {
+      setIsDragging(false);
+      const settings = imageSettings[selectedLandId];
+      if (settings) {
+        landService.saveImageSettings(selectedLandId, settings)
+          .then(success => console.log(success ? `Saved dragged settings for ${selectedLandId}` : `Failed to save dragged settings for ${selectedLandId}`));
+      }
+    }
+
+    if (isResizing && selectedLandId) {
+      setIsResizing(false);
+      setActiveHandle(null);
+      operationStartRef.current = null;
+      const settings = imageSettings[selectedLandId];
+      if (settings) {
+        landService.saveImageSettings(selectedLandId, settings)
+          .then(success => console.log(success ? `Saved resized settings for ${selectedLandId}` : `Failed to save resized settings for ${selectedLandId}`));
+      }
+    }
+  }, [isDragging, isResizing, selectedLandId, imageSettings]);
+
+
+  const handleDragEnd = useCallback(() => { // This might be redundant now with handleGlobalMouseUp
     if (isDragging && selectedLandId) {
       setIsDragging(false);
       
@@ -314,13 +503,73 @@ export default function LandMarkers({
     }
   }, [isDragging, selectedLandId, imageSettings]);
 
-  const handleResize = useCallback((e: any, direction: any, ref: any, d: any, polygonId: string) => {
-    if (!editMode || selectedLandId !== polygonId) return;
+  // const handleResize = useCallback((e: any, direction: any, ref: any, d: any, polygonId: string) => {
+    // This function is removed as we are implementing custom resize.
+  // }, [editMode, selectedLandId, imageSettings, scale]);
+
+  // Set up global mouse event listeners for drag AND RESIZE
+  useEffect(() => {
+    // Définir les gestionnaires d'événements
+    // const handleMouseMove = (e: MouseEvent) => { // Replaced by handleGlobalMouseMove
+    //   if (isDragging && selectedLandId) {
+    //     e.preventDefault(); // Empêcher le comportement par défaut
+    //     handleDrag(e);
+    //   }
+    // };
     
-    const width = parseInt(ref.style.width, 10);
-    const height = parseInt(ref.style.height, 10);
+    // const handleMouseUp = (e: MouseEvent) => { // Replaced by handleGlobalMouseUp
+    //   if (isDragging && selectedLandId) {
+    //     e.preventDefault(); // Empêcher le comportement par défaut
+    //     handleDragEnd();
+    //   }
+    // };
     
-    // Get current position from existing settings (which are world offsets)
+    // Désactiver le comportement de glisser-déposer natif du navigateur
+    const preventDragStartNative = (e: DragEvent) => {
+      if (isDragging || isResizing) { // Also prevent for resizing
+        e.preventDefault();
+      }
+    };
+    
+    // Ajouter les écouteurs d'événements si en mode édition
+    if (editMode) {
+      window.addEventListener('mousemove', handleGlobalMouseMove, { capture: true });
+      window.addEventListener('mouseup', handleGlobalMouseUp, { capture: true });
+      window.addEventListener('dragstart', preventDragStartNative, { capture: true });
+    }
+    
+    // Nettoyer les écouteurs d'événements
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove, { capture: true });
+      window.removeEventListener('mouseup', handleGlobalMouseUp, { capture: true });
+      window.removeEventListener('dragstart', preventDragStartNative, { capture: true });
+    };
+  }, [editMode, isDragging, isResizing, selectedLandId, handleGlobalMouseMove, handleGlobalMouseUp]); // Added isResizing and new handlers
+
+  // Effect to update positions when map is transformed
+  useEffect(() => {
+    const handleMapTransform = (event: CustomEvent) => {
+      if (event.detail && event.detail.offset) {
+        // Ne pas forcer de re-render pendant le glissement ou redimensionnement
+        if (!isDragging && !isResizing) {
+          // Force re-render when map is transformed
+          setImageSettings(prev => {
+            // Create a new object to trigger re-render
+            return {...prev};
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('mapTransformed', handleMapTransform as EventListener);
+    
+    return () => {
+      window.removeEventListener('mapTransformed', handleMapTransform as EventListener);
+    };
+  }, [isDragging, isResizing]); // Added isResizing
+
+  // If the component is not visible, don't render anything
+  if (!isVisible) {
     const existingSettings = imageSettings[polygonId] || {};
     // x and y are world offsets, they don't change on resize.
     // If they are not set (e.g. first time), they will be undefined here.
@@ -546,137 +795,108 @@ export default function LandMarkers({
         }
         
         if (editMode) {
-          // In edit mode, use Resizable component
+          // In edit mode, use a standard div with custom drag/resize handles
+          const handleSize = 16; // Size of the square handles
+          const handleOffset = - (handleSize / 2);
+          const resizeHandles = [
+            { name: 'top-left', cursor: 'nwse-resize', style: { top: `${handleOffset}px`, left: `${handleOffset}px` } },
+            { name: 'top', cursor: 'ns-resize', style: { top: `${handleOffset}px`, left: `calc(50% - ${handleSize/2}px)` } },
+            { name: 'top-right', cursor: 'nesw-resize', style: { top: `${handleOffset}px`, right: `${handleOffset}px` } },
+            { name: 'left', cursor: 'ew-resize', style: { top: `calc(50% - ${handleSize/2}px)`, left: `${handleOffset}px` } },
+            { name: 'right', cursor: 'ew-resize', style: { top: `calc(50% - ${handleSize/2}px)`, right: `${handleOffset}px` } },
+            { name: 'bottom-left', cursor: 'nesw-resize', style: { bottom: `${handleOffset}px`, left: `${handleOffset}px` } },
+            { name: 'bottom', cursor: 'ns-resize', style: { bottom: `${handleOffset}px`, left: `calc(50% - ${handleSize/2}px)` } },
+            { name: 'bottom-right', cursor: 'nwse-resize', style: { bottom: `${handleOffset}px`, right: `${handleOffset}px` } },
+          ];
+
           return (
-            <Resizable
+            <div
               key={polygon.id}
               data-land-id={polygon.id}
-              className={`absolute ${isSelected ? 'cursor-move' : 'cursor-pointer'}`}
-              size={{ width, height }}
+              className={`absolute ${isSelected && !isResizing ? 'cursor-move' : 'cursor-pointer'}`}
               style={{
                 position: 'absolute',
                 left: `${finalX}px`,
                 top: `${finalY}px`,
+                width: `${width}px`,
+                height: `${height}px`,
                 zIndex: isSelected ? 15 : (isHovered ? 12 : 10),
                 transform: 'translate(-50%, -50%)',
                 border: isSelected 
                   ? '2px dashed red' 
                   : (hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none'),
                 opacity: isSelected ? 0.9 : (isHovered ? opacity + 0.1 : opacity),
-                pointerEvents: 'auto',
-                background: 'rgba(255, 255, 255, 0.1)',
+                pointerEvents: 'auto', // Make sure it can receive mouse events
+                background: 'rgba(255, 255, 255, 0.1)', // Slight background for visibility
                 boxShadow: isSelected ? '0 0 10px rgba(255, 0, 0, 0.5)' : 'none',
-                touchAction: 'none' // Empêche le comportement de défilement par défaut sur les appareils tactiles
+                touchAction: 'none'
               }}
               onMouseDown={(e) => {
-                e.preventDefault(); // Empêcher le comportement par défaut
-                e.stopPropagation(); // Empêcher la propagation aux éléments parents
-                handleDragStart(e, polygon.id, polygonData.centerX, polygonData.centerY);
-              }}
-              draggable={false} // Désactiver le comportement de glisser-déposer natif du navigateur
-              onClick={() => handleClick(polygon)}
-              onMouseEnter={() => handleMouseEnter(polygon)}
-              onMouseLeave={handleMouseLeave}
-              onResizeStop={(e, direction, ref, d) => handleResize(e, direction, ref, d, polygon.id)}
-              enable={{
-                top: isSelected,
-                right: isSelected,
-                bottom: isSelected,
-                left: isSelected,
-                topRight: isSelected,
-                bottomRight: isSelected,
-                bottomLeft: isSelected,
-                topLeft: isSelected
-              }}
-              handleStyles={{
-                topRight: { 
-                  right: '-8px', 
-                  top: '-8px', 
-                  cursor: 'ne-resize',
-                  width: '16px',
-                  height: '16px',
-                  background: 'white',
-                  border: '2px solid red',
-                  borderRadius: '50%',
-                  zIndex: 20
-                },
-                bottomRight: { 
-                  right: '-8px', 
-                  bottom: '-8px', 
-                  cursor: 'se-resize',
-                  width: '16px',
-                  height: '16px',
-                  background: 'white',
-                  border: '2px solid red',
-                  borderRadius: '50%',
-                  zIndex: 20
-                },
-                bottomLeft: { 
-                  left: '-8px', 
-                  bottom: '-8px', 
-                  cursor: 'sw-resize',
-                  width: '16px',
-                  height: '16px',
-                  background: 'white',
-                  border: '2px solid red',
-                  borderRadius: '50%',
-                  zIndex: 20
-                },
-                topLeft: { 
-                  left: '-8px', 
-                  top: '-8px', 
-                  cursor: 'nw-resize',
-                  width: '16px',
-                  height: '16px',
-                  background: 'white',
-                  border: '2px solid red',
-                  borderRadius: '50%',
-                  zIndex: 20
+                if (isSelected) { // Only allow drag if selected
+                  handleDragStart(e, polygon.id, polygonData.centerX, polygonData.centerY);
                 }
               }}
-              handleComponent={{
-                right: <div className="h-full w-2 bg-red-500 opacity-70 hover:opacity-100 transition-opacity" />,
-                left: <div className="h-full w-2 bg-red-500 opacity-70 hover:opacity-100 transition-opacity" />,
-                top: <div className="h-2 w-full bg-red-500 opacity-70 hover:opacity-100 transition-opacity" />,
-                bottom: <div className="h-2 w-full bg-red-500 opacity-70 hover:opacity-100 transition-opacity" />
+              onClick={(e) => {
+                // Prevent click from propagating if dragging or resizing
+                if (isDragging || isResizing) {
+                  e.stopPropagation();
+                  return;
+                }
+                handleClick(polygon);
               }}
+              onMouseEnter={() => handleMouseEnter(polygon)}
+              onMouseLeave={handleMouseLeave}
             >
-              <div className="relative w-full h-full">
+              <div className="relative w-full h-full pointer-events-none"> {/* Content wrapper */}
                 <img
                   src={imageUrl}
                   alt={polygon.historicalName || polygon.id}
                   style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'contain',
+                    objectFit: 'contain', // Or 'cover' or 'fill' based on desired behavior
                     filter: isNight ? 'brightness(0.7) saturate(0.8)' : 'none',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none' // Image itself should not capture events
                   }}
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                 />
                 {isSelected && (
                   <>
-                    <div className="absolute top-0 left-0 bg-black/70 text-white text-xs p-1 rounded">
+                    <div className="absolute top-0 left-0 bg-black/70 text-white text-xs p-1 rounded pointer-events-none">
                       {polygon.historicalName || polygon.id}
                     </div>
-                    <div className="absolute bottom-0 right-0 bg-black/70 text-white text-xs p-1 rounded">
+                    <div className="absolute bottom-0 right-0 bg-black/70 text-white text-xs p-1 rounded pointer-events-none">
                       {Math.round(width)}×{Math.round(height)}
                     </div>
                   </>
                 )}
               </div>
-            </Resizable>
+
+              {/* Custom Resize Handles */}
+              {isSelected && editMode && resizeHandles.map(handle => (
+                <div
+                  key={handle.name}
+                  className="absolute bg-white border-2 border-red-500 rounded-full"
+                  style={{
+                    width: `${handleSize}px`,
+                    height: `${handleSize}px`,
+                    cursor: handle.cursor,
+                    zIndex: 20, // Above the main element
+                    ...handle.style
+                  }}
+                  onMouseDown={(e) => handleResizeStart(e, handle.name)}
+                />
+              ))}
+            </div>
           );
         } else {
-          // In normal mode, use regular div
+          // In normal mode, use regular div (no interaction)
           return (
             <div
               key={polygon.id}
               className="absolute"
               style={{
-                pointerEvents: 'none',
+                pointerEvents: 'none', // No pointer events in normal mode
                 position: 'absolute',
                 left: `${finalX}px`,
                 top: `${finalY}px`,
@@ -685,13 +905,14 @@ export default function LandMarkers({
                 zIndex: isHovered ? 12 : 10,
                 transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
                 transform: `translate(-50%, -50%) scale(${isHovered ? 1.05 : 1})`,
-                left: `${finalX}px`,
-                top: `${finalY}px`,
+                // left and top are repeated, remove one set
                 cursor: 'default',
                 opacity: isHovered ? opacity + 0.1 : opacity,
                 border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none',
               }}
               title={polygon.historicalName || polygon.id}
+              onMouseEnter={() => handleMouseEnter(polygon)} // Still allow hover effects
+              onMouseLeave={handleMouseLeave}
             >
               <img
                 src={imageUrl}
@@ -702,9 +923,7 @@ export default function LandMarkers({
                   objectFit: 'contain',
                   filter: isNight ? 'brightness(0.7) saturate(0.8)' : 'none',
                 }}
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
+                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
               />
             </div>
           );
