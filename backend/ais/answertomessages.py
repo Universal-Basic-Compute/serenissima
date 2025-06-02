@@ -645,12 +645,11 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
             "CreatedAt": datetime.datetime.now(timezone.utc).isoformat()
         }
         
-        # Store the reply reference in the Details field instead of InReplyTo
-        # since InReplyTo is not a valid field in the MESSAGES table
+        # Don't store the reply reference since neither InReplyTo nor Details 
+        # are valid fields in the MESSAGES table
+        # We'll just log it for reference
         if in_reply_to_message_id:
-            message_fields["Details"] = json.dumps({
-                "inReplyTo": in_reply_to_message_id
-            })
+            print(f"Message is a reply to: {in_reply_to_message_id}")
         
         tables["messages"].create(message_fields)
         print(f"Created direct message from {sender} to {receiver} with ID: {message_id}")
