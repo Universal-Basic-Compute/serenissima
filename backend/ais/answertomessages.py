@@ -3,8 +3,7 @@ import sys
 import json
 import random
 import argparse
-import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Literal
 import requests
 from dotenv import load_dotenv
@@ -476,7 +475,7 @@ def call_try_create_activity_api(
 def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_used: str = "local") -> None:
     """Create a notification for admins with the AI response summary."""
     try:
-        now = datetime.datetime.now().isoformat()
+        now = datetime.now().isoformat()
         
         # Create a summary message
         message = f"💬 **AI Message Response Summary** 💬\n\nModel utilisé: **{model_used}**\n\n"
@@ -681,7 +680,7 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
         content = content.strip()
         
         # Create a message ID
-        message_id = f"msg_{sender}_{receiver}_{datetime.datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+        message_id = f"msg_{sender}_{receiver}_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
         
         # Create the message record
         message_fields = {
@@ -716,7 +715,7 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
             "Asset": message_id,
             "AssetType": "message",
             "Status": "unread",
-            "CreatedAt": datetime.datetime.now(datetime.timezone.utc).isoformat()
+            "CreatedAt": datetime.now(timezone.utc).isoformat()
         }
         
         tables["notifications"].create(notification_fields)
@@ -736,7 +735,7 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
             new_strength = min(100, current_strength + 2)  # Increment by 2, max 100
             
             tables["relationships"].update(relationship_id, {
-                'LastInteraction': datetime.datetime.now(timezone.utc).isoformat(),
+                'LastInteraction': datetime.now(timezone.utc).isoformat(),
                 'StrengthScore': new_strength
             })
             
@@ -759,12 +758,12 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
                 "Citizen2": citizen2,
                 "Title": "Acquaintance",  # Default relationship type
                 "Description": f"Initial contact established when {sender} sent a message to {receiver}.",
-                "LastInteraction": datetime.datetime.now(timezone.utc).isoformat(),
+                "LastInteraction": datetime.now(timezone.utc).isoformat(),
                 "Tier": 1,  # Initial tier
                 "Status": "active",
                 "StrengthScore": 10,  # Initial strength
                 "TrustScore": 5,  # Initial trust
-                "CreatedAt": datetime.datetime.now(timezone.utc).isoformat()
+                "CreatedAt": datetime.now(timezone.utc).isoformat()
             }
             
             tables["relationships"].create(relationship_fields)
