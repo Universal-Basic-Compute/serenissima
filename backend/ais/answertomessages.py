@@ -3,7 +3,7 @@ import sys
 import json
 import random
 import argparse
-from datetime import datetime, timedelta
+import datetime
 from typing import Dict, List, Optional, Any, Literal
 import requests
 from dotenv import load_dotenv
@@ -425,7 +425,7 @@ def call_try_create_activity_api(
 def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_used: str = "local") -> None:
     """Create a notification for admins with the AI response summary."""
     try:
-        now = datetime.now().isoformat()
+        now = datetime.datetime.now().isoformat()
         
         # Create a summary message
         message = f"💬 **AI Message Response Summary** 💬\n\nModel utilisé: **{model_used}**\n\n"
@@ -528,9 +528,9 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                     should_respond = True
                     if sender_is_ai:
                         # If sender is AI, 25% chance of responding
-                        if random.random() > 0.25: # Changed from 0.25 to 0.25
+                        if random.random() > 0.25:
                             should_respond = False
-                            print(f"    Sender {sender_username} is an AI. {ai_username} chose not to respond to this message (90% chance).")
+                            print(f"    Sender {sender_username} is an AI. {ai_username} chose not to respond to this message (75% chance).")
                         else:
                             print(f"    Sender {sender_username} is an AI. {ai_username} will respond (25% chance).")
                     
@@ -566,12 +566,12 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                 
                 dry_run_should_respond = True
                 if sender_is_ai:
-                    # Simulate the 10% chance for dry run logging consistency
-                    if random.random() > 0.10: # Using a new random roll for dry run simulation. Changed from 0.25 to 0.10
+                    # Simulate the 25% chance for dry run logging consistency
+                    if random.random() > 0.25: # Using a new random roll for dry run simulation
                         dry_run_should_respond = False
-                        print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have chosen not to respond (90% chance).")
+                        print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have chosen not to respond (75% chance).")
                     else:
-                        print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have responded (10% chance).")
+                        print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have responded (25% chance).")
 
                 if dry_run_should_respond:
                     print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos (Model: {kinos_model_override_arg or 'local'})")
