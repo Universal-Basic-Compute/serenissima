@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-const PYTHON_ENGINE_BASE_URL = process.env.DEFAULT_FASTAPI_URL || 'http://localhost:8000';
+const PYTHON_ENGINE_BASE_URL = process.env.BACKEND_BASE_URL || 'http://localhost:10000';
 
 const TryCreateActivityRequestSchema = z.object({
   citizenUsername: z.string().min(1, "citizenUsername is required"),
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     if (activityType === 'send_message') {
       console.log(`[API /activities/try-create] Processing send_message with parameters:`, 
         `Receiver: ${activityParameters?.receiverUsername}`,
-        `Message Type: ${activityParameters?.messageType || 'personal'}`,
+        `Message Type: ${activityParameters?.messageType || 'message'}`,
         `Content Length: ${activityParameters?.content ? activityParameters.content.length : 0} characters`,
         `Target Building: ${activityParameters?.targetBuildingId || 'Receiver location'}`
       );

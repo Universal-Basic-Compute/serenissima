@@ -10,7 +10,6 @@ import { interactionService } from '@/lib/services/InteractionService';
 import { hoverStateService, HOVER_STATE_CHANGED, HoverState } from '@/lib/services/HoverStateService';
 import { CitizenRenderService } from '@/lib/services/CitizenRenderService';
 import { landService } from '@/lib/services/LandService'; // Import LandService
-import { landService } from '@/lib/services/LandService'; // Import LandService
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
