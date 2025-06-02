@@ -73,6 +73,34 @@ def _escape_airtable_value(value: Any) -> str:
         return value.replace("'", "\\'")
     return str(value)
 
+# --- Kinos API Interaction ---
+KINOS_ENGINE_API_BASE_URL = os.getenv("KINOS_ENGINE_API_BASE_URL", "https://api.kinos-engine.ai") # For Kinos Engine specific calls if any
+NEXT_PUBLIC_BASE_URL = os.getenv("NEXT_PUBLIC_BASE_URL", "http://localhost:3000") # For Next.js API calls like get-data-package
+
+def _get_data_package_for_citizen(username: str) -> Optional[Dict]:
+    """Fetches the data package for a citizen using the Next.js API."""
+    try:
+        # Use NEXT_PUBLIC_BASE_URL for this API call
+        api_url = f"{NEXT_PUBLIC_BASE_URL}/api/get-data-package?citizenUsername={username}"
+        print(f"  Fetching data package for {username} from {api_url}...")
+        response = requests.get(api_url, timeout=45) # Increased timeout
+        response.raise_for_status()
+        
+        data = response.json()
+        # Assuming the API returns the package directly on success
+        # If it's wrapped, e.g., {"success": true, "data": {...}}, adjust accordingly
+        print(f"  Successfully fetched data package for {username}.")
+        return data
+    except requests.exceptions.RequestException as e:
+        print(f"  {LogColors.FAIL}API Error fetching data package for {username}: {e}{LogColors.ENDC}")
+        return None
+    except json.JSONDecodeError:
+        print(f"  {LogColors.FAIL}Failed to decode JSON response for data package of {username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return None
+    except Exception as e:
+        print(f"  {LogColors.FAIL}Unexpected error fetching data package for {username}: {e}{LogColors.ENDC}")
+        return None
+
 def _get_relationship_data(tables: Dict[str, AirtableTable], username1: str, username2: str) -> Optional[Dict[str, Any]]:
     """Fetches relationship data between two citizens from Airtable."""
     # Ensure usernames are ordered alphabetically for consistent querying
@@ -338,19 +366,24 @@ def main(kinos_model: str, kinos_api_url: str, kinos_blueprint: str):
         )
 
         # Prepare system context for the Kinos API
+        speaker_data_package = _get_data_package_for_citizen(speaker_username)
         current_speaker_profile_data = {
             "username": speaker_info["username"],
             "influence": speaker_info["influence"],
-            "profile_fields": speaker_info["fields"] # Full profile fields
+            "profile_fields": speaker_info["fields"], # Full profile fields
+            "data_package": speaker_data_package # Add data package
         }
 
-        all_member_profiles_data = [
-            {
-                "username": m["username"],
+        all_member_profiles_data = []
+        for m in signoria_members:
+            member_username = m["username"]
+            member_data_package = _get_data_package_for_citizen(member_username)
+            all_member_profiles_data.append({
+                "username": member_username,
                 "influence": m["influence"],
-                "profile_fields": m["fields"] # Full profile fields for all members
-            } for m in signoria_members
-        ]
+                "profile_fields": m["fields"], # Full profile fields for all members
+                "data_package": member_data_package # Add data package for each member
+            })
 
         signoria_relationships_list = []
         member_usernames_for_rels = [m['username'] for m in signoria_members]
