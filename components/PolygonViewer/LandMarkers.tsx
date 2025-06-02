@@ -79,11 +79,8 @@ export default function LandMarkers({
     return null;
   }
 
-  // Calculate base size for land images based on scale
-  const getImageSize = (scale: number) => {
-    // Base size directly proportional to scale to match polygon scaling exactly
-    return 300 * scale;
-  };
+  // No need for a separate function - use the scale directly with the polygon size
+  // This ensures land images scale exactly with polygons
 
   return (
     <div className="absolute inset-0 pointer-events-none">
@@ -95,8 +92,8 @@ export default function LandMarkers({
         const isHovered = hoveredPolygonId === polygon.id;
         const imageUrl = landImages[polygon.id];
         
-        // Calculate size based on scale
-        const baseSize = getImageSize(scale);
+        // Use the scale directly to match polygon scaling exactly
+        // The size is determined by the polygon's actual size in the rendered view
         
         // Apply night effect if needed
         const opacity = isNight ? 0.5 : 0.7; // Reduce opacity at night
@@ -110,8 +107,11 @@ export default function LandMarkers({
             className="absolute"
             style={{
               pointerEvents: 'none', // Make lands completely non-interactive
+              position: 'absolute',
               left: `${polygonData.centerX}px`,
               top: `${polygonData.centerY}px`,
+              width: `${Math.max(100, 300 * scale)}px`, // Scale width with zoom level
+              height: `${Math.max(100, 300 * scale)}px`, // Scale height with zoom level
               zIndex: isHovered ? 12 : 10, // Below buildings (z-index 16-18) but above water
               transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
               transform: `translate(-50%, -50%) scale(${isHovered ? 1.05 : 1})`,
@@ -126,8 +126,8 @@ export default function LandMarkers({
               src={imageUrl}
               alt={polygon.historicalName || polygon.id}
               style={{
-                width: `${baseSize}px`,
-                height: `${baseSize}px`,
+                width: '100%',
+                height: '100%',
                 objectFit: 'contain',
                 filter: isNight ? 'brightness(0.7) saturate(0.8)' : 'none', // Darker and less saturated at night
               }}
