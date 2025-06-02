@@ -81,7 +81,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
   useEffect(() => {
     if (!isVisible || polygonsToRender.length === 0) return;
     
-    // When scale changes, update positions AND sizes
+    // When scale changes, update positions but keep actual image sizes fixed on the map
     const updatedSettings: Record<string, { x: number, y: number, width: number, height: number }> = {};
     let hasUpdates = false;
     
@@ -103,20 +103,24 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
       
       const currentSettings = customImageSettings[polygon.id];
       if (currentSettings) {
-        // For saved settings with a reference scale, use that for scaling
+        // For saved settings with a reference scale, use that for scaling positions only
         if (polygon.imageSettings && polygon.imageSettings.referenceScale) {
           const referenceScale = polygon.imageSettings.referenceScale;
+          // We scale the position with the map, but the image itself will be counter-scaled in the render
+          // to maintain a fixed size on the map
+          
+          // Use the original dimensions from saved settings
+          const originalWidth = polygon.imageSettings.width;
+          const originalHeight = polygon.imageSettings.height;
+          
+          // Scale the position to match the current map scale
           const scaleRatio = scale / referenceScale;
           
-          // Scale dimensions based on the reference scale
-          const scaledWidth = polygon.imageSettings.width * scaleRatio;
-          const scaledHeight = polygon.imageSettings.height * scaleRatio;
-          
           updatedSettings[polygon.id] = {
-            x: centerX - (scaledWidth / 2),
-            y: centerY - (scaledHeight / 2),
-            width: scaledWidth,
-            height: scaledHeight
+            x: centerX - ((originalWidth * scaleRatio) / 2),
+            y: centerY - ((originalHeight * scaleRatio) / 2),
+            width: originalWidth * scaleRatio,
+            height: originalHeight * scaleRatio
           };
           hasUpdates = true;
         } else if (!resizeMode) {
@@ -182,7 +186,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           const referenceScale = savedSettings.referenceScale || prevScale.current;
           const scaleRatio = scale / referenceScale;
           
-          // Scale dimensions based on the reference scale
+          // Scale positions based on the reference scale, but the actual image will be counter-scaled in render
           const scaledWidth = savedSettings.width * scaleRatio;
           const scaledHeight = savedSettings.height * scaleRatio;
           
@@ -417,9 +421,16 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
                   // Store the current scale with the settings to use as a reference
                   const settings = customImageSettings[selectedImageId];
                   if (settings) {
+                    // Calculate the actual size on the map (not the scaled size on screen)
+                    // by applying the inverse of the scale factor
+                    const actualWidth = settings.width;
+                    const actualHeight = settings.height;
+                    
                     // Save the settings with a reference scale
                     const settingsToSave = {
                       ...settings,
+                      width: actualWidth,
+                      height: actualHeight,
                       referenceScale: scale // Save the current scale as reference
                     };
                     landService.saveImageSettings(selectedImageId, settingsToSave)
@@ -483,7 +494,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
               opacity: 0.9, // Slightly transparent to blend better
               border: isSelected ? '2px dashed yellow' : 'none',
               cursor: resizeMode ? 'move' : 'default',
-              transform: resizeMode ? 'none' : undefined // Ensure no transform when in resize mode
+              transform: resizeMode ? 'none' : `scale(${1/scale})` // Scale inversely to the map scale to keep fixed size on map
             }}
             onMouseEnter={() => {
               if (!resizeMode) {
