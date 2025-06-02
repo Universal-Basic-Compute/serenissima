@@ -107,7 +107,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
     if (hasUpdates) {
       setCustomImageSettings(prev => ({ ...prev, ...updatedSettings }));
     }
-  }, [isVisible, polygonsToRender, scale, customImageSettings, resizeMode]);
+  }, [isVisible, polygonsToRender, customImageSettings, resizeMode]); // Removed scale from dependencies to prevent resizing on zoom
 
   // Initialize and update custom settings for polygons
   useEffect(() => {
@@ -119,7 +119,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
     polygonsToRender.forEach(({ polygon, centerX, centerY }) => {
       if (!polygon || !polygon.id) return;
       
-      const baseSize = 75; // Default base size
+      const baseSize = 75; // Default base size - fixed size regardless of zoom
       
       if (!customImageSettings[polygon.id]) {
         // First check if polygon has saved imageSettings
@@ -127,11 +127,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           // Use the saved settings, but adjust position based on current center
           const savedSettings = polygon.imageSettings;
           
-          // Calculate the offset from center in the saved settings
-          const savedCenterX = savedSettings.x + (savedSettings.width / 2);
-          const savedCenterY = savedSettings.y + (savedSettings.height / 2);
-          
-          // Apply the same offset to the current center
+          // Apply the saved width/height but center at current position
           newSettings[polygon.id] = {
             x: centerX - (savedSettings.width / 2),
             y: centerY - (savedSettings.height / 2),
@@ -148,13 +144,13 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
               (polygon.imageOverlayBounds.east - polygon.imageOverlayBounds.west) / 
               (polygon.imageOverlayBounds.north - polygon.imageOverlayBounds.south);
             
-            // Adjust size based on aspect ratio
-            let width = baseSize * scale;
+            // Use fixed size regardless of scale
+            let width = baseSize;
             let height = width / aspectRatio;
             
             // If height is too large, scale down
-            if (height > baseSize * scale * 1.5) {
-              height = baseSize * scale;
+            if (height > baseSize * 1.5) {
+              height = baseSize;
               width = height * aspectRatio;
             }
             
@@ -168,25 +164,24 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
             console.warn(`Error calculating image position for polygon ${polygon.id}:`, error);
             // Fall back to default sizing
             newSettings[polygon.id] = {
-              x: centerX - (baseSize * scale) / 2,
-              y: centerY - (baseSize * scale) / 2,
-              width: baseSize * scale,
-              height: baseSize * scale
+              x: centerX - baseSize / 2,
+              y: centerY - baseSize / 2,
+              width: baseSize,
+              height: baseSize
             };
           }
         } else {
           // Initialize settings for new polygons without bounds or saved settings
           newSettings[polygon.id] = {
-            x: centerX - (baseSize * scale) / 2,
-            y: centerY - (baseSize * scale) / 2,
-            width: baseSize * scale,
-            height: baseSize * scale
+            x: centerX - baseSize / 2,
+            y: centerY - baseSize / 2,
+            width: baseSize,
+            height: baseSize
           };
         }
         hasChanges = true;
       } else if (!resizeMode) {
         // Update position for existing polygons when not in resize mode
-        // This makes images move with the map when panning/zooming
         const currentSettings = customImageSettings[polygon.id];
         const newX = centerX - (currentSettings.width / 2);
         const newY = centerY - (currentSettings.height / 2);
