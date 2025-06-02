@@ -241,7 +241,16 @@ export default function LandMarkers({
     }
     
     // Mettre à jour l'état immédiatement pour un meilleur suivi
+    // The state update for imageSettings should store BASE width/height and referenceScale.
     const polyData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
+    
+    const currentSettings = imageSettings[selectedLandId] || {};
+    // Determine base width/height and reference scale to store in state.
+    // These should not change during a drag, only x and y (world offsets) change.
+    // If currentSettings are empty, initialize with defaults.
+    const baseWidthToStore = currentSettings.width !== undefined ? currentSettings.width : 75;
+    const baseHeightToStore = currentSettings.height !== undefined ? currentSettings.height : 75;
+    const refScaleToStore = currentSettings.referenceScale !== undefined ? currentSettings.referenceScale : scale;
     if (polyData && typeof polyData.polygonWorldMapCenterX === 'number' && typeof polyData.polygonWorldMapCenterY === 'number') {
       const pWorldMapCenterX = polyData.polygonWorldMapCenterX;
       const pWorldMapCenterY = polyData.polygonWorldMapCenterY;
