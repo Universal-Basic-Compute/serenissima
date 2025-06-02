@@ -250,7 +250,7 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_username: str, message_content: str, kinos_model_override: Optional[str] = None) -> Optional[str]:
+def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_username: str, message_content: str, kinos_model_override: Optional[str] = None, add_message: Optional[str] = None) -> Optional[str]:
     """Generate an AI response using the Kinos Engine API with enhanced context."""
     try:
         api_key = get_kinos_api_key()
@@ -280,6 +280,11 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
         ai_display_name = ai_citizen_data.get('fields', {}).get('FirstName', ai_username) if ai_citizen_data else ai_username
         sender_display_name = sender_citizen_data.get('fields', {}).get('FirstName', sender_username) if sender_citizen_data else sender_username
 
+        # Add suggestion to prompt if provided
+        suggestion_text = ""
+        if add_message:
+            suggestion_text = f"\nSUGGESTION: Consider discussing or mentioning: {add_message}\n"
+        
         kinos_prompt = (
             f"You are {ai_display_name}, an AI citizen of Venice. You are responding to a message from {sender_display_name}.\n"
             f"IMPORTANT: Your response must be human-like, and conversational. "
@@ -296,7 +301,7 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
             f"- 'recent_problems_involving_ai_or_sender': Recent issues involving you or {sender_display_name} that could be part of your discussion.\n\n"
             f"--- USER'S MESSAGE TO YOU ---\n"
             f"{message_content}\n"
-            f"--- END OF USER'S MESSAGE ---\n\n"
+            f"--- END OF USER'S MESSAGE ---\n{suggestion_text}\n"
             f"Remember: Your reply must be RELEVANT to {sender_display_name} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Just a natural, and pertinent response.\n"
             f"Your response:"
         )
@@ -480,10 +485,11 @@ def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 
-def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None, instant_mode: bool = False):
+def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None, instant_mode: bool = False, add_message: Optional[str] = None):
     """Main function to process AI messages."""
     model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
-    print(f"Starting AI message response process (dry_run={dry_run}, kinos_model={model_status}, instant_mode={instant_mode})")
+    add_message_status = f"with suggestion: '{add_message}'" if add_message else "no suggestion"
+    print(f"Starting AI message response process (dry_run={dry_run}, kinos_model={model_status}, instant_mode={instant_mode}, {add_message_status})")
     
     # Initialize Airtable connection
     tables = initialize_airtable()
@@ -562,8 +568,8 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                             print(f"    Sender {sender_username} is an AI. {ai_username} will respond (25% chance).")
                     
                     if should_respond:
-                        # Generate AI response, passing tables object
-                        response_content = generate_ai_response(tables, ai_username, sender_username, message_content, kinos_model_override_arg)
+                        # Generate AI response, passing tables object and optional message suggestion
+                        response_content = generate_ai_response(tables, ai_username, sender_username, message_content, kinos_model_override_arg, add_message)
                         
                         if response_content:
                             if instant_mode:
@@ -757,10 +763,16 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Run in dry-run mode without making actual changes")
     parser.add_argument("--model", type=str, help="Override the default Kinos model with a specific model")
     parser.add_argument("--instant", action="store_true", help="Create messages directly in Airtable without using activities")
+    parser.add_argument("--addMessage", type=str, help="Add a suggestion or topic to the AI prompt")
     args = parser.parse_args()
     
     # Call the main processing function with command-line arguments
-    process_ai_messages(dry_run=args.dry_run, kinos_model_override_arg=args.model, instant_mode=args.instant)
+    process_ai_messages(
+        dry_run=args.dry_run, 
+        kinos_model_override_arg=args.model, 
+        instant_mode=args.instant,
+        add_message=args.addMessage
+    )
 
 if __name__ == "__main__":
     main()
