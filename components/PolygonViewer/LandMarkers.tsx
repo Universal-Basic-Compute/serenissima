@@ -674,20 +674,20 @@ export default function LandMarkers({
             // settings.x and .y are world offsets
             const markerMapWorldX = pWorldMapCenterX + settings.x;
             const markerMapWorldY = pWorldMapCenterY + settings.y;
-            finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-            finalY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+            finalX = Math.round(worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight));
+            finalY = Math.round(worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight));
           } else {
             // No custom settings, use polygon's screen center
-            finalX = pScreenCenterX;
-            finalY = pScreenCenterY;
+            finalX = Math.round(pScreenCenterX);
+            finalY = Math.round(pScreenCenterY);
           }
         } else {
           // Fallback if world map center is not available (e.g., polygon.center was missing in source data)
           // In this case, custom positioning won't work correctly with map transforms.
           // Use screen center, and if settings.x/y exist, they might be screen coords (old data) or invalid.
           // For simplicity, just use screen center. A warning will be logged during drag if this happens.
-          finalX = pScreenCenterX;
-          finalY = pScreenCenterY;
+          finalX = Math.round(pScreenCenterX);
+          finalY = Math.round(pScreenCenterY);
           if (settings && (typeof settings.x === 'number' || typeof settings.y === 'number')) {
              console.warn(`LandMarker ${polygon.id}: Missing world center. Custom position from settings may be incorrect.`);
           }
