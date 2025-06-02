@@ -14,11 +14,16 @@ interface LandMarkersProps {
     centroidY: number;
     centerX: number;
     centerY: number;
+    polygonWorldMapCenterX?: number;
+    polygonWorldMapCenterY?: number;
     hasPublicDock?: boolean;
   }[];
   isNight: boolean;
   scale: number;
   activeView: string;
+  canvasWidth: number;
+  canvasHeight: number;
+  mapTransformOffset: { x: number, y: number };
 }
 
 interface LandImageSettings {
@@ -34,7 +39,10 @@ export default function LandMarkers({
   polygonsToRender,
   isNight,
   scale,
-  activeView
+  activeView,
+  canvasWidth,
+  canvasHeight,
+  mapTransformOffset
 }: LandMarkersProps) {
   const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
   const [landImages, setLandImages] = useState<Record<string, string>>({});
@@ -44,6 +52,23 @@ export default function LandMarkers({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragStartRef = useRef<{x: number, y: number}>({ x: 0, y: 0 });
   const positionRef = useRef<{x: number, y: number}>({ x: 0, y: 0 });
+
+  // Coordinate transformation utilities
+  const worldToScreenX = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasWidth: number): number => {
+    return mapWorldX * currentScale + currentCanvasWidth / 2 + currentMapTransformOffset.x;
+  };
+
+  const worldToScreenY = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasHeight: number): number => {
+    return (-mapWorldY) * currentScale * 1.4 + currentCanvasHeight / 2 + currentMapTransformOffset.y; // Assuming 1.4 factor for Y
+  };
+
+  const screenToWorldX = (screenX: number, screenY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasWidth: number): number => {
+    return (screenX - currentCanvasWidth / 2 - currentMapTransformOffset.x) / currentScale;
+  };
+
+  const screenToWorldY = (screenX: number, screenY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasHeight: number): number => {
+    return -(screenY - currentCanvasHeight / 2 - currentMapTransformOffset.y) / (currentScale * 1.4); // Assuming 1.4 factor for Y
+  };
 
   // Load land images and settings when polygons change
   useEffect(() => {
@@ -115,21 +140,38 @@ export default function LandMarkers({
     e.stopPropagation(); // Empêcher la propagation aux éléments parents
     setIsDragging(true);
     
-    dragStartRef.current = { 
-      x: e.clientX, 
-      y: e.clientY 
-    };
-    
-    // Use current position from settings or default to center
+    const polyData = polygonsToRender.find(p => p.polygon.id === polygonId);
+    if (!polyData) {
+      console.error("Polygon data not found for drag start:", polygonId);
+      setIsDragging(false);
+      return;
+    }
+
+    const pWorldMapCenterX = polyData.polygonWorldMapCenterX;
+    const pWorldMapCenterY = polyData.polygonWorldMapCenterY;
     const currentSettings = imageSettings[polygonId];
     
-    // Si nous avons des paramètres, utiliser la position sauvegardée
-    let posX = currentSettings?.x || centerX;
-    let posY = currentSettings?.y || centerY;
+    let initialScreenX, initialScreenY;
+
+    if (currentSettings && typeof currentSettings.x === 'number' && typeof currentSettings.y === 'number' && typeof pWorldMapCenterX === 'number' && typeof pWorldMapCenterY === 'number') {
+      // settings.x and .y are world offsets
+      const markerMapWorldX = pWorldMapCenterX + currentSettings.x;
+      const markerMapWorldY = pWorldMapCenterY + currentSettings.y;
+      initialScreenX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      initialScreenY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+    } else {
+      // Fallback to polygon's screen center (passed as centerX, centerY to this handler)
+      initialScreenX = centerX;
+      initialScreenY = centerY;
+      if (typeof pWorldMapCenterX !== 'number' || typeof pWorldMapCenterY !== 'number') {
+        console.warn(`DragStart: Missing world center for ${polygonId}. Custom position may not work correctly if saved.`);
+      }
+    }
     
-    positionRef.current = { x: posX, y: posY };
-    console.log(`Drag start for ${polygonId} at position:`, positionRef.current);
-  }, [editMode, selectedLandId, imageSettings]);
+    positionRef.current = { x: initialScreenX, y: initialScreenY };
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    console.log(`Drag start for ${polygonId} at screen position:`, positionRef.current, "world center:", {pWorldMapCenterX, pWorldMapCenterY});
+  }, [editMode, selectedLandId, imageSettings, polygonsToRender, scale, mapTransformOffset, canvasWidth, canvasHeight]);
 
   const handleDrag = useCallback((e: MouseEvent) => {
     if (!isDragging || !selectedLandId) return;
@@ -174,22 +216,49 @@ export default function LandMarkers({
     }
     
     // Mettre à jour l'état immédiatement pour un meilleur suivi
-    setImageSettings(prev => ({
-      ...prev,
-      [selectedLandId]: {
-        ...existingSettings,
-        width,
-        height,
-        referenceScale: scale,
-        x: newX,
-        y: newY
-      }
-    }));
+    const polyData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
+    if (polyData && typeof polyData.polygonWorldMapCenterX === 'number' && typeof polyData.polygonWorldMapCenterY === 'number') {
+      const pWorldMapCenterX = polyData.polygonWorldMapCenterX;
+      const pWorldMapCenterY = polyData.polygonWorldMapCenterY;
+
+      const markerMapWorldX = screenToWorldX(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      const markerMapWorldY = screenToWorldY(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+
+      const mapWorldOffsetX = markerMapWorldX - pWorldMapCenterX;
+      const mapWorldOffsetY = markerMapWorldY - pWorldMapCenterY;
+      
+      setImageSettings(prev => ({
+        ...prev,
+        [selectedLandId]: {
+          ...existingSettings,
+          width,
+          height,
+          referenceScale: scale,
+          x: mapWorldOffsetX, // Store world offset X
+          y: mapWorldOffsetY  // Store world offset Y
+        }
+      }));
+    } else {
+      console.warn(`Cannot update imageSettings for ${selectedLandId}: missing polygon world center data.`);
+      // Fallback: store screen coordinates if world center is not available, though this is not ideal.
+      // This path should ideally not be taken if polygonWorldMapCenterX/Y are always provided.
+      setImageSettings(prev => ({
+        ...prev,
+        [selectedLandId]: {
+          ...existingSettings,
+          width,
+          height,
+          referenceScale: scale,
+          x: newX, // Storing screenX as fallback
+          y: newY  // Storing screenY as fallback
+        }
+      }));
+    }
     
     // dragStartRef.current should hold the initial mouse position for the entire drag operation
     // when using positionRef for the initial element position.
     // dragStartRef.current = { x: e.clientX, y: e.clientY }; 
-  }, [isDragging, selectedLandId, scale, imageSettings]);
+  }, [isDragging, selectedLandId, scale, imageSettings, polygonsToRender, mapTransformOffset, canvasWidth, canvasHeight]);
 
   const handleDragEnd = useCallback(() => {
     if (isDragging && selectedLandId) {
@@ -217,19 +286,23 @@ export default function LandMarkers({
     const width = parseInt(ref.style.width, 10);
     const height = parseInt(ref.style.height, 10);
     
-    // Get current position from existing settings
+    // Get current position from existing settings (which are world offsets)
     const existingSettings = imageSettings[polygonId] || {};
-    const x = existingSettings.x || 0;
-    const y = existingSettings.y || 0;
+    // x and y are world offsets, they don't change on resize.
+    // If they are not set (e.g. first time), they will be undefined here.
+    // When saved, if x or y are undefined, saveImageSettings might need a default (e.g. 0 for offset).
+    // Or, ensure x and y are initialized to 0 if not present in existingSettings.
+    const x = existingSettings.x || 0; // Default to 0 if no world offset x exists
+    const y = existingSettings.y || 0; // Default to 0 if no world offset y exists
     
     // Store current scale with the settings for future reference
     const updatedSettings = {
-      ...existingSettings,
+      ...existingSettings, // Keep other potential fields
       width,
       height,
       referenceScale: scale,
-      x,
-      y
+      x, // Keep existing world offset x
+      y  // Keep existing world offset y
     };
     
     setImageSettings(prev => ({
@@ -375,14 +448,39 @@ export default function LandMarkers({
           height = 75 * scale;
         }
         
-        // Always use the current polygon center position from the map
-        // This ensures the marker follows the map as it's transformed
-        const posX = polygonData.centerX;
-        const posY = polygonData.centerY;
+        // Screen coordinates of the polygon's center
+        const pScreenCenterX = polygonData.centerX;
+        const pScreenCenterY = polygonData.centerY;
         
-        // Use the saved position if available, otherwise use the polygon center
-        let finalX = settings?.x || posX;
-        let finalY = settings?.y || posY;
+        let finalX, finalY;
+
+        // Check if world map center coordinates are available for this polygon
+        if (typeof polygonData.polygonWorldMapCenterX === 'number' && typeof polygonData.polygonWorldMapCenterY === 'number') {
+          const pWorldMapCenterX = polygonData.polygonWorldMapCenterX;
+          const pWorldMapCenterY = polygonData.polygonWorldMapCenterY;
+
+          if (settings && typeof settings.x === 'number' && typeof settings.y === 'number') {
+            // settings.x and .y are world offsets
+            const markerMapWorldX = pWorldMapCenterX + settings.x;
+            const markerMapWorldY = pWorldMapCenterY + settings.y;
+            finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+            finalY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+          } else {
+            // No custom settings, use polygon's screen center
+            finalX = pScreenCenterX;
+            finalY = pScreenCenterY;
+          }
+        } else {
+          // Fallback if world map center is not available (e.g., polygon.center was missing in source data)
+          // In this case, custom positioning won't work correctly with map transforms.
+          // Use screen center, and if settings.x/y exist, they might be screen coords (old data) or invalid.
+          // For simplicity, just use screen center. A warning will be logged during drag if this happens.
+          finalX = pScreenCenterX;
+          finalY = pScreenCenterY;
+          if (settings && (typeof settings.x === 'number' || typeof settings.y === 'number')) {
+             console.warn(`LandMarker ${polygon.id}: Missing world center. Custom position from settings may be incorrect.`);
+          }
+        }
         
         if (editMode) {
           // In edit mode, use Resizable component

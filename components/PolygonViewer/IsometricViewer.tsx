@@ -103,6 +103,8 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
     centroidY: number;
     centerX: number;
     centerY: number;
+    polygonWorldMapCenterX?: number; // For land marker custom positions
+    polygonWorldMapCenterY?: number; // For land marker custom positions
     hasPublicDock?: boolean; // Add this property to the type definition
   }[]>([]);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
@@ -2694,39 +2696,46 @@ const darkenColor = (colorStr: string, percent: number): string => {
       });
     
       // Use the polygon's center property if available, otherwise calculate centroid
-      let centerX, centerY;
+      let centerX_screen, centerY_screen;
+      let worldMapX, worldMapY; // To store world coordinates of the center
     
-      if (polygon.center && polygon.center.lat && polygon.center.lng) {
-        // Use the provided center
-        const centerLat = polygon.center.lat;
-        const centerLng = polygon.center.lng;
+      // Prefer polygon.center, fallback to polygon.centroid if available
+      const centerLat = polygon.center?.lat || polygon.centroid?.lat;
+      const centerLng = polygon.center?.lng || polygon.centroid?.lng;
+
+      if (centerLat && centerLng) {
+        // Convert center to world map coordinates
+        worldMapX = (centerLng - 12.3326) * 20000;
+        worldMapY = (centerLat - 45.4371) * 20000;
       
-        // Convert center to isometric coordinates
-        const x = (centerLng - 12.3326) * 20000;
-        const y = (centerLat - 45.4371) * 20000;
-      
-        centerX = localIsoX(x, y);
-        centerY = localIsoY(x, y);
+        // Convert world map center to screen coordinates
+        centerX_screen = localIsoX(worldMapX, worldMapY);
+        centerY_screen = localIsoY(worldMapX, worldMapY);
       } else {
-        // Calculate centroid as fallback
-        centerX = 0;
+        // Calculate screen centroid as fallback if no geographic center/centroid is defined
+        // This case means worldMapX/Y will be undefined, and custom positioning might not work for these.
+        centerX_screen = 0;
+        centerY_screen = 0;
         centerY = 0;
         coords.forEach(coord => {
-          centerX += coord.x;
-          centerY += coord.y;
+          centerX_screen += coord.x;
+          centerY_screen += coord.y;
         });
-        centerX /= coords.length;
-        centerY /= coords.length;
+        centerX_screen /= coords.length;
+        centerY_screen /= coords.length;
+        // worldMapX/Y would be harder to derive accurately from screen centroid, so they remain undefined here.
       }
     
       return {
         polygon,
         coords,
         fillColor,
-        centroidX: centerX, // Store both for compatibility
-        centroidY: centerY,
-        centerX: centerX,    // Add these explicitly
-        centerY: centerY,
+        centroidX: centerX_screen, // Store both for compatibility
+        centroidY: centerY_screen,
+        centerX: centerX_screen,    // Add these explicitly
+        centerY: centerY_screen,
+        polygonWorldMapCenterX: worldMapX, // Pass world map center X
+        polygonWorldMapCenterY: worldMapY, // Pass world map center Y
         hasPublicDock        // Add this flag to identify polygons with public docks
       };
     }).filter(Boolean);
@@ -4038,6 +4047,9 @@ const darkenColor = (colorStr: string, percent: number): string => {
         isNight={isNight}
         scale={scale}
         activeView={activeView}
+        canvasWidth={canvasDims.width}
+        canvasHeight={canvasDims.height}
+        mapTransformOffset={offset} // Pass the map's transformation offset
       />
       
       {/* Coat of Arms Markers - Affiche les blasons par-dessus le canvas */}
