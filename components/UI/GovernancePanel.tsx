@@ -5,6 +5,17 @@ interface GovernancePanelProps {
   standalone?: boolean;
 }
 
+interface SignoriaPlayer {
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  influence: number;
+  socialClass?: string;
+  coatOfArmsImageUrl?: string | null;
+  familyMotto?: string;
+  isCurrentUser?: boolean;
+}
+
 interface Decree {
   DecreeId: string;
   Type: string;
@@ -108,10 +119,14 @@ const mockDecrees: Decree[] = [
 ];
 
 const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone = false }) => {
-  const [governanceTab, setGovernanceTab] = useState<'council' | 'laws'>('laws');
+  const [governanceTab, setGovernanceTab] = useState<'council' | 'laws' | 'signoria'>('laws');
   const [decrees, setDecrees] = useState<Decree[]>(mockDecrees);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [signoriaPlayers, setSignoriaPlayers] = useState<SignoriaPlayer[]>([]);
+  const [isLoadingSignoria, setIsLoadingSignoria] = useState<boolean>(false);
+  const [signoriaError, setSignoriaError] = useState<string | null>(null);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
 
   // Function to fetch decrees from Airtable
   const fetchDecrees = async () => {
@@ -137,10 +152,157 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
     }
   };
 
+  // Function to fetch top players by influence
+  const fetchSignoriaPlayers = async () => {
+    setIsLoadingSignoria(true);
+    setSignoriaError(null);
+    
+    try {
+      // In a real implementation, this would fetch from an API endpoint
+      // For now, we'll use mock data
+      const mockSignoriaPlayers: SignoriaPlayer[] = [
+        {
+          username: "doge_andrea",
+          firstName: "Andrea",
+          lastName: "Gritti",
+          influence: 25000,
+          socialClass: "Nobili",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/doge_andrea.png",
+          familyMotto: "Fortitudine et Prudentia",
+          isCurrentUser: false
+        },
+        {
+          username: "lorenzo_medici",
+          firstName: "Lorenzo",
+          lastName: "de' Medici",
+          influence: 22500,
+          socialClass: "Nobili",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/lorenzo_medici.png",
+          familyMotto: "Arte et Ingenio",
+          isCurrentUser: false
+        },
+        {
+          username: "caterina_cornaro",
+          firstName: "Caterina",
+          lastName: "Cornaro",
+          influence: 19800,
+          socialClass: "Nobili",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/caterina_cornaro.png",
+          familyMotto: "Regina et Domina",
+          isCurrentUser: false
+        },
+        {
+          username: "marco_polo",
+          firstName: "Marco",
+          lastName: "Polo",
+          influence: 18200,
+          socialClass: "Cittadini",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/marco_polo.png",
+          familyMotto: "Mundus Patet",
+          isCurrentUser: false
+        },
+        {
+          username: "antonio_vivaldi",
+          firstName: "Antonio",
+          lastName: "Vivaldi",
+          influence: 16500,
+          socialClass: "Cittadini",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/antonio_vivaldi.png",
+          familyMotto: "Musica Aeterna",
+          isCurrentUser: false
+        },
+        {
+          username: "veronica_franco",
+          firstName: "Veronica",
+          lastName: "Franco",
+          influence: 15300,
+          socialClass: "Cittadini",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/veronica_franco.png",
+          familyMotto: "Veritas in Carmine",
+          isCurrentUser: false
+        },
+        {
+          username: "titian_vecellio",
+          firstName: "Tiziano",
+          lastName: "Vecellio",
+          influence: 14200,
+          socialClass: "Cittadini",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/titian_vecellio.png",
+          familyMotto: "Ars Longa, Vita Brevis",
+          isCurrentUser: false
+        },
+        {
+          username: "elena_cornaro",
+          firstName: "Elena",
+          lastName: "Cornaro Piscopia",
+          influence: 13100,
+          socialClass: "Nobili",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/elena_cornaro.png",
+          familyMotto: "Sapientia et Virtus",
+          isCurrentUser: false
+        },
+        {
+          username: "giacomo_casanova",
+          firstName: "Giacomo",
+          lastName: "Casanova",
+          influence: 12400,
+          socialClass: "Cittadini",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/giacomo_casanova.png",
+          familyMotto: "Carpe Diem",
+          isCurrentUser: false
+        },
+        {
+          username: "francesco_morosini",
+          firstName: "Francesco",
+          lastName: "Morosini",
+          influence: 11800,
+          socialClass: "Nobili",
+          coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/francesco_morosini.png",
+          familyMotto: "Fortiter et Fideliter",
+          isCurrentUser: false
+        }
+      ];
+      
+      // In a real implementation, you would mark the current user
+      // For now, we'll just set the first player as the current user for demonstration
+      if (currentUsername) {
+        mockSignoriaPlayers.forEach(player => {
+          player.isCurrentUser = player.username === currentUsername;
+        });
+      }
+      
+      setSignoriaPlayers(mockSignoriaPlayers);
+    } catch (err) {
+      console.error('Error fetching signoria players:', err);
+      setSignoriaError(err instanceof Error ? err.message : 'Failed to fetch signoria players');
+      setSignoriaPlayers([]);
+    } finally {
+      setIsLoadingSignoria(false);
+    }
+  };
+
+  // Get current username from localStorage
+  useEffect(() => {
+    try {
+      const profileStr = localStorage.getItem('citizenProfile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        if (profile && profile.username) {
+          setCurrentUsername(profile.username);
+        }
+      }
+    } catch (error) {
+      console.error('Error getting current username:', error);
+    }
+  }, []);
+
   // Fetch decrees when the component mounts or when the tab changes to 'laws'
+  // Fetch signoria players when the tab changes to 'signoria'
   useEffect(() => {
     if (governanceTab === 'laws') {
       fetchDecrees();
+    } else if (governanceTab === 'signoria') {
+      fetchSignoriaPlayers();
     }
   }, [governanceTab]);
 
@@ -184,6 +346,16 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
               onClick={() => setGovernanceTab('council')}
             >
               Council of Ten
+            </button>
+            <button
+              className={`pb-4 px-1 border-b-2 font-medium text-sm ${
+                governanceTab === 'signoria' 
+                  ? 'border-amber-600 text-amber-800' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setGovernanceTab('signoria')}
+            >
+              The Signoria
             </button>
           </nav>
         </div>
@@ -463,6 +635,195 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
               <p className="mt-2 text-xs text-amber-700 italic">
                 Proposals require approval from the Council of Ten
               </p>
+            </div>
+          </div>
+        )}
+        
+        {governanceTab === 'signoria' && (
+          <div className="py-4">
+            <h3 className="text-xl font-serif text-amber-800 mb-4 text-center">
+              The Signoria - Top 10 Players by Influence
+            </h3>
+            
+            <div className="mb-6 bg-amber-100 p-4 rounded-lg border border-amber-300">
+              <p className="text-amber-800 font-serif">
+                The Signoria represents the most influential citizens of La Serenissima. These individuals shape the future of the Republic through their political power and influence. Rising to this elite group grants special privileges in proposing and voting on decrees that affect all citizens.
+              </p>
+            </div>
+            
+            {isLoadingSignoria && (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-600"></div>
+                <p className="mt-2 text-amber-800">Assembling the Signoria...</p>
+              </div>
+            )}
+            
+            {signoriaError && (
+              <div className="bg-red-50 border border-red-300 text-red-800 p-4 rounded-lg mb-6">
+                <p className="font-medium">Failed to retrieve Signoria members</p>
+                <p className="text-sm mt-1">{signoriaError}</p>
+              </div>
+            )}
+            
+            {!isLoadingSignoria && signoriaPlayers.length > 0 && (
+              <div className="space-y-4">
+                {signoriaPlayers.map((player, index) => {
+                  // Get social class color
+                  const getSocialClassColor = (socialClass: string = ''): string => {
+                    const baseClass = socialClass.toLowerCase();
+                    
+                    if (baseClass.includes('nobili')) {
+                      return 'text-amber-700'; // Gold for nobility
+                    } else if (baseClass.includes('cittadini')) {
+                      return 'text-blue-700'; // Blue for citizens
+                    } else if (baseClass.includes('popolani')) {
+                      return 'text-amber-600'; // Brown/amber for common people
+                    } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
+                      return 'text-gray-700'; // Gray for laborers
+                    }
+                    
+                    return 'text-gray-700'; // Default color
+                  };
+
+                  // Get social class background color for the card
+                  const getSocialClassBgColor = (socialClass: string = ''): string => {
+                    const baseClass = socialClass.toLowerCase();
+                    
+                    if (baseClass.includes('nobili')) {
+                      return 'bg-gradient-to-br from-white to-amber-100'; // Subtle gold gradient for nobility
+                    } else if (baseClass.includes('cittadini')) {
+                      return 'bg-gradient-to-br from-white to-blue-50'; // Subtle blue gradient for citizens
+                    } else if (baseClass.includes('popolani')) {
+                      return 'bg-white'; // White for common people
+                    } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
+                      return 'bg-gradient-to-br from-white to-gray-100'; // Subtle gray gradient for laborers
+                    }
+                    
+                    return 'bg-white'; // Default background
+                  };
+                  
+                  // Format influence number with commas
+                  const formattedInfluence = player.influence.toLocaleString();
+                  
+                  return (
+                    <div 
+                      key={player.username} 
+                      className={`${getSocialClassBgColor(player.socialClass)} rounded-lg shadow-md p-4 border ${
+                        player.isCurrentUser ? 'border-purple-400 ring-2 ring-purple-300' : 'border-amber-200'
+                      } hover:shadow-lg transition-shadow relative`}
+                    >
+                      {/* Rank indicator */}
+                      <div className="absolute -top-3 -left-3 bg-amber-600 text-white text-sm w-8 h-8 rounded-full flex items-center justify-center shadow-md">
+                        {index + 1}
+                      </div>
+                      
+                      {/* Current user indicator */}
+                      {player.isCurrentUser && (
+                        <div className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+                          You
+                        </div>
+                      )}
+                      
+                      <div className="flex items-start">
+                        {/* Main citizen image */}
+                        <div className="w-20 h-20 mr-4 rounded-lg border-2 border-amber-600 shadow-md overflow-hidden flex-shrink-0">
+                          <img 
+                            src={`https://backend.serenissima.ai/public_assets/images/citizens/${player.username || 'default'}.jpg`}
+                            alt={`${player.firstName} ${player.lastName}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to default image if the specific one doesn't exist
+                              (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
+                            }}
+                          />
+                        </div>
+                        
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              {/* Name and social class */}
+                              <h3 className="font-serif text-lg font-bold">{player.firstName} {player.lastName}</h3>
+                              <p className={`text-sm font-medium ${getSocialClassColor(player.socialClass)}`}>
+                                {player.socialClass}
+                              </p>
+                              
+                              {/* Username */}
+                              <p className="text-xs text-gray-500 mt-1">{player.username}</p>
+                            </div>
+                            
+                            {/* Coat of arms - smaller */}
+                            {player.coatOfArmsImageUrl && (
+                              <div className="w-12 h-12 rounded-full border border-amber-300 overflow-hidden ml-2">
+                                <img 
+                                  src={player.coatOfArmsImageUrl}
+                                  alt="Coat of Arms"
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    // Fallback to default coat of arms
+                                    (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public/assets/images/coat-of-arms/default.png';
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Influence */}
+                          <div className="mt-2 flex items-center">
+                            <span className="text-amber-700 font-medium text-lg">⚜️ {formattedInfluence}</span>
+                            <span className="text-xs text-gray-500 ml-1">influence</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Family motto */}
+                      {player.familyMotto && (
+                        <div className="mt-3 pt-2 border-t border-amber-100 italic text-sm text-gray-700 w-full">
+                          "{player.familyMotto}"
+                        </div>
+                      )}
+                      
+                      {/* Action buttons */}
+                      <div className="mt-3 pt-2 border-t border-amber-100 flex justify-between">
+                        <button 
+                          className="text-xs text-amber-700 hover:text-amber-900 transition-colors"
+                          onClick={() => {
+                            // Dispatch event to show citizen profile
+                            const event = new CustomEvent('showCitizenPanelEvent', { detail: player });
+                            window.dispatchEvent(event);
+                          }}
+                        >
+                          View Profile
+                        </button>
+                        {!player.isCurrentUser && (
+                          <button className="text-xs text-amber-700 hover:text-amber-900 transition-colors">
+                            Send Message
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            
+            {!isLoadingSignoria && signoriaPlayers.length === 0 && !signoriaError && (
+              <div className="text-center py-8 text-amber-700 italic">
+                No influential citizens found in the Signoria.
+              </div>
+            )}
+            
+            <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <h4 className="text-lg font-serif text-amber-800 mb-2">How to Join the Signoria</h4>
+              <p className="text-amber-700 mb-4">
+                The Signoria is composed of the ten citizens with the highest Influence in La Serenissima. To increase your Influence and potentially join this elite group:
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-amber-800">
+                <li>Complete civic projects that benefit the Republic</li>
+                <li>Participate actively in guild leadership</li>
+                <li>Fund public works and cultural institutions</li>
+                <li>Successfully propose and support beneficial decrees</li>
+                <li>Maintain strong relationships with other influential citizens</li>
+              </ul>
             </div>
           </div>
         )}
