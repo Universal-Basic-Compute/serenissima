@@ -77,11 +77,11 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
     };
   }, [isVisible, polygonsToRender]);
 
-  // Add a separate effect to handle scale changes without resizing images
+  // Add a separate effect to handle scale changes
   useEffect(() => {
     if (!isVisible || polygonsToRender.length === 0 || resizeMode) return;
     
-    // When scale changes, update positions but maintain image sizes
+    // When scale changes, update positions AND sizes
     const updatedSettings: Record<string, { x: number, y: number, width: number, height: number }> = {};
     let hasUpdates = false;
     
@@ -90,16 +90,28 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
       
       const currentSettings = customImageSettings[polygon.id];
       if (currentSettings) {
-        // Calculate new position based on center point
-        const newX = centerX - (currentSettings.width / 2);
-        const newY = centerY - (currentSettings.height / 2);
+        // Get the base size (without scale)
+        const baseWidth = currentSettings.width / prevScale.current;
+        const baseHeight = currentSettings.height / prevScale.current;
         
-        // Only update if position has changed significantly
-        if (Math.abs(currentSettings.x - newX) > 1 || Math.abs(currentSettings.y - newY) > 1) {
+        // Calculate new size with current scale
+        const newWidth = baseWidth * scale;
+        const newHeight = baseHeight * scale;
+        
+        // Calculate new position based on center point
+        const newX = centerX - (newWidth / 2);
+        const newY = centerY - (newHeight / 2);
+        
+        // Update if position or size has changed significantly
+        if (Math.abs(currentSettings.x - newX) > 1 || 
+            Math.abs(currentSettings.y - newY) > 1 ||
+            Math.abs(currentSettings.width - newWidth) > 1 ||
+            Math.abs(currentSettings.height - newHeight) > 1) {
           updatedSettings[polygon.id] = {
-            ...currentSettings,
             x: newX,
-            y: newY
+            y: newY,
+            width: newWidth,
+            height: newHeight
           };
           hasUpdates = true;
         }
@@ -108,8 +120,9 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
     
     if (hasUpdates) {
       setCustomImageSettings(prev => ({ ...prev, ...updatedSettings }));
+      prevScale.current = scale; // Update previous scale reference
     }
-  }, [isVisible, polygonsToRender, customImageSettings, resizeMode]); // Removed scale from dependencies to prevent resizing on zoom
+  }, [isVisible, polygonsToRender, scale, customImageSettings, resizeMode]);
 
   // Initialize and update custom settings for polygons
   useEffect(() => {
