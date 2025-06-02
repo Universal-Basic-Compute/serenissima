@@ -6,7 +6,7 @@ import shutil
 import os
 import sys
 import traceback
-import datetime
+from datetime import datetime
 import json
 import requests
 import time
@@ -2941,7 +2941,7 @@ async def try_create_activity_endpoint(request_data: TryCreateActivityRequest):
         citizen_record_full = citizen_record_list[0]
 
         # Get current times
-        now_venice_dt = datetime.datetime.now(VENICE_TIMEZONE)
+        now_venice_dt = datetime.now(VENICE_TIMEZONE)
         now_utc_dt = now_venice_dt.astimezone(pytz.UTC)
 
         # Fetch definitions (these could be cached globally in a real app)
