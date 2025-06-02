@@ -34,4 +34,5 @@ from .inspect_building_for_purchase_processor import process_inspect_building_fo
 from .submit_building_purchase_offer_processor import process_submit_building_purchase_offer_fn
 from .send_message_processor import process_send_message_fn
 from .goto_location_processor import process as process_goto_location
+from .manage_guild_membership_processor import process_manage_guild_membership_fn
 # Add other processors here as they are created
