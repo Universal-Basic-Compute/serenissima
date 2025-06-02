@@ -466,7 +466,12 @@ export default function LandMarkers({
       const settings = imageSettings[selectedLandId];
       if (settings) {
         landService.saveImageSettings(selectedLandId, settings)
-          .then(success => console.log(success ? `Saved dragged settings for ${selectedLandId}` : `Failed to save dragged settings for ${selectedLandId}`));
+          .then(success => {
+            console.log(success ? `Saved dragged settings for ${selectedLandId}` : `Failed to save dragged settings for ${selectedLandId}`);
+            if (success) {
+              eventBus.emit(EventTypes.LAND_MARKER_SETTINGS_UPDATED, { polygonId: selectedLandId, settings });
+            }
+          });
       }
     }
 
@@ -477,7 +482,12 @@ export default function LandMarkers({
       const settings = imageSettings[selectedLandId];
       if (settings) {
         landService.saveImageSettings(selectedLandId, settings)
-          .then(success => console.log(success ? `Saved resized settings for ${selectedLandId}` : `Failed to save resized settings for ${selectedLandId}`));
+          .then(success => {
+            console.log(success ? `Saved resized settings for ${selectedLandId}` : `Failed to save resized settings for ${selectedLandId}`);
+            if (success) {
+              eventBus.emit(EventTypes.LAND_MARKER_SETTINGS_UPDATED, { polygonId: selectedLandId, settings });
+            }
+          });
       }
     }
   }, [isDragging, isResizing, selectedLandId, imageSettings]);

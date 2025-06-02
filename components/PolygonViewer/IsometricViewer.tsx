@@ -141,6 +141,30 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
   type InteractionMode = 'normal' | 'orient_bridge' | 'place_water_point' | 'create_water_route';
   const [interactionMode, setInteractionMode] = useState<InteractionMode>('normal');
 
+
+  // Effect to listen for land marker settings updates
+  useEffect(() => {
+    const handleLandMarkerSettingsUpdate = (eventDetail: { polygonId: string, settings: any }) => {
+      const { polygonId, settings } = eventDetail;
+      console.log(`[IsometricViewer] Received LAND_MARKER_SETTINGS_UPDATED for ${polygonId}`, settings);
+      setPolygons(prevPolygons =>
+        prevPolygons.map(p => {
+          if (p.id === polygonId) {
+            // Ensure we are updating the correct polygon object structure
+            // The 'polygons' state holds the raw polygon data which includes 'imageSettings' directly
+            return { ...p, imageSettings: settings };
+          }
+          return p;
+        })
+      );
+    };
+
+    const subscription = eventBus.subscribe(EventTypes.LAND_MARKER_SETTINGS_UPDATED, handleLandMarkerSettingsUpdate);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []); // Empty dependency array, runs once on mount
+
   const handleInteractionModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMode = e.target.value as InteractionMode;
     console.log(`[BRIDGE_ORIENT_DEBUG] Switching interaction mode from ${interactionMode} to ${newMode}`);

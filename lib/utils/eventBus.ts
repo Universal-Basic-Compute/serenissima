@@ -77,6 +77,7 @@ export const EventTypes = {
   POLYGON_DELETED: 'polygonDeleted',
   POLYGON_UPDATED: 'polygonUpdated',
   POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated',
+  LAND_MARKER_SETTINGS_UPDATED: 'landMarkerSettingsUpdated', // For LandMarkers custom image settings
     
   // Building events
   BUILDING_PLACED: 'buildingPlaced',
