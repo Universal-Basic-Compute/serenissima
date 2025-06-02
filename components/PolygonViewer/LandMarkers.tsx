@@ -482,27 +482,6 @@ export default function LandMarkers({
     }
   }, [isDragging, isResizing, selectedLandId, imageSettings]);
 
-
-  const handleDragEnd = useCallback(() => { // This might be redundant now with handleGlobalMouseUp
-    if (isDragging && selectedLandId) {
-      setIsDragging(false);
-      
-      // Récupérer les paramètres actuels
-      const settings = imageSettings[selectedLandId];
-      if (settings) {
-        // Save the settings to the server
-        landService.saveImageSettings(selectedLandId, settings)
-          .then(success => {
-            if (success) {
-              console.log(`Saved image settings for ${selectedLandId}`);
-            } else {
-              console.error(`Failed to save image settings for ${selectedLandId}`);
-            }
-          });
-      }
-    }
-  }, [isDragging, selectedLandId, imageSettings]);
-
   // const handleResize = useCallback((e: any, direction: any, ref: any, d: any, polygonId: string) => {
     // This function is removed as we are implementing custom resize.
   // }, [editMode, selectedLandId, imageSettings, scale]);
@@ -567,103 +546,6 @@ export default function LandMarkers({
       window.removeEventListener('mapTransformed', handleMapTransform as EventListener);
     };
   }, [isDragging, isResizing]); // Added isResizing
-
-  // If the component is not visible, don't render anything
-  if (!isVisible) {
-    const existingSettings = imageSettings[polygonId] || {};
-    // x and y are world offsets, they don't change on resize.
-    // If they are not set (e.g. first time), they will be undefined here.
-    // When saved, if x or y are undefined, saveImageSettings might need a default (e.g. 0 for offset).
-    // Or, ensure x and y are initialized to 0 if not present in existingSettings.
-    const x = existingSettings.x || 0; // Default to 0 if no world offset x exists
-    const y = existingSettings.y || 0; // Default to 0 if no world offset y exists
-    
-    // Store current scale with the settings for future reference
-    const updatedSettings = {
-      ...existingSettings, // Keep other potential fields
-      width,
-      height,
-      referenceScale: scale,
-      x, // Keep existing world offset x
-      y  // Keep existing world offset y
-    };
-    
-    setImageSettings(prev => ({
-      ...prev,
-      [polygonId]: updatedSettings
-    }));
-    
-    // Save the settings to the server
-    landService.saveImageSettings(polygonId, updatedSettings)
-    .then(success => {
-      if (success) {
-        console.log(`Saved resized image settings for ${polygonId}`);
-      } else {
-        console.error(`Failed to save resized image settings for ${polygonId}`);
-      }
-    });
-  }, [editMode, selectedLandId, imageSettings, scale]);
-
-  // Set up global mouse event listeners for drag
-  useEffect(() => {
-    // Définir les gestionnaires d'événements
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && selectedLandId) {
-        e.preventDefault(); // Empêcher le comportement par défaut
-        handleDrag(e);
-      }
-    };
-    
-    const handleMouseUp = (e: MouseEvent) => {
-      if (isDragging && selectedLandId) {
-        e.preventDefault(); // Empêcher le comportement par défaut
-        handleDragEnd();
-      }
-    };
-    
-    // Désactiver le comportement de glisser-déposer natif du navigateur
-    const preventDragStart = (e: DragEvent) => {
-      if (isDragging) {
-        e.preventDefault();
-      }
-    };
-    
-    // Ajouter les écouteurs d'événements si en mode édition
-    if (editMode) {
-      window.addEventListener('mousemove', handleMouseMove, { capture: true });
-      window.addEventListener('mouseup', handleMouseUp, { capture: true });
-      window.addEventListener('dragstart', preventDragStart, { capture: true });
-    }
-    
-    // Nettoyer les écouteurs d'événements
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove, { capture: true });
-      window.removeEventListener('mouseup', handleMouseUp, { capture: true });
-      window.removeEventListener('dragstart', preventDragStart, { capture: true });
-    };
-  }, [editMode, isDragging, selectedLandId, handleDrag, handleDragEnd]);
-
-  // Effect to update positions when map is transformed
-  useEffect(() => {
-    const handleMapTransform = (event: CustomEvent) => {
-      if (event.detail && event.detail.offset) {
-        // Ne pas forcer de re-render pendant le glissement
-        if (!isDragging) {
-          // Force re-render when map is transformed
-          setImageSettings(prev => {
-            // Create a new object to trigger re-render
-            return {...prev};
-          });
-        }
-      }
-    };
-    
-    window.addEventListener('mapTransformed', handleMapTransform as EventListener);
-    
-    return () => {
-      window.removeEventListener('mapTransformed', handleMapTransform as EventListener);
-    };
-  }, [isDragging]);
 
   // If the component is not visible, don't render anything
   if (!isVisible) {
