@@ -141,6 +141,7 @@ export class LandService {
     settings: { x: number, y: number, width: number, height: number, referenceScale?: number }
   ): Promise<boolean> {
     try {
+      console.log(`Saving image settings for polygon ${polygonId}:`, settings);
       const response = await fetch(`/api/lands/${polygonId}/image-settings`, {
         method: 'POST',
         headers: {
@@ -150,7 +151,8 @@ export class LandService {
       });
       
       if (response.ok) {
-        console.log(`Successfully saved image settings for polygon ${polygonId}`);
+        const data = await response.json();
+        console.log(`Successfully saved image settings for polygon ${polygonId}:`, data);
         return true;
       } else {
         console.error(`Failed to save image settings for polygon ${polygonId}:`, 
