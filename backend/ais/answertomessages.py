@@ -598,3 +598,16 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
         print("No responses were made by any AI.")
     
     print("AI message response process completed")
+
+def main():
+    """Entry point for the script with command-line argument handling."""
+    parser = argparse.ArgumentParser(description="Process unread messages for AI citizens and generate responses.")
+    parser.add_argument("--dry-run", action="store_true", help="Run in dry-run mode without making actual changes")
+    parser.add_argument("--model", type=str, help="Override the default Kinos model with a specific model")
+    args = parser.parse_args()
+    
+    # Call the main processing function with command-line arguments
+    process_ai_messages(dry_run=args.dry_run, kinos_model_override_arg=args.model)
+
+if __name__ == "__main__":
+    main()
