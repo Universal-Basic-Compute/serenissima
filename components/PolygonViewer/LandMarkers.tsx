@@ -146,9 +146,7 @@ export default function LandMarkers({
     const newX = positionRef.current.x + dx;
     const newY = positionRef.current.y + dy;
     
-    // Find the polygon data for this land
-    const polygonData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
-    if (!polygonData) return;
+    console.log(`Dragging ${selectedLandId} to position:`, { x: newX, y: newY });
     
     // Get existing settings or create defaults
     const existingSettings = imageSettings[selectedLandId] || {};
@@ -170,7 +168,7 @@ export default function LandMarkers({
     
     // Update drag start position for continuous dragging
     dragStartRef.current = { x: e.clientX, y: e.clientY };
-  }, [isDragging, selectedLandId, scale, imageSettings, polygonsToRender]);
+  }, [isDragging, selectedLandId, scale, imageSettings]);
 
   const handleDragEnd = useCallback(() => {
     if (isDragging && selectedLandId) {
