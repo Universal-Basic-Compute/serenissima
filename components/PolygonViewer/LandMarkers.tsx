@@ -140,15 +140,16 @@ export default function LandMarkers({
   const handleDrag = useCallback((e: MouseEvent) => {
     if (!isDragging || !selectedLandId) return;
     
+    e.preventDefault(); // Empêcher le comportement par défaut
+    e.stopPropagation(); // Empêcher la propagation aux éléments parents
+    
     const dx = e.clientX - dragStartRef.current.x;
     const dy = e.clientY - dragStartRef.current.y;
     
     const newX = positionRef.current.x + dx;
     const newY = positionRef.current.y + dy;
     
-    // Stocker la position dans une référence pour éviter les re-renders excessifs
-    // qui pourraient interférer avec le glissement fluide
-    const updatedPosition = { x: newX, y: newY };
+    console.log(`Dragging to: ${newX}, ${newY}`);
     
     // Get existing settings or create defaults
     const existingSettings = imageSettings[selectedLandId] || {};
@@ -158,7 +159,7 @@ export default function LandMarkers({
     // Mettre à jour le DOM directement pour un glissement fluide
     const landElement = document.querySelector(`[data-land-id="${selectedLandId}"]`);
     if (landElement) {
-      landElement.setAttribute('style', `
+      const styleString = `
         position: absolute;
         left: ${newX}px;
         top: ${newY}px;
@@ -172,7 +173,10 @@ export default function LandMarkers({
         pointer-events: auto;
         background: rgba(255, 255, 255, 0.1);
         box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-      `);
+        touch-action: none;
+      `;
+      
+      landElement.setAttribute('style', styleString);
     }
     
     // Mettre à jour l'état moins fréquemment pour éviter les re-renders excessifs
@@ -322,22 +326,34 @@ export default function LandMarkers({
     if (editMode) {
       const handleMouseMove = (e: MouseEvent) => {
         if (isDragging && selectedLandId) {
+          e.preventDefault(); // Empêcher le comportement par défaut
           handleDrag(e);
         }
       };
       
-      const handleMouseUp = () => {
+      const handleMouseUp = (e: MouseEvent) => {
         if (isDragging && selectedLandId) {
+          e.preventDefault(); // Empêcher le comportement par défaut
           handleDragEnd();
         }
       };
       
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      // Utiliser la capture pour s'assurer que nos gestionnaires sont appelés en premier
+      window.addEventListener('mousemove', handleMouseMove, { capture: true });
+      window.addEventListener('mouseup', handleMouseUp, { capture: true });
+      
+      // Désactiver le comportement de glisser-déposer natif du navigateur
+      const preventDragStart = (e: DragEvent) => {
+        if (isDragging) {
+          e.preventDefault();
+        }
+      };
+      window.addEventListener('dragstart', preventDragStart, { capture: true });
       
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mousemove', handleMouseMove, { capture: true });
+        window.removeEventListener('mouseup', handleMouseUp, { capture: true });
+        window.removeEventListener('dragstart', preventDragStart, { capture: true });
       };
     }
   }, [editMode, isDragging, selectedLandId, handleDrag, handleDragEnd]);
@@ -459,12 +475,15 @@ export default function LandMarkers({
                 opacity: isSelected ? 0.9 : (isHovered ? opacity + 0.1 : opacity),
                 pointerEvents: 'auto',
                 background: 'rgba(255, 255, 255, 0.1)',
-                boxShadow: isSelected ? '0 0 10px rgba(255, 0, 0, 0.5)' : 'none'
+                boxShadow: isSelected ? '0 0 10px rgba(255, 0, 0, 0.5)' : 'none',
+                touchAction: 'none' // Empêche le comportement de défilement par défaut sur les appareils tactiles
               }}
               onMouseDown={(e) => {
                 e.preventDefault(); // Empêcher le comportement par défaut
+                e.stopPropagation(); // Empêcher la propagation aux éléments parents
                 handleDragStart(e, polygon.id, polygonData.centerX, polygonData.centerY);
               }}
+              draggable={false} // Désactiver le comportement de glisser-déposer natif du navigateur
               onClick={() => handleClick(polygon)}
               onMouseEnter={() => handleMouseEnter(polygon)}
               onMouseLeave={handleMouseLeave}
