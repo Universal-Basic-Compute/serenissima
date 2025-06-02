@@ -1155,12 +1155,14 @@ Your response:`;
                       </div>
                     ) : (
                       <>
-                        {relationship.title && (
-                          <p className="text-sm text-amber-800 mb-2 font-semibold">{relationship.title}</p>
-                        )}
-                        {relationship.description && (
-                          <p className="text-xs text-amber-700 mb-3">{relationship.description}</p>
-                        )}
+                        <details className="mb-3">
+                          <summary className="text-sm text-amber-800 font-semibold cursor-pointer">
+                            {relationship.title || "Relationship Details"}
+                          </summary>
+                          {relationship.description && (
+                            <p className="text-xs text-amber-700 mt-2 pl-2 border-l-2 border-amber-300">{relationship.description}</p>
+                          )}
+                        </details>
                         <div className="flex justify-around text-center">
                           <div title="Entwinement (Strength Score): Quantifies the relationship's strength based on shared relevancies and common interests. A higher score indicates more shared ground or potential for mutual benefit. Useful for understanding alignment and potential for collaboration.">
                             <div className={`px-3 py-1 rounded-full text-xl font-bold ${
