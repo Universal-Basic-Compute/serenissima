@@ -422,7 +422,7 @@ def call_try_create_activity_api(
         print(f"{LogColors.FAIL}Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}{LogColors.ENDC}")
         return False
 
-def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_used: str = "default") -> None:
+def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_used: str = "local") -> None:
     """Create a notification for admins with the AI response summary."""
     try:
         now = datetime.now().isoformat()
@@ -455,7 +455,7 @@ def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_
 
 def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
     """Main function to process AI messages."""
-    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "local"
     print(f"Starting AI message response process (dry_run={dry_run}, kinos_model={model_status})")
     
     # Initialize Airtable connection
@@ -527,12 +527,12 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                     
                     should_respond = True
                     if sender_is_ai:
-                        # If sender is AI, 10% chance of responding
-                        if random.random() > 0.10: # Changed from 0.25 to 0.10
+                        # If sender is AI, 25% chance of responding
+                        if random.random() > 0.25: # Changed from 0.25 to 0.25
                             should_respond = False
                             print(f"    Sender {sender_username} is an AI. {ai_username} chose not to respond to this message (90% chance).")
                         else:
-                            print(f"    Sender {sender_username} is an AI. {ai_username} will respond (10% chance).")
+                            print(f"    Sender {sender_username} is an AI. {ai_username} will respond (25% chance).")
                     
                     if should_respond:
                         # Generate AI response, passing tables object
@@ -574,7 +574,7 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                         print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have responded (10% chance).")
 
                 if dry_run_should_respond:
-                    print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos (Model: {kinos_model_override_arg or 'default'})")
+                    print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos (Model: {kinos_model_override_arg or 'local'})")
                     # Simulate response generation for counting purposes
                     # In dry run, call_try_create_activity_api will log and return True
                     activity_params_dry_run = {
@@ -593,7 +593,7 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
     if not dry_run and total_responses > 0:
         create_admin_notification(tables, ai_response_counts, kinos_model_override_arg or "default")
     elif dry_run and total_responses > 0 : # Also show for dry run if responses would have been made
-        print(f"[DRY RUN] Would create admin notification with response counts: {ai_response_counts}, model: {kinos_model_override_arg or 'default'}")
+        print(f"[DRY RUN] Would create admin notification with response counts: {ai_response_counts}, model: {kinos_model_override_arg or 'local'}")
     elif total_responses == 0:
         print("No responses were made by any AI.")
     
