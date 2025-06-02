@@ -21,6 +21,8 @@ interface LandMarkersProps {
 }
 
 const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, isNight, scale = 1, activeView }) => {
+  // Add ref to track previous scale
+  const prevScale = useRef<number>(scale);
   // Add state for land images
   const [landImages, setLandImages] = useState<Record<string, HTMLImageElement>>({});
   // Add state for resize mode
@@ -119,7 +121,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
     polygonsToRender.forEach(({ polygon, centerX, centerY }) => {
       if (!polygon || !polygon.id) return;
       
-      const baseSize = 75; // Default base size - fixed size regardless of zoom
+      const baseSize = 75; // Default base size
       
       if (!customImageSettings[polygon.id]) {
         // First check if polygon has saved imageSettings
@@ -127,7 +129,11 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           // Use the saved settings, but adjust position based on current center
           const savedSettings = polygon.imageSettings;
           
-          // Apply the saved width/height but center at current position
+          // Calculate the offset from center in the saved settings
+          const savedCenterX = savedSettings.x + (savedSettings.width / 2);
+          const savedCenterY = savedSettings.y + (savedSettings.height / 2);
+          
+          // Apply the same offset to the current center
           newSettings[polygon.id] = {
             x: centerX - (savedSettings.width / 2),
             y: centerY - (savedSettings.height / 2),
@@ -144,13 +150,13 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
               (polygon.imageOverlayBounds.east - polygon.imageOverlayBounds.west) / 
               (polygon.imageOverlayBounds.north - polygon.imageOverlayBounds.south);
             
-            // Use fixed size regardless of scale
-            let width = baseSize;
+            // Adjust size based on aspect ratio and scale
+            let width = baseSize * scale;
             let height = width / aspectRatio;
             
             // If height is too large, scale down
-            if (height > baseSize * 1.5) {
-              height = baseSize;
+            if (height > baseSize * scale * 1.5) {
+              height = baseSize * scale;
               width = height * aspectRatio;
             }
             
@@ -164,19 +170,19 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
             console.warn(`Error calculating image position for polygon ${polygon.id}:`, error);
             // Fall back to default sizing
             newSettings[polygon.id] = {
-              x: centerX - baseSize / 2,
-              y: centerY - baseSize / 2,
-              width: baseSize,
-              height: baseSize
+              x: centerX - (baseSize * scale) / 2,
+              y: centerY - (baseSize * scale) / 2,
+              width: baseSize * scale,
+              height: baseSize * scale
             };
           }
         } else {
           // Initialize settings for new polygons without bounds or saved settings
           newSettings[polygon.id] = {
-            x: centerX - baseSize / 2,
-            y: centerY - baseSize / 2,
-            width: baseSize,
-            height: baseSize
+            x: centerX - (baseSize * scale) / 2,
+            y: centerY - (baseSize * scale) / 2,
+            width: baseSize * scale,
+            height: baseSize * scale
           };
         }
         hasChanges = true;
