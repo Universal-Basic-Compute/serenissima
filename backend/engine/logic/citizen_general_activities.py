@@ -1685,6 +1685,9 @@ def dispatch_specific_activity_request(
     transport_api_url: str,
     api_base_url: str
 ) -> Dict[str, Any]: # Return type remains Dict, but content will change slightly
+    # Get current time in UTC and Venice timezone
+    now_utc_dt = datetime.now(pytz.UTC)
+    now_venice_dt = now_utc_dt.astimezone(VENICE_TIMEZONE)
     """
     Attempts to create a specific activity for a citizen based on activity_type and parameters.
     This will now orchestrate chains of activities if necessary.
