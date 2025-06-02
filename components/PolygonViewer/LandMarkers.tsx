@@ -494,7 +494,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
               opacity: 0.9, // Slightly transparent to blend better
               border: isSelected ? '2px dashed yellow' : 'none',
               cursor: resizeMode ? 'move' : 'default',
-              transform: resizeMode ? 'none' : `scale(${1/scale})` // Scale inversely to the map scale to keep fixed size on map
+              transform: resizeMode ? 'none' : undefined // Don't apply any transform scaling
             }}
             onMouseEnter={() => {
               if (!resizeMode) {
