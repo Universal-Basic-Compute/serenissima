@@ -566,78 +566,75 @@ def process_ai_messages(kinos_model_override_arg: Optional[str] = None, instant_
             # Mark the message as read using API
             # The API expects the receiver of the original message (the AI)
             marked_read = mark_messages_as_read_api(receiver_username=ai_username, message_ids=[message_id])
+            
+            if marked_read:
+                # Check if the sender is an AI
+                sender_citizen_data = _get_citizen_data(tables, sender_username)
+                sender_is_ai = False
+                if sender_citizen_data and sender_citizen_data.get('fields', {}).get('IsAI', False):
+                    sender_is_ai = True
                 
-                if marked_read:
-                    # Check if the sender is an AI
-                    sender_citizen_data = _get_citizen_data(tables, sender_username)
-                    sender_is_ai = False
-                    if sender_citizen_data and sender_citizen_data.get('fields', {}).get('IsAI', False):
-                        sender_is_ai = True
-                    
-                    should_respond = True
-                    if sender_is_ai:
-                        # If sender is AI, 25% chance of responding
-                        if random.random() > 0.25:
-                            should_respond = False
-                            print(f"    Sender {sender_username} is an AI. {ai_username} chose not to respond to this message (75% chance).")
-                        else:
-                            print(f"    Sender {sender_username} is an AI. {ai_username} will respond (25% chance).")
-                    
-                    if should_respond:
-                        # Generate AI response, passing tables object and optional message suggestion
-                        response_content = generate_ai_response(tables, ai_username, sender_username, message_content, kinos_model_override_arg, add_message)
+                should_respond = True
+                if sender_is_ai:
+                    # If sender is AI, 25% chance of responding
+                    if random.random() > 0.25:
+                        should_respond = False
+                        print(f"    Sender {sender_username} is an AI. {ai_username} chose not to respond to this message (75% chance).")
+                    else:
+                        print(f"    Sender {sender_username} is an AI. {ai_username} will respond (25% chance).")
+                
+                if should_respond:
+                    # Generate AI response, passing tables object and optional message suggestion
+                    response_content = generate_ai_response(tables, ai_username, sender_username, message_content, kinos_model_override_arg, add_message)
                         
-                        if response_content:
-                            if instant_mode:
-                                # Create message directly in Airtable
-                                in_reply_to = message_record.get("fields", {}).get("MessageId", message_id)
-                                if create_direct_message(ai_username, sender_username, response_content, "reply", in_reply_to):
-                                    ai_response_counts[ai_username] += 1
-                                    print(f"{LogColors.OKGREEN}RESPONSE SENT: Direct message created from {ai_username} to {sender_username}.{LogColors.ENDC}")
-                                    print(f"{LogColors.OKGREEN}CONTENT:{LogColors.ENDC}")
-                                    print(f"{response_content}")
-                                    print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
-                                else:
-                                    print(f"{LogColors.FAIL}ERROR: Failed to create direct message from {ai_username} to {sender_username}.{LogColors.ENDC}")
-                                    print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
+                    if response_content:
+                        if instant_mode:
+                            # Create message directly in Airtable
+                            in_reply_to = message_record.get("fields", {}).get("MessageId", message_id)
+                            if create_direct_message(ai_username, sender_username, response_content, "reply", in_reply_to):
+                                ai_response_counts[ai_username] += 1
+                                print(f"{LogColors.OKGREEN}RESPONSE SENT: Direct message created from {ai_username} to {sender_username}.{LogColors.ENDC}")
+                                print(f"{LogColors.OKGREEN}CONTENT:{LogColors.ENDC}")
+                                print(f"{response_content}")
+                                print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
                             else:
-                                # Use the activity system
-                                # Parse and remove <think></think> tags from response_content
-                                import re
-                                cleaned_response = re.sub(r'<think>.*?</think>', '', response_content, flags=re.DOTALL)
-                                cleaned_response = cleaned_response.strip()
-                                
-                                # Remove quotes at the beginning and end if present
-                                if cleaned_response.startswith('"') and cleaned_response.endswith('"'):
-                                    cleaned_response = cleaned_response[1:-1].strip()
-                                
-                                activity_params = {
-                                    "receiverUsername": sender_username,
-                                    "content": cleaned_response,
-                                    "messageType": "reply", # Indicate it's a reply
-                                    "inReplyToMessageId": message_record.get("fields", {}).get("MessageId", message_id) # Pass original MessageId if available
-                                }
-                                print(f"{LogColors.OKGREEN}RESPONSE CONTENT:{LogColors.ENDC}")
-                                print(f"{cleaned_response}")
-                                
-                                if call_try_create_activity_api(ai_username, "send_message", activity_params):
-                                    ai_response_counts[ai_username] += 1
-                                    print(f"{LogColors.OKGREEN}RESPONSE SENT: Activity created for {ai_username} to reply to {sender_username}.{LogColors.ENDC}")
-                                    print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
-                                else:
-                                    print(f"{LogColors.FAIL}ERROR: Failed to initiate send_message activity for reply from {ai_username} to {sender_username}.{LogColors.ENDC}")
-                                    print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
+                                print(f"{LogColors.FAIL}ERROR: Failed to create direct message from {ai_username} to {sender_username}.{LogColors.ENDC}")
+                                print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
                         else:
-                            print(f"{LogColors.WARNING}No response generated by Kinos for message {message_id} from {sender_username} to {ai_username}.{LogColors.ENDC}")
-                            print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
-                    # else: # This 'else' corresponds to should_respond being False
-                        # No action needed if should_respond is False, message already printed
-                else:
-                    print(f"{LogColors.FAIL}ERROR: Failed to mark message {message_id} as read for {ai_username}, skipping response generation.{LogColors.ENDC}")
-                    print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
-                else:
-                    print(f"{LogColors.FAIL}ERROR: Failed to mark message {message_id} as read for {ai_username}, skipping response generation.{LogColors.ENDC}")
-                    print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
+                            # Use the activity system
+                            # Parse and remove <think></think> tags from response_content
+                            import re
+                            cleaned_response = re.sub(r'<think>.*?</think>', '', response_content, flags=re.DOTALL)
+                            cleaned_response = cleaned_response.strip()
+                            
+                            # Remove quotes at the beginning and end if present
+                            if cleaned_response.startswith('"') and cleaned_response.endswith('"'):
+                                cleaned_response = cleaned_response[1:-1].strip()
+                            
+                            activity_params = {
+                                "receiverUsername": sender_username,
+                                "content": cleaned_response,
+                                "messageType": "reply", # Indicate it's a reply
+                                "inReplyToMessageId": message_record.get("fields", {}).get("MessageId", message_id) # Pass original MessageId if available
+                            }
+                            print(f"{LogColors.OKGREEN}RESPONSE CONTENT:{LogColors.ENDC}")
+                            print(f"{cleaned_response}")
+                            
+                            if call_try_create_activity_api(ai_username, "send_message", activity_params):
+                                ai_response_counts[ai_username] += 1
+                                print(f"{LogColors.OKGREEN}RESPONSE SENT: Activity created for {ai_username} to reply to {sender_username}.{LogColors.ENDC}")
+                                print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
+                            else:
+                                print(f"{LogColors.FAIL}ERROR: Failed to initiate send_message activity for reply from {ai_username} to {sender_username}.{LogColors.ENDC}")
+                                print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
+                    else:
+                        print(f"{LogColors.WARNING}No response generated by Kinos for message {message_id} from {sender_username} to {ai_username}.{LogColors.ENDC}")
+                        print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
+                # else: # This 'else' corresponds to should_respond being False
+                    # No action needed if should_respond is False, message already printed
+            else:
+                print(f"{LogColors.FAIL}ERROR: Failed to mark message {message_id} as read for {ai_username}, skipping response generation.{LogColors.ENDC}")
+                print(f"{LogColors.HEADER}{'='*80}{LogColors.ENDC}\n")
     
     # Create admin notification with summary
     total_responses = sum(ai_response_counts.values())
