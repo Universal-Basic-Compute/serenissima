@@ -376,7 +376,7 @@ def main():
     parser = argparse.ArgumentParser(description="Qualifier les relations entre citoyens en utilisant KinOS.")
     parser.add_argument("--limit", type=int, help="Nombre maximum de relations à traiter")
     parser.add_argument("--min-strength", type=int, help="Force minimale de la relation pour être traitée")
-    parser.add_argument("--max-per-run", type=int, default=10, help="Nombre maximum de relations à traiter par exécution (défaut: 10)")
+    parser.add_argument("--max-per-run", type=int, help="Nombre maximum de relations à traiter par exécution")
     args = parser.parse_args()
     
     print(f"{LogColors.HEADER}=== Qualification des Relations avec KinOS ==={LogColors.ENDC}")
