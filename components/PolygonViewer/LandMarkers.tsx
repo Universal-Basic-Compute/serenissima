@@ -136,11 +136,17 @@ export default function LandMarkers({
     const newX = positionRef.current.x + dx;
     const newY = positionRef.current.y + dy;
     
+    // Find the polygon data for this land to get its center position
+    const polygonData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
+    if (!polygonData) return;
+    
     // Get existing settings or create defaults
     const existingSettings = imageSettings[selectedLandId] || {};
     const width = existingSettings.width || 75 * scale;
     const height = existingSettings.height || 75 * scale;
     
+    // Store the center position of the polygon at the time of saving
+    // This will be used as a reference point for calculating offsets
     setImageSettings(prev => ({
       ...prev,
       [selectedLandId]: {
@@ -149,13 +155,15 @@ export default function LandMarkers({
         height,
         referenceScale: scale,
         x: newX,
-        y: newY
+        y: newY,
+        centerX: polygonData.centerX,
+        centerY: polygonData.centerY
       }
     }));
     
     // Update drag start position for continuous dragging
     dragStartRef.current = { x: e.clientX, y: e.clientY };
-  }, [isDragging, selectedLandId, scale, imageSettings]);
+  }, [isDragging, selectedLandId, scale, imageSettings, polygonsToRender]);
 
   const handleDragEnd = useCallback(() => {
     if (isDragging && selectedLandId) {
@@ -182,12 +190,18 @@ export default function LandMarkers({
     const width = parseInt(ref.style.width, 10);
     const height = parseInt(ref.style.height, 10);
     
+    // Find the polygon data for this land to get its center position
+    const polygonData = polygonsToRender.find(p => p.polygon.id === polygonId);
+    if (!polygonData) return;
+    
     // Store current scale with the settings for future reference
     const updatedSettings = {
       ...imageSettings[polygonId] || { x: 0, y: 0 },
       width,
       height,
-      referenceScale: scale
+      referenceScale: scale,
+      centerX: polygonData.centerX,
+      centerY: polygonData.centerY
     };
     
     setImageSettings(prev => ({
@@ -286,7 +300,7 @@ export default function LandMarkers({
         const settings = imageSettings[polygon.id];
         
         // If we have settings with a referenceScale, adjust dimensions based on current scale
-        let width, height, posX, posY;
+        let width, height;
         
         if (settings) {
           // If we have settings with a referenceScale, adjust dimensions proportionally
@@ -298,22 +312,30 @@ export default function LandMarkers({
             width = settings.width || 75 * scale;
             height = settings.height || 75 * scale;
           }
-          
-          // Use the saved position directly, as it's already in screen coordinates
-          // This works because we're saving absolute screen positions
-          if (settings.x && settings.y) {
-            posX = settings.x;
-            posY = settings.y;
-          } else {
-            posX = polygonData.centerX;
-            posY = polygonData.centerY;
-          }
         } else {
           // Default values if no settings
           width = 75 * scale;
           height = 75 * scale;
-          posX = polygonData.centerX;
-          posY = polygonData.centerY;
+        }
+        
+        // Always use the current polygon center position from the map
+        // This ensures the marker follows the map as it's transformed
+        const posX = polygonData.centerX;
+        const posY = polygonData.centerY;
+        
+        // Calculate offset from center if settings exist
+        let offsetX = 0;
+        let offsetY = 0;
+        if (settings && settings.x !== undefined && settings.y !== undefined) {
+          // Calculate the offset as a percentage of the reference scale
+          // This makes the offset scale with zoom level
+          const referenceScale = settings.referenceScale || 3;
+          const scaleRatio = scale / referenceScale;
+          
+          // Get the original offset from when the settings were saved
+          // We store this as a percentage of the image width/height
+          offsetX = ((settings.x - polygonData.centerX) / settings.width) * width;
+          offsetY = ((settings.y - polygonData.centerY) / settings.height) * height;
         }
         
         if (editMode) {
@@ -328,7 +350,7 @@ export default function LandMarkers({
                 left: `${posX}px`,
                 top: `${posY}px`,
                 zIndex: isSelected ? 15 : (isHovered ? 12 : 10),
-                transform: 'translate(-50%, -50%)',
+                transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
                 border: isSelected 
                   ? '2px dashed red' 
                   : (hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none'),
@@ -448,7 +470,7 @@ export default function LandMarkers({
                 height: `${height}px`,
                 zIndex: isHovered ? 12 : 10,
                 transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
-                transform: `translate(-50%, -50%) scale(${isHovered ? 1.05 : 1})`,
+                transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) scale(${isHovered ? 1.05 : 1})`,
                 cursor: 'default',
                 opacity: isHovered ? opacity + 0.1 : opacity,
                 border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none',
