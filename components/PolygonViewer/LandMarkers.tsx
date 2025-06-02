@@ -147,7 +147,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
       setCustomImageSettings(prev => ({ ...prev, ...updatedSettings }));
       prevScale.current = scale; // Update previous scale reference
     }
-  }, [isVisible, polygonsToRender, scale, customImageSettings, resizeMode]);
+  }, [isVisible, polygonsToRender, scale, resizeMode]); // Removed customImageSettings from dependencies
 
   // Initialize and update custom settings for polygons
   useEffect(() => {
@@ -239,12 +239,12 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           };
         }
         hasChanges = true;
-      } else {
-        // Always update position for existing polygons, even in resize mode
-        // This ensures images move with the map
+      } else if (!resizeMode) {
+        // Only update position for existing polygons when not in resize mode
+        // This ensures images move with the map but prevents infinite loops
         const currentSettings = customImageSettings[polygon.id];
         
-        // Always update position based on the current center point
+        // Update position based on the current center point
         newSettings[polygon.id] = {
           x: centerX - (currentSettings.width / 2),
           y: centerY - (currentSettings.height / 2),
@@ -259,7 +259,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
       setCustomImageSettings(prev => ({ ...prev, ...newSettings }));
       prevScale.current = scale; // Update previous scale reference
     }
-  }, [isVisible, polygonsToRender, scale, customImageSettings, resizeMode]);
+  }, [isVisible, polygonsToRender, scale, resizeMode]); // Removed customImageSettings from dependencies
 
   // Add mouse event handlers for the document
   useEffect(() => {
