@@ -32,4 +32,6 @@ from .check_business_status_processor import process as process_check_business_s
 from .fishing_processor import process_fishing_activity # New fishing activity processor
 from .inspect_building_for_purchase_processor import process_inspect_building_for_purchase_fn
 from .submit_building_purchase_offer_processor import process_submit_building_purchase_offer_fn
+from .send_message_processor import process_send_message_fn
+from .goto_location_processor import process as process_goto_location
 # Add other processors here as they are created
