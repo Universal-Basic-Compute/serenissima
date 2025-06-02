@@ -191,7 +191,8 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                 20: [("ais/bidonlands.py", "AI land bidding", 0), # 20:00 VT
                      ("ais/delegateBusinesses.py", "AI Business Delegation", 0)], # 20:00 VT
                 21: [("ais/buildbuildings.py --model local", "AI building construction", 0), # 21:00 VT
-                     ("ais/automated_adjustleases.py --strategy standard", "Automated AI Lease Price Adjustment (Standard)", 30)], # 21:30 VT
+                     ("ais/automated_adjustleases.py --strategy standard", "Automated AI Lease Price Adjustment (Standard)", 30), # 21:30 VT
+                     ("ais/qualifyRelationships.py --newOnly", "AI Relationship Qualification (New Only)", 45)], # 21:45 VT
                 22: [("ais/adjustleases.py --model local", "AI lease adjustments", 0), # 22:00 VT (Kinos-driven, can run after rule-based)
                      ("ais/automated_adjustrents.py --strategy standard", "Automated AI Rent Adjustment (Standard)", 0)], # 22:00 VT
                 23: [("ais/automated_adjustpublicstoragecontracts.py", "Automated Public Storage Offers", 0)], # 23:00 VT
