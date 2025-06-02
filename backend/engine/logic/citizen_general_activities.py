@@ -711,25 +711,41 @@ def _handle_night_shelter(
             
             # Find the specific (start, end) block we are in or about to be in.
             chosen_rest_block_end_hour = -1
-            is_overnight_block_ending_next_day = False
+            is_overnight_block_ending_next_day = False # Correctly indicates if the chosen block itself is overnight
 
             for start_h, end_h in rest_periods:
-                if start_h <= end_h: # Same day block
+                current_block_is_overnight = (start_h > end_h)
+                if not current_block_is_overnight: # Same day block
                     if start_h <= current_hour_venice < end_h:
                         chosen_rest_block_end_hour = end_h
+                        is_overnight_block_ending_next_day = False # This chosen block is not overnight
                         break
                 else: # Overnight block (e.g. 22 to 06)
-                    if current_hour_venice >= start_h: # e.g. current 23:00, block 22-06
+                    if current_hour_venice >= start_h: # e.g. current 23:00, in block 22-06
                         chosen_rest_block_end_hour = end_h
-                        is_overnight_block_ending_next_day = True
+                        is_overnight_block_ending_next_day = True # This chosen block is overnight
                         break
-                    elif current_hour_venice < end_h: # e.g. current 01:00, block 22-06
+                    elif current_hour_venice < end_h: # e.g. current 01:00, in block 22-06 (started prev day)
                         chosen_rest_block_end_hour = end_h
+                        is_overnight_block_ending_next_day = True # This chosen block is overnight
                         break
             
             if chosen_rest_block_end_hour != -1:
-                end_time_venice_rest = now_venice_dt.replace(hour=chosen_rest_block_end_hour, minute=0, second=0, microsecond=0)
-                if is_overnight_block_ending_next_day and chosen_rest_block_end_hour <= current_hour_venice : # e.g. current 23, end_hour 06
+                # Handle end_hour being 24 (midnight of the next day)
+                actual_end_hour_for_replace = chosen_rest_block_end_hour
+                add_day_for_midnight_24 = False
+                if chosen_rest_block_end_hour == 24:
+                    actual_end_hour_for_replace = 0
+                    add_day_for_midnight_24 = True
+
+                end_time_venice_rest = now_venice_dt.replace(hour=actual_end_hour_for_replace, minute=0, second=0, microsecond=0)
+                
+                if add_day_for_midnight_24:
+                    end_time_venice_rest += timedelta(days=1)
+                # For overnight blocks like (22, 6), if current time is 23:00, chosen_rest_block_end_hour is 6.
+                # actual_end_hour_for_replace is 6. is_overnight_block_ending_next_day is True.
+                # 6 <= 23 is true, so we add a day.
+                elif is_overnight_block_ending_next_day and actual_end_hour_for_replace <= current_hour_venice:
                     end_time_venice_rest += timedelta(days=1)
                 # If current time is already past the calculated end time for today (e.g. current 07:00, end_hour 06:00 from a 22-06 block)
                 # this means we are past the rest period. This case should ideally be caught by is_rest_time_for_class.
