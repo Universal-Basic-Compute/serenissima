@@ -188,28 +188,28 @@ def assess_relationship_with_kinos(tables, relationship_record):
         "problems_involving_both": problems
     }
     
-    # Construire le prompt pour KinOS
+    # Build the prompt for KinOS
     prompt = (
-        f"[SYSTEM] Tu es {evaluator}, un citoyen de Venise. Je te demande d'évaluer ta relation avec {target}. "
-        f"Analyse les données fournies dans le contexte système (addSystem) pour comprendre votre relation actuelle. "
-        f"Ces données incluent:\n"
-        f"- Vos profils respectifs\n"
-        f"- Les détails de votre relation existante (force, confiance, etc.)\n"
-        f"- Les pertinences mutuelles entre vous\n"
-        f"- Les problèmes qui vous concernent tous les deux\n\n"
-        f"Réponds UNIQUEMENT avec un objet JSON contenant deux champs:\n"
-        f"1. 'title': Un titre court (1-3 mots) décrivant votre relation (ex: 'Ami proche', 'Rival commercial', 'Connaissance distante')\n"
-        f"2. 'description': Une description détaillée (2-3 phrases) expliquant la nature de votre relation\n\n"
-        f"Exemple de réponse valide:\n"
+        f"[SYSTEM] You are {evaluator}, a citizen of Venice. I'm asking you to evaluate your relationship with {target}. "
+        f"Analyze the data provided in the system context (addSystem) to understand your current relationship. "
+        f"This data includes:\n"
+        f"- Your respective profiles\n"
+        f"- The details of your existing relationship (strength, trust, etc.)\n"
+        f"- The mutual relevancies between you\n"
+        f"- The problems that concern both of you\n\n"
+        f"Respond ONLY with a JSON object containing two fields:\n"
+        f"1. 'title': A short title (1-3 words) describing your relationship (e.g., 'Close Friend', 'Business Rival', 'Distant Acquaintance')\n"
+        f"2. 'description': A detailed description (2-3 sentences) explaining the nature of your relationship\n\n"
+        f"Example of a valid response:\n"
         f"```json\n"
         f"{{\n"
-        f"  \"title\": \"Partenaires commerciaux\",\n"
-        f"  \"description\": \"Nous avons établi une relation commerciale basée sur la confiance mutuelle. Nos échanges réguliers de ressources ont été bénéfiques pour nos entreprises respectives, bien que nous restions prudents dans nos négociations.\"\n"
+        f"  \"title\": \"Business Partners\",\n"
+        f"  \"description\": \"We have established a business relationship based on mutual trust. Our regular exchanges of resources have been beneficial for our respective businesses, although we remain cautious in our negotiations.\"\n"
         f"}}\n"
         f"```\n\n"
-        f"IMPORTANT: Ta réponse doit être UNIQUEMENT un objet JSON valide, sans texte avant ou après. "
-        f"Assure-toi que le titre et la description reflètent fidèlement la relation telle qu'elle apparaît dans les données. "
-        f"Prends en compte la force de la relation ({fields.get('StrengthScore', 0)}/100) et le niveau de confiance ({fields.get('TrustScore', 0)}/100)."
+        f"IMPORTANT: Your response must be ONLY a valid JSON object, with no text before or after. "
+        f"Make sure the title and description accurately reflect the relationship as it appears in the data. "
+        f"Take into account the strength of the relationship ({fields.get('StrengthScore', 0)}/100) and the level of trust ({fields.get('TrustScore', 0)}/100)."
     )
     
     # Appeler l'API KinOS
