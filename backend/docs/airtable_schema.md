@@ -295,6 +295,7 @@ Communications entre citoyens.
 -   `Content` (Texte multiligne): Contenu du message.
 -   `Type` (Texte): Type de message (ex: `personal`, `business_inquiry`, `guild_communication`).
 -   `ReadAt` (Date/Heure): Horodatage de lecture par le destinataire.
+-   `Notes` (Texte multiligne): Peut contenir des informations contextuelles, par exemple `In reply to: <MessageId>` si le message est une réponse.
 -   `CreatedAt` (Date/Heure): Date d'envoi du message.
 -   `UpdatedAt` (Date/Heure): Date de dernière modification.
 

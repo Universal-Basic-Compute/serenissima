@@ -182,6 +182,7 @@ def _process_message_delivery(
     receiver_username = details.get('receiverUsername')
     content = details.get('content')
     message_type = details.get('messageType', 'personal')
+    in_reply_to_id = details.get('inReplyToMessageId') # Extract from parsed Details
     
     if not (sender and receiver_username and content):
         log.error(f"Missing data for message delivery: sender={sender}, receiver={receiver_username}, content={'present' if content else 'missing'}")
@@ -210,6 +211,10 @@ def _process_message_delivery(
             "CreatedAt": datetime.now(timezone.utc).isoformat()
         }
         
+        if in_reply_to_id:
+            message_fields["Notes"] = f"In reply to: {in_reply_to_id}"
+            log.info(f"Message {message_id} from {sender} to {receiver_username} is a reply to {in_reply_to_id}. Storing in Notes.")
+
         tables["messages"].create(message_fields)
         
         # 2. Check if a relationship exists between sender and receiver

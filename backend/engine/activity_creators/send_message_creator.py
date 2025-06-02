@@ -34,6 +34,11 @@ def try_create(
     target_building_id = details.get('targetBuildingId')  # Optional specific meeting place
     conversation_length = details.get('conversationLength', 3)  # Default to 3 exchanges
     
+    # Extract inReplyToMessageId from the nested 'details' field if present
+    # The 'details' argument to this function *is* activityParameters from the API call.
+    activity_params_details_field = details.get('details', {}) 
+    in_reply_to_message_id = activity_params_details_field.get('inReplyToMessageId')
+    
     # Validate required parameters
     if not (receiver_username and content):
         log.error(f"Missing required details for send_message: receiverUsername or content")
@@ -153,12 +158,17 @@ def try_create(
     message_end_date = (now_utc + timedelta(seconds=duration_seconds) + timedelta(minutes=10)).isoformat()
     
     # Store message details in the Details field for the processor to use
-    details_json = json.dumps({
+    details_for_processor = {
         "receiverUsername": receiver_username,
         "content": content,
         "messageType": message_type,
         "conversationLength": conversation_length
-    })
+    }
+    if in_reply_to_message_id:
+        details_for_processor["inReplyToMessageId"] = in_reply_to_message_id
+        log.info(f"Including inReplyToMessageId: {in_reply_to_message_id} in Details for deliver_message_interaction.")
+    
+    details_json = json.dumps(details_for_processor)
     
     # 1. Create goto_location activity
     goto_payload = {
