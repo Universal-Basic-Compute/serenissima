@@ -469,7 +469,7 @@ def create_admin_notification(tables, ai_response_counts: Dict[str, int], model_
 
 def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
     """Main function to process AI messages."""
-    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "local"
+    model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
     print(f"Starting AI message response process (dry_run={dry_run}, kinos_model={model_status})")
     
     # Initialize Airtable connection
@@ -588,7 +588,7 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                         print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have responded (25% chance).")
 
                 if dry_run_should_respond:
-                    print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos (Model: {kinos_model_override_arg or 'local'})")
+                    print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos (Model: {kinos_model_override_arg or 'default'})")
                     # Simulate response generation for counting purposes
                     # In dry run, call_try_create_activity_api will log and return True
                     activity_params_dry_run = {
@@ -607,7 +607,7 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
     if not dry_run and total_responses > 0:
         create_admin_notification(tables, ai_response_counts, kinos_model_override_arg or "default")
     elif dry_run and total_responses > 0 : # Also show for dry run if responses would have been made
-        print(f"[DRY RUN] Would create admin notification with response counts: {ai_response_counts}, model: {kinos_model_override_arg or 'local'}")
+        print(f"[DRY RUN] Would create admin notification with response counts: {ai_response_counts}, model: {kinos_model_override_arg or 'default'}")
     elif total_responses == 0:
         print("No responses were made by any AI.")
     

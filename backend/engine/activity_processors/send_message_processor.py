@@ -81,7 +81,7 @@ def _process_message_delivery(
     
     try:
         # 1. Create the message record
-        message_id = f"msg_{sender}_{receiver_username}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        message_id = f"msg_{sender}_{receiver_username}_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
         
         message_fields = {
             "MessageId": message_id,
@@ -89,7 +89,7 @@ def _process_message_delivery(
             "Receiver": receiver_username,
             "Content": content,
             "Type": message_type,
-            "CreatedAt": datetime.utcnow().isoformat()
+            "CreatedAt": datetime.now(timezone.utc).isoformat()
         }
         
         tables["messages"].create(message_fields)
@@ -108,7 +108,7 @@ def _process_message_delivery(
             new_strength = min(100, current_strength + 2)  # Increment by 2, max 100
             
             tables["relationships"].update(relationship_id, {
-                'LastInteraction': datetime.utcnow().isoformat(),
+                'LastInteraction': datetime.now(timezone.utc).isoformat(),
                 'StrengthScore': new_strength
             })
             
@@ -131,12 +131,12 @@ def _process_message_delivery(
                 "Citizen2": citizen2,
                 "Title": "Acquaintance",  # Default relationship type
                 "Description": f"Initial contact established when {sender} sent a message to {receiver_username}.",
-                "LastInteraction": datetime.utcnow().isoformat(),
+                "LastInteraction": datetime.now(timezone.utc).isoformat(),
                 "Tier": 1,  # Initial tier
                 "Status": "active",
                 "StrengthScore": 10,  # Initial strength
                 "TrustScore": 5,  # Initial trust
-                "CreatedAt": datetime.utcnow().isoformat()
+                "CreatedAt": datetime.now(timezone.utc).isoformat()
             }
             
             tables["relationships"].create(relationship_fields)
@@ -157,7 +157,7 @@ def _process_message_delivery(
             "Asset": message_id,
             "AssetType": "message",
             "Status": "unread",
-            "CreatedAt": datetime.utcnow().isoformat()
+            "CreatedAt": datetime.now(timezone.utc).isoformat()
         }
         
         tables["notifications"].create(notification_fields)
@@ -182,7 +182,7 @@ def _process_message_delivery(
         reply_activity_id = f"reply_to_message_{receiver_username}_{sender}_{ts}"
         
         # Set the activity to start in 10 minutes and last for 10 minutes
-        now_utc = datetime.utcnow()
+        now_utc = datetime.now(timezone.utc)
         reply_start_date = (now_utc + timedelta(minutes=10)).isoformat()
         reply_end_date = (now_utc + timedelta(minutes=20)).isoformat()
         
@@ -203,7 +203,7 @@ def _process_message_delivery(
             "Title": f"Replying to message from {sender}",
             "Description": f"Preparing a reply to the {message_type} message from {sender}",
             "Notes": f"Automatically created reply activity in response to message {message_id}",
-            "CreatedAt": datetime.utcnow().isoformat(),
+            "CreatedAt": datetime.now(timezone.utc).isoformat(),
             "StartDate": reply_start_date,
             "EndDate": reply_end_date,
             "Priority": 30  # Medium priority for social activities

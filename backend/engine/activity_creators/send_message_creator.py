@@ -148,7 +148,14 @@ def try_create(
     
     # Calculate message delivery activity times (10 minutes after arrival)
     message_start_date = travel_end_date  # Start immediately after arrival
-    message_end_date = (datetime.fromisoformat(travel_end_date.replace('Z', '+00:00')) + timedelta(minutes=10)).isoformat()
+    
+    # Handle ISO format with or without timezone info
+    travel_end_datetime = travel_end_date
+    if isinstance(travel_end_date, str):
+        # Remove 'Z' if present and add timezone info
+        travel_end_datetime = datetime.fromisoformat(travel_end_date.replace('Z', '+00:00'))
+    
+    message_end_date = (travel_end_datetime + timedelta(minutes=10)).isoformat()
     
     # Store message details in the Details field for the processor to use
     details_json = json.dumps({
