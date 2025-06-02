@@ -758,12 +758,12 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
                 "Citizen2": citizen2,
                 "Title": "Acquaintance",  # Default relationship type
                 "Description": f"Initial contact established when {sender} sent a message to {receiver}.",
-                "LastInteraction": datetime.datetime.now(timezone.utc).isoformat(),
+                "LastInteraction": datetime.now(timezone.utc).isoformat(),
                 "Tier": 1,  # Initial tier
                 "Status": "active",
                 "StrengthScore": 10,  # Initial strength
                 "TrustScore": 5,  # Initial trust
-                "CreatedAt": datetime.datetime.now(timezone.utc).isoformat()
+                "CreatedAt": datetime.now(timezone.utc).isoformat()
             }
             
             tables["relationships"].create(relationship_fields)
