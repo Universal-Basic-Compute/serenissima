@@ -269,11 +269,17 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
         system_context_data = {
             "ai_citizen_profile": ai_citizen_data,
             "sender_citizen_profile": sender_citizen_data,
-            "relationship_with_sender": relationship_data,
+            "relationship_with_sender": relationship_data,  # Oui, la RELATIONSHIP est envoyée dans le contexte système
             "recent_notifications_for_ai": notifications_data[:50],  # Limit to max 50 notifications
             "recent_relevancies_ai_to_sender": relevancies_data,
             "recent_problems_involving_ai_or_sender": problems_data
         }
+        # Log pour confirmer l'envoi de la relation
+        if relationship_data:
+            print(f"Relation entre {ai_username} et {sender_username} envoyée dans le contexte système: {relationship_data.get('fields', {}).get('Title', 'Non définie')}, Force: {relationship_data.get('fields', {}).get('StrengthScore', '0')}, Confiance: {relationship_data.get('fields', {}).get('TrustScore', '0')}")
+        else:
+            print(f"Aucune relation existante entre {ai_username} et {sender_username} à envoyer dans le contexte système")
+            
         add_system_json = json.dumps(system_context_data, indent=2)
 
         # 3. Construct the prompt for the Kinos API
