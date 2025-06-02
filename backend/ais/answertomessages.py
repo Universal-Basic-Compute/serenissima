@@ -336,7 +336,14 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
                 ]
                 if assistant_messages:
                     assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
-                    return assistant_messages[0].get("content")
+                    content = assistant_messages[0].get("content", "")
+                    
+                    # Parse and remove <think></think> tags
+                    import re
+                    content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
+                    content = content.strip()
+                    
+                    return content
             
             # Fallback if history retrieval fails or no assistant message found
             print(f"Kinos POST successful but couldn't retrieve specific assistant reply from history for {ai_username} to {sender_username}. Check Kinos logs.")
@@ -358,6 +365,11 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
 def create_response_message_api(sender_username: str, receiver_username: str, content: str, message_type: str = "message") -> bool:
     """Create a response message using the API."""
     try:
+        # Parse and remove <think></think> tags from content
+        import re
+        content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
+        content = content.strip()
+        
         api_url = f"{BASE_URL}/api/messages/send"
         payload = {
             "sender": sender_username,
@@ -564,9 +576,14 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                                     print(f"{LogColors.FAIL}Failed to create direct message from {ai_username} to {sender_username}.{LogColors.ENDC}")
                             else:
                                 # Use the activity system
+                                # Parse and remove <think></think> tags from response_content
+                                import re
+                                cleaned_response = re.sub(r'<think>.*?</think>', '', response_content, flags=re.DOTALL)
+                                cleaned_response = cleaned_response.strip()
+                                
                                 activity_params = {
                                     "receiverUsername": sender_username,
-                                    "content": response_content,
+                                    "content": cleaned_response,
                                     "messageType": "reply", # Indicate it's a reply
                                     "inReplyToMessageId": message_record.get("fields", {}).get("MessageId", message_id) # Pass original MessageId if available
                                 }
@@ -631,6 +648,11 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
     """Create a message directly in Airtable without going through the activity system."""
     try:
         tables = initialize_airtable()
+        
+        # Parse and remove <think></think> tags from content
+        import re
+        content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
+        content = content.strip()
         
         # Create a message ID
         message_id = f"msg_{sender}_{receiver}_{datetime.datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
