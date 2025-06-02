@@ -136,12 +136,16 @@ export default function LandMarkers({
     const newX = positionRef.current.x + dx;
     const newY = positionRef.current.y + dy;
     
+    // Find the polygon data for this land
+    const polygonData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
+    if (!polygonData) return;
+    
     // Get existing settings or create defaults
     const existingSettings = imageSettings[selectedLandId] || {};
     const width = existingSettings.width || 75 * scale;
     const height = existingSettings.height || 75 * scale;
     
-    // Store absolute position
+    // Store position and current polygon center for reference
     setImageSettings(prev => ({
       ...prev,
       [selectedLandId]: {
@@ -150,13 +154,15 @@ export default function LandMarkers({
         height,
         referenceScale: scale,
         x: newX,
-        y: newY
+        y: newY,
+        originalCenterX: polygonData.centerX,
+        originalCenterY: polygonData.centerY
       }
     }));
     
     // Update drag start position for continuous dragging
     dragStartRef.current = { x: e.clientX, y: e.clientY };
-  }, [isDragging, selectedLandId, scale, imageSettings]);
+  }, [isDragging, selectedLandId, scale, imageSettings, polygonsToRender]);
 
   const handleDragEnd = useCallback(() => {
     if (isDragging && selectedLandId) {
@@ -317,20 +323,23 @@ export default function LandMarkers({
         const posX = polygonData.centerX;
         const posY = polygonData.centerY;
         
-        // Calculate absolute position if settings exist
+        // Calculate position based on settings and current polygon position
         let finalX = posX;
         let finalY = posY;
-        let offsetX = 0;
-        let offsetY = 0;
         
         if (settings && settings.x !== undefined && settings.y !== undefined) {
-          // Use the saved position directly
-          finalX = settings.x;
-          finalY = settings.y;
+          // Calculate the offset from the original position when settings were saved
+          // This ensures the image moves with the map
+          const originalCenterX = settings.originalCenterX || posX;
+          const originalCenterY = settings.originalCenterY || posY;
           
-          // No need for offset calculation as we're using absolute positions
-          offsetX = 0;
-          offsetY = 0;
+          // Calculate how much the center has moved since the settings were saved
+          const deltaX = posX - originalCenterX;
+          const deltaY = posY - originalCenterY;
+          
+          // Apply the delta to the saved position
+          finalX = settings.x + deltaX;
+          finalY = settings.y + deltaY;
         }
         
         if (editMode) {
@@ -342,12 +351,10 @@ export default function LandMarkers({
               size={{ width, height }}
               style={{
                 position: 'absolute',
-                left: `${posX}px`,
-                top: `${posY}px`,
-                zIndex: isSelected ? 15 : (isHovered ? 12 : 10),
-                transform: 'translate(-50%, -50%)',
                 left: `${finalX}px`,
                 top: `${finalY}px`,
+                zIndex: isSelected ? 15 : (isHovered ? 12 : 10),
+                transform: 'translate(-50%, -50%)',
                 border: isSelected 
                   ? '2px dashed red' 
                   : (hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none'),
