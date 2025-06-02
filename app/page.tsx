@@ -916,7 +916,7 @@ export default function TwoDPage() {
     }
   }, [transportPath, activeView, calculateDistance]);
 
-  // Land images are now handled by LandService
+  // Land images are now handled by LandService and preloaded after polygons are fetched
   
   // State for loan panel
   const [showLoanPanel, setShowLoanPanel] = useState<boolean>(false);
