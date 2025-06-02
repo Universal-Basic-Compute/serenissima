@@ -1,6 +1,6 @@
 import logging
 import json
-import datetime
+from datetime import datetime
 import time
 import requests # Should be used by helpers, not directly here unless for specific API calls not in helpers
 import pytz
@@ -110,14 +110,14 @@ def _get_res_display_name_module(res_id: str, resource_definitions_dict: Dict) -
 
 # --- Helper for Water Graph Data ---
 _water_graph_cache: Optional[Dict] = None
-_water_graph_last_fetch_time: Optional[datetime.datetime] = None
+_water_graph_last_fetch_time: Optional[datetime] = None
 _WATER_GRAPH_CACHE_TTL_SECONDS = 300 # Cache for 5 minutes
 
 def _get_water_graph_data(api_base_url: str) -> Optional[Dict]:
     """Fetches water graph data from the API, with caching."""
     global _water_graph_cache, _water_graph_last_fetch_time
     
-    now = datetime.datetime.now(pytz.UTC)
+    now = datetime.now(pytz.UTC)
     if _water_graph_cache and _water_graph_last_fetch_time and \
        (now - _water_graph_last_fetch_time).total_seconds() < _WATER_GRAPH_CACHE_TTL_SECONDS:
         log.info("Using cached water graph data.")
@@ -219,7 +219,7 @@ def _find_closest_fishable_water_point(
 
 def _handle_emergency_fishing(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> Optional[Dict]:
@@ -262,7 +262,7 @@ def _handle_emergency_fishing(
 
 def _handle_leave_venice(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> bool:
@@ -329,7 +329,7 @@ def _handle_leave_venice(
 
 def _handle_eat_from_inventory(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str 
 ) -> Optional[Dict]:
@@ -363,7 +363,7 @@ def _handle_eat_from_inventory(
 
 def _handle_eat_at_home_or_goto(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str 
 ) -> Optional[Dict]:
@@ -442,7 +442,7 @@ def _handle_eat_at_home_or_goto(
 
 def _handle_eat_at_tavern_or_goto(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str 
 ) -> Optional[Dict]:
@@ -517,7 +517,7 @@ def _handle_eat_at_tavern_or_goto(
 
 def _handle_deposit_inventory_at_work(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> bool:
@@ -577,7 +577,7 @@ def _handle_deposit_inventory_at_work(
 
 def _handle_check_business_status(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> bool:
@@ -611,7 +611,7 @@ def _handle_check_business_status(
 
         if checked_at_str:
             try:
-                checked_at_dt = datetime.datetime.fromisoformat(checked_at_str.replace("Z", "+00:00"))
+                checked_at_dt = datetime.fromisoformat(checked_at_str.replace("Z", "+00:00"))
                 if checked_at_dt.tzinfo is None: # Ensure timezone aware
                     checked_at_dt = pytz.UTC.localize(checked_at_dt)
                 
@@ -651,7 +651,7 @@ def _handle_check_business_status(
 
 def _handle_night_shelter(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str 
 ) -> Optional[Dict]:
@@ -826,7 +826,7 @@ def _handle_night_shelter(
 
 def _handle_shop_for_food_at_retail(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> bool:
@@ -1039,7 +1039,7 @@ def _handle_shop_for_food_at_retail(
 
 def _handle_fishing(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> Optional[Dict]:
@@ -1086,7 +1086,7 @@ def _handle_fishing(
 
 def _handle_construction_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> bool:
@@ -1119,7 +1119,7 @@ def _handle_construction_tasks(
 
 def _handle_production_and_general_work_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
     citizen_social_class: str 
 ) -> Optional[Dict]:
@@ -1437,7 +1437,7 @@ def _handle_production_and_general_work_tasks(
 
 def _handle_forestieri_daytime_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> bool:
@@ -1487,7 +1487,7 @@ def _handle_forestieri_daytime_tasks(
 
 def _handle_shopping_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> bool:
@@ -1574,7 +1574,7 @@ def _handle_shopping_tasks(
 
 def _handle_porter_tasks(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
     citizen_social_class: str # Added social_class
 ) -> bool:
@@ -1632,7 +1632,7 @@ def _handle_porter_tasks(
 
 def _handle_general_goto_work(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
-    now_venice_dt: datetime.datetime, now_utc_dt: datetime.datetime, transport_api_url: str, api_base_url: str,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
     citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str_val: Optional[str],
     citizen_social_class: str 
 ) -> Optional[Dict]:
@@ -1682,8 +1682,8 @@ def dispatch_specific_activity_request(
     activity_parameters: Optional[Dict[str, Any]],
     resource_defs: Dict,
     building_type_defs: Dict,
-    now_venice_dt: datetime.datetime,
-    now_utc_dt: datetime.datetime,
+    now_venice_dt: datetime,
+    now_utc_dt: datetime,
     transport_api_url: str,
     api_base_url: str
 ) -> Dict[str, Any]: # Return type remains Dict, but content will change slightly
@@ -1825,8 +1825,8 @@ def process_citizen_activity(
     # is_night: bool, # This will be determined internally based on class schedule
     resource_defs: Dict,
     building_type_defs: Dict,
-    now_venice_dt: datetime.datetime,
-    now_utc_dt: datetime.datetime,
+    now_venice_dt: datetime,
+    now_utc_dt: datetime,
     transport_api_url: str,
     api_base_url: str
 ) -> Optional[Dict]:
@@ -1875,7 +1875,7 @@ def process_citizen_activity(
     ate_at_str = citizen_record['fields'].get('AteAt')
     if ate_at_str:
         try:
-            ate_at_dt = datetime.datetime.fromisoformat(ate_at_str.replace('Z', '+00:00'))
+            ate_at_dt = datetime.fromisoformat(ate_at_str.replace('Z', '+00:00'))
             if ate_at_dt.tzinfo is None: ate_at_dt = pytz.UTC.localize(ate_at_dt)
             if (now_utc_dt - ate_at_dt) > datetime.timedelta(hours=12): is_hungry = True
         except ValueError: is_hungry = True 
