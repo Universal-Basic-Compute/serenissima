@@ -394,11 +394,25 @@ def call_try_create_activity_api(
         print(f"{LogColors.OKCYAN}[DRY RUN] Would call /api/activities/try-create for {citizen_username} with type '{activity_type}' and params: {json.dumps(activity_parameters)}{LogColors.ENDC}")
         return True
 
+    # Convert any datetime objects to ISO format strings for JSON serialization
+    def convert_datetime_to_iso(obj):
+        if isinstance(obj, dict):
+            return {k: convert_datetime_to_iso(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [convert_datetime_to_iso(item) for item in obj]
+        elif isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        else:
+            return obj
+    
+    # Create a deep copy of activity_parameters with datetime objects converted to strings
+    serializable_params = convert_datetime_to_iso(activity_parameters)
+    
     api_url = f"{BASE_URL}/api/activities/try-create" # BASE_URL is defined at the top
     payload = {
         "citizenUsername": citizen_username,
         "activityType": activity_type,
-        "activityParameters": activity_parameters
+        "activityParameters": serializable_params
     }
     headers = {"Content-Type": "application/json"}
     
