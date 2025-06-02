@@ -1005,11 +1005,20 @@ number => {
           console.log(`IsometricViewer: API response status: ${response.status} ${response.statusText}`);
           return response.json();
         })
-        .then(data => {
+        .then(async data => {
           console.log(`IsometricViewer: API data received, polygons property exists: ${!!data.polygons}`);
           if (data.polygons) {
             console.log(`IsometricViewer: Setting ${data.polygons.length} polygons to state`);
             setPolygons(data.polygons);
+            
+            // Précharger les images des terres immédiatement après avoir reçu les polygones
+            console.log('IsometricViewer: Preloading land images...');
+            try {
+              await landService.preloadLandImages(data.polygons);
+              console.log('IsometricViewer: Land images preloaded successfully');
+            } catch (error) {
+              console.error('IsometricViewer: Error preloading land images:', error);
+            }
             
             if (typeof window !== 'undefined') {
               console.log(`IsometricViewer: Setting window.__polygonData with ${data.polygons.length} polygons`);

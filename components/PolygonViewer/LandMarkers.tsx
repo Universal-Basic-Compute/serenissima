@@ -53,18 +53,26 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
     resizeHandle: null
   });
 
-  // Load land images when component mounts or polygons change
+  // Get land images from LandService when component mounts or polygons change
   useEffect(() => {
     if (!isVisible || polygonsToRender.length === 0) return;
 
-    const loadLandImages = async () => {
-      // Extract the polygon data from polygonsToRender
-      const polygons = polygonsToRender.map(item => item.polygon);
-      const images = await landService.preloadLandImages(polygons);
-      setLandImages(images);
+    // Instead of loading images here, just get the already preloaded images from the service
+    const images = landService.getLandImages();
+    setLandImages(images);
+    
+    // Set up an interval to check for new images periodically
+    // This helps when new polygons are added or images are loaded after initial render
+    const checkInterval = setInterval(() => {
+      const currentImages = landService.getLandImages();
+      if (Object.keys(currentImages).length !== Object.keys(images).length) {
+        setLandImages({...currentImages});
+      }
+    }, 5000); // Check every 5 seconds
+    
+    return () => {
+      clearInterval(checkInterval);
     };
-
-    loadLandImages();
   }, [isVisible, polygonsToRender]);
 
   // Initialize and update custom settings for polygons
