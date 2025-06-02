@@ -673,9 +673,23 @@ export default function LandMarkers({
           if (settings && typeof settings.x === 'number' && typeof settings.y === 'number') {
             // settings.x and .y are world offsets
             const markerMapWorldX = pWorldMapCenterX + settings.x;
+            // La coordonnée Y du monde pour le marqueur est toujours pWorldMapCenterY + settings.y
             const markerMapWorldY = pWorldMapCenterY + settings.y;
+
+            // Pour X, la logique reste la même, car settings.x est un décalage du monde mis à l'échelle par 'scale'.
+            // worldToScreenX n'utilise pas son argument mapWorldY, donc on peut passer markerMapWorldY ou pWorldMapCenterY.
             finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-            finalY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+
+            // Pour Y, afin de corriger le problème "s'éloigne en dézoomant" :
+            // La composante de décalage à l'écran due à settings.y est rendue indépendante de 'scale'.
+            // 1. Calculer la position Y à l'écran du centre du polygone.
+            const polygonCenterScreenY = worldToScreenY(pWorldMapCenterX, pWorldMapCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+            // 2. Calculer le décalage Y à l'écran à partir de settings.y.
+            //    settings.y est un décalage du monde. Un Y positif dans le monde (sud) signifie un Y négatif à l'écran (haut) après inversion.
+            //    Le facteur 1.4 est pour l'étirement isométrique. Nous le conservons. Nous retirons 'scale'.
+            const screenOffsetY = -settings.y * 1.4;
+            // 3. Additionner ce décalage constant à l'écran au Y écran du centre du polygone.
+            finalY = polygonCenterScreenY + screenOffsetY;
           } else {
             // No custom settings, use polygon's screen center
             finalX = pScreenCenterX;
