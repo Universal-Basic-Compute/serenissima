@@ -305,7 +305,7 @@ def process_relationships(tables, limit=None, min_strength=None, max_per_run=Non
             formula_parts.append(f"{{StrengthScore}} >= {min_strength}")
         
         if new_only:
-            formula_parts.append("OR({Title}='', {Title}=BLANK())")
+            formula_parts.append("AND({Title}='', {Title}=BLANK())")
         
         formula = " AND ".join(formula_parts) if formula_parts else ""
         
