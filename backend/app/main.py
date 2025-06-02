@@ -590,9 +590,9 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
                     "Seller": "Treasury",
                     "Buyer": wallet_data.wallet_address,
                     "Price": transfer_amount,
-                    "CreatedAt": datetime.datetime.now().toISOString(),
-                    "UpdatedAt": datetime.datetime.now().toISOString(),
-                    "ExecutedAt": datetime.datetime.now().toISOString(),
+                    "CreatedAt": datetime.now().isoformat(),
+                    "UpdatedAt": datetime.now().isoformat(),
+                    "ExecutedAt": datetime.now().isoformat(),
                     "Notes": json.dumps({
                         "operation": "deposit",
                         "method": "direct"

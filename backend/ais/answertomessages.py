@@ -3,7 +3,8 @@ import sys
 import json
 import random
 import argparse
-from datetime import datetime, timezone
+import datetime
+from datetime import timezone
 from typing import Dict, List, Optional, Any, Literal
 import requests
 from dotenv import load_dotenv
@@ -436,7 +437,7 @@ def call_try_create_activity_api(
             return {k: convert_datetime_to_iso(v) for k, v in obj.items()}
         elif isinstance(obj, list):
             return [convert_datetime_to_iso(item) for item in obj]
-        elif isinstance(obj, datetime.datetime):
+        elif isinstance(obj, datetime):
             return obj.isoformat()
         else:
             return obj
@@ -689,7 +690,7 @@ def create_direct_message(sender: str, receiver: str, content: str, message_type
             "Receiver": receiver,
             "Content": content,
             "Type": message_type,
-            "CreatedAt": datetime.datetime.now(timezone.utc).isoformat()
+            "CreatedAt": datetime.now(timezone.utc).isoformat()
         }
         
         # Don't store the reply reference since neither InReplyTo nor Details 
