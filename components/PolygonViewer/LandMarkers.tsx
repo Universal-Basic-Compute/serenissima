@@ -639,13 +639,20 @@ export default function LandMarkers({
         // Correction based on the refined logic for displayWidth/displayHeight in handleDrag:
         // This should exactly mirror that logic.
         if (settings) {
-            if (settings.referenceScale && settings.width !== undefined && settings.height !== undefined) {
-                const scaleFactor = scale / settings.referenceScale;
-                width = settings.width * scaleFactor;
-                height = settings.height * scaleFactor;
-            } else { // No referenceScale, or width/height are undefined in settings
-                width = (settings.width !== undefined ? settings.width : 75 * scale);
-                height = (settings.height !== undefined ? settings.height : 75 * scale);
+            if (settings.width !== undefined && settings.height !== undefined) {
+                if (settings.referenceScale) { // If referenceScale is present, use it
+                    const scaleFactor = scale / settings.referenceScale;
+                    width = settings.width * scaleFactor;
+                    height = settings.height * scaleFactor;
+                } else {
+                    // If no referenceScale, assume settings.width/height are base dimensions
+                    // and scale them by the current map scale.
+                    width = settings.width * scale;
+                    height = settings.height * scale;
+                }
+            } else { // settings.width or settings.height are undefined
+                width = 75 * scale; // Default base size * current map scale
+                height = 75 * scale; // Default base size * current map scale
             }
         } else {
             width = 75 * scale;
