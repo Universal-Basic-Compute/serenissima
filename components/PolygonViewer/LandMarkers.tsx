@@ -180,10 +180,17 @@ export default function LandMarkers({
     if (currentSettings && typeof currentSettings.x === 'number' && typeof currentSettings.y === 'number' && typeof pWorldMapCenterX === 'number' && typeof pWorldMapCenterY === 'number') {
       // settings.x and .y are world offsets
       const markerMapWorldX = pWorldMapCenterX + currentSettings.x;
-      const markerMapWorldY = pWorldMapCenterY + currentSettings.y; 
-      
-      initialScreenX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-      initialScreenY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      // initialScreenX est basé sur la coordonnée X du monde du marqueur.
+      // L'argument Y de worldToScreenX n'est pas utilisé pour le calcul de X.
+      initialScreenX = worldToScreenX(markerMapWorldX, 0, scale, mapTransformOffset, canvasWidth, canvasHeight);
+
+      // Calcul de initialScreenY selon la nouvelle logique:
+      // 1. Position Y à l'écran du centre du polygone.
+      const polygonCenterScreenY_dragStart = worldToScreenY(pWorldMapCenterX, pWorldMapCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      // 2. Décalage Y à l'écran dû à settings.y (sans le facteur 1.4).
+      //    settings.y est un décalage du monde. Un Y positif dans le monde (sud) signifie un Y négatif à l'écran (haut) après inversion.
+      const screenOffsetY_dragStart = -currentSettings.y * scale;
+      initialScreenY = polygonCenterScreenY_dragStart + screenOffsetY_dragStart;
     } else {
       // Fallback to polygon's screen center (passed as centerX, centerY to this handler)
       initialScreenX = centerX;
@@ -335,11 +342,16 @@ export default function LandMarkers({
       const pWorldMapCenterY = polyData.polygonWorldMapCenterY;
 
       // Conversion pour X (inchangée et correcte)
-      const markerMapWorldX_drag = screenToWorldX(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight); // newY n'est pas utilisé par screenToWorldX pour le calcul de X monde
-      const markerMapWorldY_drag = screenToWorldY(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight); // newX n'est pas utilisé par screenToWorldY pour le calcul de Y monde
-
+      const markerMapWorldX_drag = screenToWorldX(newX, 0, scale, mapTransformOffset, canvasWidth, canvasHeight); // newY n'est pas utilisé par screenToWorldX
       const mapWorldOffsetX = markerMapWorldX_drag - pWorldMapCenterX;
-      const mapWorldOffsetY = markerMapWorldY_drag - pWorldMapCenterY;
+
+      // Conversion pour Y (corrigée pour correspondre à la nouvelle logique de rendu de finalY)
+      // newY est la position Y à l'écran cible du marqueur.
+      // newY = polygonCenterScreenY_drag + (-mapWorldOffsetY_to_store * scale)
+      // Donc, mapWorldOffsetY_to_store * scale = polygonCenterScreenY_drag - newY
+      // mapWorldOffsetY_to_store = (polygonCenterScreenY_drag - newY) / scale
+      const polygonCenterScreenY_drag = worldToScreenY(pWorldMapCenterX, pWorldMapCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      const mapWorldOffsetY = (polygonCenterScreenY_drag - newY) / scale;
       
       setImageSettings(prev => ({
         ...prev,
@@ -349,7 +361,7 @@ export default function LandMarkers({
           height: baseHeightToStore,   // Store base height
           referenceScale: refScaleToStore, // Store reference scale
           x: mapWorldOffsetX,         // Store new world offset X
-          y: mapWorldOffsetY          // Store new world offset Y (revenu à la logique originale)
+          y: mapWorldOffsetY          // Store new world offset Y (ajusté)
         }
       }));
     } else {
@@ -682,13 +694,18 @@ export default function LandMarkers({
             // worldToScreenX n'utilise pas son argument mapWorldY, donc on peut passer markerMapWorldY ou pWorldMapCenterY.
             finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
 
-            // Pour X, la logique reste la même, car settings.x est un décalage du monde mis à l'échelle par 'scale'.
-            // worldToScreenX n'utilise pas son argument mapWorldY pour le calcul de la coordonnée X écran.
-            finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+            // Pour X, la logique reste la même : settings.x est un décalage du monde mis à l'échelle par 'scale'.
+            // L'argument Y de worldToScreenX n'est pas utilisé pour le calcul de X.
+            finalX = worldToScreenX(markerMapWorldX, 0, scale, mapTransformOffset, canvasWidth, canvasHeight);
 
-            // Pour Y, la contribution de settings.y est maintenant également mise à l'échelle par 'scale',
-            // en utilisant la coordonnée Y du monde absolue du marqueur.
-            finalY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+            // Pour Y, nouvelle logique :
+            // 1. Calculer la position Y à l'écran du centre du polygone (avec facteur 1.4).
+            const polygonCenterScreenY_render = worldToScreenY(pWorldMapCenterX, pWorldMapCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+            // 2. Calculer le décalage Y à l'écran à partir de settings.y (sans le facteur 1.4, mais avec scale).
+            //    settings.y est un décalage du monde. Un Y positif dans le monde (sud) signifie un Y négatif à l'écran (haut) après inversion.
+            const screenOffsetY_render = -settings.y * scale;
+            // 3. Additionner ce décalage à la position Y écran du centre du polygone.
+            finalY = polygonCenterScreenY_render + screenOffsetY_render;
           } else {
             // No custom settings, use polygon's screen center
             finalX = pScreenCenterX;
