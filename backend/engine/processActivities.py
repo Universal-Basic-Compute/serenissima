@@ -414,6 +414,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "deliver_message_interaction": process_send_message_fn, # Final step in send_message chain
         "reply_to_message": process_reply_to_message_fn, # Automatically created after receiving a message
         "perform_guild_membership_action": process_manage_guild_membership_fn, # Final step in manage_guild_membership chain
+        # "reply_to_message" will be handled specially below to pass args.model
 
         # Land Management Processors
         "finalize_list_land_for_sale": process_list_land_for_sale_fn,
@@ -463,15 +464,30 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         success = False
         if dry_run:
             log.info(f"{LogColors.OKCYAN}[DRY RUN] Would process activity {activity_guid} of type {activity_type}.{LogColors.ENDC}")
-            if activity_type in ACTIVITY_PROCESSORS:
+            # Check if a processor (direct or lambda) exists for the activity type
+            processor_exists = activity_type in ACTIVITY_PROCESSORS or \
+                               (activity_type == "reply_to_message" and process_reply_to_message_fn is not None) # Special check for reply_to_message
+            if processor_exists:
                 log.info(f"{LogColors.OKCYAN}[DRY RUN] Processor for {activity_type} exists.{LogColors.ENDC}")
                 success = True # Simulate success for dry run if processor exists
             else:
                 log.warning(f"{LogColors.WARNING}[DRY RUN] No processor found for activity type: {activity_type} for activity {activity_guid}. Would mark as failed.{LogColors.ENDC}")
                 success = False
         else:
-            if activity_type in ACTIVITY_PROCESSORS:
-                processor_func = ACTIVITY_PROCESSORS[activity_type]
+            processor_func = ACTIVITY_PROCESSORS.get(activity_type)
+            if activity_type == "reply_to_message":
+                # Special handling for reply_to_message to pass the model argument
+                try:
+                    success = process_reply_to_message_fn(
+                        tables, activity_record, building_type_defs, resource_defs,
+                        kinos_model_override=args.model # Pass the CLI model argument
+                    )
+                except Exception as e_process:
+                    log.error(f"{LogColors.FAIL}Error processing activity {activity_guid} of type {activity_type}: {e_process}{LogColors.ENDC}")
+                    import traceback
+                    log.error(traceback.format_exc())
+                    success = False
+            elif processor_func:
                 try:
                     success = processor_func(tables, activity_record, building_type_defs, resource_defs)
                 except Exception as e_process:
@@ -709,6 +725,11 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process concluded activities in La Serenissima.")
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Kinos model to use for AI responses in specific processors like reply_to_message."
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",

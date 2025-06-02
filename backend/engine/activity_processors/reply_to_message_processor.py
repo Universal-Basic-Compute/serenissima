@@ -20,7 +20,8 @@ def process_reply_to_message_fn(
     tables: Dict[str, Any],
     activity_record: Dict[str, Any],
     building_type_defs: Any,
-    resource_defs: Any
+    resource_defs: Any,
+    kinos_model_override: Optional[str] = None # New parameter
 ) -> bool:
     """
     Process the reply_to_message activity.
@@ -72,7 +73,14 @@ def process_reply_to_message_fn(
     
     if conversation_length > 1:
         log.info(f"Starting a conversation with {conversation_length} exchanges between {citizen} and {receiver_username}")
-        conversation_history = conduct_conversation(citizen, receiver_username, original_content, conversation_length)
+        # Pass kinos_model_override to conduct_conversation
+        conversation_history = conduct_conversation(
+            citizen, 
+            receiver_username, 
+            original_content, 
+            conversation_length,
+            kinos_model_override=kinos_model_override 
+        )
         
         if conversation_history:
             # The last message in the conversation is the final reply
@@ -109,6 +117,21 @@ def process_reply_to_message_fn(
     # If all API calls failed, use a fallback reply
     if not final_reply_content:
         final_reply_content = f"Thank you for your message. I am responding to: \"{original_content[:50]}...\""
+    
+    # Pass kinos_model_override to Kinos API calls if it's used directly here,
+    # or ensure conduct_conversation and generate_reply_with_kinos accept and use it.
+    # For now, assuming generate_reply_with_kinos and conduct_conversation will be updated
+    # or that the global KINOS_MODEL is sufficient if no override.
+    # If generate_reply_with_kinos is the main Kinos call point from this processor:
+    if not conversation_history: # Only call if no conversation was made
+        final_reply_content = generate_reply_with_kinos(
+            citizen, 
+            receiver_username, 
+            original_content, 
+            kinos_model_override=kinos_model_override # Pass it here
+        )
+        if not final_reply_content: # Fallback if even single reply fails
+            final_reply_content = f"Thank you for your message. I am responding to: \"{original_content[:50]}...\""
     
     try:
         # 1. Create the reply message record
@@ -184,7 +207,8 @@ def conduct_conversation(
     replier_username: str, 
     sender_username: str, 
     original_message: str, 
-    max_exchanges: int
+    max_exchanges: int,
+    kinos_model_override: Optional[str] = None # Added model override
 ) -> List[Tuple[str, str]]:
     """
     Conduct a multi-turn conversation between the replier and sender.
@@ -201,8 +225,13 @@ def conduct_conversation(
     conversation_history = [("user", original_message)]
     
     try:
-        # First response from the replier
-        first_reply = generate_reply_with_kinos(replier_username, sender_username, original_message)
+        # First response from the replier, passing model override
+        first_reply = generate_reply_with_kinos(
+            replier_username, 
+            sender_username, 
+            original_message,
+            kinos_model_override=kinos_model_override
+        )
         if not first_reply:
             log.error(f"Failed to generate first reply in conversation")
             return []
@@ -213,11 +242,12 @@ def conduct_conversation(
         for i in range(1, max_exchanges - 1):
             # Alternate between sender and replier
             if i % 2 == 1:  # Sender's turn
-                # Generate a follow-up message from the sender
+                # Generate a follow-up message from the sender, passing model override
                 sender_message = generate_follow_up_message(
                     sender_username, 
                     replier_username, 
-                    conversation_history
+                    conversation_history,
+                    kinos_model_override=kinos_model_override
                 )
                 if not sender_message:
                     log.error(f"Failed to generate sender message in conversation round {i}")
@@ -225,11 +255,12 @@ def conduct_conversation(
                 
                 conversation_history.append(("user", sender_message))
             else:  # Replier's turn
-                # Generate a response from the replier
+                # Generate a response from the replier, passing model override
                 replier_message = generate_follow_up_message(
                     replier_username, 
                     sender_username, 
-                    conversation_history
+                    conversation_history,
+                    kinos_model_override=kinos_model_override
                 )
                 if not replier_message:
                     log.error(f"Failed to generate replier message in conversation round {i}")
@@ -237,12 +268,13 @@ def conduct_conversation(
                 
                 conversation_history.append(("assistant", replier_message))
         
-        # Ensure the conversation ends with the replier's message
+        # Ensure the conversation ends with the replier's message, passing model override
         if len(conversation_history) % 2 == 1:  # If last message was from sender
             final_reply = generate_follow_up_message(
                 replier_username, 
                 sender_username, 
-                conversation_history
+                conversation_history,
+                kinos_model_override=kinos_model_override
             )
             if final_reply:
                 conversation_history.append(("assistant", final_reply))
@@ -255,7 +287,8 @@ def conduct_conversation(
 def generate_follow_up_message(
     speaker_username: str, 
     listener_username: str, 
-    conversation_history: List[Tuple[str, str]]
+    conversation_history: List[Tuple[str, str]],
+    kinos_model_override: Optional[str] = None # Added model override
 ) -> Optional[str]:
     """
     Generate a follow-up message in a conversation based on the history.
@@ -285,9 +318,10 @@ def generate_follow_up_message(
         else:
             system_prompt += "Continue the conversation naturally, asking follow-up questions or responding to what was just said."
         
+        model_to_use_follow_up = kinos_model_override if kinos_model_override else KINOS_MODEL
         payload = {
             "content": "Please continue this conversation with a natural response.",
-            "model": KINOS_MODEL,
+            "model": model_to_use_follow_up,
             "history_length": 25,
             "mode": "creative",
             "addSystem": system_prompt,
@@ -313,7 +347,12 @@ def generate_follow_up_message(
         log.error(f"Error generating follow-up message: {e}")
         return None
 
-def generate_reply_with_kinos(replier_username: str, sender_username: str, original_message: str) -> Optional[str]:
+def generate_reply_with_kinos(
+    replier_username: str, 
+    sender_username: str, 
+    original_message: str,
+    kinos_model_override: Optional[str] = None # Added model override
+) -> Optional[str]:
     """
     Generate a reply using the Kinos API.
     
@@ -321,6 +360,7 @@ def generate_reply_with_kinos(replier_username: str, sender_username: str, origi
         replier_username: The username of the citizen replying to the message
         sender_username: The username of the original sender
         original_message: The content of the original message
+        kinos_model_override: Optional Kinos model string to override the default.
     
     Returns:
         The generated reply content or None if the API call fails
@@ -328,9 +368,11 @@ def generate_reply_with_kinos(replier_username: str, sender_username: str, origi
     try:
         endpoint = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{replier_username}/channels/{sender_username}/messages"
         
+        model_to_use_reply = kinos_model_override if kinos_model_override else KINOS_MODEL
+        
         payload = {
             "content": original_message,
-            "model": KINOS_MODEL,
+            "model": model_to_use_reply,
             "history_length": 25,
             "mode": "creative",
             "addSystem": f"You are {replier_username}, a citizen of La Serenissima, responding to a message from {sender_username}. Respond in character, keeping your reply concise and relevant to the message."
