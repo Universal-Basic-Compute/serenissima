@@ -132,7 +132,7 @@ def get_problems_data(tables, username1, username2):
         print(f"{LogColors.FAIL}Erreur lors de la récupération des problèmes: {e}{LogColors.ENDC}")
         return problems_list
 
-def assess_relationship_with_kinos(tables, relationship_record):
+def assess_relationship_with_kinos(tables, relationship_record, kinos_model="local"):
     """Évaluer une relation en utilisant KinOS."""
     if not KINOS_API_KEY:
         print(f"{LogColors.FAIL}Erreur: Clé API KinOS manquante. Définissez KINOS_API_KEY.{LogColors.ENDC}")
@@ -170,7 +170,7 @@ def assess_relationship_with_kinos(tables, relationship_record):
     else:
         evaluator, target = citizen2, citizen1
     
-    print(f"{LogColors.HEADER}Évaluation de la relation entre {citizen1} et {citizen2} par {evaluator}{LogColors.ENDC}")
+    print(f"{LogColors.HEADER}Évaluation de la relation entre {citizen1} et {citizen2} par {evaluator} (modèle: {kinos_model}){LogColors.ENDC}")
     
     # Récupérer les pertinences et problèmes
     relevancies_evaluator_to_target = get_relevancies_data(tables, evaluator, target)
@@ -220,7 +220,8 @@ def assess_relationship_with_kinos(tables, relationship_record):
     payload = {
         "message": prompt,
         "addSystem": json.dumps(system_context),
-        "history_length": 75
+        "history_length": 75,
+        "model": kinos_model
     }
     
     try:
@@ -294,7 +295,7 @@ def update_relationship(tables, relationship_id, assessment):
         print(f"{LogColors.FAIL}Erreur lors de la mise à jour de la relation {relationship_id}: {e}{LogColors.ENDC}")
         return False
 
-def process_relationships(tables, limit=None, min_strength=None, max_per_run=None):
+def process_relationships(tables, limit=None, min_strength=None, max_per_run=None, kinos_model="local"):
     """Traiter les relations pour les qualifier avec KinOS."""
     try:
         # Construire la formule pour filtrer les relations
@@ -340,7 +341,7 @@ def process_relationships(tables, limit=None, min_strength=None, max_per_run=Non
             print(f"\n{LogColors.HEADER}[{i}/{total}] Traitement de la relation {relationship_id} entre {citizen1} et {citizen2} (Force: {strength}, Confiance: {trust}){LogColors.ENDC}")
             
             # Évaluer la relation avec KinOS
-            assessment = assess_relationship_with_kinos(tables, relationship)
+            assessment = assess_relationship_with_kinos(tables, relationship, kinos_model)
             
             if assessment:
                 # Mettre à jour la relation avec l'évaluation
@@ -377,16 +378,18 @@ def main():
     parser.add_argument("--limit", type=int, help="Nombre maximum de relations à traiter")
     parser.add_argument("--min-strength", type=int, help="Force minimale de la relation pour être traitée")
     parser.add_argument("--max-per-run", type=int, help="Nombre maximum de relations à traiter par exécution")
+    parser.add_argument("--model", type=str, default="local", help="Modèle KinOS à utiliser (défaut: 'local')")
     args = parser.parse_args()
     
     print(f"{LogColors.HEADER}=== Qualification des Relations avec KinOS ==={LogColors.ENDC}")
     print(f"Démarrage à {datetime.now().isoformat()}")
+    print(f"Modèle KinOS: {args.model}")
     
     # Initialiser la connexion à Airtable
     tables = initialize_airtable()
     
     # Traiter les relations
-    process_relationships(tables, args.limit, args.min_strength, args.max_per_run)
+    process_relationships(tables, args.limit, args.min_strength, args.max_per_run, args.model)
     
     print(f"{LogColors.HEADER}=== Fin de l'exécution ==={LogColors.ENDC}")
     print(f"Terminé à {datetime.now().isoformat()}")
