@@ -121,10 +121,20 @@ export default function LandMarkers({
     
     // Use current position from settings or default to center
     const currentSettings = imageSettings[polygonId];
-    positionRef.current = { 
-      x: currentSettings?.x || centerX, 
-      y: currentSettings?.y || centerY 
-    };
+    
+    // Toujours utiliser la position actuelle du centre du polygone comme point de référence
+    // et ajouter l'offset si des paramètres existent
+    let posX = centerX;
+    let posY = centerY;
+    
+    // Si nous avons des paramètres, calculer la position absolue actuelle
+    if (currentSettings && currentSettings.x !== undefined && currentSettings.y !== undefined) {
+      posX = currentSettings.x;
+      posY = currentSettings.y;
+    }
+    
+    positionRef.current = { x: posX, y: posY };
+    console.log(`Drag start for ${polygonId} at position:`, positionRef.current);
   }, [editMode, selectedLandId, imageSettings]);
 
   const handleDrag = useCallback((e: MouseEvent) => {
@@ -221,15 +231,27 @@ export default function LandMarkers({
   // Set up global mouse event listeners for drag
   useEffect(() => {
     if (editMode) {
-      window.addEventListener('mousemove', handleDrag);
-      window.addEventListener('mouseup', handleDragEnd);
+      const handleMouseMove = (e: MouseEvent) => {
+        if (isDragging && selectedLandId) {
+          handleDrag(e);
+        }
+      };
+      
+      const handleMouseUp = () => {
+        if (isDragging && selectedLandId) {
+          handleDragEnd();
+        }
+      };
+      
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
       
       return () => {
-        window.removeEventListener('mousemove', handleDrag);
-        window.removeEventListener('mouseup', handleDragEnd);
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [editMode, handleDrag, handleDragEnd]);
+  }, [editMode, isDragging, selectedLandId, handleDrag, handleDragEnd]);
 
   // Effect to update positions when map is transformed
   useEffect(() => {
@@ -334,8 +356,8 @@ export default function LandMarkers({
               size={{ width, height }}
               style={{
                 position: 'absolute',
-                left: `${posX}px`,
-                top: `${posY}px`,
+                left: `${settings?.x || posX}px`,
+                top: `${settings?.y || posY}px`,
                 zIndex: isSelected ? 15 : (isHovered ? 12 : 10),
                 transform: 'translate(-50%, -50%)',
                 border: isSelected 
@@ -346,7 +368,10 @@ export default function LandMarkers({
                 background: 'rgba(255, 255, 255, 0.1)',
                 boxShadow: isSelected ? '0 0 10px rgba(255, 0, 0, 0.5)' : 'none'
               }}
-              onMouseDown={(e) => handleDragStart(e, polygon.id, polygonData.centerX, polygonData.centerY)}
+              onMouseDown={(e) => {
+                e.preventDefault(); // Empêcher le comportement par défaut
+                handleDragStart(e, polygon.id, polygonData.centerX, polygonData.centerY);
+              }}
               onClick={() => handleClick(polygon)}
               onMouseEnter={() => handleMouseEnter(polygon)}
               onMouseLeave={handleMouseLeave}
