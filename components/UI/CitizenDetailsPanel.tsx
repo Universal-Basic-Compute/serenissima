@@ -1133,7 +1133,7 @@ Your response:`;
               <>
                 {/* Relationship Section */}
                 <div className="flex items-center">
-                  <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relationship</h3>
+                  <h3 className="text-base font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relationship</h3>
                   <InfoIcon tooltipText="Entwinement: Measures relationship strength based on shared relevancies and common interests. Trust: Assesses reliability from positive direct interactions (messages, loans, contracts)." />
                 </div>
                 {isLoadingRelationship ? (
@@ -1156,7 +1156,7 @@ Your response:`;
                     ) : (
                       <>
                         <details className="mb-3">
-                          <summary className="text-sm text-amber-800 font-semibold cursor-pointer">
+                          <summary className="text-md text-amber-800 font-semibold cursor-pointer">
                             {relationship.title || "Relationship Details"}
                           </summary>
                           {relationship.description && (
