@@ -267,6 +267,8 @@ traitée. Chaque étape pertinente de ce processus aura un enregistrement dans l
 Les `activityType` listés ci-dessous sont à utiliser avec `POST /api/activities/try-create`. Les `activityParameters`
 pour cet endpoint devront contenir les informations spécifiques à chaque action.
 
+Bien que de nombreuses actions nécessitent des visites à des bâtiments officiels spécifiques (mairie, marché, archives, etc.), les étapes impliquant des rencontres directes entre citoyens (par exemple, pour discuter d'une offre, livrer un message, ou finaliser un accord informel avant enregistrement officiel) peuvent se dérouler dans divers lieux de la ville, y compris des lieux de socialisation comme les bains publics (`public_bath`), si c'est là que les citoyens concernés se trouvent ou choisissent de se rencontrer. La destination de l'activité de déplacement (`goto_location`) sera alors ce lieu.
+
 ### Gestion Foncière et Immobilière
 
 1.  **Faire une Offre sur un Terrain**
