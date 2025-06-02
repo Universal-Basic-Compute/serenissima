@@ -110,8 +110,8 @@ export default function LandMarkers({
               position: 'absolute',
               left: `${polygonData.centerX}px`,
               top: `${polygonData.centerY}px`,
-              width: `${Math.max(25, 75 * scale)}px`, // Scale width with zoom level - quarter of the original size
-              height: `${Math.max(25, 75 * scale)}px`, // Scale height with zoom level - quarter of the original size
+              width: `${75 * scale}px`, // Scale width directly with zoom level, no minimum size
+              height: `${75 * scale}px`, // Scale height directly with zoom level, no minimum size
               zIndex: isHovered ? 12 : 10, // Below buildings (z-index 16-18) but above water
               transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
               transform: `translate(-50%, -50%) scale(${isHovered ? 1.05 : 1})`,
