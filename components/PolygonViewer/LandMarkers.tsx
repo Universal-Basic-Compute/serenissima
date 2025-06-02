@@ -87,6 +87,7 @@ export default function LandMarkers({
 
   return (
     <div className="absolute inset-0 pointer-events-none">
+      {/* The container is pointer-events-none, but individual markers are pointer-events-auto */}
       {polygonsToRender.map((polygonData) => {
         const polygon = polygonData.polygon;
         if (!polygon || !polygon.id || !landImages[polygon.id]) return null;
@@ -119,7 +120,10 @@ export default function LandMarkers({
             }}
             onMouseEnter={() => handleMouseEnter(polygon)}
             onMouseLeave={handleMouseLeave}
-            onClick={() => handleClick(polygon)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent click from reaching canvas
+              handleClick(polygon);
+            }}
             title={polygon.historicalName || polygon.id}
           >
             <img
