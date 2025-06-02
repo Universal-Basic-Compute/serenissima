@@ -149,7 +149,8 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
       setCustomImageSettings(prev => ({ ...prev, ...updatedSettings }));
     }
     
-    // Always update the previous scale reference for transform scaling
+    // Update the previous scale reference even though we're not using transform: scale() anymore
+    // This is kept for compatibility with other code that might use it
     prevScale.current = scale;
     
   }, [isVisible, polygonsToRender, scale, resizeMode]); // Removed customImageSettings from dependencies
@@ -493,8 +494,8 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
               filter: nightFilter,
               opacity: 0.9, // Slightly transparent to blend better
               border: isSelected ? '2px dashed yellow' : 'none',
-              cursor: resizeMode ? 'move' : 'default',
-              transform: `scale(${scale / prevScale.current})` // Scale with the map
+              cursor: resizeMode ? 'move' : 'default'
+              // Removed transform: scale() - we now directly adjust width and height
             }}
             onMouseEnter={() => {
               if (!resizeMode) {

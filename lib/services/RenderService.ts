@@ -1037,8 +1037,8 @@ export class RenderService {
       // Check if polygon has an owner
       if (!polygon.owner) return;
       
-      // Use a fixed size for coat of arms
-      const size = 50;
+      // Use a size that scales with the map
+      const size = 50 * scale;
       
       // Use the owner's username for the coat of arms
       const ownerUsername = polygon.owner;
