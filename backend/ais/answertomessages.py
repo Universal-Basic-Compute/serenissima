@@ -271,7 +271,8 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
             "sender_citizen_profile": sender_citizen_data,
             "relationship_with_sender": relationship_data,
             "recent_notifications_for_ai": notifications_data[:50],  # Limit to max 50 notifications
-            # Removed relevancies_data and problems_data to reduce payload size
+            "recent_relevancies_ai_to_sender": relevancies_data,
+            "recent_problems_involving_ai_or_sender": problems_data
         }
         add_system_json = json.dumps(system_context_data, indent=2)
 
