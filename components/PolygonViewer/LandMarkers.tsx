@@ -321,21 +321,9 @@ export default function LandMarkers({
         const posX = polygonData.centerX;
         const posY = polygonData.centerY;
         
-        // Calculate position based on settings and current polygon position
-        // The position is the current polygon center plus any offset defined in settings
+        // Always use the current polygon center position
         let finalX = posX;
         let finalY = posY;
-        
-        if (settings && settings.x !== undefined && settings.y !== undefined) {
-          // Calculate the offset from center that was saved in settings
-          // This is a simple relative offset that will move with the map
-          const offsetX = settings.x - polygonData.centerX;
-          const offsetY = settings.y - polygonData.centerY;
-          
-          // Apply the offset to the current center position
-          finalX = posX + offsetX;
-          finalY = posY + offsetY;
-        }
         
         if (editMode) {
           // In edit mode, use Resizable component
@@ -346,8 +334,8 @@ export default function LandMarkers({
               size={{ width, height }}
               style={{
                 position: 'absolute',
-                left: `${finalX}px`,
-                top: `${finalY}px`,
+                left: `${posX}px`,
+                top: `${posY}px`,
                 zIndex: isSelected ? 15 : (isHovered ? 12 : 10),
                 transform: 'translate(-50%, -50%)',
                 border: isSelected 
@@ -470,8 +458,8 @@ export default function LandMarkers({
                 zIndex: isHovered ? 12 : 10,
                 transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
                 transform: `scale(${isHovered ? 1.05 : 1})`,
-                left: `${finalX}px`,
-                top: `${finalY}px`,
+                left: `${posX}px`,
+                top: `${posY}px`,
                 cursor: 'default',
                 opacity: isHovered ? opacity + 0.1 : opacity,
                 border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none',
