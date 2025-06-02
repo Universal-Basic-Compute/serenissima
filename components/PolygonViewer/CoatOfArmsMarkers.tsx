@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { hoverStateService } from '@/lib/services/HoverStateService'; // AJOUTER CET IMPORT
-import { eventBus, EventTypes } from '@/lib/utils/eventBus'; // AJOUTER CET IMPORT
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { hoverStateService } from '@/lib/services/HoverStateService';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
-// Définition du type PolygonData basée sur son utilisation dans IsometricViewer
+// Definition of PolygonData based on its use in IsometricViewer
 interface PolygonData {
-  polygon: any; // Envisagez de définir cela plus strictement si possible
+  polygon: any;
   coords: { x: number; y: number }[];
   fillColor: string;
   centroidX: number;
@@ -18,130 +18,141 @@ interface CoatOfArmsMarkersProps {
   isVisible: boolean;
   polygonsToRender: PolygonData[];
   landOwners: Record<string, string>;
-  coatOfArmsImageUrls: Record<string, HTMLImageElement>; // Attend des objets HTMLImageElement
+  coatOfArmsImageUrls: Record<string, HTMLImageElement>;
 }
 
-// Fonction utilitaire pour générer une couleur à partir d'une chaîne (pour l'avatar par défaut)
+// Utility function to generate a color from a string (for default avatar)
 const getColorFromString = (str: string): string => {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
   const hue = Math.abs(hash) % 360;
-  return `hsl(${hue}, 70%, 60%)`; // Saturation et luminosité fixes pour une bonne visibilité
+  return `hsl(${hue}, 70%, 60%)`; // Fixed saturation and brightness for good visibility
 };
 
-// Sous-composant pour afficher une image avec un fallback
-const CoatOfArmsImage: React.FC<{
-  src: string | undefined;
-  ownerName: string;
-  size: number;
-  baseStyle: React.CSSProperties;
-}> = ({ src, ownerName, size, baseStyle }) => {
-  const [error, setError] = useState(false);
-
-  if (error || !src) {
-    // Avatar par défaut
-    const initial = ownerName && ownerName.length > 0 ? ownerName.charAt(0).toUpperCase() : '?';
-    const backgroundColor = getColorFromString(ownerName);
-    return (
-      <div
-        style={{
-          ...baseStyle,
-          backgroundColor,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: `${size * 0.4}px`,
-          fontWeight: 'bold',
-          fontFamily: 'Arial, sans-serif',
-        }}
-      >
-        {initial}
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={src}
-      alt={`${ownerName}'s Coat of Arms`}
-      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-      onError={() => setError(true)}
-    />
-  );
-};
-
-const CoatOfArmsMarkers: React.FC<CoatOfArmsMarkersProps> = ({
+export default function CoatOfArmsMarkers({
   isVisible,
   polygonsToRender,
   landOwners,
   coatOfArmsImageUrls,
-}) => {
+}: CoatOfArmsMarkersProps) {
+  const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
+
+  // If the component is not visible, don't render anything
   if (!isVisible) {
     return null;
   }
 
-  const handleMouseEnter = (polygon: any, owner: string) => {
+  const handleMouseEnter = useCallback((polygon: any, owner: string) => {
+    setHoveredPolygonId(polygon.id);
     // Reuse polygon hover state, adding owner information
     hoverStateService.setHoverState('polygon', polygon.id, { ...polygon, owner });
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
+    setHoveredPolygonId(null);
     hoverStateService.clearHoverState();
-  };
+  }, []);
 
-  const handleClick = (polygon: any) => {
+  const handleClick = useCallback((polygon: any) => {
     // Emit an event similar to building clicks, but for polygons/land
     eventBus.emit(EventTypes.POLYGON_SELECTED, { polygonId: polygon.id, polygonData: polygon });
-  };
+  }, []);
 
   return (
-    <>
+    <div className="absolute inset-0 pointer-events-none">
       {polygonsToRender.map(({ polygon, centerX, centerY }) => {
         const owner = landOwners[polygon.id];
         if (!owner) return null;
 
-        const size = 50; // Taille fixe pour les blasons
+        const size = 50; // Fixed size for coat of arms
         const imageElement = coatOfArmsImageUrls[owner];
-        // L'élément image peut être un HTMLImageElement (image chargée ou data URL du fallback)
-        // ou undefined si l'owner n'est pas dans coatOfArmsImageUrls.
+        const isHovered = hoveredPolygonId === polygon.id;
 
-        const style: React.CSSProperties = {
-          position: 'absolute',
-          left: `${centerX - size / 2}px`,
-          top: `${centerY - size / 2}px`,
-          width: `${size}px`,
-          height: `${size}px`,
-          borderRadius: '50%',
-          overflow: 'hidden',
-          border: '2px solid white',
-          boxShadow: '0 0 5px rgba(0,0,0,0.3)',
-          zIndex: 20, // Increased z-index to be above citizens
-          pointerEvents: 'auto', // Changed from 'none' to 'auto'
-          cursor: 'pointer', // Add cursor to indicate interactivity
-        };
+        // Prepare the image source or fallback
+        let imageSrc = '';
+        let hasError = false;
+
+        if (imageElement?.src) {
+          imageSrc = imageElement.src;
+        } else {
+          hasError = true;
+        }
 
         return (
-          <div 
-            key={`${polygon.id}-coa-marker`} 
-            style={style}
+          <div
+            key={`${polygon.id}-coa-marker`}
+            className="absolute pointer-events-auto"
+            style={{
+              left: `${centerX}px`,
+              top: `${centerY}px`,
+              zIndex: isHovered ? 22 : 20, // Increased z-index when hovered
+              transform: `translate(-50%, -50%) scale(${isHovered ? 1.1 : 1})`,
+              transition: 'transform 0.1s ease-out, box-shadow 0.1s ease-out',
+              cursor: 'pointer',
+              filter: isHovered 
+                ? 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))' 
+                : 'drop-shadow(0 0 3px rgba(0, 0, 0, 0.3))',
+            }}
             onMouseEnter={() => handleMouseEnter(polygon, owner)}
             onMouseLeave={handleMouseLeave}
             onClick={() => handleClick(polygon)}
+            title={`Land owned by ${owner}`}
           >
-            <CoatOfArmsImage
-              src={imageElement?.src} // Utilise .src de HTMLImageElement
-              ownerName={owner}
-              size={size}
-              baseStyle={{ width: '100%', height: '100%' }} // Style de base pour l'image ou le div de fallback
-            />
+            {/* Wrapper div for border and image */}
+            <div 
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '2px solid white',
+                boxShadow: isHovered 
+                  ? '0 0 8px rgba(255, 255, 255, 0.7)' 
+                  : '0 0 5px rgba(0, 0, 0, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {!hasError ? (
+                <img
+                  src={imageSrc}
+                  alt={`${owner}'s Coat of Arms`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                  onError={() => {
+                    // This will trigger a re-render with hasError=true
+                    hasError = true;
+                  }}
+                />
+              ) : (
+                // Fallback to default avatar with initial
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: getColorFromString(owner),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: `${size * 0.4}px`,
+                    fontWeight: 'bold',
+                    fontFamily: 'Arial, sans-serif',
+                  }}
+                >
+                  {owner && owner.length > 0 ? owner.charAt(0).toUpperCase() : '?'}
+                </div>
+              )}
+            </div>
           </div>
         );
       })}
-    </>
+    </div>
   );
-};
-
-export default CoatOfArmsMarkers;
+}
