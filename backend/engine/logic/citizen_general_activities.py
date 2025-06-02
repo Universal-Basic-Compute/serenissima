@@ -1832,6 +1832,21 @@ def dispatch_specific_activity_request(
     #                 pass # Placeholder for chaining logic
     #     # ... return based on first_activity_of_chain ...
 
+    elif activity_type == "send_message":
+        log.info(f"Dispatching to send_message_creator for {citizen_name} with params: {activity_parameters}")
+        # The send_message_creator.try_create expects `tables`, `citizen_record`, and `details` (which are activityParameters)
+        # It will now return the first activity record of the chain, or None.
+        first_activity_of_chain = try_create_send_message_chain(
+            tables, 
+            citizen_record_full, 
+            activity_parameters if activity_parameters is not None else {} # Ensure details is a dict
+        )
+        if first_activity_of_chain and isinstance(first_activity_of_chain, dict) and 'fields' in first_activity_of_chain:
+            return {"success": True, "message": f"Send message endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain['fields'].get('Type', 'N/A')}.", "activity": first_activity_of_chain['fields']}
+        else:
+            log.warning(f"send_message_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
+            return {"success": False, "message": f"Could not initiate 'send_message' endeavor for {citizen_name}.", "activity": None, "reason": "send_message_creation_failed"}
+
     else: # Fallback for unsupported or not-yet-implemented high-level types
         return {"success": False, "message": f"Activity type '{activity_type}' is not supported for orchestrated creation by the Python engine yet.", "activity": None, "reason": "unsupported_orchestrated_activity_type"}
 
