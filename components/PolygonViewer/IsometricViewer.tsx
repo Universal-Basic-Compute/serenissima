@@ -1781,11 +1781,16 @@ number => {
       }
     };
 
+    // Store current scale in window for other components to access
+    if (typeof window !== 'undefined') {
+      window.currentScale = scale;
+    }
+
     updateNightState(); // Initial check
     const intervalId = setInterval(updateNightState, 5 * 60 * 1000); // Check every 5 minutes
 
     return () => clearInterval(intervalId);
-  }, [isNight]); // Re-run if isNight changes (e.g. manual toggle in future)
+  }, [isNight, scale]); // Re-run if isNight or scale changes
   
   // Land images are now handled by LandService and LandMarkers component
   

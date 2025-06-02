@@ -60,6 +60,7 @@ export default function LandMarkers({
           
           // Load image settings if available
           if (polygonData.polygon.imageSettings) {
+            console.log(`Loaded image settings for ${polygonData.polygon.id}:`, polygonData.polygon.imageSettings);
             settings[polygonData.polygon.id] = polygonData.polygon.imageSettings;
           }
         }
@@ -135,15 +136,23 @@ export default function LandMarkers({
     const newX = positionRef.current.x + dx;
     const newY = positionRef.current.y + dy;
     
+    // Get existing settings or create defaults
+    const existingSettings = imageSettings[selectedLandId] || {};
+    const width = existingSettings.width || 75 * scale;
+    const height = existingSettings.height || 75 * scale;
+    
     setImageSettings(prev => ({
       ...prev,
       [selectedLandId]: {
-        ...prev[selectedLandId] || { width: 75 * scale, height: 75 * scale, referenceScale: scale },
+        ...existingSettings,
+        width,
+        height,
+        referenceScale: scale,
         x: newX,
         y: newY
       }
     }));
-  }, [isDragging, selectedLandId, scale]);
+  }, [isDragging, selectedLandId, scale, imageSettings]);
 
   const handleDragEnd = useCallback(() => {
     if (isDragging && selectedLandId) {
@@ -170,21 +179,21 @@ export default function LandMarkers({
     const width = parseInt(ref.style.width, 10);
     const height = parseInt(ref.style.height, 10);
     
+    // Store current scale with the settings for future reference
+    const updatedSettings = {
+      ...imageSettings[polygonId] || { x: 0, y: 0 },
+      width,
+      height,
+      referenceScale: scale
+    };
+    
     setImageSettings(prev => ({
       ...prev,
-      [polygonId]: {
-        ...prev[polygonId] || { x: 0, y: 0, referenceScale: scale },
-        width,
-        height
-      }
+      [polygonId]: updatedSettings
     }));
     
     // Save the settings to the server
-    landService.saveImageSettings(polygonId, {
-      ...imageSettings[polygonId] || { x: 0, y: 0, referenceScale: scale },
-      width,
-      height
-    })
+    landService.saveImageSettings(polygonId, updatedSettings)
     .then(success => {
       if (success) {
         console.log(`Saved resized image settings for ${polygonId}`);
@@ -253,10 +262,31 @@ export default function LandMarkers({
         
         // Get custom settings or use defaults
         const settings = imageSettings[polygon.id];
-        const width = settings?.width || 75 * scale;
-        const height = settings?.height || 75 * scale;
-        const posX = settings?.x || polygonData.centerX;
-        const posY = settings?.y || polygonData.centerY;
+        
+        // If we have settings with a referenceScale, adjust dimensions based on current scale
+        let width, height, posX, posY;
+        
+        if (settings) {
+          // If we have settings with a referenceScale, adjust dimensions proportionally
+          if (settings.referenceScale) {
+            const scaleFactor = scale / settings.referenceScale;
+            width = settings.width * scaleFactor;
+            height = settings.height * scaleFactor;
+          } else {
+            width = settings.width || 75 * scale;
+            height = settings.height || 75 * scale;
+          }
+          
+          // Use saved position if available
+          posX = settings.x || polygonData.centerX;
+          posY = settings.y || polygonData.centerY;
+        } else {
+          // Default values if no settings
+          width = 75 * scale;
+          height = 75 * scale;
+          posX = polygonData.centerX;
+          posY = polygonData.centerY;
+        }
         
         if (editMode) {
           // In edit mode, use Resizable component

@@ -141,13 +141,19 @@ export class LandService {
     settings: { x: number, y: number, width: number, height: number, referenceScale?: number }
   ): Promise<boolean> {
     try {
-      console.log(`Saving image settings for polygon ${polygonId}:`, settings);
+      // Always include the current scale as referenceScale if not provided
+      const settingsToSave = {
+        ...settings,
+        referenceScale: settings.referenceScale || settings.referenceScale === 0 ? settings.referenceScale : window.currentScale || 3
+      };
+      
+      console.log(`Saving image settings for polygon ${polygonId}:`, settingsToSave);
       const response = await fetch(`/api/lands/${polygonId}/image-settings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ settings }),
+        body: JSON.stringify({ settings: settingsToSave }),
       });
       
       if (response.ok) {
