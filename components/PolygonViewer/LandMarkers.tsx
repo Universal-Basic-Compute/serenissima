@@ -81,7 +81,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
   useEffect(() => {
     if (!isVisible || polygonsToRender.length === 0) return;
     
-    // When scale changes, update positions but keep actual image sizes fixed on the map
+    // When scale changes, update positions AND sizes to scale with the map
     const updatedSettings: Record<string, { x: number, y: number, width: number, height: number }> = {};
     let hasUpdates = false;
     
@@ -103,24 +103,22 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
       
       const currentSettings = customImageSettings[polygon.id];
       if (currentSettings) {
-        // For saved settings with a reference scale, use that for scaling positions only
+        // For saved settings with a reference scale, use that for scaling
         if (polygon.imageSettings && polygon.imageSettings.referenceScale) {
           const referenceScale = polygon.imageSettings.referenceScale;
-          // We scale the position with the map, but the image itself will be counter-scaled in the render
-          // to maintain a fixed size on the map
           
-          // Use the original dimensions from saved settings
-          const originalWidth = polygon.imageSettings.width;
-          const originalHeight = polygon.imageSettings.height;
-          
-          // Scale the position to match the current map scale
+          // Scale dimensions based on the reference scale
           const scaleRatio = scale / referenceScale;
           
+          // Scale both position and size with the map
+          const scaledWidth = polygon.imageSettings.width * scaleRatio;
+          const scaledHeight = polygon.imageSettings.height * scaleRatio;
+          
           updatedSettings[polygon.id] = {
-            x: centerX - ((originalWidth * scaleRatio) / 2),
-            y: centerY - ((originalHeight * scaleRatio) / 2),
-            width: originalWidth * scaleRatio,
-            height: originalHeight * scaleRatio
+            x: centerX - (scaledWidth / 2),
+            y: centerY - (scaledHeight / 2),
+            width: scaledWidth,
+            height: scaledHeight
           };
           hasUpdates = true;
         } else if (!resizeMode) {
@@ -186,7 +184,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
           const referenceScale = savedSettings.referenceScale || prevScale.current;
           const scaleRatio = scale / referenceScale;
           
-          // Scale positions based on the reference scale, but the actual image will be counter-scaled in render
+          // Scale both position and size with the map
           const scaledWidth = savedSettings.width * scaleRatio;
           const scaledHeight = savedSettings.height * scaleRatio;
           
@@ -421,8 +419,7 @@ const LandMarkers: React.FC<LandMarkersProps> = ({ isVisible, polygonsToRender, 
                   // Store the current scale with the settings to use as a reference
                   const settings = customImageSettings[selectedImageId];
                   if (settings) {
-                    // Calculate the actual size on the map (not the scaled size on screen)
-                    // by applying the inverse of the scale factor
+                    // Store the actual size on the map at the current scale
                     const actualWidth = settings.width;
                     const actualHeight = settings.height;
                     
