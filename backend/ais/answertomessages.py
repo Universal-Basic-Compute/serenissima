@@ -348,6 +348,10 @@ def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_user
                     content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
                     content = content.strip()
                     
+                    # Remove quotes at the beginning and end if present
+                    if content.startswith('"') and content.endswith('"'):
+                        content = content[1:-1].strip()
+                    
                     return content
             
             # Fallback if history retrieval fails or no assistant message found
@@ -374,6 +378,14 @@ def create_response_message_api(sender_username: str, receiver_username: str, co
         import re
         content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
         content = content.strip()
+        
+        # Remove quotes at the beginning and end if present
+        if content.startswith('"') and content.endswith('"'):
+            content = content[1:-1].strip()
+        
+        # Remove quotes at the beginning and end if present
+        if content.startswith('"') and content.endswith('"'):
+            content = content[1:-1].strip()
         
         api_url = f"{BASE_URL}/api/messages/send"
         payload = {
@@ -586,6 +598,10 @@ def process_ai_messages(dry_run: bool = False, kinos_model_override_arg: Optiona
                                 import re
                                 cleaned_response = re.sub(r'<think>.*?</think>', '', response_content, flags=re.DOTALL)
                                 cleaned_response = cleaned_response.strip()
+                                
+                                # Remove quotes at the beginning and end if present
+                                if cleaned_response.startswith('"') and cleaned_response.endswith('"'):
+                                    cleaned_response = cleaned_response[1:-1].strip()
                                 
                                 activity_params = {
                                     "receiverUsername": sender_username,
