@@ -121,9 +121,19 @@ def _get_citizen_data(tables: Dict[str, Table], username: str) -> Optional[Dict]
         records = tables["citizens"].all(formula=f"{{Username}} = '{safe_username}'", max_records=1)
         if records:
             return {'id': records[0]['id'], 'fields': records[0]['fields']}
+        
+        # If not found by Username, try by CitizenId as fallback
+        records = tables["citizens"].all(formula=f"{{CitizenId}} = '{safe_username}'", max_records=1)
+        if records:
+            print(f"Found citizen {username} by CitizenId instead of Username")
+            return {'id': records[0]['id'], 'fields': records[0]['fields']}
+            
+        print(f"Citizen not found: {username}")
         return None
     except Exception as e:
         print(f"Error fetching citizen data for {username}: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def _get_relationship_data(tables: Dict[str, Table], username1: str, username2: str) -> Optional[Dict]:
