@@ -4067,6 +4067,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
       {/* Land Markers 2 - Display land images (simplified version) */}
       <LandMarkers2
         isVisible={true}
+        rawPolygons={polygons} // Passer les données brutes des polygones
         polygonsToRender={polygonsToRender}
         isNight={isNight}
         scale={scale}

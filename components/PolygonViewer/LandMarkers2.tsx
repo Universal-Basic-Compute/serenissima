@@ -3,7 +3,8 @@ import { landService } from '@/lib/services/LandService';
 
 interface LandMarkers2Props {
   isVisible: boolean;
-  polygonsToRender: {
+  rawPolygons: any[]; // Nouvelle prop pour les données brutes des polygones
+  polygonsToRender: { // Conservé pour la partie rendu, mais l'effet principal utilisera rawPolygons
     polygon: any;
     coords: {x: number, y: number}[];
     fillColor: string;
@@ -33,6 +34,7 @@ interface LandImageSettings {
 
 export default function LandMarkers2({
   isVisible,
+  rawPolygons,
   polygonsToRender,
   isNight,
   scale,
@@ -56,29 +58,74 @@ export default function LandMarkers2({
   useEffect(() => {
     const loadLandImagesAndSettings = async () => {
       const images: Record<string, string> = {};
-      const settings: Record<string, LandImageSettings> = {};
+      const settingsRecord: Record<string, LandImageSettings> = {}; // Renommé pour éviter conflit de nom
       
-      for (const polygonData of polygonsToRender) {
-        if (polygonData.polygon && polygonData.polygon.id) {
+      for (const rawPolygon of rawPolygons) { // Itérer sur rawPolygons
+        if (rawPolygon && rawPolygon.id) {
           // Charger les paramètres d'image s'ils existent
-          if (polygonData.polygon.imageSettings) {
-            const loadedSettings = polygonData.polygon.imageSettings as LandImageSettings;
+          if (rawPolygon.imageSettings) {
+            const loadedSettings = rawPolygon.imageSettings as LandImageSettings;
 
             // Migration à la volée de l'ancien format x,y vers lat,lng
             if (typeof loadedSettings.x === 'number' && typeof loadedSettings.y === 'number' &&
-                loadedSettings.lat === undefined && loadedSettings.lng === undefined &&
-                typeof polygonData.polygonWorldMapCenterX === 'number' &&
-                typeof polygonData.polygonWorldMapCenterY === 'number') {
+                loadedSettings.lat === undefined && loadedSettings.lng === undefined) {
               
-              const pWorldMapCenterX = polygonData.polygonWorldMapCenterX;
-              const pWorldMapCenterY = polygonData.polygonWorldMapCenterY;
-              const markerWorldX = pWorldMapCenterX + loadedSettings.x;
-              const markerWorldY = pWorldMapCenterY + loadedSettings.y;
+              // Calculer polygonWorldMapCenterX/Y à partir de rawPolygon.center ou rawPolygon.centroid
+              const centerLat = rawPolygon.center?.lat || rawPolygon.centroid?.lat;
+              const centerLng = rawPolygon.center?.lng || rawPolygon.centroid?.lng;
 
-              const newLng = markerWorldX / 20000 + 12.3326;
-              const newLat = markerWorldY / 20000 + 45.4371;
-              
-              settings[polygonData.polygon.id] = {
+              if (typeof centerLat === 'number' && typeof centerLng === 'number') {
+                const pWorldMapCenterX = (centerLng - 12.3326) * 20000;
+                const pWorldMapCenterY = (centerLat - 45.4371) * 20000;
+                const markerWorldX = pWorldMapCenterX + loadedSettings.x;
+                const markerWorldY = pWorldMapCenterY + loadedSettings.y;
+
+                const newLng = markerWorldX / 20000 + 12.3326;
+                const newLat = markerWorldY / 20000 + 45.4371;
+                
+                settingsRecord[rawPolygon.id] = {
+                  lat: newLat,
+                  lng: newLng,
+                  width: loadedSettings.width,
+                  height: loadedSettings.height,
+                  referenceScale: loadedSettings.referenceScale
+                };
+                // console.log(`CONVERTED old imageSettings for ${rawPolygon.id} to lat/lng`);
+              } else {
+                // Impossible de migrer sans centre/centroïde, conserver les anciens settings si lat/lng non définis
+                // ou ignorer si on veut forcer la nouvelle structure. Pour l'instant, on ne l'ajoute pas à settingsRecord.
+                console.warn(`Cannot migrate imageSettings for ${rawPolygon.id} due to missing center/centroid in rawPolygon data.`);
+              }
+            } else if (loadedSettings.lat !== undefined && loadedSettings.lng !== undefined) {
+              // Si lat/lng sont déjà présents, utiliser directement
+              settingsRecord[rawPolygon.id] = loadedSettings;
+            }
+            // Si ni x,y (migrables) ni lat,lng ne sont valides, les settings pour ce polygone ne seront pas ajoutés,
+            // et donc l'image ne sera pas affichée.
+          }
+
+          // Si des settings valides (avec lat/lng) ont été établis, charger l'image
+          if (settingsRecord[rawPolygon.id]) {
+            const imageUrl = await landService.getLandImageUrl(rawPolygon.id);
+            if (imageUrl) {
+              images[rawPolygon.id] = imageUrl;
+            }
+          }
+        }
+      }
+      
+      setLandImages(images);
+      // Fusionner les nouveaux settings avec les settings existants pour préserver l'état
+      // si les polygonesToRender ne changent pas mais que d'autres props le font.
+      setImageSettings(prevSettings => ({ ...prevSettings, ...settingsRecord }));
+    };
+    
+    if (isVisible && rawPolygons.length > 0) { // Utiliser rawPolygons.length
+      loadLandImagesAndSettings();
+    }
+  }, [isVisible, rawPolygons]); // Dépend de rawPolygons
+
+  if (!isVisible) {
                 lat: newLat,
                 lng: newLng,
                 width: loadedSettings.width,
