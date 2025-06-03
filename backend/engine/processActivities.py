@@ -203,7 +203,8 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
             'contracts': api.table(base_id, 'CONTRACTS'),
             'transactions': api.table(base_id, 'TRANSACTIONS'),
             'problems': api.table(base_id, 'PROBLEMS'),
-            'relationships': api.table(base_id, 'RELATIONSHIPS') # Ajout de la table RELATIONSHIPS
+            'relationships': api.table(base_id, 'RELATIONSHIPS'), # Ajout de la table RELATIONSHIPS
+            'LANDS': api.table(base_id, 'LANDS') # Ajout de la table LANDS
         }
 
         # Test connection with one primary table (e.g., citizens)
@@ -212,10 +213,13 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
             # Ensure api_key is not None before attempting the call
             if not api_key:
                  raise ValueError("API key is None, cannot test connection.")
-            tables['citizens'].all(max_records=1)
-            log.info(f"{LogColors.OKGREEN}Airtable connection successful.{LogColors.ENDC}")
+            tables['citizens'].all(max_records=1) # Test CITIZENS table
+            log.info(f"{LogColors.OKGREEN}Airtable connection successful (tested CITIZENS).{LogColors.ENDC}")
+            # Optionally, test LANDS table if critical for this script's core function
+            # tables['LANDS'].all(max_records=1) 
+            # log.info(f"{LogColors.OKGREEN}Airtable LANDS table also accessible.{LogColors.ENDC}")
         except Exception as conn_e:
-            log.error(f"{LogColors.FAIL}Airtable connection test failed for CITIZENS table: {conn_e}{LogColors.ENDC}")
+            log.error(f"{LogColors.FAIL}Airtable connection test failed: {conn_e}{LogColors.ENDC}")
             raise conn_e # Re-raise to be caught by the outer try-except
         
         return tables

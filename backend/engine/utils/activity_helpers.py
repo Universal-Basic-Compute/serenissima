@@ -263,6 +263,26 @@ def get_contract_record(tables: Dict[str, Table], contract_id: str) -> Optional[
         log.error(f"{LogColors.FAIL}Error fetching contract record for {contract_id}: {e}{LogColors.ENDC}")
         return None
 
+def get_land_record(tables: Dict[str, Table], land_id_value: str) -> Optional[Dict]:
+    """Fetches a land record by its LandId."""
+    # Ensure land_id_value is a string, as it's used in the formula.
+    if not isinstance(land_id_value, str):
+        log.warning(f"{LogColors.WARNING}get_land_record received non-string land_id_value: {land_id_value} (type: {type(land_id_value)}). Attempting to cast to string.{LogColors.ENDC}")
+        land_id_value = str(land_id_value)
+
+    formula = f"{{LandId}} = '{_escape_airtable_value(land_id_value)}'"
+    try:
+        # Assuming 'LANDS' is the correct table key used by the caller when populating the 'tables' dict.
+        records = tables['LANDS'].all(formula=formula, max_records=1)
+        if records:
+            return records[0]
+        else:
+            log.warning(f"{LogColors.WARNING}Land record with LandId '{land_id_value}' not found.{LogColors.ENDC}")
+            return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error fetching land record for LandId '{land_id_value}': {e}{LogColors.ENDC}")
+        return None
+
 def get_building_current_storage(tables: Dict[str, Table], building_custom_id: str) -> float:
     """Calculates the total count of resources currently in a building."""
     formula = f"AND({{Asset}} = '{_escape_airtable_value(building_custom_id)}', {{AssetType}} = 'building')"
