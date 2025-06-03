@@ -177,11 +177,28 @@ def try_create(
         "FromBuilding": from_building_id_determined, # Use the determined starting building ID
         "ToBuilding": to_building_id,
         "Path": json.dumps(path_data.get('path', [])),
-        "Details": json.dumps(details_for_goto), # Use the prepared details for goto
+        "Notes": json.dumps(details_for_goto), # Changed Details to Notes
         "Status": "created",
         "Title": f"Traveling to submit bid on land {land_id}",
         "Description": f"Traveling from {from_building_record['fields'].get('Name', from_building_id_determined)} to {to_building_record['fields'].get('Name', to_building_id)} to submit a bid of {bid_amount} Ducats on land {land_id}",
-        "Notes": f"First step of bid_on_land process. Will be followed by submit_land_bid activity.",
+        # "Notes" field was already here for simple text notes, now the JSON details go into the primary "Notes" field.
+        # If a separate simple text note is still desired, it could be appended to the JSON string or handled differently.
+        # For now, assuming the JSON details are the primary content for "Notes".
+        # We can add a simple text note to the details_for_goto if needed:
+        # details_for_goto["simple_note"] = "First step of bid_on_land process."
+        # Then the "Notes" field in goto_payload would correctly contain this.
+        # For now, let's keep the existing simple note if it's not part of details_for_goto.
+        # The original "Notes" field for simple text was:
+        # "Notes": f"First step of bid_on_land process. Will be followed by submit_land_bid activity.",
+        # Let's ensure this simple note is preserved if details_for_goto doesn't cover it.
+        # A common pattern is to have one "Notes" field that can be simple text or JSON.
+        # If details_for_goto is the primary content, the simple note might be redundant or part of details_for_goto.
+        # Given the error, "Details" was the problematic key.
+        # The schema indicates "Notes" (Texte multiligne): Notes diverses ou chaîne JSON...
+        # So, json.dumps(details_for_goto) is correct for the "Notes" field.
+        # The original simple text note will be overridden by this JSON.
+        # If both are needed, the simple note should be part of the details_for_goto dict.
+        # For now, this change directly addresses the "Unknown field name: Details" error.
         "CreatedAt": travel_start_date,
         "StartDate": travel_start_date,
         "EndDate": travel_end_date,
@@ -195,11 +212,12 @@ def try_create(
         "Citizen": citizen_username,
         "FromBuilding": to_building_id,  # Citizen is already at the courthouse/town_hall
         "ToBuilding": to_building_id,    # Stays at the same location
-        "Details": details_json_for_submit, # Use the prepared details for submit
+        "Notes": details_json_for_submit, # Changed Details to Notes
         "Status": "created",
         "Title": f"Submitting bid on land {land_id}",
         "Description": f"Submitting a bid of {bid_amount} Ducats on land {land_id} (Seller: {seller_username}) at {to_building_record['fields'].get('Name', to_building_id)}.",
-        "Notes": f"Second step of bid_on_land process. Will create building_bid contract.",
+        # The original simple text note "Second step..." will be overridden by details_json_for_submit.
+        # If this simple note is important, it should be part of the details_for_submit dict.
         "CreatedAt": travel_start_date,  # Created at the same time as the goto activity
         "StartDate": submit_start_date,  # But starts after the goto activity ends
         "EndDate": submit_end_date,
