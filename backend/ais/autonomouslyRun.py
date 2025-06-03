@@ -476,41 +476,45 @@ def make_kinos_call(
             return None
         
         log.info(f"{LogColors.OKGREEN}Received Kinos response for {ai_username}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
-        log.info(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username}:{LogColors.ENDC}\n{LogColors.LIGHTBLUE}{latest_ai_response_content[:10000]}...{LogColors.ENDC}") # Changed from log.debug
+        log.info(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username}:{LogColors.ENDC}\n{LogColors.LIGHTBLUE}{latest_ai_response_content[:10000]}...{LogColors.ENDC}")
 
-        # Attempt to parse as JSON, otherwise return as text
+        parsed_response = None
+        parsing_error_occurred = False
+        raw_reflection_content = latest_ai_response_content # Default reflection is the full content
+
+        # Attempt 1: Parse the entire response content as JSON
         try:
             parsed_response = json.loads(latest_ai_response_content)
-            log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username}: {json.dumps(parsed_response, indent=2)[:500]}...{LogColors.ENDC}")
-            return parsed_response
+            log.debug(f"{LogColors.LIGHTBLUE}Kinos response for {ai_username} is direct JSON.{LogColors.ENDC}")
         except json.JSONDecodeError:
-            log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. Full response preview: {LogColors.LIGHTBLUE}{latest_ai_response_content[:500]}...{LogColors.ENDC}")
-            # Attempt to extract JSON from markdown-like code blocks
-            # import re # re is already imported at the module level
-            json_match = re.search(r"```json\s*([\s\S]*?)\s*```", latest_ai_response_content, re.MULTILINE)
-            if json_match:
-                json_str = json_match.group(1).strip() # Ensure leading/trailing whitespace is removed from the block
+            log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. Attempting to extract from markdown.{LogColors.ENDC}")
+            
+            # Attempt 2: Extract the *last* JSON block from markdown
+            json_matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", latest_ai_response_content, re.MULTILINE))
+            if json_matches:
+                last_json_match = json_matches[-1] # Get the last match
+                json_str = last_json_match.group(1).strip()
+                raw_reflection_content = json_str # If JSON block found, use its content as potential reflection
                 try:
-                    parsed_json_from_text = json.loads(json_str)
-                    log.info(f"{LogColors.OKGREEN}Successfully extracted and parsed JSON from Kinos text response for {ai_username}.{LogColors.ENDC}")
-                    log.debug(f"{LogColors.LIGHTBLUE}Extracted JSON: {json.dumps(parsed_json_from_text, indent=2)[:500]}...{LogColors.ENDC}")
-                    return parsed_json_from_text
+                    parsed_response = json.loads(json_str)
+                    log.info(f"{LogColors.OKGREEN}Successfully extracted and parsed last JSON block from Kinos text response for {ai_username}.{LogColors.ENDC}")
                 except json.JSONDecodeError as e_inner:
-                    log.warning(f"{LogColors.WARNING}Failed to parse extracted JSON block from Kinos response for {ai_username}. Error: {e_inner}. Extracted block: {json_str[:10000]}...{LogColors.ENDC}")
-                    # Attempt to extract reflection directly from the malformed JSON string
-                    reflection_match = re.search(r'"reflection"\s*:\s*"((?:[^"\\]|\\.)*)"', json_str, re.DOTALL)
-                    if reflection_match:
-                        extracted_reflection = reflection_match.group(1)
-                        # Basic unescaping for common sequences if needed, though usually the raw string is fine for logging.
-                        # extracted_reflection = extracted_reflection.replace('\\n', '\n').replace('\\"', '"').replace("\\'", "'").replace('\\\\', '\\')
-                        log.info(f"{LogColors.OKGREEN}Successfully extracted 'reflection' field directly from malformed JSON block for {ai_username}.{LogColors.ENDC}")
-                        return {"actions": [], "reflection": extracted_reflection}
-                    else:
-                        log.warning(f"{LogColors.WARNING}Could not find 'reflection' field in malformed JSON block for {ai_username}. Using the block content as reflection.{LogColors.ENDC}")
-                        return {"actions": [], "reflection": json_str} # Use the content of the JSON block
-            else: # No json_match (no ```json ... ``` block found)
-                log.debug(f"{LogColors.OKBLUE}Kinos response for {ai_username} is not JSON and no JSON block found. Treating entire response as reflection.{LogColors.ENDC}")
-                return {"actions": [], "reflection": latest_ai_response_content}
+                    log.warning(f"{LogColors.WARNING}Failed to parse extracted last JSON block for {ai_username}. Error: {e_inner}. Block: {json_str[:200]}...{LogColors.ENDC}")
+                    parsing_error_occurred = True
+                    # Keep raw_reflection_content as the content of the malformed JSON block
+            else:
+                # No JSON block found, the entire response is considered non-JSON reflection
+                log.info(f"{LogColors.OKBLUE}No JSON block found in Kinos response for {ai_username}. Treating entire response as reflection.{LogColors.ENDC}")
+                parsing_error_occurred = True # No JSON structure at all
+                # raw_reflection_content is already latest_ai_response_content
+
+        if parsed_response:
+            log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username}: {json.dumps(parsed_response, indent=2)[:500]}...{LogColors.ENDC}")
+            if parsing_error_occurred: # If we successfully parsed after an initial failure (e.g. from markdown)
+                parsed_response["parsing_error_info"] = "Initial direct JSON parse failed, but successfully parsed from markdown block."
+            return parsed_response
+        else: # Parsing failed completely or no JSON structure found
+            return {"actions": [], "reflection": raw_reflection_content, "error_parsing_json": True, "error_message": "Failed to parse JSON from Kinos response."}
 
     except requests.exceptions.RequestException as e:
         log.error(f"{LogColors.FAIL}Kinos API request error for {ai_username}: {e}{LogColors.ENDC}", exc_info=True)
@@ -1288,12 +1292,22 @@ def autonomously_run_ai_citizen_unguided(
             "compendium_of_simplified_reads": READS_REFERENCE_EXTRACTED_TEXT, # Specifics for /api/try-read
             "guide_to_decreeing_undertakings": ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT, 
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
-            "outcomes_of_prior_actions": previous_api_results
+            "outcomes_of_prior_actions": previous_api_results,
+            "previous_kinos_response_parsing_error": None # Placeholder
         }
         if not (kinos_model_override and kinos_model_override.lower() == 'local'):
             add_system_data["overview_of_city_records_structure"] = AIRTABLE_SCHEMA_CONTENT
         if user_message and iteration_count == 1:
             add_system_data["user_missive"] = user_message
+        
+        # Check if the previous Kinos response had a parsing error
+        if previous_api_results and previous_api_results[-1].get("response", {}).get("error_parsing_json"):
+            add_system_data["previous_kinos_response_parsing_error"] = {
+                "message": previous_api_results[-1]["response"].get("error_message", "Unknown parsing error."),
+                "raw_content_snippet": previous_api_results[-1]["response"].get("reflection", "")[:200] + "..."
+            }
+            log.warning(f"{LogColors.WARNING}Informing Kinos about previous JSON parsing error for {ai_username}.{LogColors.ENDC}")
+
 
         kinos_response = None
         if not dry_run:
