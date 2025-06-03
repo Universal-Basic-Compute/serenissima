@@ -567,7 +567,7 @@ export class RenderService {
     
     // Draw coat of arms for lands with owners (only in land view)
     if (activeView === 'land') {
-      this.drawCoatOfArms(ctx, polygonsToRender, coatOfArmsImageUrls, renderedCoatOfArmsCache);
+      this.drawCoatOfArms(ctx, polygonsToRender, coatOfArmsImageUrls, renderedCoatOfArmsCache, scale); // Pass scale
     }
     
     // Draw buildings
@@ -1031,14 +1031,15 @@ export class RenderService {
     ctx: CanvasRenderingContext2D,
     polygonsToRender: any[],
     coatOfArmsImageUrls: Record<string, HTMLImageElement>,
-    renderedCoatOfArmsCache: Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>
+    renderedCoatOfArmsCache: Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>,
+    scale: number // Added scale parameter
   ): void {
     polygonsToRender.forEach(({ polygon, centerX, centerY }) => {
       // Check if polygon has an owner
       if (!polygon.owner) return;
       
       // Use a size that scales with the map
-      const size = 50 * scale;
+      const size = 50 * scale; // Now uses the passed scale
       
       // Use the owner's username for the coat of arms
       const ownerUsername = polygon.owner;

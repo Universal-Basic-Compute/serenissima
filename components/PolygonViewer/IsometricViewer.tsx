@@ -2742,7 +2742,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
         // This case means worldMapX/Y will be undefined, and custom positioning might not work for these.
         centerX_screen = 0;
         centerY_screen = 0;
-        centerY = 0;
+        // centerY = 0; // This was an error, should be using centerY_screen
         coords.forEach(coord => {
           centerX_screen += coord.x;
           centerY_screen += coord.y;

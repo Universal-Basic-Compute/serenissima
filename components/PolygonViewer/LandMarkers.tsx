@@ -221,7 +221,7 @@ export default function LandMarkers({
     if (!landElement) return;
 
     const rect = landElement.getBoundingClientRect();
-    const currentSettings = imageSettings[selectedLandId] || {};
+    const currentSettingEntry = imageSettings[selectedLandId];
     
     // finalX, finalY, width, height are screen values at current scale
     // Need to calculate them as they are in the render function
@@ -233,9 +233,9 @@ export default function LandMarkers({
     if (typeof polygonData.polygonWorldMapCenterX === 'number' && typeof polygonData.polygonWorldMapCenterY === 'number') {
       const pWorldMapCenterX = polygonData.polygonWorldMapCenterX;
       const pWorldMapCenterY = polygonData.polygonWorldMapCenterY;
-      if (currentSettings && typeof currentSettings.x === 'number' && typeof currentSettings.y === 'number') {
-        const markerMapWorldX = pWorldMapCenterX + currentSettings.x;
-        const markerMapWorldY = pWorldMapCenterY + currentSettings.y;
+      if (currentSettingEntry && typeof currentSettingEntry.x === 'number' && typeof currentSettingEntry.y === 'number') {
+        const markerMapWorldX = pWorldMapCenterX + currentSettingEntry.x;
+        const markerMapWorldY = pWorldMapCenterY + currentSettingEntry.y;
         const markerScreenCoords = CoordinateService.worldToScreen(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
         currentScreenX = markerScreenCoords.x;
         currentScreenY = markerScreenCoords.y;
@@ -248,13 +248,13 @@ export default function LandMarkers({
       currentScreenY = polygonData.centerY;
     }
     
-    if (currentSettings.referenceScale && currentSettings.width !== undefined && currentSettings.height !== undefined) {
-        const scaleFactor = scale / currentSettings.referenceScale;
-        currentScreenWidth = currentSettings.width * scaleFactor;
-        currentScreenHeight = currentSettings.height * scaleFactor;
+    if (currentSettingEntry?.referenceScale && currentSettingEntry?.width !== undefined && currentSettingEntry?.height !== undefined) {
+        const scaleFactor = scale / currentSettingEntry.referenceScale;
+        currentScreenWidth = currentSettingEntry.width * scaleFactor;
+        currentScreenHeight = currentSettingEntry.height * scaleFactor;
     } else {
-        currentScreenWidth = (currentSettings.width !== undefined ? currentSettings.width : 75 * scale);
-        currentScreenHeight = (currentSettings.height !== undefined ? currentSettings.height : 75 * scale);
+        currentScreenWidth = (currentSettingEntry?.width !== undefined ? currentSettingEntry.width : 75 * scale);
+        currentScreenHeight = (currentSettingEntry?.height !== undefined ? currentSettingEntry.height : 75 * scale);
     }
 
     operationStartRef.current = {
@@ -264,14 +264,14 @@ export default function LandMarkers({
       elementY: currentScreenY - currentScreenHeight / 2, // Assuming translate(-50%, -50%)
       width: currentScreenWidth,
       height: currentScreenHeight,
-      worldOffsetX: currentSettings.x, // Keep for potential reference, but lat/lng is primary
-      worldOffsetY: currentSettings.y, // Keep for potential reference
+      worldOffsetX: currentSettingEntry?.x, // Keep for potential reference, but lat/lng is primary
+      worldOffsetY: currentSettingEntry?.y, // Keep for potential reference
       // Store lat/lng if available, otherwise it will be undefined
-      lat: currentSettings.lat, 
-      lng: currentSettings.lng,
-      baseWidth: currentSettings.width, 
-      baseHeight: currentSettings.height, 
-      referenceScale: currentSettings.referenceScale,
+      lat: currentSettingEntry?.lat,
+      lng: currentSettingEntry?.lng,
+      baseWidth: currentSettingEntry?.width,
+      baseHeight: currentSettingEntry?.height,
+      referenceScale: currentSettingEntry?.referenceScale,
     };
 
   }, [editMode, selectedLandId, imageSettings, scale, mapTransformOffset, canvasWidth, canvasHeight, polygonsToRender]);
@@ -292,23 +292,23 @@ export default function LandMarkers({
     console.log(`Dragging to: ${newX}, ${newY}`);
     
     // Get existing settings or create defaults
-    const existingSettings = imageSettings[selectedLandId] || {};
-    const width = existingSettings.width || 75 * scale; // This is the base width or default base * current scale
-    const height = existingSettings.height || 75 * scale; // This is the base height or default base * current scale
+    const currentSettingEntry = imageSettings[selectedLandId];
+    // const width = currentSettingEntry?.width ?? (75 * scale); // This was for base width, not directly used here for display
+    // const height = currentSettingEntry?.height ?? (75 * scale); // This was for base height, not directly used here for display
     
     // Calculate display width/height for DOM update, consistent with main render logic
     let displayWidth, displayHeight;
-    const sDrag = imageSettings[selectedLandId] || {};
+    // const sDrag = imageSettings[selectedLandId] || {}; // Replaced by currentSettingEntry
 
-    if (sDrag.referenceScale && sDrag.width !== undefined && sDrag.height !== undefined) {
-        const scaleFactor = scale / sDrag.referenceScale;
-        displayWidth = sDrag.width * scaleFactor;
-        displayHeight = sDrag.height * scaleFactor;
+    if (currentSettingEntry?.referenceScale && currentSettingEntry?.width !== undefined && currentSettingEntry?.height !== undefined) {
+        const scaleFactor = scale / currentSettingEntry.referenceScale;
+        displayWidth = currentSettingEntry.width * scaleFactor;
+        displayHeight = currentSettingEntry.height * scaleFactor;
     } else {
         // If no referenceScale, or width/height are undefined in settings,
-        // use sDrag.width (if defined, assumed to be screen pixels) or default to (75 * scale)
-        displayWidth = sDrag.width !== undefined ? sDrag.width : (75 * scale);
-        displayHeight = sDrag.height !== undefined ? sDrag.height : (75 * scale);
+        // use currentSettingEntry.width (if defined, assumed to be screen pixels) or default to (75 * scale)
+        displayWidth = currentSettingEntry?.width !== undefined ? currentSettingEntry.width : (75 * scale);
+        displayHeight = currentSettingEntry?.height !== undefined ? currentSettingEntry.height : (75 * scale);
     }
 
     // Mettre à jour le DOM directement pour un glissement fluide
@@ -338,13 +338,13 @@ export default function LandMarkers({
     // The state update for imageSettings should store BASE width/height and referenceScale.
     const polyData = polygonsToRender.find(p => p.polygon.id === selectedLandId);
     
-    const currentSettings = imageSettings[selectedLandId] || {};
+    const existingSettingForUpdate = imageSettings[selectedLandId];
     // Determine base width/height and reference scale to store in state.
     // These should not change during a drag, only x and y (world offsets) change.
-    // If currentSettings are empty, initialize with defaults.
-    const baseWidthToStore = currentSettings.width !== undefined ? currentSettings.width : 75;
-    const baseHeightToStore = currentSettings.height !== undefined ? currentSettings.height : 75;
-    const refScaleToStore = currentSettings.referenceScale !== undefined ? currentSettings.referenceScale : scale;
+    // If existingSettingForUpdate are empty, initialize with defaults.
+    const baseWidthToStore = existingSettingForUpdate?.width ?? 75;
+    const baseHeightToStore = existingSettingForUpdate?.height ?? 75;
+    const refScaleToStore = existingSettingForUpdate?.referenceScale ?? scale;
 
     // Convert new screen coordinates (newX, newY) to absolute lat/lng
     const newLatLng = CoordinateService.screenToLatLng(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
@@ -353,7 +353,7 @@ export default function LandMarkers({
       ...prev,
       [selectedLandId]: {
         // Spread current settings to preserve any other fields like old x,y if they existed
-        ...currentSettings, 
+        ...(existingSettingForUpdate || {}), // Spread existing or empty object
         width: baseWidthToStore,
         height: baseHeightToStore,
         referenceScale: refScaleToStore,

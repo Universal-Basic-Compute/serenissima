@@ -425,8 +425,9 @@ export default function MapPage() {
                 finalImageBounds,
                 {
                   opacity: 0.7, // Changed opacity to 0.7
-                  map: mapRef.current,
-                  zIndex: 1 // Ensure images are drawn on top of polygons (default zIndex for polygons is often 0)
+                  map: mapRef.current
+                  // zIndex is not a valid GroundOverlayOption, it's managed by map pane or draw order.
+                  // For images on top of polygons, ensure polygons are added first or use map panes if more control is needed.
                 }
               );
               groundOverlaysMapRef.current[polygon.id] = groundOverlay; // Store in the map
@@ -739,7 +740,7 @@ export default function MapPage() {
            // TODO: Implement aspect ratio preservation here
         }
         
-        currentOverlay.setBounds(newBounds);
+        (currentOverlay as any).setBounds(newBounds);
       });
 
       handleMarker.addListener('dragend', () => {
@@ -787,7 +788,7 @@ export default function MapPage() {
           { lat: bounds.south, lng: bounds.west },
           { lat: bounds.north, lng: bounds.east }
         );
-        overlay.setBounds(newBounds);
+        (overlay as any).setBounds(newBounds);
         // Update the stored raw data for consistency if panel is reopened before save/reload
         const updatedRawData = rawPolygonsData.map(p => 
           p.id === polygonId ? { ...p, imageOverlayBounds: bounds } : p

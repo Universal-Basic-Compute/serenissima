@@ -7,9 +7,11 @@ import { FaTimes } from 'react-icons/fa'; // FaSpinner a été retiré
 
 interface DailyUpdatePanelProps {
   onClose: () => void;
+  onClose: () => void;
+  isUserLoggedIn?: boolean; // Added to accept the prop from app/page.tsx
 }
 
-const DailyUpdatePanel: React.FC<DailyUpdatePanelProps> = ({ onClose }) => {
+const DailyUpdatePanel: React.FC<DailyUpdatePanelProps> = ({ onClose, isUserLoggedIn }) => {
   const [messageContent, setMessageContent] = useState<string>(''); // Initialisé avec une chaîne vide
   const [isLoading, setIsLoading] = useState<boolean>(true); // True while fetching data
   const [error, setError] = useState<string | null>(null); // Gardé pour une gestion d'erreur spécifique si nécessaire
