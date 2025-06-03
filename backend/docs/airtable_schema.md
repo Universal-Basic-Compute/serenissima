@@ -148,8 +148,7 @@ Suit les activités et actions en cours et terminées des citoyens. Avec l'unifi
 -   `Title` (Texte): Titre concis de l'activité.
 -   `Description` (Texte multiligne): Description de ce que l'activité implique.
 -   `Thought` (Texte multiligne): Réflexion à la première personne du citoyen concernant cette activité (raisonnement, objectifs, commentaires).
--   `Notes` (Texte multiligne): Notes diverses, potentiellement pour des IDs ou informations non affichées.
--   `Details` (Texte multiligne): Chaîne JSON pour des données structurées additionnelles, utilisées par certains types d'activités pour passer des informations à des processeurs ultérieurs (ex: `goto_building_for_storage_fetch` stocke ici les infos pour l'activité `fetch_from_storage` qui suivra).
+-   `Notes` (Texte multiligne): Notes diverses ou chaîne JSON pour des données structurées additionnelles. Utilisé par certains types d'activités pour passer des informations à des processeurs ultérieurs (ex: `goto_location` peut stocker ici les paramètres pour l'activité suivante dans une chaîne, comme `send_message` qui y met les détails du message).
 -   `Priority` (Nombre): Priorité de l'activité.
 -   `CreatedAt` (Date/Heure): Date de création de l'activité.
 -   `StartDate` (Date/Heure): Date de début de l'activité.
@@ -293,9 +292,9 @@ Communications entre citoyens.
 -   `Sender` (Texte): `Username` de l'expéditeur du message.
 -   `Receiver` (Texte): `Username` du destinataire du message.
 -   `Content` (Texte multiligne): Contenu du message.
--   `Type` (Texte): Type de message (ex: `personal`, `business_inquiry`, `guild_communication`).
+-   `Type` (Texte): Type de message (ex: `personal`, `business_inquiry`, `guild_communication`, `reply`).
 -   `ReadAt` (Date/Heure): Horodatage de lecture par le destinataire.
--   `Notes` (Texte multiligne): Peut contenir des informations contextuelles, par exemple `In reply to: <MessageId>` si le message est une réponse.
+-   `Notes` (Texte multiligne): Peut contenir des informations contextuelles. Par exemple, pour les messages de type "reply", ce champ peut stocker l'ID du message original sous la forme `In reply to: <MessageId>`.
 -   `CreatedAt` (Date/Heure): Date d'envoi du message.
 -   `UpdatedAt` (Date/Heure): Date de dernière modification.
 
