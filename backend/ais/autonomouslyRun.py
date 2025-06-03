@@ -476,7 +476,7 @@ def make_kinos_call(
             return None
         
         log.info(f"{LogColors.OKGREEN}Received Kinos response for {ai_username}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
-        log.info(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username} (preview): {latest_ai_response_content[:500]}...{LogColors.ENDC}") # Changed from log.debug
+        log.info(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username}: {latest_ai_response_content[:10000]}...{LogColors.ENDC}") # Changed from log.debug
 
         # Attempt to parse as JSON, otherwise return as text
         try:
@@ -496,7 +496,7 @@ def make_kinos_call(
                     log.debug(f"{LogColors.LIGHTBLUE}Extracted JSON: {json.dumps(parsed_json_from_text, indent=2)[:500]}...{LogColors.ENDC}")
                     return parsed_json_from_text
                 except json.JSONDecodeError as e_inner:
-                    log.warning(f"{LogColors.WARNING}Failed to parse extracted JSON block from Kinos response for {ai_username}. Error: {e_inner}. Extracted block preview: {json_str[:200]}...{LogColors.ENDC}")
+                    log.warning(f"{LogColors.WARNING}Failed to parse extracted JSON block from Kinos response for {ai_username}. Error: {e_inner}. Extracted block: {json_str[:10000]}...{LogColors.ENDC}")
                     # Attempt to extract reflection directly from the malformed JSON string
                     reflection_match = re.search(r'"reflection"\s*:\s*"((?:[^"\\]|\\.)*)"', json_str, re.DOTALL)
                     if reflection_match:
