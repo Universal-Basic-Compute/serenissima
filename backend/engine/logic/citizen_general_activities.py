@@ -1848,6 +1848,28 @@ def dispatch_specific_activity_request(
             log.warning(f"send_message_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
             return {"success": False, "message": f"Could not initiate 'send_message' endeavor for {citizen_name}.", "activity": None, "reason": "send_message_creation_failed"}
 
+    elif activity_type == "manage_public_storage_offer":
+        log.info(f"Dispatching to manage_public_storage_offer_creator for {citizen_name} with params: {activity_parameters}")
+        first_activity_of_chain = try_create_manage_public_storage_offer_chain(
+            tables, citizen_record_full, activity_parameters or {},
+            resource_defs, building_type_defs,
+            now_venice_dt, now_utc_dt,
+            transport_api_url, api_base_url
+        )
+        if first_activity_of_chain and isinstance(first_activity_of_chain, dict) and 'fields' in first_activity_of_chain:
+            return {"success": True, "message": f"Manage public storage offer endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain['fields'].get('Type', 'N/A')}.", "activity": first_activity_of_chain['fields']}
+        else:
+            log.warning(f"manage_public_storage_offer_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
+            return {"success": False, "message": f"Could not initiate 'manage_public_storage_offer' endeavor for {citizen_name}.", "activity": None, "reason": "manage_public_storage_offer_creation_failed"}
+    
+    # Add other activity_type handlers here as needed, for example:
+    # elif activity_type == "manage_public_sell_contract":
+    #     # Import and call its specific creator function
+    #     # from backend.engine.activity_creators.manage_public_sell_contract_creator import try_create as try_create_manage_public_sell_chain
+    #     # first_activity_of_chain = try_create_manage_public_sell_chain(...)
+    #     # ... handle response ...
+    #     pass
+
     else: # Fallback for unsupported or not-yet-implemented high-level types
         return {"success": False, "message": f"Activity type '{activity_type}' is not supported for orchestrated creation by the Python engine yet.", "activity": None, "reason": "unsupported_orchestrated_activity_type"}
 

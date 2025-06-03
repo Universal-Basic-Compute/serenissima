@@ -76,6 +76,18 @@ export async function POST(request: Request) {
       );
     }
     
+    // Log des paramètres spécifiques pour manage_public_storage_offer
+    if (activityType === 'manage_public_storage_offer') {
+      console.log(`[API /activities/try-create] Processing manage_public_storage_offer with parameters:`,
+        activityParameters?.contractId_to_create_if_new ? `Managing contract: ${activityParameters.contractId_to_create_if_new}` : 'No specific contract ID provided (likely new)',
+        `Seller Building: ${activityParameters?.sellerBuildingId}`,
+        `Resource: ${activityParameters?.resourceType}`,
+        `Capacity: ${activityParameters?.capacityOffered}`,
+        `Price/Unit/Day: ${activityParameters?.pricePerUnitPerDay}`,
+        `Strategy: ${activityParameters?.pricingStrategy}`
+      );
+    }
+    
     // Log des paramètres spécifiques pour buy_available_land
     if (activityType === 'buy_available_land') {
       console.log(`[API /activities/try-create] Processing buy_available_land with parameters:`, 

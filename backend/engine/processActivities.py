@@ -155,6 +155,7 @@ from backend.engine.activity_processors.accept_land_offer_processor import proce
 from backend.engine.activity_processors.buy_listed_land_processor import process_buy_listed_land_fn
 from backend.engine.activity_processors.cancel_land_listing_processor import process_cancel_land_listing_fn
 from backend.engine.activity_processors.cancel_land_offer_processor import process_cancel_land_offer_fn
+from backend.engine.activity_processors.manage_public_storage_contract_processor import process_register_public_storage_offer_fn
 
 # Load environment variables
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
@@ -418,6 +419,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "deliver_message_interaction": process_send_message_fn, # Final step in send_message chain
         "reply_to_message": process_reply_to_message_fn, # Automatically created after receiving a message
         "perform_guild_membership_action": process_manage_guild_membership_fn, # Final step in manage_guild_membership chain
+        "register_public_storage_offer": process_register_public_storage_offer_fn,
         # "reply_to_message" will be handled specially below to pass args.model
 
         # Land Management Processors
