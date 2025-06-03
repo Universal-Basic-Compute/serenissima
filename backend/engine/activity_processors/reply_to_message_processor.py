@@ -31,12 +31,12 @@ def process_reply_to_message_fn(
     """
     fields = activity_record.get('fields', {})
     citizen = fields.get('Citizen')
-    details_str = fields.get('Details')
+    notes_str = fields.get('Notes') # Changed Details to Notes
     
     try:
-        details = json.loads(details_str) if details_str else {}
+        details = json.loads(notes_str) if notes_str else {} # Changed details_str to notes_str
     except Exception as e:
-        log.error(f"Error parsing Details for reply_to_message: {e}")
+        log.error(f"Error parsing Notes for reply_to_message: {e}") # Changed Details to Notes
         return False
     
     original_message_id = details.get('originalMessageId')

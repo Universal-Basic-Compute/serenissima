@@ -157,7 +157,7 @@ def try_create(
     # Calculate message end date (10 minutes after start)
     message_end_date = (now_utc + timedelta(seconds=duration_seconds) + timedelta(minutes=10)).isoformat()
     
-    # Store message details in the Details field for the processor to use
+    # Store message details in the Notes field for the processor to use
     details_for_processor = {
         "receiverUsername": receiver_username,
         "content": content,
@@ -178,7 +178,7 @@ def try_create(
         "FromBuilding": None,  # Starting from current position
         "ToBuilding": destination_building_id if destination_type != 'receiver_location' else None,
         "Path": json.dumps(path_data.get('path', [])),
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "receiverUsername": receiver_username,
             "content": content,
             "messageType": message_type,
@@ -203,7 +203,7 @@ def try_create(
         "Citizen": sender,
         "FromBuilding": destination_building_id if destination_type != 'receiver_location' else None,
         "ToBuilding": destination_building_id if destination_type != 'receiver_location' else None,
-        "Details": details_json,
+        "Notes": details_json, # Changed Details to Notes
         "Status": "created",
         "Title": f"Delivering a message to {receiver_username}",
         "Description": f"Having a conversation with {receiver_username} to deliver a {message_type} message",

@@ -39,15 +39,15 @@ def process_file_building_lease_adjustment_fn(
     citizen_username = fields.get('Citizen')
     activity_guid = fields.get('ActivityId', activity_record['id'])
     
-    details_str = fields.get('Details')
-    if not details_str:
-        log.error(f"{LogColors.FAIL}Activity {activity_guid} for {citizen_username} is missing 'Details'. Cannot process lease adjustment.{LogColors.ENDC}")
+    notes_str = fields.get('Notes') # Changed Details to Notes
+    if not notes_str:
+        log.error(f"{LogColors.FAIL}Activity {activity_guid} for {citizen_username} is missing 'Notes'. Cannot process lease adjustment.{LogColors.ENDC}") # Changed Details to Notes
         return False
 
     try:
-        details = json.loads(details_str)
+        details = json.loads(notes_str) # Changed details_str to notes_str
     except json.JSONDecodeError:
-        log.error(f"{LogColors.FAIL}Failed to parse 'Details' JSON for activity {activity_guid}: {details_str}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Failed to parse 'Notes' JSON for activity {activity_guid}: {notes_str}{LogColors.ENDC}") # Changed Details to Notes
         return False
 
     building_id_to_adjust = details.get('buildingIdToAdjust')

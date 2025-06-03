@@ -33,7 +33,7 @@ def process(
     citizen = fields.get('Citizen')
     to_building = fields.get('ToBuilding')
     path_str = fields.get('Path')
-    details_str = fields.get('Details')
+    notes_str = fields.get('Notes') # Changed Details to Notes
     
     if activity_type != "goto_location":
         log.error(f"Expected activity type 'goto_location', got '{activity_type}'")
@@ -44,12 +44,12 @@ def process(
         return False
     
     try:
-        # Parse the path and details
+        # Parse the path and notes
         path = json.loads(path_str) if path_str else []
-        details = json.loads(details_str) if details_str else {}
+        details = json.loads(notes_str) if notes_str else {} # Changed details_str to notes_str
         
         # Get the purpose of this movement
-        purpose = details.get("activityType", "unknown")
+        purpose = details.get("activityType", "unknown") # 'details' here is the parsed JSON from 'Notes'
         
         # Update citizen position to the destination
         if path and len(path) > 0:

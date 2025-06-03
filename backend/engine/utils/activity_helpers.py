@@ -1282,8 +1282,8 @@ def create_activity_record(
     if from_building_id: payload["FromBuilding"] = from_building_id
     if to_building_id: payload["ToBuilding"] = to_building_id
     if path_json: payload["Path"] = path_json
-    if details_json: payload["Details"] = details_json
-    if notes: payload["Notes"] = notes
+    if details_json: payload["Notes"] = details_json # Changed Details to Notes
+    elif notes: payload["Notes"] = notes # Use simple notes if no details_json
     if contract_id: payload["ContractId"] = contract_id
     if transporter_username: payload["Transporter"] = transporter_username
     if title: payload["Title"] = title

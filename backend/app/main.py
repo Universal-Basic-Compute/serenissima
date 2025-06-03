@@ -160,8 +160,8 @@ class ActivityResponseItem(BaseModel): # Structure of an activity field for resp
     Title: Optional[str] = None
     Description: Optional[str] = None
     Thought: Optional[str] = None
-    Notes: Optional[str] = None
-    Details: Optional[str] = None # JSON string
+    Notes: Optional[str] = None # JSON string or simple text
+    # Details: Optional[str] = None # JSON string - Replaced by Notes
     Priority: Optional[int] = None
     CreatedAt: Optional[str] = None
     StartDate: Optional[str] = None
