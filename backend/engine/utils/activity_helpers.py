@@ -905,23 +905,52 @@ def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen
         log.error(f"{LogColors.FAIL}General error fetching or assigning random position for {citizen_custom_id}: {e_general}{LogColors.ENDC}")
         return None
 
-def get_building_record(tables: Dict[str, Table], building_id_custom: str) -> Optional[Dict]:
-    """Fetches a building record by its custom BuildingId."""
-    # Ensure building_id_custom is a string, as it's used in the formula.
-    if not isinstance(building_id_custom, str):
-        log.warning(f"{LogColors.WARNING}get_building_record received non-string building_id_custom: {building_id_custom} (type: {type(building_id_custom)}). Attempting to cast to string.{LogColors.ENDC}")
-        building_id_custom = str(building_id_custom)
+def get_building_record(tables: Dict[str, Table], building_id_input: Union[str, List[str], Tuple[str, ...]]) -> Optional[Dict]:
+    """
+    Fetches a building record by its custom BuildingId.
+    Handles cases where building_id_input might be a string, or a list/tuple containing a single string ID
+    (common for linked/lookup fields from Airtable).
+    """
+    actual_building_id_str: Optional[str] = None
+    if isinstance(building_id_input, str):
+        actual_building_id_str = building_id_input
+    elif isinstance(building_id_input, (list, tuple)):
+        if building_id_input and len(building_id_input) == 1 and isinstance(building_id_input[0], str):
+            actual_building_id_str = building_id_input[0]
+            # log.debug(f"get_building_record received list/tuple {building_id_input}, using first element: '{actual_building_id_str}'.")
+        elif not building_id_input:
+             log.warning(f"{LogColors.WARNING}get_building_record received an empty list/tuple for building_id_input.{LogColors.ENDC}")
+             return None
+        else:
+            log.error(f"{LogColors.FAIL}get_building_record received list/tuple but first element is not a string or list/tuple has multiple elements: {building_id_input}{LogColors.ENDC}")
+            return None
+    else:
+        # Attempt to cast to string as a last resort if it's some other type that can be stringified.
+        try:
+            actual_building_id_str = str(building_id_input)
+            log.warning(f"{LogColors.WARNING}get_building_record received unexpected type {type(building_id_input)}, value: {building_id_input}. Cast to string: '{actual_building_id_str}'. This might lead to lookup issues if not a valid BuildingId.{LogColors.ENDC}")
+        except Exception as e_str_conv:
+            log.error(f"{LogColors.FAIL}get_building_record received uncastable type {type(building_id_input)} for building_id_input: {building_id_input}. Error: {e_str_conv}{LogColors.ENDC}")
+            return None
 
-    formula = f"{{BuildingId}} = '{_escape_airtable_value(building_id_custom)}'"
+    if not actual_building_id_str: # Should be caught by earlier checks, but as a safeguard
+        log.error(f"{LogColors.FAIL}Could not determine a valid string BuildingId from input: {building_id_input}{LogColors.ENDC}")
+        return None
+
+    formula = f"{{BuildingId}} = '{_escape_airtable_value(actual_building_id_str)}'"
     try:
         records = tables['buildings'].all(formula=formula, max_records=1)
         if records:
             return records[0]
         else:
-            log.warning(f"{LogColors.WARNING}Building with BuildingId '{building_id_custom}' not found.{LogColors.ENDC}")
+            # Do not log warning here if actual_building_id_str was a result of str(list/tuple) as it's expected to fail.
+            # Only log if it was originally a string or a successfully extracted string from list/tuple.
+            if isinstance(building_id_input, str) or \
+               (isinstance(building_id_input, (list, tuple)) and building_id_input and isinstance(building_id_input[0], str)):
+                log.warning(f"{LogColors.WARNING}Building with BuildingId '{actual_building_id_str}' not found (original input: {building_id_input}).{LogColors.ENDC}")
             return None
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error fetching building record for BuildingId '{building_id_custom}': {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error fetching building record for BuildingId '{actual_building_id_str}' (original input: {building_id_input}): {e}{LogColors.ENDC}")
         return None
 
 def get_relationship_trust_score(tables: Dict[str, Table], username1: str, username2: str) -> float:
