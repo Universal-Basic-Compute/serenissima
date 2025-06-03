@@ -15,6 +15,7 @@ import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
 import CoatOfArmsMarkers from './CoatOfArmsMarkers';
 import LandMarkers2 from './LandMarkers2'; // MODIFIED: Import LandMarkers2
+import BuildingMarkers2 from './BuildingMarkers2'; // Import the new component
 import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
 import BuildingMarkers from './BuildingMarkers';
@@ -4075,6 +4076,15 @@ const darkenColor = (colorStr: string, percent: number): string => {
         canvasWidth={canvasDims.width}
         canvasHeight={canvasDims.height}
         mapTransformOffset={offset}
+      />
+
+      {/* BuildingMarkers2 - Displays the specific static image */}
+      <BuildingMarkers2
+        scale={scale}
+        offset={offset}
+        canvasWidth={canvasDims.width}
+        canvasHeight={canvasDims.height}
+        isVisible={true} // Assuming it should always be visible when IsometricViewer is
       />
       
       {/* Coat of Arms Markers - Affiche les blasons par-dessus le canvas */}
