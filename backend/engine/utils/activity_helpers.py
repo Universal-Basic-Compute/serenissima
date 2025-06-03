@@ -1152,6 +1152,56 @@ def update_resource_count(
         log.error(traceback.format_exc())
         return False
 
+def create_notification_record(
+    tables: Dict[str, Table],
+    citizen_username: str,
+    notification_type: str,
+    content: str,
+    asset_type: Optional[str] = None,
+    asset_id: Optional[str] = None,
+    details_json: Optional[str] = None,
+    notes: Optional[str] = None,
+    status: str = "unread"
+) -> bool:
+    """
+    Creates a new notification record in Airtable.
+    Returns True on success, False on failure.
+    """
+    if not all([citizen_username, notification_type, content]):
+        log.error(f"{LogColors.FAIL}Missing required parameters for create_notification_record: citizen_username, notification_type, or content.{LogColors.ENDC}")
+        return False
+
+    payload = {
+        "Citizen": citizen_username,
+        "Type": notification_type,
+        "Content": content,
+        "Status": status,
+        "CreatedAt": datetime.datetime.now(VENICE_TIMEZONE).isoformat() # Use VENICE_TIMEZONE for CreatedAt
+    }
+    if asset_type:
+        payload["AssetType"] = asset_type
+    if asset_id:
+        payload["Asset"] = asset_id
+    if details_json:
+        payload["Details"] = details_json
+    if notes:
+        payload["Notes"] = notes
+    
+    # ReadAt should be null for unread messages
+    if status != "unread":
+        payload["ReadAt"] = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
+
+    try:
+        log.info(f"{LogColors.OKBLUE}Creating notification for {citizen_username} of type {notification_type}.{LogColors.ENDC}")
+        tables['notifications'].create(payload)
+        log.info(f"{LogColors.OKGREEN}Successfully created notification for {citizen_username}.{LogColors.ENDC}")
+        return True
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error creating notification for {citizen_username}: {e}{LogColors.ENDC}")
+        import traceback
+        log.error(traceback.format_exc())
+        return False
+
 def create_activity_record(
     tables: Dict[str, Table],
     citizen_username: str,
