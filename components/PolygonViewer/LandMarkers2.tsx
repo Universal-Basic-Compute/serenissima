@@ -49,7 +49,7 @@ export default function LandMarkers2({
   };
 
   const worldToScreenY = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasHeight: number): number => {
-    // Modification : Suppression du facteur 1.4 pour tester
+    // Rétablir la suppression du facteur 1.4 pour correspondre au comportement supposé des BuildingMarkers
     return (-mapWorldY) * currentScale + currentCanvasHeight / 2 + currentMapTransformOffset.y;
   };
 
