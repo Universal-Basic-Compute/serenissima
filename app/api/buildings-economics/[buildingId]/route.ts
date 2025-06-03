@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Airtable from 'airtable'; // Importation directe d'Airtable
 import { z } from 'zod';
 import { subDays, formatISO } from 'date-fns';
@@ -28,11 +28,12 @@ interface AggregatedTransaction {
 }
 
 export async function GET(
-  request: Request,
-  context: { params: { buildingId: string } }
-) {
+  request: NextRequest,
+  { params }: { params: Promise<{ buildingId: string }> }
+): Promise<NextResponse> {
   try {
-    const paramsValidation = BuildingIdParamsSchema.safeParse(context.params);
+    const resolvedParams = await params;
+    const paramsValidation = BuildingIdParamsSchema.safeParse(resolvedParams);
     if (!paramsValidation.success) {
       return NextResponse.json({ success: false, error: "Invalid buildingId parameter", details: paramsValidation.error.format() }, { status: 400 });
     }
