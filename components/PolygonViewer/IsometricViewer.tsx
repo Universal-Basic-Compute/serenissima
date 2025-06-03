@@ -4275,7 +4275,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
       
       {/* Loading indicator */}
       <div 
-        className={`absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/75 transition-opacity duration-1000 ease-in-out ${
+        className={`absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/95 transition-opacity duration-1000 ease-in-out ${
           loading ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
