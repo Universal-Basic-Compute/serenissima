@@ -1716,6 +1716,7 @@ def dispatch_specific_activity_request(
     Returns a dictionary with success status, message, and optionally the first activity of a chain.
     """
     # Extract common citizen details
+    original_activity_type = activity_type # Keep original for logging if redirected
     citizen_custom_id = citizen_record_full['fields'].get('CitizenId')
     citizen_username = citizen_record_full['fields'].get('Username')
     citizen_airtable_id = citizen_record_full['id']
@@ -1762,6 +1763,11 @@ def dispatch_specific_activity_request(
 
     # --- Handle specific activity_type requests ---
     # Each block should set first_activity_of_chain if successful.
+
+    # Redirect make_offer_for_land to bid_on_land
+    if activity_type == "make_offer_for_land":
+        log.info(f"Redirecting activityType 'make_offer_for_land' to 'bid_on_land' for citizen {citizen_username}.")
+        activity_type = "bid_on_land"
 
     if activity_type == "eat":
         strategy = params.get("strategy", "default_order")
@@ -1864,6 +1870,21 @@ def dispatch_specific_activity_request(
         else:
             log.warning(f"manage_public_storage_offer_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
             return {"success": False, "message": f"Could not initiate 'manage_public_storage_offer' endeavor for {citizen_name}.", "activity": None, "reason": "manage_public_storage_offer_creation_failed"}
+
+    elif activity_type == "bid_on_land":
+        log.info(f"Dispatching to bid_on_land_activity_creator for {citizen_name} (original type: {original_activity_type}) with params: {activity_parameters}")
+        from backend.engine.activity_creators.bid_on_land_activity_creator import try_create as try_create_bid_on_land_chain
+        # The bid_on_land_activity_creator.try_create now returns the first activity record or None
+        first_activity_of_chain = try_create_bid_on_land_chain(
+            tables,
+            citizen_record_full,
+            activity_parameters if activity_parameters is not None else {}
+        )
+        if first_activity_of_chain and isinstance(first_activity_of_chain, dict) and 'fields' in first_activity_of_chain:
+            return {"success": True, "message": f"Bid on land endeavor (originally {original_activity_type}) initiated for {citizen_name}. First activity: {first_activity_of_chain['fields'].get('Type', 'N/A')}.", "activity": first_activity_of_chain['fields']}
+        else:
+            log.warning(f"bid_on_land_activity_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
+            return {"success": False, "message": f"Could not initiate 'bid_on_land' (originally {original_activity_type}) endeavor for {citizen_name}.", "activity": None, "reason": "bid_on_land_creation_failed"}
     
     # Add other activity_type handlers here as needed, for example:
     # elif activity_type == "manage_public_sell_contract":
@@ -1874,7 +1895,20 @@ def dispatch_specific_activity_request(
     #     pass
 
     else: # Fallback for unsupported or not-yet-implemented high-level types
-        return {"success": False, "message": f"Activity type '{activity_type}' is not supported for orchestrated creation by the Python engine yet.", "activity": None, "reason": "unsupported_orchestrated_activity_type"}
+        supported_orchestrated_types = [
+            'eat', 'leave_venice', 'seek_shelter', 
+            'send_message', 'manage_public_storage_offer', 'bid_on_land'
+            # Add other explicitly handled types here as they are implemented in this dispatcher
+        ]
+        # Use original_activity_type in the error message if it was redirected
+        error_activity_type_display = original_activity_type if original_activity_type != activity_type else activity_type
+        
+        error_message = (f"Activity type '{error_activity_type_display}' is not supported for orchestrated creation by the Python engine yet. "
+                         f"Supported types are: {', '.join(supported_orchestrated_types)}.")
+        if original_activity_type != activity_type:
+            error_message += f" (Note: '{original_activity_type}' was redirected to '{activity_type}' which is also currently unhandled or failed). "
+
+        return {"success": False, "message": error_message, "activity": None, "reason": "unsupported_orchestrated_activity_type"}
 
 
 # --- Main Activity Processing Function ---

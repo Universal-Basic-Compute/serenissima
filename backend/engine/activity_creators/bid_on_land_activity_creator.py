@@ -116,13 +116,13 @@ def try_create(
 
     try:
         # Create both activities in sequence
-        tables["activities"].create(goto_payload)
+        goto_activity_record = tables["activities"].create(goto_payload) # Capture the record
         tables["activities"].create(submit_payload)
         
         log.info(f"Created complete bid_on_land activity chain for citizen {citizen}:")
         log.info(f"  1. goto_location activity {goto_activity_id}")
         log.info(f"  2. submit_land_bid activity {submit_activity_id}")
-        return True
+        return goto_activity_record # Return the first activity record
     except Exception as e:
         log.error(f"Failed to create bid_on_land activity chain: {e}")
-        return False
+        return None # Return None on failure
