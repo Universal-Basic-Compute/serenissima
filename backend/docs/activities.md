@@ -279,8 +279,8 @@ Bien que de nombreuses actions nécessitent des visites à des bâtiments offici
             *   **Paramètres**: `landId`, `price`, `sellerUsername`.
             *   **Mécanisme**: Crée une activité `goto_location` (ex: `town_hall`), puis `finalize_list_land_for_sale` qui crée un contrat `land_listing`.
         *   **`make_offer_for_land`**: Un citoyen fait une offre pour un terrain.
-            *   **Paramètres**: `landId`, `offerPrice`, `sellerUsername` (propriétaire actuel, peut être null si offre spéculative).
-            *   **Mécanisme**: Crée `goto_location`, puis `finalize_make_offer_for_land` qui crée un contrat `land_offer`.
+            *   **Paramètres**: `landId`, `offerPrice`, `sellerUsername` (propriétaire actuel, peut être null si offre spéculative), `targetOfficeBuildingId` (ID du bâtiment officiel où l'offre sera soumise, ex: `town_hall`). Le bâtiment de départ (`fromBuildingId`) est déterminé automatiquement par le moteur en fonction de la position actuelle du citoyen.
+            *   **Mécanisme**: Crée `goto_location` (vers `targetOfficeBuildingId`), puis `finalize_make_offer_for_land` (qui est un alias pour `submit_land_bid`) qui crée un contrat `building_bid` (de type `land_offer` implicitement).
         *   **`accept_land_offer`**: Le propriétaire accepte une offre d'achat.
             *   **Paramètres**: `contractId` (de l'offre `land_offer`), `landId`.
             *   **Mécanisme**: Crée `goto_location`, puis `execute_accept_land_offer` qui met à jour le contrat, transfère la propriété et les fonds.
