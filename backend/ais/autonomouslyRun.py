@@ -244,10 +244,14 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
         api = Api(airtable_api_key, retry_strategy=retry_strategy)
         tables = {
             "citizens": api.table(airtable_base_id, "CITIZENS"),
-            "messages": api.table(airtable_base_id, "MESSAGES"), # For logging AI reflections
-            "notifications": api.table(airtable_base_id, "NOTIFICATIONS"), # For admin notifications
+            "messages": api.table(airtable_base_id, "MESSAGES"), 
+            "notifications": api.table(airtable_base_id, "NOTIFICATIONS"),
+            "buildings": api.table(airtable_base_id, "BUILDINGS"),
+            "lands": api.table(airtable_base_id, "LANDS"),
+            "resources": api.table(airtable_base_id, "RESOURCES"),
+            "contracts": api.table(airtable_base_id, "CONTRACTS"),
         }
-        log.info(f"{LogColors.OKGREEN}Airtable connection initialized successfully.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}Airtable connection initialized successfully (citizens, messages, notifications, buildings, lands, resources, contracts).{LogColors.ENDC}")
         return tables
     except Exception as e:
         log.error(f"{LogColors.FAIL}Failed to initialize Airtable: {e}{LogColors.ENDC}", exc_info=True)
