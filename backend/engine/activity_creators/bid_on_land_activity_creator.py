@@ -41,8 +41,12 @@ def try_create(
     from_building_record = get_building_record(tables, from_building)
     to_building_record = get_building_record(tables, to_building)
     
-    if not from_building_record or not to_building_record:
-        log.error(f"Could not find building records for {from_building} or {to_building}")
+    # Specific checks and logging for building records
+    if not from_building_record:
+        log.error(f"Failed to create bid_on_land chain for citizen {citizen}: Could not find 'from' building record for ID '{from_building}'. This ID might be invalid or not a BuildingId (e.g., a LandId or incorrect format was provided).")
+        return False
+    if not to_building_record:
+        log.error(f"Failed to create bid_on_land chain for citizen {citizen}: Could not find 'to' (targetOffice) building record for ID '{to_building}'. This ID might be invalid or not a BuildingId.")
         return False
     
     # Calculate path between buildings
