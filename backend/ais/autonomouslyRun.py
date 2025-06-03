@@ -1346,6 +1346,16 @@ def autonomously_run_ai_citizen_unguided(
             break
         
         log.info(f"{LogColors.OKBLUE}AI {ai_username} decided on {len(api_actions)} actions in Unguided Iteration {iteration_count}.{LogColors.ENDC}")
+        if api_actions:
+            for idx, act_log in enumerate(api_actions):
+                log_method = act_log.get("method", "N/A")
+                log_endpoint = act_log.get("endpoint", "N/A")
+                log_body_snippet = ""
+                if log_method.upper() == "POST" and act_log.get("body"):
+                    body_content = act_log.get("body")
+                    activity_type_log = body_content.get("activityType", "N/A") if isinstance(body_content, dict) else "N/A"
+                    log_body_snippet = f" (Type: {activity_type_log})"
+                log.info(f"  Action {idx+1}: {log_method} {log_endpoint}{log_body_snippet}")
 
         current_iteration_results = []
         for i, action in enumerate(api_actions):
