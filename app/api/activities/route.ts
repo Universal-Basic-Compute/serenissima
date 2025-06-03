@@ -153,9 +153,15 @@ export async function GET(request: Request) {
     });
     
     if (response.status === 422) {
-      console.warn(`Airtable API returned 422 (Unprocessable Entity) for formula: ${filterByFormula}. Returning empty activities list.`);
+      console.warn(`Airtable API returned 422 (Unprocessable Entity) for formula: ${filterByFormula}. Request URL: ${requestUrl}. Returning empty activities list.`);
       return NextResponse.json(
-        { success: true, activities: [], _fallbackError: true, error: 'Airtable could not process the request formula.' },
+        { 
+          success: true, 
+          activities: [], 
+          _fallbackError: true, 
+          error: 'Airtable could not process the request formula.',
+          airtableRequestUrl: requestUrl // Include the problematic request URL
+        },
         { status: 200 }
       );
     }
