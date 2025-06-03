@@ -2055,8 +2055,8 @@ number => {
 
   // Handle mouse events for panning
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const currentWrapper = wrapperRef.current; // Use wrapperRef
+    if (!currentWrapper) return;
     
     const handleMouseDown_ViewerPanning = (e: MouseEvent) => {
       // If in orient_bridge mode, do not initiate map panning.
@@ -2064,6 +2064,16 @@ number => {
       if (interactionMode === 'orient_bridge') {
         return;
       }
+
+      // Prevent starting a pan if the click is on a UI element that should capture clicks,
+      // like buttons within the wrapper but outside the canvas.
+      // For ThoughtBubble, it has data-ui-panel="true". If we want panning to work *over* it,
+      // we should not check for data-ui-panel here.
+      // If specific UI elements within wrapperRef need to prevent panning, they should stopPropagation.
+      // const targetElement = e.target as HTMLElement;
+      // if (targetElement.closest('[data-ui-panel="true"], button, select, input')) {
+      //   return;
+      // }
 
       setIsDragging(true);
       isDraggingRef.current = true; 
@@ -2087,12 +2097,12 @@ number => {
       }
     };
     
-    canvas.addEventListener('mousedown', handleMouseDown_ViewerPanning);
+    currentWrapper.addEventListener('mousedown', handleMouseDown_ViewerPanning); // Attach to wrapper
     window.addEventListener('mousemove', handleMouseMove_ViewerPanning);
     window.addEventListener('mouseup', handleMouseUp_ViewerPanning);
     
     return () => {
-      canvas.removeEventListener('mousedown', handleMouseDown_ViewerPanning);
+      currentWrapper.removeEventListener('mousedown', handleMouseDown_ViewerPanning); // Clean up from wrapper
       window.removeEventListener('mousemove', handleMouseMove_ViewerPanning);
       window.removeEventListener('mouseup', handleMouseUp_ViewerPanning);
     };
