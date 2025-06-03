@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,10 +9,11 @@ if (!fs.existsSync(polygonsDir)) {
 }
 
 export async function POST(
-  request: Request,
-  { params }: { params: { polygonId: string } }
-) {
-  const polygonId = params.polygonId;
+  request: NextRequest,
+  { params }: { params: Promise<{ polygonId: string }> }
+): Promise<NextResponse> {
+  const resolvedParams = await params;
+  const polygonId = resolvedParams.polygonId;
   try {
     const { settings } = await request.json();
 
