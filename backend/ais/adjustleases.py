@@ -114,6 +114,9 @@ def initialize_airtable():
     
     return tables
 
+# This first definition of process_ai_lease_adjustments will be removed.
+# The complete one is defined later and will be moved up.
+
 def get_ai_citizens(tables) -> List[Dict]:
     """Get all citizens that are marked as AI, are in Venice, and have appropriate social class."""
     try:
@@ -595,205 +598,7 @@ def call_try_create_activity_api(
         print(f"Failed to decode JSON response for activity '{activity_type}' for {citizen_username}. Response: {response.text[:200]}")
         return False
 
-def process_ai_lease_adjustments(dry_run: bool = False):
-    """Main function to process AI lease adjustments."""
-    print(f"Starting AI lease adjustment process (dry_run={dry_run})")
-    
-    # Initialize Airtable connection
-    tables = initialize_airtable()
-    
-    # Get AI citizens
-    ai_citizens = get_ai_citizens(tables)
-    if not ai_citizens:
-        print("No AI citizens found, exiting")
-        return
-    
-    # Filter AI citizens to only those whose lands have buildings owned by others
-    filtered_ai_citizens = []
-    for ai_citizen in ai_citizens:
-        ai_username = ai_citizen["fields"].get("Username")
-        if not ai_username:
-            continue
-            
-        # Get lands owned by this AI
-        citizen_lands = get_citizen_lands(tables, ai_username)
-        
-        # Get land IDs
-        land_ids = [land["fields"].get("LandId") for land in citizen_lands if land["fields"].get("LandId")]
-        
-        # Get buildings on these lands
-        buildings_on_lands = get_all_buildings_on_lands(tables, land_ids)
-        
-        # Check if any buildings on these lands are owned by others
-        has_others_buildings = False
-        for building in buildings_on_lands:
-            building_owner = building["fields"].get("Owner", "")
-            if building_owner and building_owner != ai_username:
-                has_others_buildings = True
-                break
-                
-        if has_others_buildings:
-            filtered_ai_citizens.append(ai_citizen)
-            print(f"AI citizen {ai_username} has lands with buildings owned by others, including in processing")
-        else:
-            print(f"AI citizen {ai_username} has no lands with buildings owned by others, skipping")
-    
-    # Replace the original list with the filtered list
-    ai_citizens = filtered_ai_citizens
-    print(f"Filtered down to {len(ai_citizens)} AI citizens with lands that have buildings owned by others")
-    
-    if not ai_citizens:
-        print("No AI citizens with lands that have buildings owned by others, exiting")
-        return
-    
-    # Track lease adjustments for each AI
-    ai_lease_adjustments = {}
-    
-    # Process each AI citizen
-    for ai_citizen in ai_citizens:
-        ai_username = ai_citizen["fields"].get("Username")
-        if not ai_username:
-            continue
-        
-        print(f"Processing AI citizen: {ai_username}")
-        ai_lease_adjustments[ai_username] = []
-        
-        # Get lands owned by this AI
-        citizen_lands = get_citizen_lands(tables, ai_username)
-        
-        # Get buildings owned by this AI
-        citizen_buildings = get_citizen_buildings(tables, ai_username)
-        
-        # Get all buildings on lands owned by this AI
-        land_ids = [land["fields"].get("LandId") for land in citizen_lands if land["fields"].get("LandId")]
-        buildings_on_lands = get_all_buildings_on_lands(tables, land_ids)
-        
-        # Prepare the data package for the AI
-        data_package = prepare_lease_analysis_data(ai_citizen, citizen_lands, citizen_buildings, buildings_on_lands)
-        
-        # Send the lease adjustment request to the AI
-        if not dry_run:
-            decisions = send_lease_adjustment_request(ai_username, data_package)
-            
-            if decisions and "lease_adjustments" in decisions:
-                lease_adjustments = decisions["lease_adjustments"]
-                
-                for adjustment in lease_adjustments:
-                    building_id = adjustment.get("building_id")
-                    new_lease_price = adjustment.get("new_lease_price")
-                    reason = adjustment.get("reason", "No reason provided")
-                    
-                    if not building_id or new_lease_price is None:
-                        print(f"Invalid lease adjustment: {adjustment}")
-                        continue
-                    
-                    # Find the building to get current lease amount and owner
-                    building_formula = f"{{BuildingId}}='{building_id}'"
-                    buildings = tables["buildings"].all(formula=building_formula)
-                    
-                    if not buildings:
-                        print(f"Building {building_id} not found")
-                        continue
-                    
-                    building = buildings[0]
-                    current_lease = building["fields"].get("LeasePrice", 0)
-                    building_owner = building["fields"].get("Owner", "")
-                    
-                    # Find the building to get current lease amount and land ID
-                    building_formula = f"{{BuildingId}}='{building_id}'"
-                    buildings = tables["buildings"].all(formula=building_formula)
-                    
-                    if not buildings:
-                        print(f"Building {building_id} not found")
-                        continue
-                    
-                    building = buildings[0]
-                    current_lease = building["fields"].get("LeasePrice", 0)
-                    building_owner = building["fields"].get("Owner", "")
-                    land_id = building["fields"].get("LandId", "")
-                    
-                    # Check if the building is on a land owned by the AI
-                    if not land_id:
-                        print(f"Building {building_id} has no land ID, skipping")
-                        continue
-                    
-                    # Find the land to check ownership
-                    land_formula = f"{{LandId}}='{land_id}'"
-                    lands = tables["lands"].all(formula=land_formula)
-                    
-                    if not lands:
-                        print(f"Land {land_id} not found for building {building_id}, skipping")
-                        continue
-                    
-                    land = lands[0]
-                    land_owner = land["fields"].get("Owner", "")
-                    
-                    # Check if the AI owns this land - if not, skip it
-                    if land_owner != ai_username:
-                        print(f"Skipping building {building_id} - AI {ai_username} does not own the land {land_id} (owned by {land_owner})")
-                        continue
-                    
-                    # Update the lease amount via activity
-                    activity_params = {
-                        "buildingId": building_id, # Pass custom BuildingId
-                        "newLeasePrice": new_lease_price,
-                        "strategy": "kinos_direct_decision" # Or derive strategy if Kinos provides it
-                    }
-                    if call_try_create_activity_api(ai_username, "adjust_building_lease_price", activity_params, dry_run):
-                        building_name_for_notif = building["fields"].get("Name", building_id)
-                        # Create notification for building owner if different from AI
-                        if building_owner and building_owner != ai_username:
-                            create_notification_for_building_owner(
-                                tables, building_id, building_name_for_notif, building_owner, ai_username, 
-                                current_lease, new_lease_price, reason
-                            )
-                        
-                        # Add to the list of adjustments for this AI
-                        ai_lease_adjustments[ai_username].append({
-                            "building_id": building_id,
-                            "building_name": building_name_for_notif, # For admin summary
-                            "old_lease": current_lease,
-                            "new_lease": new_lease_price,
-                            "reason": reason
-                        })
-            else:
-                print(f"No valid lease adjustment decisions received for {ai_username}")
-        else:
-            # In dry run mode, just log what would happen
-            print(f"[DRY RUN] Would send lease adjustment request to AI citizen {ai_username}")
-            print(f"[DRY RUN] Data package summary:")
-            print(f"  - Citizen: {data_package['citizen']['username']}")
-            print(f"  - Lands: {len(data_package['lands'])}")
-            print(f"  - Buildings: {len(data_package['buildings'])}")
-            print(f"  - Buildings on lands: {len(data_package['buildings_on_lands'])}")
-            print(f"  - Net Income: {data_package['citizen']['financial']['net_income']}")
-    
-    # Create admin notification with summary
-    if not dry_run and any(adjustments for adjustments in ai_lease_adjustments.values()):
-        create_admin_notification(tables, ai_lease_adjustments)
-    else:
-        print(f"[DRY RUN] Would create admin notification with lease adjustments: {ai_lease_adjustments}")
-    
-    print("AI lease adjustment process completed")
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Adjust lease prices for AI-owned lands using Kinos AI.")
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Run the script without making actual changes to Airtable or Kinos."
-    )
-    parser.add_argument(
-        "--model",
-        type=str,
-        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
-    )
-    args = parser.parse_args()
-    
-    # Run the process
-    process_ai_lease_adjustments(dry_run=args.dry_run, kinos_model_override_arg=args.model)
-
-# Add kinos_model_override_arg to process_ai_lease_adjustments definition
+# This is the new location for the complete process_ai_lease_adjustments function
 def process_ai_lease_adjustments(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
     """Main function to process AI lease adjustments."""
     model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
@@ -877,3 +682,119 @@ def process_ai_lease_adjustments(dry_run: bool = False, kinos_model_override_arg
             
             if decisions and "lease_adjustments" in decisions:
                 lease_adjustments = decisions["lease_adjustments"]
+                
+                for adjustment in lease_adjustments:
+                    building_id = adjustment.get("building_id")
+                    new_lease_price = adjustment.get("new_lease_price")
+                    reason = adjustment.get("reason", "No reason provided")
+                    
+                    if not building_id or new_lease_price is None:
+                        print(f"Invalid lease adjustment: {adjustment}")
+                        continue
+                    
+                    # Find the building to get current lease amount and owner
+                    building_formula = f"{{BuildingId}}='{building_id}'"
+                    buildings = tables["buildings"].all(formula=building_formula)
+                    
+                    if not buildings:
+                        print(f"Building {building_id} not found")
+                        continue
+                    
+                    building = buildings[0]
+                    current_lease = building["fields"].get("LeasePrice", 0)
+                    building_owner = building["fields"].get("Owner", "")
+                    
+                    # Find the building to get current lease amount and land ID
+                    # This re-fetch is redundant if building_formula was correct, but safe.
+                    # building_formula = f"{{BuildingId}}='{building_id}'" 
+                    # buildings = tables["buildings"].all(formula=building_formula)
+                    # if not buildings: continue # Should not happen if first fetch worked
+                    # building = buildings[0]
+                    # current_lease = building["fields"].get("LeasePrice", 0)
+                    # building_owner = building["fields"].get("Owner", "")
+                    land_id = building["fields"].get("LandId", "")
+                    
+                    # Check if the building is on a land owned by the AI
+                    if not land_id:
+                        print(f"Building {building_id} has no land ID, skipping")
+                        continue
+                    
+                    # Find the land to check ownership
+                    land_formula = f"{{LandId}}='{land_id}'"
+                    lands = tables["lands"].all(formula=land_formula)
+                    
+                    if not lands:
+                        print(f"Land {land_id} not found for building {building_id}, skipping")
+                        continue
+                    
+                    land = lands[0]
+                    land_owner = land["fields"].get("Owner", "")
+                    
+                    # Check if the AI owns this land - if not, skip it
+                    if land_owner != ai_username:
+                        print(f"Skipping building {building_id} - AI {ai_username} does not own the land {land_id} (owned by {land_owner})")
+                        continue
+                    
+                    # Update the lease amount via activity
+                    activity_params = {
+                        "buildingId": building_id, # Pass custom BuildingId
+                        "newLeasePrice": new_lease_price,
+                        "strategy": "kinos_direct_decision" # Or derive strategy if Kinos provides it
+                    }
+                    if call_try_create_activity_api(ai_username, "adjust_building_lease_price", activity_params, dry_run):
+                        building_name_for_notif = building["fields"].get("Name", building_id)
+                        # Create notification for building owner if different from AI
+                        if building_owner and building_owner != ai_username:
+                            create_notification_for_building_owner(
+                                tables, building_id, building_name_for_notif, building_owner, ai_username, 
+                                current_lease, new_lease_price, reason
+                            )
+                        
+                        # Add to the list of adjustments for this AI
+                        ai_lease_adjustments[ai_username].append({
+                            "building_id": building_id,
+                            "building_name": building_name_for_notif, # For admin summary
+                            "old_lease": current_lease,
+                            "new_lease": new_lease_price,
+                            "reason": reason
+                        })
+            else:
+                print(f"No valid lease adjustment decisions received for {ai_username}")
+        else:
+            # In dry run mode, just log what would happen
+            print(f"[DRY RUN] Would send lease adjustment request to AI citizen {ai_username}")
+            print(f"[DRY RUN] Data package summary:")
+            print(f"  - Citizen: {data_package.get('ai_citizen_profile', {}).get('username', 'N/A')}") # Adjusted access
+            print(f"  - Lands: {len(data_package.get('lands', []))}")
+            print(f"  - Buildings Owned: {len(data_package.get('buildings_owned_by_ai', []))}")
+            print(f"  - Buildings on AI Lands: {len(data_package.get('buildings_on_ai_lands_potentially_others', []))}")
+            print(f"  - Net Income: {data_package.get('citizen_financial_summary', {}).get('financial', {}).get('net_income', 'N/A')}") # Adjusted access
+    
+    # Create admin notification with summary
+    if not dry_run and any(adjustments for adjustments in ai_lease_adjustments.values()):
+        create_admin_notification(tables, ai_lease_adjustments)
+    elif dry_run: # Ensure this log appears in dry_run too
+        print(f"[DRY RUN] Would create admin notification with lease adjustments: {ai_lease_adjustments}")
+    
+    print("AI lease adjustment process completed")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Adjust lease prices for AI-owned lands using Kinos AI.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run the script without making actual changes to Airtable or Kinos."
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify a Kinos model override (e.g., 'local', 'gpt-4-turbo')."
+    )
+    args = parser.parse_args()
+    
+    # Run the process
+    process_ai_lease_adjustments(dry_run=args.dry_run, kinos_model_override_arg=args.model)
+
+# The following definition of process_ai_lease_adjustments is the correct one and will be moved earlier.
+# This SEARCH/REPLACE block effectively deletes this misplaced definition.
+# The actual function content will be inserted where the old, simpler definition was.

@@ -16,9 +16,10 @@ from backend.engine.utils.activity_helpers import (
     # update_citizen_ducats, # Retiré d'ici
     create_notification_record,
     LogColors,
-    VENICE_TIMEZONE
+    VENICE_TIMEZONE,
+    update_citizen_ducats # Import from activity_helpers
 )
-from backend.engine.utils.financial_helpers import update_citizen_ducats # Ajouté depuis l'emplacement supposé
+# from backend.engine.utils.financial_helpers import update_citizen_ducats # Original incorrect import
 
 log = logging.getLogger(__name__)
 

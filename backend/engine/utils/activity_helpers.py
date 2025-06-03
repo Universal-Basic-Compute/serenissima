@@ -1255,3 +1255,78 @@ def create_activity_record(
         import traceback
         log.error(traceback.format_exc())
         return None
+
+def update_citizen_ducats(
+    tables: Dict[str, Table],
+    citizen_airtable_id: str,
+    amount_change: float,
+    reason: str,
+    related_asset_type: Optional[str] = None,
+    related_asset_id: Optional[str] = None
+) -> bool:
+    """
+    Updates a citizen's Ducats and creates a transaction record.
+    Returns True on success, False on failure.
+    """
+    if not citizen_airtable_id:
+        log.error(f"{LogColors.FAIL}Citizen Airtable ID is required to update ducats.{LogColors.ENDC}")
+        return False
+
+    try:
+        citizen_record = tables['citizens'].get(citizen_airtable_id)
+        if not citizen_record:
+            log.error(f"{LogColors.FAIL}Citizen with Airtable ID {citizen_airtable_id} not found. Cannot update ducats.{LogColors.ENDC}")
+            return False
+
+        current_ducats = float(citizen_record['fields'].get('Ducats', 0.0))
+        new_ducats = current_ducats + amount_change
+        
+        citizen_username = citizen_record['fields'].get('Username', citizen_airtable_id) # For logging and transaction
+
+        if new_ducats < 0 and amount_change < 0: # Check only if spending leads to negative
+            log.warning(f"{LogColors.WARNING}Citizen {citizen_username} has insufficient ducats ({current_ducats:.2f}) for transaction of {amount_change:.2f}. Required: {abs(amount_change):.2f}.{LogColors.ENDC}")
+            # Optionally, create a problem record here
+            return False # Transaction fails if it would result in negative balance from spending
+
+        tables['citizens'].update(citizen_airtable_id, {'Ducats': new_ducats})
+        log.info(f"{LogColors.OKGREEN}Updated ducats for citizen {citizen_username} (ID: {citizen_airtable_id}). Old: {current_ducats:.2f}, Change: {amount_change:.2f}, New: {new_ducats:.2f}. Reason: {reason}{LogColors.ENDC}")
+
+        # Create transaction record
+        transaction_type = "expense" if amount_change < 0 else "income"
+        if "fee" in reason.lower():
+            transaction_type = "fee_payment"
+        elif "wage" in reason.lower():
+            transaction_type = "wage_payment"
+        elif "rent" in reason.lower():
+            transaction_type = "rent_payment"
+        # Add more specific types as needed
+
+        transaction_payload = {
+            "Type": transaction_type,
+            "Price": abs(amount_change), # Price is always positive
+            "Notes": reason,
+            "CreatedAt": datetime.datetime.now(VENICE_TIMEZONE).isoformat(),
+            "ExecutedAt": datetime.datetime.now(VENICE_TIMEZONE).isoformat()
+        }
+
+        if amount_change < 0: # Citizen is paying
+            transaction_payload["Buyer"] = "system_entity" # Or a specific entity if known
+            transaction_payload["Seller"] = citizen_username
+        else: # Citizen is receiving
+            transaction_payload["Buyer"] = citizen_username
+            transaction_payload["Seller"] = "system_entity" # Or a specific entity if known
+        
+        if related_asset_type:
+            transaction_payload["AssetType"] = related_asset_type
+        if related_asset_id:
+            transaction_payload["Asset"] = related_asset_id
+            
+        tables['transactions'].create(transaction_payload)
+        log.info(f"{LogColors.OKGREEN}Created transaction record for {citizen_username} (Type: {transaction_type}, Amount: {abs(amount_change):.2f}).{LogColors.ENDC}")
+        
+        return True
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error updating ducats for citizen ID {citizen_airtable_id}: {e}{LogColors.ENDC}")
+        import traceback
+        log.error(traceback.format_exc())
+        return False
