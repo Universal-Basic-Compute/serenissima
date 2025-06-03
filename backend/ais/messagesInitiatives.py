@@ -472,6 +472,8 @@ def process_ai_message_initiatives(dry_run: bool = False, citizen1_arg: Optional
             print("Aucun citoyen IA trouvé, fin du processus.")
             return
 
+        random.shuffle(ai_citizens) # Randomiser l'ordre de traitement des citoyens IA
+
         for ai_citizen_record in ai_citizens:
             ai_username = ai_citizen_record.get("fields", {}).get("Username")
             if not ai_username:
