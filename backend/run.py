@@ -18,4 +18,4 @@ if __name__ == "__main__":
     print(f"Starting server on port {port}")
     
     # Utiliser la chaîne d'application correcte et le port de la variable d'environnement
-    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=port, reload=False)
+    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=port, reload=True)
