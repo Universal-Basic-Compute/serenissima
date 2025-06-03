@@ -276,7 +276,8 @@ def _handle_leave_venice(
     # For now, let's assume a simplified condition or delegate to a specific Forestieri handler.
     # This handler is high priority, so it should be relatively certain.
     # The existing process_forestieri_departure_check can be used here.
-    if not process_forestieri_departure_check(tables, citizen_record, now_utc_dt, transport_api_url):
+    # It requires: tables, citizen_record, now_utc_dt, citizen_position, transport_api_url, IDLE_ACTIVITY_DURATION_HOURS
+    if not process_forestieri_departure_check(tables, citizen_record, now_utc_dt, citizen_position, transport_api_url, IDLE_ACTIVITY_DURATION_HOURS):
         return None # Changed from False
 
     log.info(f"{LogColors.OKCYAN}[Départ] Forestiero {citizen_name}: Conditions de départ remplies.{LogColors.ENDC}")
