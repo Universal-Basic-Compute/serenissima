@@ -1878,7 +1878,9 @@ def dispatch_specific_activity_request(
         first_activity_of_chain = try_create_bid_on_land_chain(
             tables,
             citizen_record_full,
-            activity_parameters if activity_parameters is not None else {}
+            activity_parameters if activity_parameters is not None else {},
+            api_base_url, # Pass api_base_url
+            transport_api_url # Pass transport_api_url
         )
         if first_activity_of_chain and isinstance(first_activity_of_chain, dict) and 'fields' in first_activity_of_chain:
             return {"success": True, "message": f"Bid on land endeavor (originally {original_activity_type}) initiated for {citizen_name}. First activity: {first_activity_of_chain['fields'].get('Type', 'N/A')}.", "activity": first_activity_of_chain['fields']}

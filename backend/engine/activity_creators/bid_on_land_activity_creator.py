@@ -18,8 +18,10 @@ log = logging.getLogger(__name__)
 def try_create(
     tables: Dict[str, Any],
     citizen_record: Dict[str, Any],
-    details: Dict[str, Any]
-) -> Optional[Dict[str, Any]]: # Changed return type
+    details: Dict[str, Any],
+    api_base_url: str, # Added api_base_url
+    transport_api_url: str # Added transport_api_url
+) -> Optional[Dict[str, Any]]:
     """
     Create both activities in the bid_on_land chain at once:
     1. A goto_location activity for travel to the official location
@@ -124,7 +126,12 @@ def try_create(
         log.warning(f"Could not find land record for {land_id}. Assuming bid is for unlisted/state land, seller ConsiglioDeiDieci.")
 
     # Calculate path between buildings
-    path_data = find_path_between_buildings(from_building_record, to_building_record)
+    # Use find_path_between_buildings_or_coords for consistency, or ensure find_path_between_buildings takes api_base_url
+    # Assuming find_path_between_buildings is the intended direct helper here.
+    # It needs api_base_url and optionally transport_api_url.
+    # The helper find_path_between_buildings in activity_helpers.py already takes api_base_url.
+    # It does not take transport_api_url directly, it constructs it from api_base_url.
+    path_data = find_path_between_buildings(from_building_record, to_building_record, api_base_url)
     if not path_data or not path_data.get('path'):
         log.error(f"Could not find path between {from_building_id_determined} and {to_building_id}")
         return None
