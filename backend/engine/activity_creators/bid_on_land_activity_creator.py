@@ -28,13 +28,13 @@ def try_create(
     The 'sellerUsername' is determined from the land's current owner.
     """
     land_id = details.get('landId')
-    bid_amount = details.get('bidAmount')
+    bid_amount = details.get('bidAmount') or details.get('offerPrice') # Accept offerPrice as an alias
     # from_building_id is determined based on citizen's current position
     # to_building_id (targetOfficeBuildingId) will be determined below
     # sellerUsername will be determined from land_id's owner
     
     if not (land_id and bid_amount):
-        log.error(f"Missing required details for bid_on_land: landId or bidAmount. Provided details: {details}")
+        log.error(f"Missing required details for bid_on_land: landId or bidAmount (or offerPrice). Provided details: {details}")
         return None
 
     citizen_username = citizen_record['fields'].get('Username')
