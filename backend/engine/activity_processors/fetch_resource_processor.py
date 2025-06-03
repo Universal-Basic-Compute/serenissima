@@ -290,9 +290,18 @@ def process(
         # For simplicity now, if amount_to_purchase is 0 due to any of these, let's consider it a general fetch failure.
         if desired_amount_to_fetch > 0: # Only penalize if they actually wanted something
             if carrier_username and effective_buyer_username: # Carrier failed the buyer
-                update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_pickup", False, "nothing_to_pickup")
+                # Ensure carrier and buyer are different before updating trust
+                if carrier_username != effective_buyer_username:
+                    update_trust_score_for_activity(tables, carrier_username, effective_buyer_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_pickup", False, "nothing_to_pickup")
+                else:
+                    log.info(f"Skipping trust update for fetch_pickup: carrier ({carrier_username}) and effective_buyer ({effective_buyer_username}) are the same.")
+            
             if effective_buyer_username and effective_seller_username: # Buyer couldn't get from seller
-                update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_purchase", False, "nothing_to_pickup")
+                # Ensure buyer and seller are different before updating trust
+                if effective_buyer_username != effective_seller_username:
+                    update_trust_score_for_activity(tables, effective_buyer_username, effective_seller_username, TRUST_SCORE_FAILURE_SIMPLE, "fetch_purchase", False, "nothing_to_pickup")
+                else:
+                    log.info(f"Skipping trust update for fetch_purchase: effective_buyer ({effective_buyer_username}) and effective_seller ({effective_seller_username}) are the same.")
         
         # Note: In the new architecture, we don't create follow-up activities here.
         # The activity creator should have already created the entire chain.
