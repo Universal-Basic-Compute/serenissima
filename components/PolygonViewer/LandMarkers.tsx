@@ -108,7 +108,7 @@ export default function LandMarkers({
                 height: loadedSettings.height,
                 referenceScale: loadedSettings.referenceScale
               };
-              console.log(`CONVERTED old imageSettings for ${polygonData.polygon.id} from offset (x:${loadedSettings.x}, y:${loadedSettings.y}) to lat/lng (lat:${newLat.toFixed(6)}, lng:${newLng.toFixed(6)})`);
+              console.log(`CONVERTED old imageSettings for ${polygonData.polygon.id} from offset (x:${loadedSettings.x}, y:${loadedSettings.y}) to lat/lng (lat:${newLatLng.lat.toFixed(6)}, lng:${newLatLng.lng.toFixed(6)})`);
             } else {
               settings[polygonData.polygon.id] = loadedSettings;
             }
