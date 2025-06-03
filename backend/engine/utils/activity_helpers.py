@@ -816,7 +816,7 @@ def get_citizen_contracts(tables: Dict[str, Table], citizen_id: str) -> List[Dic
         log.error(f"{LogColors.FAIL}Error getting contracts for citizen {citizen_id}: {e}{LogColors.ENDC}")
         return []
 
-def get_idle_citizens(tables: Dict[str, Table]) -> List[Dict]:
+def get_idle_citizens(tables: Dict[str, Table], now_utc_for_check_override: Optional[datetime.datetime] = None) -> List[Dict]: # Ajout du paramètre
     """Fetch all citizens who are currently idle (no active activities)."""
     log.info(f"{LogColors.OKBLUE}Fetching idle citizens...{LogColors.ENDC}")
     
@@ -828,7 +828,11 @@ def get_idle_citizens(tables: Dict[str, Table]) -> List[Dict]:
         non_terminal_activities_formula = "NOT(OR({Status} = 'processed', {Status} = 'failed'))"
         all_potentially_active_activities = tables['activities'].all(formula=non_terminal_activities_formula)
         
-        now_utc_for_check = datetime.datetime.now(pytz.utc)
+        # Utiliser l'override si fourni, sinon l'heure actuelle réelle
+        now_utc_to_use = now_utc_for_check_override if now_utc_for_check_override else datetime.datetime.now(pytz.utc)
+        if now_utc_for_check_override:
+            log.info(f"{LogColors.WARNING}get_idle_citizens is using provided time for check: {now_utc_to_use.isoformat()}{LogColors.ENDC}")
+
         busy_citizen_usernames = set()
 
         for activity in all_potentially_active_activities:
@@ -849,7 +853,7 @@ def get_idle_citizens(tables: Dict[str, Table]) -> List[Dict]:
                     if end_date_dt.tzinfo is None: end_date_dt = pytz.utc.localize(end_date_dt)
                     
                     # Check if the current UTC time falls within the activity's StartDate and EndDate
-                    if start_date_dt <= now_utc_for_check <= end_date_dt:
+                    if start_date_dt <= now_utc_to_use <= end_date_dt: # Utiliser now_utc_to_use
                         busy_citizen_usernames.add(citizen_username_from_activity)
                 except Exception as e_parse_activity_dates:
                     log.error(f"{LogColors.FAIL}Error parsing dates for activity {activity.get('id', 'N/A')}: {e_parse_activity_dates}{LogColors.ENDC}")
@@ -860,7 +864,7 @@ def get_idle_citizens(tables: Dict[str, Table]) -> List[Dict]:
             if username and username not in busy_citizen_usernames:
                 idle_citizens.append(citizen_record)
         
-        log.info(f"{LogColors.OKGREEN}Found {len(idle_citizens)} idle citizens (after Python date filtering of non-terminal activities).{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}Found {len(idle_citizens)} idle citizens (using time: {now_utc_to_use.isoformat()}).{LogColors.ENDC}")
         return idle_citizens
     except Exception as e:
         log.error(f"{LogColors.FAIL}Error fetching idle citizens: {e}{LogColors.ENDC}")

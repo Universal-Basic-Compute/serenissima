@@ -219,25 +219,26 @@ def create_activities(target_citizen_username: Optional[str] = None, forced_hour
 
             # Check if this citizen is idle
             # VENICE_TIMEZONE is imported
-            now_venice_for_target_check = datetime.datetime.now(VENICE_TIMEZONE)
-            now_iso_utc_for_target = now_venice_for_target_check.astimezone(pytz.UTC).isoformat()
+            # now_venice_for_target_check = datetime.datetime.now(VENICE_TIMEZONE) # NE PAS UTILISER L'HEURE REELLE ICI
+            # now_iso_utc_for_target = now_venice_for_target_check.astimezone(pytz.UTC).isoformat()
+            now_iso_utc_for_target = now_utc_dt.isoformat() # <<<< UTILISER now_utc_dt (potentiellement forcé)
             activity_formula = f"AND({{Citizen}}='{_escape_airtable_value(target_citizen_username)}', {{StartDate}} <= '{now_iso_utc_for_target}', {{EndDate}} >= '{now_iso_utc_for_target}')"
             active_activities = tables['activities'].all(formula=activity_formula, max_records=1)
             
             if active_activities:
-                log.info(f"{LogColors.OKBLUE}Citizen '{target_citizen_username}' already has an active activity. No new activity will be created.{LogColors.ENDC}")
+                log.info(f"{LogColors.OKBLUE}Citizen '{target_citizen_username}' already has an active activity (checked with time {now_iso_utc_for_target}). No new activity will be created.{LogColors.ENDC}")
                 return # Citizen is busy
             else:
-                log.info(f"{LogColors.OKGREEN}Citizen '{target_citizen_username}' is idle. Proceeding to create activity.{LogColors.ENDC}")
+                log.info(f"{LogColors.OKGREEN}Citizen '{target_citizen_username}' is idle (checked with time {now_iso_utc_for_target}). Proceeding to create activity.{LogColors.ENDC}")
                 citizens_to_process_list = [target_citizen_record]
         except Exception as e:
             log.error(f"{LogColors.FAIL}Error fetching or checking status for citizen '{target_citizen_username}': {e}{LogColors.ENDC}")
             return
     else:
-        citizens_to_process_list = get_idle_citizens(tables) # Existing logic for all idle citizens
+        citizens_to_process_list = get_idle_citizens(tables, now_utc_dt) # <<<< Passer now_utc_dt ici
     
     if not citizens_to_process_list:
-        log.info(f"{LogColors.OKBLUE}No idle citizens to process.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKBLUE}No idle citizens to process (checked with time {now_utc_dt.isoformat()}).{LogColors.ENDC}")
         return
     
     # Check if it's nighttime in Venice (for general logging, less critical for core logic now)
