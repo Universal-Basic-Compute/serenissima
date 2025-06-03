@@ -76,6 +76,7 @@ from dotenv import load_dotenv
 # Import shared utilities
 from backend.engine.utils.activity_helpers import (
     get_building_record,
+    dateutil_parser, # Ensure dateutil_parser is imported if not already
     get_citizen_record,
     get_contract_record,
     get_building_current_storage,
@@ -441,6 +442,13 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
     # Pass the forced_utc_datetime_for_check to process_building_arrivals as well
     process_building_arrivals(tables, dry_run, forced_utc_datetime_override=forced_utc_datetime_for_check)
 
+    # Handle activity interruptions before processing concluded activities
+    if not dry_run: # Interruptions should only happen in a live run
+        log.info(f"{LogColors.OKCYAN}Checking for activity interruptions...{LogColors.ENDC}")
+        handle_activity_interruptions(tables, forced_utc_datetime_for_check)
+    else:
+        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for activity interruptions.{LogColors.ENDC}")
+
     # Fetch definitions once
     building_type_defs = get_building_type_definitions_from_api()
     resource_defs = get_resource_definitions_from_api()
@@ -728,6 +736,79 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
 
     summary_color = LogColors.OKGREEN if failed_count == 0 else LogColors.WARNING if processed_count > 0 else LogColors.FAIL
     log.info(f"{summary_color}Process Activities script finished. Processed: {processed_count}, Failed: {failed_count}.{LogColors.ENDC}")
+
+
+def handle_activity_interruptions(tables: Dict[str, Table], now_utc_for_check_override: Optional[datetime] = None):
+    """
+    Checks for overlapping activities and marks 'idle' or 'rest' activities as 'interrupted'
+    if another higher-priority activity is active for the same citizen.
+    """
+    now_utc_to_use = now_utc_for_check_override if now_utc_for_check_override else datetime.now(timezone.utc)
+    if now_utc_for_check_override:
+        log.info(f"{LogColors.WARNING}handle_activity_interruptions is using provided time for check: {now_utc_to_use.isoformat()}{LogColors.ENDC}")
+
+    try:
+        all_citizens = tables['citizens'].all(fields=['Username']) # Only need Username
+    except Exception as e_fetch_citizens:
+        log.error(f"{LogColors.FAIL}Failed to fetch citizens for interruption check: {e_fetch_citizens}{LogColors.ENDC}")
+        return
+
+    for citizen_data in all_citizens:
+        citizen_username = citizen_data['fields'].get('Username')
+        if not citizen_username:
+            continue
+
+        # Fetch all 'created' or 'in_progress' activities for this citizen
+        formula = f"AND({{Citizen}}='{_escape_airtable_value(citizen_username)}', OR({{Status}}='created', {{Status}}='in_progress'))"
+        try:
+            citizen_activities = tables['activities'].all(formula=formula)
+        except Exception as e_fetch_activities:
+            log.error(f"{LogColors.FAIL}Failed to fetch activities for citizen {citizen_username} during interruption check: {e_fetch_activities}{LogColors.ENDC}")
+            continue
+
+        currently_active_for_citizen: List[Dict] = []
+        for activity in citizen_activities:
+            start_date_str = activity['fields'].get('StartDate')
+            end_date_str = activity['fields'].get('EndDate')
+
+            if start_date_str and end_date_str:
+                try:
+                    start_date_dt = dateutil_parser.isoparse(start_date_str)
+                    end_date_dt = dateutil_parser.isoparse(end_date_str)
+
+                    if start_date_dt.tzinfo is None: start_date_dt = pytz.utc.localize(start_date_dt)
+                    if end_date_dt.tzinfo is None: end_date_dt = pytz.utc.localize(end_date_dt)
+                    
+                    if start_date_dt <= now_utc_to_use <= end_date_dt:
+                        currently_active_for_citizen.append(activity)
+                except Exception as e_parse_dates:
+                    log.error(f"{LogColors.FAIL}Error parsing dates for activity {activity['id']} for citizen {citizen_username}: {e_parse_dates}{LogColors.ENDC}")
+        
+        if len(currently_active_for_citizen) > 1:
+            # We have multiple activities active at the same time for this citizen
+            low_priority_tasks = []
+            other_tasks = []
+            for active_task in currently_active_for_citizen:
+                task_type = active_task['fields'].get('Type', '').lower()
+                if task_type in ['idle', 'rest']:
+                    low_priority_tasks.append(active_task)
+                else:
+                    other_tasks.append(active_task)
+            
+            if low_priority_tasks and other_tasks:
+                # If there's at least one low-priority task and at least one other task active simultaneously
+                for lp_task in low_priority_tasks:
+                    lp_task_id_airtable = lp_task['id']
+                    lp_task_guid = lp_task['fields'].get('ActivityId', lp_task_id_airtable)
+                    lp_task_type = lp_task['fields'].get('Type')
+                    
+                    # Check if it's not already interrupted to avoid redundant updates
+                    if lp_task['fields'].get('Status') != 'interrupted':
+                        log.info(f"{LogColors.WARNING}Citizen {citizen_username} has overlapping activities. Interrupting low-priority task '{lp_task_type}' (ID: {lp_task_guid}). Other active tasks: {[ot['fields'].get('Type') for ot in other_tasks]}.{LogColors.ENDC}")
+                        update_activity_status(tables, lp_task_id_airtable, "interrupted")
+                    else:
+                        log.debug(f"Low-priority task '{lp_task_type}' (ID: {lp_task_guid}) for citizen {citizen_username} is already interrupted. Skipping.")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process concluded activities in La Serenissima.")
