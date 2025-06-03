@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, MouseEvent as ReactMouseEvent
 import { landService } from '@/lib/services/LandService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
+import { CoordinateService } from '@/lib/services/CoordinateService';
 
 interface LandMarkersProps {
   isVisible: boolean;
@@ -68,23 +69,6 @@ export default function LandMarkers({
   } | null>(null);
   const dragStartRef = useRef<{x: number, y: number}>({ x: 0, y: 0 }); // For original drag logic
   const positionRef = useRef<{x: number, y: number}>({ x: 0, y: 0 }); // For original drag logic
-
-  // Coordinate transformation utilities
-  const worldToScreenX = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasWidth: number): number => {
-    return mapWorldX * currentScale + currentCanvasWidth / 2 + currentMapTransformOffset.x;
-  };
-
-  const worldToScreenY = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasHeight: number): number => {
-    return (-mapWorldY) * currentScale * 1.4 + currentCanvasHeight / 2 + currentMapTransformOffset.y; // Assuming 1.4 factor for Y
-  };
-
-  const screenToWorldX = (screenX: number, screenY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasWidth: number): number => {
-    return (screenX - currentCanvasWidth / 2 - currentMapTransformOffset.x) / currentScale;
-  };
-
-  const screenToWorldY = (screenX: number, screenY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasHeight: number): number => {
-    return -(screenY - currentCanvasHeight / 2 - currentMapTransformOffset.y) / (currentScale * 1.4); // Assuming 1.4 factor for Y
-  };
 
   // Load land images and settings when polygons change
   useEffect(() => {
@@ -213,12 +197,11 @@ export default function LandMarkers({
 
     if (currentSettings && typeof currentSettings.lat === 'number' && typeof currentSettings.lng === 'number') {
       // New format: lat, lng are absolute world coordinates for the marker's center
-      const markerMapWorldX = (currentSettings.lng - 12.3326) * 20000;
-      // Supprimer le facteur 0.7 pour utiliser la coordonnée Y du monde réelle du marqueur
-      const markerMapWorldY = (currentSettings.lat - 45.4371) * 20000; 
+      const markerWorldCoords = CoordinateService.latLngToWorld(currentSettings.lat, currentSettings.lng);
+      const markerScreenCoords = CoordinateService.worldToScreen(markerWorldCoords.x, markerWorldCoords.y, scale, mapTransformOffset, canvasWidth, canvasHeight);
       
-      initialScreenX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-      initialScreenY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+      initialScreenX = markerScreenCoords.x;
+      initialScreenY = markerScreenCoords.y;
     } else {
       // Fallback to polygon's screen center (passed as centerX, centerY to this handler)
       // This might happen if settings are missing or in an unexpected old format not yet converted
@@ -259,8 +242,9 @@ export default function LandMarkers({
       if (currentSettings && typeof currentSettings.x === 'number' && typeof currentSettings.y === 'number') {
         const markerMapWorldX = pWorldMapCenterX + currentSettings.x;
         const markerMapWorldY = pWorldMapCenterY + currentSettings.y;
-        currentScreenX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-        currentScreenY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+        const markerScreenCoords = CoordinateService.worldToScreen(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+        currentScreenX = markerScreenCoords.x;
+        currentScreenY = markerScreenCoords.y;
       } else {
         currentScreenX = polygonData.centerX;
         currentScreenY = polygonData.centerY;
@@ -368,17 +352,8 @@ export default function LandMarkers({
     const baseHeightToStore = currentSettings.height !== undefined ? currentSettings.height : 75;
     const refScaleToStore = currentSettings.referenceScale !== undefined ? currentSettings.referenceScale : scale;
 
-    // Convert new screen coordinates (newX, newY) to absolute world coordinates
-    const newMarkerWorldX = screenToWorldX(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-    // newMarkerWorldY_projected_for_screen est la coordonnée Y du monde qui correspond à newY à l'écran,
-    // en tenant compte du facteur 1.4 dans screenToWorldY.
-    const newMarkerWorldY_projected_for_screen = screenToWorldY(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-    // newMarkerWorldY_actual est maintenant la même chose, car nous ne modifions plus par 0.7.
-    const newMarkerWorldY_actual = newMarkerWorldY_projected_for_screen;
-
-    // Convert absolute actual world coordinates to lat/lng
-    const newLng = newMarkerWorldX / 20000 + 12.3326;
-    const newLat = newMarkerWorldY_actual / 20000 + 45.4371;
+    // Convert new screen coordinates (newX, newY) to absolute lat/lng
+    const newLatLng = CoordinateService.screenToLatLng(newX, newY, scale, mapTransformOffset, canvasWidth, canvasHeight);
       
     setImageSettings(prev => ({
       ...prev,
@@ -388,8 +363,8 @@ export default function LandMarkers({
         width: baseWidthToStore,
         height: baseHeightToStore,
         referenceScale: refScaleToStore,
-        lat: newLat, // Store new absolute latitude
-        lng: newLng  // Store new absolute longitude
+        lat: newLatLng.lat, // Store new absolute latitude
+        lng: newLatLng.lng  // Store new absolute longitude
         // x and y (offsets) are no longer the primary way to store position, but might be kept if currentSettings had them
       }
     }));
@@ -467,15 +442,8 @@ export default function LandMarkers({
       const newScreenCenterX = newX + newWidth / 2;
       const newScreenCenterY = newY + newHeight / 2;
 
-      // Convert new screen center to absolute world coordinates
-      const resizedMarkerWorldX = screenToWorldX(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-      // resizedMarkerWorldY_projected_for_screen est la coordonnée Y du monde qui correspond à newScreenCenterY.
-      const resizedMarkerWorldY_projected_for_screen = screenToWorldY(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-      const resizedMarkerWorldY_actual = resizedMarkerWorldY_projected_for_screen; // Supprimer l'inversion du facteur 0.7
-
-      // Convert absolute actual world coordinates to lat/lng
-      const newLat = resizedMarkerWorldY_actual / 20000 + 45.4371;
-      const newLng = resizedMarkerWorldX / 20000 + 12.3326;
+      // Convert new screen center to absolute lat/lng
+      const newLatLng = CoordinateService.screenToLatLng(newScreenCenterX, newScreenCenterY, scale, mapTransformOffset, canvasWidth, canvasHeight);
       
       // For width/height, we store the "base" dimensions, and referenceScale is the current scale.
       // newWidth and newHeight are screen dimensions at the current scale.
@@ -493,8 +461,8 @@ export default function LandMarkers({
           width: baseWidthToStore,
           height: baseHeightToStore,
           referenceScale: refScaleToStore, // Current map scale is the reference for these new base dimensions
-          lat: newLat, // Store new absolute latitude
-          lng: newLng  // Store new absolute longitude
+          lat: newLatLng.lat, // Store new absolute latitude
+          lng: newLatLng.lng  // Store new absolute longitude
           // x and y (offsets) are no longer the primary way to store position
         }
       }));
@@ -711,12 +679,10 @@ export default function LandMarkers({
 
         // Use new lat/lng settings if available
         if (settings && typeof settings.lat === 'number' && typeof settings.lng === 'number') {
-          const markerMapWorldX = (settings.lng - 12.3326) * 20000;
-          // Supprimer le facteur 0.7 pour utiliser la coordonnée Y du monde réelle du marqueur
-          const markerMapWorldY = (settings.lat - 45.4371) * 20000;
-
-          finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-          finalY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+          const markerWorldCoords = CoordinateService.latLngToWorld(settings.lat, settings.lng);
+          const markerScreenCoords = CoordinateService.worldToScreen(markerWorldCoords.x, markerWorldCoords.y, scale, mapTransformOffset, canvasWidth, canvasHeight);
+          finalX = markerScreenCoords.x;
+          finalY = markerScreenCoords.y;
         } else {
           // Fallback if no lat/lng settings (e.g., old data not yet converted or no settings at all)
           // Use polygon's screen center.
