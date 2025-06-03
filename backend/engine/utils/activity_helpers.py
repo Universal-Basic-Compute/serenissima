@@ -1303,13 +1303,35 @@ def create_activity_record(
     payload["CreatedAt"] = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
 
     try:
-        log.info(f"{LogColors.OKBLUE}Creating activity: {activity_guid} for {citizen_username} of type {activity_type}{LogColors.ENDC}")
-        log.debug(f"Activity payload: {json.dumps(payload, indent=2)}")
-        new_activity_record = tables['activities'].create(payload)
-        log.info(f"{LogColors.OKGREEN}Successfully created activity {activity_guid} (Airtable ID: {new_activity_record['id']}).{LogColors.ENDC}")
-        return new_activity_record
+        # Check if an activity with this ActivityId already exists
+        existing_activity_formula = f"{{ActivityId}}='{_escape_airtable_value(activity_guid)}'"
+        existing_records = tables['activities'].all(formula=existing_activity_formula, max_records=1)
+
+        if existing_records:
+            existing_record = existing_records[0]
+            log.info(f"{LogColors.OKBLUE}Activity {activity_guid} already exists (Airtable ID: {existing_record['id']}). Updating it for {citizen_username} of type {activity_type}.{LogColors.ENDC}")
+            
+            # Prepare update payload: remove ActivityId and CreatedAt, as these should not change.
+            # UpdatedAt is handled automatically by Airtable.
+            update_payload = payload.copy()
+            del update_payload["ActivityId"] # Cannot update the primary field this way, and it's for matching
+            if "CreatedAt" in update_payload:
+                 del update_payload["CreatedAt"] # Do not change original creation timestamp
+
+            log.debug(f"Update payload: {json.dumps(update_payload, indent=2)}")
+            updated_activity_record = tables['activities'].update(existing_record['id'], update_payload)
+            log.info(f"{LogColors.OKGREEN}Successfully updated activity {activity_guid} (Airtable ID: {updated_activity_record['id']}).{LogColors.ENDC}")
+            return updated_activity_record
+        else:
+            # Create new activity if it doesn't exist
+            log.info(f"{LogColors.OKBLUE}Creating new activity: {activity_guid} for {citizen_username} of type {activity_type}{LogColors.ENDC}")
+            log.debug(f"Activity payload: {json.dumps(payload, indent=2)}")
+            new_activity_record = tables['activities'].create(payload)
+            log.info(f"{LogColors.OKGREEN}Successfully created activity {activity_guid} (Airtable ID: {new_activity_record['id']}).{LogColors.ENDC}")
+            return new_activity_record
+            
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error creating activity {activity_guid} for {citizen_username}: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error creating/updating activity {activity_guid} for {citizen_username}: {e}{LogColors.ENDC}")
         import traceback
         log.error(traceback.format_exc())
         return None
