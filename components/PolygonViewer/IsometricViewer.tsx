@@ -2905,7 +2905,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
       selectedPolygonId,
       hoveredPolygonId: currentHoverState.type === 'polygon' ? currentHoverState.id : null,
       fillOpacity: 0, // Set opacity to 0 to make polygons invisible
-      strokeOpacity: 0.5 // Keep borders visible but more subtle
+      strokeOpacity: 0 // Set stroke opacity to 0 to hide polygon borders
     });
     
     // We don't need to draw land images twice - the first pass above is sufficient
