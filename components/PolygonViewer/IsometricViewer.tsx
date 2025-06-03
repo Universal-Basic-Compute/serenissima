@@ -4072,7 +4072,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
   // Helper function to darken a color (This is the duplicate, it will be removed)
 
   return (
-    <div ref={wrapperRef} className="w-screen h-screen"> {/* Add ref to the main div */}
+    <div ref={wrapperRef} className="w-screen h-screen select-none"> {/* Add select-none and ref to the main div */}
       <canvas 
         ref={canvasRef} 
         className="w-full h-full"
