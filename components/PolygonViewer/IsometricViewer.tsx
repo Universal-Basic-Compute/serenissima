@@ -19,6 +19,7 @@ import BuildingMarkers2 from './BuildingMarkers2'; // Import the new component
 import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
 import BuildingMarkers from './BuildingMarkers';
+import LandMarkers from './LandMarkers'; // Import LandMarkers
 import ContractMarkers from '@/components/PolygonViewer/ContractMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 import TransportDebugPanel from '../UI/TransportDebugPanel';
@@ -4067,7 +4068,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
       
       {/* Land Markers 2 - Display land images (simplified version) */}
       <LandMarkers2
-        isVisible={true}
+        isVisible={false}
         rawPolygons={polygons} // Passer les données brutes des polygones
         polygonsToRender={polygonsToRender}
         isNight={isNight}
@@ -4084,9 +4085,21 @@ const darkenColor = (colorStr: string, percent: number): string => {
         offset={offset}
         canvasWidth={canvasDims.width}
         canvasHeight={canvasDims.height}
-        isVisible={true} // Assuming it should always be visible when IsometricViewer is
+        isVisible={false} // Assuming it should always be visible when IsometricViewer is
       />
       
+      {/* Land Markers - Editable land images */}
+      <LandMarkers
+        isVisible={true}
+        polygonsToRender={polygonsToRender}
+        isNight={isNight}
+        scale={scale}
+        activeView={activeView}
+        canvasWidth={canvasDims.width}
+        canvasHeight={canvasDims.height}
+        mapTransformOffset={offset}
+      />
+
       {/* Coat of Arms Markers - Affiche les blasons par-dessus le canvas */}
       <CoatOfArmsMarkers
         isVisible={activeView === 'land'}
