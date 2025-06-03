@@ -106,20 +106,20 @@ export class CitizenService {
     
     // Base colors for different social classes
     if (baseClass.includes('nobili')) {
-      // Gold/yellow for nobility
-      return 'rgba(218, 165, 32, 0.8)';
+      // Reddish for nobility
+      return 'rgba(178, 34, 34, 0.8)';
     } else if (baseClass.includes('cittadini')) {
-      // Blue for citizens
+      // Blue for citizens (unchanged)
       return 'rgba(70, 130, 180, 0.8)';
     } else if (baseClass.includes('popolani')) {
-      // Brown/amber for common people
-      return 'rgba(205, 133, 63, 0.8)';
+      // Yellowish for common people
+      return 'rgba(255, 215, 0, 0.8)';
     } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
-      // Gray for laborers
+      // Greyish for laborers
       return 'rgba(128, 128, 128, 0.8)';
     } else if (baseClass.includes('forestieri')) {
-      // Burgundy for Forestieri
-      return 'rgba(128, 0, 32, 0.8)';
+      // Greenish for Forestieri
+      return 'rgba(60, 179, 113, 0.8)';
     }
     
     // Default color if social class is unknown or not matched
