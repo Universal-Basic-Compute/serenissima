@@ -13,6 +13,7 @@ export async function POST(request: Request) {
   let rawBody: any; // Declare rawBody here to make it accessible in the catch block
   try {
     rawBody = await request.json(); // Assign here
+    console.log(`[API /activities/try-create] Raw request body:`, JSON.stringify(rawBody, null, 2)); // Log the raw request body
     const validationResult = TryCreateActivityRequestSchema.safeParse(rawBody);
 
     if (!validationResult.success) {
