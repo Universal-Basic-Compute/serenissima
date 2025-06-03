@@ -619,7 +619,7 @@ def _handle_check_business_status(
                     checked_at_dt = pytz.UTC.localize(checked_at_dt)
                 
                 # Check if last check was within the last 23 hours (giving a 1-hour buffer before 24h penalty)
-                if (now_utc_dt - checked_at_dt) < datetime.timedelta(hours=23):
+                if (now_utc_dt - checked_at_dt) < timedelta(hours=23):
                     needs_check = False
             except ValueError:
                 log.warning(f"{LogColors.WARNING}[Vérif. Business] Format de date invalide pour CheckedAt ({checked_at_str}) pour {business_name_display}. Supposition : vérification nécessaire.{LogColors.ENDC}")
