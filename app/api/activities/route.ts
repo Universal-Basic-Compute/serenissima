@@ -56,8 +56,11 @@ export async function GET(request: Request) {
     
     // Handle specific hasPath filter
     if (hasPath) {
-      filterByFormulaParts.push(`NOT({Path} = BLANK())`);
-      loggableFilters['hasPath'] = 'true';
+      // Exclude 'idle' and 'rest' activities at the API level
+      // The client will then filter for activities that have a path.
+      filterByFormulaParts.push(`{Type} != 'idle'`);
+      filterByFormulaParts.push(`{Type} != 'rest'`);
+      loggableFilters['hasPath_excludedTypes'] = 'idle, rest';
     }
 
     // Handle specific timeRange or ongoing filters
