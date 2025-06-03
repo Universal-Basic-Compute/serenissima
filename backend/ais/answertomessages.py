@@ -251,6 +251,29 @@ def _get_problems_data(tables: Dict[str, Table], username1: str, username2: str,
         print(f"Erreur lors de la récupération des problèmes pour {username1} ou {username2} via API: {e}")
         return []
 
+def _get_data_package_for_citizen(username: str) -> Optional[Dict]:
+    """Fetches the data package for a citizen using the Next.js API."""
+    try:
+        # Use BASE_URL as defined in this file
+        api_url = f"{BASE_URL}/api/get-data-package?citizenUsername={username}"
+        # Using print as per existing style in this script for ais module
+        print(f"  Fetching data package for {username} from {api_url}...")
+        response = requests.get(api_url, timeout=45) 
+        response.raise_for_status()
+        
+        data = response.json()
+        print(f"  Successfully fetched data package for {username}.")
+        return data
+    except requests.exceptions.RequestException as e:
+        print(f"  {LogColors.FAIL}API Error fetching data package for {username}: {e}{LogColors.ENDC}")
+        return None
+    except json.JSONDecodeError:
+        print(f"  {LogColors.FAIL}Failed to decode JSON response for data package of {username}. Response: {response.text[:200]}{LogColors.ENDC}")
+        return None
+    except Exception as e:
+        print(f"  {LogColors.FAIL}Unexpected error fetching data package for {username}: {e}{LogColors.ENDC}")
+        return None
+
 def get_kinos_api_key() -> str:
     """Get the Kinos API key from environment variables."""
     load_dotenv()
