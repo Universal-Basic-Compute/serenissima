@@ -856,8 +856,8 @@ def get_idle_citizens(tables: Dict[str, Table], now_utc_for_check_override: Opti
                     # The previous check (start_date_dt <= now_utc_to_use <= end_date_dt) was too narrow,
                     # as it only considered activities active *right now*.
                     busy_citizen_usernames.add(citizen_username_from_activity)
-                # except Exception as e_parse_activity_dates: # Date parsing is no longer strictly needed here for this check
-                    # log.error(f"{LogColors.FAIL}Error parsing dates for activity {activity.get('id', 'N/A')}: {e_parse_activity_dates}{LogColors.ENDC}")
+                except Exception as e_parse_activity_dates: # Date parsing is no longer strictly needed here for this check
+                    log.error(f"{LogColors.FAIL}Error parsing dates for activity {activity.get('id', 'N/A')}: {e_parse_activity_dates}{LogColors.ENDC}")
         
         idle_citizens = []
         for citizen_record in all_citizens:
