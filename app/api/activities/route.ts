@@ -41,7 +41,8 @@ export async function GET(request: Request) {
     let filterByFormulaParts: string[] = [];
     const loggableFilters: Record<string, string> = {};
     // Reserved parameters are those handled by specific logic or Airtable's select options directly
-    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection', 'citizenId', 'hasPath', 'ongoing', 'timeRange'];
+    // Ensure all are lowercase for case-insensitive matching with key.toLowerCase()
+    const reservedParams = ['limit', 'offset', 'sortfield', 'sortdirection', 'citizenid', 'haspath', 'ongoing', 'timerange'];
     
     // Handle specific citizenId filter
     if (citizenIds.length > 0) {
