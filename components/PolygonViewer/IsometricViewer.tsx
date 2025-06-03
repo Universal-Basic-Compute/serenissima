@@ -38,6 +38,7 @@ interface IsometricViewerProps {
 type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
 export default function IsometricViewer({ activeView, setActiveView, fullWaterGraphData }: IsometricViewerProps) { // Add setActiveView to destructuring
+  const wrapperRef = useRef<HTMLDivElement>(null); // Ref for the main wrapper div
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -2014,6 +2015,8 @@ number => {
 
   // Handle mouse wheel for zooming
   useEffect(() => {
+    const currentWrapper = wrapperRef.current; // Use the wrapper ref
+
     // Create a throttled version of the zoom handler
     const handleWheel = throttle((e: WheelEvent) => {
       e.preventDefault();
@@ -2037,19 +2040,18 @@ number => {
       });
     }, 50); // Throttle to 50ms (20 updates per second max)
     
-    const canvas = canvasRef.current;
-    if (canvas) {
-      canvas.addEventListener('wheel', handleWheel);
+    if (currentWrapper) { // Attach listener to the wrapper div
+      currentWrapper.addEventListener('wheel', handleWheel);
     }
     
     return () => {
-      if (canvas) {
-        canvas.removeEventListener('wheel', handleWheel);
+      if (currentWrapper) { // Clean up listener from the wrapper div
+        currentWrapper.removeEventListener('wheel', handleWheel);
       }
       // Clean up the throttled function
       handleWheel.cancel();
     };
-  }, []);
+  }, []); // Empty dependency array, runs once
 
   // Handle mouse events for panning
   useEffect(() => {
@@ -4060,7 +4062,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
   // Helper function to darken a color (This is the duplicate, it will be removed)
 
   return (
-    <div className="w-screen h-screen">
+    <div ref={wrapperRef} className="w-screen h-screen"> {/* Add ref to the main div */}
       <canvas 
         ref={canvasRef} 
         className="w-full h-full"
