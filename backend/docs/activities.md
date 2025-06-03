@@ -343,8 +343,7 @@ enregistrer la modification du loyer, potentiellement en payant des frais d'enre
     *   **Paramètres Attendus (pour `activityParameters` dans `try-create`)**:
         *   `buildingIdToBidOn` (string): ID personnalisé du bâtiment sur lequel enchérir.
         *   `bidAmount` (number): Montant de l'offre en Ducats.
-        *   `fromBuildingId` (string): ID personnalisé du bâtiment où le citoyen se trouve actuellement (pour le premier déplacement).
-        *   `targetOfficeBuildingId` (string, optionnel): ID personnalisé du bâtiment officiel (ex: `courthouse`, `town_hall`) où l'offre sera soumise. Si non fourni, un bâtiment officiel par défaut sera recherché.
+        *   `targetOfficeBuildingId` (string, optionnel): ID personnalisé du bâtiment officiel (ex: `courthouse`, `town_hall`) où l'offre sera soumise. Si non fourni, un bâtiment officiel par défaut sera recherché. Le bâtiment de départ (`fromBuildingId`) est déterminé automatiquement par le moteur.
         *   `notes` (string, optionnel): Notes pour l'offre.
 
 ### Commerce et Contrats
