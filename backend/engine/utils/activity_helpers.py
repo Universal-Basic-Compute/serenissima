@@ -852,19 +852,24 @@ def get_idle_citizens(tables: Dict[str, Table], now_utc_for_check_override: Opti
                     if start_date_dt.tzinfo is None: start_date_dt = pytz.utc.localize(start_date_dt)
                     if end_date_dt.tzinfo is None: end_date_dt = pytz.utc.localize(end_date_dt)
                     
-                    # Check if the current UTC time falls within the activity's StartDate and EndDate
-                    if start_date_dt <= now_utc_to_use <= end_date_dt: # Utiliser now_utc_to_use
-                        busy_citizen_usernames.add(citizen_username_from_activity)
-                except Exception as e_parse_activity_dates:
-                    log.error(f"{LogColors.FAIL}Error parsing dates for activity {activity.get('id', 'N/A')}: {e_parse_activity_dates}{LogColors.ENDC}")
+                    # If an activity exists with status 'created' or 'in_progress', the citizen is considered busy.
+                    # The previous check (start_date_dt <= now_utc_to_use <= end_date_dt) was too narrow,
+                    # as it only considered activities active *right now*.
+                    busy_citizen_usernames.add(citizen_username_from_activity)
+                # except Exception as e_parse_activity_dates: # Date parsing is no longer strictly needed here for this check
+                    # log.error(f"{LogColors.FAIL}Error parsing dates for activity {activity.get('id', 'N/A')}: {e_parse_activity_dates}{LogColors.ENDC}")
         
         idle_citizens = []
         for citizen_record in all_citizens:
             username = citizen_record['fields'].get('Username')
+            # Check if 'IsAI' is true for the citizen record before adding to idle_citizens
+            # This ensures only AI citizens are processed by createActivities if that's the intent.
+            # However, get_idle_citizens is generic. The filtering by IsAI should happen in the caller if needed.
+            # For now, we keep the original logic: if a citizen has no non-terminal activities, they are idle.
             if username and username not in busy_citizen_usernames:
                 idle_citizens.append(citizen_record)
         
-        log.info(f"{LogColors.OKGREEN}Found {len(idle_citizens)} idle citizens (using time: {now_utc_to_use.isoformat()}).{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}Found {len(idle_citizens)} idle citizens (citizens with no 'created' or 'in_progress' activities, using time: {now_utc_to_use.isoformat()}).{LogColors.ENDC}")
         return idle_citizens
     except Exception as e:
         log.error(f"{LogColors.FAIL}Error fetching idle citizens: {e}{LogColors.ENDC}")

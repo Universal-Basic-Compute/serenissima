@@ -221,15 +221,16 @@ def create_activities(target_citizen_username: Optional[str] = None, forced_hour
             # VENICE_TIMEZONE is imported
             # now_venice_for_target_check = datetime.datetime.now(VENICE_TIMEZONE) # NE PAS UTILISER L'HEURE REELLE ICI
             # now_iso_utc_for_target = now_venice_for_target_check.astimezone(pytz.UTC).isoformat()
-            now_iso_utc_for_target = now_utc_dt.isoformat() # <<<< UTILISER now_utc_dt (potentiellement forcé)
-            activity_formula = f"AND({{Citizen}}='{_escape_airtable_value(target_citizen_username)}', {{StartDate}} <= '{now_iso_utc_for_target}', {{EndDate}} >= '{now_iso_utc_for_target}')"
-            active_activities = tables['activities'].all(formula=activity_formula, max_records=1)
+            # now_iso_utc_for_target = now_utc_dt.isoformat() # <<<< UTILISER now_utc_dt (potentiellement forcé)
+            # Stricter check: if citizen has ANY activity that is 'created' or 'in_progress', they are not idle.
+            activity_formula = f"AND({{Citizen}}='{_escape_airtable_value(target_citizen_username)}', NOT(OR({{Status}} = 'processed', {{Status}} = 'failed')))"
+            existing_activities = tables['activities'].all(formula=activity_formula, max_records=1)
             
-            if active_activities:
-                log.info(f"{LogColors.OKBLUE}Citizen '{target_citizen_username}' already has an active activity (checked with time {now_iso_utc_for_target}). No new activity will be created.{LogColors.ENDC}")
+            if existing_activities:
+                log.info(f"{LogColors.OKBLUE}Citizen '{target_citizen_username}' already has a planned or ongoing activity. No new activity will be created by the general scheduler.{LogColors.ENDC}")
                 return # Citizen is busy
             else:
-                log.info(f"{LogColors.OKGREEN}Citizen '{target_citizen_username}' is idle (checked with time {now_iso_utc_for_target}). Proceeding to create activity.{LogColors.ENDC}")
+                log.info(f"{LogColors.OKGREEN}Citizen '{target_citizen_username}' is idle (no 'created' or 'in_progress' activities). Proceeding to create activity.{LogColors.ENDC}")
                 citizens_to_process_list = [target_citizen_record]
         except Exception as e:
             log.error(f"{LogColors.FAIL}Error fetching or checking status for citizen '{target_citizen_username}': {e}{LogColors.ENDC}")
