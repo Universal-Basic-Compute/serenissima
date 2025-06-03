@@ -24,14 +24,17 @@ def try_create(
     2. A submit_land_bid activity that will execute after arrival
     
     The 'fromBuildingId' is now determined based on the citizen's current position.
+    The 'targetBuildingId' (official office) is determined by finding the closest town_hall or courthouse.
+    The 'sellerUsername' is determined from the land's current owner.
     """
     land_id = details.get('landId')
     bid_amount = details.get('bidAmount')
-    # from_building = details.get('fromBuildingId') # No longer taken from details
-    to_building_id = details.get('targetBuildingId')  # courthouse or town_hall
+    # from_building_id is determined based on citizen's current position
+    # to_building_id (targetOfficeBuildingId) will be determined below
+    # sellerUsername will be determined from land_id's owner
     
-    if not (land_id and bid_amount and to_building_id):
-        log.error(f"Missing required details for bid_on_land: landId, bidAmount, or targetBuildingId")
+    if not (land_id and bid_amount):
+        log.error(f"Missing required details for bid_on_land: landId or bidAmount. Provided details: {details}")
         return None
 
     citizen_username = citizen_record['fields'].get('Username')
@@ -79,19 +82,50 @@ def try_create(
     from_building_id_determined = from_building_record['fields'].get('BuildingId', from_building_record['id'])
     log.info(f"Determined starting building for {citizen_username} for bid_on_land: {from_building_id_determined} (based on current position).")
 
-    to_building_record = get_building_record(tables, to_building_id)
-    
-    # Specific checks and logging for building records
-    # from_building_record is already checked by virtue of being found by get_closest_building_to_position
-    if not to_building_record:
-        log.error(f"Failed to create bid_on_land chain for citizen {citizen_username}: Could not find 'to' (targetOffice) building record for ID '{to_building_id}'. This ID might be invalid or not a BuildingId.")
+    # Determine targetBuildingId (official office)
+    official_building_types = ["town_hall", "courthouse"]
+    closest_official_office_record = None
+    min_dist_to_office = float('inf')
+
+    for office_type in official_building_types:
+        try:
+            offices = tables['buildings'].all(formula=f"{{Type}}='{_escape_airtable_value(office_type)}'")
+            for office in offices:
+                office_pos = _get_building_position_coords(office)
+                if office_pos and citizen_position_coords: # citizen_position_coords is from_building_record's location effectively
+                    dist = _calculate_distance_meters(citizen_position_coords, office_pos)
+                    if dist < min_dist_to_office:
+                        min_dist_to_office = dist
+                        closest_official_office_record = office
+        except Exception as e_office:
+            log.error(f"Error fetching {office_type} buildings: {e_office}")
+            continue
+            
+    if not closest_official_office_record:
+        log.error(f"Failed to find any official office (town_hall or courthouse) for {citizen_username} to submit bid.")
         return None
-    
+        
+    to_building_record = closest_official_office_record
+    to_building_id = to_building_record['fields'].get('BuildingId', to_building_record['id'])
+    log.info(f"Determined target office for {citizen_username} bid: {to_building_id} ({to_building_record['fields'].get('Type')}) at {min_dist_to_office:.0f}m distance.")
+
+    # Determine sellerUsername from land_id
+    from backend.engine.utils.activity_helpers import get_land_record # Import locally if not already top-level
+    land_record_for_bid = get_land_record(tables, land_id)
+    seller_username = "ConsiglioDeiDieci" # Default if no owner
+    if land_record_for_bid and land_record_for_bid['fields'].get('Owner'):
+        seller_username = land_record_for_bid['fields'].get('Owner')
+        log.info(f"Land {land_id} is owned by {seller_username}.")
+    elif land_record_for_bid:
+        log.info(f"Land {land_id} has no specific owner, assuming ConsiglioDeiDieci.")
+    else:
+        log.warning(f"Could not find land record for {land_id}. Assuming bid is for unlisted/state land, seller ConsiglioDeiDieci.")
+
     # Calculate path between buildings
     path_data = find_path_between_buildings(from_building_record, to_building_record)
     if not path_data or not path_data.get('path'):
         log.error(f"Could not find path between {from_building_id_determined} and {to_building_id}")
-        return None # Changed from False
+        return None
     
     # Create activity IDs
     goto_activity_id = f"goto_location_for_bid_{_escape_airtable_value(land_id)}_{citizen_username}_{ts}"
@@ -109,10 +143,22 @@ def try_create(
     submit_end_date = (datetime.fromisoformat(travel_end_date.replace('Z', '+00:00')) + timedelta(minutes=15)).isoformat()
     
     # Store bid details in the Details field for the processor to use
-    details_json = json.dumps({
+    # Include determined seller and office for context, though processor might not use them directly for contract.
+    details_for_goto = {
         "landId": land_id,
-        "bidAmount": bid_amount
-    })
+        "bidAmount": bid_amount,
+        "activityType": "bid_on_land", # Keep original context
+        "nextStep": "submit_land_bid",
+        "determinedSellerUsername": seller_username, # For context/logging
+        "determinedTargetOfficeId": to_building_id   # For context/logging
+    }
+    details_for_submit = { # submit_land_bid processor primarily needs landId and bidAmount
+        "landId": land_id,
+        "bidAmount": bid_amount,
+        "determinedSellerUsername": seller_username, 
+        "determinedTargetOfficeId": to_building_id
+    }
+    details_json_for_submit = json.dumps(details_for_submit)
     
     # 1. Create goto_location activity
     goto_payload = {
@@ -122,12 +168,7 @@ def try_create(
         "FromBuilding": from_building_id_determined, # Use the determined starting building ID
         "ToBuilding": to_building_id,
         "Path": json.dumps(path_data.get('path', [])),
-        "Details": json.dumps({
-            "landId": land_id,
-            "bidAmount": bid_amount,
-            "activityType": "bid_on_land", # Keep original context
-            "nextStep": "submit_land_bid"
-        }),
+        "Details": json.dumps(details_for_goto), # Use the prepared details for goto
         "Status": "created",
         "Title": f"Traveling to submit bid on land {land_id}",
         "Description": f"Traveling from {from_building_record['fields'].get('Name', from_building_id_determined)} to {to_building_record['fields'].get('Name', to_building_id)} to submit a bid of {bid_amount} Ducats on land {land_id}",
@@ -145,10 +186,10 @@ def try_create(
         "Citizen": citizen_username,
         "FromBuilding": to_building_id,  # Citizen is already at the courthouse/town_hall
         "ToBuilding": to_building_id,    # Stays at the same location
-        "Details": details_json, # Contains landId and bidAmount
+        "Details": details_json_for_submit, # Use the prepared details for submit
         "Status": "created",
         "Title": f"Submitting bid on land {land_id}",
-        "Description": f"Submitting a bid of {bid_amount} Ducats on land {land_id}",
+        "Description": f"Submitting a bid of {bid_amount} Ducats on land {land_id} (Seller: {seller_username}) at {to_building_record['fields'].get('Name', to_building_id)}.",
         "Notes": f"Second step of bid_on_land process. Will create building_bid contract.",
         "CreatedAt": travel_start_date,  # Created at the same time as the goto activity
         "StartDate": submit_start_date,  # But starts after the goto activity ends
