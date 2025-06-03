@@ -57,5 +57,12 @@
       "streetDescription": "A rio terà is a former canal that was filled in to create a street. This name references the Knights Hospitallers, a religious order that maintained hospices for pilgrims and the sick. The order likely had a presence in this area of Venice during the Renaissance, providing medical care and assistance to travelers and the local population, aligning with the theme of mercy and charity reflected in the Misericordia name.",
       "id": "building_45.446012_12.331576"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.44612529099368,
+    "lng": 12.330792616225722,
+    "width": 280.99999977293464,
+    "height": 267.99999977293464,
+    "referenceScale": 5.000000015137688
+  }
 }

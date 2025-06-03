@@ -94,5 +94,12 @@
       "streetDescription": "This name refers to a covered passageway (sottoportego) where charitable activities or a charitable institution might have been located. During the Renaissance, Venice had numerous charitable confraternities (Scuole) that provided social services. Near San Gerardo Sagredo, such a passageway might have connected to a building where alms were distributed or where a charitable brotherhood met. The name reflects the strong tradition of organized charity in Renaissance Venice.",
       "id": "building_45.425766_12.312443"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.42578265026767,
+    "lng": 12.31208863547043,
+    "width": 276.00000056766334,
+    "height": 265.00000056766334,
+    "referenceScale": 4.000000007568844
+  }
 }

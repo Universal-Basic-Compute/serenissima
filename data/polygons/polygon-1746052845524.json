@@ -250,5 +250,12 @@
       "streetDescription": "Likely named after an architectural feature from the original Byzantine-influenced construction of the Celestia convent or a nearby church. Venice's architecture shows strong Byzantine influences, particularly in its older structures.",
       "id": "building_45.427542_12.310530"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.42694341916484,
+    "lng": 12.309376913421609,
+    "width": 362.00000056766334,
+    "height": 355.00000056766334,
+    "referenceScale": 4.000000007568844
+  }
 }

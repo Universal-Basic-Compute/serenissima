@@ -280,5 +280,12 @@
       "streetDescription": "Named after the noble Pisani family who may have owned property in this area. The Pisani were one of Venice's nobili families who had estates throughout the city, including properties in the western districts near Santa Chiara.",
       "id": "building_45.441483_12.315508"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.43981452383527,
+    "lng": 12.315931711027089,
+    "width": 430,
+    "height": 392,
+    "referenceScale": 3.0000000151376884
+  }
 }

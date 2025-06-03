@@ -81,5 +81,12 @@
       "streetDescription": "This name honors the Franciscan friars (known as Frati Minori) who had a significant presence at the Church of San Giobbe. The church and adjoining monastery were run by the Franciscan Order, followers of Saint Francis of Assisi. The salizada would have been one of the few paved streets in this area, likely leading to or near the religious complex.",
       "id": "building_45.445923_12.328425"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.44590402799398,
+    "lng": 12.328529531695951,
+    "width": 470.99999977293464,
+    "height": 463.99999977293464,
+    "referenceScale": 5.000000015137688
+  }
 }

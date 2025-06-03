@@ -134,5 +134,12 @@
       "streetDescription": "This filled-in canal got its name from the wooden palisades ('palada' in Venetian dialect) that were constructed along parts of the Giudecca's shoreline. These wooden barriers helped protect the island from erosion and provided mooring points for boats serving the various industries established there.",
       "id": "building_45.427977_12.319997"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.42689472118304,
+    "lng": 12.318748594405259,
+    "width": 449.9999988646734,
+    "height": 667.9999982843954,
+    "referenceScale": 4.000000007568844
+  }
 }

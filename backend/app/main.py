@@ -1507,7 +1507,7 @@ async def execute_transaction(transaction_id: str, data: dict):
                 raise HTTPException(status_code=500, detail=f"Failed to update land ownership: {str(land_error)}")
 
         # Update the contract with buyer, executed_at timestamp, and status
-        now = datetime.datetime.now().isoformat()
+        now = datetime.now().isoformat()
         updated_contract_record = contracts_table.update(transaction_id, { # transaction_id is ContractId
             "Buyer": buyer_username,
             "ExecutedAt": now,
@@ -1854,9 +1854,9 @@ async def transfer_compute_between_citizens(data: dict):
                 "Seller": to_wallet,  # Recipient is the "seller" in this context
                 "Buyer": from_wallet,  # Sender is the "buyer" in this context
                 "Price": amount,
-                "CreatedAt": datetime.datetime.now().isoformat(),
-                "UpdatedAt": datetime.datetime.now().isoformat(),
-                "ExecutedAt": datetime.datetime.now().isoformat(),
+                "CreatedAt": datetime.now().isoformat(),
+                "UpdatedAt": datetime.now().isoformat(),
+                "ExecutedAt": datetime.now().isoformat(),
                 "Notes": json.dumps({
                     "operation": "direct_transfer",
                     "from_wallet": from_wallet,
@@ -2386,7 +2386,7 @@ async def apply_for_loan(loan_application: dict):
             # Special case: If this is a template loan and borrower has no other loans,
             # immediately approve and transfer funds
             if is_template_loan and not borrower_has_loans:
-                now = datetime.datetime.now().isoformat()
+                now = datetime.now().isoformat()
                 
                 # Calculate payment details
                 principal = loan_application.get("principalAmount")
@@ -2492,7 +2492,7 @@ async def apply_for_loan(loan_application: dict):
                 raise HTTPException(status_code=400, detail="Loan is not available")
             
             # Update the loan with borrower information
-            now = datetime.datetime.now().isoformat()
+            now = datetime.now().isoformat()
             
             # Calculate payment details
             principal = loan_application.get("principalAmount")
@@ -2581,7 +2581,7 @@ async def apply_for_loan(loan_application: dict):
                 }
         else:
             # Create a new loan application
-            now = datetime.datetime.now().isoformat()
+            now = datetime.now().isoformat()
             
             # Create the loan record
             record = loans_table.create({
@@ -2655,7 +2655,7 @@ async def make_loan_payment(loan_id: str, payment_data: dict):
         status = "paid" if new_balance <= 0 else "active"
         
         # Update the loan record
-        now = datetime.datetime.now().isoformat()
+        now = datetime.now().isoformat()
         updated_record = loans_table.update(loan_id, {
             "RemainingBalance": new_balance,
             "Status": status,
@@ -2728,10 +2728,10 @@ async def create_loan_offer(loan_offer: dict):
     
     try:
         # Create the loan offer
-        now = datetime.datetime.now().isoformat()
+        now = datetime.now().isoformat()
         
         # Calculate final payment date
-        final_payment_date = (datetime.datetime.now() + datetime.timedelta(days=loan_offer.get("termDays"))).isoformat()
+        final_payment_date = (datetime.now() + datetime.timedelta(days=loan_offer.get("termDays"))).isoformat()
         
         # Create the loan record
         record = loans_table.create({
@@ -2939,10 +2939,6 @@ async def try_create_activity_endpoint(request_data: TryCreateActivityRequest):
             return JSONResponse(status_code=404, content={"success": False, "message": f"Citizen '{request_data.citizenUsername}' not found.", "activity": None, "reason": "citizen_not_found"})
         citizen_record_full = citizen_record_list[0]
 
-        # Get current times
-        now_venice_dt = datetime.now(VENICE_TIMEZONE)
-        now_utc_dt = now_venice_dt.astimezone(pytz.UTC)
-
         # Fetch definitions (these could be cached globally in a real app)
         resource_defs = get_resource_types_from_api()
         building_type_defs = get_building_types_from_api()
@@ -2958,8 +2954,6 @@ async def try_create_activity_endpoint(request_data: TryCreateActivityRequest):
             activity_parameters=request_data.activityParameters,
             resource_defs=resource_defs,
             building_type_defs=building_type_defs,
-            now_venice_dt=now_venice_dt,
-            now_utc_dt=now_utc_dt,
             transport_api_url=os.getenv("TRANSPORT_API_URL", "http://localhost:3000/api/transport"),
             api_base_url=os.getenv("API_BASE_URL", "http://localhost:3000")
         )

@@ -308,5 +308,12 @@
       "streetDescription": "Commemorates the hospital's role during Venice's numerous plague outbreaks. San Zanipolo's hospital would have been crucial in treating victims during these devastating epidemics.",
       "id": "building_45.434825_12.360382"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.43389142226298,
+    "lng": 12.359920332696946,
+    "width": 416.00000113532667,
+    "height": 321.00000113532667,
+    "referenceScale": 3.0000000151376884
+  }
 }

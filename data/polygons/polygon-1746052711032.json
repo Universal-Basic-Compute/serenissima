@@ -1008,5 +1008,12 @@
       "id": "building_45.427452_12.341112"
     }
   ],
-  "id": "polygon-1746052711032"
+  "id": "polygon-1746052711032",
+  "imageSettings": {
+    "lat": 45.42566452358357,
+    "lng": 12.337679352295169,
+    "width": 587,
+    "height": 617,
+    "referenceScale": 3
+  }
 }

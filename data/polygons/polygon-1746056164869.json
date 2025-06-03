@@ -88,5 +88,12 @@
       "streetDescription": "This covered passageway would have led to or passed beneath the famous malvasia (wine shop) that gave the main street its name. Malvasie were important establishments serving sweet wines from Greece and were often gathering places for merchants and nobles. This sottoportego would have connected the main thoroughfare to smaller courtyards or adjacent streets, creating the labyrinthine urban texture characteristic of Renaissance Venice.",
       "id": "building_45.438462_12.339142"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.43832071943034,
+    "lng": 12.338920352425903,
+    "width": 233,
+    "height": 228,
+    "referenceScale": 5.000000030275377
+  }
 }

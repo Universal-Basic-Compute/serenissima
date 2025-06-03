@@ -121,5 +121,12 @@
       "streetDescription": "A sottoportego is a covered passageway under a building. This name would reference the nearby Scuola Grande della Misericordia, one of Venice's important confraternities dedicated to charitable works. Such passageways often connected neighborhoods to important religious or charitable institutions.",
       "id": "building_45.439265_12.328825"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.438810659582636,
+    "lng": 12.328714633505374,
+    "width": 225,
+    "height": 216,
+    "referenceScale": 4.000000007568844
+  }
 }

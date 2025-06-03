@@ -1056,5 +1056,12 @@
       "streetDescription": "Named for the lay guardians who maintained continuous prayer before the Madonna shrine. These volunteers would pass through this covered walkway during their rotation changes.",
       "id": "building_45.440267_12.362106"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.43796804767033,
+    "lng": 12.357635650941532,
+    "width": 692.0000005676633,
+    "height": 650.0000005676633,
+    "referenceScale": 2.000000007568844
+  }
 }

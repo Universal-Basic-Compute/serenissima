@@ -454,5 +454,12 @@
       "streetDescription": "A covered passageway where mercers (cloth merchants) had their shops. The textile trade was central to Venice's economy, and mercers selling fine fabrics would have been concentrated near Campo San Polo, catering to the wealthy residents of the district.",
       "id": "building_45.442630_12.357934"
     }
-  ]
+  ],
+  "imageSettings": {
+    "lat": 45.44162670692369,
+    "lng": 12.356246264557278,
+    "width": 386.00000113532667,
+    "height": 401.00000113532667,
+    "referenceScale": 3.0000000151376884
+  }
 }
