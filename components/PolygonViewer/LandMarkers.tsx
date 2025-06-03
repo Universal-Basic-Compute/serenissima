@@ -572,30 +572,7 @@ export default function LandMarkers({
 
   return (
     <div className="absolute inset-0 pointer-events-none">
-      {/* Edit Mode Toggle Button */}
-      {/*
-      /**<div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-auto">
-        <button
-          onClick={toggleEditMode}
-          className={`px-4 py-2 rounded-lg shadow-lg font-medium transition-colors ${
-            editMode 
-              ? 'bg-red-600 text-white hover:bg-red-700' 
-              : 'bg-amber-600 text-white hover:bg-amber-700'
-          }`}
-        >
-          {editMode ? 'Exit Land Edit Mode' : 'Edit Land Markers'}
-        </button>
-        */}
-        {editMode && (
-          <div className="mt-2 bg-black/70 text-white p-2 rounded text-sm text-center">
-            <p>Cliquez sur une terre pour la sélectionner</p>
-            <p>Utilisez les poignées pour redimensionner</p>
-            <p>Glissez-déposez pour repositionner</p>
-          </div>
-        )}
-      
-      </div>
-      
+      {/* Le bouton Edit Mode et le texte associé ont été supprimés pour le rendre non affiché */}
 
       {/* Land Markers */}
       {polygonsToRender.map((polygonData) => {

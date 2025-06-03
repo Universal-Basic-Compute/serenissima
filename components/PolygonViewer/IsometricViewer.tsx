@@ -2898,13 +2898,16 @@ const darkenColor = (colorStr: string, percent: number): string => {
     // Draw polygons using RenderService, incorporating currentHoverState
     // This handles the primary drawing of polygons, including their fill color,
     // selection, and hover states.
-    // Set fillOpacity to 0 to hide polygons and show land images instead
+    // L'appel à renderService.drawPolygons est commenté pour rendre les polygones non affichés.
+    // Les LandMarkers (images des terrains) sont gérés séparément.
+    /*
     renderService.drawPolygons(ctx, polygonsToRender, {
       selectedPolygonId,
       hoveredPolygonId: currentHoverState.type === 'polygon' ? currentHoverState.id : null,
       fillOpacity: 0, // Set opacity to 0 to make polygons invisible
       strokeOpacity: 0 // Set stroke opacity to 0 to hide polygon borders
     });
+    */
     
     // We don't need to draw land images twice - the first pass above is sufficient
     // This second pass is removed to avoid drawing the images twice
