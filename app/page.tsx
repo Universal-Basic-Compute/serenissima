@@ -989,7 +989,7 @@ export default function TwoDPage() {
         <IsometricViewer activeView={activeView} setActiveView={setActiveView} fullWaterGraphData={fullWaterGraphData} />
         
         {/* Top Navigation Bar */}
-        <div className="absolute top-0 left-0 right-0 bg-black/95 text-white p-4 flex justify-between items-center z-30">
+        <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center z-30">
           <div className="flex items-center space-x-4">
             <Link href="/" className="text-xl font-serif font-bold hover:text-amber-400 transition-colors">
               La Serenissima
@@ -1006,7 +1006,7 @@ export default function TwoDPage() {
         </div>
 
         {/* Left Side Menu */}
-        <div className="absolute left-0 top-2/5 transform -translate-y-1/2 bg-black/95 text-white z-20 flex flex-col w-16 rounded-lg">
+        <div className="absolute left-0 top-2/5 transform -translate-y-1/2 bg-black/70 text-white z-20 flex flex-col w-16 rounded-lg">
           {/* Menu Items */}
           <div className="flex-1 overflow-y-auto py-4">
             <ul className="space-y-2 px-2">
