@@ -99,17 +99,11 @@ export default function LandMarkers({
               const markerWorldX = pWorldMapCenterX + loadedSettings.x;
               const markerWorldY = pWorldMapCenterY + loadedSettings.y;
 
-              // Convert absolute world coordinates back to lat/lng
-              // These are simplified inverse of the projection math in IsometricViewer
-              // lng = worldX / 20000 + 12.3326
-              // lat = worldY / 20000 + 45.4371 
-              // (assuming worldY is positive for south, which is consistent with screenToWorldY's inversion)
-              const newLng = markerWorldX / 20000 + 12.3326;
-              const newLat = markerWorldY / 20000 + 45.4371;
+              const newLatLng = CoordinateService.worldToLatLng(markerWorldX, markerWorldY);
               
               settings[polygonData.polygon.id] = {
-                lat: newLat,
-                lng: newLng,
+                lat: newLatLng.lat,
+                lng: newLatLng.lng,
                 width: loadedSettings.width,
                 height: loadedSettings.height,
                 referenceScale: loadedSettings.referenceScale
