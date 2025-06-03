@@ -14,8 +14,6 @@ import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
 import CoatOfArmsMarkers from './CoatOfArmsMarkers';
-import LandMarkers2 from './LandMarkers2'; // MODIFIED: Import LandMarkers2
-import BuildingMarkers2 from './BuildingMarkers2'; // Import the new component
 import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
 import BuildingMarkers from './BuildingMarkers';
@@ -4064,28 +4062,6 @@ const darkenColor = (colorStr: string, percent: number): string => {
         ref={canvasRef} 
         className="w-full h-full"
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-      />
-      
-      {/* Land Markers 2 - Display land images (simplified version) */}
-      <LandMarkers2
-        isVisible={false}
-        rawPolygons={polygons} // Passer les données brutes des polygones
-        polygonsToRender={polygonsToRender}
-        isNight={isNight}
-        scale={scale}
-        // activeView={activeView} // activeView n'est plus nécessaire pour LandMarkers2
-        canvasWidth={canvasDims.width}
-        canvasHeight={canvasDims.height}
-        mapTransformOffset={offset}
-      />
-
-      {/* BuildingMarkers2 - Displays the specific static image */}
-      <BuildingMarkers2
-        scale={scale}
-        offset={offset}
-        canvasWidth={canvasDims.width}
-        canvasHeight={canvasDims.height}
-        isVisible={false} // Assuming it should always be visible when IsometricViewer is
       />
       
       {/* Land Markers - Editable land images */}
