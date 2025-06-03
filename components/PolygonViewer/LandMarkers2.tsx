@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { landService } from '@/lib/services/LandService';
+import { CoordinateService } from '@/lib/services/CoordinateService';
 
 interface LandMarkers2Props {
   isVisible: boolean;
@@ -45,16 +46,6 @@ export default function LandMarkers2({
   const [landImages, setLandImages] = useState<Record<string, string>>({});
   const [imageSettings, setImageSettings] = useState<Record<string, LandImageSettings>>({});
 
-  // Coordinate transformation utilities (identiques à LandMarkers.tsx)
-  const worldToScreenX = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasWidth: number): number => {
-    return mapWorldX * currentScale + currentCanvasWidth / 2 + currentMapTransformOffset.x;
-  };
-
-  const worldToScreenY = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasHeight: number): number => {
-    // Appliquer le facteur d'étirement vertical de 1.4 pour la projection isométrique
-    return (-mapWorldY) * currentScale * 1.4 + currentCanvasHeight / 2 + currentMapTransformOffset.y;
-  };
-
   useEffect(() => {
     const loadLandImagesAndSettings = async () => {
       const images: Record<string, string> = {};
@@ -75,17 +66,16 @@ export default function LandMarkers2({
               const centerLng = rawPolygon.center?.lng || rawPolygon.centroid?.lng;
 
               if (typeof centerLat === 'number' && typeof centerLng === 'number') {
-                const pWorldMapCenterX = (centerLng - 12.3326) * 20000;
-                const pWorldMapCenterY = (centerLat - 45.4371) * 20000;
-                const markerWorldX = pWorldMapCenterX + loadedSettings.x;
-                const markerWorldY = pWorldMapCenterY + loadedSettings.y;
-
-                const newLng = markerWorldX / 20000 + 12.3326;
-                const newLat = markerWorldY / 20000 + 45.4371;
+                const polygonCenterWorld = CoordinateService.latLngToWorld(centerLat, centerLng);
+                const markerWorld = { 
+                  x: polygonCenterWorld.x + loadedSettings.x, 
+                  y: polygonCenterWorld.y + loadedSettings.y 
+                };
+                const newLatLng = CoordinateService.worldToLatLng(markerWorld.x, markerWorld.y);
                 
                 settingsRecord[rawPolygon.id] = {
-                  lat: newLat,
-                  lng: newLng,
+                  lat: newLatLng.lat,
+                  lng: newLatLng.lng,
                   width: loadedSettings.width,
                   height: loadedSettings.height,
                   referenceScale: loadedSettings.referenceScale
@@ -162,12 +152,11 @@ export default function LandMarkers2({
           width = 75 * scale; // Valeurs par défaut
           height = 75 * scale;
         }
-        
-        const markerMapWorldX = (settings.lng - 12.3326) * 20000;
-        const markerMapWorldY = (settings.lat - 45.4371) * 20000;
 
-        const finalX = worldToScreenX(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
-        const finalY = worldToScreenY(markerMapWorldX, markerMapWorldY, scale, mapTransformOffset, canvasWidth, canvasHeight);
+        const worldCoords = CoordinateService.latLngToWorld(settings.lat, settings.lng);
+        const screenCoords = CoordinateService.worldToScreen(worldCoords.x, worldCoords.y, scale, mapTransformOffset, canvasWidth, canvasHeight);
+        const finalX = screenCoords.x;
+        const finalY = screenCoords.y;
         
         return (
           <div
