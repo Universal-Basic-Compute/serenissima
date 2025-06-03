@@ -66,6 +66,8 @@ export default function LandMarkers({
     baseWidth?: number;
     baseHeight?: number;
     referenceScale?: number;
+    lat?: number; // Added for storing initial lat during resize
+    lng?: number; // Added for storing initial lng during resize
   } | null>(null);
   const dragStartRef = useRef<{x: number, y: number}>({ x: 0, y: 0 }); // For original drag logic
   const positionRef = useRef<{x: number, y: number}>({ x: 0, y: 0 }); // For original drag logic
