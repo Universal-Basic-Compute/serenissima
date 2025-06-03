@@ -126,43 +126,6 @@ export default function LandMarkers2({
   }, [isVisible, rawPolygons]); // Dépend de rawPolygons
 
   if (!isVisible) {
-                lat: newLat,
-                lng: newLng,
-                width: loadedSettings.width,
-                height: loadedSettings.height,
-                referenceScale: loadedSettings.referenceScale
-              };
-              // console.log(`CONVERTED old imageSettings for ${polygonData.polygon.id} to lat/lng`);
-            } else if (loadedSettings.lat !== undefined && loadedSettings.lng !== undefined) {
-              // Si lat/lng sont déjà présents, utiliser directement
-              settings[polygonData.polygon.id] = loadedSettings;
-            }
-            // Si ni x,y ni lat,lng ne sont valides, les settings pour ce polygone ne seront pas ajoutés,
-            // et donc l'image ne sera pas affichée.
-          }
-
-          // Si des settings valides (avec lat/lng) ont été établis, charger l'image
-          if (settings[polygonData.polygon.id]) {
-            const imageUrl = await landService.getLandImageUrl(polygonData.polygon.id);
-            if (imageUrl) {
-              images[polygonData.polygon.id] = imageUrl;
-            }
-          }
-        }
-      }
-      
-      setLandImages(images);
-      // Fusionner les nouveaux settings avec les settings existants pour préserver l'état
-      // si les polygonesToRender ne changent pas mais que d'autres props le font.
-      setImageSettings(prevSettings => ({ ...prevSettings, ...settings }));
-    };
-    
-    if (isVisible && polygonsToRender.length > 0) {
-      loadLandImagesAndSettings();
-    }
-  }, [isVisible, polygonsToRender]); // Dépend uniquement de isVisible et polygonsToRender
-
-  if (!isVisible) {
     return null;
   }
 
