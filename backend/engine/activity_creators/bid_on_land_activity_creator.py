@@ -8,7 +8,9 @@ from backend.engine.utils.activity_helpers import (
     VENICE_TIMEZONE,
     find_path_between_buildings, # Keep this for path between determined from_building and to_building
     get_building_record,
-    get_closest_building_to_position # Import new helper
+    get_closest_building_to_position, # Import new helper
+    _get_building_position_coords, # Import missing helper
+    _calculate_distance_meters # Import missing helper
 )
 
 log = logging.getLogger(__name__)
