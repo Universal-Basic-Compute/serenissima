@@ -49,8 +49,8 @@ export default function LandMarkers2({
   };
 
   const worldToScreenY = (mapWorldX: number, mapWorldY: number, currentScale: number, currentMapTransformOffset: {x: number, y: number}, currentCanvasHeight: number): number => {
-    // Rétablir la suppression du facteur 1.4 pour correspondre au comportement supposé des BuildingMarkers
-    return (-mapWorldY) * currentScale + currentCanvasHeight / 2 + currentMapTransformOffset.y;
+    // Appliquer le facteur d'étirement vertical de 1.4 pour la projection isométrique
+    return (-mapWorldY) * currentScale * 1.4 + currentCanvasHeight / 2 + currentMapTransformOffset.y;
   };
 
   useEffect(() => {
