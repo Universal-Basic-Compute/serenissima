@@ -61,6 +61,7 @@ from backend.engine.activity_creators import (
     try_create_check_business_status_activity, # Import new creator
     # Import new storage activity creators
     try_create_deliver_to_storage_activity,
+    try_create_initiate_building_project_activity, # Import new creator for building projects
     try_create_fetch_from_storage_activity,
     try_create_fishing_activity, # Import new creator
     # try_create_fetch_from_galley_activity is not used by process_citizen_activity
@@ -1898,7 +1899,8 @@ def dispatch_specific_activity_request(
 
     else: # Fallback for unsupported or not-yet-implemented high-level types
         supported_orchestrated_types = [
-            'eat', 'leave_venice', 'seek_shelter', 
+            'eat', 'leave_venice', 'seek_shelter',
+            'initiate_building_project', # Added
             'send_message', 'manage_public_storage_offer', 'bid_on_land'
             # Add other explicitly handled types here as they are implemented in this dispatcher
         ]
