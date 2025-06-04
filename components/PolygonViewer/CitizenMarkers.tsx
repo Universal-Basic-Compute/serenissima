@@ -81,6 +81,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const thoughtDisplayDurationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isThoughtBubbleHovered, setIsThoughtBubbleHovered] = useState<boolean>(false);
 
+  const handleThoughtBubbleDurationEnd = useCallback(() => {
+    // This function is intentionally empty because the thought cycle logic
+    // in CitizenMarkers.useEffect (around line 450) already handles clearing activeThought
+    // and scheduling the next one. This callback is primarily to satisfy
+    // ThoughtBubble's prop and ensure its useEffect dependency is stable.
+  }, []);
+
   // Define these constants outside useEffect so they are accessible in the render method
   const WPM = 120; // Words per minute for reading speed (reduced from 180)
   const MIN_DISPLAY_TIME = 6000; // Minimum 6 seconds (doubled)
@@ -1247,7 +1254,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           citizenPosition={activeThought.position}
           socialClass={activeThought.socialClass}
           isVisible={!!activeThought}
-          onDurationEnd={() => { /* La logique pour masquer/effacer est gérée par l'effet de cycle */ }}
+          onDurationEnd={handleThoughtBubbleDurationEnd}
           displayDuration={ // Calculer la durée en fonction de la longueur du texte
             Math.min(MAX_DISPLAY_TIME, Math.max(MIN_DISPLAY_TIME, (activeThought.thought.mainThought.split(/\s+/).length / WPM) * 60 * 1000 * 3))
           }

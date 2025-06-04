@@ -122,7 +122,7 @@ export default function LandMarkers({
       
       setLandImages(images);
       setImageSettings(prevSettings => {
-        const mergedSettings = { ...settings }; 
+        const mergedSettings = { ...settings };
         for (const polyId in prevSettings) {
           if (Object.prototype.hasOwnProperty.call(prevSettings, polyId)) {
             // If editing this land, or if it's already in new format, keep existing state
@@ -133,7 +133,11 @@ export default function LandMarkers({
             }
           }
         }
-        return mergedSettings;
+        // Only update if the new settings are actually different
+        if (JSON.stringify(mergedSettings) !== JSON.stringify(prevSettings)) {
+          return mergedSettings;
+        }
+        return prevSettings; // Return previous state if no change
       });
     };
     
