@@ -413,7 +413,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     return () => {
       citizenAnimationService.stopAnimation();
     };
-  }, [activityPaths, citizens, animationActive, handleAnimationUpdate, animatedCitizens, positionsInitialized]); // Added animatedCitizens and positionsInitialized to dependencies
+  }, [activityPaths, citizens, animationActive, handleAnimationUpdate, positionsInitialized]); // Removed animatedCitizens from dependencies
   
   // Add effect to start/stop animation when view changes
   useEffect(() => {
