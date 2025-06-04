@@ -38,6 +38,40 @@ interface IsometricViewerProps {
 // Define a type for all possible view types to use throughout the component
 type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
+// Cache constants and helpers for loading images (moved outside component)
+const LOADING_IMAGE_CACHE_KEY = 'loadingScreenImageCache';
+const LOADING_IMAGE_CACHE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+interface LoadingImageCacheItem {
+  src: string;
+  timestamp: number;
+  failed?: boolean;
+  lastAttempt?: number;
+}
+type LoadingImageCache = Record<string, LoadingImageCacheItem>; // Keyed by image filename
+
+// Helper to get loading image cache
+const getLoadingImageCache = (): LoadingImageCache => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const cached = localStorage.getItem(LOADING_IMAGE_CACHE_KEY);
+    return cached ? JSON.parse(cached) : {};
+  } catch (e) {
+    console.error("Error reading loading image cache:", e);
+    return {};
+  }
+};
+
+// Helper to set loading image cache
+const setLoadingImageCache = (cache: LoadingImageCache) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(LOADING_IMAGE_CACHE_KEY, JSON.stringify(cache));
+  } catch (e) {
+    console.error("Error writing loading image cache:", e);
+  }
+};
+
 export default function IsometricViewer({ activeView, setActiveView, fullWaterGraphData }: IsometricViewerProps) { // Add setActiveView to destructuring
   const wrapperRef = useRef<HTMLDivElement>(null); // Ref for the main wrapper div
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -106,40 +140,6 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
 
   const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(initialLoadingImage);
   const [currentLoadingTip, setCurrentLoadingTip] = useState<string>('');
-
-  // Cache constants for loading images
-  const LOADING_IMAGE_CACHE_KEY = 'loadingScreenImageCache';
-  const LOADING_IMAGE_CACHE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
-
-  interface LoadingImageCacheItem {
-    src: string;
-    timestamp: number;
-    failed?: boolean;
-    lastAttempt?: number;
-  }
-  type LoadingImageCache = Record<string, LoadingImageCacheItem>; // Keyed by image filename
-
-  // Helper to get loading image cache
-  const getLoadingImageCache = (): LoadingImageCache => {
-    if (typeof window === 'undefined') return {};
-    try {
-      const cached = localStorage.getItem(LOADING_IMAGE_CACHE_KEY);
-      return cached ? JSON.parse(cached) : {};
-    } catch (e) {
-      console.error("Error reading loading image cache:", e);
-      return {};
-    }
-  };
-
-  // Helper to set loading image cache
-  const setLoadingImageCache = (cache: LoadingImageCache) => {
-    if (typeof window === 'undefined') return;
-    try {
-      localStorage.setItem(LOADING_IMAGE_CACHE_KEY, JSON.stringify(cache));
-    } catch (e) {
-      console.error("Error writing loading image cache:", e);
-    }
-  };
 
   // Add refs to track previous state
   const prevActiveView = useRef<ViewType | null>(null); // Peut être conservé si utilisé ailleurs
