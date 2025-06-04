@@ -805,7 +805,17 @@ export default function LandMarkers({
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
-                  filter: isNight ? 'brightness(0.7) saturate(0.8)' : 'none',
+                  filter: (() => {
+                    let baseFilter = isNight ? 'brightness(0.7) saturate(0.8)' : 'none';
+                    if (isHovered && activeView === 'land') {
+                      if (isNight) {
+                        baseFilter = 'brightness(0.84) saturate(0.8)'; // 0.7 * 1.2
+                      } else {
+                        baseFilter = 'brightness(1.2)';
+                      }
+                    }
+                    return baseFilter;
+                  })(),
                   pointerEvents: 'none', // Explicitly make image non-interactive to pointer events
                 }}
                 onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
