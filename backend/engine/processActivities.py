@@ -449,6 +449,16 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
     else:
         log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for activity interruptions.{LogColors.ENDC}")
 
+    # Reschedule future ('created') activities based on priority
+    if not dry_run:
+        log.info(f"{LogColors.OKCYAN}Rescheduling future activities by priority...{LogColors.ENDC}")
+        reschedule_created_activities_by_priority(tables, forced_utc_datetime_for_check, dry_run, target_citizen_username)
+    else:
+        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would reschedule future activities by priority.{LogColors.ENDC}")
+        # Even in dry_run, call it to see logs, but it won't make changes.
+        reschedule_created_activities_by_priority(tables, forced_utc_datetime_for_check, dry_run, target_citizen_username)
+
+
     # Fetch definitions once
     building_type_defs = get_building_type_definitions_from_api()
     resource_defs = get_resource_definitions_from_api()
@@ -808,6 +818,161 @@ def handle_activity_interruptions(tables: Dict[str, Table], now_utc_for_check_ov
                         update_activity_status(tables, lp_task_id_airtable, "interrupted")
                     else:
                         log.debug(f"Low-priority task '{lp_task_type}' (ID: {lp_task_guid}) for citizen {citizen_username} is already interrupted. Skipping.")
+
+
+def reschedule_created_activities_by_priority(
+    tables: Dict[str, Table], 
+    now_utc_for_check_override: Optional[datetime] = None,
+    dry_run: bool = False,
+    target_citizen_username_filter: Optional[str] = None
+):
+    """
+    Reschedules 'created' activities for citizens based on priority.
+    Activities are grouped into 'endeavors' (likely chains) and then these endeavors
+    are scheduled sequentially according to their priority.
+    """
+    now_utc_to_use = now_utc_for_check_override if now_utc_for_check_override else datetime.now(timezone.utc)
+    if now_utc_for_check_override:
+        log.info(f"{LogColors.WARNING}reschedule_created_activities_by_priority is using provided time for check: {now_utc_to_use.isoformat()}{LogColors.ENDC}")
+
+    citizens_to_process_scheduling = []
+    if target_citizen_username_filter:
+        citizen_rec = get_citizen_record(tables, target_citizen_username_filter)
+        if citizen_rec:
+            citizens_to_process_scheduling.append(citizen_rec)
+        else:
+            log.warning(f"{LogColors.WARNING}Target citizen {target_citizen_username_filter} not found for rescheduling.{LogColors.ENDC}")
+            return
+    else:
+        try:
+            citizens_to_process_scheduling = tables['citizens'].all(fields=['Username']) # Only need Username for filtering activities
+        except Exception as e_fetch_all_citizens:
+            log.error(f"{LogColors.FAIL}Failed to fetch all citizens for rescheduling: {e_fetch_all_citizens}{LogColors.ENDC}")
+            return
+
+    for citizen_data in citizens_to_process_scheduling:
+        citizen_username = citizen_data['fields'].get('Username')
+        if not citizen_username:
+            continue
+
+        log.info(f"{LogColors.OKBLUE}Processing rescheduling for citizen: {citizen_username}{LogColors.ENDC}")
+
+        try:
+            formula = f"AND({{Citizen}}='{_escape_airtable_value(citizen_username)}', {{Status}}='created')"
+            created_activities_raw = tables['activities'].all(formula=formula)
+        except Exception as e_fetch_citizen_activities:
+            log.error(f"{LogColors.FAIL}Failed to fetch 'created' activities for citizen {citizen_username}: {e_fetch_citizen_activities}{LogColors.ENDC}")
+            continue
+
+        if not created_activities_raw:
+            log.info(f"No 'created' activities found for citizen {citizen_username} to reschedule.{LogColors.ENDC}")
+            continue
+
+        # Parse dates and add to a new list for easier processing
+        created_activities = []
+        for act_raw in created_activities_raw:
+            try:
+                act_raw['fields']['_StartDateDt'] = dateutil_parser.isoparse(act_raw['fields']['StartDate'])
+                act_raw['fields']['_EndDateDt'] = dateutil_parser.isoparse(act_raw['fields']['EndDate'])
+                act_raw['fields']['_CreatedAtDt'] = dateutil_parser.isoparse(act_raw['fields']['CreatedAt'])
+                if act_raw['fields']['_StartDateDt'].tzinfo is None: act_raw['fields']['_StartDateDt'] = pytz.utc.localize(act_raw['fields']['_StartDateDt'])
+                if act_raw['fields']['_EndDateDt'].tzinfo is None: act_raw['fields']['_EndDateDt'] = pytz.utc.localize(act_raw['fields']['_EndDateDt'])
+                if act_raw['fields']['_CreatedAtDt'].tzinfo is None: act_raw['fields']['_CreatedAtDt'] = pytz.utc.localize(act_raw['fields']['_CreatedAtDt'])
+                created_activities.append(act_raw)
+            except Exception as e_parse:
+                log.error(f"Error parsing dates for activity {act_raw.get('id', 'N/A')} for citizen {citizen_username}: {e_parse}. Skipping this activity for rescheduling.")
+        
+        if not created_activities: # If all failed parsing
+            log.info(f"No valid 'created' activities after date parsing for citizen {citizen_username}.")
+            continue
+
+        # Group activities into endeavors
+        # Heuristic: Same Priority and CreatedAt within ~2 seconds.
+        endeavors: List[List[Dict]] = []
+        temp_activities = sorted(created_activities, key=lambda x: (x['fields'].get('Priority', 0), x['fields']['_CreatedAtDt']))
+        
+        current_endeavor: List[Dict] = []
+        for act in temp_activities:
+            priority = act['fields'].get('Priority', 0)
+            created_at_dt = act['fields']['_CreatedAtDt']
+
+            if not current_endeavor:
+                current_endeavor.append(act)
+            else:
+                last_act_in_endeavor = current_endeavor[-1]
+                last_priority = last_act_in_endeavor['fields'].get('Priority', 0)
+                last_created_at_dt = last_act_in_endeavor['fields']['_CreatedAtDt']
+                
+                if priority == last_priority and abs((created_at_dt - last_created_at_dt).total_seconds()) <= 2:
+                    current_endeavor.append(act)
+                else:
+                    endeavors.append(list(current_endeavor)) # Add a copy
+                    current_endeavor = [act]
+        
+        if current_endeavor: # Add the last endeavor
+            endeavors.append(list(current_endeavor))
+
+        # Sort endeavors: Primary by Priority (desc), Secondary by earliest original StartDate in endeavor (asc)
+        def get_endeavor_sort_keys(endeavor_list: List[Dict]):
+            priority = endeavor_list[0]['fields'].get('Priority', 0) if endeavor_list else 0
+            min_start_date = min(act['fields']['_StartDateDt'] for act in endeavor_list) if endeavor_list else datetime.max.replace(tzinfo=pytz.UTC)
+            return (-priority, min_start_date) # Negative priority for descending sort
+
+        endeavors.sort(key=get_endeavor_sort_keys)
+
+        log.info(f"Citizen {citizen_username}: Identified {len(endeavors)} endeavors to reschedule.")
+
+        # Reschedule endeavors sequentially
+        next_available_time_utc = now_utc_to_use
+        updates_to_make: List[Tuple[str, Dict[str, str]]] = []
+
+        for endeavor in endeavors:
+            if not endeavor: continue
+
+            # Sort activities within this endeavor by their original StartDate to maintain internal sequence
+            endeavor.sort(key=lambda x: x['fields']['_StartDateDt'])
+            
+            # Determine the anchor time for this endeavor (earliest original start time)
+            min_original_start_date_in_endeavor = endeavor[0]['fields']['_StartDateDt']
+            
+            # Calculate the time shift needed for this endeavor
+            # If the endeavor's original start is already after next_available_time_utc, don't pull it earlier than its plan.
+            # However, the goal is to re-pack based on priority, so we should use next_available_time_utc.
+            effective_start_for_shift_calc = min_original_start_date_in_endeavor
+            
+            time_shift = next_available_time_utc - effective_start_for_shift_calc
+            
+            current_endeavor_max_end_time = next_available_time_utc # Initialize with current available time
+
+            for activity in endeavor:
+                original_start_dt = activity['fields']['_StartDateDt']
+                original_end_dt = activity['fields']['_EndDateDt']
+                
+                new_start_dt = original_start_dt + time_shift
+                new_end_dt = original_end_dt + time_shift # Preserves original duration
+
+                updates_to_make.append((activity['id'], {'StartDate': new_start_dt.isoformat(), 'EndDate': new_end_dt.isoformat()}))
+                
+                if new_end_dt > current_endeavor_max_end_time:
+                    current_endeavor_max_end_time = new_end_dt
+            
+            next_available_time_utc = current_endeavor_max_end_time # Next endeavor starts after this one ends
+
+        if updates_to_make:
+            log.info(f"Citizen {citizen_username}: Applying {len(updates_to_make)} rescheduling updates.")
+            if not dry_run:
+                try:
+                    # Airtable batch update can take a list of dicts: [{'id': record_id, 'fields': fields_to_update}, ...]
+                    batch_payload = [{'id': rec_id, 'fields': flds} for rec_id, flds in updates_to_make]
+                    tables['activities'].batch_update(batch_payload)
+                    log.info(f"{LogColors.OKGREEN}Successfully applied {len(updates_to_make)} rescheduling updates for citizen {citizen_username}.{LogColors.ENDC}")
+                except Exception as e_batch_update:
+                    log.error(f"{LogColors.FAIL}Error batch updating rescheduled activities for citizen {citizen_username}: {e_batch_update}{LogColors.ENDC}")
+            else:
+                for rec_id, flds_to_update in updates_to_make:
+                    log.info(f"[DRY RUN] Would update activity {rec_id} for citizen {citizen_username} to StartDate: {flds_to_update['StartDate']}, EndDate: {flds_to_update['EndDate']}.")
+        else:
+            log.info(f"Citizen {citizen_username}: No rescheduling updates needed after evaluation.")
 
 
 if __name__ == "__main__":
