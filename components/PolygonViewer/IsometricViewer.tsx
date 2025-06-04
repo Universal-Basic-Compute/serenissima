@@ -18,7 +18,7 @@ import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
 import BuildingMarkers from './BuildingMarkers';
 import LandMarkers from './LandMarkers';
-import FeaturePointMarkers, { FeaturePoint } from './FeaturePointMarkers'; // Import FeaturePointMarkers
+// import FeaturePointMarkers, { FeaturePoint } from './FeaturePointMarkers'; // Removed FeaturePointMarkers
 import ContractMarkers from '@/components/PolygonViewer/ContractMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 import TransportDebugPanel from '../UI/TransportDebugPanel';
@@ -3965,39 +3965,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
         mapTransformOffset={offset}
       />
 
-      {/* FeaturePointMarkers - Renders building, canal, and bridge points as DOM elements */}
-      <FeaturePointMarkers
-        rawPolygons={polygonsToRender} // Pass polygonsToRender as rawPolygons
-        scale={scale}
-        offset={offset}
-        canvasWidth={canvasDims.width}
-        canvasHeight={canvasDims.height}
-        activeView={activeView}
-        currentHoverState={currentHoverState}
-        isNight={isNight}
-        hoveredPolygonId={currentHoverState.type === 'polygon' ? currentHoverState.id : null} // Pass hovered polygon ID
-        onPointClick={(point) => { 
-          let finalPolygonId = point.polygonId;
-          // Attempt to find polygonId if it's unknown
-          if (point.polygonId === 'unknown' || !point.polygonId) {
-            console.warn(`[IsometricViewer] FeaturePoint click with unknown polygonId. Point:`, point);
-            finalPolygonId = findPolygonIdForPoint({ lat: point.lat, lng: point.lng });
-          }
-      
-          const pointTypeForCreationPanel: 'land' | 'canal' | 'bridge' = 
-            point.type === 'buildingPoint' ? 'land' : 
-            point.type === 'canalPoint' ? 'canal' : 
-            'bridge';
-      
-          setSelectedPointForCreation({ 
-            lat: point.lat, 
-            lng: point.lng, 
-            polygonId: finalPolygonId, 
-            pointType: pointTypeForCreationPanel 
-          });
-          setShowBuildingCreationPanel(true);
-        }}
-      />
+      {/* FeaturePointMarkers component removed */}
 
       {/* Coat of Arms Markers - Affiche les blasons par-dessus le canvas */}
       <CoatOfArmsMarkers
