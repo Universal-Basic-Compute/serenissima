@@ -17,7 +17,8 @@ import CoatOfArmsMarkers from './CoatOfArmsMarkers';
 import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
 import BuildingMarkers from './BuildingMarkers';
-import LandMarkers from './LandMarkers'; // Import LandMarkers
+import LandMarkers from './LandMarkers';
+import FeaturePointMarkers, { FeaturePoint } from './FeaturePointMarkers'; // Import FeaturePointMarkers
 import ContractMarkers from '@/components/PolygonViewer/ContractMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 import TransportDebugPanel from '../UI/TransportDebugPanel';
@@ -3098,137 +3099,10 @@ const darkenColor = (colorStr: string, percent: number): string => {
       });
     }
 
-    // Draw dock points and bridge points with consistent styling in all views
-    if (polygons.length > 0) {
-      // Draw dock points with subtle styling
-      polygons.forEach(polygon => {
-        if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
-          polygon.canalPoints.forEach((point: any) => {
-            if (!point.edge) return;
-            
-            // Convert lat/lng to isometric coordinates
-            const x = (point.edge.lng - 12.3326) * 20000;
-            const y = (point.edge.lat - 45.4371) * 20000;
-            
-            const isoPos = {
-              x: calculateIsoX(x, y, scale, offset, canvas.width),
-              y: calculateIsoY(x, y, scale, offset, canvas.height)
-            };
-            
-            // Draw a small, semi-transparent circle for dock points
-            ctx.beginPath();
-            ctx.arc(isoPos.x, isoPos.y, 2 * scale, 0, Math.PI * 2);
-      
-            // Use a subtle blue color with low opacity
-            // Make points more visible in transport view, more subtle in other views
-            const baseOpacity = activeView === 'transport' ? 0.6 : 0.15;
-      
-            ctx.fillStyle = `rgba(0, 120, 215, ${baseOpacity})`;
-            ctx.fill();
-      
-            // Add a border
-            ctx.strokeStyle = 'rgba(0, 120, 215, 0.4)';
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          });
-        }
-        
-        // Draw bridge points with subtle styling
-        if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
-          polygon.bridgePoints.forEach((point: any) => {
-            if (!point.edge) return;
-            
-            // Convert lat/lng to isometric coordinates
-            const x = (point.edge.lng - 12.3326) * 20000;
-            const y = (point.edge.lat - 45.4371) * 20000;
-            
-            const isoPos = {
-              x: calculateIsoX(x, y, scale, offset, canvas.width),
-              y: calculateIsoY(x, y, scale, offset, canvas.height)
-            };
-            
-            // Draw a small, semi-transparent square for bridge points
-            const pointSize = 2 * scale;
-      
-            // Use a subtle orange/brown color with low opacity
-            // Make points more visible in transport view, more subtle in other views
-            const baseOpacity = activeView === 'transport' ? 0.6 : 0.15;
-      
-            ctx.fillStyle = `rgba(180, 120, 60, ${baseOpacity})`;
-            ctx.beginPath();
-            ctx.rect(
-              isoPos.x - pointSize/2, 
-              isoPos.y - pointSize/2, 
-              pointSize, 
-              pointSize
-            );
-            ctx.fill();
-      
-            // Add a border
-            ctx.strokeStyle = 'rgba(180, 120, 60, 0.4)';
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          });
-        }
-      });
-    }
+    // Building points, canal points, and bridge points are now rendered by FeaturePointMarkers component.
+    // The canvas drawing logic for these points has been removed from here.
 
-    // Draw all building points on all polygons
-    polygonsToRender.forEach(polygonData => {
-      const currentPolygon = polygonData.polygon;
-      if (currentPolygon.buildingPoints && Array.isArray(currentPolygon.buildingPoints)) {
-        if (currentPolygon.buildingPoints.length === 0) {
-          // console.warn(`[IsometricViewer] Polygon ${currentPolygon.id} has an empty buildingPoints array.`); // DEBUG
-        }
-
-        currentPolygon.buildingPoints.forEach((buildingPoint: { lat: number, lng: number, id?: string }) => {
-          if (typeof buildingPoint.lat !== 'number' || typeof buildingPoint.lng !== 'number') {
-            console.warn('[IsometricViewer] Skipping building point with invalid coordinates for polygon ' + currentPolygon.id + ':', buildingPoint); // DEBUG
-            return;
-          }
-
-          // Convert buildingPoint.lat, buildingPoint.lng to screen coordinates
-          const worldX = (buildingPoint.lng - 12.3326) * 20000;
-          const worldY = (buildingPoint.lat - 45.4371) * 20000;
-          
-          const isoPos = {
-            x: calculateIsoX(worldX, worldY, scale, offset, canvas.width),
-            y: calculateIsoY(worldX, worldY, scale, offset, canvas.height)
-          };
-          
-          // isHovered is true if the mouse is over this specific building point
-          const isPointHovered = currentHoverState.type === 'buildingPoint' &&
-                            currentHoverState.data &&
-                            typeof currentHoverState.data.lat === 'number' &&
-                            typeof currentHoverState.data.lng === 'number' &&
-                            Math.abs(currentHoverState.data.lat - buildingPoint.lat) < 0.00001 &&
-                            Math.abs(currentHoverState.data.lng - buildingPoint.lng) < 0.00001;
-
-          const pointSize = (activeView === 'buildings' ? 2.2 : 1.8) * scale * (isPointHovered ? 1.5 : 1);
-          // console.log(`[IsometricViewer] Drawing building point at screen: (${isoPos.x.toFixed(2)}, ${isoPos.y.toFixed(2)}), size: ${pointSize.toFixed(2)}`); // DEBUG
-          ctx.beginPath();
-          ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
-  
-          // Make points slightly more visible
-          const baseOpacity = activeView === 'buildings' ? 0.125 : 0.075; // Made twice as transparent
-          const finalOpacity = isPointHovered ? Math.min(1, baseOpacity * 3) : baseOpacity;
-          // console.log(`[IsometricViewer] Point opacity: ${finalOpacity}`); // DEBUG
-        
-          ctx.fillStyle = `rgba(160, 140, 120, ${finalOpacity})`;
-          ctx.fill();
-
-          if (isPointHovered) {
-              ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-              ctx.lineWidth = 0.5 * scale;
-              ctx.stroke();
-          }
-        });
-      } else {
-        // console.warn(`[IsometricViewer] Polygon ${currentPolygon.id} 'buildingPoints' is missing, not an array, or empty.`, currentPolygon.buildingPoints); // DEBUG
-      }
-    });
-
-    // Draw buildings on canvas
+    // Draw buildings on canvas (bridges, galleys)
     const currentFilteredBuildings = filterBuildings(); 
 
     if (currentFilteredBuildings.length > 0) {
@@ -4089,6 +3963,39 @@ const darkenColor = (colorStr: string, percent: number): string => {
         canvasWidth={canvasDims.width}
         canvasHeight={canvasDims.height}
         mapTransformOffset={offset}
+      />
+
+      {/* FeaturePointMarkers - Renders building, canal, and bridge points as DOM elements */}
+      <FeaturePointMarkers
+        polygonsToRender={polygonsToRender}
+        scale={scale}
+        offset={offset}
+        canvasWidth={canvasDims.width}
+        canvasHeight={canvasDims.height}
+        activeView={activeView}
+        currentHoverState={currentHoverState}
+        isNight={isNight}
+        onPointClick={(point) => { // Add this callback handler
+          let finalPolygonId = point.polygonId;
+          // Attempt to find polygonId if it's unknown, though FeaturePointMarkers should provide it
+          if (point.polygonId === 'unknown' || !point.polygonId) {
+            console.warn(`[IsometricViewer] FeaturePoint click with unknown polygonId. Point:`, point);
+            finalPolygonId = findPolygonIdForPoint({ lat: point.lat, lng: point.lng });
+          }
+      
+          const pointTypeForCreationPanel: 'land' | 'canal' | 'bridge' = 
+            point.type === 'buildingPoint' ? 'land' : 
+            point.type === 'canalPoint' ? 'canal' : 
+            'bridge';
+      
+          setSelectedPointForCreation({ 
+            lat: point.lat, 
+            lng: point.lng, 
+            polygonId: finalPolygonId, 
+            pointType: pointTypeForCreationPanel 
+          });
+          setShowBuildingCreationPanel(true);
+        }}
       />
 
       {/* Coat of Arms Markers - Affiche les blasons par-dessus le canvas */}
