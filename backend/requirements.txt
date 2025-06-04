@@ -217,7 +217,6 @@ pypager==3.0.1
 pypandoc==1.15
 pyparsing==3.0.9
 pyperclip==1.9.0
-pypiwin32==223
 pyreadline3==3.4.1
 PyRect==0.2.0
 pyrsistent==0.19.3
@@ -232,7 +231,6 @@ pyttsx3==2.98
 pytweening==1.2.0
 pytz==2024.2
 PyWavelets==1.4.1
-pywin32==306
 PyYAML==6.0.2
 pyyaml_env_tag==0.1
 realesrgan==0.3.0
