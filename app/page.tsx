@@ -115,6 +115,41 @@ export default function TwoDPage() {
   const [showInfo, setShowInfo] = useState(false);
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
   const [activeView, setActiveView] = useState<ViewType>('buildings');
+
+  // Cache constants and helpers for loading images (moved before initialLoadingImage)
+  const LOADING_IMAGE_CACHE_KEY = 'loadingScreenImageCache';
+  const LOADING_IMAGE_CACHE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+  interface LoadingImageCacheItem {
+    src: string;
+    timestamp: number;
+    failed?: boolean;
+    lastAttempt?: number;
+  }
+  type LoadingImageCache = Record<string, LoadingImageCacheItem>; // Keyed by image filename
+
+  // Helper to get loading image cache
+  const getLoadingImageCache = (): LoadingImageCache => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const cached = localStorage.getItem(LOADING_IMAGE_CACHE_KEY);
+      return cached ? JSON.parse(cached) : {};
+    } catch (e) {
+      console.error("Error reading loading image cache:", e);
+      return {};
+    }
+  };
+
+  // Helper to set loading image cache
+  const setLoadingImageCache = (cache: LoadingImageCache) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(LOADING_IMAGE_CACHE_KEY, JSON.stringify(cache));
+    } catch (e) {
+      console.error("Error writing loading image cache:", e);
+    }
+  };
+
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
   const [showGuildsPanel, setShowGuildsPanel] = useState<boolean>(false);
