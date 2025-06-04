@@ -3950,6 +3950,90 @@ const darkenColor = (colorStr: string, percent: number): string => {
 
   // Helper function to darken a color (This is the duplicate, it will be removed)
 
+  const handleLandRightClick = useCallback((polygonId: string, clickX: number, clickY: number) => {
+    console.log(`Right click on land: ${polygonId} at screen (${clickX}, ${clickY})`);
+    const targetPolygonData = polygonsToRender.find(p => p.polygon.id === polygonId);
+    if (!targetPolygonData || !targetPolygonData.polygon) {
+      console.warn(`Could not find polygon data for ID: ${polygonId}`);
+      return;
+    }
+
+    const polygon = targetPolygonData.polygon;
+    const allPoints: { lat: number, lng: number, type: 'land' | 'canal', originalId?: string, screenPos: {x: number, y: number} }[] = [];
+    const occupiedThreshold = 0.00001; // For lat/lng comparisons
+
+    // Process building points
+    if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+      polygon.buildingPoints.forEach((bp: any) => {
+        if (bp && typeof bp.lat === 'number' && typeof bp.lng === 'number') {
+          const isOccupied = buildings.some(b => {
+            if (!b.position) return false;
+            let bPos;
+            try {
+              bPos = typeof b.position === 'string' ? JSON.parse(b.position) : b.position;
+            } catch (e) { return false; }
+            return bPos && Math.abs(bPos.lat - bp.lat) < occupiedThreshold && Math.abs(bPos.lng - bp.lng) < occupiedThreshold;
+          });
+          if (!isOccupied) {
+            const screenPos = latLngToScreen(bp.lat, bp.lng);
+            allPoints.push({ lat: bp.lat, lng: bp.lng, type: 'land', originalId: bp.id, screenPos });
+          }
+        }
+      });
+    }
+
+    // Process canal points
+    if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+      polygon.canalPoints.forEach((cp: any) => {
+        if (cp && cp.edge && typeof cp.edge.lat === 'number' && typeof cp.edge.lng === 'number') {
+          const isOccupied = buildings.some(b => {
+            if (!b.position || !(b.type?.toLowerCase().includes('dock') || b.category?.toLowerCase().includes('dock'))) return false; // Check if it's a dock-like building
+            let bPos;
+            try {
+              bPos = typeof b.position === 'string' ? JSON.parse(b.position) : b.position;
+            } catch (e) { return false; }
+            return bPos && Math.abs(bPos.lat - cp.edge.lat) < occupiedThreshold && Math.abs(bPos.lng - cp.edge.lng) < occupiedThreshold;
+          });
+          if (!isOccupied) {
+            const screenPos = latLngToScreen(cp.edge.lat, cp.edge.lng);
+            allPoints.push({ lat: cp.edge.lat, lng: cp.edge.lng, type: 'canal', originalId: cp.id, screenPos });
+          }
+        }
+      });
+    }
+
+    if (allPoints.length === 0) {
+      console.log(`No unoccupied points found on polygon ${polygonId}`);
+      // Optionally, provide feedback to the user (e.g., via a toast notification)
+      return;
+    }
+
+    // Find the closest point to the click
+    let closestPoint: { lat: number, lng: number, type: 'land' | 'canal', originalId?: string, screenPos: {x: number, y: number} } | null = null;
+    let minDistanceSq = Infinity;
+
+    allPoints.forEach(point => {
+      const distSq = (point.screenPos.x - clickX) ** 2 + (point.screenPos.y - clickY) ** 2;
+      if (distSq < minDistanceSq) {
+        minDistanceSq = distSq;
+        closestPoint = point;
+      }
+    });
+
+    if (closestPoint) {
+      console.log(`Closest unoccupied point:`, closestPoint);
+      setSelectedPointForCreation({
+        lat: closestPoint.lat,
+        lng: closestPoint.lng,
+        polygonId: polygonId, // The polygonId of the land parcel itself
+        pointType: closestPoint.type, // 'land' or 'canal'
+      });
+      setShowBuildingCreationPanel(true);
+    } else {
+      console.log(`Strangely, no closest point found even though allPoints was not empty.`);
+    }
+  }, [polygonsToRender, buildings, latLngToScreen, setSelectedPointForCreation, setShowBuildingCreationPanel]);
+
   return (
     <div ref={wrapperRef} className="w-screen h-screen select-none"> {/* Add select-none and ref to the main div */}
       <canvas 
