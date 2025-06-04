@@ -132,7 +132,7 @@ lark==1.1.5
 lazy_loader==0.4
 linkify-it-py==2.0.0
 litellm==1.65.3
-llvmlite==0.39.1
+llvmlite==0.42.0
 lmdb==1.4.0
 lockfile==0.12.2
 Markdown==3.5.2
@@ -159,7 +159,7 @@ mypy-extensions==1.0.0
 narwhals==1.8.2
 networkx==3.2.1
 nh3==0.2.11
-numba==0.56.4
+numba==0.59.0
 numpy==1.26.4
 oauthlib==3.2.2
 omegaconf==2.3.0
