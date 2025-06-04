@@ -3968,6 +3968,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
         canvasWidth={canvasDims.width}
         canvasHeight={canvasDims.height}
         mapTransformOffset={offset}
+        onLandRightClick={(polygonId, clickX, clickY) => handleLandRightClick(polygonId, clickX, clickY)} // Pass new handler
       />
 
       {/* FeaturePointMarkers component removed */}

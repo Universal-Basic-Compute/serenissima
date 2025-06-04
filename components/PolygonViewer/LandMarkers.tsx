@@ -24,6 +24,7 @@ interface LandMarkersProps {
   canvasWidth: number;
   canvasHeight: number;
   mapTransformOffset: { x: number, y: number };
+  onLandRightClick?: (polygonId: string, screenX: number, screenY: number) => void; // New prop
 }
 
 interface LandImageSettings {
@@ -44,7 +45,8 @@ export default function LandMarkers({
   activeView,
   canvasWidth,
   canvasHeight,
-  mapTransformOffset
+  mapTransformOffset,
+  onLandRightClick // Destructure new prop
 }: LandMarkersProps) {
   const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
   const [landImages, setLandImages] = useState<Record<string, string>>({});
@@ -773,7 +775,7 @@ export default function LandMarkers({
               key={polygon.id}
               className="absolute"
               style={{
-                pointerEvents: 'none', // No pointer events in normal mode
+                pointerEvents: 'auto', // Allow pointer events for interaction
                 position: 'absolute',
                 left: `${finalX}px`,
                 top: `${finalY}px`,
@@ -782,14 +784,19 @@ export default function LandMarkers({
                 zIndex: isHovered ? 12 : 10,
                 transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
                 transform: `translate(-50%, -50%) scale(${isHovered ? 1.05 : 1})`,
-                // left and top are repeated, remove one set
-                cursor: 'default',
+                cursor: 'pointer', // Change cursor to pointer
                 opacity: isHovered ? opacity + 0.1 : opacity,
                 border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none',
               }}
-              // title={polygon.historicalName || polygon.id} // Removed to make it more passive
-              // onMouseEnter={() => handleMouseEnter(polygon)} // Removed for non-edit mode
-              // onMouseLeave={handleMouseLeave} // Removed for non-edit mode
+              onClick={() => handleClick(polygon)} // Added back
+              onMouseEnter={() => handleMouseEnter(polygon)} // Added back
+              onMouseLeave={handleMouseLeave} // Added back
+              onContextMenu={(e) => { // New context menu handler
+                e.preventDefault();
+                if (onLandRightClick) {
+                  onLandRightClick(polygon.id, e.clientX, e.clientY);
+                }
+              }}
             >
               <img
                 src={imageUrl}
