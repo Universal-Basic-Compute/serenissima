@@ -16,8 +16,14 @@ log = logging.getLogger(__name__)
 def try_create(
     tables: Dict[str, Any],
     citizen_record: Dict[str, Any],
-    details: Dict[str, Any]
-) -> bool:
+    activity_parameters: Dict[str, Any], # Renamed from details
+    resource_defs: Dict, # Added
+    building_type_defs: Dict, # Added
+    now_venice_dt: datetime, # Added
+    now_utc_dt: datetime, # Added
+    transport_api_url: str, # Added
+    api_base_url: str # Added
+) -> Optional[Dict]: # Changed return type from bool to Optional[Dict]
     """
     Create the complete initiate_building_project activity chain:
     1. A goto_location activity for travel to the land plot for inspection
@@ -28,11 +34,11 @@ def try_create(
     This approach creates the complete activity chain upfront.
     """
     # Extract required parameters
-    land_id = details.get('landId')
-    building_type_definition = details.get('buildingTypeDefinition')
-    point_details = details.get('pointDetails')
-    builder_contract_details = details.get('builderContractDetails')  # Optional
-    target_office_building_id = details.get('targetOfficeBuildingId')  # town_hall or builder's workshop
+    land_id = activity_parameters.get('landId')
+    building_type_definition = activity_parameters.get('buildingTypeDefinition') # This is a dict
+    point_details = activity_parameters.get('pointDetails')
+    builder_contract_details = activity_parameters.get('builderContractDetails')  # Optional
+    target_office_building_id = activity_parameters.get('targetOfficeBuildingId')  # town_hall or builder's workshop
     
     # Validate required parameters
     if not (land_id and building_type_definition and point_details):
@@ -40,7 +46,7 @@ def try_create(
         return False
 
     citizen = citizen_record['fields'].get('Username')
-    ts = int(datetime.now(VENICE_TIMEZONE).timestamp())
+    ts = int(now_venice_dt.timestamp()) # Use passed now_venice_dt
     
     # Get current citizen position to determine first path
     citizen_position_str = citizen_record['fields'].get('Position')
@@ -101,7 +107,7 @@ def try_create(
     goto_office_activity_id = f"goto_office_for_building_project_{citizen}_{ts}"
     submit_project_activity_id = f"submit_building_project_{_escape_airtable_value(land_id)}_{citizen}_{ts}"
     
-    now_utc = datetime.utcnow()
+    # now_utc is now passed as now_utc_dt
     
     # Calculate path to land plot
     # For simplicity, we'll use the land's center point as the destination
@@ -126,28 +132,28 @@ def try_create(
         land_position = point_details
     else:
         log.error(f"Invalid point_details format")
-        return False
+        return None # Changed from False
     
     # Calculate path to land
-    path_to_land = find_path_between_buildings(None, None, current_position=current_position, target_position=land_position)
-    if not path_to_land or not path_to_land.get('path'):
+    path_to_land = find_path_between_buildings(None, None, transport_api_url, current_position_coords=current_position, target_position_coords=land_position)
+    if not path_to_land or not path_to_land.get('path'): # path_to_land itself is the path data or None
         log.error(f"Could not find path to land {land_id}")
-        return False
+        return None # Changed from False
     
     # Calculate land inspection duration
     land_duration_seconds = path_to_land.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min
-    inspect_start_date = now_utc.isoformat()
-    inspect_end_date = (now_utc + timedelta(seconds=land_duration_seconds)).isoformat()
+    inspect_start_date = now_utc_dt.isoformat() # Use passed now_utc_dt
+    inspect_end_date = (now_utc_dt + timedelta(seconds=land_duration_seconds)).isoformat() # Use passed now_utc_dt
     
     # Calculate inspection activity times (15 minutes)
     land_inspection_start_date = inspect_end_date
     land_inspection_end_date = (datetime.fromisoformat(inspect_end_date.replace('Z', '+00:00')) + timedelta(minutes=15)).isoformat()
     
     # Calculate path from land to office
-    path_to_office = find_path_between_buildings(None, target_office_building_record, current_position=land_position)
-    if not path_to_office or not path_to_office.get('path'):
+    path_to_office = find_path_between_buildings(None, target_office_building_record, transport_api_url, current_position_coords=land_position)
+    if not path_to_office or not path_to_office.get('path'): # path_to_office itself is the path data or None
         log.error(f"Could not find path from land {land_id} to office {target_office_building_id}")
-        return False
+        return None # Changed from False
     
     # Calculate office travel duration
     office_duration_seconds = path_to_office.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min
@@ -273,10 +279,10 @@ def try_create(
         log.info(f"Created complete initiate_building_project activity chain for citizen {citizen}:")
         for idx, activity in enumerate(activities_to_create, 1):
             log.info(f"  {idx}. {activity['Type']} activity {activity['ActivityId']}")
-        return True
+        return activities_to_create[0] # Return the first activity created
     except Exception as e:
         log.error(f"Failed to create initiate_building_project activity chain: {e}")
-        return False
+        return None # Changed from False
 
 def _calculate_distance(pos1, pos2):
     """Calculate simple Euclidean distance between two positions."""
