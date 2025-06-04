@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { CoordinateService } from '@/lib/services/CoordinateService';
 import { HoverState, hoverStateService } from '@/lib/services/HoverStateService';
 
@@ -11,39 +11,51 @@ export interface FeaturePoint { // Exporting for use in IsometricViewer if neede
 }
 
 interface FeaturePointMarkersProps {
-  polygonsToRender: any[];
+  rawPolygons: any[]; // Changed from polygonsToRender
   scale: number;
   offset: { x: number; y: number };
   canvasWidth: number;
   canvasHeight: number;
   activeView: string;
-  currentHoverState: HoverState;
+  currentHoverState: HoverState; // Kept for direct hover effect on points
   isNight: boolean;
   onPointClick: (point: FeaturePoint) => void;
+  hoveredPolygonId: string | null; // New prop
 }
 
 const FeaturePointMarkers: React.FC<FeaturePointMarkersProps> = ({
-  polygonsToRender,
+  rawPolygons, // Changed from polygonsToRender
   scale,
   offset,
   canvasWidth,
   canvasHeight,
   activeView,
   currentHoverState,
-  isNight, // isNight can be used for styling if needed, e.g. opacity adjustments
+  isNight,
   onPointClick,
+  hoveredPolygonId, // Destructure new prop
 }) => {
-  const allPoints: FeaturePoint[] = [];
+  const allPoints: FeaturePoint[] = useMemo(() => {
+    const points: FeaturePoint[] = [];
+    if (!hoveredPolygonId) {
+      return points; // If no polygon is hovered, render no points
+    }
 
-  polygonsToRender.forEach(polygonData => {
-    const polygon = polygonData.polygon;
-    if (!polygon || !polygon.id) return;
+    // rawPolygons is an array of polygonData objects.
+    // Each polygonData object has a 'polygon' property.
+    const activePolygonData = rawPolygons.find(pData => pData.polygon && pData.polygon.id === hoveredPolygonId);
+
+    if (!activePolygonData || !activePolygonData.polygon) {
+      return points; // Hovered polygon not found or invalid
+    }
+
+    const polygon = activePolygonData.polygon; // Process only the activePolygon's polygon object
 
     // Extract Building Points
     if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
       polygon.buildingPoints.forEach((bp: any) => {
         if (bp && typeof bp.lat === 'number' && typeof bp.lng === 'number') {
-          allPoints.push({
+          points.push({ // Push to local 'points' array
             lat: bp.lat,
             lng: bp.lng,
             id: bp.id || `buildingPoint-${polygon.id}-${bp.lat}-${bp.lng}`,
@@ -58,7 +70,7 @@ const FeaturePointMarkers: React.FC<FeaturePointMarkersProps> = ({
     if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
       polygon.canalPoints.forEach((cp: any) => {
         if (cp && cp.edge && typeof cp.edge.lat === 'number' && typeof cp.edge.lng === 'number') {
-          allPoints.push({
+          points.push({ // Push to local 'points' array
             lat: cp.edge.lat,
             lng: cp.edge.lng,
             id: cp.id || `canalPoint-${polygon.id}-${cp.edge.lat}-${cp.edge.lng}`,
@@ -73,7 +85,7 @@ const FeaturePointMarkers: React.FC<FeaturePointMarkersProps> = ({
     if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
       polygon.bridgePoints.forEach((brp: any) => {
         if (brp && brp.edge && typeof brp.edge.lat === 'number' && typeof brp.edge.lng === 'number') {
-          allPoints.push({
+          points.push({ // Push to local 'points' array
             lat: brp.edge.lat,
             lng: brp.edge.lng,
             id: brp.id || `bridgePoint-${polygon.id}-${brp.edge.lat}-${brp.edge.lng}`,
@@ -83,7 +95,9 @@ const FeaturePointMarkers: React.FC<FeaturePointMarkersProps> = ({
         }
       });
     }
-  });
+    // The forEach(polygonData => ...) loop is implicitly closed by the new structure
+    return points;
+  }, [rawPolygons, hoveredPolygonId]); // Add hoveredPolygonId to dependency array
 
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 16 }}> {/* Ensure this zIndex is above LandMarkers */}

@@ -3967,7 +3967,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
 
       {/* FeaturePointMarkers - Renders building, canal, and bridge points as DOM elements */}
       <FeaturePointMarkers
-        polygonsToRender={polygonsToRender}
+        rawPolygons={polygonsToRender} // Pass polygonsToRender as rawPolygons
         scale={scale}
         offset={offset}
         canvasWidth={canvasDims.width}
@@ -3975,9 +3975,10 @@ const darkenColor = (colorStr: string, percent: number): string => {
         activeView={activeView}
         currentHoverState={currentHoverState}
         isNight={isNight}
-        onPointClick={(point) => { // Add this callback handler
+        hoveredPolygonId={currentHoverState.type === 'polygon' ? currentHoverState.id : null} // Pass hovered polygon ID
+        onPointClick={(point) => { 
           let finalPolygonId = point.polygonId;
-          // Attempt to find polygonId if it's unknown, though FeaturePointMarkers should provide it
+          // Attempt to find polygonId if it's unknown
           if (point.polygonId === 'unknown' || !point.polygonId) {
             console.warn(`[IsometricViewer] FeaturePoint click with unknown polygonId. Point:`, point);
             finalPolygonId = findPolygonIdForPoint({ lat: point.lat, lng: point.lng });
