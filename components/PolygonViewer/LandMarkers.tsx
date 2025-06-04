@@ -787,9 +787,9 @@ export default function LandMarkers({
                 opacity: isHovered ? opacity + 0.1 : opacity,
                 border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none',
               }}
-              title={polygon.historicalName || polygon.id}
-              onMouseEnter={() => handleMouseEnter(polygon)} // Still allow hover effects
-              onMouseLeave={handleMouseLeave}
+              // title={polygon.historicalName || polygon.id} // Removed to make it more passive
+              // onMouseEnter={() => handleMouseEnter(polygon)} // Removed for non-edit mode
+              // onMouseLeave={handleMouseLeave} // Removed for non-edit mode
             >
               <img
                 src={imageUrl}
@@ -799,6 +799,7 @@ export default function LandMarkers({
                   height: '100%',
                   objectFit: 'contain',
                   filter: isNight ? 'brightness(0.7) saturate(0.8)' : 'none',
+                  pointerEvents: 'none', // Explicitly make image non-interactive to pointer events
                 }}
                 onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
               />
