@@ -775,28 +775,20 @@ export default function LandMarkers({
               key={polygon.id}
               className="absolute"
               style={{
-                pointerEvents: 'auto', // Allow pointer events for interaction
+                pointerEvents: 'none', // Make non-interactive
                 position: 'absolute',
                 left: `${finalX}px`,
                 top: `${finalY}px`,
                 width: `${width}px`,
                 height: `${height}px`,
-                zIndex: isHovered ? 12 : 10,
-                transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
-                transform: `translate(-50%, -50%) scale(${activeView === 'land' ? 1 : (isHovered ? 1.05 : 1)})`, // No scale in land view
-                cursor: 'pointer', // Change cursor to pointer
-                opacity: isHovered ? opacity + 0.1 : opacity,
+                zIndex: 10, // Static z-index
+                transition: 'opacity 0.2s ease-out', // Only transition opacity if needed, or remove
+                transform: `translate(-50%, -50%)`, // No scaling
+                cursor: 'default', // Default cursor
+                opacity: opacity, // Base opacity
                 border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none',
               }}
-              onClick={() => handleClick(polygon)} // Added back
-              onMouseEnter={() => handleMouseEnter(polygon)} // Added back
-              onMouseLeave={handleMouseLeave} // Added back
-              onContextMenu={(e) => { // New context menu handler
-                e.preventDefault();
-                if (onLandRightClick) {
-                  onLandRightClick(polygon.id, e.clientX, e.clientY);
-                }
-              }}
+              // onClick, onMouseEnter, onMouseLeave, onContextMenu removed
             >
               <img
                 src={imageUrl}
@@ -805,17 +797,7 @@ export default function LandMarkers({
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
-                  filter: (() => {
-                    let baseFilter = isNight ? 'brightness(0.7) saturate(0.8)' : 'none';
-                    if (isHovered && activeView === 'land') {
-                      if (isNight) {
-                        baseFilter = 'brightness(0.84) saturate(0.8)'; // 0.7 * 1.2
-                      } else {
-                        baseFilter = 'brightness(1.2)';
-                      }
-                    }
-                    return baseFilter;
-                  })(),
+                  filter: isNight ? 'brightness(0.7) saturate(0.8)' : 'none', // Only night filter, no hover brightness change
                   pointerEvents: 'none', // Explicitly make image non-interactive to pointer events
                 }}
                 onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
