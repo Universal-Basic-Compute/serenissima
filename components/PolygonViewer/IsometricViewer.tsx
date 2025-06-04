@@ -3014,6 +3014,11 @@ const darkenColor = (colorStr: string, percent: number): string => {
       
       currentWaterPoints.forEach(waterPoint => {
         if (!waterPoint.position) return;
+
+        // Only draw water points that have fish
+        if (!waterPoint.hasFish) {
+          return;
+        }
         
         // Convert lat/lng to isometric coordinates
         const x = (waterPoint.position.lng - 12.3326) * 20000;
