@@ -2917,7 +2917,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Draw water background
-    ctx.fillStyle = isNight ? '#001f3f' : '#87CEEB'; // Dark blue for night, sky blue for day
+    ctx.fillStyle = isNight ? '#001020' : '#1E90FF'; // Darker blue for night, DodgerBlue for day
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   
     // Draw water route in all views, but only if there's a path to show
