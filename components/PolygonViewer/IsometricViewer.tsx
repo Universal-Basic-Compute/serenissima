@@ -3506,7 +3506,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     };
   }, []); // Empty dependency array, runs once on mount for setup and cleanup
   
-  // Listen for problem details panel events and building selection from BuildingMarkers
+  // Listen for problem details panel events, building selection, and polygon selection
   useEffect(() => {
     const handleShowProblemDetailsPanel = (event: CustomEvent) => {
       if (event.detail && event.detail.problemId) {
@@ -3525,12 +3525,22 @@ const darkenColor = (colorStr: string, percent: number): string => {
       }
     };
     const buildingSelectedSubscription = eventBus.subscribe(EventTypes.BUILDING_SELECTED, handleBuildingSelectedFromMarkers);
+
+    const handlePolygonSelectedFromMarkers = (eventData: { polygonId: string, polygonData: any }) => {
+      if (activeView === 'land' && eventData && eventData.polygonId) {
+        console.log(`IsometricViewer: Received POLYGON_SELECTED event for ${eventData.polygonId} from LandMarkers/CoatOfArmsMarkers.`);
+        setSelectedPolygonId(eventData.polygonId);
+        setShowLandDetailsPanel(true);
+      }
+    };
+    const polygonSelectedSubscription = eventBus.subscribe(EventTypes.POLYGON_SELECTED, handlePolygonSelectedFromMarkers);
     
     return () => {
       window.removeEventListener('showProblemDetailsPanel', handleShowProblemDetailsPanel as EventListener);
       buildingSelectedSubscription.unsubscribe();
+      polygonSelectedSubscription.unsubscribe();
     };
-  }, []); // Ensure selectedBuildingId and showBuildingDetailsPanel are not in deps if they cause loops
+  }, [activeView]); // Add activeView as a dependency
 
   // Listen for hover state changes and update local state
   useEffect(() => {

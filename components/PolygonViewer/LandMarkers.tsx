@@ -783,7 +783,7 @@ export default function LandMarkers({
                 height: `${height}px`,
                 zIndex: isHovered ? 12 : 10,
                 transition: 'transform 0.1s ease-out, opacity 0.2s ease-out',
-                transform: `translate(-50%, -50%) scale(${isHovered ? 1.05 : 1})`,
+                transform: `translate(-50%, -50%) scale(${activeView === 'land' ? 1 : (isHovered ? 1.05 : 1)})`, // No scale in land view
                 cursor: 'pointer', // Change cursor to pointer
                 opacity: isHovered ? opacity + 0.1 : opacity,
                 border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none',
