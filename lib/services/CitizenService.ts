@@ -66,6 +66,15 @@ export class CitizenService {
             citizens: this.citizens,
             citizensByBuilding: {} // Empty object for building associations
           });
+
+          // Log social class distribution
+          const socialClassCounts: Record<string, number> = {};
+          this.citizens.forEach(c => {
+            const sc = c.socialclass || 'Unknown'; // Use the processed socialclass
+            socialClassCounts[sc] = (socialClassCounts[sc] || 0) + 1;
+          });
+          console.log('CitizenService: Social class distribution:', socialClassCounts);
+
         } else {
           console.error('Invalid response format from citizens API:', responseData);
         }
