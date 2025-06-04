@@ -25,11 +25,8 @@ echo "Installing required Node.js packages from $REPO_PATH..."
 
 # Make scripts executable (Python scripts don't strictly need +x if run with `python3 ...`)
 # but it doesn't hurt. Paths are relative to BACKEND_DIR.
-chmod +x "$BACKEND_DIR/distributeIncome.py"
-echo "Made distributeIncome.py executable"
-chmod +x "$BACKEND_DIR/engine/generate_citizen.py"
-chmod +x "$BACKEND_DIR/engine/generate_citizen_images.py"
-echo "Made generate_citizen.py and generate_citizen_images.py executable"
+echo "distributeIncome.py no longer exists, chmod skipped."
+echo "generate_citizen.py and generate_citizen_images.py no longer exist, chmod skipped."
 
 # echo "Setting up cron jobs..."
 #
