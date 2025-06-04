@@ -85,8 +85,10 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
   const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [canvasDims, setCanvasDims] = useState({ width: typeof window !== 'undefined' ? window.innerWidth : 0, height: typeof window !== 'undefined' ? window.innerHeight : 0 });
+  const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(null); // Initialize to null
+  const [currentLoadingTip, setCurrentLoadingTip] = useState<string>('');
 
-  // Define loading images and select one randomly for initial state
+  // Define loading images (can be moved outside if static)
   const loadingImageFiles = [
     'renaissance-architectural-construction.png',
     'renaissance-venetian-merchant-s-ledger.png',
@@ -127,9 +129,7 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
     }
     return `https://backend.serenissima.ai/public_assets/images/loading/${selectedFileName}`;
   })();
-
-  const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(initialLoadingImage);
-  const [currentLoadingTip, setCurrentLoadingTip] = useState<string>('');
+  // The initialLoadingImage IIFE is kept for the useEffect logic, but not for initial state.
 
   // Add refs to track previous state
   const prevActiveView = useRef<ViewType | null>(null); // Peut être conservé si utilisé ailleurs
@@ -1021,6 +1021,40 @@ number => {
 
   // Effect for initial setup: setting loading states and starting timers/image load/tip selection
   useEffect(() => {
+    // Client-side selection of initial loading image
+    const selectInitialLoadingImage = () => {
+      if (loadingImageFiles.length === 0) return null;
+      const cache = getLoadingImageCache(); // Assumes getLoadingImageCache is defined above or globally
+      const now = Date.now();
+      const oneDayMs = 24 * 60 * 60 * 1000;
+
+      const viableImageFiles = loadingImageFiles.filter(fileName => {
+        const cacheEntry = cache[fileName];
+        if (cacheEntry?.failed && cacheEntry.lastAttempt && (now - cacheEntry.lastAttempt < oneDayMs)) {
+          return false;
+        }
+        return true;
+      });
+
+      let selectedFileName: string;
+      if (viableImageFiles.length > 0) {
+        selectedFileName = viableImageFiles[Math.floor(Math.random() * viableImageFiles.length)];
+        console.log("IsometricViewer: Selected a viable loading image (client-side):", selectedFileName);
+      } else {
+        selectedFileName = loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)];
+        console.log("IsometricViewer: All images failed recently, retrying a random one (client-side):", selectedFileName);
+      }
+      return `https://backend.serenissima.ai/public_assets/images/loading/${selectedFileName}`;
+    };
+    const newLoadingImage = selectInitialLoadingImage();
+    // Only set if currentLoadingImage is still null (i.e., this is the first client-side run for this)
+    // This check might be redundant if the useEffect has an empty dependency array,
+    // but it's safer if this effect were to run more than once for other reasons.
+    if (currentLoadingImage === null && newLoadingImage) {
+        setCurrentLoadingImage(newLoadingImage);
+    }
+
+
     console.log('IsometricViewer: Initial setup effect running...');
     setLoading(true);
     setPolygonsDataLoaded(false);

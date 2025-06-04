@@ -153,6 +153,9 @@ export default function TwoDPage() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
   const [showGuildsPanel, setShowGuildsPanel] = useState<boolean>(false);
+  // Initialize currentLoadingImage to null for deterministic SSR
+  const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(null);
+  const [currentLoadingTip, setCurrentLoadingTip] = useState<string>('');
   const [showKnowledgePanel, setShowKnowledgePanel] = useState<boolean>(false);
   const [showTechTreePanel, setShowTechTreePanel] = useState<boolean>(false); // État pour TechTree
   const [showCitizenRegistry, setShowCitizenRegistry] = useState<boolean>(false); // State for CitizenRegistry
@@ -207,8 +210,36 @@ export default function TwoDPage() {
   //   setSelectedLandInitialData(null);
   // }, []);
 
-  // Effect to determine client-side initial status after mount
+  // Effect to determine client-side initial status after mount AND set initial loading image
   useEffect(() => {
+    // Set initial loading image (client-side only)
+    const selectInitialLoadingImage = () => {
+      if (loadingImageFiles.length === 0) return null;
+      const cache = getLoadingImageCache();
+      const now = Date.now();
+      const oneDayMs = 24 * 60 * 60 * 1000;
+
+      const viableImageFiles = loadingImageFiles.filter(fileName => {
+        const cacheEntry = cache[fileName];
+        if (cacheEntry?.failed && cacheEntry.lastAttempt && (now - cacheEntry.lastAttempt < oneDayMs)) {
+          return false;
+        }
+        return true;
+      });
+
+      let selectedFileName: string;
+      if (viableImageFiles.length > 0) {
+        selectedFileName = viableImageFiles[Math.floor(Math.random() * viableImageFiles.length)];
+        console.log("App Page: Selected a viable loading image (client-side):", selectedFileName);
+      } else {
+        selectedFileName = loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)];
+        console.log("App Page: All images failed recently, retrying a random one (client-side):", selectedFileName);
+      }
+      return `https://backend.serenissima.ai/public_assets/images/loading/${selectedFileName}`;
+    };
+    setCurrentLoadingImage(selectInitialLoadingImage());
+
+    // Determine app status
     const clientDeterminedStatus = determineInitialAppStatus();
     if (clientDeterminedStatus === 'ready') {
       // If localStorage indicates we should skip daily update,
