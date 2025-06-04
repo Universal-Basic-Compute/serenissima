@@ -39,26 +39,26 @@ export default function CoatOfArmsMarkers({
 }: CoatOfArmsMarkersProps) {
   const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
 
-  // If the component is not visible, don't render anything
-  if (!isVisible) {
-    return null;
-  }
-
   const handleMouseEnter = useCallback((polygon: any, owner: string) => {
     setHoveredPolygonId(polygon.id);
     // Reuse polygon hover state, adding owner information
     hoverStateService.setHoverState('polygon', polygon.id, { ...polygon, owner });
-  }, []);
+  }, []); // Dependencies are stable, so this is fine
 
   const handleMouseLeave = useCallback(() => {
     setHoveredPolygonId(null);
     hoverStateService.clearHoverState();
-  }, []);
+  }, []); // Dependencies are stable
 
   const handleClick = useCallback((polygon: any) => {
     // Emit an event similar to building clicks, but for polygons/land
     eventBus.emit(EventTypes.POLYGON_SELECTED, { polygonId: polygon.id, polygonData: polygon });
-  }, []);
+  }, []); // Dependencies are stable
+
+  // If the component is not visible, don't render anything
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <div className="absolute inset-0 pointer-events-none">
