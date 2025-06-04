@@ -925,7 +925,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   // border: '1px solid white', // Removed white border
                   // boxShadow is removed, will be handled by filter on img
                 }}
-                title={`${firstName} ${lastName} (${socialClass})${
+                title={`${firstName} ${lastName} (${socialClassRawStatic})${ // Changed socialClass to socialClassRawStatic
                   citizen.username === currentUsername ? ' - This is you' : 
                   citizen.worksFor === currentUsername ? ' - Works for you' : ''
                 }`}
