@@ -65,11 +65,82 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
     '6.png',
     '7.png'
   ];
-  const initialLoadingImage = loadingImageFiles.length > 0
-    ? `https://backend.serenissima.ai/public_assets/images/loading/${loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)]}`
-    : null;
+  const initialLoadingImage = (() => {
+    if (loadingImageFiles.length === 0) return null;
+
+    const cache = getLoadingImageCache();
+    const now = Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+
+    // Filter out images that failed recently (e.g., within the last day)
+    const viableImageFiles = loadingImageFiles.filter(fileName => {
+      const cacheEntry = cache[fileName];
+      if (cacheEntry?.failed && cacheEntry.lastAttempt && (now - cacheEntry.lastAttempt < oneDayMs)) {
+        return false; // Failed recently
+      }
+      return true;
+    });
+
+    let selectedFileName: string;
+    if (viableImageFiles.length > 0) {
+      // Prefer images that were successfully loaded and are not expired from the viable list
+      const goodCachedViableFiles = viableImageFiles.filter(fileName => {
+        const cacheEntry = cache[fileName];
+        return cacheEntry && !cacheEntry.failed && (now - cacheEntry.timestamp < LOADING_IMAGE_CACHE_EXPIRY_MS);
+      });
+
+      if (goodCachedViableFiles.length > 0) {
+        selectedFileName = goodCachedViableFiles[Math.floor(Math.random() * goodCachedViableFiles.length)];
+        console.log("Selected a good cached loading image:", selectedFileName);
+      } else {
+        selectedFileName = viableImageFiles[Math.floor(Math.random() * viableImageFiles.length)];
+        console.log("Selected a viable (not recently failed or never tried) loading image:", selectedFileName);
+      }
+    } else {
+      // All images failed recently, pick one at random from the original list to retry
+      selectedFileName = loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)];
+      console.log("All images failed recently, retrying a random one:", selectedFileName);
+    }
+    return `https://backend.serenissima.ai/public_assets/images/loading/${selectedFileName}`;
+  })();
+
   const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(initialLoadingImage);
   const [currentLoadingTip, setCurrentLoadingTip] = useState<string>('');
+
+  // Cache constants for loading images
+  const LOADING_IMAGE_CACHE_KEY = 'loadingScreenImageCache';
+  const LOADING_IMAGE_CACHE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+  interface LoadingImageCacheItem {
+    src: string;
+    timestamp: number;
+    failed?: boolean;
+    lastAttempt?: number;
+  }
+  type LoadingImageCache = Record<string, LoadingImageCacheItem>; // Keyed by image filename
+
+  // Helper to get loading image cache
+  const getLoadingImageCache = (): LoadingImageCache => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const cached = localStorage.getItem(LOADING_IMAGE_CACHE_KEY);
+      return cached ? JSON.parse(cached) : {};
+    } catch (e) {
+      console.error("Error reading loading image cache:", e);
+      return {};
+    }
+  };
+
+  // Helper to set loading image cache
+  const setLoadingImageCache = (cache: LoadingImageCache) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(LOADING_IMAGE_CACHE_KEY, JSON.stringify(cache));
+    } catch (e) {
+      console.error("Error writing loading image cache:", e);
+    }
+  };
+
   // Add refs to track previous state
   const prevActiveView = useRef<ViewType | null>(null); // Peut être conservé si utilisé ailleurs
   const prevScale = useRef<number>(3); // Peut être conservé si utilisé ailleurs
@@ -1005,17 +1076,31 @@ number => {
     // Load the initially selected background image
     if (currentLoadingImage) {
       const img = new Image();
+      const imageName = currentLoadingImage.substring(currentLoadingImage.lastIndexOf('/') + 1);
+
       img.onload = () => {
-        console.log('IsometricViewer: Background image loaded successfully.');
+        console.log('App Page: Background image loaded successfully:', currentLoadingImage);
         setBgImageReady(true);
+        const cache = getLoadingImageCache();
+        cache[imageName] = { src: currentLoadingImage, timestamp: Date.now(), failed: false };
+        setLoadingImageCache(cache);
       };
       img.onerror = () => {
-        console.warn(`IsometricViewer: Failed to load background image: ${currentLoadingImage}`);
+        console.warn(`App Page: Failed to load background image: ${currentLoadingImage}`);
         setBgImageReady(true); // Mark as ready even on error to not block UI
+        const cache = getLoadingImageCache();
+        cache[imageName] = { 
+          src: currentLoadingImage, 
+          timestamp: cache[imageName]?.timestamp || 0, // Preserve old success timestamp if any
+          failed: true, 
+          lastAttempt: Date.now() 
+        };
+        setLoadingImageCache(cache);
+        // Optionally, try to load a different image here if the selected one fails
       };
       img.src = currentLoadingImage;
     } else {
-      console.log('IsometricViewer: No background image to load, marking as ready.');
+      console.log('App Page: No background image to load, marking as ready.');
       setBgImageReady(true); // No image to load
     }
 
