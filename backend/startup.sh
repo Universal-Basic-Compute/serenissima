@@ -98,5 +98,5 @@ echo "Cron job setup skipped."
 
 # Start the application
 echo "Starting application (FastAPI backend) from $BACKEND_DIR..."
-# run.py is in BACKEND_DIR, so just python run.py
-python run.py
+# run.py is in BACKEND_DIR, use the venv python
+/opt/render/project/src/.venv/bin/python run.py
