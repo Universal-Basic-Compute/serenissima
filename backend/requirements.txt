@@ -5,3 +5,4 @@ python-dateutil
 uvicorn[standard]
 fastapi
 pyairtable
+python-multipart
