@@ -321,7 +321,7 @@ def calculate_gondola_travel_details(path_json_string: Optional[str]) -> tuple[f
 def process_building_arrivals(tables: Dict[str, Table], dry_run: bool = False, forced_utc_datetime_override: Optional[datetime] = None):
     """Checks for buildings (e.g., merchant galleys) that have 'arrived'."""
     log.info(f"{LogColors.OKBLUE}Checking for building arrivals (e.g., merchant galleys)...{LogColors.ENDC}")
-    
+
     if forced_utc_datetime_override:
         now_utc_for_check = forced_utc_datetime_override
         log.info(f"{LogColors.WARNING}Using forced UTC datetime {now_utc_for_check.isoformat()} for building arrival check.{LogColors.ENDC}")
@@ -352,6 +352,50 @@ def process_building_arrivals(tables: Dict[str, Table], dry_run: bool = False, f
                 log.info(f"{LogColors.OKCYAN}[DRY RUN] Would update merchant galley {building_custom_id} to IsConstructed=True.{LogColors.ENDC}")
     except Exception as e_fetch:
         log.error(f"{LogColors.FAIL}Error fetching arriving buildings: {e_fetch}{LogColors.ENDC}")
+
+def mark_started_activities_as_in_progress(
+    tables: Dict[str, Table], 
+    now_utc_for_check_override: Optional[datetime] = None,
+    dry_run: bool = False
+):
+    """
+    Identifies activities that have started (StartDate <= now) but are still 'created'
+    and updates their status to 'in_progress'.
+    """
+    now_utc_to_use = now_utc_for_check_override if now_utc_for_check_override else datetime.now(timezone.utc)
+    now_iso_utc = now_utc_to_use.isoformat()
+
+    log.info(f"{LogColors.OKBLUE}Marking started activities as 'in_progress' (effective time: {now_iso_utc})...{LogColors.ENDC}")
+
+    formula = f"AND({{Status}}='created', {{StartDate}}<='{now_iso_utc}')"
+    try:
+        activities_to_mark_started = tables['activities'].all(formula=formula)
+        if not activities_to_mark_started:
+            log.info("No 'created' activities found that have already started.")
+            return
+
+        updates_for_in_progress = []
+        for activity in activities_to_mark_started:
+            activity_id_airtable = activity['id']
+            activity_guid = activity['fields'].get('ActivityId', activity_id_airtable)
+            citizen_username_log = activity['fields'].get('Citizen', 'UnknownCitizen')
+            activity_type_log = activity['fields'].get('Type', 'UnknownType')
+            
+            if not dry_run:
+                updates_for_in_progress.append({'id': activity_id_airtable, 'fields': {'Status': 'in_progress'}})
+                log.info(f"Marking activity {activity_guid} (Citizen: {citizen_username_log}, Type: {activity_type_log}) as 'in_progress'.")
+            else:
+                log.info(f"[DRY RUN] Would mark activity {activity_guid} (Citizen: {citizen_username_log}, Type: {activity_type_log}) as 'in_progress'.")
+        
+        if updates_for_in_progress and not dry_run:
+            tables['activities'].batch_update(updates_for_in_progress)
+            log.info(f"{LogColors.OKGREEN}Successfully marked {len(updates_for_in_progress)} activities as 'in_progress'.{LogColors.ENDC}")
+        elif dry_run and activities_to_mark_started:
+            log.info(f"[DRY RUN] Would have marked {len(activities_to_mark_started)} activities as 'in_progress'.")
+
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error marking started activities as 'in_progress': {e}{LogColors.ENDC}")
+
 
 def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, forced_venice_hour_override: Optional[int] = None):
     if target_citizen_username:
@@ -441,6 +485,10 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
     # Process building arrivals (e.g., galleys)
     # Pass the forced_utc_datetime_for_check to process_building_arrivals as well
     process_building_arrivals(tables, dry_run, forced_utc_datetime_override=forced_utc_datetime_for_check)
+
+    # Mark activities that have started as 'in_progress'
+    # This should happen before interruption checks and rescheduling.
+    mark_started_activities_as_in_progress(tables, forced_utc_datetime_for_check, dry_run)
 
     # Handle activity interruptions before processing concluded activities
     if not dry_run: # Interruptions should only happen in a live run
