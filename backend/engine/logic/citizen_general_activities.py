@@ -1843,6 +1843,26 @@ def dispatch_specific_activity_request(
     #                 pass # Placeholder for chaining logic
     #     # ... return based on first_activity_of_chain ...
 
+    elif activity_type == "initiate_building_project":
+        log.info(f"Dispatching to initiate_building_project_creator for {citizen_name} with params: {activity_parameters}")
+        # The initiate_building_project_creator.try_create should return the first activity record or None
+        first_activity_of_chain = try_create_initiate_building_project_activity(
+            tables,
+            citizen_record_full,
+            activity_parameters if activity_parameters is not None else {},
+            resource_defs, # Pass resource_defs
+            building_type_defs, # Pass building_type_defs
+            now_venice_dt, # Pass now_venice_dt
+            now_utc_dt, # Pass now_utc_dt
+            transport_api_url, # Pass transport_api_url
+            api_base_url # Pass api_base_url
+        )
+        if first_activity_of_chain and isinstance(first_activity_of_chain, dict) and 'fields' in first_activity_of_chain:
+            return {"success": True, "message": f"Initiate building project endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain['fields'].get('Type', 'N/A')}.", "activity": first_activity_of_chain['fields']}
+        else:
+            log.warning(f"initiate_building_project_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
+            return {"success": False, "message": f"Could not initiate 'initiate_building_project' endeavor for {citizen_name}.", "activity": None, "reason": "initiate_building_project_creation_failed"}
+
     elif activity_type == "send_message":
         log.info(f"Dispatching to send_message_creator for {citizen_name} with params: {activity_parameters}")
         # The send_message_creator.try_create expects `tables`, `citizen_record`, and `details` (which are activityParameters)
