@@ -1,4 +1,3 @@
-Function and alias for aider_nova created/updated.
 absl-py==1.4.0
 accelerate==0.18.0
 addict==2.4.0
