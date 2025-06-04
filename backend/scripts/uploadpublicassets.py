@@ -1,6 +1,7 @@
 import os
 import requests
 import argparse
+import pathlib
 from dotenv import load_dotenv
 import mimetypes # Pour déterminer le type MIME si nécessaire, bien que requests le fasse souvent.
 import posixpath # Pour la jonction correcte des segments de chemin d'URL
