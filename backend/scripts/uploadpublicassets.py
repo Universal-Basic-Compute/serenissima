@@ -174,16 +174,36 @@ def main():
         
         destination_on_server = args.destination_path_on_server.replace(os.path.sep, '/')
         if not destination_on_server:
-            # Si aucune destination n'est fournie, essayons de deviner un chemin de base
-            # Par exemple, si le fichier est dans un dossier 'images/buildings', utiliser 'images/buildings'
-            # Sinon, le placer à la racine du type d'asset (ex: 'images/')
-            # Pour une image unique, il est souvent préférable de spécifier la destination.
-            # Ici, on va juste utiliser le nom du fichier à la racine si non spécifié.
-            # Ou, si on veut être plus intelligent, on pourrait essayer de déduire à partir du chemin local.
-            # Pour l'instant, si vide, on le met à la racine du bucket d'upload (qui est géré par l'API /api/upload-asset)
-            # L'API /api/upload-asset s'attend à un 'destination_path' qui est le dossier.
-            # Si args.destination_path_on_server est vide, cela signifie la racine du bucket.
-            print(f"Chemin de destination sur le serveur : '{destination_on_server}' (racine du bucket d'upload ou chemin spécifié par l'API si vide ici)")
+            # Essayer de déduire le chemin de destination à partir du chemin de l'image source
+            # en cherchant le dossier "public"
+            try:
+                path_parts = pathlib.Path(image_path).parts
+                # Trouver l'index de "public" (insensible à la casse)
+                public_index = -1
+                for i, part in enumerate(path_parts):
+                    if part.lower() == "public":
+                        public_index = i
+                        break
+                
+                if public_index != -1 and public_index < len(path_parts) - 2: # -2 car on veut le dossier parent du fichier
+                    # Reconstruire le chemin relatif à partir de "public"
+                    # On veut le dossier parent du fichier, donc jusqu'à l'avant-dernier élément après "public"
+                    relative_parts = path_parts[public_index + 1 : -1] # Exclut "public" et le nom du fichier
+                    destination_on_server = posixpath.join(*relative_parts)
+                    print(f"Chemin de destination déduit à partir de '{image_path}' : '{destination_on_server}'")
+                else:
+                    # Si "public" n'est pas trouvé ou si le fichier est directement dans "public"
+                    # (pas de sous-dossiers pour la destination), on met à la racine.
+                    destination_on_server = "" # Signifie la racine du bucket d'upload
+                    print(f"Impossible de déduire un chemin de destination significatif à partir de '{image_path}'. Utilisation de la racine du bucket d'upload.")
+            except Exception as e:
+                print(f"Erreur lors de la déduction du chemin de destination : {e}. Utilisation de la racine du bucket d'upload.")
+                destination_on_server = ""
+
+            if not destination_on_server: # Double vérification si la déduction a échoué
+                 print(f"Chemin de destination sur le serveur : '{destination_on_server}' (racine du bucket d'upload ou chemin spécifié par l'API si vide ici)")
+        else:
+            print(f"Chemin de destination sur le serveur (fourni) : '{destination_on_server}'")
 
         if upload_file(args.api_url, args.api_key, image_path, destination_on_server):
             successful_uploads += 1
