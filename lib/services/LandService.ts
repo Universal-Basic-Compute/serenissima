@@ -68,7 +68,7 @@ export class LandService {
           await new Promise<void>((resolve, reject) => {
             const timeoutId = setTimeout(() => {
               reject(new Error(`Timeout loading image for polygon ${polygon.id}`));
-            }, 5000); // 5 second timeout
+            }, 15000); // 15 second timeout
             
             img.onload = () => {
               clearTimeout(timeoutId);
