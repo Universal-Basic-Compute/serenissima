@@ -212,6 +212,20 @@ export default function TwoDPage() {
 
   // Effect to determine client-side initial status after mount AND set initial loading image
   useEffect(() => {
+    // Define loading images (can be moved outside if static and shared, but here for clarity)
+    const loadingImageFiles = [
+      'renaissance-architectural-construction.png',
+      'renaissance-venetian-merchant-s-ledger.png',
+      'secretive-venetian-council-of-ten-meeting.png',
+      '1.png',
+      '2.png',
+      '3.png',
+      '4.png',
+      '5.png',
+      '6.png',
+      '7.png'
+    ];
+
     // Set initial loading image (client-side only)
     const selectInitialLoadingImage = () => {
       if (loadingImageFiles.length === 0) return null;
