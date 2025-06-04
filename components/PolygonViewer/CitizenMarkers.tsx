@@ -368,44 +368,45 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Add effect to initialize animated citizens when paths are loaded
   useEffect(() => {
-    // Mark as not ready to render while processing new data
     setReadyToRenderMarkers(false);
 
     if (Object.keys(activityPaths).length === 0 || citizens.length === 0) {
-      setAnimatedCitizens({}); // Clear previous animated citizens
-      setPositionsInitialized(false); // Not initialized if no data
-      // Still, we can mark as ready to render (nothing) to avoid indefinite loading message
-      // Or, if an explicit "no citizens to display" message is desired, handle that in renderCitizenMarkers
+      if (Object.keys(animatedCitizens).length > 0) { // Only update if it's actually changing
+        setAnimatedCitizens({});
+      }
+      if (positionsInitialized) { // Only update if it's actually changing
+        setPositionsInitialized(false);
+      }
       setReadyToRenderMarkers(true); 
       return;
     }
     
-    console.log('CitizenMarkers: (Re)Initializing animated citizens with paths...');
+    // console.log('CitizenMarkers: (Re)Initializing animated citizens with paths...'); // Reduced logging
     
-    // Use the CitizenAnimationService to initialize animated citizens
     const newAnimatedCitizens = citizenAnimationService.initializeAnimatedCitizens(
       citizens,
       activityPaths
     );
     
-    // Update state with the initialized citizens
-    setAnimatedCitizens(newAnimatedCitizens);
-    console.log(`CitizenMarkers: Initialized ${Object.keys(newAnimatedCitizens).length} animated citizens`);
+    // Only update if the new object is different from the current one to prevent loops
+    if (JSON.stringify(newAnimatedCitizens) !== JSON.stringify(animatedCitizens)) {
+      setAnimatedCitizens(newAnimatedCitizens);
+      // console.log(`CitizenMarkers: Updated animatedCitizens. New count: ${Object.keys(newAnimatedCitizens).length}`);
+    }
     
-    // Set the positions initialized flag to true
-    setPositionsInitialized(true);
-    setReadyToRenderMarkers(true); // Mark as ready to render new positions
+    if (!positionsInitialized) { // Only update if it's actually changing
+      setPositionsInitialized(true);
+    }
+    setReadyToRenderMarkers(true);
     
-    // Start animation loop immediately
     if (animationActive && Object.keys(newAnimatedCitizens).length > 0) {
       citizenAnimationService.startAnimation(handleAnimationUpdate);
     }
     
-    // Cleanup animation loop on unmount
     return () => {
       citizenAnimationService.stopAnimation();
     };
-  }, [activityPaths, citizens, animationActive, handleAnimationUpdate]);
+  }, [activityPaths, citizens, animationActive, handleAnimationUpdate, animatedCitizens, positionsInitialized]); // Added animatedCitizens and positionsInitialized to dependencies
   
   // Add effect to start/stop animation when view changes
   useEffect(() => {
@@ -772,7 +773,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           const isCitizenInvolvedInBuildingHover = involvedCitizenIdsInBuildingHover.has(citizenId);
 
           const socialClassRaw = (citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Citizen').trim();
-          const socialClassForIcon = socialClassRaw || 'Citizen'; // Fallback for empty string after trim
+          let socialClassForIcon = socialClassRaw || 'Citizen'; // Fallback for empty string after trim
+          if (socialClassForIcon) { // Normalize to PascalCase
+            socialClassForIcon = socialClassForIcon.charAt(0).toUpperCase() + socialClassForIcon.slice(1).toLowerCase();
+            if (socialClassRaw.includes('Dei') || socialClassRaw.includes('dei')) { // Preserve multi-word names like ConsiglioDeiDieci
+                socialClassForIcon = socialClassRaw;
+            }
+          }
           const iconFilename = `${socialClassForIcon}.png`;
           const iconSrc = `/images/icons/${iconFilename}`;
           const fallbackIconSrc = '/images/icons/Citizen.png';
@@ -867,11 +874,17 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           
           const firstName = citizen.firstname || citizen.FirstName || citizen.firstName || '';
           const lastName = citizen.lastname || citizen.LastName || citizen.lastName || '';
-          const socialClass = (citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Citizen').trim();
+          const socialClassRawStatic = (citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Citizen').trim();
           const citizenId = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id;
           const isCitizenInvolvedInBuildingHover = involvedCitizenIdsInBuildingHover.has(citizenId);
 
-          const socialClassForIcon = socialClass || 'Citizen';
+          let socialClassForIcon = socialClassRawStatic || 'Citizen';
+          if (socialClassForIcon) { // Normalize to PascalCase
+            socialClassForIcon = socialClassForIcon.charAt(0).toUpperCase() + socialClassForIcon.slice(1).toLowerCase();
+            if (socialClassRawStatic.includes('Dei') || socialClassRawStatic.includes('dei')) { // Preserve multi-word names
+                socialClassForIcon = socialClassRawStatic;
+            }
+          }
           const iconFilename = `${socialClassForIcon}.png`;
           const iconSrc = `/images/icons/${iconFilename}`;
           const fallbackIconSrc = '/images/icons/Citizen.png';
