@@ -968,9 +968,11 @@ def reschedule_created_activities_by_priority(
                     log.info(f"{LogColors.OKGREEN}Successfully applied {len(updates_to_make)} rescheduling updates for citizen {citizen_username}.{LogColors.ENDC}")
                 except Exception as e_batch_update:
                     log.error(f"{LogColors.FAIL}Error batch updating rescheduled activities for citizen {citizen_username}: {e_batch_update}{LogColors.ENDC}")
-            else:
-                for rec_id, flds_to_update in updates_to_make:
-                    log.info(f"[DRY RUN] Would update activity {rec_id} for citizen {citizen_username} to StartDate: {flds_to_update['StartDate']}, EndDate: {flds_to_update['EndDate']}.")
+            else: # dry_run
+                for rec_id_dry, flds_to_update_dry in updates_to_make:
+                    original_activity_for_log = next((act for act in created_activities if act['id'] == rec_id_dry), None)
+                    original_start_date_log = original_activity_for_log['fields']['_StartDateDt'].isoformat() if original_activity_for_log and '_StartDateDt' in original_activity_for_log['fields'] else "N/A"
+                    log.info(f"[DRY RUN] Citizen {citizen_username}: Activity {rec_id_dry} (Original Start: {original_start_date_log}) would be updated to StartDate: {flds_to_update_dry['StartDate']}, EndDate: {flds_to_update_dry['EndDate']}.")
         else:
             log.info(f"Citizen {citizen_username}: No rescheduling updates needed after evaluation.")
 
