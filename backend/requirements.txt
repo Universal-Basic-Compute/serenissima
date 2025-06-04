@@ -31,7 +31,6 @@ black==24.1.1
 blendmodes==2022
 blinker==1.8.2
 boltons==23.0.0
-bunch==1.0.1
 CacheControl==0.14.2
 cachetools==4.2.4
 certifi==2025.1.31
