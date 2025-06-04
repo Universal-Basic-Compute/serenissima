@@ -60,7 +60,7 @@ import re
 import math # Added for Haversine distance
 from datetime import datetime, timezone, timedelta
 import pytz # Added for Venice timezone
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 
 # Add the project root to sys.path to allow imports from backend.engine
 # Corrected sys.path manipulation:
