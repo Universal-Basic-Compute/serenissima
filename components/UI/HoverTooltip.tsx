@@ -148,8 +148,11 @@ export const HoverTooltip: React.FC = () => {
         lastName: typeof citizen.lastName === 'string' ? citizen.lastName : '',
         socialClass: typeof citizen.socialClass === 'string' ? citizen.socialClass : '',
         imageUrl: typeof citizen.imageUrl === 'string' && citizen.imageUrl !== '' ? citizen.imageUrl : null,
-        id: typeof citizen.id === 'string' ? citizen.id : '',
-        activityNotes: typeof citizen.activityNotes === 'string' ? citizen.activityNotes : null // Extract activityNotes
+        // Ensure 'id' is present for fallback or other uses, prefer 'id' then 'citizenid' from the source 'citizen' object
+        id: typeof citizen.id === 'string' ? citizen.id : (typeof citizen.citizenid === 'string' ? citizen.citizenid : ''),
+        // Explicitly add username if it exists on 'citizen' (which is state.data.citizen)
+        username: typeof citizen.username === 'string' ? citizen.username : null,
+        activityNotes: typeof citizen.activityNotes === 'string' ? citizen.activityNotes : null
       };
       
       setTooltipData({
@@ -285,7 +288,9 @@ export const HoverTooltip: React.FC = () => {
     if (citizen) {
       // If we have the citizen data, display it
       // Ensure we have the correct property names for image and social class
-      const imageUrl = citizen.imageUrl || `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.id || 'default'}.jpg`; // Use citizen.id from safeCitizen
+      // Prioritize citizen.username for the image path, then citizen.id, then 'default'
+      const identifierForImage = citizen.username || citizen.id || 'default';
+      const imageUrl = citizen.imageUrl || `https://backend.serenissima.ai/public_assets/images/citizens/${identifierForImage}.jpg`;
     
       // This console.log can be removed or kept, but the one above is more comprehensive now.
       // console.log('TOOLTIP: Using image URL:', imageUrl); 
