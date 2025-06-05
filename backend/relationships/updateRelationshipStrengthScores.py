@@ -67,10 +67,13 @@ RELATIONSHIP_TRUST_DECAY_FACTOR = 0.75 # Facteur de déclin pour le score latent
 
 # Importer les fonctions de conversion et constantes
 from backend.engine.utils.relationship_helpers import (
-    convert_latent_to_normalized_score,
-    convert_normalized_to_latent_score,
+    convert_latent_to_normalized_score, # Pour TrustScore
+    convert_normalized_to_latent_score, # Pour TrustScore
+    convert_latent_strength_to_normalized_score, # Pour StrengthScore
+    convert_normalized_strength_to_latent_score, # Pour StrengthScore
     LATENT_SCORE_SCALE_FACTOR,
-    DEFAULT_NORMALIZED_SCORE
+    DEFAULT_NORMALIZED_SCORE, # Pour TrustScore
+    DEFAULT_NORMALIZED_STRENGTH_SCORE # Pour StrengthScore
 )
 
 def initialize_airtable():
@@ -651,18 +654,18 @@ def update_relationship_scores(
                 record = existing_relationships[target_username]
                 record_id = record['id']
 
-                # --- StrengthScore (0-100 en BDD) ---
+                # --- StrengthScore (0-100 en BDD, base 0) ---
                 # 1. Lire le score normalisé actuel et convertir en latent
-                current_normalized_strength = float(record.get('StrengthScore', DEFAULT_NORMALIZED_SCORE))
-                current_latent_strength = convert_normalized_to_latent_score(current_normalized_strength)
-                # 2. Appliquer le déclin au score latent
+                current_normalized_strength = float(record.get('StrengthScore', DEFAULT_NORMALIZED_STRENGTH_SCORE))
+                current_latent_strength = convert_normalized_strength_to_latent_score(current_normalized_strength)
+                # 2. Appliquer le déclin au score latent (s'assurer qu'il ne devient pas négatif si non souhaité)
                 latent_strength_decayed = current_latent_strength * RELATIONSHIP_STRENGTH_DECAY_FACTOR
                 # 3. Ajouter les points bruts de pertinence (score_to_add) au score latent décliné
                 new_latent_strength = latent_strength_decayed + score_to_add
                 # 4. Reconvertir en score normalisé pour stockage
-                updated_normalized_strength_score = convert_latent_to_normalized_score(new_latent_strength)
+                updated_normalized_strength_score = convert_latent_strength_to_normalized_score(new_latent_strength)
 
-                # --- TrustScore (0-100 en BDD) ---
+                # --- TrustScore (0-100 en BDD, base 50) ---
                 # 1. Lire le score normalisé actuel et convertir en latent
                 current_normalized_trust = float(record.get('TrustScore', DEFAULT_NORMALIZED_SCORE))
                 current_latent_trust = convert_normalized_to_latent_score(current_normalized_trust)
@@ -726,8 +729,9 @@ def update_relationship_scores(
             elif score_to_add > 0 or new_relevancy_types_set: # Only create if there's a new relevancy
                 # Create new relationship
                 # Initial latent StrengthScore comes from relevancy (score_to_add)
-                initial_latent_strength = score_to_add
-                new_normalized_strength_score = convert_latent_to_normalized_score(initial_latent_strength)
+                initial_latent_strength = score_to_add # Points bruts de pertinence
+                # Convertir en score normalisé (0-100, base 0) pour stockage
+                new_normalized_strength_score = convert_latent_strength_to_normalized_score(initial_latent_strength)
 
                 # Initial latent TrustScore is calculated from interactions
                 target_citizen_record = username_to_citizen_record_map.get(target_username)

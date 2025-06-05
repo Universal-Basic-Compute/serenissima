@@ -227,31 +227,22 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
       }}
       linkColor={(link: any) => getTrustScoreColor(link.trustScore)}
       linkWidth={(link: any) => {
-        // StrengthScore (internal) is on a 50-100 scale. Remap to 0-100 for display/width calculation.
-        // (internal 50 -> 0, internal 100 -> 100)
-        const internalStrength = link.strengthScore || 50;
-        const displayStrength = Math.max(0, (internalStrength - 50) * 2); // Remaps to 0-100
-        // Now normalize this 0-100 displayStrength to 0-100 for log scaling (or use directly if scale is appropriate)
-        // For log1p, we want a value that grows. Let's use displayStrength directly, perhaps scaled.
-        // A strength of 0 (internal 50) should give a minimal width (e.g., 1).
-        // A strength of 100 (internal 100) should give a max width.
-        // Math.log1p(0) is 0. Math.log1p(large_number) grows.
-        // Let's scale displayStrength (0-100) to something like 0-20 for the log part.
-        const scaledDisplayStrength = displayStrength / 5; // Now 0-20
-        return 1 + Math.log1p(scaledDisplayStrength) * 0.75; // Adjust multiplier for visual effect
+        // StrengthScore is now directly on a 0-100 scale.
+        const strength = link.strengthScore || 0; // Default to 0 if undefined
+        // Scale strength (0-100) to something like 0-20 for the log part.
+        const scaledStrength = strength / 5; // Now 0-20
+        return 1 + Math.log1p(scaledStrength) * 0.75; // Adjust multiplier for visual effect
       }}
       linkDirectionalParticles={1}
       linkDirectionalParticleWidth={(link: any) => {
-        const internalStrength = link.strengthScore || 50;
-        const displayStrength = Math.max(0, (internalStrength - 50) * 2);
-        const scaledDisplayStrength = displayStrength / 5; // 0-20
-        return 0.5 + Math.log1p(scaledDisplayStrength) * 0.375; // Half of linkWidth's log part
+        const strength = link.strengthScore || 0;
+        const scaledStrength = strength / 5; // 0-20
+        return 0.5 + Math.log1p(scaledStrength) * 0.375; // Half of linkWidth's log part
       }}
       linkDirectionalParticleSpeed={(link: any) => {
-        const internalStrength = link.strengthScore || 50;
-        const displayStrength = Math.max(0, (internalStrength - 50) * 2); // 0-100
-        // Speed from 0.002 (for displayStrength 0) to 0.007 (for displayStrength 100)
-        return (displayStrength / 100) * 0.005 + 0.002; 
+        const strength = link.strengthScore || 0; // 0-100
+        // Speed from 0.002 (for strength 0) to 0.007 (for strength 100)
+        return (strength / 100) * 0.005 + 0.002; 
       }}
       cooldownTicks={100}
       onEngineStop={() => fgRef.current && processedNodes.length > 0 && fgRef.current.zoomToFit(400, 150)} // Zoom to fit after engine stops

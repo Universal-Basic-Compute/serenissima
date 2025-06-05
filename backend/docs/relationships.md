@@ -6,18 +6,15 @@ Le système de scoring pour les relations (`StrengthScore` et `TrustScore`) fonc
 
 1.  **Scores Visibles** :
     *   **`TrustScore` (0-100)**:
-        *   **0**: Méfiance totale.
-        *   **50**: Neutre.
-        *   **100**: Confiance totale.
-    *   **`StrengthScore` (Interprété sur 0-100)**:
-        *   Le score `StrengthScore` est stocké en interne sur une base qui se traduit par une échelle normalisée de [50-100] (où 50 est une force latente de 0, et 100 est une force latente maximale).
-        *   Pour l'utilisation et l'affichage, ce score [50-100] est souvent remappé linéairement sur une échelle de **0 à 100** :
-            *   Un score interne de **50** (force latente nulle) devient **0** (force affichée nulle).
-            *   Un score interne de **75** devient **50** (force affichée moyenne).
-            *   Un score interne de **100** (force latente maximale) devient **100** (force affichée maximale).
-        *   La formule de remappage est : `StrengthScoreAffiché = (StrengthScoreInterne - 50) * 2`.
+        *   **0**: Méfiance totale (correspond à un score latent très négatif).
+        *   **50**: Neutre (correspond à un score latent de 0).
+        *   **100**: Confiance totale (correspond à un score latent très positif).
+    *   **`StrengthScore` (0-100)**:
+        *   **0**: Aucune force/pertinence (correspond à un score latent de 0).
+        *   **100**: Force/pertinence maximale (correspond à un score latent très positif).
+        *   *Note*: Le `StrengthScore` utilise une fonction de normalisation différente qui mappe un score latent de 0 à un score normalisé de 0.
 
-2.  **Impact Dégressif** : Pour les deux scores, l'effet de chaque point "latent" ajouté/retiré diminue à mesure que le score normalisé (interne) s'approche de ses extrêmes. Il est plus facile d'influencer un score proche du point de départ (latent 0 / normalisé 50) qu'un score déjà très élevé ou très bas.
+2.  **Impact Dégressif** : Pour les deux scores, l'effet de chaque point "latent" ajouté/retiré diminue à mesure que le score normalisé s'approche de ses extrêmes (0 ou 100).
 
 3.  **Mécanisme Interne** : Pour cela, le système convertit le score (0-100) en une valeur "latente", applique les changements à cette valeur, puis la reconvertit en score (0-100). Cette double conversion (utilisant `atan` et `tan`) crée l'effet d'impact dégressif.
 
@@ -35,7 +32,7 @@ Each record in the `RELATIONSHIPS` table represents a unique bond between two ci
 
 -   **`Citizen1`**: Text - The username of the first citizen (alphabetically).
 -   **`Citizen2`**: Text - The username of the second citizen (alphabetically).
--   **`StrengthScore`**: Number (Float) - Score normalisé interne sur une échelle de 50 à 100. Ce score est souvent remappé en 0-100 pour l'affichage/utilisation (où 50 interne = 0 affiché, 100 interne = 100 affiché).
+-   **`StrengthScore`**: Number (Float) - Score normalisé sur une échelle de 0 à 100. 0 indique une absence de force/pertinence, 100 indique une force maximale.
 -   **`TrustScore`**: Number (Float) - Score normalisé sur une échelle de 0 à 100 qui quantifie le niveau de confiance. Un score de 50 est neutre.
 -   **`LastInteraction`**: DateTime - Timestamp of the last time this relationship record was updated by the scoring script.
 -   **`Notes`**: Long Text - A comma-separated list of keywords indicating the sources that contributed to the scores (e.g., "Sources: proximity_relevancy, messages_interaction, loans_interaction").
@@ -70,14 +67,16 @@ The `updateRelationshipStrengthScores.py` script runs daily to update both `Stre
 Pour obtenir l'effet de rendement décroissant souhaité tout en stockant des scores sur une échelle de 0 à 100, le système utilise un espace de calcul "latent" :
 
 1.  **Lecture du Score (0-100)** : Le score actuel (`StrengthScore` ou `TrustScore`) est lu depuis Airtable.
-2.  **Conversion en Score Latent** : Ce score (0-100) est transformé en un score latent en utilisant l'inverse de la fonction `atan` :
-    `ScoreLatent = tan( ((ScoreNormalisé / 50) - 1) * (pi/2) ) / k`
-    Où `k` est le `LATENT_SCORE_SCALE_FACTOR` (ex: 0.1). Un score normalisé de 50 devient un score latent de 0.
-3.  **Application du Déclin au Score Latent** : Le score latent est multiplié par le `DECAY_FACTOR` (ex: 0.75).
-4.  **Ajout de Points Bruts au Score Latent** : Les "points bruts" (ex: `+1.0` pour une interaction positive) sont ajoutés à ce score latent décliné.
-5.  **Reconversion en Score Normalisé (0-100)** : Le nouveau score latent est reconverti en une échelle de 0 à 100 pour stockage :
-    `NouveauScoreNormalisé = ( (atan(NouveauScoreLatent * k) / (pi/2)) + 1 ) * 50`
-6.  **Écriture en BDD** : Ce `NouveauScoreNormalisé` est écrit dans Airtable.
+2.  **Conversion en Score Latent** :
+    *   Pour `TrustScore` (0-100, neutre à 50) : `ScoreLatentTrust = tan( ((ScoreNormaliséTrust / 50) - 1) * (pi/2) ) / k`
+    *   Pour `StrengthScore` (0-100, base à 0) : `ScoreLatentStrength = tan( (ScoreNormaliséStrength / 100) * (pi/2) ) / k`
+    Où `k` est le `LATENT_SCORE_SCALE_FACTOR` (ex: 0.1).
+3.  **Application du Déclin au Score Latent** : Le score latent est multiplié par le `DECAY_FACTOR` (ex: 0.75). Pour `StrengthScore`, le score latent ne descendra pas en dessous de 0.
+4.  **Ajout de Points Bruts au Score Latent** : Les "points bruts" (ex: `+1.0` pour une interaction positive ou une pertinence) sont ajoutés à ce score latent décliné. Pour `StrengthScore`, les points bruts de pertinence sont généralement positifs.
+5.  **Reconversion en Score Normalisé (0-100)** :
+    *   Pour `TrustScore` : `NouveauScoreNormaliséTrust = ( (atan(NouveauScoreLatentTrust * k) / (pi/2)) + 1 ) * 50`
+    *   Pour `StrengthScore` : `NouveauScoreNormaliséStrength = (atan(max(0, NouveauScoreLatentStrength) * k) / (pi/2)) * 100`
+6.  **Écriture en BDD** : Ces nouveaux scores normalisés sont écrits dans Airtable.
 
 Ce processus garantit que l'impact de l'ajout de points bruts diminue à mesure que le score normalisé s'approche de 0 ou 100.
 

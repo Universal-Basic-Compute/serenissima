@@ -33,7 +33,8 @@ TRUST_SCORE_MINOR_NEGATIVE = -0.5
 # Exemple : si latent_score * scale_factor = 1, le score normalisé est 75.
 # Si latent_score * scale_factor = -1, le score normalisé est 25.
 LATENT_SCORE_SCALE_FACTOR = 0.1 # Ajustez au besoin pour la sensibilité désirée
-DEFAULT_NORMALIZED_SCORE = 50.0 # Score neutre sur l'échelle 0-100
+DEFAULT_NORMALIZED_SCORE = 50.0 # Score neutre sur l'échelle 0-100 (pour TrustScore)
+DEFAULT_NORMALIZED_STRENGTH_SCORE = 0.0 # Score de base pour StrengthScore (0-100)
 
 def convert_latent_to_normalized_score(latent_score: float, scale_factor: float = LATENT_SCORE_SCALE_FACTOR) -> float:
     """
@@ -207,14 +208,14 @@ def update_trust_score_for_activity(
             initial_latent_trust_score = trust_change_amount
             # Convertir en score normalisé (0-100) pour stockage
             initial_normalized_trust_score = convert_latent_to_normalized_score(initial_latent_trust_score)
-            # Le StrengthScore initial sera 50.0 (neutre sur l'échelle 0-100)
-            initial_normalized_strength_score = DEFAULT_NORMALIZED_SCORE
+            # Le StrengthScore initial sera 0.0 (base de l'échelle 0-100 pour la force)
+            initial_normalized_strength_score = DEFAULT_NORMALIZED_STRENGTH_SCORE
 
             payload = {
                 'Citizen1': user1,
                 'Citizen2': user2,
                 'TrustScore': initial_normalized_trust_score,
-                'StrengthScore': initial_normalized_strength_score,
+                'StrengthScore': initial_normalized_strength_score, # Utilise la nouvelle base 0.0
                 'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(),
                 'Notes': interaction_note_key,
                 'Status': 'Active' # Statut initial
