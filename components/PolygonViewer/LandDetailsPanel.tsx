@@ -1141,11 +1141,4 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       )}
     </div>
   );
-  
-  // handleConfirmPurchase is no longer directly used as purchases go through activities.
-  // If a confirmation step is needed before calling handleGenericActivity,
-  // that logic would be placed before the call.
-  // The existing LandPurchaseConfirmation modal might need to be adapted or removed
-  // if all purchases go through the new activity system.
-  // handleConfirmPurchase function has been removed as it's deprecated.
 }
