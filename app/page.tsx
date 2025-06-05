@@ -20,9 +20,11 @@ import CitizenRegistry from '@/components/UI/CitizenRegistry'; // Import Citizen
 import LoanPanel from '@/components/Loans/LoanPanel'; // Importer le nouveau LoanPanel
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel'; // Import CitizenDetailsPanel
 // import InitialLoadingScreen from '@/components/UI/InitialLoadingScreen'; // Import InitialLoadingScreen - Supprimé
-import DailyUpdatePanel from '@/components/UI/DailyUpdatePanel'; // Import DailyUpdatePanel
-import BackgroundMusic from '@/components/UI/BackgroundMusic'; // Importer BackgroundMusic
-import { ambientAudioManager } from '@/lib/services/AmbientAudioManager'; // Import AmbientAudioManager
+import DailyUpdatePanel from '@/components/UI/DailyUpdatePanel';
+import BackgroundMusic from '@/components/UI/BackgroundMusic';
+import { ambientAudioManager } from '@/lib/services/AmbientAudioManager';
+import { weatherService } from '@/lib/services/WeatherService'; // Import WeatherService
+import WeatherTimeDisplay from '@/components/UI/WeatherTimeDisplay'; // Import WeatherTimeDisplay
 import { 
   StrategiesArticle, 
   BeginnersGuideArticle, 
@@ -298,7 +300,14 @@ export default function TwoDPage() {
       // Attempt to initialize immediately if possible (e.g. if user has interacted before)
       initAmbientAudio();
 
-  }, [handleDailyUpdateClose, appStatus, isAmbientAudioInitialized]); // Added appStatus and isAmbientAudioInitialized
+      // Initialize WeatherService
+      weatherService.initialize().then(() => {
+        console.log('WeatherService initialized by app/page.tsx.');
+      }).catch(error => {
+        console.error('Failed to initialize WeatherService from app/page.tsx:', error);
+      });
+
+  }, [handleDailyUpdateClose, appStatus, isAmbientAudioInitialized]);
 
   // State for path statistics
   const [pathStats, setPathStats] = useState<{
@@ -1462,9 +1471,12 @@ export default function TwoDPage() {
 
       {/* Background Music Component - Contrôlé par l'état de l'application */}
       {/* Enveloppé dans un div pour un positionnement optionnel si nécessaire, sinon il peut être placé directement */}
-      <div className="absolute bottom-4 right-1/2 transform translate-x-1/2 z-10 pointer-events-none"> {/* Example positioning, adjust as needed */}
+      <div className="absolute bottom-4 right-1/2 transform translate-x-1/2 z-10 pointer-events-none"> 
         <BackgroundMusic isAppReady={appStatus === 'ready'} />
       </div>
+
+      {/* Weather and Time Display */}
+      {canShowMainPanels && <WeatherTimeDisplay />}
     </div>
   );
 }
