@@ -16,13 +16,7 @@ API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
 # VENICE_TIMEZONE could be imported if needed for date operations.
 # from backend.engine.utils.activity_helpers import VENICE_TIMEZONE
 
-class LogColors: # Basic LogColors for consistency
-    FAIL = '\033[91m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    ENDC = '\033[0m'
+# Local LogColors class removed, using imported version.
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -123,32 +117,7 @@ def call_try_create_activity_api(
         return False
 
 # execute_land_purchase_contract and update_land_with_owner will be removed as their logic is handled by the activity.
-# def execute_land_purchase_contract(tables, contract_id: str, buyer_username: str) -> Optional[Dict]:
-    # """Update a land_sale contract with a buyer, marking it as executed."""
-    try:
-        now = datetime.now().isoformat()
-        
-        # Update the contract
-        updated_contract = tables["contracts"].update(contract_id, {
-            "Buyer": buyer_username,
-            "Status": "executed",
-            "ExecutedAt": now,
-            "UpdatedAt": now
-        })
-        
-        print(f"Executed land_sale contract {contract_id} with buyer {buyer_username}")
-        return updated_contract
-    except Exception as e:
-        print(f"Error executing land_sale contract {contract_id}: {str(e)}")
-        return None
-        # The 'return True' here is unreachable due to 'return None' above.
-        # Assuming the intent was for the try block to return the updated_contract or True on success.
-        # However, the current structure returns updated_contract or None.
-        # The 'return True' in the except block was likely a copy-paste error or leftover.
-        # The original error was about transaction_id, which is fixed below.
-    except Exception as e:
-        print(f"Error executing land_sale contract {contract_id}: {str(e)}") # Changed transaction_id to contract_id
-        return False # Should be None to match the function's return type hint Optional[Dict] or handle error differently
+# The orphaned try-except block below that belonged to the commented out execute_land_purchase_contract has been removed.
 
 # Removed update_land_with_owner function
 

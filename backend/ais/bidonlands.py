@@ -18,7 +18,8 @@ if PROJECT_ROOT not in sys.path:
 
 # --- Configuration ---
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
-from backend.engine.utils.activity_helpers import LogColors, log_header
+# LogColors and log_header are imported from activity_helpers, so local definition is removed.
+from backend.engine.utils.activity_helpers import LogColors, log_header 
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
