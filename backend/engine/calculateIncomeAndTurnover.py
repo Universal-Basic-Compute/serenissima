@@ -2,24 +2,28 @@ import os
 import sys
 import json
 from datetime import datetime, timedelta, timezone
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv # Removed find_dotenv
 from pyairtable import Api, Table
 
-# Load environment variables from .env file in the project root
-# This assumes the script might be run from different working directories
-try:
-    dotenv_path = find_dotenv(raise_error_if_not_found=True, usecwd=True)
+# Determine the project root directory
+# __file__ is backend/engine/calculateIncomeAndTurnover.py
+# os.path.dirname(__file__) is backend/engine/
+# os.path.join(..., '..') is backend/
+# os.path.join(..., '..', '..') is the project root (serenissima/)
+PROJECT_ROOT_CALC_FINANCIALS = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+
+# Construct the path to the .env file
+dotenv_path = os.path.join(PROJECT_ROOT_CALC_FINANCIALS, '.env')
+
+# Load environment variables from the .env file
+if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
     # print(f"Loaded .env file from: {dotenv_path}") # Keep this commented unless debugging .env loading
-except IOError:
-    # Fallback for environments where .env might be in a parent directory (e.g. running from backend/engine)
-    try:
-        dotenv_path = find_dotenv(raise_error_if_not_found=True, usecwd=False) # Search parent directories
-        load_dotenv(dotenv_path)
-        # print(f"Loaded .env file from parent: {dotenv_path}")
-    except IOError:
-        print("Error: .env file not found. Please ensure it's in the project root or a parent directory.")
-        sys.exit(1)
+else:
+    print(f"Error: .env file not found at {dotenv_path}. Please ensure it's in the project root.")
+    # Attempt to load from environment variables directly as a fallback (e.g., in Render)
+    print("Attempting to load credentials from environment variables directly.")
+    # No explicit action needed here, os.getenv will pick them up if set in the environment
 
 # Define ANSI color codes for logging
 class LogColors:
