@@ -35,8 +35,8 @@ load_dotenv()
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000") # Added API_BASE_URL
 
-# Import LogColors from shared utils
-from backend.engine.utils.activity_helpers import LogColors
+# Import LogColors and log_header from shared utils
+from backend.engine.utils.activity_helpers import LogColors, log_header
 
 BUSINESS_LIMIT_PER_AI = 10
 
@@ -268,7 +268,7 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Run the script in dry-run mode without making changes.")
     args = parser.parse_args()
 
-    log.info(f"Starting business delegation script (dry_run={args.dry_run})...")
+    log_header(f"Business Delegation Script (dry_run={args.dry_run})", LogColors.HEADER)
     
     tables = initialize_airtable()
     if not tables:

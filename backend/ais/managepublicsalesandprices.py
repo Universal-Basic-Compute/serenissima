@@ -10,21 +10,23 @@ from typing import Dict, List, Optional, Tuple, Any
 import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
-import colorama # Added for colored logs
-from colorama import Fore, Style # Added for colored logs
 from pprint import pformat # Added for pretty printing data
 import textwrap # Added for text wrapping in logs
 import logging # Added to define log
 
-# Initialize colorama
-colorama.init(autoreset=True)
-
+# colorama initialization is handled by log_header or globally
 # Setup logging
 log = logging.getLogger(__name__)
 logging.basicConfig(level=os.getenv('LOG_LEVEL', 'INFO').upper(), 
                     format='%(asctime)s - %(levelname)s - %(module)s - %(message)s',
                     stream=sys.stdout)
 
+# Add project root to sys.path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from backend.engine.utils.activity_helpers import log_header, LogColors, Fore, Style # Import shared log_header, LogColors, and colorama elements if needed by other log functions
 
 # Configuration for API calls
 BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
@@ -1034,7 +1036,7 @@ def process_ai_sales_and_price_strategies(dry_run: bool = False, kinos_model_ove
     """Main function to process AI public sales and pricing strategies."""
     script_name = "AI Public Sales & Pricing Strategy"
     model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
-    print(f"Starting {script_name} process (dry_run={dry_run}, kinos_model={model_status})")
+    log_header(f"{script_name} Process (dry_run={dry_run}, kinos_model={model_status})", LogColors.HEADER)
     
     tables = initialize_airtable()
     building_definitions = get_building_types_from_api() # Renamed for clarity from building_types

@@ -28,7 +28,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 # Import shared utilities
-from backend.engine.utils.activity_helpers import VENICE_TIMEZONE, _escape_airtable_value, get_venice_time_now
+from backend.engine.utils.activity_helpers import VENICE_TIMEZONE, _escape_airtable_value, get_venice_time_now, LogColors, log_header
 
 # Configuration
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
@@ -43,15 +43,8 @@ logging.basicConfig(
 )
 log = logging.getLogger("generatethoughts")
 
-class LogColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
+# LogColors will be imported from activity_helpers
+# from backend.engine.utils.activity_helpers import LogColors, log_header # Added log_header
 
 # --- Airtable and API Key Initialization ---
 
@@ -456,7 +449,7 @@ def process_ai_thoughts(
     filter_desc = f"citizen={specific_citizen_username}" if specific_citizen_username else "all eligible"
     
     model_status = f"override: {kinos_model_override}" if kinos_model_override else "default"
-    log.info(f"{LogColors.HEADER}Starting Citizen Thought Generation Process (dry_run={dry_run}, filter={filter_desc}, kinos_model={model_status})...{LogColors.ENDC}")
+    log_header(f"Citizen Thought Generation Process (dry_run={dry_run}, filter={filter_desc}, kinos_model={model_status})", LogColors.HEADER)
 
     tables = initialize_airtable()
     kinos_api_key = get_kinos_api_key()

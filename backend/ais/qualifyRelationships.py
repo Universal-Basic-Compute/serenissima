@@ -12,18 +12,8 @@ from pyairtable import Api, Table
 # Ajouter le répertoire parent au chemin Python
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Importer les fonctions utilitaires si disponibles
-try:
-    from backend.engine.utils.activity_helpers import LogColors
-except ImportError:
-    class LogColors:
-        HEADER = '\033[95m'
-        FAIL = '\033[91m'
-        OKGREEN = '\033[92m'
-        WARNING = '\033[93m'
-        OKBLUE = '\033[94m'
-        OKCYAN = '\033[96m'
-        ENDC = '\033[0m'
+# Importer les fonctions utilitaires
+from backend.engine.utils.activity_helpers import LogColors, log_header
 
 # Charger les variables d'environnement
 load_dotenv()
@@ -479,7 +469,7 @@ def main():
     parser.add_argument("--newOnly", action="store_true", help="Traiter uniquement les relations sans titre")
     args = parser.parse_args()
     
-    print(f"{LogColors.HEADER}=== Qualification des Relations avec KinOS ==={LogColors.ENDC}")
+    log_header("Qualification des Relations avec KinOS", LogColors.HEADER)
     print(f"Démarrage à {datetime.now().isoformat()}")
     print(f"Modèle KinOS: {args.model}")
     if args.newOnly:

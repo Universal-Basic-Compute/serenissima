@@ -11,18 +11,14 @@ from pyairtable import Api, Table
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.citizen_utils import find_citizen_by_identifier
 
+# Add project root to sys.path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 # --- Configuration ---
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
-# VENICE_TIMEZONE could be imported if needed for date operations, but not directly used here yet.
-# from backend.engine.utils.activity_helpers import VENICE_TIMEZONE
-
-class LogColors: # Basic LogColors for consistency if not imported
-    FAIL = '\033[91m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    ENDC = '\033[0m'
+from backend.engine.utils.activity_helpers import LogColors, log_header
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -215,7 +211,7 @@ def create_admin_notification(tables, ai_bid_counts: Dict[str, int]) -> None:
 
 def process_ai_land_bidding(dry_run: bool = False):
     """Main function to process AI bidding on lands."""
-    print(f"Starting AI land bidding process (dry_run={dry_run})")
+    log_header(f"AI Land Bidding Process (dry_run={dry_run})", LogColors.HEADER)
     
     # Initialize Airtable connection
     tables = initialize_airtable()

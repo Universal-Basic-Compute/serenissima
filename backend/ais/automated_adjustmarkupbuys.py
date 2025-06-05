@@ -41,15 +41,7 @@ VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
 DEFAULT_MARKUP_BUY_TARGET_AMOUNT = 50.0 # Default amount for new markup_buy contracts
 CONTRACT_DURATION_WEEKS = 1 # New contracts will be valid for this many weeks
 
-class LogColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
+from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
 
 # --- Helper Functions ---
 
@@ -81,16 +73,12 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
         log.error(f"{LogColors.FAIL}Failed to initialize Airtable: {e}{LogColors.ENDC}")
         return None
 
-def _escape_airtable_value(value: Any) -> str:
-    """Escapes single quotes for Airtable formulas."""
-    if isinstance(value, str):
-        return value.replace("'", "\\'")
-    return str(value)
+# _escape_airtable_value is now imported from activity_helpers
 
 # Import API fetching functions from activity_helpers
-from backend.engine.utils.activity_helpers import get_building_types_from_api
-
+from backend.engine.utils.activity_helpers import get_building_types_from_api, _escape_airtable_value
 # Removed local get_building_types_from_api
+# _escape_airtable_value was defined locally, now imported
 
 def get_resource_name(resource_id: str, resource_type_defs: Dict[str, Dict]) -> str:
     """Gets the human-readable name of a resource."""
@@ -274,7 +262,7 @@ def get_building_resource_stock(
 # --- Main Processing Logic ---
 
 def process_automated_markup_buys(dry_run: bool = False):
-    log.info(f"{LogColors.HEADER}Starting Automated Markup Buys process (dry_run={dry_run})...{LogColors.ENDC}")
+    log_header(f"Automated Markup Buys Process (dry_run={dry_run})", LogColors.HEADER)
 
     tables = initialize_airtable()
     if not tables:

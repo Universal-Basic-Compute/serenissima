@@ -416,10 +416,10 @@ def call_try_create_activity_api(
 def process_ai_message_initiatives(dry_run: bool = False, citizen1_arg: Optional[str] = None, citizen2_arg: Optional[str] = None, kinos_model_override_arg: Optional[str] = None):
     """Fonction principale pour traiter les initiatives de messages IA."""
     model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
+    header_msg = "Processus d'Initiatives de Messages IA"
     if citizen1_arg and citizen2_arg:
-        print(f"Démarrage du processus d'initiative de message IA CIBLÉ de {citizen1_arg} à {citizen2_arg} (dry_run={dry_run}, kinos_model={model_status})")
-    else:
-        print(f"Démarrage du processus d'initiatives de messages IA (dry_run={dry_run}, kinos_model={model_status})")
+        header_msg = f"Initiative de Message IA CIBLÉ de {citizen1_arg} à {citizen2_arg}"
+    log_header(f"{header_msg} (dry_run={dry_run}, kinos_model={model_status})", LogColors.HEADER)
     
     tables = initialize_airtable()
     if not tables:

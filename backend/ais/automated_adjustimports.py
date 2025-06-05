@@ -40,8 +40,7 @@ log = logging.getLogger("automated_adjust_imports")
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
-from backend.engine.utils.activity_helpers import VENICE_TIMEZONE # Import VENICE_TIMEZONE
-from backend.engine.utils.activity_helpers import LogColors
+from backend.engine.utils.activity_helpers import VENICE_TIMEZONE, LogColors, log_header # Import log_header
 
 # DESIRED_STOCK_VALUE_TARGET = 1000.0 # Removed global constant
 # New constants for dynamic calculation
@@ -297,10 +296,11 @@ def create_automated_import_contract(
 
 def process_automated_imports(dry_run: bool = False, specific_buyer_building_id: Optional[str] = None):
     """Main function to process automated import contract creation."""
+    header_message = "Automated Import Adjustment Process"
     if specific_buyer_building_id:
-        log.info(f"Starting automated import adjustment process for specific building {specific_buyer_building_id} (dry_run={dry_run})")
-    else:
-        log.info(f"Starting automated import adjustment process (dry_run={dry_run})")
+        header_message += f" for specific building {specific_buyer_building_id}"
+    header_message += f" (dry_run={dry_run})"
+    log_header(header_message, LogColors.HEADER)
 
     tables = initialize_airtable()
     if not tables:

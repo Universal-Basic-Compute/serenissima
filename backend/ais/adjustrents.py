@@ -8,10 +8,15 @@ import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
-# Add the parent directory to the path to import citizen_utils
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.citizen_utils import find_citizen_by_identifier
 import logging # Added logging
+
+# Add the project root to sys.path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+from app.citizen_utils import find_citizen_by_identifier
+from backend.engine.utils.activity_helpers import log_header, LogColors
 
 # Configuration for API calls
 BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
@@ -561,7 +566,7 @@ def call_try_create_activity_api(
 
 def process_ai_rent_adjustments(dry_run: bool = False):
     """Main function to process AI rent adjustments."""
-    print(f"Starting AI rent adjustment process (dry_run={dry_run})")
+    log_header(f"AI Rent Adjustment Process (dry_run={dry_run})", LogColors.HEADER)
     
     # Initialize Airtable connection
     tables = initialize_airtable()

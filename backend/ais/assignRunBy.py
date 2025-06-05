@@ -13,19 +13,7 @@ if PROJECT_ROOT not in sys.path:
 
 from dotenv import load_dotenv
 from pyairtable import Api, Table
-from backend.engine.utils.activity_helpers import calculate_haversine_distance_meters, _get_building_position_coords # Assuming this utility exists
-
-# Minimal placeholder for LogColors if not available in a shared utility
-class LogColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+from backend.engine.utils.activity_helpers import calculate_haversine_distance_meters, _get_building_position_coords, LogColors, log_header
 
 # --- Configuration ---
 logging.basicConfig(
@@ -36,6 +24,9 @@ logging.basicConfig(
     ]
 )
 log = logging.getLogger(__name__)
+
+# LogColors will be imported from activity_helpers
+# from backend.engine.utils.activity_helpers import LogColors, log_header # Added log_header
 
 # Explicitly load .env from the project root
 dotenv_path = os.path.join(PROJECT_ROOT, '.env')
@@ -171,7 +162,7 @@ def call_try_create_activity_api(
 
 # --- Main Logic ---
 def assign_runby_to_buildings(tables: Dict[str, Table], dry_run: bool = False):
-    log.info(f"{LogColors.HEADER}Starting Assign RunBy to Buildings process (dry_run={dry_run})...{LogColors.ENDC}")
+    log_header(f"Assign RunBy to Buildings Process (dry_run={dry_run})", LogColors.HEADER)
 
     all_citizens_records = tables["citizens"].all()
     all_buildings_records = tables["buildings"].all()

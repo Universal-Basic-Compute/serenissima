@@ -37,7 +37,7 @@ log = logging.getLogger("automated_adjustpublicstoragecontracts")
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
-from backend.engine.utils.activity_helpers import VENICE_TIMEZONE # Import VENICE_TIMEZONE
+from backend.engine.utils.activity_helpers import VENICE_TIMEZONE, LogColors, log_header # Import LogColors and log_header
 CONTRACT_DURATION_WEEKS = 1 # New contracts will be valid for this many weeks
 
 # Price tier multipliers based on importPrice (per unit per day)
@@ -49,7 +49,7 @@ PRICE_TIER_MULTIPLIERS = {
 DEFAULT_PRICING_TIERS = ["standard"] # Default if --pricing is not provided
 DEFAULT_STORAGE_CAPACITY_PER_RESOURCE_TYPE = 100 # Fallback if calculation fails
 
-from backend.engine.utils.activity_helpers import LogColors
+# LogColors is now imported from activity_helpers
 
 # --- Helper Functions ---
 
@@ -162,7 +162,7 @@ def process_public_storage_contracts(dry_run: bool = False, pricing_tiers_str: O
             log.warning(f"{LogColors.WARNING}No valid pricing tiers provided. Defaulting to: {DEFAULT_PRICING_TIERS}{LogColors.ENDC}")
             selected_tiers = DEFAULT_PRICING_TIERS
     
-    log.info(f"{LogColors.HEADER}Starting Public Storage Contract Adjustment process (dry_run={dry_run}, pricing_tiers={selected_tiers})...{LogColors.ENDC}")
+    log_header(f"Public Storage Contract Adjustment Process (dry_run={dry_run}, pricing_tiers={selected_tiers})", LogColors.HEADER)
 
     tables = initialize_airtable()
     if not tables:

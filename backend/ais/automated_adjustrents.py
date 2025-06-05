@@ -38,19 +38,10 @@ log = logging.getLogger("automated_adjust_rents")
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
-VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+# VENICE_TIMEZONE is imported from activity_helpers
 
-class LogColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-
-# Import VENICE_TIMEZONE from shared utils
-from backend.engine.utils.activity_helpers import VENICE_TIMEZONE
+# Import LogColors, log_header and VENICE_TIMEZONE from shared utils
+from backend.engine.utils.activity_helpers import LogColors, log_header, VENICE_TIMEZONE
 
 # --- Airtable Initialization ---
 def initialize_airtable() -> Optional[Dict[str, Table]]:
@@ -364,7 +355,7 @@ def call_try_create_activity_api(
 
 # --- Main Processing Logic ---
 def process_automated_rent_adjustments(strategy: str, dry_run: bool):
-    log.info(f"{LogColors.HEADER}Starting Automated Rent Adjustment Process (Strategy: {strategy}, Dry Run: {dry_run}){LogColors.ENDC}")
+    log_header(f"Automated Rent Adjustment Process (Strategy: {strategy}, Dry Run: {dry_run})", LogColors.HEADER)
 
     tables = initialize_airtable()
     if not tables: return

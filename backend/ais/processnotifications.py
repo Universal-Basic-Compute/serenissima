@@ -8,9 +8,13 @@ import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
-# Add the parent directory to the path to import citizen_utils
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the project root to sys.path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 from app.citizen_utils import find_citizen_by_identifier
+from backend.engine.utils.activity_helpers import log_header, LogColors
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -211,7 +215,7 @@ def create_admin_notification(tables, ai_notification_counts: Dict[str, int]) ->
 def process_ai_notifications(dry_run: bool = False, kinos_model_override_arg: Optional[str] = None):
     """Main function to process AI notifications."""
     model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "class-based"
-    print(f"Starting AI notification processing (dry_run={dry_run}, kinos_model_selection={model_status})")
+    log_header(f"AI Notification Processing (dry_run={dry_run}, kinos_model_selection={model_status})", LogColors.HEADER)
     
     # Initialize Airtable connection
     tables = initialize_airtable()
