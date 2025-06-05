@@ -133,19 +133,30 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [internalCurrentCitizenUsername, setInternalCurrentCitizenUsername] = useState<string | null>(getCurrentCitizenUsername());
 
   useEffect(() => {
-    const updateUsername = () => {
-      const newUsername = getCurrentCitizenUsername();
-      console.log('[LandDetailsPanel] Wallet state changed, updating username to:', newUsername);
+    // Define the handler to accept the event payload
+    const handleWalletChange = (walletData?: { profile?: { username?: string | null }; [key: string]: any }) => {
+      let newUsername: string | null = null;
+      if (walletData && walletData.profile && walletData.profile.username) {
+        newUsername = walletData.profile.username;
+        console.log('[LandDetailsPanel] Username from WALLET_CHANGED event payload:', newUsername);
+      } else {
+        // Fallback if payload is not as expected or event is emitted without data
+        newUsername = getCurrentCitizenUsername();
+        console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (fallback or no payload):', newUsername);
+      }
       setInternalCurrentCitizenUsername(newUsername);
     };
 
-    // Initial check
-    updateUsername();
+    // Set initial state directly from localStorage/sessionStorage
+    const initialUsername = getCurrentCitizenUsername();
+    setInternalCurrentCitizenUsername(initialUsername);
+    console.log('[LandDetailsPanel] Initial username check on mount:', initialUsername);
 
-    // Listen for wallet changes
-    const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, updateUsername);
+    // Subscribe to wallet changes
+    const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, handleWalletChange);
     
-    // Request current status on mount in case WALLET_CHANGED was missed
+    // Request current status on mount
+    // This should trigger WalletButton (or equivalent) to emit WALLET_CHANGED with current data
     eventBus.emit(EventTypes.REQUEST_WALLET_STATUS);
 
     return () => {
