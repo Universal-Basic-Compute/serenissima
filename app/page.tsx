@@ -1469,12 +1469,6 @@ export default function TwoDPage() {
         <TechTree onClose={() => setShowTechTreePanel(false)} />
       )}
 
-      {/* Background Music Component - Contrôlé par l'état de l'application */}
-      {/* Enveloppé dans un div pour un positionnement optionnel si nécessaire, sinon il peut être placé directement */}
-      <div className="absolute bottom-4 right-1/2 transform translate-x-1/2 z-10 pointer-events-none"> 
-        <BackgroundMusic isAppReady={appStatus === 'ready'} />
-      </div>
-
       {/* Weather and Time Display */}
       {canShowMainPanels && <WeatherTimeDisplay />}
     </div>
