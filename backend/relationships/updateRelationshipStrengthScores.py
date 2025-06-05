@@ -64,6 +64,7 @@ TRUST_SCORE_PUBLIC_WELFARE_HUNGRY = -10.0
 TRUST_SCORE_PUBLIC_WELFARE_HOMELESS = -15.0
 RELATIONSHIP_STRENGTH_DECAY_FACTOR = 0.75 # Facteur de déclin pour le score latent
 RELATIONSHIP_TRUST_DECAY_FACTOR = 0.75 # Facteur de déclin pour le score latent
+RAW_POINT_TOTAL_MULTIPLIER = 0.25 # Multiplicateur global pour l'impact des points bruts journaliers
 
 # Importer les fonctions de conversion et constantes
 from backend.engine.utils.relationship_helpers import (
@@ -658,9 +659,10 @@ def update_relationship_scores(
                 strength_score_decayed = current_strength_score * RELATIONSHIP_STRENGTH_DECAY_FACTOR
                 strength_score_decayed = max(0.0, strength_score_decayed) # S'assurer qu'il ne descend pas sous 0
                 # 2. Ajouter les points bruts de pertinence (score_to_add)
+                scaled_score_to_add = score_to_add * RAW_POINT_TOTAL_MULTIPLIER
                 updated_strength_score = apply_scaled_score_change(
                     strength_score_decayed, 
-                    score_to_add, 
+                    scaled_score_to_add, 
                     RAW_POINT_SCALE_FACTOR, 
                     min_score=0.0, 
                     max_score=100.0
@@ -685,9 +687,10 @@ def update_relationship_scores(
                 else:
                     log.warning(f"{Colors.WARNING}Target citizen '{target_username}' (for source '{source_username}') not found in map for trust calculation on existing relationship. Trust additions from interactions will be 0.{Colors.ENDC}")
                 # 3. Ajouter les points bruts d'interaction
+                scaled_trust_additions_raw = trust_additions_raw * RAW_POINT_TOTAL_MULTIPLIER
                 updated_trust_score = apply_scaled_score_change(
                     trust_score_decayed,
-                    trust_additions_raw,
+                    scaled_trust_additions_raw,
                     RAW_POINT_SCALE_FACTOR,
                     min_score=0.0,
                     max_score=100.0
@@ -732,9 +735,10 @@ def update_relationship_scores(
             elif score_to_add > 0 or new_relevancy_types_set: # Only create if there's a new relevancy
                 # Create new relationship
                 # Initial StrengthScore starts at base (0) and applies relevancy points
+                scaled_score_to_add_new_rel = score_to_add * RAW_POINT_TOTAL_MULTIPLIER
                 initial_strength_score = apply_scaled_score_change(
                     DEFAULT_NORMALIZED_STRENGTH_SCORE, 
-                    score_to_add, 
+                    scaled_score_to_add_new_rel, 
                     RAW_POINT_SCALE_FACTOR, 
                     min_score=0.0, 
                     max_score=100.0
@@ -755,9 +759,10 @@ def update_relationship_scores(
                 else:
                     log.warning(f"{Colors.WARNING}Target citizen '{target_username}' (for source '{source_username}') not found in map for new trust calculation. Trust score for new relationship will be based on 0 initial trust additions from interactions.{Colors.ENDC}")
                 
+                scaled_trust_additions_new_rel = trust_additions_raw * RAW_POINT_TOTAL_MULTIPLIER
                 initial_trust_score = apply_scaled_score_change(
                     DEFAULT_NORMALIZED_SCORE,
-                    trust_additions_raw,
+                    scaled_trust_additions_new_rel,
                     RAW_POINT_SCALE_FACTOR,
                     min_score=0.0,
                     max_score=100.0
