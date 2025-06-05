@@ -64,7 +64,7 @@ TRUST_SCORE_PUBLIC_WELFARE_HUNGRY = -10.0
 TRUST_SCORE_PUBLIC_WELFARE_HOMELESS = -15.0
 RELATIONSHIP_STRENGTH_DECAY_FACTOR = 0.75 # Facteur de déclin pour le score latent
 RELATIONSHIP_TRUST_DECAY_FACTOR = 0.75 # Facteur de déclin pour le score latent
-RAW_POINT_TOTAL_MULTIPLIER = 0.25 # Multiplicateur global pour l'impact des points bruts journaliers
+RAW_POINT_TOTAL_MULTIPLIER = 0.1 # Multiplicateur global pour l'impact des points bruts journaliers
 
 # Importer les fonctions de conversion et constantes
 from backend.engine.utils.relationship_helpers import (
