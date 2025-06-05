@@ -133,7 +133,8 @@ from backend.engine.activity_processors import (
         process_submit_building_purchase_offer_fn,
         process_execute_respond_to_building_bid_fn, 
         process_execute_withdraw_building_bid_fn, 
-        process_finalize_manage_markup_buy_contract_fn # New, imported from __init__
+        process_finalize_manage_markup_buy_contract_fn, 
+        process_finalize_manage_storage_query_contract_fn # New, imported from __init__
 )
 from backend.engine.activity_processors.manage_public_import_contract_processor import process_manage_public_import_contract_fn
 from backend.engine.activity_processors.bid_on_land_activity_processor import process_bid_on_land_fn
@@ -444,7 +445,8 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "submit_building_purchase_offer": process_submit_building_purchase_offer_fn, 
         "execute_respond_to_building_bid": process_execute_respond_to_building_bid_fn, 
         "execute_withdraw_building_bid": process_execute_withdraw_building_bid_fn, 
-        "finalize_manage_markup_buy_contract": process_finalize_manage_markup_buy_contract_fn, # New
+        "finalize_manage_markup_buy_contract": process_finalize_manage_markup_buy_contract_fn, 
+        "finalize_manage_storage_query_contract": process_finalize_manage_storage_query_contract_fn, # New
         "idle": process_placeholder_activity_fn,
         "rest": process_placeholder_activity_fn,
         "bid_on_land": process_bid_on_land_fn,
