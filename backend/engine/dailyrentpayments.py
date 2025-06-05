@@ -59,7 +59,8 @@ def initialize_airtable():
             'citizens': Table(api_key, base_id, 'CITIZENS'),
             'businesses': Table(api_key, base_id, 'BUSINESSES'),
             'transactions': Table(api_key, base_id, 'TRANSACTIONS'),
-            'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
+            'notifications': Table(api_key, base_id, 'NOTIFICATIONS'),
+            'relationships': Table(api_key, base_id, 'RELATIONSHIPS') # Ajout de la table RELATIONSHIPS
         }
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
