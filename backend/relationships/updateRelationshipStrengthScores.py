@@ -714,14 +714,14 @@ def update_relationship_scores(
                 
                 # log.info(
                 #     f"{Colors.OKCYAN}Updating existing relationship for {Colors.BOLD}{source_username}{Colors.ENDC}{Colors.OKCYAN} with {Colors.BOLD}{target_username}{Colors.ENDC}:\n"
-                #     f"  StrengthScore (0-100): {current_normalized_strength:.2f} -> {updated_normalized_strength_score:.2f} (Latent: {current_latent_strength:.2f} -> {new_latent_strength:.2f})\n"
-                #     f"  TrustScore (0-100): {current_normalized_trust:.2f} -> {updated_normalized_trust_score:.2f} (Latent: {current_latent_trust:.2f} -> {new_latent_trust:.2f})\n"
+                #     f"  StrengthScore (0-100): {current_strength_score:.2f} (decayed: {strength_score_decayed:.2f}) -> {updated_strength_score:.2f}\n"
+                #     f"  TrustScore (0-100): {current_trust_score:.2f} (decayed: {trust_score_decayed:.2f}) -> {updated_trust_score:.2f}\n"
                 #     f"  Contributing Notes: {notes_string}{Colors.ENDC}"
                 # )
                 
                 tables['relationships'].update(record_id, {
-                    'StrengthScore': updated_normalized_strength_score,
-                    'TrustScore': updated_normalized_trust_score,
+                    'StrengthScore': updated_strength_score,
+                    'TrustScore': updated_trust_score,
                     'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
                     'Notes': notes_string
                 })
@@ -730,12 +730,16 @@ def update_relationship_scores(
             
             elif score_to_add > 0 or new_relevancy_types_set: # Only create if there's a new relevancy
                 # Create new relationship
-                # Initial latent StrengthScore comes from relevancy (score_to_add)
-                initial_latent_strength = score_to_add # Points bruts de pertinence
-                # Convertir en score normalisé (0-100, base 0) pour stockage
-                new_normalized_strength_score = convert_latent_strength_to_normalized_score(initial_latent_strength)
+                # Initial StrengthScore starts at base (0) and applies relevancy points
+                initial_strength_score = apply_scaled_score_change(
+                    DEFAULT_NORMALIZED_STRENGTH_SCORE, 
+                    score_to_add, 
+                    RAW_POINT_SCALE_FACTOR, 
+                    min_score=0.0, 
+                    max_score=100.0
+                )
 
-                # Initial latent TrustScore is calculated from interactions
+                # Initial TrustScore starts at neutral (50) and applies interaction points
                 target_citizen_record = username_to_citizen_record_map.get(target_username)
                 trust_additions_raw, trust_interaction_types = (0.0, set())
                 if target_citizen_record:
@@ -749,12 +753,18 @@ def update_relationship_scores(
                     )
                 else:
                     log.warning(f"{Colors.WARNING}Target citizen '{target_username}' (for source '{source_username}') not found in map for new trust calculation. Trust score for new relationship will be based on 0 initial trust additions from interactions.{Colors.ENDC}")
-                initial_latent_trust = trust_additions_raw
-                new_normalized_trust_score = convert_latent_to_normalized_score(initial_latent_trust)
+                
+                initial_trust_score = apply_scaled_score_change(
+                    DEFAULT_NORMALIZED_SCORE,
+                    trust_additions_raw,
+                    RAW_POINT_SCALE_FACTOR,
+                    min_score=0.0,
+                    max_score=100.0
+                )
                 
                 # Combine notes sources
                 all_source_types = new_relevancy_types_set.union(trust_interaction_types)
-                if all_source_types:
+                if all_source_types: # This check was missing in the previous REPLACE block
                     notes_string = f"Sources: {', '.join(sorted(list(all_source_types)))}"
                 else:
                     notes_string = ""
