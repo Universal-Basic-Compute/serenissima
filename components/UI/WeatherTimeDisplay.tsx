@@ -6,8 +6,8 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { 
   WiDaySunny, WiNightClear, WiDayCloudy, WiNightAltCloudy, WiCloud, WiCloudy, 
   WiDayShowers, WiNightAltShowers, WiDayRain, WiNightAltRain, WiDayThunderstorm, WiNightAltThunderstorm,
-  WiDaySnow, WiNightAltSnow, WiDayFog, WiNightFog, WiStrongWind, WiNa
-} from 'weather-icons-react';
+  WiDaySnow, WiNightAltSnow, WiDayFog, WiNightFog, WiStrongWind
+} from 'weather-icons-react'; // Removed WiNa
 
 const WeatherTimeDisplay: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -48,10 +48,15 @@ const WeatherTimeDisplay: React.FC = () => {
   }, [timeZone]);
 
   const getWeatherIcon = (weather: WeatherData | null): JSX.Element => {
-    if (!weather || !weather.icon) return <WiNa size={24} color="#ccc" />;
+    const size = 24;
+    const defaultColor = "#ccc"; // Color for the fallback icon
+
+    if (!weather || !weather.icon) {
+      // Use WiCloud as a generic fallback if no weather data or icon code
+      return <WiCloud size={size} color={defaultColor} />;
+    }
 
     const iconCode = weather.icon;
-    const size = 24;
     const color = weather.isDay ? '#FFD700' : '#B0E0E6'; // Gold for day, PowderBlue for night
 
     // Mapping OpenWeatherMap icon codes to weather-icons-react components
