@@ -133,41 +133,39 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [internalCurrentCitizenUsername, setInternalCurrentCitizenUsername] = useState<string | null>(getCurrentCitizenUsername());
 
   useEffect(() => {
-    // Define the handler to accept the event payload
-    const handleWalletChange = (walletData?: { profile?: { username?: string | null }; isConnected?: boolean; [key: string]: any }) => {
+    const handleWalletChange = (walletData?: { address?: string | null; publicKey?: any; profile?: { username?: string | null }; isConnected?: boolean; [key: string]: any }) => {
       console.log('[LandDetailsPanel] handleWalletChange received walletData:', JSON.stringify(walletData || {note: "payload was undefined"}, null, 2));
       let newUsername: string | null = null;
-      const wasConnected = internalCurrentCitizenUsername !== null;
+      
+      // Determine login status based on a broader set of conditions, similar to app/page.tsx
+      const isLoggedIn = !!(walletData && (walletData.address || walletData.publicKey || walletData.isConnected === true));
+      // Also consider explicit disconnection
+      const explicitlyDisconnected = walletData && walletData.isConnected === false;
 
-      if (walletData && walletData.isConnected === true) { // Explicitly connected
-        if (walletData.profile && typeof walletData.profile.username === 'string' && walletData.profile.username.trim() !== '') {
-          newUsername = walletData.profile.username;
-          console.log('[LandDetailsPanel] Username from WALLET_CHANGED event payload (connected):', newUsername);
-        } else {
-          // Connected, but no username in payload, try storage as a fallback
-          newUsername = getCurrentCitizenUsername();
-          console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (connected, but no/invalid username in payload):', newUsername);
-        }
-      } else if (walletData && walletData.isConnected === false) { // Explicitly disconnected
+      if (explicitlyDisconnected) {
         newUsername = null;
         console.log('[LandDetailsPanel] User explicitly disconnected via WALLET_CHANGED event.');
-      } else { // Ambiguous event or no isConnected field, or walletData is null/undefined
-        // This branch will also be hit if walletData is null/undefined from the eventBus.
-        const usernameFromStorage = getCurrentCitizenUsername();
-        newUsername = usernameFromStorage;
-        console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (event payload was ambiguous, null, or lacked isConnected):', newUsername);
+      } else if (isLoggedIn) {
+        if (walletData.profile && typeof walletData.profile.username === 'string' && walletData.profile.username.trim() !== '') {
+          newUsername = walletData.profile.username;
+          console.log('[LandDetailsPanel] Username from WALLET_CHANGED event payload (profile):', newUsername);
+        } else {
+          // If logged in but no username in payload, try storage as a fallback
+          newUsername = getCurrentCitizenUsername();
+          console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (logged in, but no/invalid username in payload):', newUsername);
+        }
+      } else {
+        // Not explicitly disconnected, and not meeting loggedIn criteria from event payload.
+        // This could be an initial event or an ambiguous one. Fallback to storage.
+        newUsername = getCurrentCitizenUsername();
+        console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (event payload was ambiguous or did not indicate active login):', newUsername);
       }
       
-      // Only update state if the username has actually changed to avoid unnecessary re-renders
-      // or if the connection status implies a change (e.g. was connected, now newUsername is null)
       if (internalCurrentCitizenUsername !== newUsername) {
         console.log(`[LandDetailsPanel] Updating internalCurrentCitizenUsername from "${internalCurrentCitizenUsername}" to "${newUsername}"`);
         setInternalCurrentCitizenUsername(newUsername);
-      } else if (wasConnected !== (newUsername !== null)) {
-        // This case handles if the username string is the same (e.g. both null) but connection status changed.
-        // For example, if it was null and event indicates disconnection (still null), no state change needed.
-        // If it was 'UserA' and event indicates connection with 'UserA', no state change needed.
-        console.log(`[LandDetailsPanel] Username ("${newUsername}") is the same as previous ("${internalCurrentCitizenUsername}"), but connection status might have changed.`);
+      } else {
+        console.log(`[LandDetailsPanel] Username ("${newUsername}") is the same as previous ("${internalCurrentCitizenUsername}"). No state update needed.`);
       }
     };
 
