@@ -1908,6 +1908,28 @@ def dispatch_specific_activity_request(
         else:
             log.warning(f"bid_on_land_activity_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
             return {"success": False, "message": f"Could not initiate 'bid_on_land' (originally {original_activity_type}) endeavor for {citizen_name}.", "activity": None, "reason": "bid_on_land_creation_failed"}
+
+    elif activity_type == "buy_listed_land":
+        log.info(f"Dispatching to buy_listed_land_creator for {citizen_name} with params: {activity_parameters}")
+        from backend.engine.activity_creators.buy_listed_land_creator import try_create as try_create_buy_listed_land_activity
+        
+        activities_chain = try_create_buy_listed_land_activity(
+            tables,
+            citizen_record_full,
+            activity_type,
+            activity_parameters if activity_parameters is not None else {},
+            now_venice_dt,
+            now_utc_dt,
+            transport_api_url,
+            api_base_url
+        )
+        first_activity_of_chain_fields = activities_chain[0] if activities_chain else None
+        
+        if first_activity_of_chain_fields and isinstance(first_activity_of_chain_fields, dict) and 'ActivityId' in first_activity_of_chain_fields:
+            return {"success": True, "message": f"Buy listed land endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain_fields.get('Type', 'N/A')}.", "activity": first_activity_of_chain_fields}
+        else:
+            log.warning(f"buy_listed_land_creator did not return a valid activity for {citizen_name}. Returned: {activities_chain}")
+            return {"success": False, "message": f"Could not initiate 'buy_listed_land' endeavor for {citizen_name}.", "activity": None, "reason": "buy_listed_land_creation_failed"}
     
     # Add other activity_type handlers here as needed, for example:
     # elif activity_type == "manage_public_sell_contract":
@@ -1920,8 +1942,9 @@ def dispatch_specific_activity_request(
     else: # Fallback for unsupported or not-yet-implemented high-level types
         supported_orchestrated_types = [
             'eat', 'leave_venice', 'seek_shelter',
-            'initiate_building_project', # Added
-            'send_message', 'manage_public_storage_offer', 'bid_on_land'
+            'initiate_building_project', 
+            'send_message', 'manage_public_storage_offer', 'bid_on_land',
+            'buy_listed_land' # Added buy_listed_land
             # Add other explicitly handled types here as they are implemented in this dispatcher
         ]
         # Use original_activity_type in the error message if it was redirected
