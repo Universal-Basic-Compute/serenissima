@@ -35,5 +35,6 @@ from .submit_building_purchase_offer_processor import process_submit_building_pu
 from .send_message_processor import process_send_message_fn
 from .goto_location_processor import process as process_goto_location
 from .manage_guild_membership_processor import process_manage_guild_membership_fn as process_manage_guild_membership
-from .execute_respond_to_building_bid_processor import process_execute_respond_to_building_bid_fn # New
+from .execute_respond_to_building_bid_processor import process_execute_respond_to_building_bid_fn 
+from .execute_withdraw_building_bid_processor import process_execute_withdraw_building_bid_fn # New
 # Add other processors here as they are created

@@ -439,8 +439,9 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         "fishing": process_fishing_activity_fn, # New
         "emergency_fishing": process_fishing_activity_fn, # New, uses same processor
         "inspect_building_for_purchase": process_inspect_building_for_purchase_fn, # New
-        "submit_building_purchase_offer": process_submit_building_purchase_offer_fn, # New
-        "execute_respond_to_building_bid": process_execute_respond_to_building_bid_fn, # New
+        "submit_building_purchase_offer": process_submit_building_purchase_offer_fn, 
+        "execute_respond_to_building_bid": process_execute_respond_to_building_bid_fn, 
+        "execute_withdraw_building_bid": process_execute_withdraw_building_bid_fn, # New
         "idle": process_placeholder_activity_fn,
         "rest": process_placeholder_activity_fn,
         "bid_on_land": process_bid_on_land_fn,
