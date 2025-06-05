@@ -530,6 +530,22 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     setInputValue('');
     setIsTyping(true);
 
+    // Check if we can proceed with Kinos AI interaction
+    if (!dynamicOwner || dynamicOwner === currentCitizenUsername) {
+      let noAiResponseMessage = "This land is currently unowned, so there's no specific owner to chat with.";
+      if (dynamicOwner === currentCitizenUsername) {
+        noAiResponseMessage = "You are the owner of this land. Perhaps discuss its matters with another citizen?";
+      }
+      setMessages(prev => [...prev, {
+        id: `info-${Date.now()}`,
+        role: 'assistant',
+        content: noAiResponseMessage,
+        timestamp: new Date().toISOString()
+      }]);
+      setIsTyping(false);
+      return;
+    }
+
     try {
       // 1. Persist user's message
       const persistUserMessageResponse = await fetch('/api/messages/send', {
@@ -550,9 +566,12 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       }
 
       // 2. Kinos AI Interaction
-      let currentUserProfile = null;
+      let currentUserProfile = null; // Profile of the user sending the message
       const savedProfile = localStorage.getItem('citizenProfile');
       if (savedProfile) try { currentUserProfile = JSON.parse(savedProfile); } catch(e) { console.error("Error parsing user profile for Kinos context:", e); }
+
+      // The AI (Kin) is the owner of the land. ownerDetails should contain their profile.
+      const aiOwnerProfile = ownerDetails; 
 
       const landDetailsForKinos = {
         id: selectedPolygon.id,
@@ -568,27 +587,32 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       };
       
       const kinosSystemContext = {
-        land_parcel_details: landDetailsForKinos,
-        interacting_citizen_profile: currentUserProfile,
+        ai_citizen_profile: aiOwnerProfile, // The profile of the Kin (land owner)
+        land_parcel_details: landDetailsForKinos, // Details of the land being discussed
+        interacting_citizen_profile: currentUserProfile, // Profile of the user initiating chat
       };
 
-      const kinosPromptContent = 
-`You are the Genius Loci, the spirit and living memory of the land parcel known as "${selectedPolygon?.historicalName || selectedPolygon.id}" in Renaissance Venice. You are conversing with ${currentUserProfile?.firstName || currentCitizenUsername}, a citizen of Venice.
+      const ownerDisplayName = aiOwnerProfile?.firstName || aiOwnerProfile?.username || dynamicOwner;
+      const interactorDisplayName = currentUserProfile?.firstName || currentCitizenUsername;
 
-Your knowledge encompasses this land's history, its current state (ownership, market status, physical attributes), and its potential. You are wise, perhaps a little ancient, and deeply connected to this specific piece of Venice. Your responses should be insightful, relevant to the land, and subtly guide the citizen towards understanding its value or opportunities.
+      const kinosPromptContent = 
+`You are ${ownerDisplayName}, the owner of the land parcel known as "${selectedPolygon?.historicalName || selectedPolygon.id}" in Renaissance Venice. You are conversing with ${interactorDisplayName}, another citizen.
+
+Your conversation should be focused on business and gameplay related to THIS land parcel. Discuss potential deals, its current status, its use, buildings on it, or any relevant economic or strategic aspects. Be pragmatic and direct, as a landowner discussing their property.
 
 Use the structured context provided in 'addSystem' to inform your response:
-- 'land_parcel_details': Your own detailed information (historical name, owner, market listings, offers, physical attributes).
-- 'interacting_citizen_profile': The profile of the citizen you are speaking with.
+- 'ai_citizen_profile': Your own profile (the landowner).
+- 'land_parcel_details': Detailed information about the land parcel you own and are discussing.
+- 'interacting_citizen_profile': The profile of ${interactorDisplayName}, the citizen you are speaking with.
 
---- CITIZEN'S MESSAGE ---
+--- CITIZEN'S (${interactorDisplayName}) MESSAGE ---
 ${content}
 --- END OF CITIZEN'S MESSAGE ---
 
-Respond to the citizen's message. Be informative, perhaps a bit enigmatic, and always focused on aspects related to THIS land parcel.`;
+Respond to ${interactorDisplayName}'s message. Be business-like, focused on gameplay, and relevant to the land parcel.`;
 
-      const kinosKinId = selectedPolygon.id; 
-      const kinosChannelId = currentCitizenUsername; 
+      const kinosKinId = dynamicOwner; // The Kin is the owner of the land
+      const kinosChannelId = `${currentCitizenUsername}_${selectedPolygon.id}`; // Channel specific to user and land
 
       const kinosResponse = await fetch(
         `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${kinosKinId}/channels/${kinosChannelId}/messages`,
