@@ -1556,88 +1556,36 @@ Your response:`;
           <div className="w-full mb-6 flex-shrink-0">
             {/* Full-width image container with relative positioning for the coat of arms overlay, now square */}
             <div className="w-full aspect-square relative mb-4 overflow-hidden rounded-lg border-2 border-amber-600 shadow-lg">
-              {/* Main citizen image - Use citizen.imageUrl, citizen.profileImage (camelCase) */}
-              {citizen.imageUrl || citizen.profileImage ? ( 
-                <img 
-                  src={citizen.imageUrl || citizen.profileImage} 
-                  alt={`${citizen.firstName} ${citizen.lastName}`} 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
-                    
-                    // Try fallback to username-based path
-                    if (citizen.username) {
-                      const fallbackSrc = `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.username}.jpg`;
-                      console.log(`Trying fallback image: ${fallbackSrc}`);
-                      (e.target as HTMLImageElement).src = fallbackSrc;
-                      
-                      // Add a second error handler for the fallback
-                      (e.target as HTMLImageElement).onerror = () => {
-                        console.error(`Fallback image also failed: ${fallbackSrc}`);
-                        // Replace with placeholder
-                        const parent = (e.target as HTMLImageElement).parentElement;
-                        if (parent) {
-                          parent.innerHTML = `
-                            <div class="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
-                            </div>
-                          `;
-                        }
-                      };
-                    } else {
-                      // Replace with placeholder immediately if no username
-                      const parent = (e.target as HTMLImageElement).parentElement;
-                      if (parent) {
-                        parent.innerHTML = `
-                          <div class="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          </div>
-                        `;
-                      }
+              {/* Main citizen image - Use citizen.username to construct path */}
+              <img 
+                src={citizen.username ? `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.username}.jpg` : `https://backend.serenissima.ai/public_assets/images/citizens/default_citizen.png`}
+                alt={`${citizen.firstName} ${citizen.lastName}`} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.warn(`Failed to load citizen image for ${citizen.username}: ${(e.target as HTMLImageElement).src}. Falling back to default.`);
+                  (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default_citizen.png';
+                  // Optional: If even default fails, show placeholder SVG
+                  (e.target as HTMLImageElement).onerror = () => {
+                    const parent = (e.target as HTMLImageElement).parentElement;
+                    if (parent) {
+                      parent.innerHTML = `
+                        <div class="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                      `;
                     }
-                  }}
-                />
-              ) : (
-                // Try username-based path directly if no imageurl
-                citizen.username ? (
-                  <img 
-                    src={`https://backend.serenissima.ai/public_assets/images/citizens/${citizen.username}.jpg`}
-                    alt={`${citizen.firstName} ${citizen.lastName}`} 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
-                      // Replace with placeholder
-                      const parent = (e.target as HTMLImageElement).parentElement;
-                      if (parent) {
-                        parent.innerHTML = `
-                          <div class="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          </div>
-                        `;
-                      }
-                    }}
-                  />
-                ) : (
-                  // Placeholder if no image sources available
-                  <div className="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                )
-              )}
+                  };
+                }}
+              />
               
               {/* Coat of arms overlay in the bottom right corner */}
-              {citizen.coatOfArmsImageUrl && ( // Keep this check to only render div if URL might exist
-                <div className="absolute bottom-3 right-3 w-20 h-20 rounded-full overflow-hidden border-2 border-amber-600 shadow-lg bg-amber-100 z-10"> {/* Increased size and added z-10 */}
+              {/* Render div only if coatOfArmsSrc is defined (i.e., citizen.username exists) */}
+              {coatOfArmsSrc && (
+                <div className="absolute bottom-3 right-3 w-20 h-20 rounded-full overflow-hidden border-2 border-amber-600 shadow-lg bg-amber-100 z-10">
                   <img 
-                    src={coatOfArmsSrc} // Use the memoized and processed URL
+                    src={coatOfArmsSrc}
                     alt="Coat of Arms"
                     className="w-full h-full object-cover"
                     onError={(e) => {
