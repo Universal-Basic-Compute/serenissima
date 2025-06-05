@@ -2,7 +2,7 @@
 import { eventBus, EventTypes } from '../utils/eventBus';
 import { WeatherData, WeatherCondition, weatherService } from './WeatherService'; // Import WeatherService and types
 
-const AUDIO_BASE_PATH = '/sounds/';
+const AUDIO_BASE_PATH = 'https://backend.serenissima.ai/public_assets/sounds/';
 
 export const WEATHER_AUDIO_CONFIG = {
   trackDuration: 22000,
