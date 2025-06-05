@@ -2,7 +2,7 @@ import json
 import uuid
 import logging
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List # Added List
 from backend.engine.utils.activity_helpers import (
     _escape_airtable_value, 
     VENICE_TIMEZONE,
