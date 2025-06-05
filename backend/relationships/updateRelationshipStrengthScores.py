@@ -62,6 +62,7 @@ TRUST_SCORE_EMPLOYEE_WAGE_ISSUE = -30.0
 TRUST_SCORE_PUBLIC_WELFARE_HUNGRY_HOMELESS = -25.0
 TRUST_SCORE_PUBLIC_WELFARE_HUNGRY = -10.0
 TRUST_SCORE_PUBLIC_WELFARE_HOMELESS = -15.0
+TRUST_SCORE_CO_GUILD_MEMBER = 1.0 # Bonus pour être dans la même guilde
 RELATIONSHIP_STRENGTH_DECAY_FACTOR = 0.75 # Facteur de déclin pour le score latent
 RELATIONSHIP_TRUST_DECAY_FACTOR = 0.75 # Facteur de déclin pour le score latent
 RAW_POINT_TOTAL_MULTIPLIER = 0.1 # Multiplicateur global pour l'impact des points bruts journaliers
@@ -150,9 +151,9 @@ def get_all_citizens(tables) -> tuple[List[Dict], Dict[str, str], Dict[str, str]
     try:
         log.info(f"{Colors.OKBLUE}Fetching all citizens from Airtable...{Colors.ENDC}")
         
-        # Step 1: Fetch all citizens with basic info + AteAt
+        # Step 1: Fetch all citizens with basic info + AteAt + GuildId
         all_citizen_records_raw = tables['citizens'].all(
-            fields=["Username", "FirstName", "LastName", "AteAt"] # Removed WorksFor
+            fields=["Username", "FirstName", "LastName", "AteAt", "GuildId"] # Added GuildId
         )
         
         for record in all_citizen_records_raw:
@@ -564,6 +565,17 @@ def _calculate_trust_score_contributions_from_interactions( #NOSONAR
             trust_score_addition += TRUST_SCORE_PUBLIC_WELFARE_HOMELESS # Note: This is negative
             interaction_types.add("public_welfare_homeless")
             # log.info(f"{Colors.WARNING}{citizen_to_check_username} is homeless. Trust with ConsiglioDeiDieci {TRUST_SCORE_PUBLIC_WELFARE_HOMELESS:.2f}.{Colors.ENDC}")
+
+    # 7. Co-Guild Membership (Bonus if not ConsiglioDeiDieci)
+    # This check is for general relationships, not specifically with Consiglio.
+    if username1 != consiglio_username and username2 != consiglio_username:
+        if citizen1_fields and citizen2_fields:
+            guild1_id = citizen1_fields.get('GuildId')
+            guild2_id = citizen2_fields.get('GuildId')
+            if guild1_id and guild2_id and guild1_id == guild2_id:
+                trust_score_addition += TRUST_SCORE_CO_GUILD_MEMBER
+                interaction_types.add("co_guild_members_interaction")
+                # log.info(f"{Colors.OKCYAN}{username1} and {username2} are in the same guild ({guild1_id}). Trust +{TRUST_SCORE_CO_GUILD_MEMBER:.2f}{Colors.ENDC}")
 
     # log.info(f"{Colors.OKGREEN}Calculated trust score addition of {Colors.BOLD}{trust_score_addition:.2f}{Colors.ENDC}{Colors.OKGREEN} for {Colors.BOLD}{username1}-{username2}{Colors.ENDC}{Colors.OKGREEN} from types: {Colors.BOLD}{interaction_types}{Colors.ENDC}")
     return trust_score_addition, interaction_types
