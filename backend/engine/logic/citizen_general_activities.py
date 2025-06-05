@@ -1893,9 +1893,10 @@ def dispatch_specific_activity_request(
             return {"success": False, "message": f"Could not initiate 'manage_public_storage_offer' endeavor for {citizen_name}.", "activity": None, "reason": "manage_public_storage_offer_creation_failed"}
 
     elif activity_type == "bid_on_land":
-        log.info(f"Dispatching to bid_on_land_activity_creator for {citizen_name} (original type: {original_activity_type}) with params: {activity_parameters}")
-        from backend.engine.activity_creators.bid_on_land_activity_creator import try_create as try_create_bid_on_land_chain
-        # The bid_on_land_activity_creator.try_create now returns the first activity record or None
+        log.info(f"Dispatching to make_offer_for_land_creator (aliased for bid_on_land) for {citizen_name} (original type: {original_activity_type}) with params: {activity_parameters}")
+        # Use make_offer_for_land_creator as bid_on_land_activity_creator was removed and functionality merged.
+        from backend.engine.activity_creators.make_offer_for_land_creator import try_create as try_create_bid_on_land_chain
+        # The try_create function from make_offer_for_land_creator will be used.
         first_activity_of_chain = try_create_bid_on_land_chain(
             tables,
             citizen_record_full,
