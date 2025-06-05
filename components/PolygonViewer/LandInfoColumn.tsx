@@ -344,7 +344,7 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
                 </p>
                 {!isOwner && currentCitizenUsername && normalizeIdentifier(landListingByOwner.Seller) !== normalizeIdentifier(currentCitizenUsername) && (
                   <ActionButton
-                    onClick={() => handleGenericActivity('buy_listed_land', { contractId: landListingByOwner.id, landId: selectedPolygonId, price: landListingByOwner.PricePerResource })}
+                    onClick={() => handleGenericActivity('buy_listed_land', { contractId: landListingByOwner.contractId || landListingByOwner.id, landId: selectedPolygonId, price: landListingByOwner.PricePerResource })}
                     variant="primary"
                     className="w-full mt-2 text-xs"
                   >
