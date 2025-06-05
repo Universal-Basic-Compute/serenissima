@@ -362,7 +362,7 @@ def process_relationships(tables, limit=None, min_strength=None, max_per_run=Non
         
         if new_only:
             # En mode newOnly, on cible les relations qui n'ont jamais été qualifiées ou qui n'ont pas de titre.
-            formula = "OR(IS_BLANK({Title}), IS_BLANK({QualifiedAt}))"
+            formula = "OR({Title} = BLANK(), {QualifiedAt} = BLANK())"
             print(f"{LogColors.OKBLUE}Mode 'newOnly': Formule = {formula}{LogColors.ENDC}")
             all_relationships_raw = tables["relationships"].all(formula=formula, fields=fields_to_fetch, sort=["-StrengthScore"])
         else:
