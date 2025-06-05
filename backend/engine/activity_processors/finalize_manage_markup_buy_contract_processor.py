@@ -3,8 +3,7 @@ import json
 from datetime import datetime, timezone
 import uuid
 
-from backend.engine.utils.activity_helpers import LogColors, get_contract_record
-from backend.engine.utils.notification_helpers import create_notification
+from backend.engine.utils.activity_helpers import LogColors, get_contract_record, create_notification_record
 
 log = logging.getLogger(__name__)
 
@@ -73,21 +72,21 @@ def process_finalize_manage_markup_buy_contract_fn(tables: dict, activity_record
 
                 tables['contracts'].update(existing_contract_record['id'], updateable_fields)
                 log.info(f"{LogColors.SUCCESS}Updated markup_buy_contract {contract_id_to_update} for {citizen_username}.{LogColors.ENDC}")
-                create_notification(tables, citizen_username, "markup_buy_contract_updated", f"Your buy order for {resource_type} has been updated.", {"contractId": contract_id_to_update})
+                create_notification_record(tables, citizen_username, "markup_buy_contract_updated", f"Your buy order for {resource_type} has been updated.", details_json=json.dumps({"contractId": contract_id_to_update}))
             else:
                 log.warning(f"{LogColors.WARNING}Contract {contract_id_to_update} not found for update. Creating new one instead for {citizen_username}.{LogColors.ENDC}")
                 contract_fields["ContractId"] = str(uuid.uuid4()) # Generate new custom ID
                 contract_fields["CreatedAt"] = now_iso
-                tables['contracts'].create(contract_fields)
-                log.info(f"{LogColors.SUCCESS}Created new markup_buy_contract {contract_fields['ContractId']} for {citizen_username}.{LogColors.ENDC}")
-                create_notification(tables, citizen_username, "markup_buy_contract_created", f"Your buy order for {resource_type} has been placed.", {"contractId": contract_fields['ContractId']})
+                new_contract_record_from_create = tables['contracts'].create(contract_fields) # Renamed to avoid conflict
+                log.info(f"{LogColors.SUCCESS}Created new markup_buy_contract {new_contract_record_from_create['fields'].get('ContractId')} for {citizen_username}.{LogColors.ENDC}")
+                create_notification_record(tables, citizen_username, "markup_buy_contract_created", f"Your buy order for {resource_type} has been placed.", details_json=json.dumps({"contractId": new_contract_record_from_create['fields'].get('ContractId')}))
         else:
             # Create new contract
             contract_fields["ContractId"] = f"mbc_{citizen_username[:3]}_{resource_type[:4]}_{str(uuid.uuid4())[:4]}" # Example custom ID
             contract_fields["CreatedAt"] = now_iso
             new_contract_record = tables['contracts'].create(contract_fields)
             log.info(f"{LogColors.SUCCESS}Created new markup_buy_contract {new_contract_record['fields'].get('ContractId')} for {citizen_username}.{LogColors.ENDC}")
-            create_notification(tables, citizen_username, "markup_buy_contract_created", f"Your buy order for {resource_type} has been placed.", {"contractId": new_contract_record['fields'].get('ContractId')})
+            create_notification_record(tables, citizen_username, "markup_buy_contract_created", f"Your buy order for {resource_type} has been placed.", details_json=json.dumps({"contractId": new_contract_record['fields'].get('ContractId')}))
             
         return True
 
