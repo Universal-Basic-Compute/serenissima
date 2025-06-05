@@ -659,7 +659,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     };
   }, []);
 
-
+  ; // Explicit semicolon to potentially reset parser state
   return (
     <div 
       className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[1200px] h-[75vh] max-h-[700px] bg-amber-50 border-2 border-amber-700 rounded-lg shadow-lg z-50 transition-all duration-300 pointer-events-auto flex flex-col ${
