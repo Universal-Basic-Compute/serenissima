@@ -19,18 +19,26 @@ export const normalizeProfileData = (profile: any): any => {
     { pascal: 'LastName', camel: 'lastName' },
     { pascal: 'CoatOfArmsImageUrl', camel: 'coatOfArmsImageUrl' },
     { pascal: 'FamilyMotto', camel: 'familyMotto' },
-    // Ducats is special due to existing handling, ensure ducats (lowercase) is primary
+    { api: 'citizen_name', camel: 'username' }, // Map citizen_name from API to username
+    { pascal: 'Username', camel: 'username' },   // Also handle Username (PascalCase) to username
   ];
 
   fieldsToNormalize.forEach(field => {
-    if (profile[field.pascal] !== undefined && profile[field.camel] === undefined) {
-      normalized[field.camel] = profile[field.pascal];
-      // delete normalized[field.pascal]; // Optional: remove original
+    const keyToCheck = field.pascal || field.api;
+    if (keyToCheck && profile[keyToCheck] !== undefined && normalized[field.camel] === undefined) {
+      normalized[field.camel] = profile[keyToCheck];
+      // delete normalized[keyToCheck]; // Optional: remove original
     }
   });
 
+  // Ensure 'username' is present if not mapped from citizen_name or Username
+  if (!normalized.username && profile.username) {
+    normalized.username = profile.username;
+  }
+
+
   // Handle Ducats: prefer 'ducats', ensure it exists
-  if (profile.Ducats !== undefined && profile.ducats === undefined) {
+  if (profile.Ducats !== undefined && normalized.ducats === undefined) {
     normalized.ducats = profile.Ducats;
   } else if (profile.ducats !== undefined) {
     normalized.ducats = profile.ducats; // Ensure it's there if already lowercase
@@ -73,8 +81,20 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     if (normalizedProfile) {
       localStorage.setItem('citizenProfile', JSON.stringify(normalizedProfile));
+      if (normalizedProfile.username) {
+        localStorage.setItem('username', normalizedProfile.username);
+        sessionStorage.setItem('username', normalizedProfile.username);
+        console.log(`[WalletProvider] Stored username '${normalizedProfile.username}' in localStorage and sessionStorage from "${source}".`);
+      } else {
+        localStorage.removeItem('username');
+        sessionStorage.removeItem('username');
+        console.log(`[WalletProvider] Removed 'username' from localStorage and sessionStorage because it's missing in normalizedProfile from "${source}".`);
+      }
     } else {
       localStorage.removeItem('citizenProfile');
+      localStorage.removeItem('username');
+      sessionStorage.removeItem('username');
+      console.log(`[WalletProvider] Cleared 'citizenProfile' and 'username' from localStorage and sessionStorage due to null profile from "${source}".`);
     }
     // Emit event with the (potentially null) normalized profile and current connection status
     eventBus.emit(EventTypes.WALLET_CHANGED, { 
