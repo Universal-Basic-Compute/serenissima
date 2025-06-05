@@ -9,7 +9,7 @@ import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
 import { eventBus, EventTypes } from '../../lib/utils/eventBus';
 import { getWalletAddress, getCurrentCitizenUsername } from '../../lib/utils/walletUtils';
-import { FaMapMarkedAlt, FaBuilding, FaUserShield, FaLandmark, FaTimes, FaComments, FaExpand, FaCompress, FaSpinner } from 'react-icons/fa'; // Added icons
+import { FaMapMarkedAlt, FaBuilding, FaUserShield, FaLandmark, FaTimes, FaComments, FaExpand, FaCompress, FaSpinner, FaTags } from 'react-icons/fa'; // Added FaTags
 import ReactMarkdown from 'react-markdown'; // Added import
 import remarkGfm from 'remark-gfm'; // Added import
 
@@ -131,7 +131,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isCorrespondanceFullScreen, setIsCorrespondanceFullScreen] = useState(false);
-  const [activeLeftTab, setActiveLeftTab] = useState<'info' | 'buildings'>('info'); // Tabs for left column
+  const [activeLeftTab, setActiveLeftTab] = useState<'info' | 'buildings' | 'realEstate'>('info'); // Tabs for left column
 
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
@@ -717,6 +717,16 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               >
                 Buildings
               </button>
+              <button
+                onClick={() => setActiveLeftTab('realEstate')}
+                className={`px-3 py-2 font-medium text-xs rounded-t-md transition-colors
+                  ${activeLeftTab === 'realEstate' 
+                    ? 'bg-amber-600 text-white' 
+                    : 'text-amber-600 hover:bg-amber-200 hover:text-amber-800'
+                  }`}
+              >
+                <FaTags className="inline mr-1 -mt-0.5" /> Real Estate
+              </button>
             </nav>
           </div>
 
@@ -826,6 +836,162 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 <p className="text-xs text-gray-500 italic">Building list coming soon.</p>
               </div>
             )}
+            {activeLeftTab === 'realEstate' && (
+              <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200 space-y-3">
+                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Market Status</h3>
+
+                {isLoading && <p className="text-xs text-amber-700">Loading market data...</p>}
+
+                {/* Case 1: Land is listed for sale by the owner */}
+                {landListingByOwner && (
+                  <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                    <p className="text-lg font-semibold text-amber-800">
+                      For Sale by {landListingByOwner.SellerName || landListingByOwner.Seller}
+                    </p>
+                    <p className="text-2xl font-semibold text-center my-2">
+                      <span style={{ color: '#d4af37' }}>
+                        <AnimatedDucats 
+                          value={landListingByOwner.PricePerResource} 
+                          suffix="⚜️ ducats" 
+                          duration={1500}
+                        />
+                      </span>
+                    </p>
+                    {!isOwner && currentCitizenUsername && normalizeIdentifier(landListingByOwner.Seller) !== normalizeIdentifier(currentCitizenUsername) && (
+                      <ActionButton
+                        onClick={() => handleGenericActivity('buy_listed_land', { contractId: landListingByOwner.id, landId: selectedPolygonId, price: landListingByOwner.PricePerResource })}
+                        variant="primary"
+                        className="w-full mt-2"
+                      >
+                        Buy Now at {landListingByOwner.PricePerResource.toLocaleString()} ⚜️
+                      </ActionButton>
+                    )}
+                    {isOwner && normalizeIdentifier(landListingByOwner.Seller) === normalizeIdentifier(currentCitizenUsername) && (
+                       <ActionButton
+                        onClick={() => handleGenericActivity('cancel_land_listing', { contractId: landListingByOwner.id, landId: selectedPolygonId })}
+                        variant="danger"
+                        className="w-full mt-2"
+                      >
+                        Cancel Your Listing
+                      </ActionButton>
+                    )}
+                  </div>
+                )}
+
+                {/* Case 2: Current citizen is owner and land is NOT listed by them */}
+                {isOwner && !myLandListing && (
+                  <ActionButton
+                    onClick={() => setShowListForSaleModal(true)}
+                    variant="primary"
+                    className="w-full"
+                  >
+                    List Your Land for Sale
+                  </ActionButton>
+                )}
+                
+                {/* Case 3: Land is unowned (available from state) */}
+                {isAvailableFromState && (
+                    <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-center">
+                        <p className="text-lg font-semibold text-green-800">Available from the Republic</p>
+                        {/* Assuming a fixed price for state land, e.g., 10000. This should come from config or game balance. */}
+                        <p className="text-xl text-green-700 my-1">Price: 10,000 ⚜️ ducats</p> 
+                        <ActionButton
+                            onClick={() => handleGenericActivity('buy_available_land', { landId: selectedPolygonId, expectedPrice: 10000, targetBuildingId: "town_hall_default" })} // targetBuildingId might be needed by processor
+                            variant="primary"
+                            className="w-full mt-2"
+                        >
+                            Acquire from Republic
+                        </ActionButton>
+                    </div>
+                )}
+
+                {/* Display Incoming Buy Offers (if current citizen is the owner and land is not listed by them OR is listed by them) */}
+                {isOwner && incomingBuyOffers.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-md font-semibold text-amber-700 mb-2">Incoming Offers to Buy:</h4>
+                    {incomingBuyOffers.map(offer => (
+                      <div key={offer.id} className="p-3 mb-2 rounded-lg bg-blue-50 border border-blue-200">
+                        <p>Offer from: {offer.BuyerName || offer.Buyer}</p>
+                        <p>Amount: {offer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
+                        <ActionButton
+                          onClick={() => handleGenericActivity('accept_land_offer', { contractId: offer.id, landId: selectedPolygonId })}
+                          variant="primary"
+                          className="w-full mt-1"
+                        >
+                          Accept Offer
+                        </ActionButton>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Display Current Citizen's Buy Offer (if they are not the owner) */}
+                {myBuyOffer && !isOwner && (
+                  <div className="mt-4 p-3 rounded-lg bg-purple-50 border border-purple-200">
+                    <h4 className="text-md font-semibold text-purple-700 mb-1">Your Offer to Buy:</h4>
+                    <p>Amount: {myBuyOffer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
+                    <ActionButton
+                      onClick={() => handleGenericActivity('cancel_land_offer', { contractId: myBuyOffer.id, landId: selectedPolygonId })}
+                      variant="danger"
+                      className="w-full mt-1"
+                    >
+                      Cancel Your Offer
+                    </ActionButton>
+                  </div>
+                )}
+                
+                {/* Show "Make an Offer" input/button if:
+                    - Land is owned by someone else OR land is unowned but NOT available from state (e.g. specific auction)
+                    - AND current citizen does not already have an active buy offer for this land
+                    - AND the land is not currently listed by the owner (to avoid confusion with "Buy Now")
+                */}
+                {currentCitizenUsername && !isOwner && !myBuyOffer && !landListingByOwner && !isAvailableFromState && (
+                  showOfferInput ? (
+                    <div className="flex flex-col w-full space-y-3 mt-3">
+                      <div className="flex space-x-2">
+                        <input
+                          type="number"
+                          value={offerAmount}
+                          onChange={(e) => setOfferAmount(parseInt(e.target.value) || 0)}
+                          className="px-3 py-2 border border-amber-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          placeholder="Offer amount in ⚜️ ducats"
+                          min="1"
+                        />
+                        <ActionButton
+                          onClick={() => {
+                            if (offerAmount <= 0) {
+                              alert('Please enter a valid offer amount.');
+                              return;
+                            }
+                            handleGenericActivity('make_offer_for_land', { 
+                              landId: selectedPolygonId, 
+                              offerPrice: offerAmount, 
+                              sellerUsername: owner // Can be null if land is unowned and offers are allowed
+                            });
+                          }}
+                          variant="primary"
+                          disabled={isLoading}
+                        >
+                          Submit Offer
+                        </ActionButton>
+                      </div>
+                      <ActionButton onClick={() => setShowOfferInput(false)} variant="secondary" disabled={isLoading}>
+                        Cancel
+                      </ActionButton>
+                    </div>
+                  ) : (
+                    <ActionButton
+                      onClick={() => setShowOfferInput(true)}
+                      variant="primary"
+                      className="w-full mt-2"
+                      disabled={isLoading}
+                    >
+                      Make an Offer to Purchase
+                    </ActionButton>
+                  )
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -917,9 +1083,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         {/* Third column - Owner & Market Actions */}
         <div className={isCorrespondanceFullScreen ? 'hidden' : 'w-1/3 flex flex-col space-y-3 overflow-y-auto custom-scrollbar pr-1'}>
           {/* Owner information */}
-          <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
-          {/* Le contenu dupliqué/mal placé (canvas, income info) a été retiré d'ici. */}
-          {/* La section Owner correcte (avec PlayerProfile) et Market Status devrait suivre. */}
           <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
             <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
             {owner && owner !== "" ? (
@@ -943,163 +1106,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
               </div>
             )}
           </div>
-          
-          {/* Market Status & Actions */}
-          <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200 space-y-3">
-            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Market Status</h3>
-
-            {isLoading && <p className="text-xs text-amber-700">Loading market data...</p>}
-
-            {/* Case 1: Land is listed for sale by the owner */}
-            {landListingByOwner && (
-              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-                <p className="text-lg font-semibold text-amber-800">
-                  For Sale by {landListingByOwner.SellerName || landListingByOwner.Seller}
-                </p>
-                <p className="text-2xl font-semibold text-center my-2">
-                  <span style={{ color: '#d4af37' }}>
-                    <AnimatedDucats 
-                      value={landListingByOwner.PricePerResource} 
-                      suffix="⚜️ ducats" 
-                      duration={1500}
-                    />
-                  </span>
-                </p>
-                {!isOwner && currentCitizenUsername && normalizeIdentifier(landListingByOwner.Seller) !== normalizeIdentifier(currentCitizenUsername) && (
-                  <ActionButton
-                    onClick={() => handleGenericActivity('buy_listed_land', { contractId: landListingByOwner.id, landId: selectedPolygonId, price: landListingByOwner.PricePerResource })}
-                    variant="primary" // "success" n'est pas une variante valide
-                    className="w-full mt-2"
-                  >
-                    Buy Now at {landListingByOwner.PricePerResource.toLocaleString()} ⚜️
-                  </ActionButton>
-                )}
-                {isOwner && normalizeIdentifier(landListingByOwner.Seller) === normalizeIdentifier(currentCitizenUsername) && (
-                   <ActionButton
-                    onClick={() => handleGenericActivity('cancel_land_listing', { contractId: landListingByOwner.id, landId: selectedPolygonId })}
-                    variant="danger"
-                    className="w-full mt-2"
-                  >
-                    Cancel Your Listing
-                  </ActionButton>
-                )}
-              </div>
-            )}
-
-            {/* Case 2: Current citizen is owner and land is NOT listed by them */}
-            {isOwner && !myLandListing && (
-              <ActionButton
-                onClick={() => setShowListForSaleModal(true)}
-                variant="primary"
-                className="w-full"
-              >
-                List Your Land for Sale
-              </ActionButton>
-            )}
-            
-            {/* Case 3: Land is unowned (available from state) */}
-            {isAvailableFromState && (
-                <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-center">
-                    <p className="text-lg font-semibold text-green-800">Available from the Republic</p>
-                    {/* Assuming a fixed price for state land, e.g., 10000. This should come from config or game balance. */}
-                    <p className="text-xl text-green-700 my-1">Price: 10,000 ⚜️ ducats</p> 
-                    <ActionButton
-                        onClick={() => handleGenericActivity('buy_available_land', { landId: selectedPolygonId, expectedPrice: 10000, targetBuildingId: "town_hall_default" })} // targetBuildingId might be needed by processor
-                        variant="primary" // "success" n'est pas une variante valide
-                        className="w-full mt-2"
-                    >
-                        Acquire from Republic
-                    </ActionButton>
-                </div>
-            )}
-
-            {/* Display Incoming Buy Offers (if current citizen is the owner and land is not listed by them OR is listed by them) */}
-            {isOwner && incomingBuyOffers.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-md font-semibold text-amber-700 mb-2">Incoming Offers to Buy:</h4>
-                {incomingBuyOffers.map(offer => (
-                  <div key={offer.id} className="p-3 mb-2 rounded-lg bg-blue-50 border border-blue-200">
-                    <p>Offer from: {offer.BuyerName || offer.Buyer}</p>
-                    <p>Amount: {offer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
-                    <ActionButton
-                      onClick={() => handleGenericActivity('accept_land_offer', { contractId: offer.id, landId: selectedPolygonId })}
-                      variant="primary" // "success" n'est pas une variante valide
-                      className="w-full mt-1"
-                    >
-                      Accept Offer
-                    </ActionButton>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Display Current Citizen's Buy Offer (if they are not the owner) */}
-            {myBuyOffer && !isOwner && (
-              <div className="mt-4 p-3 rounded-lg bg-purple-50 border border-purple-200">
-                <h4 className="text-md font-semibold text-purple-700 mb-1">Your Offer to Buy:</h4>
-                <p>Amount: {myBuyOffer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
-                <ActionButton
-                  onClick={() => handleGenericActivity('cancel_land_offer', { contractId: myBuyOffer.id, landId: selectedPolygonId })}
-                  variant="danger"
-                  className="w-full mt-1"
-                >
-                  Cancel Your Offer
-                </ActionButton>
-              </div>
-            )}
-            
-            {/* Show "Make an Offer" input/button if:
-                - Land is owned by someone else OR land is unowned but NOT available from state (e.g. specific auction)
-                - AND current citizen does not already have an active buy offer for this land
-                - AND the land is not currently listed by the owner (to avoid confusion with "Buy Now")
-            */}
-            {currentCitizenUsername && !isOwner && !myBuyOffer && !landListingByOwner && !isAvailableFromState && (
-              showOfferInput ? (
-                <div className="flex flex-col w-full space-y-3 mt-3">
-                  <div className="flex space-x-2">
-                    <input
-                      type="number"
-                      value={offerAmount}
-                      onChange={(e) => setOfferAmount(parseInt(e.target.value) || 0)}
-                      className="px-3 py-2 border border-amber-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      placeholder="Offer amount in ⚜️ ducats"
-                      min="1"
-                    />
-                    <ActionButton
-                      onClick={() => {
-                        if (offerAmount <= 0) {
-                          alert('Please enter a valid offer amount.');
-                          return;
-                        }
-                        handleGenericActivity('make_offer_for_land', { 
-                          landId: selectedPolygonId, 
-                          offerPrice: offerAmount, 
-                          sellerUsername: owner // Can be null if land is unowned and offers are allowed
-                        });
-                      }}
-                      variant="primary"
-                      disabled={isLoading}
-                    >
-                      Submit Offer
-                    </ActionButton>
-                  </div>
-                  <ActionButton onClick={() => setShowOfferInput(false)} variant="secondary" disabled={isLoading}>
-                    Cancel
-                  </ActionButton>
-                </div>
-              ) : (
-                <ActionButton
-                  onClick={() => setShowOfferInput(true)}
-                  variant="primary"
-                  className="w-full mt-2"
-                  disabled={isLoading}
-                >
-                  Make an Offer to Purchase
-                </ActionButton>
-              )
-            )}
-          </div>
-
+          {/* Market Status & Actions have been moved to the "Real Estate" tab in the first column. */}
+          {/* This column now primarily shows owner information. */}
           </div>
         </div>
       </div>
