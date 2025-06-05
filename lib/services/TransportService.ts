@@ -1083,7 +1083,10 @@ export class TransportService {
       
       // Create abort controller for timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => {
+        console.warn('[TransportService] Timeout loading water graph after 30 seconds.');
+        controller.abort();
+      }, 30000); // 30 second timeout
       
       // Try multiple possible paths for the water graph file
       const pathsToTry = [
