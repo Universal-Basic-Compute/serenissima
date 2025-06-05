@@ -1112,7 +1112,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         </div>
       </div>
       
-      {/* Footer (optional, can be removed or simplified) */}
+      {/* Footer section (optional, can be removed or simplified) */}
       <div className="p-2 text-xs text-amber-500 italic text-center flex-shrink-0 border-t border-amber-200">
         La Serenissima Repubblica di Venezia
       </div>
