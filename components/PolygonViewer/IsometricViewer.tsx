@@ -3067,31 +3067,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     // We don't need to draw land images twice - the first pass above is sufficient
     // This second pass is removed to avoid drawing the images twice
 
-    // Second pass: Draw all polygon names (only in land view)
-    // This is drawn on top of the polygons rendered by renderService.drawPolygons
-    if (activeView === 'land') {
-      // Only show text if zoom level is above a certain threshold (closer zoom)
-      const showText = scale >= 2.0; // Further reduced threshold to match new minimum zoom level
-        
-      if (showText) {
-        polygonsToRender.forEach(({ polygon, centerX, centerY }) => {
-          if (polygon.historicalName) {
-            // Use a fixed font size regardless of zoom level
-            ctx.font = `10px Arial`;
-            ctx.fillStyle = '#000';
-            ctx.textAlign = 'center';
-            
-            // Calculate offset to position text below coat of arms
-            const coatOfArmsSize = Math.min(71, Math.max(35, Math.floor(scale * 18.84)));
-            const fontSize = 10; // Define the font size to match the fixed font size we're using
-            const textYOffset = coatOfArmsSize / 2 + fontSize + 5; // Half the coat of arms size + font size + padding
-            
-            // Draw text below the coat of arms at the center position
-            ctx.fillText(polygon.historicalName, centerX, centerY + textYOffset);
-          }
-        });
-      }
-    }
+    // Land names are no longer displayed.
       
     // Le rendu des blasons est maintenant géré par le composant CoatOfArmsMarkers (voir plus bas dans le JSX)
 
