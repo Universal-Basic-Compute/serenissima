@@ -40,7 +40,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         log.error(f"{LogColors.FAIL}Missing landId or offerPrice for make_offer_for_land for citizen {citizen_username}. Params: {activity_parameters}{LogColors.ENDC}")
         return []
 
-    log.info(f"{LogColors.ACTIVITY}Attempting to create 'make_offer_for_land' activity chain for {citizen_username} for land {land_id} at price {offer_price}. Target seller: {target_seller_username or 'N/A'}.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}Attempting to create 'make_offer_for_land' activity chain for {citizen_username} for land {land_id} at price {offer_price}. Target seller: {target_seller_username or 'N/A'}.{LogColors.ENDC}")
 
     # 1. Determine citizen's current location
     citizen_position_str = citizen_record['fields'].get('Position')
@@ -71,18 +71,18 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         target_office_record = get_building_record(tables, user_specified_target_office_id)
         if target_office_record:
             target_office_building_id = target_office_record['fields'].get('BuildingId')
-            log.info(f"{LogColors.ACTIVITY}Using user-specified target office: {target_office_building_id}{LogColors.ENDC}")
+            log.info(f"{LogColors.OKCYAN}Using user-specified target office: {target_office_building_id}{LogColors.ENDC}")
         else:
             log.warning(f"{LogColors.WARNING}User-specified target office {user_specified_target_office_id} not found. Proceeding to fallback search.{LogColors.ENDC}")
 
     if not target_office_record:
-        log.info(f"{LogColors.ACTIVITY}Searching for closest appropriate office from types: {preferred_office_types}.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKCYAN}Searching for closest appropriate office from types: {preferred_office_types}.{LogColors.ENDC}")
         for office_type in preferred_office_types:
             found_office = get_closest_building_of_type(tables, from_location_data, office_type, transport_api_url)
             if found_office:
                 target_office_record = found_office
                 target_office_building_id = target_office_record['fields'].get('BuildingId')
-                log.info(f"{LogColors.ACTIVITY}Found closest '{office_type}': {target_office_building_id}. Using as target office.{LogColors.ENDC}")
+                log.info(f"{LogColors.OKCYAN}Found closest '{office_type}': {target_office_building_id}. Using as target office.{LogColors.ENDC}")
                 break
         
         if not target_office_record:
@@ -113,7 +113,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
             "CreatedAt": now_utc_dt.isoformat(), "UpdatedAt": now_utc_dt.isoformat()
         }
         activities_created.append(goto_activity)
-        log.info(f"{LogColors.ACTIVITY}Created goto_location activity {goto_activity_id} for {citizen_username} to {target_office_building_id}. Duration: {travel_duration_minutes} mins.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKCYAN}Created goto_location activity {goto_activity_id} for {citizen_username} to {target_office_building_id}. Duration: {travel_duration_minutes} mins.{LogColors.ENDC}")
     else:
         log.warning(f"{LogColors.WARNING}No path found for {citizen_username} to {target_office_building_id}. Creating finalize activity directly at current time.{LogColors.ENDC}")
 
@@ -142,6 +142,6 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         "CreatedAt": now_utc_dt.isoformat(), "UpdatedAt": now_utc_dt.isoformat()
     }
     activities_created.append(finalize_activity)
-    log.info(f"{LogColors.ACTIVITY}Created finalize_make_offer_for_land activity {finalize_activity_id} for {citizen_username}. Starts at {finalize_start_time_utc.isoformat()}.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}Created finalize_make_offer_for_land activity {finalize_activity_id} for {citizen_username}. Starts at {finalize_start_time_utc.isoformat()}.{LogColors.ENDC}")
 
     return activities_created
