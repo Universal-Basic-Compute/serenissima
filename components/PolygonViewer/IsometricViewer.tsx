@@ -1910,8 +1910,8 @@ number => {
   useEffect(() => {
     const updateNightState = () => {
       const currentHour = getVeniceHour();
-      // Consider night from 8 PM (20) to 6 AM (6)
-      const nightTime = currentHour >= 20 || currentHour < 6;
+      // Consider night from 7 PM (19) to 7 AM (7) to approximate Venice sunset/sunrise
+      const nightTime = currentHour >= 19 || currentHour < 7;
       if (nightTime !== isNight) {
         setIsNight(nightTime);
         console.log(`Venice time update: It is now ${nightTime ? 'night' : 'day'}. Hour: ${currentHour}`);
