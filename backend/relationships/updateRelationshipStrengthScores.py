@@ -716,12 +716,23 @@ def update_relationship_scores(
                 if all_source_types:
                     notes_string = f"Sources: {', '.join(sorted(list(all_source_types)))}"
                 
-                # log.info(
-                #     f"{Colors.OKCYAN}Updating existing relationship for {Colors.BOLD}{source_username}{Colors.ENDC}{Colors.OKCYAN} with {Colors.BOLD}{target_username}{Colors.ENDC}:\n"
-                #     f"  StrengthScore (0-100): {current_strength_score:.2f} (decayed: {strength_score_decayed:.2f}) -> {updated_strength_score:.2f}\n"
-                #     f"  TrustScore (0-100): {current_trust_score:.2f} (decayed: {trust_score_decayed:.2f}) -> {updated_trust_score:.2f}\n"
-                #     f"  Contributing Notes: {notes_string}{Colors.ENDC}"
-                # )
+                # Log avec couleurs pour les deltas
+                strength_delta = updated_strength_score - current_strength_score
+                trust_delta = updated_trust_score - current_trust_score
+                
+                strength_color = Colors.OKGREEN if strength_delta >= 0 else Colors.FAIL
+                trust_color = Colors.OKGREEN if trust_delta >= 0 else Colors.FAIL
+                
+                log_message_update = (
+                    f"{Colors.OKCYAN}Updating existing relationship for {Colors.BOLD}{source_username}{Colors.ENDC}{Colors.OKCYAN} with {Colors.BOLD}{target_username}{Colors.ENDC}:\n"
+                    f"  StrengthScore: {current_strength_score:.2f} -> {updated_strength_score:.2f} "
+                    f"({strength_color}{strength_delta:+.2f}{Colors.ENDC})\n"
+                    f"  TrustScore:    {current_trust_score:.2f} -> {updated_trust_score:.2f} "
+                    f"({trust_color}{trust_delta:+.2f}{Colors.ENDC})\n"
+                    f"  Decayed Strength: {strength_score_decayed:.2f}, Decayed Trust: {trust_score_decayed:.2f}\n"
+                    f"  Contributing Notes: {notes_string}{Colors.ENDC}"
+                )
+                log.info(log_message_update)
                 
                 tables['relationships'].update(record_id, {
                     'StrengthScore': updated_strength_score,
@@ -775,12 +786,22 @@ def update_relationship_scores(
                 else:
                     notes_string = ""
 
-                # log.info(
-                #     f"{Colors.OKGREEN}Creating new relationship for {Colors.BOLD}{source_username}{Colors.ENDC}{Colors.OKGREEN} with {Colors.BOLD}{target_username}{Colors.ENDC}:\n"
-                #     f"  StrengthScore (0-100): {initial_strength_score:.2f} (from {new_relevancy_types_set})\n"
-                #     f"  TrustScore (0-100): {initial_trust_score:.2f} (from {trust_interaction_types})\n"
-                #     f"  Contributing Notes: {notes_string}{Colors.ENDC}"
-                # )
+                # Log avec couleurs pour les deltas par rapport aux valeurs par défaut
+                strength_delta_new = initial_strength_score - DEFAULT_NORMALIZED_STRENGTH_SCORE
+                trust_delta_new = initial_trust_score - DEFAULT_NORMALIZED_SCORE
+                
+                strength_color_new = Colors.OKGREEN if strength_delta_new >= 0 else Colors.FAIL
+                trust_color_new = Colors.OKGREEN if trust_delta_new >= 0 else Colors.FAIL
+
+                log_message_create = (
+                    f"{Colors.OKGREEN}Creating new relationship for {Colors.BOLD}{source_username}{Colors.ENDC}{Colors.OKGREEN} with {Colors.BOLD}{target_username}{Colors.ENDC}:\n"
+                    f"  StrengthScore: {DEFAULT_NORMALIZED_STRENGTH_SCORE:.2f} -> {initial_strength_score:.2f} "
+                    f"({strength_color_new}{strength_delta_new:+.2f}{Colors.ENDC}) (Relevancies: {new_relevancy_types_set})\n"
+                    f"  TrustScore:    {DEFAULT_NORMALIZED_SCORE:.2f} -> {initial_trust_score:.2f} "
+                    f"({trust_color_new}{trust_delta_new:+.2f}{Colors.ENDC}) (Interactions: {trust_interaction_types})\n"
+                    f"  Contributing Notes: {notes_string}{Colors.ENDC}"
+                )
+                log.info(log_message_create)
 
                 # Ensure Citizen1 and Citizen2 are stored alphabetically
                 c1, c2 = tuple(sorted((source_username, target_username)))
