@@ -47,6 +47,31 @@ const LandMarketColumn: React.FC<LandMarketColumnProps> = ({
   setShowListForSaleModal,
   normalizeIdentifier,
 }) => {
+
+  const renderActivities = (contract: any, title: string) => {
+    if (!contract || contract.isLoadingActivities === true) {
+      return <p className="text-xs text-gray-500 italic mt-1">{title}: Loading actions...</p>;
+    }
+    if (!contract.activities || contract.activities.length === 0) {
+      // Optionally, you can choose to render nothing if there are no activities,
+      // instead of "No associated actions."
+      // return null; 
+      return <p className="text-xs text-gray-500 italic mt-1">{title}: No associated actions.</p>;
+    }
+    return (
+      <div className="mt-2">
+        <h5 className="text-xs font-semibold text-gray-600 mb-1">{title}:</h5>
+        <ul className="space-y-1 text-xs">
+          {contract.activities.map((activity: any) => (
+            <li key={activity.id || activity.activityId} className="text-gray-700">
+              - {activity.type} by {activity.citizen} ({activity.status})
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col space-y-3 overflow-y-auto custom-scrollbar pr-1 h-full"> {/* Ensure full height for scrolling */}
       {/* Owner information */}
@@ -114,6 +139,7 @@ const LandMarketColumn: React.FC<LandMarketColumnProps> = ({
                   Cancel Your Listing
                 </ActionButton>
               )}
+              {renderActivities(landListingByOwner, "Actions on this Listing")}
             </div>
           )}
 
@@ -158,6 +184,7 @@ const LandMarketColumn: React.FC<LandMarketColumnProps> = ({
                   >
                     Accept Offer
                   </ActionButton>
+                  {renderActivities(offer, "Actions on this Offer")}
                 </div>
               ))}
             </div>
@@ -175,6 +202,7 @@ const LandMarketColumn: React.FC<LandMarketColumnProps> = ({
               >
                 Cancel Your Offer
               </ActionButton>
+              {renderActivities(myBuyOffer, "Actions on Your Offer")}
             </div>
           )}
           
