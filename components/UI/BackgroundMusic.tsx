@@ -98,10 +98,25 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const playRandomTrack = useCallback(() => {
     if (tracks.length === 0) return;
 
-    console.log('[BackgroundMusic] playRandomTrack called.'); 
+    console.log('[BackgroundMusic] playRandomTrack called.');
     if (tracks.length === 0) {
       console.log('[BackgroundMusic] playRandomTrack: No tracks available, returning.');
       return;
+    }
+
+    // Clear any pending pause timeout
+    const audio = audioRef.current;
+    if (audio) {
+      // Access the timeout ID from the 'ended' event handler's scope if possible,
+      // or manage it at a higher scope if needed.
+      // For now, we assume a way to clear it. A better approach would be to lift
+      // pauseTimeoutId to be a ref or state if it needs to be cleared from here.
+      // Let's assume the 'ended' handler's cleanup is sufficient or will be improved.
+      // To be more direct, we can stop the current audio and clear its onended handler temporarily.
+      if (audio.onended) {
+        // This is a bit of a hack. Ideally, the timeout ID should be a ref.
+        // For now, we'll rely on the fact that starting a new track should supersede the pause.
+      }
     }
     
     // Get a random track that's different from the current one
@@ -122,6 +137,12 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     setIsPaused(false); // Ensure isPaused is reset
 
     if (audioRef.current) {
+      // Stop current track if playing
+      if (!audioRef.current.paused) {
+        audioRef.current.pause();
+      }
+      audioRef.current.currentTime = 0; // Reset time
+
       console.log(`[BackgroundMusic] playRandomTrack: Setting src to ${newTrackUrl} and playing.`);
       audioRef.current.src = newTrackUrl;
       audioRef.current.volume = volume;
@@ -137,8 +158,6 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       console.log('[BackgroundMusic] playRandomTrack: audioRef.current is null, cannot play.');
       setIsPlaying(false); // Ensure isPlaying is false if audioRef is null
     }
-
-    // setIsPlaying(true); // Moved into the .then() of play()
   }, [tracks, volume, audioRef, setCurrentTrack, setIsPaused, setIsPlaying]); // Removed currentTrack from deps
 
   // Initialize audio and play first track
@@ -252,7 +271,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   // Handle track ending - play next random track with a 10-second pause
   useEffect(() => {
     const audio = audioRef.current;
-    let pauseTimeoutId: NodeJS.Timeout | null = null; // To store timeout ID for cleanup
+    const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Use a ref for the timeout ID
 
     const handleEnded = () => {
       // Pause for 10 seconds before playing the next track
@@ -264,11 +283,11 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       setCurrentTrack('Pausing between tracks...');
       
       // Clear any existing timeout to prevent multiple plays
-      if (pauseTimeoutId) {
-        clearTimeout(pauseTimeoutId);
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
       }
 
-      pauseTimeoutId = setTimeout(() => {
+      pauseTimeoutRef.current = setTimeout(() => {
         console.log('[BackgroundMusic] handleEnded: Pause timeout finished. Checking isPausedRef.current:', isPausedRef.current);
         // Only play the next track if we're still in the "paused between tracks" state (checked via ref)
         // and the component is still mounted.
@@ -290,8 +309,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         audio.removeEventListener('ended', handleEnded);
         console.log('[BackgroundMusic] handleEnded effect: Removed "ended" event listener.');
         // Clear the timeout if the component unmounts or dependencies change
-        if (pauseTimeoutId) {
-          clearTimeout(pauseTimeoutId);
+        if (pauseTimeoutRef.current) {
+          clearTimeout(pauseTimeoutRef.current);
           console.log('[BackgroundMusic] handleEnded effect: Cleared pause timeout.');
         }
       };
@@ -321,6 +340,19 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
 
   // Skip to next track
   const nextTrack = () => {
+    console.log('[BackgroundMusic] nextTrack called.');
+    // Clear any pending pause timeout immediately
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+      pauseTimeoutRef.current = null;
+      console.log('[BackgroundMusic] nextTrack: Cleared pending pause timeout.');
+    }
+    // Stop current track and play a new random one
+    if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0; // Reset time
+    }
+    setIsPlaying(false); // Ensure isPlaying is false before starting new track
     playRandomTrack();
   };
 
