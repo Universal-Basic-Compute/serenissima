@@ -175,12 +175,6 @@ export default function TwoDPage() {
   const [loginStatusChecked, setLoginStatusChecked] = useState<boolean>(false);
   const [currentUserUsername, setCurrentUserUsername] = useState<string | null>(null); // Pour stocker le nom d'utilisateur
 
-  // State for LandDetailsPanel (géré par IsometricViewer, mais nous devons savoir quand il est ouvert pour la logique de la page)
-  // const [showLandDetailPanel, setShowLandDetailPanel] = useState<boolean>(false); // Plus géré ici directement
-  // const [selectedLandId, setSelectedLandId] = useState<string | null>(null); // Plus géré ici directement
-  // const [selectedLandInitialData, setSelectedLandInitialData] = useState<any | null>(null); // Plus géré ici directement
-
-
   // const handleLoadingComplete = () => { // Supprimé car InitialLoadingScreen est retiré
   //   console.log('InitialLoadingScreen complete, showing Daily Update panel.');
   //   setAppStatus('dailyUpdate');
@@ -203,12 +197,6 @@ export default function TwoDPage() {
     setShowCitizenDetailsPanelDirect(false);
     setCitizenForPanelDirect(null);
   }, []);
-
-  // const handleLandDetailPanelClose = useCallback(() => { // Plus géré ici directement
-  //   setShowLandDetailPanel(false);
-  //   setSelectedLandId(null);
-  //   setSelectedLandInitialData(null);
-  // }, []);
 
   // Effect to determine client-side initial status after mount AND set initial loading image
   useEffect(() => {
