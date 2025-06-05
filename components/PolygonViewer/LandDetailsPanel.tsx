@@ -134,35 +134,59 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
 
   useEffect(() => {
     // Define the handler to accept the event payload
-    const handleWalletChange = (walletData?: { profile?: { username?: string | null }; [key: string]: any }) => {
+    const handleWalletChange = (walletData?: { profile?: { username?: string | null }; isConnected?: boolean; [key: string]: any }) => {
+      console.log('[LandDetailsPanel] handleWalletChange received walletData:', JSON.stringify(walletData || {note: "payload was undefined"}, null, 2));
       let newUsername: string | null = null;
-      if (walletData && walletData.profile && walletData.profile.username) {
-        newUsername = walletData.profile.username;
-        console.log('[LandDetailsPanel] Username from WALLET_CHANGED event payload:', newUsername);
-      } else {
-        // Fallback if payload is not as expected or event is emitted without data
-        newUsername = getCurrentCitizenUsername();
-        console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (fallback or no payload):', newUsername);
+      const wasConnected = internalCurrentCitizenUsername !== null;
+
+      if (walletData && walletData.isConnected === true) { // Explicitly connected
+        if (walletData.profile && typeof walletData.profile.username === 'string' && walletData.profile.username.trim() !== '') {
+          newUsername = walletData.profile.username;
+          console.log('[LandDetailsPanel] Username from WALLET_CHANGED event payload (connected):', newUsername);
+        } else {
+          // Connected, but no username in payload, try storage as a fallback
+          newUsername = getCurrentCitizenUsername();
+          console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (connected, but no/invalid username in payload):', newUsername);
+        }
+      } else if (walletData && walletData.isConnected === false) { // Explicitly disconnected
+        newUsername = null;
+        console.log('[LandDetailsPanel] User explicitly disconnected via WALLET_CHANGED event.');
+      } else { // Ambiguous event or no isConnected field, or walletData is null/undefined
+        // This branch will also be hit if walletData is null/undefined from the eventBus.
+        const usernameFromStorage = getCurrentCitizenUsername();
+        newUsername = usernameFromStorage;
+        console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (event payload was ambiguous, null, or lacked isConnected):', newUsername);
       }
-      setInternalCurrentCitizenUsername(newUsername);
+      
+      // Only update state if the username has actually changed to avoid unnecessary re-renders
+      // or if the connection status implies a change (e.g. was connected, now newUsername is null)
+      if (internalCurrentCitizenUsername !== newUsername) {
+        console.log(`[LandDetailsPanel] Updating internalCurrentCitizenUsername from "${internalCurrentCitizenUsername}" to "${newUsername}"`);
+        setInternalCurrentCitizenUsername(newUsername);
+      } else if (wasConnected !== (newUsername !== null)) {
+        // This case handles if the username string is the same (e.g. both null) but connection status changed.
+        // For example, if it was null and event indicates disconnection (still null), no state change needed.
+        // If it was 'UserA' and event indicates connection with 'UserA', no state change needed.
+        console.log(`[LandDetailsPanel] Username ("${newUsername}") is the same as previous ("${internalCurrentCitizenUsername}"), but connection status might have changed.`);
+      }
     };
 
-    // Set initial state directly from localStorage/sessionStorage
-    const initialUsername = getCurrentCitizenUsername();
-    setInternalCurrentCitizenUsername(initialUsername);
-    console.log('[LandDetailsPanel] Initial username check on mount:', initialUsername);
+    // Set initial state directly from localStorage/sessionStorage on mount
+    const initialUsernameOnMount = getCurrentCitizenUsername();
+    setInternalCurrentCitizenUsername(initialUsernameOnMount);
+    console.log('[LandDetailsPanel] Initial username check on mount:', initialUsernameOnMount);
 
     // Subscribe to wallet changes
     const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, handleWalletChange);
     
-    // Request current status on mount
-    // This should trigger WalletButton (or equivalent) to emit WALLET_CHANGED with current data
+    // Request current status on mount AFTER subscription is set up.
+    console.log('[LandDetailsPanel] Emitting REQUEST_WALLET_STATUS to get current wallet state.');
     eventBus.emit(EventTypes.REQUEST_WALLET_STATUS);
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []); // Empty dependency array, runs on mount and cleans up
+  }, []); // Empty dependency array ensures this runs once on mount and cleans up on unmount.
 
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
