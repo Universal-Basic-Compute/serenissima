@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { debounce, throttle } from 'lodash';
+import { useWalletContext } from '@/components/UI/WalletProvider'; // Import useWalletContext
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { fetchCoatOfArmsImageUrl } from '@/app/utils/coatOfArmsUtils';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
