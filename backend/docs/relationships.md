@@ -4,21 +4,24 @@
 
 Le système de scoring pour les relations (`StrengthScore` et `TrustScore`) fonctionne comme suit :
 
-1.  **Scores Visibles** :
-    *   **`TrustScore` (0-100)**:
-        *   **0**: Méfiance totale (correspond à un score latent très négatif).
-        *   **50**: Neutre (correspond à un score latent de 0).
-        *   **100**: Confiance totale (correspond à un score latent très positif).
-    *   **`StrengthScore` (0-100)**:
-        *   **0**: Aucune force/pertinence (correspond à un score latent de 0).
-        *   **100**: Force/pertinence maximale (correspond à un score latent très positif).
-        *   *Note*: Le `StrengthScore` utilise une fonction de normalisation différente qui mappe un score latent de 0 à un score normalisé de 0.
+1.  **Scores Visibles (0-100)** : Les scores affichés et stockés vont de 0 à 100.
+    *   **`TrustScore`**:
+        *   **0**: Méfiance totale.
+        *   **50**: Neutre.
+        *   **100**: Confiance totale.
+    *   **`StrengthScore`**:
+        *   **0**: Aucune force/pertinence.
+        *   **100**: Force/pertinence maximale.
 
-2.  **Impact Dégressif** : Pour les deux scores, l'effet de chaque point "latent" ajouté/retiré diminue à mesure que le score normalisé s'approche de ses extrêmes (0 ou 100).
+2.  **Impact Dégressif des Points Bruts** : L'effet de chaque "point brut" ajouté ou retiré à un score diminue à mesure que ce score s'approche des extrêmes (0 ou 100). Il est plus facile d'influencer un score proche du point de départ/neutre qu'un score déjà très bon ou très mauvais.
 
-3.  **Mécanisme Interne** : Pour cela, le système convertit le score (0-100) en une valeur "latente", applique les changements à cette valeur, puis la reconvertit en score (0-100). Cette double conversion (utilisant `atan` et `tan`) crée l'effet d'impact dégressif.
+3.  **Mécanisme Interne** :
+    *   **Déclin (Decay)**:
+        *   `StrengthScore` décline vers 0 (multiplié par un facteur < 1).
+        *   `TrustScore` décline vers 50 (point neutre).
+    *   **Ajout/Retrait de Points**: La fonction `apply_scaled_score_change` est utilisée. Elle prend le score actuel (0-100), les points bruts à ajouter/retirer, et utilise `atan` pour calculer le changement effectif. Ce changement est proportionnel à "l'espace disponible" avant d'atteindre les bornes 0 ou 100.
 
-Pour plus de détails techniques sur le calcul, voir la section "Mécanisme de Mise à Jour des Scores (0-100 via Espace Latent)" plus bas.
+Pour plus de détails techniques sur le calcul, voir la section "Mécanisme de Mise à Jour des Scores" plus bas.
 
 ## Overview
 
@@ -52,34 +55,47 @@ The `updateRelationshipStrengthScores.py` script runs daily to update both `Stre
 2.  **Iterate per Citizen (Source Citizen)**: For each citizen:
     *   **Fetch Recent Relevancies**: It calls the `/api/relevancies` endpoint to get relevancies where the source citizen is `RelevantToCitizen`. These relevancies must have been created in the last 24 hours. Relevancies where `RelevantToCitizen` is "all" are excluded.
     *   **Fetch Existing Relationships**: It retrieves all existing relationship records involving the source citizen.
-    *   **Déclin** : Le `StrengthScore` et le `TrustScore` actuels (0-100) sont d'abord convertis en un score "latent". Ce score latent est ensuite multiplié par un facteur de déclin (ex: 0.75 pour un déclin de 25%).
-    *   **Calcul des Ajouts aux Scores Latents** :
-        *   **StrengthScore**: Les "points bruts" de chaque pertinence récente sont ajoutés au `StrengthScore` latent (déjà décliné).
-        *   **TrustScore**: Les "points bruts" calculés à partir des interactions directes (voir section suivante) sont ajoutés au `TrustScore` latent (déjà décliné).
-    *   **Reconversion et Mise à Jour** :
-        *   Les nouveaux scores latents (après déclin et ajouts) sont reconvertis en scores normalisés (0-100) en utilisant une fonction `atan`.
-        *   Ces scores normalisés sont ensuite écrits dans Airtable.
-        *   Si aucune relation n'existe, une nouvelle est créée. Le `StrengthScore` et `TrustScore` initiaux (0-100) sont calculés en convertissant les premiers points bruts (de pertinence ou d'interaction) via l'espace latent. Si aucun point n'est ajouté, ils commencent à 50 (neutre).
+    *   **Application du Déclin**:
+        *   `StrengthScore` existant (0-100) est multiplié par `RELATIONSHIP_STRENGTH_DECAY_FACTOR` (ex: 0.75), tendant vers 0.
+        *   `TrustScore` existant (0-100) est ajusté pour tendre vers 50 (neutre) : `ScoreNeutre (50) + (ScoreActuel - ScoreNeutre) * RELATIONSHIP_TRUST_DECAY_FACTOR`.
+    *   **Calcul des Ajouts de Points Bruts**:
+        *   **StrengthScore**: Les "points bruts" de chaque pertinence récente sont collectés.
+        *   **TrustScore**: Les "points bruts" des interactions directes sont calculés (voir section suivante).
+    *   **Application des Points Bruts et Mise à Jour**:
+        *   Les points bruts (positifs ou négatifs) sont ajoutés aux scores déclinés en utilisant la fonction `apply_scaled_score_change`. Cette fonction module l'impact des points bruts pour que le score s'approche asymptotiquement de 0 ou 100.
+        *   Les nouveaux scores (0-100) sont écrits dans Airtable.
+        *   Si aucune relation n'existe, une nouvelle est créée. Le `StrengthScore` initial commence à 0 et le `TrustScore` à 50, puis les premiers points bruts sont appliqués via `apply_scaled_score_change`.
 3.  **Admin Notification**: A summary notification is sent to administrators detailing the number of citizens processed, relevancies fetched, and relationships updated/created.
 
-### Mécanisme de Mise à Jour des Scores (0-100 via Espace Latent)
+### Mécanisme de Mise à Jour des Scores
 
-Pour obtenir l'effet de rendement décroissant souhaité tout en stockant des scores sur une échelle de 0 à 100 :
+Les scores sont stockés et lus sur une échelle de 0 à 100.
 
-1.  **Lecture du Score (0-100)** : Le score actuel (`StrengthScore` ou `TrustScore`) est lu depuis Airtable.
-2.  **Application du Déclin** :
-    *   Pour `TrustScore` (0-100, neutre à 50) : `ScoreDéclinéTrust = 50 + (ScoreActuelTrust - 50) * FACTEUR_DÉCLIN_TRUST`
-    *   Pour `StrengthScore` (0-100, base à 0) : `ScoreDéclinéStrength = ScoreActuelStrength * FACTEUR_DÉCLIN_STRENGTH`. (Assuré >= 0).
-3.  **Ajout de Points Bruts avec Échelle `atan`** :
-    *   Les "points bruts" (ex: `+1.0` pour une interaction positive ou une pertinence) sont appliqués au score décliné en utilisant la fonction `apply_scaled_score_change`.
-    *   `NouveauScore = apply_scaled_score_change(ScoreDécliné, PointsBruts, RAW_POINT_SCALE_FACTOR, min_score, max_score)`
-    *   Cette fonction utilise `atan(PointsBruts * RAW_POINT_SCALE_FACTOR)` pour déterminer une fraction de "l'espace disponible" (entre le score actuel et `min_score` ou `max_score`) à ajouter ou soustraire.
-    *   `RAW_POINT_SCALE_FACTOR` (ex: 0.1) contrôle la sensibilité de l'impact des points bruts.
-4.  **Écriture en BDD** : Le nouveau score (0-100) est écrit dans Airtable.
+1.  **Lecture du Score Actuel (0-100)** : Le `StrengthScore` et `TrustScore` sont lus depuis Airtable.
+    *   `StrengthScore` par défaut si inexistant : 0.0 (`DEFAULT_NORMALIZED_STRENGTH_SCORE`).
+    *   `TrustScore` par défaut si inexistant : 50.0 (`DEFAULT_NORMALIZED_SCORE`).
 
-Ce processus garantit que l'impact de l'ajout de points bruts diminue à mesure que le score normalisé s'approche de 0 ou 100, sans utiliser d'espace "latent" explicite pour le stockage ou la conversion aller-retour complexe.
+2.  **Application du Déclin (Decay)** :
+    *   Pour `StrengthScore`: `ScoreDécliné = ScoreActuel * RELATIONSHIP_STRENGTH_DECAY_FACTOR`. Le score est borné à 0.
+    *   Pour `TrustScore`: `ScoreDécliné = PointNeutre (50) + (ScoreActuel - PointNeutre) * RELATIONSHIP_TRUST_DECAY_FACTOR`.
 
-### Interaction Contributions (Points Bruts pour Score Latent)
+3.  **Calcul des Points Bruts d'Interaction/Pertinence**:
+    *   Les points bruts sont déterminés par la logique métier (ex: +1.0 pour un message, score de pertinence, etc.).
+
+4.  **Application des Points Bruts avec Échelle `atan`**:
+    *   La fonction `apply_scaled_score_change(score_actuel, delta_brut, scale_factor, min_score, max_score)` est utilisée.
+    *   `score_actuel` est le score après déclin.
+    *   `delta_brut` sont les points bruts calculés à l'étape 3.
+    *   `scale_factor` (ex: `RAW_POINT_SCALE_FACTOR = 0.1`) module l'impact des `delta_brut`.
+    *   `min_score` et `max_score` sont typiquement 0 et 100.
+    *   La fonction calcule un `increment_factor` (ou `decrement_factor`) basé sur `atan(delta_brut * scale_factor)`. Ce facteur (entre 0 et 1) est ensuite multiplié par "l'espace disponible" pour que le score change (`max_score - score_actuel` ou `score_actuel - min_score`).
+    *   `NouveauScore = score_actuel + (espace_disponible * increment_factor)`.
+
+5.  **Écriture en BDD** : Le `NouveauScore` (entre 0 et 100) est écrit dans Airtable.
+
+Ce processus garantit que l'impact de l'ajout de points bruts diminue à mesure que le score s'approche de 0 ou 100.
+
+### Interaction Contributions (Points Bruts)
 
 The `_calculate_trust_score_contributions_from_interactions` function aggregates points from the following activities between two citizens:
 
