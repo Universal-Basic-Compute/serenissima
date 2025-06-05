@@ -262,7 +262,43 @@ export default function TwoDPage() {
     // as the state is already 'dailyUpdate'. The DailyUpdatePanel will show.
     // The existing useEffect for loginStatusChecked will also run and can call handleDailyUpdateClose
     // if the user is not logged in, which is the correct behavior.
-  }, [handleDailyUpdateClose]); // handleDailyUpdateClose is stable due to useCallback.
+
+      // Initialize Ambient Audio Manager after a user interaction or when app is ready
+      const initAmbientAudio = async () => {
+        if (!isAmbientAudioInitialized) {
+          console.log('Attempting to initialize AmbientAudioManager...');
+          const success = await ambientAudioManager.initialize();
+          if (success) {
+            setIsAmbientAudioInitialized(true);
+            console.log('AmbientAudioManager initialized by app/page.tsx.');
+            if (appStatus === 'ready') { // Start playing if app is already ready
+              ambientAudioManager.start();
+            }
+          } else {
+            console.warn('AmbientAudioManager failed to initialize on page load.');
+          }
+        }
+      };
+
+      // Attempt initialization. User interaction might be needed for AudioContext.
+      // We can also tie this to a button or the first user click.
+      // For now, let's try to initialize it. If it fails due to autoplay,
+      // it should resume on first user interaction if IsometricViewer handles that.
+      // A more robust way would be to initialize on first click if not already.
+      const handleFirstInteraction = async () => {
+        await initAmbientAudio();
+        window.removeEventListener('click', handleFirstInteraction);
+        window.removeEventListener('keydown', handleFirstInteraction);
+      };
+
+      if (typeof window !== 'undefined') {
+        window.addEventListener('click', handleFirstInteraction, { once: true });
+        window.addEventListener('keydown', handleFirstInteraction, { once: true });
+      }
+      // Attempt to initialize immediately if possible (e.g. if user has interacted before)
+      initAmbientAudio();
+
+  }, [handleDailyUpdateClose, appStatus, isAmbientAudioInitialized]); // Added appStatus and isAmbientAudioInitialized
 
   // State for path statistics
   const [pathStats, setPathStats] = useState<{
