@@ -196,227 +196,207 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   }, [selectedPolygonId, selectedPolygon, dynamicOwner]);
   
   // Add this useEffect to render the top view of the land
-  // useEffect(() => {
-  //   if (selectedPolygon && canvasRef.current && !landRendered) {
-  //     // Clear the canvas first to remove any previous rendering
-  //     const ctx = canvasRef.current.getContext('2d');
-  //     if (ctx) {
-  //       ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-  //     }
+  useEffect(() => {
+    if (selectedPolygon && canvasRef.current && !landRendered) {
+      // Clear the canvas first to remove any previous rendering
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
       
-  //     // Now render the new polygon
-  //     // renderLandTopView(selectedPolygon, canvasRef.current); // Temporarily commented out
-  //     setLandRendered(true);
-  //   }
-  // }, [selectedPolygon, landRendered]);
+      // Now render the new polygon
+      renderLandTopView(selectedPolygon, canvasRef.current); // Uncommented call
+      setLandRendered(true);
+    }
+  }, [selectedPolygon, landRendered]);
 
   // Function to render a top-down view of the land
-  // const renderLandTopView = (polygon: Polygon, canvas: HTMLCanvasElement): void => {
-  //   if (!polygon.coordinates || polygon.coordinates.length < 3) return;
+  const renderLandTopView = (polygon: Polygon, canvas: HTMLCanvasElement): void => {
+    if (!polygon.coordinates || polygon.coordinates.length < 3) return;
     
-  //   // Set canvas size to be square
-  //   canvas.width = 200;
-  //   canvas.height = 200;
+    // Set canvas size to be square
+    canvas.width = 200;
+    canvas.height = 200;
     
-  //   const ctx = canvas.getContext('2d');
-  //   if (!ctx) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     
-  //   // Clear canvas
-  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-  //   // Extract coordinates
-  //   const coords = polygon.coordinates;
+    // Extract coordinates
+    const coords = polygon.coordinates;
     
-  //   // Find min/max to scale the polygon to fit the canvas
-  //   let minLat = coords[0]?.lat || 0, maxLat = coords[0]?.lat || 0;
-  //   let minLng = coords[0]?.lng || 0, maxLng = coords[0]?.lng || 0;
+    // Find min/max to scale the polygon to fit the canvas
+    let minLat = coords[0]?.lat || 0, maxLat = coords[0]?.lat || 0;
+    let minLng = coords[0]?.lng || 0, maxLng = coords[0]?.lng || 0;
     
-  //   coords.forEach(coord => {
-  //     if (coord) {
-  //       minLat = Math.min(minLat, coord.lat);
-  //       maxLat = Math.max(maxLat, coord.lat);
-  //       minLng = Math.min(minLng, coord.lng);
-  //       maxLng = Math.max(maxLng, coord.lng);
-  //     }
-  //   });
+    coords.forEach(coord => {
+      if (coord) {
+        minLat = Math.min(minLat, coord.lat);
+        maxLat = Math.max(maxLat, coord.lat);
+        minLng = Math.min(minLng, coord.lng);
+        maxLng = Math.max(maxLng, coord.lng);
+      }
+    });
     
-  //   // Apply the 0.7 factor to latitude range to correct the aspect ratio
-  //   const latRange = (maxLat - minLat) * 0.7;
-  //   const lngRange = maxLng - minLng;
+    // Apply the 0.7 factor to latitude range to correct the aspect ratio
+    const latRange = (maxLat - minLat) * 0.7;
+    const lngRange = maxLng - minLng;
     
-  //   // Add padding
-  //   const padding = 20;
-  //   const scaleX = (canvas.width - padding * 2) / lngRange;
-  //   const scaleY = (canvas.height - padding * 2) / latRange; // Use adjusted latRange
+    // Add padding
+    const padding = 20;
+    const scaleX = (canvas.width - padding * 2) / lngRange;
+    const scaleY = (canvas.height - padding * 2) / latRange; // Use adjusted latRange
     
-  //   // Use the smaller scale to maintain aspect ratio
-  //   const scale = Math.min(scaleX, scaleY);
+    // Use the smaller scale to maintain aspect ratio
+    const scale = Math.min(scaleX, scaleY);
     
-  //   // Center the polygon
-  //   const centerX = (canvas.width / 2) - ((minLng + maxLng) / 2) * scale;
-  //   const centerY = (canvas.height / 2) + ((minLat + maxLat) / 2) * scale;
+    // Center the polygon
+    const centerX = (canvas.width / 2) - ((minLng + maxLng) / 2) * scale;
+    const centerY = (canvas.height / 2) + ((minLat + maxLat) / 2) * scale;
     
-  //   // Draw the polygon
-  //   ctx.beginPath();
-  //   coords.forEach((coord, index) => {
-  //     // Apply the 0.7 factor to latitude when drawing
-  //     const x = (coord.lng * scale) + centerX;
-  //     const y = centerY - (coord.lat * scale * 0.7); // Apply 0.7 factor here
+    // Draw the polygon
+    ctx.beginPath();
+    coords.forEach((coord, index) => {
+      // Apply the 0.7 factor to latitude when drawing
+      const x = (coord.lng * scale) + centerX;
+      const y = centerY - (coord.lat * scale * 0.7); // Apply 0.7 factor here
         
-  //     if (index === 0) {
-  //       ctx.moveTo(x, y);
-  //     } else {
-  //       ctx.lineTo(x, y);
-  //     }
-  //   });
-  //   ctx.closePath();
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    ctx.closePath();
       
-  //   // Fill with a sand color
-  //   ctx.fillStyle = '#f5e9c8';
-  //   ctx.fill();
+    // Fill with a sand color
+    ctx.fillStyle = '#f5e9c8';
+    ctx.fill();
       
-  //   // Draw border
-  //   ctx.strokeStyle = '#8B4513';
-  //   ctx.lineWidth = 2;
-  //   ctx.stroke();
+    // Draw border
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 2;
+    ctx.stroke();
       
-  //   // If there's a last income or income from service, color the polygon accordingly
-  //   const hasIncome = polygon.lastIncome !== undefined || (() => {
-  //     try {
-  //       const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
-  //       return getIncomeDataService().getIncome(polygon.id) !== undefined;
-  //     } catch (error) {
-  //       return false;
-  //     }
-  //   })();
+    // If there's a last income or income from service, color the polygon accordingly
+    const hasIncome = polygon.lastIncome !== undefined || (() => {
+      try {
+        const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+        return getIncomeDataService().getIncome(polygon.id) !== undefined;
+      } catch (error) {
+        return false;
+      }
+    })();
     
-  //   if (hasIncome) {
-  //     try {
-  //       // Get income from polygon or service
-  //       const income = polygon.lastIncome !== undefined 
-  //         ? polygon.lastIncome 
-  //         : (() => {
-  //             const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
-  //             return getIncomeDataService().getIncome(polygon.id);
-  //           })();
+    if (hasIncome) {
+      try {
+        // Get income from polygon or service
+        const income = polygon.lastIncome !== undefined 
+          ? polygon.lastIncome 
+          : (() => {
+              const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+              return getIncomeDataService().getIncome(polygon.id);
+            })();
         
-  //       // Get min/max income from service
-  //       const minIncome = (() => {
-  //         try {
-  //           const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
-  //           return getIncomeDataService().getMinIncome();
-  //         } catch (error) {
-  //           return 0;
-  //         }
-  //       })();
+        // Get min/max income from service
+        const minIncome = (() => {
+          try {
+            const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+            return getIncomeDataService().getMinIncome();
+          } catch (error) {
+            return 0;
+          }
+        })();
         
-  //       const maxIncome = (() => {
-  //         try {
-  //           const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
-  //           return getIncomeDataService().getMaxIncome();
-  //         } catch (error) {
-  //           return 1000;
-  //         }
-  //       })();
+        const maxIncome = (() => {
+          try {
+            const { getIncomeDataService } = require('../../lib/services/IncomeDataService');
+            return getIncomeDataService().getMaxIncome();
+          } catch (error) {
+            return 1000;
+          }
+        })();
         
-  //       // Normalize income to a 0-1 scale for coloring
-  //       const normalizedIncome = Math.min(Math.max((income - minIncome) / (maxIncome - minIncome), 0), 1);
+        // Normalize income to a 0-1 scale for coloring
+        // Add a check to prevent division by zero if maxIncome equals minIncome
+        let normalizedIncome = 0;
+        if (maxIncome > minIncome) {
+            normalizedIncome = Math.min(Math.max((income - minIncome) / (maxIncome - minIncome), 0), 1);
+        } else if (income >= maxIncome) { // If maxIncome == minIncome, check if income is at or above this value
+            normalizedIncome = 1;
+        }
+
+
+        // Create a semi-transparent overlay with color based on income
+        ctx.globalAlpha = 0.4;
         
-  //       // Create a semi-transparent overlay with color based on income
-  //       ctx.globalAlpha = 0.4;
+        if (normalizedIncome >= 0.5) {
+          // Higher income: yellow to red
+          const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+          const r = Math.floor(255);
+          const g = Math.floor(255 * (1 - t));
+          const b = 0;
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+        } else {
+          // Lower income: green to yellow
+          const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+          const r = Math.floor(255 * t);
+          const g = Math.floor(255);
+          const b = 0;
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+        }
         
-  //       if (normalizedIncome >= 0.5) {
-  //         // Higher income: yellow to red
-  //         const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
-  //         const r = Math.floor(255);
-  //         const g = Math.floor(255 * (1 - t));
-  //         const b = 0;
-  //         ctx.fillStyle = `rgb(${r},${g},${b})`;
-  //       } else {
-  //         // Lower income: green to yellow
-  //         const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-  //         const r = Math.floor(255 * t);
-  //         const g = Math.floor(255);
-  //         const b = 0;
-  //         ctx.fillStyle = `rgb(${r},${g},${b})`;
-  //       }
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      } catch (error) {
+        console.warn('Error applying income-based coloring:', error);
         
-  //       ctx.fill();
-  //       ctx.globalAlpha = 1.0;
-  //     } catch (error) {
-  //       console.warn('Error applying income-based coloring:', error);
-        
-  //       // Fallback to simple coloring if there's an error
-  //       if (polygon.lastIncome !== undefined) {
-  //         // Normalize income to a 0-1 scale for coloring
-  //         const maxIncome = 1000; // Default max income
-  //         const normalizedIncome = Math.min(Math.max(polygon.lastIncome / maxIncome, 0), 1);
+        // Fallback to simple coloring if there's an error AND polygon.lastIncome is defined
+        if (polygon.lastIncome !== undefined) {
+          // Normalize income to a 0-1 scale for coloring
+          const fallbackMaxIncome = 1000; // Default max income for fallback
+          const normalizedFallbackIncome = Math.min(Math.max(polygon.lastIncome / fallbackMaxIncome, 0), 1);
           
-  //         // Create a semi-transparent overlay with color based on income
-  //         ctx.globalAlpha = 0.4;
+          // Create a semi-transparent overlay with color based on income
+          ctx.globalAlpha = 0.4;
           
-  //         if (normalizedIncome >= 0.5) {
-  //           // Higher income: yellow to red
-  //           const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
-  //           const r = Math.floor(255);
-  //           const g = Math.floor(255 * (1 - t));
-  //           const b = 0;
-  //           ctx.fillStyle = `rgb(${r},${g},${b})`;
-  //         } else {
-  //           // Lower income: green to yellow
-  //           const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-  //           const r = Math.floor(255 * t);
-  //           const g = Math.floor(255);
-  //           const b = 0;
-  //           ctx.fillStyle = `rgb(${r},${g},${b})`;
-  //         }
+          if (normalizedFallbackIncome >= 0.5) {
+            // Higher income: yellow to red
+            const t = (normalizedFallbackIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
+            const r = Math.floor(255);
+            const g = Math.floor(255 * (1 - t));
+            const b = 0;
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+          } else {
+            // Lower income: green to yellow
+            const t = normalizedFallbackIncome * 2; // Scale 0-0.5 to 0-1
+            const r = Math.floor(255 * t);
+            const g = Math.floor(255);
+            const b = 0;
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+          }
           
-  //         ctx.fill();
-  //         ctx.globalAlpha = 1.0;
-  //       }
-  //     }
-  //   }
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        }
+      }
+    }
+    // The redundant block for coloring based on polygon.lastIncome has been removed.
+    // The logic is now handled by the `if (hasIncome)` block and its fallback.
     
-  //   // If there's a last income, color the polygon accordingly
-  //   if (polygon.lastIncome !== undefined) {
-  //     // Normalize income to a 0-1 scale for coloring
-  //     const maxIncome = 1000; // Adjust based on your actual data range
-  //     const normalizedIncome = Math.min(Math.max(polygon.lastIncome / maxIncome, 0), 1);
+    // If there's a centroid, mark it
+    if (polygon.centroid) {
+      const x = (polygon.centroid.lng * scale) + centerX;
+      const y = centerY - (polygon.centroid.lat * scale); // Corrected: use original scale for y
       
-  //     // Create a semi-transparent overlay with color based on income
-  //     ctx.globalAlpha = 0.4;
-      
-  //     if (normalizedIncome >= 0.5) {
-  //       // Higher income: yellow to red
-  //       const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
-  //       const r = Math.floor(255);
-  //       const g = Math.floor(255 * (1 - t));
-  //       const b = 0;
-  //       ctx.fillStyle = `rgb(${r},${g},${b})`;
-  //     } else {
-  //       // Lower income: green to yellow
-  //       const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-  //       const r = Math.floor(255 * t);
-  //       const g = Math.floor(255);
-  //       const b = 0;
-  //       ctx.fillStyle = `rgb(${r},${g},${b})`;
-  //     }
-      
-  //     ctx.fill();
-  //     ctx.globalAlpha = 1.0;
-  //   }
-    
-  //   // If there's a centroid, mark it
-  //   if (polygon.centroid) {
-  //     const x = (polygon.centroid.lng * scale) + centerX;
-  //     const y = centerY - (polygon.centroid.lat * scale);
-      
-  //     ctx.beginPath();
-  //     ctx.arc(x, y, 4, 0, Math.PI * 2);
-  //     ctx.fillStyle = '#ff0000';
-  //     ctx.fill();
-  //   }
-  // }; // End of commented out renderLandTopView
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff0000';
+      ctx.fill();
+    }
+  }; // End of renderLandTopView
 
   // Land purchase events are no longer handled to prevent land modification
   
