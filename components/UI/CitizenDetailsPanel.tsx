@@ -1080,32 +1080,17 @@ Your response:`;
   const socialClassStyle = getSocialClassColor(citizen.socialClass);
 
   const coatOfArmsSrc = useMemo(() => {
-    if (!citizen?.coatOfArmsImageUrl) {
-      // If coatOfArmsImageUrl is null, undefined, or empty,
-      // src will be undefined, and onError will handle the fallback.
-      return undefined;
+    // Always construct the path based on username.
+    // The onError handler in the <img> tag will manage the default image.
+    if (citizen?.username) {
+      return `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${citizen.username}.png`;
     }
-
-    const url = citizen.coatOfArmsImageUrl;
-
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return url; // Already a full URL
-    }
-
-    // If it starts with a slash, assume it's a path from the backend root
-    // e.g., /public_assets/images/coat-of-arms/file.png or /public/assets/images/coat-of-arms/file.png
-    if (url.startsWith('/')) {
-      // Corrected base URL as per user request
-      return `https://backend.serenissima.ai/public_assets${url}`;
-    }
-    
-    // If it's a relative path not starting with '/' (e.g., "filename.png" or "folder/filename.png")
-    // This case is ambiguous. For maximum safety and to rely on the onError for a consistent default,
-    // we return the URL as is. If it's not a valid image source, onError will trigger.
-    // Alternatively, one could attempt to construct a full URL based on a convention,
-    // but that might be risky if the convention isn't universally followed for these paths.
-    return url; 
-  }, [citizen?.coatOfArmsImageUrl]);
+    // If no username, no custom coat of arms can be determined.
+    // The <img> tag's onError will use the default.
+    // We can return undefined, or the default path directly if we want to skip one onError cycle.
+    // For consistency with image handling, returning undefined and letting onError manage it is fine.
+    return undefined; 
+  }, [citizen?.username]);
   
   return (
     <div

@@ -29,9 +29,7 @@ Contient les informations sur tous les citoyens (IA et humains).
 -   `Description` (Texte multiligne): Description de la personnalité.
 -   `CorePersonality` (Texte multiligne): Chaîne JSON des 3 traits de personnalité principaux (Strength, Flaw, Drive).
 -   `ImagePrompt` (Texte multiligne): Prompt utilisé pour générer l'image du citoyen.
--   `ImageUrl` (URL): URL de l'image du citoyen.
 -   `LastActiveAt` (Date/Heure): Horodatage de la dernière activité. (Venice time)
--   `CoatOfArmsImageUrl` (URL): URL de l'image du blason.
 -   `Color` (Texte): Couleur principale associée au citoyen.
 -   `SecondaryColor` (Texte): Couleur secondaire associée au citoyen.
 -   `GuildId` (Texte): ID de la guilde à laquelle le citoyen appartient.

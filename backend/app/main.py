@@ -413,8 +413,9 @@ async def store_wallet(wallet_data: WalletRequest):
             if wallet_data.family_motto:
                 update_fields["FamilyMotto"] = wallet_data.family_motto
                 
-            if wallet_data.coat_of_arms_image:
-                update_fields["CoatOfArmsImageUrl"] = wallet_data.coat_of_arms_image
+            # CoatOfArmsImageUrl is no longer stored in Airtable.
+            # The path is constructed dynamically by the frontend.
+            # The coat_of_arms_image field in the request might be used by /api/generate-coat-of-arms if it's a prompt.
                 
             # Always update color field if provided, even if null/empty
             if wallet_data.color is not None:
@@ -436,7 +437,7 @@ async def store_wallet(wallet_data: WalletRequest):
                 "email": record["fields"].get("Email", None),
                 "family_coat_of_arms": record["fields"].get("CoatOfArms", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
-                "coat_of_arms_image": record["fields"].get("CoatOfArmsImageUrl", None),
+                # CoatOfArmsImageUrl is no longer stored in Airtable.
                 "color": record["fields"].get("Color", "#8B4513")
             }
         
@@ -607,8 +608,8 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
                 "ducats": updated_record["fields"].get("Ducats", 0),
                 "citizen_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
-                "family_motto": updated_record["fields"].get("FamilyMotto", None),
-                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None)
+                "family_motto": updated_record["fields"].get("FamilyMotto", None)
+                # CoatOfArmsImageUrl is no longer stored in Airtable.
             }
         else:
             # Create new record
@@ -646,6 +647,7 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
                 "citizen_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None)
+                # CoatOfArmsImageUrl is no longer stored in Airtable.
             }
     except Exception as e:
         error_msg = f"Failed to transfer compute: {str(e)}"
@@ -1614,28 +1616,33 @@ async def generate_coat_of_arms(data: dict):
         # Sanitize username for filename
         import re
         sanitized_username = re.sub(r'[^a-zA-Z0-9_-]', '_', username)
-        filename = f"{sanitized_username}_{int(time.time())}.png"
+        # Use username as filename for consistency, typically .png for coat of arms
+        filename = f"{sanitized_username}.png" 
         
-        # Create directory if it doesn't exist
-        public_dir = os.path.join(os.getcwd(), 'public')
-        coat_of_arms_dir = os.path.join(public_dir, 'coat-of-arms')
-        os.makedirs(coat_of_arms_dir, exist_ok=True)
+        if not PERSISTENT_ASSETS_PATH_ENV:
+            print("CRITICAL ERROR: PERSISTENT_ASSETS_PATH is not set. Cannot save generated coat of arms.")
+            raise HTTPException(status_code=500, detail="Server configuration error: Asset storage path not set.")
+
+        # Create directory if it doesn't exist, using persistent path
+        coat_of_arms_dir = pathlib.Path(PERSISTENT_ASSETS_PATH_ENV).joinpath("images", "coat-of-arms")
+        coat_of_arms_dir.mkdir(parents=True, exist_ok=True)
         
-        # Save the image to the public folder
-        file_path = os.path.join(coat_of_arms_dir, filename)
+        # Save the image to the persistent public assets folder
+        file_path = coat_of_arms_dir / filename
         print(f"Saving coat of arms image to: {file_path}")
         with open(file_path, 'wb') as f:
             for chunk in image_response.iter_content(chunk_size=8192):
                 f.write(chunk)
         
-        # Return the path to the saved image (relative to public folder)
-        relative_path = f"https://backend.serenissima.ai/public/assets/images/coat-of-arms/{filename}"
-        print(f"Returning relative path: {relative_path}")
+        # Return the relative path for frontend use (relative to /public_assets/)
+        # The frontend will prepend https://backend.serenissima.ai/public_assets
+        relative_path_for_frontend = f"/images/coat-of-arms/{filename}"
+        print(f"Returning relative path for frontend: {relative_path_for_frontend}")
         
         return {
             "success": True,
-            "image_url": image_url,  # Original URL from Ideogram
-            "local_image_url": relative_path,  # Path to the saved image
+            "image_url_ideogram": image_url,  # Original URL from Ideogram for reference
+            "local_image_url": relative_path_for_frontend,  # Path for frontend to construct full URL
             "prompt": prompt
         }
     except Exception as e:
@@ -1771,7 +1778,7 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "citizen_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
-                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None),
+                # CoatOfArmsImageUrl is no longer stored in Airtable.
                 "transaction_signature": signature,
                 "block_time": transfer_result.get("blockTime")
             }
@@ -1812,6 +1819,7 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "citizen_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
+                # CoatOfArmsImageUrl is no longer stored in Airtable.
                 "transaction_signature": signature,
                 "block_time": transfer_result.get("blockTime")
             }
@@ -2002,7 +2010,7 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
                     "citizen_name": updated_record["fields"].get("Username", None),
                     "email": updated_record["fields"].get("Email", None),
                     "family_motto": updated_record["fields"].get("FamilyMotto", None),
-                    "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None),
+                    # CoatOfArmsImageUrl is no longer stored in Airtable.
                     "transaction_signature": signature,
                     "transaction_details": {
                         "from_wallet": wallet_data.wallet_address,
@@ -2062,23 +2070,51 @@ async def get_citizens_coat_of_arms():
     try:
         print("Fetching all citizens with coat of arms images...")
         # Fetch all records from the CITIZENS table
-        records = citizens_table.all()
+        records = citizens_table.all(fields=['Username', 'FirstName', 'LastName']) # Only fetch necessary fields
         
         # Format the response
-        citizens = []
+        citizens_with_coat_of_arms_info = []
+        
+        if not PERSISTENT_ASSETS_PATH_ENV:
+            print("WARNING: PERSISTENT_ASSETS_PATH_ENV is not set. Cannot check for coat of arms files.")
+            # Return all citizens but indicate that coat of arms status is unknown
+            for record in records:
+                fields = record['fields']
+                citizens_with_coat_of_arms_info.append({
+                    'username': fields.get('Username', ''),
+                    'firstName': fields.get('FirstName', ''),
+                    'lastName': fields.get('LastName', ''),
+                    'hasCustomCoatOfArms': False, # Assume false if path not set
+                    'coatOfArmsPath': f"/images/coat-of-arms/{fields.get('Username', 'default')}.png" # Default path
+                })
+            return {"success": True, "citizens": citizens_with_coat_of_arms_info, "warning": "Asset path not configured, coat of arms status may be inaccurate."}
+
+        base_coat_of_arms_dir = pathlib.Path(PERSISTENT_ASSETS_PATH_ENV).joinpath("images", "coat-of-arms")
+
         for record in records:
             fields = record['fields']
-            if 'CoatOfArmsImageUrl' in fields:
-                citizen_data = {
-                    'citizen_name': fields.get('Username', ''),
-                    'first_name': fields.get('FirstName', ''),
-                    'last_name': fields.get('LastName', ''),
-                    'coat_of_arms_image': fields.get('CoatOfArmsImageUrl', '')
-                }
-                citizens.append(citizen_data)
+            username = fields.get('Username')
+            if not username:
+                continue
+
+            # Construct the expected filename, e.g., NLR.png
+            # Ensure username is sanitized if it can contain special characters, though typically it shouldn't.
+            # For simplicity, assuming username is safe for filenames here.
+            coat_of_arms_filename = f"{username}.png"
+            custom_coat_of_arms_file_path = base_coat_of_arms_dir / coat_of_arms_filename
+            
+            has_custom_coat_of_arms = custom_coat_of_arms_file_path.exists()
+            
+            citizens_with_coat_of_arms_info.append({
+                'username': username,
+                'firstName': fields.get('FirstName', ''),
+                'lastName': fields.get('LastName', ''),
+                'hasCustomCoatOfArms': has_custom_coat_of_arms,
+                'coatOfArmsPath': f"/images/coat-of-arms/{coat_of_arms_filename}" # Relative path for frontend
+            })
         
-        print(f"Found {len(citizens)} citizens with coat of arms images")
-        return {"success": True, "citizens": citizens}
+        print(f"Processed {len(citizens_with_coat_of_arms_info)} citizens for coat of arms info.")
+        return {"success": True, "citizens": citizens_with_coat_of_arms_info}
     except Exception as e:
         error_msg = f"Error fetching citizens coat of arms: {str(e)}"
         print(f"ERROR: {error_msg}")
@@ -2104,8 +2140,8 @@ async def get_citizens():
                 'last_name': fields.get('LastName', ''),
                 'wallet_address': fields.get('Wallet', ''),
                 'ducats': fields.get('Ducats', 0),
-                'family_motto': fields.get('FamilyMotto', ''),
-                'coat_of_arms_image': fields.get('CoatOfArmsImageUrl', '')
+                'family_motto': fields.get('FamilyMotto', '')
+                # coat_of_arms_image is removed as CoatOfArmsImageUrl is no longer stored
             }
             citizens.append(citizen_data)
         
@@ -2847,7 +2883,7 @@ async def inject_compute_complete(data: dict):
                 "citizen_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
-                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None),
+                # CoatOfArmsImageUrl is no longer stored in Airtable.
                 "transaction_signature": data["transaction_signature"]
             }
         else:
@@ -2887,6 +2923,7 @@ async def inject_compute_complete(data: dict):
                 "citizen_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
+                # CoatOfArmsImageUrl is no longer stored in Airtable.
                 "transaction_signature": data["transaction_signature"]
             }
     except HTTPException:
