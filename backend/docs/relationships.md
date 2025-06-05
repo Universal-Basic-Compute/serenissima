@@ -1,5 +1,20 @@
 # Relationship System Documentation
 
+## Explication Simplifiée du Scoring
+
+Le système de scoring pour les relations (`StrengthScore` et `TrustScore`) fonctionne comme suit :
+
+1.  **Scores Visibles (0-100)** : Les scores affichés vont de 0 à 100.
+    *   **50** est neutre.
+    *   Proche de **100** : relation forte/confiance élevée.
+    *   Proche de **0** : relation faible/confiance basse.
+
+2.  **Impact Dégressif** : L'effet de chaque point ajouté/retiré diminue à mesure que le score s'approche des extrêmes (0 ou 100). Il est plus facile d'influencer un score neutre qu'un score déjà très bon ou très mauvais.
+
+3.  **Mécanisme Interne** : Pour cela, le système convertit le score (0-100) en une valeur "latente", applique les changements à cette valeur, puis la reconvertit en score (0-100). Cette double conversion (utilisant `atan` et `tan`) crée l'effet d'impact dégressif.
+
+Pour plus de détails techniques sur le calcul, voir la section "Mécanisme de Mise à Jour des Scores (0-100 via Espace Latent)" plus bas.
+
 ## Overview
 
 The Relationship System in La Serenissima is designed to quantify and track the dynamic connections between citizens. It establishes two primary metrics: `StrengthScore` and `TrustScore`, which evolve based on shared relevancies and direct interactions. These scores influence AI behavior, particularly in communication, and provide insights into the social fabric of Venice.
