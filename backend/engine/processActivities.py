@@ -131,8 +131,9 @@ from backend.engine.activity_processors import (
         # Import new building bid processors
         process_inspect_building_for_purchase_fn,
         process_submit_building_purchase_offer_fn,
-        process_execute_respond_to_building_bid_fn, # New
-        process_execute_withdraw_building_bid_fn # New, imported from __init__
+        process_execute_respond_to_building_bid_fn, 
+        process_execute_withdraw_building_bid_fn, 
+        process_finalize_manage_markup_buy_contract_fn # New, imported from __init__
 )
 from backend.engine.activity_processors.manage_public_import_contract_processor import process_manage_public_import_contract_fn
 from backend.engine.activity_processors.bid_on_land_activity_processor import process_bid_on_land_fn
