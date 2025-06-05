@@ -226,10 +226,25 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
         ctx.fill();
       }}
       linkColor={(link: any) => getTrustScoreColor(link.trustScore)}
-      linkWidth={(link: any) => 1 + Math.log1p((link.strengthScore || 0) / 25) * 1.5} // Subtle log scale: 1 to ~3.4px
+      linkWidth={(link: any) => {
+        // StrengthScore is on a 50-100 scale, where 50 is no strength.
+        // Normalize to 0-50 for log scaling.
+        const normalizedStrength = Math.max(0, (link.strengthScore || 50) - 50);
+        // Adjust divisor for sensitivity, e.g. /10 or /5.
+        // A smaller divisor makes the log scale up faster.
+        return 1 + Math.log1p(normalizedStrength / 10) * 1.5; 
+      }}
       linkDirectionalParticles={1}
-      linkDirectionalParticleWidth={(link: any) => 0.5 + Math.log1p((link.strengthScore || 0) / 25) * 0.75} // Subtle particle width
-      linkDirectionalParticleSpeed={(link: any) => ((link.strengthScore || 0) / 100) * 0.005 + 0.002} // Slower particle speed
+      linkDirectionalParticleWidth={(link: any) => {
+        const normalizedStrength = Math.max(0, (link.strengthScore || 50) - 50);
+        return 0.5 + Math.log1p(normalizedStrength / 10) * 0.75;
+      }}
+      linkDirectionalParticleSpeed={(link: any) => {
+        // Speed can still be based on the 50-100 scale, or normalized.
+        // Using normalized 0-50 for speed calculation.
+        const normalizedStrength = Math.max(0, (link.strengthScore || 50) - 50);
+        return (normalizedStrength / 50) * 0.005 + 0.002; // Max speed 0.007, min 0.002
+      }}
       cooldownTicks={100}
       onEngineStop={() => fgRef.current && processedNodes.length > 0 && fgRef.current.zoomToFit(400, 150)} // Zoom to fit after engine stops
       dagMode={null} // Disable DAG mode for a more organic layout

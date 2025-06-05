@@ -4,12 +4,17 @@
 
 Le système de scoring pour les relations (`StrengthScore` et `TrustScore`) fonctionne comme suit :
 
-1.  **Scores Visibles (0-100)** : Les scores affichés vont de 0 à 100.
-    *   **50** est neutre.
-    *   Proche de **100** : relation forte/confiance élevée.
-    *   Proche de **0** : relation faible/confiance basse.
+1.  **Scores Visibles** :
+    *   **`TrustScore` (0-100)**:
+        *   **0**: Méfiance totale.
+        *   **50**: Neutre.
+        *   **100**: Confiance totale.
+    *   **`StrengthScore` (50-100)**:
+        *   **50**: Aucune force/pertinence (score latent de 0).
+        *   **100**: Force/pertinence maximale.
+        *   *Note*: L'échelle effective est [50, 100] car les scores de pertinence latents sont généralement positifs ou nuls, et la fonction de conversion mappe un score latent de 0 à un score normalisé de 50.
 
-2.  **Impact Dégressif** : L'effet de chaque point ajouté/retiré diminue à mesure que le score s'approche des extrêmes (0 ou 100). Il est plus facile d'influencer un score neutre qu'un score déjà très bon ou très mauvais.
+2.  **Impact Dégressif** : Pour les deux scores, l'effet de chaque point "latent" ajouté/retiré diminue à mesure que le score normalisé s'approche de ses extrêmes. Il est plus facile d'influencer un score proche du point de départ (50) qu'un score déjà très élevé ou très bas.
 
 3.  **Mécanisme Interne** : Pour cela, le système convertit le score (0-100) en une valeur "latente", applique les changements à cette valeur, puis la reconvertit en score (0-100). Cette double conversion (utilisant `atan` et `tan`) crée l'effet d'impact dégressif.
 
@@ -27,7 +32,7 @@ Each record in the `RELATIONSHIPS` table represents a unique bond between two ci
 
 -   **`Citizen1`**: Text - The username of the first citizen (alphabetically).
 -   **`Citizen2`**: Text - The username of the second citizen (alphabetically).
--   **`StrengthScore`**: Number (Float) - Score normalisé sur une échelle de 0 à 100 qui quantifie la force de la relation. Un score de 50 est neutre.
+-   **`StrengthScore`**: Number (Float) - Score normalisé sur une échelle effective de 50 à 100. 50 indique une absence de force/pertinence, 100 indique une force maximale.
 -   **`TrustScore`**: Number (Float) - Score normalisé sur une échelle de 0 à 100 qui quantifie le niveau de confiance. Un score de 50 est neutre.
 -   **`LastInteraction`**: DateTime - Timestamp of the last time this relationship record was updated by the scoring script.
 -   **`Notes`**: Long Text - A comma-separated list of keywords indicating the sources that contributed to the scores (e.g., "Sources: proximity_relevancy, messages_interaction, loans_interaction").
