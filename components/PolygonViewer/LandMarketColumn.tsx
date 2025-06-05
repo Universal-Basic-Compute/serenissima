@@ -70,7 +70,7 @@ const LandMarketColumn: React.FC<LandMarketColumnProps> = ({
   };
 
   return (
-    <div className="flex flex-col space-y-3 overflow-y-auto custom-scrollbar pr-1 h-full"> {/* Ensure full height for scrolling */}
+    <div> {/* Attributes removed for diagnostics */}
       {/* Owner information */}
       <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
         <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
