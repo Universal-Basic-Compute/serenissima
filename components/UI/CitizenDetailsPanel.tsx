@@ -1095,8 +1095,8 @@ Your response:`;
     // If it starts with a slash, assume it's a path from the backend root
     // e.g., /public_assets/images/coat-of-arms/file.png or /public/assets/images/coat-of-arms/file.png
     if (url.startsWith('/')) {
-      const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://backend.serenissima.ai';
-      return `${backendUrl}${url}`;
+      // Corrected base URL as per user request
+      return `https://backend.serenissima.ai/public_assets${url}`;
     }
     
     // If it's a relative path not starting with '/' (e.g., "filename.png" or "folder/filename.png")
