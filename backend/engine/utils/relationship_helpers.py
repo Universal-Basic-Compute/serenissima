@@ -130,6 +130,69 @@ def convert_normalized_to_latent_score(normalized_score: float, scale_factor: fl
         log.error(f"Erreur dans convert_normalized_to_latent_score avec normalized_score={normalized_score}, scale_factor={scale_factor}: {e}")
         return 0.0 
 
+def convert_latent_strength_to_normalized_score(latent_score: float, scale_factor: float = LATENT_SCORE_SCALE_FACTOR) -> float:
+    """
+    Convertit un score latent de force (supposé >= 0) en un score normalisé sur une échelle de 0 à 100.
+    - latent_score = 0 se traduit par un score normalisé de 0.
+    - Des scores latents positifs importants se rapprochent de 100.
+    """
+    if not isinstance(latent_score, (int, float)):
+        log.warning(f"convert_latent_strength_to_normalized_score a reçu une valeur non numérique : {latent_score}. Retour de 0.0.")
+        return 0.0
+    if not isinstance(scale_factor, (int, float)) or scale_factor == 0:
+        log.warning(f"convert_latent_strength_to_normalized_score a reçu un scale_factor invalide : {scale_factor}. Utilisation de la valeur par défaut.")
+        scale_factor = LATENT_SCORE_SCALE_FACTOR
+
+    try:
+        import math
+        # atan(x) pour x >= 0 est dans [0, pi/2)
+        # (atan(x) / (pi/2)) normalise cela dans [0, 1)
+        # Multiplier par 100 pour obtenir [0, 100)
+        # Utiliser max(0, latent_score) pour s'assurer que l'argument de atan n'est pas négatif
+        normalized_value = (math.atan(max(0, latent_score) * scale_factor) / (math.pi / 2))
+        return round(normalized_value * 100.0, 2)
+    except Exception as e:
+        log.error(f"Erreur dans convert_latent_strength_to_normalized_score avec latent_score={latent_score}, scale_factor={scale_factor}: {e}")
+        return 0.0
+
+def convert_normalized_strength_to_latent_score(normalized_strength_score: float, scale_factor: float = LATENT_SCORE_SCALE_FACTOR) -> float:
+    """
+    Convertit un score de force normalisé (0-100) en un score latent de force (>=0).
+    C'est l'inverse de convert_latent_strength_to_normalized_score.
+    - normalized_strength_score = 0 se traduit par un score latent de 0.
+    - normalized_strength_score proche de 100 se traduit par un score latent positif élevé.
+    """
+    if not isinstance(normalized_strength_score, (int, float)):
+        log.warning(f"convert_normalized_strength_to_latent_score a reçu une valeur non numérique : {normalized_strength_score}. Retour de 0.0.")
+        return 0.0
+    if not isinstance(scale_factor, (int, float)) or scale_factor == 0:
+        log.warning(f"convert_normalized_strength_to_latent_score a reçu un scale_factor invalide : {scale_factor}. Utilisation de la valeur par défaut.")
+        scale_factor = LATENT_SCORE_SCALE_FACTOR
+
+    try:
+        import math
+        # Assurer que normalized_strength_score est dans [0, 100) pour éviter tan(pi/2)
+        # normalized_strength_score est dans [0, 100]
+        # val_0_1 = normalized_strength_score / 100.0 (valeur dans [0, 1])
+        # arg_tan = val_0_1 * (math.pi / 2) (argument pour tan, dans [0, pi/2])
+        # latent_scaled = tan(arg_tan)
+        # latent = latent_scaled / scale_factor
+
+        # Clipper pour éviter les erreurs mathématiques aux limites
+        if normalized_strength_score >= 100.0:
+            return math.tan((math.pi / 2) * 0.9999999999) / scale_factor
+        elif normalized_strength_score <= 0.0:
+            return 0.0 # Un score normalisé de 0 ou moins correspond à un score latent de 0
+
+        val_0_1 = normalized_strength_score / 100.0
+        arg_for_tan = val_0_1 * (math.pi / 2)
+        
+        latent_score = math.tan(arg_for_tan) / scale_factor
+        return latent_score
+    except Exception as e:
+        log.error(f"Erreur dans convert_normalized_strength_to_latent_score avec normalized_strength_score={normalized_strength_score}, scale_factor={scale_factor}: {e}")
+        return 0.0
+
 def update_trust_score_for_activity(
     tables: Dict[str, Any],
     citizen1_username: str,
