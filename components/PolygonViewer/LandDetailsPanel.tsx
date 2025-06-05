@@ -496,7 +496,30 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       });
       const result = await response.json();
       if (response.ok && result.success) {
-        alert(`Action "${activityType}" initiated successfully! Activity ID: ${result.activityId || 'N/A'}`);
+        let successMessage = "";
+        const firstActivityId = result.activity?.ActivityId || 'N/A';
+        const firstActivityType = result.activity?.Type || 'Unknown Step';
+
+        if (activityType === 'make_offer_for_land') {
+          // Utiliser le message descriptif du backend s'il est disponible
+          if (result.message) {
+            successMessage = `${result.message} Votre citoyen va maintenant se rendre au bureau désigné pour soumettre l'offre. (Première étape ID: ${firstActivityId})`;
+          } else { // Fallback si le message du backend est manquant
+            const landIdParam = parameters.landId || 'selected land';
+            successMessage = `Votre démarche pour faire une offre sur le terrain ${landIdParam} a commencé ! Votre citoyen va se rendre au bureau désigné. Première étape : ${firstActivityType} (ID: ${firstActivityId}).`;
+          }
+        } else {
+          successMessage = `Action "${activityType}" initiée avec succès !`;
+          if (result.activity && result.activity.ActivityId) {
+            successMessage += ` ID de la première activité : ${result.activity.ActivityId}.`;
+          } else if (result.message) { // Fallback to backend message if activityId is not directly available but message is
+            successMessage = result.message;
+          } else {
+            successMessage += ` (ID d'activité non disponible).`;
+          }
+        }
+        
+        alert(successMessage);
         setRefreshKey(prev => prev + 1); // Refresh panel data
         setShowOfferInput(false); // Close offer input if open
         // Potentially close modals or navigate if needed
