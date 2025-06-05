@@ -14,6 +14,7 @@ interface LandChatColumnProps {
   isCorrespondanceFullScreen: boolean;
   setIsCorrespondanceFullScreen: (isFullScreen: boolean) => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
+  isLoadingHistory?: boolean; 
 }
 
 const LandChatColumn: React.FC<LandChatColumnProps> = ({
@@ -26,6 +27,7 @@ const LandChatColumn: React.FC<LandChatColumnProps> = ({
   isCorrespondanceFullScreen,
   setIsCorrespondanceFullScreen,
   messagesEndRef,
+  isLoadingHistory,
 }) => {
   return (
     <div className="flex flex-col h-full"> {/* Ensure full height for scrolling */}
@@ -46,35 +48,48 @@ const LandChatColumn: React.FC<LandChatColumnProps> = ({
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
         }}
       >
-        {messages.length === 0 && !isTyping && (
+        {isLoadingHistory ? (
+          <div className="flex justify-center items-center h-full">
+            <div className="bg-yellow-500 text-white p-3 rounded-lg rounded-bl-none inline-block">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 bg-yellow-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-yellow-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-yellow-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+            </div>
+          </div>
+        ) : messages.length === 0 && !isTyping ? (
           <div className="text-center py-8 text-amber-700 italic">
             No discussion yet for this land parcel.
           </div>
+        ) : (
+          <>
+            {messages.map((message) => (
+              <div 
+                key={message.id} 
+                className={`mb-3 ${message.role === 'user' ? 'text-right' : 'text-left'}`}
+              >
+                <div 
+                  className={`inline-block p-2 rounded-lg max-w-[80%] text-sm ${
+                    message.role === 'user'
+                      ? 'bg-amber-100 text-amber-900 rounded-br-none'
+                      : 'bg-amber-700 text-white rounded-bl-none'
+                  }`}
+                >
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="text-left mb-3">
+                <div className="inline-block p-2 rounded-lg bg-yellow-500 text-white">
+                  <FaSpinner className="animate-spin" />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </>
         )}
-        {messages.map((message) => (
-          <div 
-            key={message.id} 
-            className={`mb-3 ${message.role === 'user' ? 'text-right' : 'text-left'}`}
-          >
-            <div 
-              className={`inline-block p-2 rounded-lg max-w-[80%] text-sm ${
-                message.role === 'user'
-                  ? 'bg-amber-100 text-amber-900 rounded-br-none'
-                  : 'bg-amber-700 text-white rounded-bl-none'
-              }`}
-            >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-            </div>
-          </div>
-        ))}
-        {isTyping && (
-          <div className="text-left mb-3">
-            <div className="inline-block p-2 rounded-lg bg-yellow-500 text-white">
-              <FaSpinner className="animate-spin" />
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
       </div>
       
       <form 

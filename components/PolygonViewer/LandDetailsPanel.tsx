@@ -129,6 +129,16 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [isCorrespondanceFullScreen, setIsCorrespondanceFullScreen] = useState(false);
   const [activeLeftTab, setActiveLeftTab] = useState<'info' | 'buildings' | 'realEstate'>('info');
 
+  // State for chat history
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [messagesFetchFailed, setMessagesFetchFailed] = useState<boolean>(false);
+  const messagesFetchAttemptedRef = useRef<{[landId: string]: boolean}>({});
+
+  // Kinos constants
+  const KINOS_API_CHANNEL_BASE_URL = 'https://api.kinos-engine.ai/v2';
+  const KINOS_CHANNEL_BLUEPRINT = 'serenissima-ai';
+
+
   // State for current citizen username, reactive to login changes
   const [internalCurrentCitizenUsername, setInternalCurrentCitizenUsername] = useState<string | null>(getCurrentCitizenUsername());
 
@@ -253,6 +263,54 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   //     // setLandRendered(false); // This state is now in LandInfoColumn
   //   }
   // }, [selectedPolygonId]);
+
+  const fetchLandMessageHistory = async (landId: string) => {
+    if (!landId || !internalCurrentCitizenUsername) return;
+
+    if (messagesFetchAttemptedRef.current[landId]) {
+      console.log(`[LandDetailsPanel] Already attempted to fetch messages for land ${landId}, skipping`);
+      return;
+    }
+    messagesFetchAttemptedRef.current[landId] = true;
+
+    setIsLoadingHistory(true);
+    setMessagesFetchFailed(false);
+    try {
+      console.log(`[LandDetailsPanel] Fetching message history for land ${landId} and user ${internalCurrentCitizenUsername}`);
+      const response = await fetch('/api/messages', { // Assuming POST to /api/messages for fetching history
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentCitizen: internalCurrentCitizenUsername,
+          otherCitizen: landId, // Use landId as the "other party" for context
+          messageTypeContext: 'land_chat' // Specific context for backend
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch message history for land ${landId}: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success && data.messages) {
+        const formattedMessages = data.messages.map((msg: any) => ({
+          id: msg.messageId || msg.id, // Prefer messageId if available
+          role: msg.sender === internalCurrentCitizenUsername ? 'user' : 'assistant',
+          content: msg.content,
+          timestamp: msg.createdAt || msg.timestamp, // Prefer createdAt
+        }));
+        setMessages(formattedMessages);
+      } else {
+        setMessages([]);
+        if (data.error) console.warn(`[LandDetailsPanel] API error fetching messages for land ${landId}: ${data.error}`);
+      }
+    } catch (error) {
+      console.error(`[LandDetailsPanel] Error fetching message history for land ${landId}:`, error);
+      setMessagesFetchFailed(true);
+      setMessages([]);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
   
   // Add this useEffect to listen for the custom event to keep panel open
   useEffect(() => {
@@ -358,14 +416,34 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   }, [selectedPolygonId, refreshKey]);
 
   // Show panel with animation when a polygon is selected
+  // Also fetch message history when polygon changes
   useEffect(() => {
     if (selectedPolygonId) {
       setIsVisible(true);
+      setMessages([]); // Clear messages from previous land parcel
+      // Reset fetch attempt flag for the new landId.
+      // If messagesFetchAttemptedRef was keyed by landId, clear specific key or reset.
+      // For simplicity, if it's a simple boolean, reset it. If object, clear specific key.
+      // Assuming messagesFetchAttemptedRef is an object keyed by landId:
+      if (messagesFetchAttemptedRef.current[selectedPolygonId]) {
+        delete messagesFetchAttemptedRef.current[selectedPolygonId];
+      }
+      // Or if it's a global ref for the current panel:
+      // messagesFetchAttemptedRef.current = {}; // Or set the specific landId to false
+
+      if (internalCurrentCitizenUsername) {
+        fetchLandMessageHistory(selectedPolygonId);
+      } else {
+        // User not logged in, clear messages and don't fetch
+        setMessages([]);
+        setIsLoadingHistory(false);
+        setMessagesFetchFailed(false); // Reset error state
+      }
     } else if (!preventAutoClose) {
-      // Only hide the panel if preventAutoClose is false
       setIsVisible(false);
+      setMessages([]); // Clear messages when panel closes
     }
-  }, [selectedPolygonId, preventAutoClose]);
+  }, [selectedPolygonId, preventAutoClose, internalCurrentCitizenUsername]);
   
   // Early return if not visible or no selected polygon
   if (!visible || !selectedPolygonId) return null;
@@ -443,7 +521,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     if (!content.trim() || !currentCitizenUsername || !selectedPolygon?.id) return;
 
     const userMessage = {
-      id: `temp-${Date.now()}`,
+      id: `temp-user-${Date.now()}`,
       role: 'user',
       content: content,
       timestamp: new Date().toISOString()
@@ -452,17 +530,127 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI response for land chat (placeholder)
-    setTimeout(() => {
-      const aiResponse = {
-        id: `ai-${Date.now()}`,
-        role: 'assistant',
-        content: `Regarding land parcel ${selectedPolygon?.historicalName || selectedPolygon?.id}, I acknowledge your message: "${content}". However, direct chat about land parcels is a feature under consideration.`,
-        timestamp: new Date().toISOString()
+    try {
+      // 1. Persist user's message
+      const persistUserMessageResponse = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sender: currentCitizenUsername,
+          receiver: selectedPolygon.id, // Land ID as receiver context
+          content: content,
+          type: 'land_message' // Specific type for land chat
+        }),
+      });
+      if (!persistUserMessageResponse.ok) {
+        console.error('[LandDetailsPanel] Failed to persist user message:', await persistUserMessageResponse.text());
+        // Optionally, show an error to the user or remove optimistic message
+      } else {
+        console.log('[LandDetailsPanel] User message persisted.');
+      }
+
+      // 2. Kinos AI Interaction
+      let currentUserProfile = null;
+      const savedProfile = localStorage.getItem('citizenProfile');
+      if (savedProfile) try { currentUserProfile = JSON.parse(savedProfile); } catch(e) { console.error("Error parsing user profile for Kinos context:", e); }
+
+      const landDetailsForKinos = {
+        id: selectedPolygon.id,
+        historicalName: selectedPolygon.historicalName,
+        englishName: selectedPolygon.englishName,
+        description: selectedPolygon.historicalDescription,
+        owner: dynamicOwner, // Current owner of the land
+        coordinates: selectedPolygon.coordinates,
+        buildingPointsCount: selectedPolygon.buildingPoints?.length || 0,
+        lastIncome: selectedPolygon.lastIncome,
+        listing: landListingByOwner ? { price: landListingByOwner.PricePerResource, seller: landListingByOwner.SellerName || landListingByOwner.Seller } : null,
+        offers: incomingBuyOffers.map(offer => ({ price: offer.PricePerResource, buyer: offer.BuyerName || offer.Buyer })),
       };
-      setMessages(prev => [...prev, aiResponse]);
+      
+      const kinosSystemContext = {
+        land_parcel_details: landDetailsForKinos,
+        interacting_citizen_profile: currentUserProfile,
+      };
+
+      const kinosPromptContent = 
+`You are the Genius Loci, the spirit and living memory of the land parcel known as "${selectedPolygon?.historicalName || selectedPolygon.id}" in Renaissance Venice. You are conversing with ${currentUserProfile?.firstName || currentCitizenUsername}, a citizen of Venice.
+
+Your knowledge encompasses this land's history, its current state (ownership, market status, physical attributes), and its potential. You are wise, perhaps a little ancient, and deeply connected to this specific piece of Venice. Your responses should be insightful, relevant to the land, and subtly guide the citizen towards understanding its value or opportunities.
+
+Use the structured context provided in 'addSystem' to inform your response:
+- 'land_parcel_details': Your own detailed information (historical name, owner, market listings, offers, physical attributes).
+- 'interacting_citizen_profile': The profile of the citizen you are speaking with.
+
+--- CITIZEN'S MESSAGE ---
+${content}
+--- END OF CITIZEN'S MESSAGE ---
+
+Respond to the citizen's message. Be informative, perhaps a bit enigmatic, and always focused on aspects related to THIS land parcel.`;
+
+      const kinosKinId = selectedPolygon.id; 
+      const kinosChannelId = currentCitizenUsername; 
+
+      const kinosResponse = await fetch(
+        `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${kinosKinId}/channels/${kinosChannelId}/messages`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: kinosPromptContent,
+            addSystem: JSON.stringify(kinosSystemContext),
+            model: 'gemini-2.5-flash-preview-05-20' 
+          }),
+        }
+      );
+
+      if (kinosResponse.ok) {
+        const kinosData = await kinosResponse.json();
+        if (kinosData.content) {
+          const aiMessage = {
+            id: kinosData.message_id || kinosData.id || `kinos-land-${Date.now()}`,
+            role: 'assistant' as 'assistant',
+            content: kinosData.content,
+            timestamp: kinosData.timestamp || new Date().toISOString(),
+          };
+          setMessages(prev => [...prev, aiMessage]);
+
+          // 3. Persist AI's response
+          const persistAiResponse = await fetch('/api/messages/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sender: selectedPolygon.id, // Land ID as sender (AI)
+              receiver: currentCitizenUsername,
+              content: kinosData.content,
+              type: 'land_message_ai_augmented'
+            }),
+          });
+          if (!persistAiResponse.ok) {
+            console.error('[LandDetailsPanel] Failed to persist Kinos AI response for land chat:', await persistAiResponse.text());
+          } else {
+            console.log('[LandDetailsPanel] Kinos AI response for land chat persisted.');
+          }
+        } else {
+          throw new Error("Kinos AI response missing content.");
+        }
+      } else {
+        const errorText = await kinosResponse.text();
+        console.error('[LandDetailsPanel] Error from Kinos AI for land chat:', kinosResponse.status, errorText);
+        throw new Error(`Kinos AI error: ${kinosResponse.status} - ${errorText.substring(0,100)}`);
+      }
+
+    } catch (error) {
+      console.error('[LandDetailsPanel] Error in handleSendMessage for land chat:', error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+      setMessages(prev => [...prev, {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: `My apologies, citizen. I seem to be unable to fully process that right now. The winds of the lagoon are fickle today. (Error: ${errorMessage.substring(0,100)})`,
+        timestamp: new Date().toISOString()
+      }]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   useEffect(() => {
@@ -551,6 +739,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             isCorrespondanceFullScreen={isCorrespondanceFullScreen}
             setIsCorrespondanceFullScreen={setIsCorrespondanceFullScreen}
             messagesEndRef={messagesEndRef}
+            isLoadingHistory={isLoadingHistory} // Pass isLoadingHistory
           />
         </div>
 
