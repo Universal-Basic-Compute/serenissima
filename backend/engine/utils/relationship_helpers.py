@@ -72,8 +72,14 @@ def update_trust_score_for_activity(
 
         if existing_relationships:
             relationship_record = existing_relationships[0]
-            current_trust_score = float(relationship_record['fields'].get('TrustScore', 0.0))
-            new_trust_score = current_trust_score + trust_change_amount
+            # Lire le score normalisé actuel (0-100)
+            current_normalized_trust_score = float(relationship_record['fields'].get('TrustScore', DEFAULT_NORMALIZED_SCORE))
+            # Convertir en score latent
+            current_latent_trust_score = convert_normalized_to_latent_score(current_normalized_trust_score)
+            # Ajouter le changement (points bruts) au score latent
+            new_latent_trust_score = current_latent_trust_score + trust_change_amount
+            # Reconvertir en score normalisé (0-100) pour stockage
+            new_normalized_trust_score = convert_latent_to_normalized_score(new_latent_trust_score)
 
             current_notes = relationship_record['fields'].get('Notes', "")
             # Ajout simple, le script quotidien de consolidation des relations pourra nettoyer/agréger
@@ -87,26 +93,32 @@ def update_trust_score_for_activity(
                     updated_notes = ",".join(notes_parts[-20:]) # Garder les 20 dernières
 
             payload = {
-                'TrustScore': new_trust_score,
+                'TrustScore': new_normalized_trust_score,
                 'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(),
                 'Notes': updated_notes
             }
             tables['relationships'].update(relationship_record['id'], payload)
-            log.info(f"{LogColors.OKGREEN}TrustScore mis à jour pour {user1}-{user2}: {current_trust_score:.2f} -> {new_trust_score:.2f}. Notes: {interaction_note_key}{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}TrustScore (0-100) mis à jour pour {user1}-{user2}: {current_normalized_trust_score:.2f} -> {new_normalized_trust_score:.2f}. Notes: {interaction_note_key}{LogColors.ENDC}")
         else:
             # Créer une nouvelle relation
-            new_trust_score = trust_change_amount # Le score initial est le changement
+            # Le score latent initial est simplement trust_change_amount (points bruts)
+            initial_latent_trust_score = trust_change_amount
+            # Convertir en score normalisé (0-100) pour stockage
+            initial_normalized_trust_score = convert_latent_to_normalized_score(initial_latent_trust_score)
+            # Le StrengthScore initial sera 50.0 (neutre sur l'échelle 0-100)
+            initial_normalized_strength_score = DEFAULT_NORMALIZED_SCORE
+
             payload = {
                 'Citizen1': user1,
                 'Citizen2': user2,
-                'TrustScore': new_trust_score,
-                'StrengthScore': 0.0, # Initialiser StrengthScore à 0
+                'TrustScore': initial_normalized_trust_score,
+                'StrengthScore': initial_normalized_strength_score,
                 'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(),
                 'Notes': interaction_note_key,
                 'Status': 'Active' # Statut initial
             }
             tables['relationships'].create(payload)
-            log.info(f"{LogColors.OKGREEN}Nouvelle relation créée pour {user1}-{user2} avec TrustScore: {new_trust_score:.2f}. Notes: {interaction_note_key}{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}Nouvelle relation créée pour {user1}-{user2}. TrustScore (0-100): {initial_normalized_trust_score:.2f}, StrengthScore (0-100): {initial_normalized_strength_score:.2f}. Notes: {interaction_note_key}{LogColors.ENDC}")
 
     except Exception as e:
         log.error(f"{LogColors.FAIL}Erreur lors de la mise à jour du TrustScore pour {user1}-{user2}: {e}{LogColors.ENDC}")

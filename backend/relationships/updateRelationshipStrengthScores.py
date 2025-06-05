@@ -62,8 +62,16 @@ TRUST_SCORE_EMPLOYEE_WAGE_ISSUE = -30.0
 TRUST_SCORE_PUBLIC_WELFARE_HUNGRY_HOMELESS = -25.0
 TRUST_SCORE_PUBLIC_WELFARE_HUNGRY = -10.0
 TRUST_SCORE_PUBLIC_WELFARE_HOMELESS = -15.0
-RELATIONSHIP_STRENGTH_DECAY_FACTOR = 0.75 # Applied to both StrengthScore and TrustScore
-RELATIONSHIP_TRUST_DECAY_FACTOR = 0.75 # Explicitly for trust, though same as strength for now
+RELATIONSHIP_STRENGTH_DECAY_FACTOR = 0.75 # Facteur de déclin pour le score latent
+RELATIONSHIP_TRUST_DECAY_FACTOR = 0.75 # Facteur de déclin pour le score latent
+
+# Importer les fonctions de conversion et constantes
+from backend.engine.utils.relationship_helpers import (
+    convert_latent_to_normalized_score,
+    convert_normalized_to_latent_score,
+    LATENT_SCORE_SCALE_FACTOR,
+    DEFAULT_NORMALIZED_SCORE
+)
 
 def initialize_airtable():
     """Initialize Airtable connection."""
@@ -642,19 +650,31 @@ def update_relationship_scores(
                 # Update existing relationship
                 record = existing_relationships[target_username]
                 record_id = record['id']
-                
-                # === StrengthScore Calculation (from relevancies) ===
-                existing_strength_score_decayed = float(record.get('StrengthScore', 0.0)) * RELATIONSHIP_STRENGTH_DECAY_FACTOR
-                updated_strength_score = existing_strength_score_decayed + score_to_add # score_to_add is from relevancies
 
-                # === TrustScore Calculation (from interactions) ===
-                existing_trust_score_decayed = float(record.get('TrustScore', 0.0)) * RELATIONSHIP_TRUST_DECAY_FACTOR
+                # --- StrengthScore (0-100 en BDD) ---
+                # 1. Lire le score normalisé actuel et convertir en latent
+                current_normalized_strength = float(record.get('StrengthScore', DEFAULT_NORMALIZED_SCORE))
+                current_latent_strength = convert_normalized_to_latent_score(current_normalized_strength)
+                # 2. Appliquer le déclin au score latent
+                latent_strength_decayed = current_latent_strength * RELATIONSHIP_STRENGTH_DECAY_FACTOR
+                # 3. Ajouter les points bruts de pertinence (score_to_add) au score latent décliné
+                new_latent_strength = latent_strength_decayed + score_to_add
+                # 4. Reconvertir en score normalisé pour stockage
+                updated_normalized_strength_score = convert_latent_to_normalized_score(new_latent_strength)
+
+                # --- TrustScore (0-100 en BDD) ---
+                # 1. Lire le score normalisé actuel et convertir en latent
+                current_normalized_trust = float(record.get('TrustScore', DEFAULT_NORMALIZED_SCORE))
+                current_latent_trust = convert_normalized_to_latent_score(current_normalized_trust)
+                # 2. Appliquer le déclin au score latent
+                latent_trust_decayed = current_latent_trust * RELATIONSHIP_TRUST_DECAY_FACTOR
+                # 3. Calculer les points bruts d'interaction
                 target_citizen_record = username_to_citizen_record_map.get(target_username)
-                trust_additions, trust_interaction_types = (0.0, set()) # Default if target_citizen_record is None
+                trust_additions_raw, trust_interaction_types = (0.0, set())
                 if target_citizen_record:
-                    trust_additions, trust_interaction_types = _calculate_trust_score_contributions_from_interactions(
-                        tables, 
-                        source_username, 
+                    trust_additions_raw, trust_interaction_types = _calculate_trust_score_contributions_from_interactions(
+                        tables,
+                        source_username,
                         target_username,
                         source_citizen_record['fields'],
                         target_citizen_record['fields'],
@@ -662,7 +682,10 @@ def update_relationship_scores(
                     )
                 else:
                     log.warning(f"{Colors.WARNING}Target citizen '{target_username}' (for source '{source_username}') not found in map for trust calculation on existing relationship. Trust additions from interactions will be 0.{Colors.ENDC}")
-                updated_trust_score = existing_trust_score_decayed + trust_additions
+                # 4. Ajouter les points bruts d'interaction au score latent décliné
+                new_latent_trust = latent_trust_decayed + trust_additions_raw
+                # 5. Reconvertir en score normalisé pour stockage
+                updated_normalized_trust_score = convert_latent_to_normalized_score(new_latent_trust)
 
                 # === Notes Update ===
                 existing_notes_str = record.get('notes', '')
@@ -686,14 +709,14 @@ def update_relationship_scores(
                 
                 # log.info(
                 #     f"{Colors.OKCYAN}Updating existing relationship for {Colors.BOLD}{source_username}{Colors.ENDC}{Colors.OKCYAN} with {Colors.BOLD}{target_username}{Colors.ENDC}:\n"
-                #     f"  Old StrengthScore (after decay): {existing_strength_score_decayed:.2f}, Addition: {score_to_add:.2f} (from {new_relevancy_types_set}), New: {updated_strength_score:.2f}\n"
-                #     f"  Old TrustScore (after decay): {existing_trust_score_decayed:.2f}, Addition: {trust_additions:.2f} (from {trust_interaction_types}), New: {updated_trust_score:.2f}\n"
+                #     f"  StrengthScore (0-100): {current_normalized_strength:.2f} -> {updated_normalized_strength_score:.2f} (Latent: {current_latent_strength:.2f} -> {new_latent_strength:.2f})\n"
+                #     f"  TrustScore (0-100): {current_normalized_trust:.2f} -> {updated_normalized_trust_score:.2f} (Latent: {current_latent_trust:.2f} -> {new_latent_trust:.2f})\n"
                 #     f"  Contributing Notes: {notes_string}{Colors.ENDC}"
                 # )
                 
                 tables['relationships'].update(record_id, {
-                    'StrengthScore': updated_strength_score,
-                    'TrustScore': updated_trust_score,
+                    'StrengthScore': updated_normalized_strength_score,
+                    'TrustScore': updated_normalized_trust_score,
                     'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
                     'Notes': notes_string
                 })
@@ -702,16 +725,17 @@ def update_relationship_scores(
             
             elif score_to_add > 0 or new_relevancy_types_set: # Only create if there's a new relevancy
                 # Create new relationship
-                # StrengthScore comes from relevancy (score_to_add)
-                new_strength_score = score_to_add
+                # Initial latent StrengthScore comes from relevancy (score_to_add)
+                initial_latent_strength = score_to_add
+                new_normalized_strength_score = convert_latent_to_normalized_score(initial_latent_strength)
 
-                # TrustScore is calculated from interactions (base is 0, so no decay needed for new record)
+                # Initial latent TrustScore is calculated from interactions
                 target_citizen_record = username_to_citizen_record_map.get(target_username)
-                trust_additions, trust_interaction_types = (0.0, set()) # Default if target_citizen_record is None
+                trust_additions_raw, trust_interaction_types = (0.0, set())
                 if target_citizen_record:
-                    trust_additions, trust_interaction_types = _calculate_trust_score_contributions_from_interactions(
-                        tables, 
-                        source_username, 
+                    trust_additions_raw, trust_interaction_types = _calculate_trust_score_contributions_from_interactions(
+                        tables,
+                        source_username,
                         target_username,
                         source_citizen_record['fields'],
                         target_citizen_record['fields'],
@@ -719,7 +743,8 @@ def update_relationship_scores(
                     )
                 else:
                     log.warning(f"{Colors.WARNING}Target citizen '{target_username}' (for source '{source_username}') not found in map for new trust calculation. Trust score for new relationship will be based on 0 initial trust additions from interactions.{Colors.ENDC}")
-                new_trust_score = trust_additions
+                initial_latent_trust = trust_additions_raw
+                new_normalized_trust_score = convert_latent_to_normalized_score(initial_latent_trust)
                 
                 # Combine notes sources
                 all_source_types = new_relevancy_types_set.union(trust_interaction_types)
@@ -730,8 +755,8 @@ def update_relationship_scores(
 
                 # log.info(
                 #     f"{Colors.OKGREEN}Creating new relationship for {Colors.BOLD}{source_username}{Colors.ENDC}{Colors.OKGREEN} with {Colors.BOLD}{target_username}{Colors.ENDC}:\n"
-                #     f"  StrengthScore: {new_strength_score:.2f} (from {new_relevancy_types_set})\n"
-                #     f"  TrustScore: {new_trust_score:.2f} (from {trust_interaction_types})\n"
+                #     f"  StrengthScore (0-100): {new_normalized_strength_score:.2f} (Latent: {initial_latent_strength:.2f}, from {new_relevancy_types_set})\n"
+                #     f"  TrustScore (0-100): {new_normalized_trust_score:.2f} (Latent: {initial_latent_trust:.2f}, from {trust_interaction_types})\n"
                 #     f"  Contributing Notes: {notes_string}{Colors.ENDC}"
                 # )
 
@@ -741,15 +766,15 @@ def update_relationship_scores(
                 tables['relationships'].create({
                     'Citizen1': c1,
                     'Citizen2': c2,
-                    'StrengthScore': new_strength_score,
-                    'TrustScore': new_trust_score,
+                    'StrengthScore': new_normalized_strength_score,
+                    'TrustScore': new_normalized_trust_score,
                     'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
                     'Notes': notes_string
                 })
                 created_count += 1
                 processed_scores_for_stats[target_username] = score_to_add # For stats
             
-        log.info(f"{Colors.OKGREEN}For source {Colors.BOLD}{source_username}{Colors.ENDC}{Colors.OKGREEN}: Updated {Colors.BOLD}{updated_count}{Colors.ENDC}{Colors.OKGREEN} and created {Colors.BOLD}{created_count}{Colors.ENDC}{Colors.OKGREEN} relationships.{Colors.ENDC}")
+        log.info(f"{Colors.OKGREEN}For source {Colors.BOLD}{source_username}{Colors.ENDC}{Colors.OKGREEN}: Updated {Colors.BOLD}{updated_count}{Colors.ENDC}{Colors.OKGREEN} and created {Colors.BOLD}{created_count}{Colors.ENDC}{Colors.OKGREEN} relationships (scores are 0-100).{Colors.ENDC}")
         # Return a dictionary of target_username to score_to_add for stats calculation
         return processed_scores_for_stats
     except Exception as e:
