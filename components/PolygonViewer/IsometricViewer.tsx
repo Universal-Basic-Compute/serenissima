@@ -88,49 +88,6 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
   const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(null); // Initialize to null
   const [currentLoadingTip, setCurrentLoadingTip] = useState<string>('');
 
-  // Define loading images (can be moved outside if static)
-  const loadingImageFiles = [
-    'renaissance-architectural-construction.png',
-    'renaissance-venetian-merchant-s-ledger.png',
-    'secretive-venetian-council-of-ten-meeting.png',
-    '1.png',
-    '2.png',
-    '3.png',
-    '4.png',
-    '5.png',
-    '6.png',
-    '7.png'
-  ];
-  const initialLoadingImage = (() => {
-    if (loadingImageFiles.length === 0) return null;
-
-    const cache = getLoadingImageCache(); // Correctly defined above this IIFE
-    const now = Date.now();
-    const oneDayMs = 24 * 60 * 60 * 1000; // How long to remember a failure
-
-    // Filter out images that failed to load within the last day
-    const viableImageFiles = loadingImageFiles.filter(fileName => {
-      const cacheEntry = cache[fileName];
-      if (cacheEntry?.failed && cacheEntry.lastAttempt && (now - cacheEntry.lastAttempt < oneDayMs)) {
-        return false; // Failed recently, not viable for now
-      }
-      return true; // Viable if never tried, succeeded, or failed long ago
-    });
-
-    let selectedFileName: string;
-    if (viableImageFiles.length > 0) {
-      // If there are viable images (not recently failed), pick one randomly from them.
-      selectedFileName = viableImageFiles[Math.floor(Math.random() * viableImageFiles.length)];
-      console.log("Selected a viable loading image:", selectedFileName);
-    } else {
-      // All images failed recently. Fallback to picking one at random from the original list to retry.
-      selectedFileName = loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)];
-      console.log("All images failed recently, retrying a random one from original list:", selectedFileName);
-    }
-    return `https://backend.serenissima.ai/public_assets/images/loading/${selectedFileName}`;
-  })();
-  // The initialLoadingImage IIFE is kept for the useEffect logic, but not for initial state.
-
   // Add refs to track previous state
   const prevActiveView = useRef<ViewType | null>(null); // Peut être conservé si utilisé ailleurs
   const prevScale = useRef<number>(3); // Peut être conservé si utilisé ailleurs
