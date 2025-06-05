@@ -46,6 +46,14 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const previousTrackUrlRef = useRef<string | null>(null); // Ref to store the URL of the previously played track
   const [showControls, setShowControls] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Load available tracks
   useEffect(() => {
@@ -259,7 +267,9 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       // Ensure calculatedVolume is within 0-1 range
       calculatedVolume = Math.max(0, Math.min(1, calculatedVolume));
 
-      setVolume(calculatedVolume);
+      if (isMountedRef.current) {
+        setVolume(calculatedVolume);
+      }
     };
 
     window.addEventListener('audioSettingsChanged', handleAudioSettingsChanged as EventListener);
