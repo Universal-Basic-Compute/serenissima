@@ -28,6 +28,107 @@ TRUST_SCORE_PROGRESS = 0.5
 TRUST_SCORE_MINOR_POSITIVE = 0.2
 TRUST_SCORE_MINOR_NEGATIVE = -0.5
 
+# Facteur d'échelle pour la conversion entre scores latents et scores normalisés (0-100)
+# Une valeur plus petite signifie une saturation plus rapide des scores normalisés.
+# Exemple : si latent_score * scale_factor = 1, le score normalisé est 75.
+# Si latent_score * scale_factor = -1, le score normalisé est 25.
+LATENT_SCORE_SCALE_FACTOR = 0.1 # Ajustez au besoin pour la sensibilité désirée
+DEFAULT_NORMALIZED_SCORE = 50.0 # Score neutre sur l'échelle 0-100
+
+def convert_latent_to_normalized_score(latent_score: float, scale_factor: float = LATENT_SCORE_SCALE_FACTOR) -> float:
+    """
+    Convertit un score latent (potentiellement non borné) en un score normalisé sur une échelle de 0 à 100
+    en utilisant la fonction atan.
+    - latent_score = 0 se traduit par un score normalisé de 50.
+    - Des scores latents positifs importants se rapprochent de 100.
+    - Des scores latents négatifs importants se rapprochent de 0.
+
+    Args:
+        latent_score: Le score latent à convertir.
+        scale_factor: Contrôle la "raideur" de la courbe atan.
+                      Une valeur plus petite rend la courbe plus raide (saturation plus rapide).
+
+    Returns:
+        Le score normalisé entre 0 et 100.
+    """
+    if not isinstance(latent_score, (int, float)):
+        log.warning(f"convert_latent_to_normalized_score a reçu une valeur non numérique : {latent_score}. Retour de {DEFAULT_NORMALIZED_SCORE}.")
+        return DEFAULT_NORMALIZED_SCORE
+    if not isinstance(scale_factor, (int, float)) or scale_factor == 0:
+        log.warning(f"convert_latent_to_normalized_score a reçu un scale_factor invalide : {scale_factor}. Utilisation de la valeur par défaut.")
+        scale_factor = LATENT_SCORE_SCALE_FACTOR # Utiliser la valeur par défaut du module
+
+    # atan(x) retourne une valeur dans [-pi/2, pi/2]
+    # (atan(x) / (pi/2)) normalise cela dans [-1, 1]
+    # ((atan(x) / (pi/2)) + 1) normalise cela dans [0, 2]
+    # (((atan(x) / (pi/2)) + 1) / 2) normalise cela dans [0, 1]
+    # Enfin, multiplier par 100 pour obtenir [0, 100]
+    
+    try:
+        # Ajout de l'import math manquant ici, il devrait être en haut du fichier mais pour la portabilité de la fonction :
+        import math 
+        normalized_value = (math.atan(latent_score * scale_factor) / (math.pi / 2) + 1) / 2
+        return round(normalized_value * 100.0, 2) # Arrondir à 2 décimales
+    except Exception as e:
+        log.error(f"Erreur dans convert_latent_to_normalized_score avec latent_score={latent_score}, scale_factor={scale_factor}: {e}")
+        return DEFAULT_NORMALIZED_SCORE # Retourner une valeur neutre en cas d'erreur mathématique improbable
+
+def convert_normalized_to_latent_score(normalized_score: float, scale_factor: float = LATENT_SCORE_SCALE_FACTOR) -> float:
+    """
+    Convertit un score normalisé (0-100) en un score latent.
+    C'est l'inverse de convert_latent_to_normalized_score.
+    - normalized_score = 50 se traduit par un score latent de 0.
+    - normalized_score proche de 100 se traduit par un score latent positif élevé.
+    - normalized_score proche de 0 se traduit par un score latent négatif élevé.
+
+    Args:
+        normalized_score: Le score normalisé (0-100) à convertir.
+        scale_factor: Doit être le même que celui utilisé pour la conversion inverse.
+
+    Returns:
+        Le score latent.
+    """
+    if not isinstance(normalized_score, (int, float)):
+        log.warning(f"convert_normalized_to_latent_score a reçu une valeur non numérique : {normalized_score}. Retour de 0.0.")
+        return 0.0
+    if not isinstance(scale_factor, (int, float)) or scale_factor == 0:
+        log.warning(f"convert_normalized_to_latent_score a reçu un scale_factor invalide : {scale_factor}. Utilisation de la valeur par défaut.")
+        scale_factor = LATENT_SCORE_SCALE_FACTOR
+
+    # Inverser les étapes de convert_latent_to_normalized_score:
+    # normalized_score est dans [0, 100]
+    # val_0_1 = normalized_score / 100.0  (valeur dans [0, 1])
+    # val_0_2 = val_0_1 * 2               (valeur dans [0, 2])
+    # val_minus1_1 = val_0_2 - 1          (valeur dans [-1, 1])
+    # arg_tan = val_minus1_1 * (math.pi / 2) (argument pour tan, dans [-pi/2, pi/2])
+    # latent_scaled = tan(arg_tan)
+    # latent = latent_scaled / scale_factor
+    
+    try:
+        # Ajout de l'import math manquant ici
+        import math
+        # Gérer les cas limites pour éviter les erreurs avec tan(pi/2) ou tan(-pi/2)
+        if normalized_score >= 100.0:
+            return math.tan((math.pi / 2) * 0.9999999999) / scale_factor
+        elif normalized_score <= 0.0:
+            return math.tan(-(math.pi / 2) * 0.9999999999) / scale_factor
+
+        val_0_1 = normalized_score / 100.0
+        val_minus1_1 = (val_0_1 * 2.0) - 1.0
+        
+        epsilon = 1e-9 
+        if val_minus1_1 >= 1.0 - epsilon:
+            val_minus1_1 = 1.0 - epsilon
+        elif val_minus1_1 <= -1.0 + epsilon:
+            val_minus1_1 = -1.0 + epsilon
+            
+        arg_for_tan = val_minus1_1 * (math.pi / 2)
+        latent_score = math.tan(arg_for_tan) / scale_factor
+        return latent_score
+    except Exception as e:
+        log.error(f"Erreur dans convert_normalized_to_latent_score avec normalized_score={normalized_score}, scale_factor={scale_factor}: {e}")
+        return 0.0 
+
 def update_trust_score_for_activity(
     tables: Dict[str, Any],
     citizen1_username: str,
