@@ -47,6 +47,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const previousTrackUrlRef = useRef<string | null>(null); // Ref to store the URL of the previously played track
   const [showControls, setShowControls] = useState(false);
   const isMountedRef = useRef(true);
+  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Use a ref for the timeout ID
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -281,7 +282,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   // Handle track ending - play next random track with a 10-second pause
   useEffect(() => {
     const audio = audioRef.current;
-    const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Use a ref for the timeout ID
+    // const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null); // MOVED TO COMPONENT TOP LEVEL
 
     const handleEnded = () => {
       // Pause for 10 seconds before playing the next track
