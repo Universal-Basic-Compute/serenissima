@@ -105,26 +105,31 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                 else:
                     error_message = f"Scheduler (Thread {threading.get_ident()}): Error running {task_name}. Return code: {return_code}"
                     print(error_message)
-                    telegram_message = (f"❌ Task Failed: {task_name}\n"
-                                        f"Script: `{script_full_path}`\n"
-                                        f"Return Code: {return_code}\n\n"
-                                        f"```\n--- Last 20 lines of log ---\n{log_output_for_telegram}\n```")
-                    send_telegram_notification(telegram_message)
+                    if "KeyboardInterrupt" not in log_output_for_telegram:
+                        telegram_message = (f"❌ Task Failed: {task_name}\n"
+                                            f"Script: `{script_full_path}`\n"
+                                            f"Return Code: {return_code}\n\n"
+                                            f"```\n--- Last 20 lines of log ---\n{log_output_for_telegram}\n```")
+                        send_telegram_notification(telegram_message)
+                    else:
+                        print(f"Scheduler (Thread {threading.get_ident()}): KeyboardInterrupt detected for {task_name}. Skipping Telegram notification.")
             except FileNotFoundError:
                 error_message = f"Scheduler (Thread {threading.get_ident()}): Exception running {task_name}: Script not found at {script_full_path}"
                 print(error_message)
+                # No specific log output to check for KeyboardInterrupt here, but FileNotFoundError is unlikely to be a KeyboardInterrupt scenario.
                 send_telegram_notification(f"❌ Task Failed: {task_name}\nScript: `{script_full_path}`\nError: Script not found")
             except Exception as e:
                 error_message = f"Scheduler (Thread {threading.get_ident()}): Exception running {task_name}: {str(e)}"
                 print(error_message)
-                # For general exceptions, output_lines might not be fully populated or relevant in the same way
-                # but we can still try to send what we have.
                 log_output_for_telegram_exception = "\n".join(output_lines[-20:]) if output_lines else "No specific script output captured before exception."
-                telegram_message = (f"❌ Task Failed: {task_name}\n"
-                                    f"Script: `{script_full_path}`\n"
-                                    f"Exception: {str(e)}\n\n"
-                                    f"```\n--- Last 20 lines of log (if any) ---\n{log_output_for_telegram_exception}\n```")
-                send_telegram_notification(telegram_message)
+                if "KeyboardInterrupt" not in str(e) and "KeyboardInterrupt" not in log_output_for_telegram_exception:
+                    telegram_message = (f"❌ Task Failed: {task_name}\n"
+                                        f"Script: `{script_full_path}`\n"
+                                        f"Exception: {str(e)}\n\n"
+                                        f"```\n--- Last 20 lines of log (if any) ---\n{log_output_for_telegram_exception}\n```")
+                    send_telegram_notification(telegram_message)
+                else:
+                    print(f"Scheduler (Thread {threading.get_ident()}): KeyboardInterrupt detected during exception for {task_name}. Skipping Telegram notification.")
             finally:
                 # Remove from active threads when done
                 if task_name in active_threads_dict:
@@ -257,11 +262,14 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                                     else:
                                         error_message_hourly = f"Error running task {task_name}. Return code: {return_code}"
                                         print(error_message_hourly)
-                                        telegram_message_hourly = (f"❌ Task Failed: {task_name}\n"
-                                                                   f"Script: `{script_full_path}`\n"
-                                                                   f"Return Code: {return_code}\n\n"
-                                                                   f"```\n--- Last 20 lines of log ---\n{log_output_hourly_telegram}\n```")
-                                        send_telegram_notification(telegram_message_hourly)
+                                        if "KeyboardInterrupt" not in log_output_hourly_telegram:
+                                            telegram_message_hourly = (f"❌ Task Failed: {task_name}\n"
+                                                                       f"Script: `{script_full_path}`\n"
+                                                                       f"Return Code: {return_code}\n\n"
+                                                                       f"```\n--- Last 20 lines of log ---\n{log_output_hourly_telegram}\n```")
+                                            send_telegram_notification(telegram_message_hourly)
+                                        else:
+                                            print(f"Scheduler (Hourly): KeyboardInterrupt detected for {task_name}. Skipping Telegram notification.")
                                 except FileNotFoundError:
                                     error_message_hourly = f"Exception running task {task_name}: Script not found at {script_full_path}"
                                     print(error_message_hourly)
@@ -270,11 +278,14 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                                     error_message_hourly = f"Exception running task {task_name}: {str(e)}"
                                     print(error_message_hourly)
                                     log_output_hourly_exception = "\n".join(output_lines_hourly[-20:]) if output_lines_hourly else "No specific script output captured before exception."
-                                    telegram_message_hourly_exception = (f"❌ Task Failed: {task_name}\n"
-                                                                         f"Script: `{script_full_path}`\n"
-                                                                         f"Exception: {str(e)}\n\n"
-                                                                         f"```\n--- Last 20 lines of log (if any) ---\n{log_output_hourly_exception}\n```")
-                                    send_telegram_notification(telegram_message_hourly_exception)
+                                    if "KeyboardInterrupt" not in str(e) and "KeyboardInterrupt" not in log_output_hourly_exception:
+                                        telegram_message_hourly_exception = (f"❌ Task Failed: {task_name}\n"
+                                                                             f"Script: `{script_full_path}`\n"
+                                                                             f"Exception: {str(e)}\n\n"
+                                                                             f"```\n--- Last 20 lines of log (if any) ---\n{log_output_hourly_exception}\n```")
+                                        send_telegram_notification(telegram_message_hourly_exception)
+                                    else:
+                                        print(f"Scheduler (Hourly): KeyboardInterrupt detected during exception for {task_name}. Skipping Telegram notification.")
                         else:
                             log_message_invalid_tuple = f"Task entry item for Venice hour {current_hour_venice} is not a (script_path, task_name, target_minute) tuple: {task_entry}. Skipping."
                             print(log_message_invalid_tuple)
