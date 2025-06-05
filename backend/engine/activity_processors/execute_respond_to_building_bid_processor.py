@@ -4,8 +4,10 @@ from datetime import datetime, timezone
 
 from backend.engine.utils.activity_helpers import (
     LogColors, get_citizen_record, get_contract_record, get_building_record,
-    VENICE_TIMEZONE, create_notification_record
+    VENICE_TIMEZONE
 )
+# Import create_notification from the new notification_helpers module
+from backend.engine.utils.notification_helpers import create_notification
 from backend.app.citizen_utils import update_compute_balance
 
 log = logging.getLogger(__name__)
@@ -88,8 +90,9 @@ def process_execute_respond_to_building_bid_fn(tables: dict, activity_record: di
                 log.error(f"{LogColors.FAIL}Bidder {bidder_username} has insufficient funds ({bidder_ducats}) for bid {bid_price} on contract {building_bid_contract_id}.{LogColors.ENDC}")
                 # Update contract to failed or let it expire? For now, fail the activity.
                 tables['contracts'].update(bid_contract_record['id'], {"Status": "failed_insufficient_funds", "UpdatedAt": now_iso})
-                create_notification_record(tables, bidder_username, "building_bid_failed_funds", f"Your bid for {building_id_custom} failed due to insufficient funds.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
-                create_notification_record(tables, owner_username, "building_bid_failed_buyer_funds", f"The bid from {bidder_username} for your building {building_id_custom} failed; they had insufficient funds.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
+                notification_details_failure = {"contractId": building_bid_contract_id, "buildingId": building_id_custom}
+                create_notification(tables, bidder_username, "building_bid_failed_funds", f"Your bid for {building_id_custom} failed due to insufficient funds.", details=notification_details_failure)
+                create_notification(tables, owner_username, "building_bid_failed_buyer_funds", f"The bid from {bidder_username} for your building {building_id_custom} failed; they had insufficient funds.", details=notification_details_failure)
                 return False # Activity fails, contract status updated
 
             # 2. Transfer Ducats
@@ -106,16 +109,18 @@ def process_execute_respond_to_building_bid_fn(tables: dict, activity_record: di
             log.info(f"{LogColors.SUCCESS}Building bid contract {building_bid_contract_id} status updated to 'executed'.{LogColors.ENDC}")
 
             # 5. Notifications
-            create_notification_record(tables, bidder_username, "building_purchase_successful", f"Your bid for {building_id_custom} was accepted! You are now the owner.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
-            create_notification_record(tables, owner_username, "building_sale_successful", f"You accepted the bid from {bidder_username} for your building {building_id_custom}. The sale is complete.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
+            notification_details_success = {"contractId": building_bid_contract_id, "buildingId": building_id_custom}
+            create_notification(tables, bidder_username, "building_purchase_successful", f"Your bid for {building_id_custom} was accepted! You are now the owner.", details=notification_details_success)
+            create_notification(tables, owner_username, "building_sale_successful", f"You accepted the bid from {bidder_username} for your building {building_id_custom}. The sale is complete.", details=notification_details_success)
 
         elif response_action == "refused":
             log.info(f"{LogColors.PROCESS}Bid {building_bid_contract_id} refused by {owner_username}.{LogColors.ENDC}")
             tables['contracts'].update(bid_contract_record['id'], {"Status": "refused_by_seller", "UpdatedAt": now_iso})
             log.info(f"{LogColors.SUCCESS}Building bid contract {building_bid_contract_id} status updated to 'refused_by_seller'.{LogColors.ENDC}")
             
-            create_notification_record(tables, bidder_username, "building_bid_refused", f"Your bid for {building_id_custom} was refused by the owner.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
-            create_notification_record(tables, owner_username, "building_bid_response_sent", f"You refused the bid from {bidder_username} for your building {building_id_custom}.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
+            notification_details_refusal = {"contractId": building_bid_contract_id, "buildingId": building_id_custom}
+            create_notification(tables, bidder_username, "building_bid_refused", f"Your bid for {building_id_custom} was refused by the owner.", details=notification_details_refusal)
+            create_notification(tables, owner_username, "building_bid_response_sent", f"You refused the bid from {bidder_username} for your building {building_id_custom}.", details=notification_details_refusal)
         
         return True
 
