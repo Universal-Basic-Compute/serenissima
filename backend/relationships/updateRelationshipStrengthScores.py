@@ -523,7 +523,7 @@ def _calculate_trust_score_contributions_from_interactions( #NOSONAR
         citizen_to_check_username = username1
         citizen_to_check_fields = citizen1_fields
 
-    if citizen_to_check_username and citizen_to_check_fields:
+    if citizen_to_check_username and citizen_to_check_fields: # This is for public welfare vs Consiglio
         is_hungry = False
         is_homeless = False
 
