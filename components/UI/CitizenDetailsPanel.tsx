@@ -1657,7 +1657,7 @@ Your response:`;
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       // Fallback to default coat of arms
-                      (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public/assets/images/coat-of-arms/default.png';
+                      (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/coat-of-arms/default.png';
                     }}
                   />
                 </div>
