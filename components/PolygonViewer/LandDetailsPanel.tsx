@@ -322,9 +322,21 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const isOwner = dynamicOwner && currentCitizenUsername && normalizeIdentifier(dynamicOwner) === normalizeIdentifier(currentCitizenUsername);
 
   // Derive specific contracts from activeLandContracts
-  const landListingByOwner = activeLandContracts.find(
-    c => c.Type === 'land_listing' && c.Seller && dynamicOwner && normalizeIdentifier(c.Seller) === normalizeIdentifier(dynamicOwner)
-  );
+  console.log('[LandDetailsPanel] Debugging for "Buy Now" button visibility:');
+  console.log('[LandDetailsPanel] selectedPolygonId:', selectedPolygonId);
+  console.log('[LandDetailsPanel] currentCitizenUsername:', currentCitizenUsername);
+  console.log('[LandDetailsPanel] dynamicOwner (from landOwners prop):', dynamicOwner);
+  console.log('[LandDetailsPanel] isOwner (current user is dynamicOwner):', isOwner);
+  console.log('[LandDetailsPanel] activeLandContracts:', JSON.parse(JSON.stringify(activeLandContracts)));
+
+  const landListingByOwner = activeLandContracts.find(c => {
+    const typeMatch = c.Type === 'land_listing';
+    const sellerMatch = c.Seller && dynamicOwner && normalizeIdentifier(c.Seller) === normalizeIdentifier(dynamicOwner);
+    // console.log(`[LandDetailsPanel] Checking contract ${c.id || c.ContractId}: Type match: ${typeMatch}, Seller: ${c.Seller}, dynamicOwner: ${dynamicOwner}, Seller match with dynamicOwner: ${sellerMatch}`);
+    return typeMatch && sellerMatch;
+  });
+  
+  console.log('[LandDetailsPanel] landListingByOwner (listing by dynamicOwner):', landListingByOwner ? JSON.parse(JSON.stringify(landListingByOwner)) : null);
 
   const myLandListing = activeLandContracts.find(
     c => c.Type === 'land_listing' && c.Seller && currentCitizenUsername && normalizeIdentifier(c.Seller) === normalizeIdentifier(currentCitizenUsername)
