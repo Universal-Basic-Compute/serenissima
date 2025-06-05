@@ -10,7 +10,7 @@ import LandChatColumn from './LandChatColumn';
 import LandMarketColumn from './LandMarketColumn';
 
 // Helper function to normalize identifiers for comparison
-export const normalizeIdentifier = (id: string | null | undefined): string | null => { // Export if needed by subcomponents or keep local
+export const normalizeIdentifier = (id: string | null | undefined): string | null => {
   if (!id) return null;
   // Convert to lowercase and trim
   return id.toLowerCase().trim();
@@ -127,7 +127,31 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isCorrespondanceFullScreen, setIsCorrespondanceFullScreen] = useState(false);
-  const [activeLeftTab, setActiveLeftTab] = useState<'info' | 'buildings' | 'realEstate'>('info'); // Tabs for left column, added 'realEstate'
+  const [activeLeftTab, setActiveLeftTab] = useState<'info' | 'buildings' | 'realEstate'>('info');
+
+  // State for current citizen username, reactive to login changes
+  const [internalCurrentCitizenUsername, setInternalCurrentCitizenUsername] = useState<string | null>(getCurrentCitizenUsername());
+
+  useEffect(() => {
+    const updateUsername = () => {
+      const newUsername = getCurrentCitizenUsername();
+      console.log('[LandDetailsPanel] Wallet state changed, updating username to:', newUsername);
+      setInternalCurrentCitizenUsername(newUsername);
+    };
+
+    // Initial check
+    updateUsername();
+
+    // Listen for wallet changes
+    const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, updateUsername);
+    
+    // Request current status on mount in case WALLET_CHANGED was missed
+    eventBus.emit(EventTypes.REQUEST_WALLET_STATUS);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []); // Empty dependency array, runs on mount and cleans up
 
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
@@ -317,14 +341,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // Early return if not visible or no selected polygon
   if (!visible || !selectedPolygonId) return null;
 
-  const currentCitizenUsername = getCurrentCitizenUsername();
-  // isOwner needs to be determined based on dynamicOwner and currentCitizenUsername
+  // Use the state variable for currentCitizenUsername
+  const currentCitizenUsername = internalCurrentCitizenUsername; 
   const isOwner = dynamicOwner && currentCitizenUsername && normalizeIdentifier(dynamicOwner) === normalizeIdentifier(currentCitizenUsername);
 
   // Derive specific contracts from activeLandContracts
   console.log('[LandDetailsPanel] Debugging for "Buy Now" button visibility:');
   console.log('[LandDetailsPanel] selectedPolygonId:', selectedPolygonId);
-  console.log('[LandDetailsPanel] currentCitizenUsername:', currentCitizenUsername);
+  console.log('[LandDetailsPanel] currentCitizenUsername (from state):', currentCitizenUsername);
   console.log('[LandDetailsPanel] dynamicOwner (from landOwners prop):', dynamicOwner);
   console.log('[LandDetailsPanel] isOwner (current user is dynamicOwner):', isOwner);
   console.log('[LandDetailsPanel] activeLandContracts:', JSON.parse(JSON.stringify(activeLandContracts)));
@@ -332,7 +356,6 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const landListingByOwner = activeLandContracts.find(c => {
     const typeMatch = c.Type === 'land_listing';
     const sellerMatch = c.Seller && dynamicOwner && normalizeIdentifier(c.Seller) === normalizeIdentifier(dynamicOwner);
-    // console.log(`[LandDetailsPanel] Checking contract ${c.id || c.ContractId}: Type match: ${typeMatch}, Seller: ${c.Seller}, dynamicOwner: ${dynamicOwner}, Seller match with dynamicOwner: ${sellerMatch}`);
     return typeMatch && sellerMatch;
   });
   
