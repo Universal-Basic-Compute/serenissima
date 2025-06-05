@@ -5,7 +5,7 @@ import json
 import random
 import requests
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta # Ajout de timezone, timedelta
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
@@ -341,7 +341,8 @@ def update_relationship(tables, relationship_id, assessment):
         # Mettre à jour les champs Title et Description
         update_data = {
             "Title": assessment["title"],
-            "Description": assessment["description"]
+            "Description": assessment["description"],
+            "QualifiedAt": datetime.now(timezone.utc).isoformat() # Mettre à jour QualifiedAt
         }
         
         tables["relationships"].update(relationship_id, update_data)
@@ -354,52 +355,89 @@ def update_relationship(tables, relationship_id, assessment):
 def process_relationships(tables, limit=None, min_strength=None, max_per_run=None, kinos_model="local", new_only=False):
     """Traiter les relations pour les qualifier avec KinOS."""
     try:
-        # Construire la formule pour filtrer les relations
-        formula_parts = []
-        
-        if min_strength is not None:
-            formula_parts.append(f"{{StrengthScore}} >= {min_strength}")
-        
-        if new_only:
-            formula_parts.append("AND({Title}='', {Title}=BLANK())")
-        
-        formula = " AND ".join(formula_parts) if formula_parts else ""
-        
         # Récupérer les relations, triées par force décroissante
         print(f"{LogColors.HEADER}Récupération des relations depuis Airtable...{LogColors.ENDC}")
-        if formula:
-            relationships = tables["relationships"].all(formula=formula, sort=["-StrengthScore"])
-        else:
-            relationships = tables["relationships"].all(sort=["-StrengthScore"])
         
-        print(f"{LogColors.OKBLUE}Trouvé {len(relationships)} relations à évaluer.{LogColors.ENDC}")
+        fields_to_fetch = ["Citizen1", "Citizen2", "StrengthScore", "TrustScore", "LastInteraction", "Notes", "Title", "QualifiedAt"]
+        
         if new_only:
-            print(f"{LogColors.OKBLUE}Mode 'newOnly': Seules les relations sans titre seront traitées.{LogColors.ENDC}")
-        
-        # Limiter le nombre de relations à traiter si spécifié
+            # En mode newOnly, on cible les relations qui n'ont jamais été qualifiées ou qui n'ont pas de titre.
+            formula = "OR(IS_BLANK({Title}), IS_BLANK({QualifiedAt}))"
+            print(f"{LogColors.OKBLUE}Mode 'newOnly': Formule = {formula}{LogColors.ENDC}")
+            all_relationships_raw = tables["relationships"].all(formula=formula, fields=fields_to_fetch, sort=["-StrengthScore"])
+        else:
+            # En mode par défaut, on récupère toutes les relations (ou un sous-ensemble si min_strength est utilisé)
+            # et on filtre en Python.
+            formula_parts = []
+            if min_strength is not None:
+                formula_parts.append(f"{{StrengthScore}} >= {min_strength}")
+            
+            base_formula = " AND ".join(formula_parts) if formula_parts else ""
+            print(f"{LogColors.OKBLUE}Mode par défaut. Formule de base Airtable = '{base_formula}' (si non vide). Le filtrage fin se fera en Python.{LogColors.ENDC}")
+            all_relationships_raw = tables["relationships"].all(formula=base_formula, fields=fields_to_fetch, sort=["-StrengthScore"])
+
+        print(f"{LogColors.OKBLUE}Récupéré {len(all_relationships_raw)} relations brutes depuis Airtable.{LogColors.ENDC}")
+
+        relationships_to_process = []
+        if not new_only:
+            now_utc = datetime.now(timezone.utc)
+            fourteen_days_ago = now_utc - timedelta(days=14)
+            seven_days_ago = now_utc - timedelta(days=7)
+
+            for rel in all_relationships_raw:
+                fields = rel.get('fields', {})
+                qualified_at_str = fields.get('QualifiedAt')
+                last_interaction_str = fields.get('LastInteraction')
+
+                should_process = False
+                if not qualified_at_str: # Jamais qualifiée
+                    should_process = True
+                else:
+                    try:
+                        qualified_at_dt = datetime.fromisoformat(qualified_at_str.replace('Z', '+00:00'))
+                        if qualified_at_dt < fourteen_days_ago: # Plus de 14 jours
+                            if last_interaction_str:
+                                last_interaction_dt = datetime.fromisoformat(last_interaction_str.replace('Z', '+00:00'))
+                                if last_interaction_dt > seven_days_ago: # Moins de 7 jours
+                                    should_process = True
+                            # Si LastInteraction est vide, on ne requalifie pas une ancienne qualification.
+                    except ValueError:
+                        print(f"{LogColors.WARNING}Format de date invalide pour QualifiedAt ou LastInteraction pour la relation {rel.get('id')}. Elle sera traitée comme 'jamais qualifiée'.{LogColors.ENDC}")
+                        should_process = True # Traiter en cas d'erreur de date, comme si elle n'avait jamais été qualifiée.
+                
+                if should_process:
+                    relationships_to_process.append(rel)
+            print(f"{LogColors.OKBLUE}Après filtrage Python (mode par défaut), {len(relationships_to_process)} relations à évaluer.{LogColors.ENDC}")
+        else: # new_only mode, all fetched records are to be processed
+            relationships_to_process = all_relationships_raw
+            print(f"{LogColors.OKBLUE}Mode 'newOnly': {len(relationships_to_process)} relations à évaluer (pas de filtrage Python supplémentaire).{LogColors.ENDC}")
+
+        # Limiter le nombre de relations à traiter si spécifié (après filtrage Python pour le mode par défaut)
         if limit is not None and limit > 0:
-            relationships = relationships[:limit]
-            print(f"{LogColors.OKBLUE}Limité à {limit} relations.{LogColors.ENDC}")
+            relationships_to_process = relationships_to_process[:limit]
+            print(f"{LogColors.OKBLUE}Limité à {limit} relations après filtrage.{LogColors.ENDC}")
         
         if max_per_run is not None and max_per_run > 0:
-            relationships = relationships[:max_per_run]
-            print(f"{LogColors.OKBLUE}Limité à {max_per_run} relations par exécution.{LogColors.ENDC}")
+            relationships_to_process = relationships_to_process[:max_per_run]
+            print(f"{LogColors.OKBLUE}Limité à {max_per_run} relations par exécution après filtrage.{LogColors.ENDC}")
         
         # Compteurs pour les statistiques
-        total = len(relationships)
+        total = len(relationships_to_process)
         success_count = 0
         error_count = 0
         
         # Traiter chaque relation
-        for i, relationship in enumerate(relationships, 1):
+        for i, relationship in enumerate(relationships_to_process, 1):
             relationship_id = relationship.get('id')
             fields = relationship.get('fields', {})
             citizen1 = fields.get('Citizen1')
             citizen2 = fields.get('Citizen2')
             strength = fields.get('StrengthScore', 0)
             trust = fields.get('TrustScore', 0)
+            qualified_at_display = fields.get('QualifiedAt', 'Jamais')
+            last_interaction_display = fields.get('LastInteraction', 'Jamais')
             
-            print(f"\n{LogColors.HEADER}[{i}/{total}] Traitement de la relation {relationship_id} entre {citizen1} et {citizen2} (Force: {strength}, Confiance: {trust}){LogColors.ENDC}")
+            print(f"\n{LogColors.HEADER}[{i}/{total}] Traitement de la relation {relationship_id} entre {citizen1} et {citizen2} (Force: {strength:.1f}, Confiance: {trust:.1f}, Qualifié: {qualified_at_display}, Interagi: {last_interaction_display}){LogColors.ENDC}")
             
             # Évaluer la relation avec KinOS
             assessment = assess_relationship_with_kinos(tables, relationship, kinos_model)

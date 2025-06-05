@@ -37,7 +37,8 @@ Each record in the `RELATIONSHIPS` table represents a unique bond between two ci
 -   **`Citizen2`**: Text - The username of the second citizen (alphabetically).
 -   **`StrengthScore`**: Number (Float) - Score normalisé sur une échelle de 0 à 100. 0 indique une absence de force/pertinence, 100 indique une force maximale.
 -   **`TrustScore`**: Number (Float) - Score normalisé sur une échelle de 0 à 100 qui quantifie le niveau de confiance. Un score de 50 est neutre.
--   **`LastInteraction`**: DateTime - Timestamp of the last time this relationship record was updated by the scoring script.
+-   **`LastInteraction`**: DateTime - Timestamp of the last time this relationship record was updated by the scoring script. (Heure de Venise)
+-   **`QualifiedAt`**: DateTime - Timestamp of the last successful qualification by `qualifyRelationships.py`. (UTC)
 -   **`Notes`**: Long Text - A comma-separated list of keywords indicating the sources that contributed to the scores (e.g., "Sources: proximity_relevancy, messages_interaction, loans_interaction").
 -   **`Title`**: Text (Optional) - A descriptive title for the relationship (e.g., "Close Allies", "Business Partners"). Can be manually set or potentially by future systems.
 -   **`Description`**: Long Text (Optional) - A more detailed description of the relationship.

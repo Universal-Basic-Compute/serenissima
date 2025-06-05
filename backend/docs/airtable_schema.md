@@ -333,6 +333,7 @@ Liens et relations entre citoyens (bi-directionnel).
 -   `StrengthScore` (Nombre): Score de force de la relation.
 -   `TrustScore` (Nombre): Score de confiance mutuelle.
 -   `Notes` (Texte multiligne): Notes sur la relation.
+-   `QualifiedAt` (Date/Heure): Horodatage de la dernière qualification réussie par le script `qualifyRelationships.py`. (UTC)
 -   `CreatedAt` (Date/Heure): Date de début de la relation ou de création de l'enregistrement.
 -   `UpdatedAt` (Date/Heure): Date de dernière modification.
 
