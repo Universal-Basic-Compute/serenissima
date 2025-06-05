@@ -26,7 +26,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Normalize profile data to ensure consistent casing (camelCase)
-  const normalizeProfileData = (profile: any): any => {
+export const normalizeProfileData = (profile: any): any => {
     if (!profile || typeof profile !== 'object') { // Handle null or non-object input
       console.log('[WalletProvider] normalizeProfileData received null or non-object, returning null.');
       return null;
