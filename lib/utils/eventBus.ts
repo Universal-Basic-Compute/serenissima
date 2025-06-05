@@ -189,5 +189,7 @@ export const EventTypes = {
   TRANSPORT_ROUTE_CALCULATED: 'TRANSPORT_ROUTE_CALCULATED',
   TRANSPORT_ROUTE_ERROR: 'TRANSPORT_ROUTE_ERROR',
   TRANSPORT_RESET: 'TRANSPORT_RESET',
-  REQUEST_WALLET_STATUS: 'requestWalletStatus' // Added missing event type
+  REQUEST_WALLET_STATUS: 'requestWalletStatus', // Added missing event type
+  WEATHER_UPDATED: 'WEATHER_UPDATED', // Added for weather updates
+  AUDIO_SETTINGS_CHANGED: 'AUDIO_SETTINGS_CHANGED' // Added for audio settings changes
 };

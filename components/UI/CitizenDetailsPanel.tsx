@@ -586,7 +586,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           
           try {
             const aiDisplayName = citizen.firstName || citizen.username || 'Citizen';
-            const senderDisplayName = senderProfileObj?.firstName || currentUsername || 'User';
+            const senderDisplayName = senderProfileObj?.firstName || internalCurrentCitizenUsername || 'User';
 
             const kinosPromptContent = 
 `You are ${aiDisplayName}, an AI citizen of Venice. You are responding to a message from ${senderDisplayName}.
@@ -795,8 +795,10 @@ Your response:`;
         // --- Relevancies (Opportunities) ---
         // Fetch only if internalCurrentCitizenUsername is available
         if (internalCurrentCitizenUsername) {
-            if (cachedRelevancies.hasOwnProperty(citizen.username) && cachedRelevancies[citizen.username].forUser === internalCurrentCitizenUsername) {
-                setRelevancies(cachedRelevancies[citizen.username].data);
+            // Adjusted cache check: if cache has an entry for citizen.username, assume it's for the current user context
+            // The forUser check was problematic as the cache structure is Record<string, any[]>
+            if (cachedRelevancies.hasOwnProperty(citizen.username)) {
+                setRelevancies(cachedRelevancies[citizen.username]);
                 setIsLoadingRelevancies(false);
             } else {
                 setRelevancies([]);
