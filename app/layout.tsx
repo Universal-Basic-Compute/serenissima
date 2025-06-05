@@ -3,7 +3,7 @@ import "./globals.css";
 import ClientWalletProvider from "@/components/UI/ClientWalletProvider";
 import Compagno from "@/components/UI/Compagno";
 import ContextMenuPreventer from "@/components/UI/ContextMenuPreventer";
-import BackgroundMusic from "@/components/UI/BackgroundMusic"; // Importer BackgroundMusic
+// BackgroundMusic sera déplacé vers app/page.tsx
 // Add this to ensure buildings are always visible
 
 const geistSans = Geist({
@@ -26,7 +26,7 @@ export default function RootLayout({
       <body className="antialiased">
         <ClientWalletProvider>
           {children}
-          <BackgroundMusic /> {/* Ajouter BackgroundMusic ici */}
+          {/* BackgroundMusic a été déplacé vers app/page.tsx pour un meilleur contrôle basé sur l'état */}
           <Compagno />
           <ContextMenuPreventer />
           <script dangerouslySetInnerHTML={{

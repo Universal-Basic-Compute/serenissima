@@ -21,6 +21,7 @@ import LoanPanel from '@/components/Loans/LoanPanel'; // Importer le nouveau Loa
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel'; // Import CitizenDetailsPanel
 // import InitialLoadingScreen from '@/components/UI/InitialLoadingScreen'; // Import InitialLoadingScreen - Supprimé
 import DailyUpdatePanel from '@/components/UI/DailyUpdatePanel'; // Import DailyUpdatePanel
+import BackgroundMusic from '@/components/UI/BackgroundMusic'; // Importer BackgroundMusic
 import { 
   StrategiesArticle, 
   BeginnersGuideArticle, 
@@ -1395,6 +1396,12 @@ export default function TwoDPage() {
       {canShowMainPanels && showTechTreePanel && (
         <TechTree onClose={() => setShowTechTreePanel(false)} />
       )}
+
+      {/* Background Music Component - Contrôlé par l'état de l'application */}
+      {/* Enveloppé dans un div pour un positionnement optionnel si nécessaire, sinon il peut être placé directement */}
+      <div className="absolute bottom-4 right-1/2 transform translate-x-1/2 z-10 pointer-events-none"> {/* Example positioning, adjust as needed */}
+        <BackgroundMusic isAppReady={appStatus === 'ready'} />
+      </div>
     </div>
   );
 }
