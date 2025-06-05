@@ -192,13 +192,13 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                 20: [("ais/bidonlands.py", "AI land bidding", 0), # 20:00 VT
                      ("ais/delegateBusinesses.py", "AI Business Delegation", 0)], # 20:00 VT
                 21: [("ais/buildbuildings.py --model local", "AI building construction", 0), # 21:00 VT
-                     ("ais/automated_adjustleases.py --strategy standard", "Automated AI Lease Price Adjustment (Standard)", 30), # 21:30 VT
-                     ("ais/qualifyRelationships.py --newOnly", "AI Relationship Qualification (New Only)", 45)], # 21:45 VT
+                     ("ais/automated_adjustleases.py --strategy standard", "Automated AI Lease Price Adjustment (Standard)", 30)], # 21:30 VT
                 22: [("ais/adjustleases.py --model local", "AI lease adjustments", 0), # 22:00 VT (Kinos-driven, can run after rule-based)
                      ("ais/automated_adjustrents.py --strategy standard", "Automated AI Rent Adjustment (Standard)", 0)], # 22:00 VT
                 23: [("ais/automated_adjustpublicstoragecontracts.py", "Automated Public Storage Offers", 0)], # 23:00 VT
                 0: [("ais/automated_adjustwages.py --strategy standard", "Automated AI Wage Adjustment (Standard)", 0), # 00:00 VT (Midnight)
-                    ("ais/automated_adjuststoragequeriescontracts.py", "Automated Storage Queries", 0)], # 00:00 VT
+                    ("ais/automated_adjuststoragequeriescontracts.py", "Automated Storage Queries", 0), # 00:00 VT
+                    ("ais/qualifyRelationships.py --newOnly", "AI Relationship Qualification (New Only - Nightly)", 15)], # 00:15 VT
                 1: [("ais/processnotifications.py", "AI notification processing", 0), # 1:00 VT  (processnotifications.py does not take --model)
                     ("engine/paystoragecontracts.py", "Process Storage Contract Payments", 0)], # 1:00 VT
                 2: [("ais/answertomessages.py --model local", "AI message responses", 0)], # 2:00 VT
