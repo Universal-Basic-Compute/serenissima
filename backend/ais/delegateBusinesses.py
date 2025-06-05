@@ -145,6 +145,7 @@ def call_try_create_activity_api(
 
 def delegate_businesses_logic(tables: Dict[str, Table], dry_run: bool = False):
     """Main logic for delegating businesses."""
+    # Header will be in the main() function that calls this
     ai_citizens = get_all_ai_citizens(tables)
     all_businesses = get_all_businesses(tables)
 
