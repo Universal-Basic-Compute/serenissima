@@ -182,7 +182,8 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                      ("ais/answertomessages.py --model local", "AI message responses", 0)], # 12:00 VT
                 14: [("engine/citizenhousingmobility.py", "Citizen housing mobility", 0), # 14:00 VT
                      ("ais/answertomessages.py --model local", "AI message responses", 0)], # 14:00 VT
-                15: [("engine/dailyloanpayments.py", "Daily loan payments", 0)], # 15:00 VT
+                15: [("engine/dailyloanpayments.py", "Daily loan payments", 0), # 15:00 VT
+                     ("engine/cleanTables.py", "Clean Old Table Records (Afternoon)", 0)], # 15:00 VT
                 16: [("engine/citizenworkmobility.py", "Citizen work mobility", 0), # 16:00 VT
                      ("ais/answertomessages.py --model local", "AI message responses", 0)], # 16:00 VT
                 17: [("engine/dailywages.py", "Daily wage payments", 0)], # 17:00 VT
