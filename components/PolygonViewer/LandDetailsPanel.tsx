@@ -110,7 +110,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // Combined state for all relevant land contracts (listings and offers)
   const [activeLandContracts, setActiveLandContracts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [offerAmount, setOfferAmount] = useState<number>(100000); // Default offer amount
+  const [offerAmount, setOfferAmount] = useState<number>(200000); // Default offer amount, start of slider range
   const [showOfferInput, setShowOfferInput] = useState<boolean>(false);
   // showPurchaseConfirmation and isPurchasing might be reused or adapted if direct purchase confirmation is kept for some flow
   const [showPurchaseConfirmation, setShowPurchaseConfirmation] = useState(false);

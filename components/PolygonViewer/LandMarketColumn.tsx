@@ -181,37 +181,47 @@ const LandMarketColumn: React.FC<LandMarketColumnProps> = ({
           {/* "Make an Offer" input/button */}
           {currentCitizenUsername && !isOwner && !myBuyOffer && !landListingByOwner && !isAvailableFromState && (
             showOfferInput ? (
-              <div className="flex flex-col w-full space-y-3 mt-3">
-                <div className="flex space-x-2">
-                  <input
-                    type="number"
-                    value={offerAmount}
-                    onChange={(e) => setOfferAmount(parseInt(e.target.value) || 0)}
-                    className="px-3 py-2 border border-amber-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    placeholder="Offer amount in ⚜️ ducats"
-                    min="1"
-                  />
+              <div className="flex flex-col w-full space-y-3 mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <label htmlFor="offerRange" className="block text-sm font-medium text-gray-700">
+                  Your Offer: <span className="font-semibold text-amber-700">{offerAmount.toLocaleString()} ⚜️</span>
+                </label>
+                <input
+                  id="offerRange"
+                  type="range"
+                  min="200000"
+                  max="20000000"
+                  step="50000"
+                  value={offerAmount}
+                  onChange={(e) => setOfferAmount(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
+                />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>200k ⚜️</span>
+                  <span>20M ⚜️</span>
+                </div>
+                <div className="flex space-x-2 mt-2">
                   <ActionButton
                     onClick={() => {
-                      if (offerAmount <= 0) {
-                        alert('Please enter a valid offer amount.');
+                      if (offerAmount < 200000) { // Ensure offer is within valid range
+                        alert('Please enter a valid offer amount (min 200,000 ⚜️).');
                         return;
                       }
                       handleGenericActivity('make_offer_for_land', { 
                         landId: selectedPolygonId, 
                         offerPrice: offerAmount, 
-                        sellerUsername: owner 
+                        sellerUsername: owner // This is dynamicOwner, the current land owner
                       });
                     }}
                     variant="primary"
                     disabled={isLoading}
+                    className="flex-grow"
                   >
                     Submit Offer
                   </ActionButton>
+                  <ActionButton onClick={() => setShowOfferInput(false)} variant="secondary" disabled={isLoading}>
+                    Cancel
+                  </ActionButton>
                 </div>
-                <ActionButton onClick={() => setShowOfferInput(false)} variant="secondary" disabled={isLoading}>
-                  Cancel
-                </ActionButton>
               </div>
             ) : (
               <ActionButton
