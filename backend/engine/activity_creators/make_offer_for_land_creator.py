@@ -78,7 +78,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
     if not target_office_record:
         log.info(f"{LogColors.OKCYAN}Searching for closest appropriate office from types: {preferred_office_types}.{LogColors.ENDC}")
         for office_type in preferred_office_types:
-            found_office = get_closest_building_of_type(tables, from_location_data, office_type, transport_api_url)
+            found_office = get_closest_building_of_type(tables, from_location_data, office_type)
             if found_office:
                 target_office_record = found_office
                 target_office_building_id = target_office_record['fields'].get('BuildingId')
