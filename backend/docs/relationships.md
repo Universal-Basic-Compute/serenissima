@@ -12,8 +12,8 @@ Each record in the `RELATIONSHIPS` table represents a unique bond between two ci
 
 -   **`Citizen1`**: Text - The username of the first citizen (alphabetically).
 -   **`Citizen2`**: Text - The username of the second citizen (alphabetically).
--   **`StrengthScore`**: Number (Float) - Quantifies the relationship's strength based on shared relevancies and common interests.
--   **`TrustScore`**: Number (Float) - Quantifies the level of trust built through direct positive interactions.
+-   **`StrengthScore`**: Number (Float) - Score normalisé sur une échelle de 0 à 100 qui quantifie la force de la relation. Un score de 50 est neutre.
+-   **`TrustScore`**: Number (Float) - Score normalisé sur une échelle de 0 à 100 qui quantifie le niveau de confiance. Un score de 50 est neutre.
 -   **`LastInteraction`**: DateTime - Timestamp of the last time this relationship record was updated by the scoring script.
 -   **`Notes`**: Long Text - A comma-separated list of keywords indicating the sources that contributed to the scores (e.g., "Sources: proximity_relevancy, messages_interaction, loans_interaction").
 -   **`Title`**: Text (Optional) - A descriptive title for the relationship (e.g., "Close Allies", "Business Partners"). Can be manually set or potentially by future systems.
@@ -32,23 +32,33 @@ The `updateRelationshipStrengthScores.py` script runs daily to update both `Stre
 2.  **Iterate per Citizen (Source Citizen)**: For each citizen:
     *   **Fetch Recent Relevancies**: It calls the `/api/relevancies` endpoint to get relevancies where the source citizen is `RelevantToCitizen`. These relevancies must have been created in the last 24 hours. Relevancies where `RelevantToCitizen` is "all" are excluded.
     *   **Fetch Existing Relationships**: It retrieves all existing relationship records involving the source citizen.
-    *   **Apply Decay**:
-        *   Existing `StrengthScore` is decayed by 25% (multiplied by 0.75).
-        *   Existing `TrustScore` is decayed by 25% (multiplied by 0.75).
-    *   **Calculate StrengthScore Additions**:
-        *   The `score` from each recent relevancy is added to the decayed `StrengthScore` for the relationship between the source citizen and the `TargetCitizen`(s) of the relevancy.
-        *   The `type` of the relevancy (e.g., `proximity`, `guild_member`) is noted for the `Notes` field.
-    *   **Calculate TrustScore Additions**:
-        *   The script calls an internal helper function `_calculate_trust_score_contributions_from_interactions` for the source citizen and each target citizen they have a relevancy with (or an existing relationship).
-        *   This function calculates new trust points based on direct interactions (see "Interaction Contributions to TrustScore" below).
-        *   These new points are added to the decayed `TrustScore`.
-        *   The types of interactions (e.g., `messages_interaction`) are noted for the `Notes` field.
-    *   **Update/Create Relationship Record**:
-        *   If a relationship record exists, it's updated with the new `StrengthScore`, `TrustScore`, `LastInteraction` (current timestamp), and consolidated `Notes`.
-        *   If no record exists, a new one is created with `Citizen1` and `Citizen2` set alphabetically, the calculated scores, `LastInteraction`, and `Notes`.
+    *   **Déclin** : Le `StrengthScore` et le `TrustScore` actuels (0-100) sont d'abord convertis en un score "latent". Ce score latent est ensuite multiplié par un facteur de déclin (ex: 0.75 pour un déclin de 25%).
+    *   **Calcul des Ajouts aux Scores Latents** :
+        *   **StrengthScore**: Les "points bruts" de chaque pertinence récente sont ajoutés au `StrengthScore` latent (déjà décliné).
+        *   **TrustScore**: Les "points bruts" calculés à partir des interactions directes (voir section suivante) sont ajoutés au `TrustScore` latent (déjà décliné).
+    *   **Reconversion et Mise à Jour** :
+        *   Les nouveaux scores latents (après déclin et ajouts) sont reconvertis en scores normalisés (0-100) en utilisant une fonction `atan`.
+        *   Ces scores normalisés sont ensuite écrits dans Airtable.
+        *   Si aucune relation n'existe, une nouvelle est créée. Le `StrengthScore` et `TrustScore` initiaux (0-100) sont calculés en convertissant les premiers points bruts (de pertinence ou d'interaction) via l'espace latent. Si aucun point n'est ajouté, ils commencent à 50 (neutre).
 3.  **Admin Notification**: A summary notification is sent to administrators detailing the number of citizens processed, relevancies fetched, and relationships updated/created.
 
-### Interaction Contributions to `TrustScore`
+### Mécanisme de Mise à Jour des Scores (0-100 via Espace Latent)
+
+Pour obtenir l'effet de rendement décroissant souhaité tout en stockant des scores sur une échelle de 0 à 100, le système utilise un espace de calcul "latent" :
+
+1.  **Lecture du Score (0-100)** : Le score actuel (`StrengthScore` ou `TrustScore`) est lu depuis Airtable.
+2.  **Conversion en Score Latent** : Ce score (0-100) est transformé en un score latent en utilisant l'inverse de la fonction `atan` :
+    `ScoreLatent = tan( ((ScoreNormalisé / 50) - 1) * (pi/2) ) / k`
+    Où `k` est le `LATENT_SCORE_SCALE_FACTOR` (ex: 0.1). Un score normalisé de 50 devient un score latent de 0.
+3.  **Application du Déclin au Score Latent** : Le score latent est multiplié par le `DECAY_FACTOR` (ex: 0.75).
+4.  **Ajout de Points Bruts au Score Latent** : Les "points bruts" (ex: `+1.0` pour une interaction positive) sont ajoutés à ce score latent décliné.
+5.  **Reconversion en Score Normalisé (0-100)** : Le nouveau score latent est reconverti en une échelle de 0 à 100 pour stockage :
+    `NouveauScoreNormalisé = ( (atan(NouveauScoreLatent * k) / (pi/2)) + 1 ) * 50`
+6.  **Écriture en BDD** : Ce `NouveauScoreNormalisé` est écrit dans Airtable.
+
+Ce processus garantit que l'impact de l'ajout de points bruts diminue à mesure que le score normalisé s'approche de 0 ou 100.
+
+### Interaction Contributions (Points Bruts pour Score Latent)
 
 The `_calculate_trust_score_contributions_from_interactions` function aggregates points from the following activities between two citizens:
 
@@ -117,11 +127,12 @@ This endpoint is used to fetch relationship data.
     *   If no relationship exists, it returns `null` for the relationship object.
 
 **Response Fields (for each relationship object):**
-`id`, `citizen1`, `citizen2`, `strengthScore`, `title`, `description`, `tier`, `trustScore`, `status`, `lastInteraction`, `notes`, `createdAt`.
+`id`, `citizen1`, `citizen2`, `strengthScore` (0-100), `title`, `description`, `tier`, `trustScore` (0-100), `status`, `lastInteraction`, `notes`, `createdAt`.
+Les scores en base de données sont directement sur l'échelle 0-100.
 
 ## AI Usage
 
-The relationship scores, particularly `TrustScore` and the combined `StrengthScore + TrustScore`, are used by AI systems:
+The relationship scores, `TrustScore` (0-100) and the combined (`StrengthScore` (0-100) + `TrustScore` (0-100)), are used by AI systems:
 
 1.  **`backend/ais/answertomessages.py`**:
     *   When an AI citizen generates a response to a message, the script fetches contextual data including the relationship record with the sender.

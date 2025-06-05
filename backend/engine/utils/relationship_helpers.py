@@ -39,7 +39,8 @@ def update_trust_score_for_activity(
     activity_record_for_kinos: Optional[Dict[str, Any]] = None
 ) -> None:
     """
-    Met à jour le TrustScore entre deux citoyens suite à une activité.
+    Met à jour le TrustScore (stocké en BDD sur une échelle de 0 à 100) entre deux citoyens suite à une activité.
+    Les calculs internes (ajout de points, déclin) se font sur un score "latent" pour obtenir l'effet de rendement décroissant.
     Crée la relation si elle n'existe pas.
     Ajoute une note sur l'interaction.
 
