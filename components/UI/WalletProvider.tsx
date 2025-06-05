@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useWallet } from '@/lib/hooks/useWallet';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus'; // Added import
 
 // Create a context for the wallet
 interface WalletContextType {
