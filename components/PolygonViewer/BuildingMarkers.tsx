@@ -175,7 +175,7 @@ export default function BuildingMarkers({
             style={{
               left: `${x}px`,
               top: `${y}px`,
-              zIndex: isHovered ? 18 : 16, // Adjusted z-index
+              zIndex: isHovered ? 18 : (building.type?.toLowerCase() === 'merchant_galley' ? 17 : 16), // Adjusted z-index
               transition: 'transform 0.1s ease-out, box-shadow 0.1s ease-out, opacity 0.2s ease-out',
               transform: `translate(-50%, -50%) scale(${isHovered ? 2 : 1})`,
               cursor: 'pointer',
