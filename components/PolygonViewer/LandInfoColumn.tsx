@@ -207,7 +207,7 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
                 : 'text-amber-600 hover:bg-amber-200 hover:text-amber-800'
               }`}
           >
-            Immobilier
+            Real Estate
           </button>
         </nav>
       </div>
@@ -320,18 +320,18 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
         )}
         {activeLeftTab === 'realEstate' && (
           <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200 space-y-3">
-            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Marché Immobilier</h3>
-            {isLoadingMarketData && <p className="text-xs text-amber-700">Chargement des données du marché...</p>}
+            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Real Estate Market</h3>
+            {isLoadingMarketData && <p className="text-xs text-amber-700">Loading market data...</p>}
 
             {!isLoadingMarketData && !landListingByOwner && incomingBuyOffers.length === 0 && (
-              <p className="text-xs text-gray-500 italic">Aucune annonce ou offre active pour ce terrain.</p>
+              <p className="text-xs text-gray-500 italic">No active listings or offers for this land.</p>
             )}
 
-            {/* Affichage de l'annonce du propriétaire */}
+            {/* Display Owner's Listing */}
             {landListingByOwner && (
               <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
                 <p className="text-md font-semibold text-amber-800">
-                  À Vendre par {landListingByOwner.SellerName || landListingByOwner.Seller}
+                  For Sale by {landListingByOwner.SellerName || landListingByOwner.Seller}
                 </p>
                 <p className="text-xl font-semibold text-center my-1">
                   <span style={{ color: '#d4af37' }}>
@@ -348,7 +348,7 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
                     variant="primary"
                     className="w-full mt-2 text-xs"
                   >
-                    Acheter Maintenant à {landListingByOwner.PricePerResource.toLocaleString()} ⚜️
+                    Buy Now at {landListingByOwner.PricePerResource.toLocaleString()} ⚜️
                   </ActionButton>
                 )}
                 {isOwner && normalizeIdentifier(landListingByOwner.Seller) === normalizeIdentifier(currentCitizenUsername) && (
@@ -357,27 +357,27 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
                     variant="danger"
                     className="w-full mt-2 text-xs"
                   >
-                    Annuler Votre Annonce
+                    Cancel Your Listing
                   </ActionButton>
                 )}
               </div>
             )}
 
-            {/* Affichage des offres d'achat reçues */}
+            {/* Display Incoming Buy Offers */}
             {incomingBuyOffers.length > 0 && (
               <div className="mt-3">
-                <h4 className="text-sm font-semibold text-amber-700 mb-1">Offres d'Achat Reçues :</h4>
+                <h4 className="text-sm font-semibold text-amber-700 mb-1">Incoming Buy Offers:</h4>
                 {incomingBuyOffers.map(offer => (
                   <div key={offer.id} className="p-2 mb-2 rounded-lg bg-blue-50 border border-blue-200 text-xs">
-                    <p>Offre de : {offer.BuyerName || offer.Buyer}</p>
-                    <p>Montant : {offer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
+                    <p>Offer from: {offer.BuyerName || offer.Buyer}</p>
+                    <p>Amount: {offer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
                     {isOwner && (
                       <ActionButton
                         onClick={() => handleGenericActivity('accept_land_offer', { contractId: offer.id, landId: selectedPolygonId })}
                         variant="primary"
                         className="w-full mt-1 text-xs"
                       >
-                        Accepter l'Offre
+                        Accept Offer
                       </ActionButton>
                     )}
                   </div>
