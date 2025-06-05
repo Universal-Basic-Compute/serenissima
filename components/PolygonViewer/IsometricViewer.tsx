@@ -2820,7 +2820,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
 
       // Apply night effect to land polygons, except for income view
       if (isNight && !(activeView === 'land' && incomeDataLoaded)) {
-        fillColor = darkenColor(fillColor, 0.3); // Darken by 30%
+        fillColor = darkenColor(fillColor, 0.2); // Darken by 20%
       }
     
       // Create local shorthand functions that use the current state values
@@ -2917,7 +2917,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Draw water background
-    ctx.fillStyle = isNight ? '#1B263B' : '#4A9BC1'; // Darker Steel Blue for night, Darker desaturated cyan for day
+    ctx.fillStyle = isNight ? '#001A33' : '#4A9BC1'; // Very Dark Blue for night, Darker desaturated cyan for day
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   
     // Draw water route in all views, but only if there's a path to show
