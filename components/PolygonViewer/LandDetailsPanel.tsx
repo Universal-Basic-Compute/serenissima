@@ -733,7 +733,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           {/* Tab Content */}
           <div className="flex-grow overflow-y-auto custom-scrollbar space-y-3 pr-1">
             {activeLeftTab === 'info' && (
-              <>
+              <div> {/* Changed from <> to <div> */}
                 {/* Land Overview (Top View) */}
                 <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Overview</h3>
@@ -827,7 +827,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                     </div>
                   </div>
                 )}
-              </>
+              </div> {/* Changed from </> to </div> */}
             )}
             {activeLeftTab === 'buildings' && (
               <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
