@@ -52,3 +52,10 @@ from .buy_listed_land_creator import try_create as try_create_buy_listed_land_ac
 from .cancel_land_listing_creator import try_create as try_create_cancel_land_listing_activity
 from .cancel_land_offer_creator import try_create as try_create_cancel_land_offer_activity
 # Note: buy_available_land_creator already exists and is imported
+
+# Import new stubbed creators
+from .respond_to_building_bid_creator import try_create as try_create_respond_to_building_bid_activity
+from .withdraw_building_bid_creator import try_create as try_create_withdraw_building_bid_activity
+from .manage_markup_buy_contract_creator import try_create as try_create_manage_markup_buy_contract_activity
+from .manage_storage_query_contract_creator import try_create as try_create_manage_storage_query_contract_activity
+from .update_citizen_profile_creator import try_create as try_create_update_citizen_profile_activity

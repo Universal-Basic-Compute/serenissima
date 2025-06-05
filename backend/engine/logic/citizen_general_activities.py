@@ -2117,6 +2117,75 @@ def dispatch_specific_activity_request(
         else:
             log.warning(f"manage_guild_membership_creator did not return valid activity. Returned: {activities_chain}")
             return {"success": False, "message": "Could not initiate 'manage_guild_membership'.", "activity": None, "reason": "manage_guild_membership_creation_failed"}
+
+    elif activity_type == "buy_available_land":
+        log.info(f"Dispatching to buy_available_land_creator for {citizen_name} with params: {activity_parameters}")
+        from backend.engine.activity_creators.buy_available_land_creator import try_create as try_create_buy_available_land_activity
+        activities_chain = try_create_buy_available_land_activity(
+            tables, citizen_record_full, activity_type, activity_parameters or {}, 
+            now_venice_dt, now_utc_dt, transport_api_url, api_base_url
+        )
+        first_activity_of_chain_fields = activities_chain[0] if activities_chain else None
+        if first_activity_of_chain_fields and isinstance(first_activity_of_chain_fields, dict) and 'ActivityId' in first_activity_of_chain_fields:
+            return {"success": True, "message": f"Buy available land endeavor initiated. First activity: {first_activity_of_chain_fields.get('Type', 'N/A')}.", "activity": first_activity_of_chain_fields}
+        else:
+            log.warning(f"buy_available_land_creator did not return valid activity. Returned: {activities_chain}")
+            return {"success": False, "message": "Could not initiate 'buy_available_land'.", "activity": None, "reason": "buy_available_land_creation_failed"}
+
+    elif activity_type == "respond_to_building_bid":
+        log.info(f"Dispatching to respond_to_building_bid_creator for {citizen_name} with params: {activity_parameters}")
+        from backend.engine.activity_creators.respond_to_building_bid_creator import try_create as try_create_respond_to_building_bid_activity
+        activities_chain = try_create_respond_to_building_bid_activity(tables, citizen_record_full, activity_type, activity_parameters or {}, now_venice_dt, now_utc_dt, transport_api_url, api_base_url)
+        first_activity_of_chain_fields = activities_chain[0] if activities_chain else None
+        if first_activity_of_chain_fields and isinstance(first_activity_of_chain_fields, dict) and 'ActivityId' in first_activity_of_chain_fields:
+            return {"success": True, "message": f"Respond to building bid endeavor initiated. First activity: {first_activity_of_chain_fields.get('Type', 'N/A')}.", "activity": first_activity_of_chain_fields}
+        else:
+            log.warning(f"respond_to_building_bid_creator did not return valid activity. Returned: {activities_chain}")
+            return {"success": False, "message": "Could not initiate 'respond_to_building_bid'.", "activity": None, "reason": "respond_to_building_bid_creation_failed"}
+
+    elif activity_type == "withdraw_building_bid":
+        log.info(f"Dispatching to withdraw_building_bid_creator for {citizen_name} with params: {activity_parameters}")
+        from backend.engine.activity_creators.withdraw_building_bid_creator import try_create as try_create_withdraw_building_bid_activity
+        activities_chain = try_create_withdraw_building_bid_activity(tables, citizen_record_full, activity_type, activity_parameters or {}, now_venice_dt, now_utc_dt, transport_api_url, api_base_url)
+        first_activity_of_chain_fields = activities_chain[0] if activities_chain else None
+        if first_activity_of_chain_fields and isinstance(first_activity_of_chain_fields, dict) and 'ActivityId' in first_activity_of_chain_fields:
+            return {"success": True, "message": f"Withdraw building bid endeavor initiated. First activity: {first_activity_of_chain_fields.get('Type', 'N/A')}.", "activity": first_activity_of_chain_fields}
+        else:
+            log.warning(f"withdraw_building_bid_creator did not return valid activity. Returned: {activities_chain}")
+            return {"success": False, "message": "Could not initiate 'withdraw_building_bid'.", "activity": None, "reason": "withdraw_building_bid_creation_failed"}
+
+    elif activity_type == "manage_markup_buy_contract":
+        log.info(f"Dispatching to manage_markup_buy_contract_creator for {citizen_name} with params: {activity_parameters}")
+        from backend.engine.activity_creators.manage_markup_buy_contract_creator import try_create as try_create_manage_markup_buy_contract_activity
+        activities_chain = try_create_manage_markup_buy_contract_activity(tables, citizen_record_full, activity_type, activity_parameters or {}, resource_defs, building_type_defs, now_venice_dt, now_utc_dt, transport_api_url, api_base_url)
+        first_activity_of_chain_fields = activities_chain[0] if activities_chain else None
+        if first_activity_of_chain_fields and isinstance(first_activity_of_chain_fields, dict) and 'ActivityId' in first_activity_of_chain_fields:
+            return {"success": True, "message": f"Manage markup buy contract endeavor initiated. First activity: {first_activity_of_chain_fields.get('Type', 'N/A')}.", "activity": first_activity_of_chain_fields}
+        else:
+            log.warning(f"manage_markup_buy_contract_creator did not return valid activity. Returned: {activities_chain}")
+            return {"success": False, "message": "Could not initiate 'manage_markup_buy_contract'.", "activity": None, "reason": "manage_markup_buy_contract_creation_failed"}
+
+    elif activity_type == "manage_storage_query_contract":
+        log.info(f"Dispatching to manage_storage_query_contract_creator for {citizen_name} with params: {activity_parameters}")
+        from backend.engine.activity_creators.manage_storage_query_contract_creator import try_create as try_create_manage_storage_query_contract_activity
+        activities_chain = try_create_manage_storage_query_contract_activity(tables, citizen_record_full, activity_type, activity_parameters or {}, resource_defs, building_type_defs, now_venice_dt, now_utc_dt, transport_api_url, api_base_url)
+        first_activity_of_chain_fields = activities_chain[0] if activities_chain else None
+        if first_activity_of_chain_fields and isinstance(first_activity_of_chain_fields, dict) and 'ActivityId' in first_activity_of_chain_fields:
+            return {"success": True, "message": f"Manage storage query contract endeavor initiated. First activity: {first_activity_of_chain_fields.get('Type', 'N/A')}.", "activity": first_activity_of_chain_fields}
+        else:
+            log.warning(f"manage_storage_query_contract_creator did not return valid activity. Returned: {activities_chain}")
+            return {"success": False, "message": "Could not initiate 'manage_storage_query_contract'.", "activity": None, "reason": "manage_storage_query_contract_creation_failed"}
+
+    elif activity_type == "update_citizen_profile":
+        log.info(f"Dispatching to update_citizen_profile_creator for {citizen_name} with params: {activity_parameters}")
+        from backend.engine.activity_creators.update_citizen_profile_creator import try_create as try_create_update_citizen_profile_activity
+        activities_chain = try_create_update_citizen_profile_activity(tables, citizen_record_full, activity_type, activity_parameters or {}, now_venice_dt, now_utc_dt, transport_api_url, api_base_url)
+        first_activity_of_chain_fields = activities_chain[0] if activities_chain else None
+        if first_activity_of_chain_fields and isinstance(first_activity_of_chain_fields, dict) and 'ActivityId' in first_activity_of_chain_fields:
+            return {"success": True, "message": f"Update citizen profile endeavor initiated. First activity: {first_activity_of_chain_fields.get('Type', 'N/A')}.", "activity": first_activity_of_chain_fields}
+        else:
+            log.warning(f"update_citizen_profile_creator did not return valid activity. Returned: {activities_chain}")
+            return {"success": False, "message": "Could not initiate 'update_citizen_profile'.", "activity": None, "reason": "update_citizen_profile_creation_failed"}
     
     # Add other activity_type handlers here as needed, for example:
     # elif activity_type == "manage_public_sell_contract":
@@ -2131,13 +2200,16 @@ def dispatch_specific_activity_request(
             'eat', 'leave_venice', 'seek_shelter',
             'initiate_building_project', 
             'send_message', 'manage_public_storage_offer', 'bid_on_land',
-            'buy_listed_land',
+            'buy_listed_land', 'buy_available_land', # Added buy_available_land
             'list_land_for_sale', 'accept_land_offer', 'cancel_land_listing', 'cancel_land_offer',
             'adjust_land_lease_price', 'adjust_building_rent_price', 'adjust_building_lease_price',
             'bid_on_building', 'manage_public_sell_contract', 'manage_import_contract',
             'manage_public_import_contract', 'manage_logistics_service_contract',
             'adjust_business_wages', 'change_business_manager', 'request_loan', 'offer_loan',
-            'manage_guild_membership'
+            'manage_guild_membership',
+            'respond_to_building_bid', 'withdraw_building_bid', # Added new
+            'manage_markup_buy_contract', 'manage_storage_query_contract', # Added new
+            'update_citizen_profile' # Added new
             # Add other explicitly handled types here as they are implemented in this dispatcher
         ]
         # Use original_activity_type in the error message if it was redirected

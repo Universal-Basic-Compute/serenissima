@@ -13,128 +13,131 @@ from backend.engine.utils.activity_helpers import (
 log = logging.getLogger(__name__)
 
 def try_create(
-    tables: Dict[str, Any],
-    citizen_record: Dict[str, Any],
-    details: Dict[str, Any]
-) -> bool:
+    tables: Dict[str, Any], 
+    citizen_record: Dict[str, Any], 
+    activity_type: str, # Added
+    activity_parameters: Dict[str, Any], # Renamed from details
+    now_venice_dt: Any, # datetime, Added
+    now_utc_dt: Any, # datetime, Added
+    transport_api_url: str, # Added
+    api_base_url: str # Added
+) -> List[Dict[str, Any]]: # Return type changed to list of activity dicts
     """
-    Create both activities in the buy_available_land chain at once:
-    1. A goto_location activity for travel to the official location (courthouse/town_hall)
-    2. A finalize_land_purchase activity that will execute after arrival
-    
-    This approach creates the complete activity chain upfront.
+    Creates a chain of activities for a citizen to buy available land:
+    1. A goto_location activity for travel to the official location (e.g., town_hall).
+    2. A finalize_land_purchase activity that will execute after arrival.
+    Returns a list of activity dictionaries to be created by the caller.
     """
-    land_id = details.get('landId')
-    expected_price = details.get('expectedPrice')
-    from_building = details.get('fromBuildingId')
-    to_building = details.get('targetBuildingId')  # courthouse or town_hall
+    activities_created = []
+    citizen_username = citizen_record['fields'].get('Username')
     
-    if not (land_id and expected_price is not None and to_building):
-        log.error(f"Missing required details for buy_available_land: landId, expectedPrice, or targetBuildingId")
-        return False
+    land_id = activity_parameters.get('landId')
+    expected_price = activity_parameters.get('expectedPrice')
+    # from_building_id = activity_parameters.get('fromBuildingId') # Optional, current location used if None
+    target_office_building_id = activity_parameters.get('targetBuildingId') # e.g., town_hall
 
-    citizen = citizen_record['fields'].get('Username')
-    ts = int(datetime.now(VENICE_TIMEZONE).timestamp())
-    
-    # Get building records for path calculation
-    to_building_record = get_building_record(tables, to_building)
-    
-    if not to_building_record:
-        log.error(f"Could not find building record for {to_building}")
-        return False
-    
-    # Get current citizen position to determine path
+    if not (land_id and expected_price is not None and target_office_building_id):
+        log.error(f"Missing required details for buy_available_land: landId, expectedPrice, or targetBuildingId. Params: {activity_parameters}")
+        return []
+
+    log.info(f"Attempting to create 'buy_available_land' activity chain for {citizen_username} for land {land_id} at price {expected_price}.")
+
+    # 1. Determine citizen's current location
     citizen_position_str = citizen_record['fields'].get('Position')
-    current_position = None
+    from_location_data: Optional[Dict[str, Any]] = None
     if citizen_position_str:
         try:
-            current_position = json.loads(citizen_position_str)
+            pos_data = json.loads(citizen_position_str)
+            if 'lat' in pos_data and 'lng' in pos_data: from_location_data = {"lat": pos_data['lat'], "lng": pos_data['lng']}
+            elif 'building_id' in pos_data: from_location_data = {"building_id": pos_data['building_id']}
         except json.JSONDecodeError:
-            log.error(f"Could not parse citizen position: {citizen_position_str}")
-            return False
+            if isinstance(citizen_position_str, str) and citizen_position_str.startswith("bld_"): from_location_data = {"building_id": citizen_position_str}
     
-    # Calculate path to official building
-    from_building_record = None
-    if from_building:
-        from_building_record = get_building_record(tables, from_building)
+    if not from_location_data:
+        log.warning(f"Citizen {citizen_username} has no valid current location for buy_available_land. Cannot create goto_location.")
+        return [] # Or decide to create finalize_land_purchase directly if travel is optional
+
+    # 2. Get target office building record
+    target_office_record = get_building_record(tables, target_office_building_id)
+    if not target_office_record:
+        log.error(f"Could not find target office building record for {target_office_building_id}.")
+        return []
     
-    path_data = find_path_between_buildings(from_building_record, to_building_record, current_position=current_position)
-    if not path_data or not path_data.get('path'):
-        log.error(f"Could not find path to {to_building}")
-        return False
+    # 3. Find path to the target office building
+    # The find_path_between_buildings_or_coords helper is more flexible
+    from backend.engine.utils.activity_helpers import find_path_between_buildings_or_coords
+    path_data = find_path_between_buildings_or_coords(tables, from_location_data, {"building_id": target_office_building_id}, transport_api_url)
     
-    # Create activity IDs
-    goto_activity_id = f"goto_location_for_purchase_{_escape_airtable_value(land_id)}_{citizen}_{ts}"
-    purchase_activity_id = f"finalize_land_purchase_{_escape_airtable_value(land_id)}_{citizen}_{ts}"
-    
-    now_utc = datetime.utcnow()
-    travel_start_date = now_utc.isoformat()
-    
-    # Calculate travel end date based on path duration
-    duration_seconds = path_data.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min if not specified
-    travel_end_date = (now_utc + timedelta(seconds=duration_seconds)).isoformat()
-    
-    # Calculate purchase activity times (15 minutes after arrival)
-    purchase_start_date = travel_end_date  # Start immediately after arrival
-    purchase_end_date = (datetime.fromisoformat(travel_end_date.replace('Z', '+00:00')) + timedelta(minutes=15)).isoformat()
-    
-    # Store purchase details in the Details field for the processor to use
-    details_json = json.dumps({
+    current_activity_end_time_utc = now_utc_dt # Start time for the first activity in chain
+
+    # 4. Create goto_location activity if path is found
+    if path_data and path_data.get("path"):
+        path_json = json.dumps(path_data["path"])
+        travel_duration_minutes = path_data.get("duration_minutes", 30) # Default 30 min
+        
+        goto_activity_id = str(uuid.uuid4())
+        goto_start_time_utc = now_utc_dt # Travel starts now
+        goto_end_time_utc = goto_start_time_utc + timedelta(minutes=travel_duration_minutes)
+        current_activity_end_time_utc = goto_end_time_utc # Update for next activity
+
+        goto_activity = {
+            "ActivityId": goto_activity_id,
+            "Type": "goto_location",
+            "Citizen": citizen_username,
+            "FromBuilding": from_location_data.get("building_id") if isinstance(from_location_data, dict) and "building_id" in from_location_data else None,
+            "ToBuilding": target_office_building_id,
+            "Path": path_json,
+            "TransportMode": path_data.get("transport_mode", "walk"),
+            "Notes": json.dumps({
+                "landId": land_id,
+                "expectedPrice": expected_price,
+                "originalActivityType": "buy_available_land",
+                "nextStep": "finalize_land_purchase"
+            }),
+            "Status": "created",
+            "Title": f"Travel to purchase land {land_id}",
+            "Description": f"Traveling to {target_office_record['fields'].get('Name', target_office_building_id)} to purchase land {land_id}.",
+            "Thought": f"I must go to the {target_office_record['fields'].get('Type', 'office')} to secure the land parcel {land_id}.",
+            "CreatedAt": now_utc_dt.isoformat(),
+            "StartDate": goto_start_time_utc.isoformat(),
+            "EndDate": goto_end_time_utc.isoformat(),
+            "Priority": 20 
+        }
+        activities_created.append(goto_activity)
+        log.info(f"Created goto_location activity {goto_activity_id} for {citizen_username} to {target_office_building_id}. Duration: {travel_duration_minutes} mins.")
+    else:
+        log.warning(f"No path found for {citizen_username} to {target_office_building_id}. Finalize activity will start immediately.")
+        # If no path, the finalize_land_purchase activity will start at now_utc_dt (current_activity_end_time_utc is still now_utc_dt)
+
+    # 5. Create finalize_land_purchase activity
+    purchase_activity_id = str(uuid.uuid4())
+    purchase_duration_minutes = 15 # Example duration
+    purchase_start_time_utc = current_activity_end_time_utc # Starts after travel (or immediately if no travel)
+    purchase_end_time_utc = purchase_start_time_utc + timedelta(minutes=purchase_duration_minutes)
+
+    purchase_details_json = json.dumps({
         "landId": land_id,
-        "expectedPrice": expected_price
+        "expectedPrice": expected_price,
+        "buyerUsername": citizen_username # For clarity in processor
     })
     
-    # 1. Create goto_location activity
-    goto_payload = {
-        "ActivityId": goto_activity_id,
-        "Type": "goto_location",
-        "Citizen": citizen,
-        "FromBuilding": from_building,
-        "ToBuilding": to_building,
-        "Path": json.dumps(path_data.get('path', [])),
-        "Notes": json.dumps({ # Changed Details to Notes
-            "landId": land_id,
-            "expectedPrice": expected_price,
-            "activityType": "buy_available_land",
-            "nextStep": "finalize_land_purchase"
-        }),
-        "Status": "created",
-        "Title": f"Traveling to purchase land {land_id}",
-        "Description": f"Traveling to {to_building_record['fields'].get('Name', to_building)} to purchase land {land_id} for {expected_price} Ducats",
-        "Notes": f"First step of buy_available_land process. Will be followed by finalize_land_purchase activity.",
-        "CreatedAt": travel_start_date,
-        "StartDate": travel_start_date,
-        "EndDate": travel_end_date,
-        "Priority": 20  # Medium-high priority for economic activities
-    }
-    
-    # 2. Create finalize_land_purchase activity (to be executed after arrival)
-    purchase_payload = {
+    purchase_activity = {
         "ActivityId": purchase_activity_id,
         "Type": "finalize_land_purchase",
-        "Citizen": citizen,
-        "FromBuilding": to_building,  # Citizen is already at the courthouse/town_hall
-        "ToBuilding": to_building,    # Stays at the same location
-        "Notes": details_json, # Changed Details to Notes. The original "Notes" field content is now part of details_json or needs to be added there if still relevant.
+        "Citizen": citizen_username,
+        "FromBuilding": target_office_building_id, 
+        "ToBuilding": target_office_building_id,   
+        "Notes": purchase_details_json,
         "Status": "created",
-        "Title": f"Finalizing purchase of land {land_id}",
-        "Description": f"Completing the purchase of land {land_id} for {expected_price} Ducats",
-        # "Notes" field now contains details_json. If the simple text note is still needed, it should be part of details_json.
-        "CreatedAt": travel_start_date,  # Created at the same time as the goto activity
-        "StartDate": purchase_start_date,  # But starts after the goto activity ends
-        "EndDate": purchase_end_date,
-        "Priority": 20  # Medium-high priority for economic activities
+        "Title": f"Finalize purchase of land {land_id}",
+        "Description": f"Completing the purchase of land {land_id} for {expected_price} Ducats at {target_office_record['fields'].get('Name', target_office_building_id)}.",
+        "Thought": f"Now to complete the paperwork for land {land_id}.",
+        "CreatedAt": now_utc_dt.isoformat(), # Created at the same time as goto
+        "StartDate": purchase_start_time_utc.isoformat(),
+        "EndDate": purchase_end_time_utc.isoformat(),
+        "Priority": 20
     }
-
-    try:
-        # Create both activities in sequence
-        tables["activities"].create(goto_payload)
-        tables["activities"].create(purchase_payload)
-        
-        log.info(f"Created complete buy_available_land activity chain for citizen {citizen}:")
-        log.info(f"  1. goto_location activity {goto_activity_id}")
-        log.info(f"  2. finalize_land_purchase activity {purchase_activity_id}")
-        return True
-    except Exception as e:
-        log.error(f"Failed to create buy_available_land activity chain: {e}")
-        return False
+    activities_created.append(purchase_activity)
+    log.info(f"Created finalize_land_purchase activity {purchase_activity_id} for {citizen_username}. Starts at {purchase_start_time_utc.isoformat()}.")
+    
+    return activities_created
