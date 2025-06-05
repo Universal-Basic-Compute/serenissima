@@ -21,9 +21,13 @@ class LogColors:
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
     ACTIVITY = '\033[96m'  # Ajout de la couleur ACTIVITY, identique à OKCYAN
+    CYAN = '\033[96m'     # Alias pour OKCYAN
+    INFO = '\033[96m'     # Alias pour OKCYAN/ACTIVITY
     OKGREEN = '\033[92m'
+    SUCCESS = '\033[92m'  # Alias pour OKGREEN
     WARNING = '\033[93m'
     FAIL = '\033[91m'
+    ERROR = '\033[91m'    # Alias pour FAIL
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
