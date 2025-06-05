@@ -202,6 +202,33 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
 
   // New state for unified interaction mode
   type InteractionMode = 'normal' | 'orient_bridge' | 'place_water_point' | 'create_water_route';
+
+  // Helper function to get current hour and month in Venice (approximated by Rome timezone)
+  const getVeniceDateTimeParts = () => {
+    const options: Intl.DateTimeFormatOptions = { 
+      timeZone: 'Europe/Rome', 
+      hour: 'numeric', 
+      hour12: false,
+      month: 'numeric' // 1-indexed month
+    };
+    const formatter = new Intl.DateTimeFormat([], options);
+    try {
+      const parts = formatter.formatToParts(new Date());
+      const hourPart = parts.find(part => part.type === 'hour');
+      const monthPart = parts.find(part => part.type === 'month');
+      
+      const hour = hourPart ? parseInt(hourPart.value, 10) : new Date().getHours(); // Fallback to local hour
+      // Intl.DateTimeFormat month is 1-indexed, convert to 0-indexed for array access
+      const month = monthPart ? parseInt(monthPart.value, 10) - 1 : new Date().getMonth(); // Fallback to local month
+
+      return { hour, month };
+    } catch (e) {
+      console.error("Error getting Venice time parts:", e);
+      // Fallback to local time parts on error
+      const now = new Date();
+      return { hour: now.getHours(), month: now.getMonth() };
+    }
+  };
   const [interactionMode, setInteractionMode] = useState<InteractionMode>('normal');
 
 
@@ -1892,29 +1919,35 @@ number => {
     }
   }, [buildings, initialPositionCalculated]);
 
-  // Helper function to get current hour in Venice (approximated by Rome timezone)
-  const getVeniceHour = () => {
-    const options: Intl.DateTimeFormatOptions = { timeZone: 'Europe/Rome', hour: 'numeric', hour12: false };
-    const formatter = new Intl.DateTimeFormat([], options);
-    try {
-      const parts = formatter.formatToParts(new Date());
-      const hourPart = parts.find(part => part.type === 'hour');
-      return hourPart ? parseInt(hourPart.value, 10) : new Date().getHours(); // Fallback to local hour
-    } catch (e) {
-      console.error("Error getting Venice time:", e);
-      return new Date().getHours(); // Fallback to local hour on error
-    }
-  };
-
   // Effect to update isNight state based on Venice time
   useEffect(() => {
     const updateNightState = () => {
-      const currentHour = getVeniceHour();
-      // Consider night from 7 PM (19) to 7 AM (7) to approximate Venice sunset/sunrise
-      const nightTime = currentHour >= 19 || currentHour < 7;
+      const { hour: currentHour, month: currentMonth } = getVeniceDateTimeParts(); // Get both hour and month
+
+      // Approximate night hours (local time) for Venice per month [NightEndHour, NightStartHour]
+      // Night if currentHour < NightEndHour OR currentHour >= NightStartHour
+      // Index 0 = January, 11 = December
+      const monthlyNightHours: [number, number][] = [
+        [8, 17], // Jan: Nuit si < 8h ou >= 17h
+        [7, 18], // Feb: Nuit si < 7h ou >= 18h
+        [7, 19], // Mar: Nuit si < 7h ou >= 19h (DST commence fin mars)
+        [6, 20], // Apr: Nuit si < 6h ou >= 20h
+        [6, 21], // May: Nuit si < 6h ou >= 21h
+        [5, 21], // Jun: Nuit si < 5h ou >= 21h
+        [6, 21], // Jul: Nuit si < 6h ou >= 21h
+        [6, 20], // Aug: Nuit si < 6h ou >= 20h
+        [7, 19], // Sep: Nuit si < 7h ou >= 19h
+        [8, 18], // Oct: Nuit si < 8h ou >= 18h (DST finit fin octobre)
+        [7, 17], // Nov: Nuit si < 7h ou >= 17h
+        [8, 17]  // Dec: Nuit si < 8h ou >= 17h
+      ];
+
+      const [nightEndHour, nightStartHour] = monthlyNightHours[currentMonth];
+      const nightTime = currentHour < nightEndHour || currentHour >= nightStartHour;
+      
       if (nightTime !== isNight) {
         setIsNight(nightTime);
-        console.log(`Venice time update: It is now ${nightTime ? 'night' : 'day'}. Hour: ${currentHour}`);
+        console.log(`Venice time update: Month ${currentMonth + 1}, Hour ${currentHour}. It is now ${nightTime ? 'night' : 'day'}. (Night ends <${nightEndHour}, starts >=${nightStartHour})`);
       }
     };
 
