@@ -32,166 +32,54 @@ TRUST_SCORE_MINOR_NEGATIVE = -0.5
 # Une valeur plus petite signifie une saturation plus rapide des scores normalisés.
 # Exemple : si latent_score * scale_factor = 1, le score normalisé est 75.
 # Si latent_score * scale_factor = -1, le score normalisé est 25.
-LATENT_SCORE_SCALE_FACTOR = 0.1 # Ajustez au besoin pour la sensibilité désirée
+# LATENT_SCORE_SCALE_FACTOR = 0.1 # Ajustez au besoin pour la sensibilité désirée - Supprimé, remplacé par RAW_POINT_SCALE_FACTOR
+RAW_POINT_SCALE_FACTOR = 0.1 # Facteur pour moduler l'impact des points bruts via atan
 DEFAULT_NORMALIZED_SCORE = 50.0 # Score neutre sur l'échelle 0-100 (pour TrustScore)
 DEFAULT_NORMALIZED_STRENGTH_SCORE = 0.0 # Score de base pour StrengthScore (0-100)
 
-def convert_latent_to_normalized_score(latent_score: float, scale_factor: float = LATENT_SCORE_SCALE_FACTOR) -> float:
+# Les fonctions convert_latent_to_normalized_score, convert_normalized_to_latent_score,
+# convert_latent_strength_to_normalized_score, convert_normalized_strength_to_latent_score
+# ne sont plus nécessaires et seront supprimées.
+
+def apply_scaled_score_change(current_score: float, raw_delta: float, scale_factor: float = RAW_POINT_SCALE_FACTOR, min_score: float = 0.0, max_score: float = 100.0) -> float:
     """
-    Convertit un score latent (potentiellement non borné) en un score normalisé sur une échelle de 0 à 100
-    en utilisant la fonction atan.
-    - latent_score = 0 se traduit par un score normalisé de 50.
-    - Des scores latents positifs importants se rapprochent de 100.
-    - Des scores latents négatifs importants se rapprochent de 0.
-
-    Args:
-        latent_score: Le score latent à convertir.
-        scale_factor: Contrôle la "raideur" de la courbe atan.
-                      Une valeur plus petite rend la courbe plus raide (saturation plus rapide).
-
-    Returns:
-        Le score normalisé entre 0 et 100.
+    Applique un changement de points bruts à un score existant (0-100),
+    en utilisant atan pour moduler l'impact de sorte que le score s'approche
+    asymptotiquement des bornes min_score/max_score.
     """
-    if not isinstance(latent_score, (int, float)):
-        log.warning(f"convert_latent_to_normalized_score a reçu une valeur non numérique : {latent_score}. Retour de {DEFAULT_NORMALIZED_SCORE}.")
-        return DEFAULT_NORMALIZED_SCORE
-    if not isinstance(scale_factor, (int, float)) or scale_factor == 0:
-        log.warning(f"convert_latent_to_normalized_score a reçu un scale_factor invalide : {scale_factor}. Utilisation de la valeur par défaut.")
-        scale_factor = LATENT_SCORE_SCALE_FACTOR # Utiliser la valeur par défaut du module
+    import math # S'assurer que math est importé
 
-    # atan(x) retourne une valeur dans [-pi/2, pi/2]
-    # (atan(x) / (pi/2)) normalise cela dans [-1, 1]
-    # ((atan(x) / (pi/2)) + 1) normalise cela dans [0, 2]
-    # (((atan(x) / (pi/2)) + 1) / 2) normalise cela dans [0, 1]
-    # Enfin, multiplier par 100 pour obtenir [0, 100]
-    
-    try:
-        # Ajout de l'import math manquant ici, il devrait être en haut du fichier mais pour la portabilité de la fonction :
-        import math 
-        normalized_value = (math.atan(latent_score * scale_factor) / (math.pi / 2) + 1) / 2
-        return round(normalized_value * 100.0, 2) # Arrondir à 2 décimales
-    except Exception as e:
-        log.error(f"Erreur dans convert_latent_to_normalized_score avec latent_score={latent_score}, scale_factor={scale_factor}: {e}")
-        return DEFAULT_NORMALIZED_SCORE # Retourner une valeur neutre en cas d'erreur mathématique improbable
+    if raw_delta == 0:
+        return round(current_score, 2)
 
-def convert_normalized_to_latent_score(normalized_score: float, scale_factor: float = LATENT_SCORE_SCALE_FACTOR) -> float:
-    """
-    Convertit un score normalisé (0-100) en un score latent.
-    C'est l'inverse de convert_latent_to_normalized_score.
-    - normalized_score = 50 se traduit par un score latent de 0.
-    - normalized_score proche de 100 se traduit par un score latent positif élevé.
-    - normalized_score proche de 0 se traduit par un score latent négatif élevé.
-
-    Args:
-        normalized_score: Le score normalisé (0-100) à convertir.
-        scale_factor: Doit être le même que celui utilisé pour la conversion inverse.
-
-    Returns:
-        Le score latent.
-    """
-    if not isinstance(normalized_score, (int, float)):
-        log.warning(f"convert_normalized_to_latent_score a reçu une valeur non numérique : {normalized_score}. Retour de 0.0.")
-        return 0.0
-    if not isinstance(scale_factor, (int, float)) or scale_factor == 0:
-        log.warning(f"convert_normalized_to_latent_score a reçu un scale_factor invalide : {scale_factor}. Utilisation de la valeur par défaut.")
-        scale_factor = LATENT_SCORE_SCALE_FACTOR
-
-    # Inverser les étapes de convert_latent_to_normalized_score:
-    # normalized_score est dans [0, 100]
-    # val_0_1 = normalized_score / 100.0  (valeur dans [0, 1])
-    # val_0_2 = val_0_1 * 2               (valeur dans [0, 2])
-    # val_minus1_1 = val_0_2 - 1          (valeur dans [-1, 1])
-    # arg_tan = val_minus1_1 * (math.pi / 2) (argument pour tan, dans [-pi/2, pi/2])
-    # latent_scaled = tan(arg_tan)
-    # latent = latent_scaled / scale_factor
-    
-    try:
-        # Ajout de l'import math manquant ici
-        import math
-        # Gérer les cas limites pour éviter les erreurs avec tan(pi/2) ou tan(-pi/2)
-        if normalized_score >= 100.0:
-            return math.tan((math.pi / 2) * 0.9999999999) / scale_factor
-        elif normalized_score <= 0.0:
-            return math.tan(-(math.pi / 2) * 0.9999999999) / scale_factor
-
-        val_0_1 = normalized_score / 100.0
-        val_minus1_1 = (val_0_1 * 2.0) - 1.0
+    if raw_delta > 0:
+        room_to_grow = max_score - current_score
+        if room_to_grow <= 1e-4: # Pratiquement à la limite max ou au-dessus
+            return round(max(min(current_score, max_score), min_score), 2)
         
-        epsilon = 1e-9 
-        if val_minus1_1 >= 1.0 - epsilon:
-            val_minus1_1 = 1.0 - epsilon
-        elif val_minus1_1 <= -1.0 + epsilon:
-            val_minus1_1 = -1.0 + epsilon
+        # increment_factor est entre 0 et 1
+        increment_factor = (math.atan(raw_delta * scale_factor) / (math.pi / 2))
+        actual_increment = room_to_grow * increment_factor
+        new_score = current_score + actual_increment
+    else: # raw_delta < 0
+        room_to_fall = current_score - min_score
+        if room_to_fall <= 1e-4: # Pratiquement à la limite min ou en-dessous
+            return round(max(min(current_score, max_score), min_score), 2)
             
-        arg_for_tan = val_minus1_1 * (math.pi / 2)
-        latent_score = math.tan(arg_for_tan) / scale_factor
-        return latent_score
-    except Exception as e:
-        log.error(f"Erreur dans convert_normalized_to_latent_score avec normalized_score={normalized_score}, scale_factor={scale_factor}: {e}")
-        return 0.0 
-
-def convert_latent_strength_to_normalized_score(latent_score: float, scale_factor: float = LATENT_SCORE_SCALE_FACTOR) -> float:
-    """
-    Convertit un score latent de force (supposé >= 0) en un score normalisé sur une échelle de 0 à 100.
-    - latent_score = 0 se traduit par un score normalisé de 0.
-    - Des scores latents positifs importants se rapprochent de 100.
-    """
-    if not isinstance(latent_score, (int, float)):
-        log.warning(f"convert_latent_strength_to_normalized_score a reçu une valeur non numérique : {latent_score}. Retour de 0.0.")
-        return 0.0
-    if not isinstance(scale_factor, (int, float)) or scale_factor == 0:
-        log.warning(f"convert_latent_strength_to_normalized_score a reçu un scale_factor invalide : {scale_factor}. Utilisation de la valeur par défaut.")
-        scale_factor = LATENT_SCORE_SCALE_FACTOR
-
-    try:
-        import math
-        # atan(x) pour x >= 0 est dans [0, pi/2)
-        # (atan(x) / (pi/2)) normalise cela dans [0, 1)
-        # Multiplier par 100 pour obtenir [0, 100)
-        # Utiliser max(0, latent_score) pour s'assurer que l'argument de atan n'est pas négatif
-        normalized_value = (math.atan(max(0, latent_score) * scale_factor) / (math.pi / 2))
-        return round(normalized_value * 100.0, 2)
-    except Exception as e:
-        log.error(f"Erreur dans convert_latent_strength_to_normalized_score avec latent_score={latent_score}, scale_factor={scale_factor}: {e}")
-        return 0.0
-
-def convert_normalized_strength_to_latent_score(normalized_strength_score: float, scale_factor: float = LATENT_SCORE_SCALE_FACTOR) -> float:
-    """
-    Convertit un score de force normalisé (0-100) en un score latent de force (>=0).
-    C'est l'inverse de convert_latent_strength_to_normalized_score.
-    - normalized_strength_score = 0 se traduit par un score latent de 0.
-    - normalized_strength_score proche de 100 se traduit par un score latent positif élevé.
-    """
-    if not isinstance(normalized_strength_score, (int, float)):
-        log.warning(f"convert_normalized_strength_to_latent_score a reçu une valeur non numérique : {normalized_strength_score}. Retour de 0.0.")
-        return 0.0
-    if not isinstance(scale_factor, (int, float)) or scale_factor == 0:
-        log.warning(f"convert_normalized_strength_to_latent_score a reçu un scale_factor invalide : {scale_factor}. Utilisation de la valeur par défaut.")
-        scale_factor = LATENT_SCORE_SCALE_FACTOR
-
-    try:
-        import math
-        # Assurer que normalized_strength_score est dans [0, 100) pour éviter tan(pi/2)
-        # normalized_strength_score est dans [0, 100]
-        # val_0_1 = normalized_strength_score / 100.0 (valeur dans [0, 1])
-        # arg_tan = val_0_1 * (math.pi / 2) (argument pour tan, dans [0, pi/2])
-        # latent_scaled = tan(arg_tan)
-        # latent = latent_scaled / scale_factor
-
-        # Clipper pour éviter les erreurs mathématiques aux limites
-        if normalized_strength_score >= 100.0:
-            return math.tan((math.pi / 2) * 0.9999999999) / scale_factor
-        elif normalized_strength_score <= 0.0:
-            return 0.0 # Un score normalisé de 0 ou moins correspond à un score latent de 0
-
-        val_0_1 = normalized_strength_score / 100.0
-        arg_for_tan = val_0_1 * (math.pi / 2)
+        # decrement_factor est entre 0 et 1
+        decrement_factor = (math.atan(abs(raw_delta) * scale_factor) / (math.pi / 2))
+        actual_decrement = room_to_fall * decrement_factor
+        new_score = current_score - actual_decrement
         
-        latent_score = math.tan(arg_for_tan) / scale_factor
-        return latent_score
-    except Exception as e:
-        log.error(f"Erreur dans convert_normalized_strength_to_latent_score avec normalized_strength_score={normalized_strength_score}, scale_factor={scale_factor}: {e}")
-        return 0.0
+    return round(max(min_score, min(new_score, max_score)), 2)
+
+
+# Suppression des anciennes fonctions de conversion (elles étaient ici)
+# convert_latent_to_normalized_score
+# convert_normalized_to_latent_score
+# convert_latent_strength_to_normalized_score
+# convert_normalized_strength_to_latent_score
+# La nouvelle fonction apply_scaled_score_change est définie plus haut.
 
 def update_trust_score_for_activity(
     tables: Dict[str, Any],
@@ -205,7 +93,7 @@ def update_trust_score_for_activity(
 ) -> None:
     """
     Met à jour le TrustScore (stocké en BDD sur une échelle de 0 à 100) entre deux citoyens suite à une activité.
-    Les calculs internes (ajout de points, déclin) se font sur un score "latent" pour obtenir l'effet de rendement décroissant.
+    L'ajout de points bruts est modulé pour un effet de rendement décroissant.
     Crée la relation si elle n'existe pas.
     Ajoute une note sur l'interaction.
 
@@ -238,14 +126,16 @@ def update_trust_score_for_activity(
 
         if existing_relationships:
             relationship_record = existing_relationships[0]
-            # Lire le score normalisé actuel (0-100)
-            current_normalized_trust_score = float(relationship_record['fields'].get('TrustScore', DEFAULT_NORMALIZED_SCORE))
-            # Convertir en score latent
-            current_latent_trust_score = convert_normalized_to_latent_score(current_normalized_trust_score)
-            # Ajouter le changement (points bruts) au score latent
-            new_latent_trust_score = current_latent_trust_score + trust_change_amount
-            # Reconvertir en score normalisé (0-100) pour stockage
-            new_normalized_trust_score = convert_latent_to_normalized_score(new_latent_trust_score)
+            current_trust_score = float(relationship_record['fields'].get('TrustScore', DEFAULT_NORMALIZED_SCORE))
+            
+            # Appliquer le changement de points bruts au score actuel
+            new_trust_score = apply_scaled_score_change(
+                current_trust_score, 
+                trust_change_amount, 
+                RAW_POINT_SCALE_FACTOR, 
+                min_score=0.0, 
+                max_score=100.0
+            )
 
             current_notes = relationship_record['fields'].get('Notes', "")
             # Ajout simple, le script quotidien de consolidation des relations pourra nettoyer/agréger
@@ -259,32 +149,37 @@ def update_trust_score_for_activity(
                     updated_notes = ",".join(notes_parts[-20:]) # Garder les 20 dernières
 
             payload = {
-                'TrustScore': new_normalized_trust_score,
+                'TrustScore': new_trust_score,
                 'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(),
                 'Notes': updated_notes
             }
             tables['relationships'].update(relationship_record['id'], payload)
-            log.info(f"{LogColors.OKGREEN}TrustScore (0-100) mis à jour pour {user1}-{user2}: {current_normalized_trust_score:.2f} -> {new_normalized_trust_score:.2f}. Notes: {interaction_note_key}{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}TrustScore (0-100) mis à jour pour {user1}-{user2}: {current_trust_score:.2f} -> {new_trust_score:.2f}. Notes: {interaction_note_key}{LogColors.ENDC}")
         else:
             # Créer une nouvelle relation
-            # Le score latent initial est simplement trust_change_amount (points bruts)
-            initial_latent_trust_score = trust_change_amount
-            # Convertir en score normalisé (0-100) pour stockage
-            initial_normalized_trust_score = convert_latent_to_normalized_score(initial_latent_trust_score)
-            # Le StrengthScore initial sera 0.0 (base de l'échelle 0-100 pour la force)
-            initial_normalized_strength_score = DEFAULT_NORMALIZED_STRENGTH_SCORE
+            # Commencer avec le score neutre par défaut, puis appliquer le premier changement
+            initial_trust_score_base = DEFAULT_NORMALIZED_SCORE
+            final_initial_trust_score = apply_scaled_score_change(
+                initial_trust_score_base,
+                trust_change_amount,
+                RAW_POINT_SCALE_FACTOR,
+                min_score=0.0,
+                max_score=100.0
+            )
+            
+            initial_strength_score = DEFAULT_NORMALIZED_STRENGTH_SCORE # Commence à 0
 
             payload = {
                 'Citizen1': user1,
                 'Citizen2': user2,
-                'TrustScore': initial_normalized_trust_score,
-                'StrengthScore': initial_normalized_strength_score, # Utilise la nouvelle base 0.0
+                'TrustScore': final_initial_trust_score,
+                'StrengthScore': initial_strength_score,
                 'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(),
                 'Notes': interaction_note_key,
                 'Status': 'Active' # Statut initial
             }
             tables['relationships'].create(payload)
-            log.info(f"{LogColors.OKGREEN}Nouvelle relation créée pour {user1}-{user2}. TrustScore (0-100): {initial_normalized_trust_score:.2f}, StrengthScore (0-100): {initial_normalized_strength_score:.2f}. Notes: {interaction_note_key}{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}Nouvelle relation créée pour {user1}-{user2}. TrustScore (0-100): {final_initial_trust_score:.2f}, StrengthScore (0-100): {initial_strength_score:.2f}. Notes: {interaction_note_key}{LogColors.ENDC}")
 
     except Exception as e:
         log.error(f"{LogColors.FAIL}Erreur lors de la mise à jour du TrustScore pour {user1}-{user2}: {e}{LogColors.ENDC}")

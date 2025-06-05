@@ -64,21 +64,20 @@ The `updateRelationshipStrengthScores.py` script runs daily to update both `Stre
 
 ### Mécanisme de Mise à Jour des Scores (0-100 via Espace Latent)
 
-Pour obtenir l'effet de rendement décroissant souhaité tout en stockant des scores sur une échelle de 0 à 100, le système utilise un espace de calcul "latent" :
+Pour obtenir l'effet de rendement décroissant souhaité tout en stockant des scores sur une échelle de 0 à 100 :
 
 1.  **Lecture du Score (0-100)** : Le score actuel (`StrengthScore` ou `TrustScore`) est lu depuis Airtable.
-2.  **Conversion en Score Latent** :
-    *   Pour `TrustScore` (0-100, neutre à 50) : `ScoreLatentTrust = tan( ((ScoreNormaliséTrust / 50) - 1) * (pi/2) ) / k`
-    *   Pour `StrengthScore` (0-100, base à 0) : `ScoreLatentStrength = tan( (ScoreNormaliséStrength / 100) * (pi/2) ) / k`
-    Où `k` est le `LATENT_SCORE_SCALE_FACTOR` (ex: 0.1).
-3.  **Application du Déclin au Score Latent** : Le score latent est multiplié par le `DECAY_FACTOR` (ex: 0.75). Pour `StrengthScore`, le score latent ne descendra pas en dessous de 0.
-4.  **Ajout de Points Bruts au Score Latent** : Les "points bruts" (ex: `+1.0` pour une interaction positive ou une pertinence) sont ajoutés à ce score latent décliné. Pour `StrengthScore`, les points bruts de pertinence sont généralement positifs.
-5.  **Reconversion en Score Normalisé (0-100)** :
-    *   Pour `TrustScore` : `NouveauScoreNormaliséTrust = ( (atan(NouveauScoreLatentTrust * k) / (pi/2)) + 1 ) * 50`
-    *   Pour `StrengthScore` : `NouveauScoreNormaliséStrength = (atan(max(0, NouveauScoreLatentStrength) * k) / (pi/2)) * 100`
-6.  **Écriture en BDD** : Ces nouveaux scores normalisés sont écrits dans Airtable.
+2.  **Application du Déclin** :
+    *   Pour `TrustScore` (0-100, neutre à 50) : `ScoreDéclinéTrust = 50 + (ScoreActuelTrust - 50) * FACTEUR_DÉCLIN_TRUST`
+    *   Pour `StrengthScore` (0-100, base à 0) : `ScoreDéclinéStrength = ScoreActuelStrength * FACTEUR_DÉCLIN_STRENGTH`. (Assuré >= 0).
+3.  **Ajout de Points Bruts avec Échelle `atan`** :
+    *   Les "points bruts" (ex: `+1.0` pour une interaction positive ou une pertinence) sont appliqués au score décliné en utilisant la fonction `apply_scaled_score_change`.
+    *   `NouveauScore = apply_scaled_score_change(ScoreDécliné, PointsBruts, RAW_POINT_SCALE_FACTOR, min_score, max_score)`
+    *   Cette fonction utilise `atan(PointsBruts * RAW_POINT_SCALE_FACTOR)` pour déterminer une fraction de "l'espace disponible" (entre le score actuel et `min_score` ou `max_score`) à ajouter ou soustraire.
+    *   `RAW_POINT_SCALE_FACTOR` (ex: 0.1) contrôle la sensibilité de l'impact des points bruts.
+4.  **Écriture en BDD** : Le nouveau score (0-100) est écrit dans Airtable.
 
-Ce processus garantit que l'impact de l'ajout de points bruts diminue à mesure que le score normalisé s'approche de 0 ou 100.
+Ce processus garantit que l'impact de l'ajout de points bruts diminue à mesure que le score normalisé s'approche de 0 ou 100, sans utiliser d'espace "latent" explicite pour le stockage ou la conversion aller-retour complexe.
 
 ### Interaction Contributions (Points Bruts pour Score Latent)
 
