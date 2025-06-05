@@ -1,5 +1,14 @@
 import logging
 from typing import Dict, List, Any, Optional
+import json
+import uuid
+from datetime import timedelta
+
+from backend.engine.utils.activity_helpers import (
+    LogColors, find_path_between_buildings_or_coords, 
+    get_closest_building_of_type, get_contract_record,
+    get_building_record 
+)
 
 log = logging.getLogger(__name__)
 
@@ -36,14 +45,7 @@ def try_create(
 
     # 1. Determine citizen's current location
     # (Assuming helper functions are available or imported)
-    from backend.engine.utils.activity_helpers import (
-        LogColors, find_path_between_buildings_or_coords, 
-        get_closest_building_of_type, get_contract_record,
-        get_building_record 
-    )
-    import json
-    import uuid
-    from datetime import timedelta
+    # Imports moved to module level
 
     citizen_position_str = citizen_record['fields'].get('Position')
     from_location_data = None
