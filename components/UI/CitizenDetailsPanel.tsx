@@ -91,6 +91,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [activeLeftTab, setActiveLeftTab] = useState<'relations' | 'citizen'>('relations');
   // State for current logged-in citizen username
   const [internalCurrentCitizenUsername, setInternalCurrentCitizenUsername] = useState<string | null>(null);
+  const initialLogDoneRef = useRef(false); // Ref to track if initial log has been made
 
   useEffect(() => {
     const handleWalletChange = (walletData?: { profile?: { username?: string | null }; isConnected?: boolean; address?: string | null; publicKey?: any; [key: string]: any }) => {
@@ -120,7 +121,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
     const initialUsernameOnMount = getCurrentCitizenUsername();
     setInternalCurrentCitizenUsername(initialUsernameOnMount);
-    console.log('[CitizenDetailsPanel] Initial username check on mount:', initialUsernameOnMount || 'null');
+    if (!initialLogDoneRef.current) {
+      console.log('[CitizenDetailsPanel] Initial username check on mount (first run):', initialUsernameOnMount || 'null');
+      initialLogDoneRef.current = true;
+    }
 
     const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, handleWalletChange);
 
