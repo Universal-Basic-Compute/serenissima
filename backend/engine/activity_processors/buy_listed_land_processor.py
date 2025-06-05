@@ -12,6 +12,8 @@ if PROJECT_ROOT not in sys.path:
 from backend.engine.utils.activity_helpers import (
     LogColors, get_citizen_record, get_land_record, get_contract_record, VENICE_TIMEZONE
 )
+# Import create_notification from the new notification_helpers module
+from backend.engine.utils.notification_helpers import create_notification
 
 log = logging.getLogger(__name__)
 
@@ -130,6 +132,36 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
         }
         tables['transactions'].create(transaction_payload)
         log.info(f"{LogColors.SUCCESS}Land sale transaction recorded for land {land_id_being_bought}. Activity {activity_guid}.{LogColors.ENDC}")
+
+        # Notifications for buyer and seller
+        notification_details = {
+            "landId": land_id_being_bought,
+            "price": purchase_price,
+            "listingContractId": listing_contract_custom_id,
+            "activityGuid": activity_guid
+        }
+        
+        # Notify seller
+        create_notification(
+            tables,
+            seller_username,
+            "land_sold",
+            f"Your land parcel {land_id_being_bought} has been sold to {buyer_username} for {purchase_price} ducats.",
+            details=notification_details,
+            asset_id=land_id_being_bought,
+            asset_type="land"
+        )
+        
+        # Notify buyer
+        create_notification(
+            tables,
+            buyer_username,
+            "land_purchased",
+            f"You have successfully purchased land parcel {land_id_being_bought} from {seller_username} for {purchase_price} ducats.",
+            details=notification_details,
+            asset_id=land_id_being_bought,
+            asset_type="land"
+        )
 
         # Optional: Cancel other active offers for this land made by the buyer or others
         # Example: Cancel active 'land_offer' by the buyer for this land
