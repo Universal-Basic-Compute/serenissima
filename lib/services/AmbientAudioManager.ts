@@ -17,16 +17,17 @@ export const WEATHER_AUDIO_CONFIG = {
   windLayerOffset: 5000,
 
   // Volume levels
-  waterBaseVolume: 0.8, // Keeping current adjusted value, spec was 1.0
-  windBaseVolume: 0.45, // Adjusted from spec 0.6, will be further modulated by wind speed
+  waterBaseVolume: 0.8,
+  windBaseVolume: 0.45,
   rainOverlayVolume: 0.3,
-  birdVolume: 0.25, // Base volume for birds, can be reduced by rain
+  birdVolume: 0.25,
 
   // Zoom thresholds (percentage)
-  zoomHighToMidGeneral: 40, // General threshold for layers
+  zoomHighToMidGeneral: 33, // High zoom ends, Mid zoom begins
+  zoomMidToLowGeneral: 66,  // Mid zoom ends, Low zoom begins
 
   // Weather specific
-  windyThresholdMPS: 5.0, // m/s wind speed to consider 'windy' for audio adjustment
+  windyThresholdMPS: 5.0,
   // precipitationThreshold not directly used here, WeatherService determines 'rainy' state
 };
 
@@ -41,18 +42,28 @@ export const weatherAudioAssets = {
       clear: ['atmospheric_water_mid_clear_1.mp3', 'atmospheric_water_mid_clear_2.mp3'],
       rainy: ['atmospheric_water_mid_rainy_1.mp3', 'atmospheric_water_mid_rainy_2.mp3'],
       windy: ['atmospheric_water_mid_windy_1.mp3']
+    },
+    low: { // New Low Zoom category - reusing Mid tracks for now
+      clear: ['atmospheric_water_mid_clear_1.mp3', 'atmospheric_water_mid_clear_2.mp3'], // TODO: Add specific low zoom water tracks
+      rainy: ['atmospheric_water_mid_rainy_1.mp3', 'atmospheric_water_mid_rainy_2.mp3'], // TODO: Add specific low zoom water tracks
+      windy: ['atmospheric_water_mid_windy_1.mp3']  // TODO: Add specific low zoom water tracks
     }
   },
   wind: {
     high: {
       clear: ['atmospheric_wind_high_clear_1.mp3'],
-      rainy: ['atmospheric_wind_high_rainy_2.mp3'], // Using specific rainy track for high zoom
+      rainy: ['atmospheric_wind_high_rainy_2.mp3'],
       windy: ['atmospheric_wind_high_windy_1.mp3']
     },
     mid: {
       clear: ['atmospheric_wind_mid_clear_2.mp3'],
-      rainy: ['atmospheric_wind_mid_clear_2.mp3'], // Mid zoom rainy uses clear tracks as per spec
+      rainy: ['atmospheric_wind_mid_clear_2.mp3'],
       windy: ['atmospheric_wind_mid_windy_1.mp3']
+    },
+    low: { // New Low Zoom category - reusing Mid tracks for now
+      clear: ['atmospheric_wind_mid_clear_2.mp3'], // TODO: Add specific low zoom wind tracks
+      rainy: ['atmospheric_wind_mid_clear_2.mp3'], // TODO: Add specific low zoom wind tracks
+      windy: ['atmospheric_wind_mid_windy_1.mp3']  // TODO: Add specific low zoom wind tracks
     }
   },
   rain: ['atmospheric_rain_mid_1.mp3', 'atmospheric_rain_mid_2.mp3'],
@@ -113,7 +124,7 @@ abstract class AudioLayer {
   protected masterGain: GainNode;
   protected layerVolume: number = 1.0;
   protected globalVolume: number = 1.0;
-  protected currentZoomCategory: 'high' | 'mid' = 'high'; // Simplified zoom categories
+  protected currentZoomCategory: 'high' | 'mid' | 'low' = 'high'; // Added 'low'
 
   constructor(audioContext: AudioContext, bufferPool: AudioBufferPool, initialVolume: number) {
     this.audioContext = audioContext;
@@ -150,11 +161,13 @@ type WeatherTrackSet = {
 type ZoomWeatherTrackSet = {
   high: WeatherTrackSet;
   mid: WeatherTrackSet;
+  low: WeatherTrackSet; // Added 'low'
 };
 
 class CrossfadeAudioLayer extends AudioLayer {
   private trackSet: ZoomWeatherTrackSet;
-  private zoomThreshold: number;
+  private zoomHighToMidThreshold: number;
+  private zoomMidToLowThreshold: number;
   private currentWeatherData: WeatherCondition = 'clear';
 
   private currentSource: ManagedAudioSource;
@@ -169,12 +182,14 @@ class CrossfadeAudioLayer extends AudioLayer {
     audioContext: AudioContext,
     bufferPool: AudioBufferPool,
     trackSet: ZoomWeatherTrackSet,
-    zoomThreshold: number,
+    zoomHighToMidThreshold: number, // Renamed for clarity
+    zoomMidToLowThreshold: number,  // New threshold
     initialVolume: number
   ) {
     super(audioContext, bufferPool, initialVolume);
     this.trackSet = trackSet;
-    this.zoomThreshold = zoomThreshold;
+    this.zoomHighToMidThreshold = zoomHighToMidThreshold;
+    this.zoomMidToLowThreshold = zoomMidToLowThreshold;
     this.currentSource = this.createManagedSource();
     this.nextSource = this.createManagedSource();
   }
@@ -349,12 +364,19 @@ class CrossfadeAudioLayer extends AudioLayer {
   }
 
   async updateZoom(zoomPercent: number, weatherCondition: WeatherCondition): Promise<void> {
-    const newZoomCategory = zoomPercent < this.zoomThreshold ? 'high' : 'mid';
+    let newZoomCategory: 'high' | 'mid' | 'low';
+    if (zoomPercent < this.zoomHighToMidThreshold) {
+      newZoomCategory = 'high';
+    } else if (zoomPercent < this.zoomMidToLowThreshold) {
+      newZoomCategory = 'mid';
+    } else {
+      newZoomCategory = 'low';
+    }
     const newWeatherCondition = weatherCondition;
 
     if (newZoomCategory !== this.currentZoomCategory || newWeatherCondition !== this.currentWeatherData) {
       // console.log(`${this.constructor.name}: State changed. Zoom: ${this.currentZoomCategory}->${newZoomCategory}, Weather: ${this.currentWeatherData}->${newWeatherCondition}. Transitioning.`);
-      this.currentZoomCategory = newZoomCategory;
+      this.currentZoomCategory = newZoomCategory; // This is already 'high', 'mid', or 'low'
       this.currentWeatherData = newWeatherCondition;
       this.isTransitioning = true;
 
@@ -505,24 +527,29 @@ class RainOverlayLayer extends AudioLayer {
 
 
 class TriggerAudioLayer extends AudioLayer {
-  private variationsLow: string[];
-  private variationsMid: string[];
-  private zoomThreshold: number;
+  private variationsLowZoom: string[]; // Renamed for clarity (previously variationsLow)
+  private variationsMidZoom: string[]; // Renamed for clarity (previously variationsMid)
+  // For Low zoom, we'll reuse MidZoom tracks or specific ones if added later
+  private zoomHighToMidThreshold: number;
+  private zoomMidToLowThreshold: number;
   private triggerTimeoutId: NodeJS.Timeout | null = null;
   private source: ManagedAudioSource;
 
   constructor(
     audioContext: AudioContext,
     bufferPool: AudioBufferPool,
-    variationsLow: string[],
-    variationsMid: string[],
-    zoomThreshold: number,
+    variationsLowZoom: string[], // Tracks for 'low' zoom level (e.g., birds_mid)
+    variationsMidZoom: string[], // Tracks for 'mid' zoom level (e.g., mix of birds_low, birds_mid)
+    // variationsHighZoom will be variationsLowZoom from original spec (birds_low)
+    zoomHighToMidThreshold: number,
+    zoomMidToLowThreshold: number,
     initialVolume: number
   ) {
     super(audioContext, bufferPool, initialVolume);
-    this.variationsLow = variationsLow;
-    this.variationsMid = variationsMid;
-    this.zoomThreshold = zoomThreshold; // This is WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral
+    this.variationsLowZoom = variationsLowZoom; // These are 'birds_low' from original spec
+    this.variationsMidZoom = variationsMidZoom; // These are 'birds_mid' from original spec
+    this.zoomHighToMidThreshold = zoomHighToMidThreshold;
+    this.zoomMidToLowThreshold = zoomMidToLowThreshold;
     this.source = this.createManagedSource();
   }
 
@@ -533,16 +560,36 @@ class TriggerAudioLayer extends AudioLayer {
   }
 
   private selectTrackUrl(): string | null {
-    let selectedTracks;
-    // currentZoomCategory is 'high' or 'mid'
-    if (this.currentZoomCategory === 'high') { // Corresponds to birds_low
-      selectedTracks = this.variationsLow;
-    } else { // Corresponds to mix of birds_low and birds_mid
-      const useMid = Math.random() < 0.4; // 40% chance for mid
-      selectedTracks = useMid && this.variationsMid.length > 0 ? this.variationsMid : this.variationsLow;
+    let selectedTracksPool: string[];
+
+    switch (this.currentZoomCategory) {
+      case 'high':
+        selectedTracksPool = this.variationsLowZoom; // Distant birds (birds_low_*)
+        break;
+      case 'mid':
+        // Mix of distant and mid-distance birds
+        selectedTracksPool = (Math.random() < 0.6 && this.variationsLowZoom.length > 0) ? this.variationsLowZoom : this.variationsMidZoom;
+        if (selectedTracksPool.length === 0 && this.variationsLowZoom.length > 0) selectedTracksPool = this.variationsLowZoom; // Fallback
+        if (selectedTracksPool.length === 0 && this.variationsMidZoom.length > 0) selectedTracksPool = this.variationsMidZoom; // Fallback
+        break;
+      case 'low':
+        // More mid-distance birds, potentially new "close" bird sounds in future
+        selectedTracksPool = (Math.random() < 0.6 && this.variationsMidZoom.length > 0) ? this.variationsMidZoom : this.variationsLowZoom; // Prioritize mid
+        if (selectedTracksPool.length === 0 && this.variationsMidZoom.length > 0) selectedTracksPool = this.variationsMidZoom; // Fallback
+        if (selectedTracksPool.length === 0 && this.variationsLowZoom.length > 0) selectedTracksPool = this.variationsLowZoom; // Fallback
+        break;
+      default:
+        selectedTracksPool = this.variationsLowZoom; // Default to distant
     }
-    if (!selectedTracks || selectedTracks.length === 0) return null;
-    return selectedTracks[Math.floor(Math.random() * selectedTracks.length)];
+    
+    if (!selectedTracksPool || selectedTracksPool.length === 0) {
+        // console.warn(`${this.constructor.name}: No bird tracks available for zoom ${this.currentZoomCategory}`);
+        // Try a global fallback if specific pool is empty
+        if (this.variationsMidZoom.length > 0) selectedTracksPool = this.variationsMidZoom;
+        else if (this.variationsLowZoom.length > 0) selectedTracksPool = this.variationsLowZoom;
+        else return null;
+    }
+    return selectedTracksPool[Math.floor(Math.random() * selectedTracksPool.length)];
   }
 
   private async playTriggeredSound(): Promise<void> {
@@ -608,8 +655,16 @@ class TriggerAudioLayer extends AudioLayer {
     this.source.buffer = null;
   }
 
-  updateZoom(zoomPercent: number, weatherCondition: WeatherCondition): void { // WeatherCondition might not be used by birds directly but good for signature consistency
-    const newZoomCategory = zoomPercent < this.zoomThreshold ? 'high' : 'mid';
+  updateZoom(zoomPercent: number, weatherCondition: WeatherCondition): void {
+    let newZoomCategory: 'high' | 'mid' | 'low';
+    if (zoomPercent < this.zoomHighToMidThreshold) {
+      newZoomCategory = 'high';
+    } else if (zoomPercent < this.zoomMidToLowThreshold) {
+      newZoomCategory = 'mid';
+    } else {
+      newZoomCategory = 'low';
+    }
+
     if (newZoomCategory !== this.currentZoomCategory) {
         this.currentZoomCategory = newZoomCategory;
         // No immediate sound change, selection happens at trigger time.
@@ -680,18 +735,23 @@ export class AmbientAudioManager {
     this.waterLayer?.transitionToWeather(weatherCondition, WEATHER_AUDIO_CONFIG.weatherTransitionDuration);
     this.windLayer?.transitionToWeather(weatherCondition, WEATHER_AUDIO_CONFIG.weatherTransitionDuration);
 
-    // Adjust wind layer volume based on actual wind speed
+    // Adjust wind layer volume based on actual wind speed and zoom
     let windSpeedFactor = 1.0;
     if (weatherCondition === 'windy') {
-        // Scale volume between 1.0 and 1.5 for wind speeds from WINDY_THRESHOLD_MPS to e.g. 15 m/s
-        const maxWindSpeedEffect = 15.0; // Max wind speed that further increases volume
-        windSpeedFactor = 1.0 + 0.5 * Math.min(1, (weatherData.windSpeed - WEATHER_AUDIO_CONFIG.windyThresholdMPS) / (maxWindSpeedEffect - WEATHER_AUDIO_CONFIG.windyThresholdMPS));
+        const maxWindSpeedEffect = 15.0;
+        windSpeedFactor = 1.0 + 0.5 * Math.min(1, Math.max(0, (weatherData.windSpeed - WEATHER_AUDIO_CONFIG.windyThresholdMPS) / (maxWindSpeedEffect - WEATHER_AUDIO_CONFIG.windyThresholdMPS)));
     }
-    const baseWindVolume = this.lastZoomPercent < WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral 
-                            ? WEATHER_AUDIO_CONFIG.windBaseVolume * 1.1 // Slightly louder for high zoom wind
-                            : WEATHER_AUDIO_CONFIG.windBaseVolume;
-    this.windLayer?.setLayerVolume(Math.min(1.0, baseWindVolume * windSpeedFactor));
 
+    let baseWindVolume;
+    if (this.lastZoomPercent < WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral) { // High zoom
+        baseWindVolume = WEATHER_AUDIO_CONFIG.windBaseVolume * 1.1; // Slightly louder for high zoom
+    } else if (this.lastZoomPercent < WEATHER_AUDIO_CONFIG.zoomMidToLowGeneral) { // Mid zoom
+        baseWindVolume = WEATHER_AUDIO_CONFIG.windBaseVolume;
+    } else { // Low zoom
+        baseWindVolume = WEATHER_AUDIO_CONFIG.windBaseVolume * 0.9; // Slightly quieter for low zoom (e.g. street level, less open wind)
+                                                                  // TODO: This could be a new config value if desired
+    }
+    this.windLayer?.setLayerVolume(Math.min(1.0, baseWindVolume * windSpeedFactor));
 
     if (weatherCondition === 'rainy') {
       this.rainLayer?.fadeIn(WEATHER_AUDIO_CONFIG.weatherTransitionDuration);
@@ -732,18 +792,25 @@ export class AmbientAudioManager {
 
       this.waterLayer = new CrossfadeAudioLayer(
         this.audioContext, this.bufferPool,
-        weatherAudioAssets.water,
-        WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral, WEATHER_AUDIO_CONFIG.waterBaseVolume
+        weatherAudioAssets.water, // This now includes high, mid, low definitions
+        WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral,
+        WEATHER_AUDIO_CONFIG.zoomMidToLowGeneral, // Pass the new threshold
+        WEATHER_AUDIO_CONFIG.waterBaseVolume
       );
       this.windLayer = new CrossfadeAudioLayer(
         this.audioContext, this.bufferPool,
-        weatherAudioAssets.wind,
-        WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral, WEATHER_AUDIO_CONFIG.windBaseVolume // Base volume, will be adjusted by zoom/weather
+        weatherAudioAssets.wind, // This now includes high, mid, low definitions
+        WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral,
+        WEATHER_AUDIO_CONFIG.zoomMidToLowGeneral, // Pass the new threshold
+        WEATHER_AUDIO_CONFIG.windBaseVolume
       );
       this.birdLayer = new TriggerAudioLayer(
         this.audioContext, this.bufferPool,
-        weatherAudioAssets.birds.low, weatherAudioAssets.birds.mid,
-        WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral, WEATHER_AUDIO_CONFIG.birdVolume
+        weatherAudioAssets.birds.low, // For 'high' zoom (distant)
+        weatherAudioAssets.birds.mid, // For 'mid' and 'low' zoom (closer)
+        WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral,
+        WEATHER_AUDIO_CONFIG.zoomMidToLowGeneral, // Pass the new threshold
+        WEATHER_AUDIO_CONFIG.birdVolume
       );
       this.rainLayer = new RainOverlayLayer(
         this.audioContext, this.bufferPool,
@@ -853,14 +920,20 @@ export class AmbientAudioManager {
         // Rain layer is not zoom dependent
 
         // Adjust wind layer's base volume based on zoom (before weather modulation)
-        const baseWindVolume = zoomPercent < WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral 
-                                ? WEATHER_AUDIO_CONFIG.windBaseVolume * 1.1 // Slightly louder for high zoom wind
-                                : WEATHER_AUDIO_CONFIG.windBaseVolume;
+        let baseWindVolume;
+        if (zoomPercent < WEATHER_AUDIO_CONFIG.zoomHighToMidGeneral) { // High zoom
+            baseWindVolume = WEATHER_AUDIO_CONFIG.windBaseVolume * 1.1;
+        } else if (zoomPercent < WEATHER_AUDIO_CONFIG.zoomMidToLowGeneral) { // Mid zoom
+            baseWindVolume = WEATHER_AUDIO_CONFIG.windBaseVolume;
+        } else { // Low zoom
+            baseWindVolume = WEATHER_AUDIO_CONFIG.windBaseVolume * 0.9; // Example: Quieter at very close zoom
+        }
+        
         // Re-apply weather modulation for wind
         let windSpeedFactor = 1.0;
         if (this.currentWeatherData && this.currentWeatherData.condition === 'windy') {
             const maxWindSpeedEffect = 15.0;
-            windSpeedFactor = 1.0 + 0.5 * Math.min(1, (this.currentWeatherData.windSpeed - WEATHER_AUDIO_CONFIG.windyThresholdMPS) / (maxWindSpeedEffect - WEATHER_AUDIO_CONFIG.windyThresholdMPS));
+            windSpeedFactor = 1.0 + 0.5 * Math.min(1, Math.max(0, (this.currentWeatherData.windSpeed - WEATHER_AUDIO_CONFIG.windyThresholdMPS) / (maxWindSpeedEffect - WEATHER_AUDIO_CONFIG.windyThresholdMPS)));
         }
         this.windLayer?.setLayerVolume(Math.min(1.0, baseWindVolume * windSpeedFactor));
 
