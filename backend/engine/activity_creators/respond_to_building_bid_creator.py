@@ -39,7 +39,7 @@ def try_create(
     from backend.engine.utils.activity_helpers import (
         LogColors, find_path_between_buildings_or_coords, 
         get_closest_building_of_type, get_contract_record,
-        get_building_record # Added get_building_record
+        get_building_record 
     )
     import json
     import uuid
