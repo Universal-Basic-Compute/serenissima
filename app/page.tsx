@@ -22,6 +22,7 @@ import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel'; // Import
 // import InitialLoadingScreen from '@/components/UI/InitialLoadingScreen'; // Import InitialLoadingScreen - Supprimé
 import DailyUpdatePanel from '@/components/UI/DailyUpdatePanel'; // Import DailyUpdatePanel
 import BackgroundMusic from '@/components/UI/BackgroundMusic'; // Importer BackgroundMusic
+import { ambientAudioManager } from '@/lib/services/AmbientAudioManager'; // Import AmbientAudioManager
 import { 
   StrategiesArticle, 
   BeginnersGuideArticle, 
@@ -175,6 +176,7 @@ export default function TwoDPage() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
   const [loginStatusChecked, setLoginStatusChecked] = useState<boolean>(false);
   const [currentUserUsername, setCurrentUserUsername] = useState<string | null>(null); // Pour stocker le nom d'utilisateur
+  const [isAmbientAudioInitialized, setIsAmbientAudioInitialized] = useState(false);
 
   // const handleLoadingComplete = () => { // Supprimé car InitialLoadingScreen est retiré
   //   console.log('InitialLoadingScreen complete, showing Daily Update panel.');
@@ -777,6 +779,12 @@ export default function TwoDPage() {
       console.log('Received DAILY_UPDATE_PANEL_CLOSED event, setting appStatus to ready and allowing main panels to show.');
       setAppStatus('ready');
       setCanShowMainPanels(true);
+      if (isAmbientAudioInitialized && !ambientAudioManager.isCurrentlyPlaying()) {
+        console.log('App ready, starting ambient audio manager.');
+        ambientAudioManager.start();
+      } else if (!isAmbientAudioInitialized) {
+        console.log('App ready, but ambient audio not initialized yet. Will start when initialized.');
+      }
     };
 
     const subscription = eventBus.subscribe(EventTypes.DAILY_UPDATE_PANEL_CLOSED, handleDailyUpdateFinished);
@@ -844,8 +852,27 @@ export default function TwoDPage() {
       console.log('User is not logged in. Bypassing DailyUpdatePanel.');
       handleDailyUpdateClose(); // This will emit DAILY_UPDATE_PANEL_CLOSED
     }
-    // handleDailyUpdateClose is now wrapped in useCallback and stable.
   }, [appStatus, isUserLoggedIn, loginStatusChecked, handleDailyUpdateClose]);
+  
+  // Effect to start/stop ambient audio when appStatus changes or initialization happens
+  useEffect(() => {
+    if (isAmbientAudioInitialized) {
+      if (appStatus === 'ready' && !ambientAudioManager.isCurrentlyPlaying()) {
+        console.log('Ambient audio initialized and app ready, starting ambient audio.');
+        ambientAudioManager.start();
+      } else if (appStatus !== 'ready' && ambientAudioManager.isCurrentlyPlaying()) {
+        console.log('App not ready, stopping ambient audio.');
+        ambientAudioManager.stop();
+      }
+    }
+    // Cleanup on unmount
+    return () => {
+      if (ambientAudioManager.isCurrentlyPlaying()) {
+        // console.log('Page unmounting, stopping ambient audio.');
+        // ambientAudioManager.stop(); // Decide if audio should stop on page/component unmount
+      }
+    };
+  }, [appStatus, isAmbientAudioInitialized]);
 
 
   // Set up event listener for ensureBuildingsVisible

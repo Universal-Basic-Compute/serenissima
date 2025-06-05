@@ -28,6 +28,7 @@ import ProblemDetailsPanel from '../UI/ProblemDetailsPanel';
 import BuildingCreationPanel from './BuildingCreationPanel';
 import { renderService } from '@/lib/services/RenderService';
 import { CoordinateService } from '@/lib/services/CoordinateService';
+import { ambientAudioManager } from '@/lib/services/AmbientAudioManager'; // Import AmbientAudioManager
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -2150,8 +2151,15 @@ number => {
               detail: { scale: newScale } 
             }));
           });
-        }
         
+          // Update ambient audio manager with new zoom level
+          // Map scale (1.0 to 10.8) to zoomPercent (0 to 100)
+          const minScale = 1.0;
+          const maxScale = 10.8;
+          const zoomPercent = ((newScale - minScale) / (maxScale - minScale)) * 100;
+          ambientAudioManager.updateZoom(Math.max(0, Math.min(100, zoomPercent)));
+        }
+      
         return newScale;
       });
     }, 50); // Throttle to 50ms (20 updates per second max)
