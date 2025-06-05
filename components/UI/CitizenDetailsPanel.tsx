@@ -120,8 +120,14 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     console.log('[CitizenDetailsPanel] Initial username check on mount:', initialUsernameOnMount || 'null');
 
     const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, handleWalletChange);
-    console.log('[CitizenDetailsPanel] Emitting REQUEST_WALLET_STATUS to get current wallet state.');
-    eventBus.emit(EventTypes.REQUEST_WALLET_STATUS);
+
+    if (!hasRequestedWalletStatusGlobally) {
+      console.log('[CitizenDetailsPanel] Globally emitting REQUEST_WALLET_STATUS for the first time.');
+      eventBus.emit(EventTypes.REQUEST_WALLET_STATUS);
+      hasRequestedWalletStatusGlobally = true;
+    } else {
+      console.log('[CitizenDetailsPanel] REQUEST_WALLET_STATUS already emitted globally. This instance will rely on existing WALLET_CHANGED broadcasts.');
+    }
 
     return () => {
       subscription.unsubscribe();
