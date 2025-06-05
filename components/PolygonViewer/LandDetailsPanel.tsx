@@ -1111,33 +1111,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           </div>
         </div>
       </div>
-      {/* Le commentaire précédent et {null} ont été supprimés à des fins de diagnostic */}
+     
       <div className="p-2 text-xs text-amber-500 italic text-center flex-shrink-0 border-t border-amber-200">
         La Serenissima Repubblica di Venezia
       </div>
-      
-      {/* Modals */}
-      {showListForSaleModal && selectedPolygonId && (
-        <ListLandForSaleModal
-          landId={selectedPolygonId}
-          landName={selectedPolygon?.historicalName}
-          englishName={selectedPolygon?.englishName}
-          landDescription={selectedPolygon?.historicalDescription}
-          onClose={() => setShowListForSaleModal(false)}
-          onComplete={(price: number) => {
-            // Refresh the panel to show the new listing
-            // The modal now calls handleGenericActivity directly.
-            // This onComplete might still be useful for UI cleanup or notifications.
-            console.log(`ListLandForSaleModal completed, price: ${price}`);
-            setRefreshKey(prevKey => prevKey + 1);
-            setShowListForSaleModal(false); // Ensure modal closes
-          }}
-          // Pass the handleGenericActivity function to the modal
-          onInitiateListForSale={(landId, price) => 
-            handleGenericActivity('list_land_for_sale', { landId, price, sellerUsername: currentCitizenUsername })
-          }
-        />
-      )}
+
     </div>
   );
 }
