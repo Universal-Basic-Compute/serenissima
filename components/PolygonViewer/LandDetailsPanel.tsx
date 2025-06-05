@@ -127,7 +127,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isCorrespondanceFullScreen, setIsCorrespondanceFullScreen] = useState(false);
-  const [activeLeftTab, setActiveLeftTab] = useState<'info' | 'buildings'>('info'); // Tabs for left column
+  const [activeLeftTab, setActiveLeftTab] = useState<'info' | 'buildings' | 'realEstate'>('info'); // Tabs for left column, added 'realEstate'
 
   // Find the selected polygon
   const selectedPolygon = selectedPolygonId 
@@ -464,6 +464,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             selectedPolygonId={selectedPolygonId}
             activeLeftTab={activeLeftTab}
             setActiveLeftTab={setActiveLeftTab}
+            // Props for Real Estate Tab in LandInfoColumn
+            landListingByOwner={landListingByOwner}
+            incomingBuyOffers={incomingBuyOffers}
+            isOwner={isOwner}
+            currentCitizenUsername={currentCitizenUsername}
+            handleGenericActivity={handleGenericActivity}
+            normalizeIdentifier={normalizeIdentifier}
+            isLoadingMarketData={isLoading} // Pass market loading state
           />
         </div>
 

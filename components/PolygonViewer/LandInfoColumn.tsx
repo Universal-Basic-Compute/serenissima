@@ -3,11 +3,24 @@ import { Polygon } from './types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import ActionButton from '../UI/ActionButton'; // Added for action buttons
+import AnimatedDucats from '../UI/AnimatedDucats'; // Added for displaying prices
+
+type ActiveLeftTabType = 'info' | 'buildings' | 'realEstate';
+
 interface LandInfoColumnProps {
   selectedPolygon: Polygon | null;
-  selectedPolygonId: string | null; // For income service, ensure it's passed if needed by income logic
-  activeLeftTab: 'info' | 'buildings';
-  setActiveLeftTab: (tab: 'info' | 'buildings') => void;
+  selectedPolygonId: string | null;
+  activeLeftTab: ActiveLeftTabType;
+  setActiveLeftTab: (tab: ActiveLeftTabType) => void;
+  // Props for Real Estate Tab
+  landListingByOwner: any | null;
+  incomingBuyOffers: any[];
+  isOwner: boolean;
+  currentCitizenUsername: string | null;
+  handleGenericActivity: (activityType: string, parameters: Record<string, any>) => Promise<void>;
+  normalizeIdentifier: (id: string | null | undefined) => string | null;
+  isLoadingMarketData: boolean;
 }
 
 const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
@@ -15,6 +28,14 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
   selectedPolygonId,
   activeLeftTab,
   setActiveLeftTab,
+  // Props for Real Estate Tab
+  landListingByOwner,
+  incomingBuyOffers,
+  isOwner,
+  currentCitizenUsername,
+  handleGenericActivity,
+  normalizeIdentifier,
+  isLoadingMarketData,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [landRendered, setLandRendered] = useState<boolean>(false);
@@ -178,6 +199,16 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
           >
             Buildings
           </button>
+          <button
+            onClick={() => setActiveLeftTab('realEstate')}
+            className={`px-3 py-2 font-medium text-xs rounded-t-md transition-colors
+              ${activeLeftTab === 'realEstate' 
+                ? 'bg-amber-600 text-white' 
+                : 'text-amber-600 hover:bg-amber-200 hover:text-amber-800'
+              }`}
+          >
+            Immobilier
+          </button>
         </nav>
       </div>
 
@@ -284,6 +315,75 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
           <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
             <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Buildings on this Land</h3>
             <p className="text-xs text-gray-500 italic">Building list coming soon.</p>
+            {/* TODO: Implement building list display here */}
+          </div>
+        )}
+        {activeLeftTab === 'realEstate' && (
+          <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200 space-y-3">
+            <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Marché Immobilier</h3>
+            {isLoadingMarketData && <p className="text-xs text-amber-700">Chargement des données du marché...</p>}
+
+            {!isLoadingMarketData && !landListingByOwner && incomingBuyOffers.length === 0 && (
+              <p className="text-xs text-gray-500 italic">Aucune annonce ou offre active pour ce terrain.</p>
+            )}
+
+            {/* Affichage de l'annonce du propriétaire */}
+            {landListingByOwner && (
+              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                <p className="text-md font-semibold text-amber-800">
+                  À Vendre par {landListingByOwner.SellerName || landListingByOwner.Seller}
+                </p>
+                <p className="text-xl font-semibold text-center my-1">
+                  <span style={{ color: '#d4af37' }}>
+                    <AnimatedDucats 
+                      value={landListingByOwner.PricePerResource} 
+                      suffix="⚜️ ducats" 
+                      duration={1500}
+                    />
+                  </span>
+                </p>
+                {!isOwner && currentCitizenUsername && normalizeIdentifier(landListingByOwner.Seller) !== normalizeIdentifier(currentCitizenUsername) && (
+                  <ActionButton
+                    onClick={() => handleGenericActivity('buy_listed_land', { contractId: landListingByOwner.id, landId: selectedPolygonId, price: landListingByOwner.PricePerResource })}
+                    variant="primary"
+                    className="w-full mt-2 text-xs"
+                  >
+                    Acheter Maintenant à {landListingByOwner.PricePerResource.toLocaleString()} ⚜️
+                  </ActionButton>
+                )}
+                {isOwner && normalizeIdentifier(landListingByOwner.Seller) === normalizeIdentifier(currentCitizenUsername) && (
+                   <ActionButton
+                    onClick={() => handleGenericActivity('cancel_land_listing', { contractId: landListingByOwner.id, landId: selectedPolygonId })}
+                    variant="danger"
+                    className="w-full mt-2 text-xs"
+                  >
+                    Annuler Votre Annonce
+                  </ActionButton>
+                )}
+              </div>
+            )}
+
+            {/* Affichage des offres d'achat reçues */}
+            {incomingBuyOffers.length > 0 && (
+              <div className="mt-3">
+                <h4 className="text-sm font-semibold text-amber-700 mb-1">Offres d'Achat Reçues :</h4>
+                {incomingBuyOffers.map(offer => (
+                  <div key={offer.id} className="p-2 mb-2 rounded-lg bg-blue-50 border border-blue-200 text-xs">
+                    <p>Offre de : {offer.BuyerName || offer.Buyer}</p>
+                    <p>Montant : {offer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
+                    {isOwner && (
+                      <ActionButton
+                        onClick={() => handleGenericActivity('accept_land_offer', { contractId: offer.id, landId: selectedPolygonId })}
+                        variant="primary"
+                        className="w-full mt-1 text-xs"
+                      >
+                        Accepter l'Offre
+                      </ActionButton>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
