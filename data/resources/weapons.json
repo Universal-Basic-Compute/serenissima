@@ -4,48 +4,6 @@
   "category": "finished_goods",
   "subCategory": "military_equipment",
   "description": "Crafted armaments for military use, personal defense, and ceremonial purposes. Venice produces both standard military equipment and finely crafted pieces for wealthy clients.",
-  "varieties": [
-    {
-      "type": "swords",
-      "productionDifficulty": "high",
-      "popularity": "high",
-      "valueMultiplier": 1.2,
-      "primaryUse": "naval_officers_nobles",
-      "modelVariant": "models/resources/weapons_sword.glb"
-    },
-    {
-      "type": "pikes",
-      "productionDifficulty": "medium",
-      "popularity": "high",
-      "valueMultiplier": 0.8,
-      "primaryUse": "infantry",
-      "modelVariant": "models/resources/weapons_pike.glb"
-    },
-    {
-      "type": "crossbows",
-      "productionDifficulty": "high",
-      "popularity": "medium",
-      "valueMultiplier": 1.3,
-      "primaryUse": "ship_defense",
-      "modelVariant": "models/resources/weapons_crossbow.glb"
-    },
-    {
-      "type": "naval_cutlass",
-      "productionDifficulty": "medium",
-      "popularity": "very_high",
-      "valueMultiplier": 1,
-      "primaryUse": "ship_crews",
-      "modelVariant": "models/resources/weapons_cutlass.glb"
-    },
-    {
-      "type": "ceremonial_weapons",
-      "productionDifficulty": "very_high",
-      "popularity": "low",
-      "valueMultiplier": 2.5,
-      "primaryUse": "display_ceremony",
-      "modelVariant": "models/resources/weapons_ceremonial.glb"
-    }
-  ],
   "historicalNotes": {
     "introductionYear": "ancient",
     "notableProducers": [

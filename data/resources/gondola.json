@@ -4,32 +4,6 @@
   "category": "finished_goods",
   "subCategory": "transportation",
   "description": "The iconic Venetian boat designed for canal transportation. With its asymmetrical design and skilled gondolier, it serves as the primary means of passenger transport through Venice's narrow waterways.",
-  "varieties": [
-    {
-      "type": "standard_gondola",
-      "productionDifficulty": "medium",
-      "popularity": "high",
-      "valueMultiplier": 1,
-      "passengerCapacity": 6,
-      "modelVariant": "models/resources/gondola_standard.glb"
-    },
-    {
-      "type": "luxury_gondola",
-      "productionDifficulty": "high",
-      "popularity": "medium",
-      "valueMultiplier": 1.8,
-      "passengerCapacity": 4,
-      "modelVariant": "models/resources/gondola_luxury.glb"
-    },
-    {
-      "type": "ceremonial_gondola",
-      "productionDifficulty": "very_high",
-      "popularity": "low",
-      "valueMultiplier": 3,
-      "passengerCapacity": 8,
-      "modelVariant": "models/resources/gondola_ceremonial.glb"
-    }
-  ],
   "historicalNotes": {
     "introductionYear": 1100,
     "notableProducers": [

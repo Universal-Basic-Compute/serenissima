@@ -4,7 +4,6 @@
   "category": "raw_materials",
   "subCategory": "textile",
   "description": "Plant fiber used for producing linen textiles and rope.",
-  "icon": "https://backend.serenissima.ai/public_assets/images/resources/flax.png",
   "importPrice": 150.0,
   "lifetimeHours": 17550,
   "consumptionHours": null,

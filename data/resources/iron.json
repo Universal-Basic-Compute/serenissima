@@ -4,7 +4,6 @@
   "category": "raw_materials",
   "subCategory": "metal",
   "description": "Versatile metal used for tools, hardware, and structural reinforcement in buildings.",
-  "icon": "https://backend.serenissima.ai/public_assets/images/resources/iron.png",
   "importPrice": 540.0,
   "lifetimeHours": null,
   "consumptionHours": null,

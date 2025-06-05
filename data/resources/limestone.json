@@ -4,7 +4,6 @@
   "category": "raw_materials",
   "subCategory": "mineral",
   "description": "Sedimentary rock used for building materials and when processed, creates lime for mortar and plaster.",
-  "icon": "https://backend.serenissima.ai/public_assets/images/resources/limestone.png",
   "importPrice": 150.0,
   "lifetimeHours": null,
   "consumptionHours": null,

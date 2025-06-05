@@ -4,32 +4,6 @@
   "category": "finished_goods",
   "subCategory": "transportation",
   "description": "Specialized equipment for professional porters to transport goods through Venice's narrow streets and over countless bridges. Includes carrying poles, balanced containers, and harnesses designed for the unique challenges of Venetian terrain.",
-  "varieties": [
-    {
-      "type": "carrying_pole",
-      "productionDifficulty": "low",
-      "popularity": "high",
-      "valueMultiplier": 0.8,
-      "capacity": "balanced_loads",
-      "modelVariant": "models/resources/porter_pole.glb"
-    },
-    {
-      "type": "back_harness",
-      "productionDifficulty": "medium",
-      "popularity": "medium",
-      "valueMultiplier": 1,
-      "capacity": "heavy_single_items",
-      "modelVariant": "models/resources/porter_harness.glb"
-    },
-    {
-      "type": "specialized_carriers",
-      "productionDifficulty": "high",
-      "popularity": "low",
-      "valueMultiplier": 1.5,
-      "capacity": "fragile_or_liquid_goods",
-      "modelVariant": "models/resources/porter_specialized.glb"
-    }
-  ],
   "historicalNotes": {
     "introductionYear": "ancient",
     "notableProducers": [
