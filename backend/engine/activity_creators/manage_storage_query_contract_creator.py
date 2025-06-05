@@ -1,5 +1,13 @@
 import logging
 from typing import Dict, List, Any, Optional
+import json
+import uuid
+from datetime import timedelta
+
+from backend.engine.utils.activity_helpers import (
+    LogColors, find_path_between_buildings_or_coords, 
+    get_closest_building_of_type, get_building_record
+)
 
 log = logging.getLogger(__name__)
 
@@ -36,14 +44,7 @@ def try_create(
 
     log.info(f"{LogColors.ACTIVITY}Attempting to create 'manage_storage_query_contract' chain for {citizen_username} for {resource_type}.{LogColors.ENDC}")
 
-    # Imports
-    import json
-    import uuid
-    from datetime import timedelta
-    from backend.engine.utils.activity_helpers import (
-        LogColors, find_path_between_buildings_or_coords, 
-        get_closest_building_of_type, get_building_record
-    )
+    # Imports moved to module level
 
     # 1. Determine citizen's current location
     citizen_position_str = citizen_record['fields'].get('Position')
