@@ -3,9 +3,8 @@ import json
 from datetime import datetime, timezone
 
 from backend.engine.utils.activity_helpers import (
-    LogColors, get_citizen_record, get_contract_record
+    LogColors, get_citizen_record, get_contract_record, create_notification_record
 )
-from backend.engine.utils.notification_helpers import create_notification # Assuming this helper exists
 
 log = logging.getLogger(__name__)
 
@@ -67,9 +66,9 @@ def process_execute_withdraw_building_bid_fn(tables: dict, activity_record: dict
 
         # Notifications
         if contract_seller_username: # Notify seller if there is one
-            create_notification(tables, contract_seller_username, "building_bid_withdrawn", f"The bid from {bidder_username} for your building {building_id_custom} has been withdrawn.", {"contractId": building_bid_contract_id, "buildingId": building_id_custom})
+            create_notification_record(tables, contract_seller_username, "building_bid_withdrawn", f"The bid from {bidder_username} for your building {building_id_custom} has been withdrawn.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
         
-        create_notification(tables, bidder_username, "building_bid_withdrawal_confirmed", f"Your bid for building {building_id_custom} has been successfully withdrawn.", {"contractId": building_bid_contract_id, "buildingId": building_id_custom})
+        create_notification_record(tables, bidder_username, "building_bid_withdrawal_confirmed", f"Your bid for building {building_id_custom} has been successfully withdrawn.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
         
         return True
 
