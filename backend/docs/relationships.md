@@ -9,12 +9,15 @@ Le système de scoring pour les relations (`StrengthScore` et `TrustScore`) fonc
         *   **0**: Méfiance totale.
         *   **50**: Neutre.
         *   **100**: Confiance totale.
-    *   **`StrengthScore` (50-100)**:
-        *   **50**: Aucune force/pertinence (score latent de 0).
-        *   **100**: Force/pertinence maximale.
-        *   *Note*: L'échelle effective est [50, 100] car les scores de pertinence latents sont généralement positifs ou nuls, et la fonction de conversion mappe un score latent de 0 à un score normalisé de 50.
+    *   **`StrengthScore` (Interprété sur 0-100)**:
+        *   Le score `StrengthScore` est stocké en interne sur une base qui se traduit par une échelle normalisée de [50-100] (où 50 est une force latente de 0, et 100 est une force latente maximale).
+        *   Pour l'utilisation et l'affichage, ce score [50-100] est souvent remappé linéairement sur une échelle de **0 à 100** :
+            *   Un score interne de **50** (force latente nulle) devient **0** (force affichée nulle).
+            *   Un score interne de **75** devient **50** (force affichée moyenne).
+            *   Un score interne de **100** (force latente maximale) devient **100** (force affichée maximale).
+        *   La formule de remappage est : `StrengthScoreAffiché = (StrengthScoreInterne - 50) * 2`.
 
-2.  **Impact Dégressif** : Pour les deux scores, l'effet de chaque point "latent" ajouté/retiré diminue à mesure que le score normalisé s'approche de ses extrêmes. Il est plus facile d'influencer un score proche du point de départ (50) qu'un score déjà très élevé ou très bas.
+2.  **Impact Dégressif** : Pour les deux scores, l'effet de chaque point "latent" ajouté/retiré diminue à mesure que le score normalisé (interne) s'approche de ses extrêmes. Il est plus facile d'influencer un score proche du point de départ (latent 0 / normalisé 50) qu'un score déjà très élevé ou très bas.
 
 3.  **Mécanisme Interne** : Pour cela, le système convertit le score (0-100) en une valeur "latente", applique les changements à cette valeur, puis la reconvertit en score (0-100). Cette double conversion (utilisant `atan` et `tan`) crée l'effet d'impact dégressif.
 
@@ -32,7 +35,7 @@ Each record in the `RELATIONSHIPS` table represents a unique bond between two ci
 
 -   **`Citizen1`**: Text - The username of the first citizen (alphabetically).
 -   **`Citizen2`**: Text - The username of the second citizen (alphabetically).
--   **`StrengthScore`**: Number (Float) - Score normalisé sur une échelle effective de 50 à 100. 50 indique une absence de force/pertinence, 100 indique une force maximale.
+-   **`StrengthScore`**: Number (Float) - Score normalisé interne sur une échelle de 50 à 100. Ce score est souvent remappé en 0-100 pour l'affichage/utilisation (où 50 interne = 0 affiché, 100 interne = 100 affiché).
 -   **`TrustScore`**: Number (Float) - Score normalisé sur une échelle de 0 à 100 qui quantifie le niveau de confiance. Un score de 50 est neutre.
 -   **`LastInteraction`**: DateTime - Timestamp of the last time this relationship record was updated by the scoring script.
 -   **`Notes`**: Long Text - A comma-separated list of keywords indicating the sources that contributed to the scores (e.g., "Sources: proximity_relevancy, messages_interaction, loans_interaction").
