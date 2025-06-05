@@ -1,14 +1,8 @@
 {
   "git": {
     "deploymentEnabled": {
-      "main": true
-      // Selon la documentation de Vercel, toute branche non spécifiée ici est activée par défaut pour le déploiement (true).
-      // Pour empêcher le déploiement automatique d'autres branches, vous devez les lister explicitement avec la valeur false.
-      // Exemple :
-      //   "main": true,  <-- Notez la virgule si "main" n'est plus le dernier élément.
-      //   "develop": false,
-      //   "staging": false
-      // (Assurez-vous que la dernière entrée réelle dans cet objet n'a PAS de virgule de fin.)
+      "main": true,
+      "*": false
     }
   }
 }
