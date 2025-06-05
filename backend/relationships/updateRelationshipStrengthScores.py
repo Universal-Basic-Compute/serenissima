@@ -580,6 +580,7 @@ def update_relationship_scores(
     from backend.engine.utils.activity_helpers import VENICE_TIMEZONE # Import VENICE_TIMEZONE here
     source_username = source_citizen_record['fields']['Username']
     try:
+        log.info(f"{Colors.OKBLUE}Processing scores for {source_username}: Found {len(relevancies)} new relevancies and {len(existing_relationships)} existing relationships to consider.{Colors.ENDC}")
         # log.info(f"{Colors.HEADER}Updating relationship scores for source citizen: {Colors.BOLD}{source_username}{Colors.ENDC}")
     
         # Track new scores and relevancy types for each target citizen
