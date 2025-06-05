@@ -133,46 +133,42 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [internalCurrentCitizenUsername, setInternalCurrentCitizenUsername] = useState<string | null>(getCurrentCitizenUsername());
 
   useEffect(() => {
-    const handleWalletChange = (walletData?: { address?: string | null; publicKey?: any; profile?: { username?: string | null }; isConnected?: boolean; [key: string]: any }) => {
+    const handleWalletChange = (walletData?: { profile?: { username?: string | null }; isConnected?: boolean; address?: string | null; publicKey?: any; [key: string]: any }) => {
       console.log('[LandDetailsPanel] handleWalletChange received walletData:', JSON.stringify(walletData || {note: "payload was undefined"}, null, 2));
       let newUsername: string | null = null;
-      
-      // Determine login status based on a broader set of conditions, similar to app/page.tsx
-      const isLoggedIn = !!(walletData && (walletData.address || walletData.publicKey || walletData.isConnected === true));
-      // Also consider explicit disconnection
+
       const explicitlyDisconnected = walletData && walletData.isConnected === false;
 
       if (explicitlyDisconnected) {
         newUsername = null;
         console.log('[LandDetailsPanel] User explicitly disconnected via WALLET_CHANGED event.');
-      } else if (isLoggedIn) {
-        if (walletData.profile && typeof walletData.profile.username === 'string' && walletData.profile.username.trim() !== '') {
-          newUsername = walletData.profile.username;
-          console.log('[LandDetailsPanel] Username from WALLET_CHANGED event payload (profile):', newUsername);
-        } else {
-          // If logged in but no username in payload, try storage as a fallback
-          newUsername = getCurrentCitizenUsername();
-          console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (logged in, but no/invalid username in payload):', newUsername);
-        }
+      } else if (walletData && walletData.profile && typeof walletData.profile.username === 'string' && walletData.profile.username.trim() !== '') {
+        // Primary source: username from event profile if valid
+        newUsername = walletData.profile.username.trim();
+        console.log('[LandDetailsPanel] Username from WALLET_CHANGED event payload (profile):', newUsername);
       } else {
-        // Not explicitly disconnected, and not meeting loggedIn criteria from event payload.
-        // This could be an initial event or an ambiguous one. Fallback to storage.
-        newUsername = getCurrentCitizenUsername();
-        console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (event payload was ambiguous or did not indicate active login):', newUsername);
+        // Fallback: get from storage. This covers:
+        // - walletData is undefined/null
+        // - walletData.isConnected is true or undefined (i.e., not explicitly false)
+        // - walletData.profile is missing or profile.username is invalid/empty
+        // This will also be hit on initial REQUEST_WALLET_STATUS if the event doesn't have profile.username but user is logged in.
+        const usernameFromStorage = getCurrentCitizenUsername();
+        console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (fallback or no/invalid profile.username in payload):', usernameFromStorage);
+        newUsername = usernameFromStorage;
       }
       
       if (internalCurrentCitizenUsername !== newUsername) {
-        console.log(`[LandDetailsPanel] Updating internalCurrentCitizenUsername from "${internalCurrentCitizenUsername}" to "${newUsername}"`);
+        console.log(`[LandDetailsPanel] Updating internalCurrentCitizenUsername from "${internalCurrentCitizenUsername || 'null'}" to "${newUsername || 'null'}"`);
         setInternalCurrentCitizenUsername(newUsername);
       } else {
-        console.log(`[LandDetailsPanel] Username ("${newUsername}") is the same as previous ("${internalCurrentCitizenUsername}"). No state update needed.`);
+        console.log(`[LandDetailsPanel] Username ("${newUsername || 'null'}") is the same as previous ("${internalCurrentCitizenUsername || 'null'}"). No state update needed.`);
       }
     };
 
     // Set initial state directly from localStorage/sessionStorage on mount
     const initialUsernameOnMount = getCurrentCitizenUsername();
     setInternalCurrentCitizenUsername(initialUsernameOnMount);
-    console.log('[LandDetailsPanel] Initial username check on mount:', initialUsernameOnMount);
+    console.log('[LandDetailsPanel] Initial username check on mount:', initialUsernameOnMount || 'null');
 
     // Subscribe to wallet changes
     const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, handleWalletChange);
