@@ -10,6 +10,9 @@ import remarkGfm from 'remark-gfm'; // Added import
 import { FaSpinner, FaVolumeUp, FaVolumeMute, FaExpand, FaCompress } from 'react-icons/fa'; // Added FaExpand, FaCompress
 import CitizenRelevanciesList from './CitizenRelevanciesList'; // Import the new component
 
+// Module-level flag to track if REQUEST_WALLET_STATUS has been emitted globally
+let hasRequestedWalletStatusGlobally = false;
+
 // Add global styles for custom scrollbar
 const scrollbarStyles = `
   .custom-scrollbar::-webkit-scrollbar {
