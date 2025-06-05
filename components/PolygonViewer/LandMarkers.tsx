@@ -590,7 +590,7 @@ export default function LandMarkers({
         const imageUrl = landImages[polygon.id];
         
         // Apply night effect if needed
-        const opacity = isNight ? 0.8 : 1.0; // Opacity: 0.8 at night, 1.0 during day
+        const opacity = 1.0; // Opacity: 1.0 always, night effect is handled by brightness/saturation on image
         
         // Highlight land with public dock in transport view
         const hasDock = polygonData.hasPublicDock && activeView === 'transport';
