@@ -216,7 +216,7 @@ def assess_relationship_with_kinos(tables, relationship_record, kinos_model="loc
         f"- The problems that concern both of you\n\n"
         f"Respond with only a JSON object containing two fields:\n"
         f"1. 'title': A short title (2-4 words) describing your relationship (e.g., 'Trusted Business Partners', 'Suspicious Competitors', 'Reluctant Political Allies')\n"
-        f"2. 'description': A detailed description (2-3 sentences) explaining the nature of your relationship (don't invent facts, use the discussion/data), formulated with \"We\"\n"
+        f"2. 'description': A detailed description (2-3 sentences) explaining the nature of your relationship (don't invent facts, use the discussion/data), formulated with \"We\". Keep it immersive but gameplay-focused.\n"
         f"Example of a valid response:\n"
         f"```json\n"
         f"{{\n"

@@ -79,15 +79,16 @@ export class ActivityPathService {
                 parsedPath = typeof activity.path === 'string' ? JSON.parse(activity.path) : activity.path;
                 
                 // Log the raw Notes field from the activity
-                console.log(`[ActivityPathService] Processing activity ${activity.activityId || 'unknown_activity'} for citizen ${citizenIdForLog}. Raw Notes: ${activity.notes}`); // Use camelCase
+                //console.log(`[ActivityPathService] Processing activity ${activity.activityId || 'unknown_activity'} for citizen ${citizenIdForLog}. Raw Notes: ${activity.notes}`); // Use camelCase
 
                 // Log the raw path field before parsing (using activity.path)
-                console.log(`[ActivityPathService] Activity ${activity.activityId || 'unknown'}: Raw path field (activity.path):`, activity.path); // Use camelCase
+                //console.log(`[ActivityPathService] Activity ${activity.activityId || 'unknown'}: Raw path field (activity.path):`, activity.path); // Use camelCase
 
                 // Log the parsed path for debugging
-                console.log(`Parsed path for activity ${activity.activityId || 'unknown'}, citizen ${activity.citizen || activity.citizenId}:`, // Use camelCase
+                /**console.log(`Parsed path for activity ${activity.activityId || 'unknown'}, citizen ${activity.citizen || activity.citizenId}:`, // Use camelCase
                   parsedPath && Array.isArray(parsedPath) && parsedPath.length > 0 ? `${parsedPath.length} points, first: ${JSON.stringify(parsedPath[0])}` : 'empty or invalid path object');
-              
+                */
+
                 // Skip activities without valid paths
                 if (!Array.isArray(parsedPath) || parsedPath.length < 2) {
                   console.warn(`Skipping invalid path for activity ${activity.ActivityId || 'unknown'}: not an array or too short. Path data:`, parsedPath);

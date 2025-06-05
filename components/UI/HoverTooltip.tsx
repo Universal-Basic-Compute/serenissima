@@ -275,7 +275,7 @@ export const HoverTooltip: React.FC = () => {
   } else if (tooltipData.type === 'citizen') {
     const citizen = tooltipData.citizen;
     
-    console.log('TOOLTIP: Rendering citizen tooltip with data:', {
+    /**console.log('TOOLTIP: Rendering citizen tooltip with data:', {
       citizen: citizen ? { // citizen here is safeCitizen
         firstName: citizen.firstName,
         lastName: citizen.lastName,
@@ -283,7 +283,7 @@ export const HoverTooltip: React.FC = () => {
         imageUrl: citizen.imageUrl,
         activityNotes: citizen.activityNotes // Add activityNotes to the log
       } : 'No citizen data'
-    });
+    });*/
     
     if (citizen) {
       // If we have the citizen data, display it

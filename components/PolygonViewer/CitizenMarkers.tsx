@@ -1048,15 +1048,6 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             overflow: 'visible' // Add this to ensure paths aren't clipped
           }}
         >
-          {/* Debug text to confirm the SVG is rendering */}
-          <text x="20" y="40" fill="red" fontSize="12">
-            Paths: {hoveredCitizenPaths.length} hovered, {selectedCitizenPaths.length} selected, {Object.values(activityPaths).flat().filter(a => a.transportMode === "merchant_galley").length} merchant galleys
-          </text>
-          
-          {/* Animation status indicator */}
-          <text x="20" y="60" fill={animationActive ? "green" : "red"} fontSize="12">
-            Animation: {animationActive ? "Active" : "Paused"}
-          </text>
           
           {/* Render always-visible merchant galley paths */}
           {Object.values(activityPaths).flat().filter(activity => activity.transportMode === "merchant_galley").map((activity) => {
