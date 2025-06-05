@@ -4,8 +4,9 @@ from datetime import datetime, timezone
 
 from backend.engine.utils.activity_helpers import (
     LogColors, get_citizen_record, get_contract_record, get_building_record,
-    update_compute_balance, VENICE_TIMEZONE
+    VENICE_TIMEZONE
 )
+from backend.app.citizen_utils import update_compute_balance
 from backend.engine.utils.notification_helpers import create_notification # Assuming this helper exists
 
 log = logging.getLogger(__name__)
