@@ -209,7 +209,7 @@ def assess_relationship_with_kinos(tables, relationship_record, kinos_model="loc
         f"Analyze the data provided in the system context (addSystem) to understand your current relationship. "
         f"This data includes:\n"
         f"- Your respective profiles\n"
-        f"- The details of your existing relationship (strength, trust, etc.)\n"
+        f"- The details of your existing relationship (StrengthScore and TrustScore are on a 0-100 scale, where 50 is neutral, <50 is negative/distrust, >50 is positive/trust).\n"
         f"- The mutual relevancies between you\n"
         f"- The problems that concern both of you\n\n"
         f"Respond with only a JSON object containing two fields:\n"
@@ -224,7 +224,7 @@ def assess_relationship_with_kinos(tables, relationship_record, kinos_model="loc
         f"```\n\n"
         f"IMPORTANT: Your response must be ONLY a valid JSON object, with no text before or after. "
         f"Make sure the title and description accurately reflect the relationship as it appears in the data. "
-        f"Take into account the strength of the relationship ({fields.get('StrengthScore', 0)}) and the level of trust ({fields.get('TrustScore', 0)}).[/SYSTEM]"
+        f"Take into account the StrengthScore ({fields.get('StrengthScore', 50):.1f}/100) and the TrustScore ({fields.get('TrustScore', 50):.1f}/100).[/SYSTEM]"
     )
     
     # Appeler l'API KinOS

@@ -29,25 +29,27 @@ interface RelationshipGraphProps {
 const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, width, height, onNodeClick }) => {
   const fgRef = useRef<any>();
   const [processedNodes, setProcessedNodes] = useState<CitizenNode[]>([]);
-  const [minTrust, setMinTrust] = useState<number>(0);
-  const [maxTrust, setMaxTrust] = useState<number>(100);
+  // Trust scores are now 0-100, with 50 as neutral.
+  // We don't need to dynamically calculate min/max for color scale if it's fixed.
+  // const [minTrust, setMinTrust] = useState<number>(0);
+  // const [maxTrust, setMaxTrust] = useState<number>(100);
 
-  useEffect(() => {
-    if (links && links.length > 0) {
-      let currentMin = Infinity;
-      let currentMax = -Infinity;
-      links.forEach(link => {
-        if (link.trustScore < currentMin) currentMin = link.trustScore;
-        if (link.trustScore > currentMax) currentMax = link.trustScore;
-      });
-      setMinTrust(currentMin);
-      setMaxTrust(currentMax);
-    } else {
-      // Default values if no links or empty links
-      setMinTrust(0);
-      setMaxTrust(100);
-    }
-  }, [links]);
+  // useEffect(() => {
+  //   if (links && links.length > 0) {
+  //     let currentMin = Infinity;
+  //     let currentMax = -Infinity;
+  //     links.forEach(link => {
+  //       if (link.trustScore < currentMin) currentMin = link.trustScore;
+  //       if (link.trustScore > currentMax) currentMax = link.trustScore;
+  //     });
+  //     setMinTrust(currentMin);
+  //     setMaxTrust(currentMax);
+  //   } else {
+  //     // Default values if no links or empty links
+  //     setMinTrust(0);
+  //     setMaxTrust(100);
+  //   }
+  // }, [links]);
 
   useEffect(() => {
     const loadImages = async () => {
@@ -123,39 +125,27 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
 
   const getTrustScoreColor = (trustScore: number): string => {
     const COLOR_RED = '#DC2626';       // Crimson Red (Distrust)
-    const COLOR_YELLOW = '#F5E7C1';    // Parchment Yellow (Neutral/Tenuous)
-    const COLOR_PURPLE = '#8B5CF6';    // Purple (Steadfast Trust)
+    const COLOR_YELLOW = '#F5E7C1';    // Parchment Yellow (Neutral/Tenuous) - Corresponds to score around 50
+    const COLOR_PURPLE = '#8B5CF6';    // Purple (Steadfast Trust) - Corresponds to score 100
 
-    // Handle edge case: no links or all links have the same score
-    if (minTrust === maxTrust) {
-      if (minTrust < 0) return COLOR_RED;
-      if (minTrust === 0) return COLOR_YELLOW;
-      return COLOR_PURPLE; // All positive and same
-    }
+    // Normalize trustScore (0-100) to a factor (0-1) for interpolation
+    // Scores < 40: Red -> Yellow
+    // Scores 40-60: Yellow (Neutral zone)
+    // Scores > 60: Yellow -> Purple
+    
+    const neutralLow = 40;
+    const neutralHigh = 60;
 
-    // Case 1: All scores are negative (or zero)
-    if (maxTrust <= 0) {
-      if (minTrust === maxTrust) return COLOR_RED; // All same negative value
-      const t = (trustScore - minTrust) / (maxTrust - minTrust); // Normalize from 0 (minTrust) to 1 (maxTrust, which is <=0)
-      return interpolateColor(COLOR_RED, COLOR_YELLOW, t); // Interpolate Red to Yellow
-    }
-
-    // Case 2: All scores are positive (or zero)
-    if (minTrust >= 0) {
-      if (minTrust === maxTrust) return COLOR_PURPLE; // All same positive value
-      const t = (trustScore - minTrust) / (maxTrust - minTrust); // Normalize from 0 (minTrust) to 1 (maxTrust)
-      return interpolateColor(COLOR_YELLOW, COLOR_PURPLE, t); // Interpolate Yellow to Purple
-    }
-
-    // Case 3: Scores span across zero (minTrust < 0 and maxTrust > 0)
-    if (trustScore < 0) {
-      // Normalize from 0 (minTrust) to 1 (zero score)
-      const t = (trustScore - minTrust) / (0 - minTrust);
-      return interpolateColor(COLOR_RED, COLOR_YELLOW, t);
-    } else { // trustScore >= 0
-      // Normalize from 0 (zero score) to 1 (maxTrust)
-      const t = trustScore / maxTrust;
-      return interpolateColor(COLOR_YELLOW, COLOR_PURPLE, t);
+    if (trustScore < neutralLow) { // Distrust: Red (0) to Yellow (40)
+      // Normalize trustScore from 0 to neutralLow into a 0-1 factor
+      const factor = Math.max(0, trustScore) / neutralLow; // Ensure factor is not negative if trustScore is < 0 (though it shouldn't be)
+      return interpolateColor(COLOR_RED, COLOR_YELLOW, factor);
+    } else if (trustScore <= neutralHigh) { // Neutral zone
+      return COLOR_YELLOW;
+    } else { // Trust: Yellow (60) to Purple (100)
+      // Normalize trustScore from neutralHigh to 100 into a 0-1 factor
+      const factor = (trustScore - neutralHigh) / (100 - neutralHigh);
+      return interpolateColor(COLOR_YELLOW, COLOR_PURPLE, factor);
     }
   };
 
