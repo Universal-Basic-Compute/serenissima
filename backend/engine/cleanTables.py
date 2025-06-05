@@ -48,16 +48,18 @@ ACTIVITIES_TABLE_NAME = 'ACTIVITIES'
 NOTIFICATIONS_TABLE_NAME = 'NOTIFICATIONS'
 RELEVANCIES_TABLE_NAME = 'RELEVANCIES'
 PROBLEMS_TABLE_NAME = 'PROBLEMS'
+CONTRACTS_TABLE_NAME = 'CONTRACTS' # Added
 BUILDINGS_TABLE_NAME = 'BUILDINGS' # Added
 RESOURCES_TABLE_NAME = 'RESOURCES' # Added
 
 from backend.engine.utils.activity_helpers import LogColors
 
 TABLE_CONFIGS = {
-    ACTIVITIES_TABLE_NAME: {"days_to_keep": 4, "field_to_check": "CreatedAt"},
-    NOTIFICATIONS_TABLE_NAME: {"days_to_keep": 14, "field_to_check": "CreatedAt"},
-    RELEVANCIES_TABLE_NAME: {"days_to_keep": 7, "field_to_check": "CreatedAt"},
-    PROBLEMS_TABLE_NAME: {"days_to_keep": 14, "field_to_check": "CreatedAt"},
+    ACTIVITIES_TABLE_NAME: {"time_value_to_keep": 4, "time_unit_to_keep": "days", "field_to_check": "CreatedAt"},
+    NOTIFICATIONS_TABLE_NAME: {"time_value_to_keep": 14, "time_unit_to_keep": "days", "field_to_check": "CreatedAt"},
+    RELEVANCIES_TABLE_NAME: {"time_value_to_keep": 7, "time_unit_to_keep": "days", "field_to_check": "CreatedAt"},
+    PROBLEMS_TABLE_NAME: {"time_value_to_keep": 14, "time_unit_to_keep": "days", "field_to_check": "CreatedAt"},
+    CONTRACTS_TABLE_NAME: {"time_value_to_keep": 24, "time_unit_to_keep": "hours", "field_to_check": "EndAt"},
 }
 
 # --- Helper Functions ---
@@ -110,19 +112,18 @@ def initialize_airtable_tables() -> Optional[Dict[str, Table]]:
 def delete_old_records(
     table_object: Table,
     table_name: str,
-    days_to_keep: int,
+    time_value_to_keep: int,
+    time_unit_to_keep: str, # "days" or "hours"
     date_field: str,
     dry_run: bool
 ) -> int:
-    """Deletes records from the given table older than `days_to_keep`."""
-    log.info(f"{LogColors.HEADER}--- Cleaning table: {table_name} (keeping last {days_to_keep} days) ---{LogColors.ENDC}")
+    """Deletes records from the given table older than `time_value_to_keep` `time_unit_to_keep`."""
+    log.info(f"{LogColors.HEADER}--- Cleaning table: {table_name} (keeping last {time_value_to_keep} {time_unit_to_keep}) ---{LogColors.ENDC}")
     
-    # Airtable's NOW() is UTC. CreatedAt is also UTC.
-    # We want to delete records where CreatedAt < (NOW() - days_to_keep)
-    # Formula: IS_BEFORE({DateField}, DATEADD(NOW(), -{days_to_keep}, 'days'))
-    # For calculating dates for comparison or logging, ensure timezone awareness if needed.
-    # The formula itself uses Airtable's NOW() which is UTC.
-    formula = f"IS_BEFORE({{{date_field}}}, DATEADD(NOW(), -{days_to_keep}, 'days'))"
+    # Airtable's NOW() is UTC. Date fields are also typically UTC.
+    # We want to delete records where DateField < (NOW() - time_value_to_keep time_unit_to_keep)
+    # Formula: IS_BEFORE({DateField}, DATEADD(NOW(), -{time_value_to_keep}, '{time_unit_to_keep}'))
+    formula = f"IS_BEFORE({{{date_field}}}, DATEADD(NOW(), -{time_value_to_keep}, '{time_unit_to_keep}'))"
     
     log.info(f"Using formula: {formula}")
     
@@ -131,7 +132,7 @@ def delete_old_records(
         old_records = table_object.all(formula=formula) # Fetch all fields, will include 'id'
         
         if not old_records:
-            log.info(f"No records older than {days_to_keep} days found in {table_name}.")
+            log.info(f"No records older than {time_value_to_keep} {time_unit_to_keep} found in {table_name}.")
             return 0
             
         records_to_delete_ids = [record['id'] for record in old_records]
@@ -369,7 +370,8 @@ def main(dry_run: bool):
                 deleted_in_table = delete_old_records(
                     tables[table_name],
                     table_name,
-                    config["days_to_keep"],
+                    config["time_value_to_keep"],
+                    config["time_unit_to_keep"],
                     config["field_to_check"],
                     dry_run
                 )
