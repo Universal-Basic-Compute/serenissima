@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { getCurrentCitizenUsername } from '@/lib/utils/walletUtils'; // Import for current user
 import { eventBus, EventTypes } from '@/lib/utils/eventBus'; // Import eventBus
 // Citizen type might still be needed if 'citizen' prop has more fields than CitizenRelevanciesList expects for formatting
@@ -1077,7 +1077,35 @@ Your response:`;
   };
   
   // Use citizen.socialClass (camelCase)
-  const socialClassStyle = getSocialClassColor(citizen.socialClass); 
+  const socialClassStyle = getSocialClassColor(citizen.socialClass);
+
+  const coatOfArmsSrc = useMemo(() => {
+    if (!citizen?.coatOfArmsImageUrl) {
+      // If coatOfArmsImageUrl is null, undefined, or empty,
+      // src will be undefined, and onError will handle the fallback.
+      return undefined;
+    }
+
+    const url = citizen.coatOfArmsImageUrl;
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url; // Already a full URL
+    }
+
+    // If it starts with a slash, assume it's a path from the backend root
+    // e.g., /public_assets/images/coat-of-arms/file.png or /public/assets/images/coat-of-arms/file.png
+    if (url.startsWith('/')) {
+      const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://backend.serenissima.ai';
+      return `${backendUrl}${url}`;
+    }
+    
+    // If it's a relative path not starting with '/' (e.g., "filename.png" or "folder/filename.png")
+    // This case is ambiguous. For maximum safety and to rely on the onError for a consistent default,
+    // we return the URL as is. If it's not a valid image source, onError will trigger.
+    // Alternatively, one could attempt to construct a full URL based on a convention,
+    // but that might be risky if the convention isn't universally followed for these paths.
+    return url; 
+  }, [citizen?.coatOfArmsImageUrl]);
   
   return (
     <div
@@ -1621,10 +1649,10 @@ Your response:`;
               )}
               
               {/* Coat of arms overlay in the bottom right corner */}
-              {citizen.coatOfArmsImageUrl && (
+              {citizen.coatOfArmsImageUrl && ( // Keep this check to only render div if URL might exist
                 <div className="absolute bottom-3 right-3 w-20 h-20 rounded-full overflow-hidden border-2 border-amber-600 shadow-lg bg-amber-100 z-10"> {/* Increased size and added z-10 */}
                   <img 
-                    src={citizen.coatOfArmsImageUrl}
+                    src={coatOfArmsSrc} // Use the memoized and processed URL
                     alt="Coat of Arms"
                     className="w-full h-full object-cover"
                     onError={(e) => {
