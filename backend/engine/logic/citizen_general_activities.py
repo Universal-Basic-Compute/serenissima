@@ -1900,12 +1900,19 @@ def dispatch_specific_activity_request(
         first_activity_of_chain = try_create_bid_on_land_chain(
             tables,
             citizen_record_full,
+            activity_type, # Pass the actual activity_type
             activity_parameters if activity_parameters is not None else {},
-            api_base_url, # Pass api_base_url
-            transport_api_url # Pass transport_api_url
+            now_venice_dt, # Pass now_venice_dt
+            now_utc_dt,    # Pass now_utc_dt
+            transport_api_url, # Pass transport_api_url
+            api_base_url       # Pass api_base_url
         )
-        if first_activity_of_chain and isinstance(first_activity_of_chain, dict) and 'fields' in first_activity_of_chain:
+        if first_activity_of_chain and isinstance(first_activity_of_chain, dict) and 'fields' in first_activity_of_chain: # Check if it's a single activity record
             return {"success": True, "message": f"Bid on land endeavor (originally {original_activity_type}) initiated for {citizen_name}. First activity: {first_activity_of_chain['fields'].get('Type', 'N/A')}.", "activity": first_activity_of_chain['fields']}
+        elif first_activity_of_chain and isinstance(first_activity_of_chain, list) and first_activity_of_chain: # Check if it's a list of activities
+             # Assuming the creator returns a list, and we want the fields of the first one
+            first_activity_fields = first_activity_of_chain[0] if isinstance(first_activity_of_chain[0], dict) else {}
+            return {"success": True, "message": f"Bid on land endeavor (originally {original_activity_type}) initiated for {citizen_name}. First activity: {first_activity_fields.get('Type', 'N/A')}.", "activity": first_activity_fields}
         else:
             log.warning(f"bid_on_land_activity_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
             return {"success": False, "message": f"Could not initiate 'bid_on_land' (originally {original_activity_type}) endeavor for {citizen_name}.", "activity": None, "reason": "bid_on_land_creation_failed"}
