@@ -41,6 +41,33 @@ export async function GET(request: Request) {
     
     const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
     const contractsTable = airtable(CONTRACTS_TABLE);
+    
+    // Cache for citizen details to avoid refetching for the same username within a single request
+    const citizenDetailsCache: Map<string, any> = new Map();
+    const serverSideFetchBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+    // Helper function to fetch citizen details
+    const getCitizenDetails = async (username: string | null | undefined) => {
+      if (!username) return null;
+      if (citizenDetailsCache.has(username)) {
+        return citizenDetailsCache.get(username);
+      }
+      try {
+        const citizenApiUrl = new URL(`/api/citizens/${encodeURIComponent(username)}`, serverSideFetchBaseUrl);
+        const response = await fetch(citizenApiUrl.toString());
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.citizen) {
+            citizenDetailsCache.set(username, data.citizen);
+            return data.citizen;
+          }
+        }
+      } catch (e) {
+        console.error(`Error fetching details for citizen ${username}:`, e);
+      }
+      citizenDetailsCache.set(username, null); // Cache null if fetch fails to avoid retrying
+      return null;
+    };
 
     // Fetch all resource type definitions for enrichment
     let resourceTypeDefinitions: Map<string, any> = new Map();
@@ -89,10 +116,13 @@ export async function GET(request: Request) {
     }
     
     const filterByFormula = formulaParts.length > 0 ? `AND(${formulaParts.join(', ')})` : '';
+    
     console.log('%c GET /api/contracts request received', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     console.log('Query parameters (filters):', loggableFilters);
     if (filterByFormula) {
       console.log('Applying Airtable filter formula:', filterByFormula);
+    } else {
+      console.log('No specific filters applied, fetching all (or default sorted/limited) contracts.');
     }
     
     // Query Airtable
@@ -124,50 +154,71 @@ export async function GET(request: Request) {
         const resourceTypeId = record.get('ResourceType') || 'unknown';
         const resourceDef = resourceTypeDefinitions.get(resourceTypeId);
         const formattedResourceType = resourceTypeId.toLowerCase().replace(/\s+/g, '_');
+
+        const sellerUsername = record.get('Seller') as string | undefined;
+        const buyerUsername = record.get('Buyer') as string | undefined;
+
+        let sellerName = sellerUsername;
+        let buyerName = buyerUsername;
+
+        if (sellerUsername) {
+          const sellerDetails = await getCitizenDetails(sellerUsername);
+          if (sellerDetails) {
+            sellerName = `${sellerDetails.firstName || ''} ${sellerDetails.lastName || ''}`.trim() || sellerUsername;
+          }
+        }
+        if (buyerUsername) {
+          const buyerDetails = await getCitizenDetails(buyerUsername);
+          if (buyerDetails) {
+            buyerName = `${buyerDetails.firstName || ''} ${buyerDetails.lastName || ''}`.trim() || buyerUsername;
+          }
+        }
         
         const contractData: Record<string, any> = {
-          id: record.id,
-          contractId: record.get('ContractId'),
-          type: record.get('Type'),
-          buyer: record.get('Buyer'),
-          seller: record.get('Seller'),
-          resourceType: resourceTypeId,
-          resourceName: resourceDef?.name || resourceTypeId,
-          resourceCategory: resourceDef?.category || 'Unknown',
-          resourceSubCategory: resourceDef?.subCategory || null,
-          resourceTier: resourceDef?.tier ?? null,
-          resourceDescription: resourceDef?.description || '',
-          resourceImportPrice: resourceDef?.importPrice ?? 0,
-          resourceLifetimeHours: resourceDef?.lifetimeHours ?? null,
-          resourceConsumptionHours: resourceDef?.consumptionHours ?? null,
-          imageUrl: resourceDef?.icon ? `/resources/${resourceDef.icon}` : `/resources/${formattedResourceType}.png`,
-          buyerBuilding: record.get('BuyerBuilding'),
-          sellerBuilding: record.get('SellerBuilding'),
-          price: record.get('PricePerResource'), 
-          amount: record.get('TargetAmount'), 
-          asset: record.get('Asset'), 
-          assetType: record.get('AssetType'), 
-          createdAt: record.get('CreatedAt'),
-          endAt: record.get('EndAt'),
-          status: record.get('Status') || 'active',
-          notes: record.get('Notes'), 
-          location: null
+          // Use ContractId as 'id' for frontend consistency, include airtableRecordId for debugging/direct ops
+          id: record.get('ContractId') || record.id, 
+          airtableRecordId: record.id,
+          contractId: record.get('ContractId'), // Keep original ContractId field as well
+          Type: record.get('Type'), // Keep original casing from Airtable for direct field names
+          Buyer: buyerUsername, // Original Buyer username
+          Seller: sellerUsername, // Original Seller username
+          BuyerName: buyerName, // Enriched name
+          SellerName: sellerName, // Enriched name
+          ResourceType: resourceTypeId,
+          ResourceName: resourceDef?.name || resourceTypeId, // Enriched
+          ResourceCategory: resourceDef?.category || 'Unknown', // Enriched
+          ResourceSubCategory: resourceDef?.subCategory || null, // Enriched
+          ResourceTier: resourceDef?.tier ?? null, // Enriched
+          ResourceDescription: resourceDef?.description || '', // Enriched
+          ResourceImportPrice: resourceDef?.importPrice ?? 0, // Enriched
+          ResourceLifetimeHours: resourceDef?.lifetimeHours ?? null, // Enriched
+          ResourceConsumptionHours: resourceDef?.consumptionHours ?? null, // Enriched
+          ImageUrl: resourceDef?.icon ? `/resources/${resourceDef.icon}` : `/resources/${formattedResourceType}.png`, // Enriched
+          BuyerBuilding: record.get('BuyerBuilding'),
+          SellerBuilding: record.get('SellerBuilding'),
+          PricePerResource: record.get('PricePerResource'), // Keep original casing
+          TargetAmount: record.get('TargetAmount'), // Keep original casing
+          Asset: record.get('Asset'), 
+          AssetType: record.get('AssetType'), 
+          CreatedAt: record.get('CreatedAt'),
+          EndAt: record.get('EndAt'),
+          Status: record.get('Status') || 'active',
+          Notes: record.get('Notes'), 
+          Title: record.get('Title'), // Added Title
+          Description: record.get('Description'), // Added Description
+          UpdatedAt: record.get('UpdatedAt'), // Added UpdatedAt
+          ExecutedAt: record.get('ExecutedAt'), // Added ExecutedAt
+          location: null // Location enrichment logic remains
         };
         
-        if (contractData.sellerBuilding) {
-          const coordinates = parseBuildingCoordinates(contractData.sellerBuilding);
+        if (contractData.SellerBuilding) { // Use SellerBuilding (original casing)
+          const coordinates = parseBuildingCoordinates(contractData.SellerBuilding);
           if (coordinates) {
             contractData.location = coordinates;
           } else {
             try {
-              // Détermine l'URL de base pour les appels fetch côté serveur.
-              // En développement, cela devrait être http://localhost:3000.
-              // En production, NEXT_PUBLIC_BASE_URL doit être l'URL canonique de l'application.
-              const serverSideFetchBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-              const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(contractData.sellerBuilding)}`, serverSideFetchBaseUrl);
-              
-              console.log(`[contracts GET] Tentative de récupération des détails du bâtiment pour ${contractData.sellerBuilding} depuis ${buildingUrl.toString()}`);
-              
+              const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(contractData.SellerBuilding)}`, serverSideFetchBaseUrl);
+              console.log(`[contracts GET] Fetching building details for ${contractData.SellerBuilding} from ${buildingUrl.toString()}`);
               const buildingResponse = await fetch(buildingUrl.toString(), {
                 headers: {
                   'Content-Type': 'application/json',
