@@ -5,11 +5,13 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 interface BackgroundMusicProps {
   initialVolume?: number; // 0 to 1
   autoplay?: boolean;
+  isAppReady?: boolean; // Nouvelle propriété pour contrôler le chargement
 }
 
 const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ 
   initialVolume = 0.24, // Default prop volume, will be overridden by localStorage if available
-  autoplay = true 
+  autoplay = true,
+  isAppReady = false // Par défaut à false, le parent doit explicitement le passer à true
 }) => {
   const [isPlaying, setIsPlaying] = useState(autoplay);
   const [volume, setVolume] = useState(() => {
@@ -78,8 +80,19 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       }
     };
 
-    loadTracks();
-  }, []);
+    if (isAppReady) {
+      console.log('[BackgroundMusic] App is ready, loading tracks.');
+      loadTracks();
+    } else {
+      console.log('[BackgroundMusic] App not ready, deferring track loading.');
+      // Optionnel: vous pouvez mettre setIsLoading(false) ici si vous ne voulez pas afficher "Loading music..."
+      // tant que l'application n'est pas prête. Actuellement, il restera sur "Loading music..."
+      // jusqu'à ce que isAppReady devienne true et que loadTracks() soit appelé.
+      // Si vous voulez un état "En attente de l'application..." :
+      // setIsLoading(false); // Et ajuster le message dans le rendu.
+      // Pour l'instant, laissons le comportement actuel où il attendra isAppReady.
+    }
+  }, [isAppReady]); // Déclenche l'effet si isAppReady change
 
   // Play a random track
   const playRandomTrack = useCallback(() => {
