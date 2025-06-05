@@ -4,6 +4,43 @@ import React, { createContext, useContext, ReactNode, useState, useEffect } from
 import { useWallet } from '@/lib/hooks/useWallet';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus'; // Added import
 
+// Normalize profile data to ensure consistent casing (camelCase)
+// Moved outside the component to allow export
+export const normalizeProfileData = (profile: any): any => {
+  if (!profile || typeof profile !== 'object') { // Handle null or non-object input
+    console.log('[WalletProvider] normalizeProfileData received null or non-object, returning null.');
+    return null;
+  }
+  const normalized = { ...profile };
+
+  const fieldsToNormalize = [
+    { pascal: 'SocialClass', camel: 'socialClass' },
+    { pascal: 'FirstName', camel: 'firstName' },
+    { pascal: 'LastName', camel: 'lastName' },
+    { pascal: 'CoatOfArmsImageUrl', camel: 'coatOfArmsImageUrl' },
+    { pascal: 'FamilyMotto', camel: 'familyMotto' },
+    // Ducats is special due to existing handling, ensure ducats (lowercase) is primary
+  ];
+
+  fieldsToNormalize.forEach(field => {
+    if (profile[field.pascal] !== undefined && profile[field.camel] === undefined) {
+      normalized[field.camel] = profile[field.pascal];
+      // delete normalized[field.pascal]; // Optional: remove original
+    }
+  });
+
+  // Handle Ducats: prefer 'ducats', ensure it exists
+  if (profile.Ducats !== undefined && profile.ducats === undefined) {
+    normalized.ducats = profile.Ducats;
+  } else if (profile.ducats !== undefined) {
+    normalized.ducats = profile.ducats; // Ensure it's there if already lowercase
+  }
+  // PlayerProfile expects 'Ducats' prop, but WalletButton passes 'citizenProfile.ducats'.
+  // To simplify, WalletProvider will ensure 'citizenProfile.ducats' (lowercase) is the source of truth.
+
+  return normalized;
+};
+
 // Create a context for the wallet
 interface WalletContextType {
   walletAddress: string | null;
@@ -24,42 +61,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [citizenProfile, setCitizenProfile] = useState<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-
-  // Normalize profile data to ensure consistent casing (camelCase)
-export const normalizeProfileData = (profile: any): any => {
-    if (!profile || typeof profile !== 'object') { // Handle null or non-object input
-      console.log('[WalletProvider] normalizeProfileData received null or non-object, returning null.');
-      return null;
-    }
-    const normalized = { ...profile };
-
-    const fieldsToNormalize = [
-      { pascal: 'SocialClass', camel: 'socialClass' },
-      { pascal: 'FirstName', camel: 'firstName' },
-      { pascal: 'LastName', camel: 'lastName' },
-      { pascal: 'CoatOfArmsImageUrl', camel: 'coatOfArmsImageUrl' },
-      { pascal: 'FamilyMotto', camel: 'familyMotto' },
-      // Ducats is special due to existing handling, ensure ducats (lowercase) is primary
-    ];
-
-    fieldsToNormalize.forEach(field => {
-      if (profile[field.pascal] !== undefined && profile[field.camel] === undefined) {
-        normalized[field.camel] = profile[field.pascal];
-        // delete normalized[field.pascal]; // Optional: remove original
-      }
-    });
-
-    // Handle Ducats: prefer 'ducats', ensure it exists
-    if (profile.Ducats !== undefined && profile.ducats === undefined) {
-      normalized.ducats = profile.Ducats;
-    } else if (profile.ducats !== undefined) {
-      normalized.ducats = profile.ducats; // Ensure it's there if already lowercase
-    }
-    // PlayerProfile expects 'Ducats' prop, but WalletButton passes 'citizenProfile.ducats'.
-    // To simplify, WalletProvider will ensure 'citizenProfile.ducats' (lowercase) is the source of truth.
-
-    return normalized;
-  };
 
   // Centralized function to set citizen profile state, localStorage, and emit event
   const setAndLogCitizenProfile = (profile: any, source: string) => {
