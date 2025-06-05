@@ -103,7 +103,7 @@ const WeatherTimeDisplay: React.FC = () => {
 
   return (
     <div 
-        className="fixed bottom-4 left-20 bg-black/70 text-white px-3 py-2 rounded-lg shadow-md flex items-center space-x-2 text-xs z-40"
+        className="fixed bottom-4 left-[130px] bg-black/70 text-white px-3 py-2 rounded-lg shadow-md flex items-center space-x-2 text-xs z-40"
         title={getWeatherDescription(currentWeather)}
     >
       {getWeatherIcon(currentWeather)}
