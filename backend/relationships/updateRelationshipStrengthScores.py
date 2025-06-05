@@ -738,7 +738,8 @@ def update_relationship_scores(
                     'StrengthScore': updated_strength_score,
                     'TrustScore': updated_trust_score,
                     'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(), # Use VENICE_TIMEZONE
-                    'Notes': notes_string
+                    'Notes': notes_string,
+                    'Status': 'Active'  # Assurer que le statut est Actif lors de la mise à jour
                 })
                 updated_count += 1
                 processed_scores_for_stats[target_username] = score_to_add # For stats

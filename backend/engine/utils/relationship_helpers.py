@@ -151,10 +151,11 @@ def update_trust_score_for_activity(
             payload = {
                 'TrustScore': new_trust_score,
                 'LastInteraction': datetime.now(VENICE_TIMEZONE).isoformat(),
-                'Notes': updated_notes
+                'Notes': updated_notes,
+                'Status': 'Active'  # Assurer que le statut est Actif lors de la mise à jour
             }
             tables['relationships'].update(relationship_record['id'], payload)
-            log.info(f"{LogColors.OKGREEN}TrustScore (0-100) mis à jour pour {user1}-{user2}: {current_trust_score:.2f} -> {new_trust_score:.2f}. Notes: {interaction_note_key}{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}TrustScore (0-100) mis à jour pour {user1}-{user2}: {current_trust_score:.2f} -> {new_trust_score:.2f}. Statut défini sur 'Active'. Notes: {interaction_note_key}{LogColors.ENDC}")
         else:
             # Créer une nouvelle relation
             # Commencer avec le score neutre par défaut, puis appliquer le premier changement
