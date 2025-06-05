@@ -1006,6 +1006,18 @@ number => {
   // Effect for initial setup: setting loading states and starting timers/image load/tip selection
   useEffect(() => {
     // Client-side selection of initial loading image
+    const loadingImageFiles = [ // Define loadingImageFiles here
+      'renaissance-architectural-construction.png',
+      'renaissance-venetian-merchant-s-ledger.png',
+      'secretive-venetian-council-of-ten-meeting.png',
+      '1.png',
+      '2.png',
+      '3.png',
+      '4.png',
+      '5.png',
+      '6.png',
+      '7.png'
+    ];
     const selectInitialLoadingImage = () => {
       if (loadingImageFiles.length === 0) return null;
       const cache = getLoadingImageCache(); // Assumes getLoadingImageCache is defined above or globally
