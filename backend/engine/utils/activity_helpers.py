@@ -7,6 +7,8 @@ import requests
 import pytz
 import math # Added for Haversine distance
 import os # Added import for os module
+import textwrap # For log_header
+from colorama import Fore, Style # For log_header
 from typing import Dict, List, Optional, Any, Tuple, Union # Added Tuple and Union
 from pyairtable import Table # Import Table for type hinting
 from dateutil import parser as dateutil_parser # For robust date parsing
@@ -1360,3 +1362,22 @@ def update_citizen_ducats(
         import traceback
         log.error(traceback.format_exc())
         return False
+
+def log_header(message: str, color_code: str = Fore.CYAN):
+    """Prints a header message with a colorful border if colorama is available."""
+    # colorama_available check is implicit now, as Fore/Style would fail on import if not present
+    border_char = "═"
+    side_char = "║"
+    corner_tl = "╔"
+    corner_tr = "╗"
+    corner_bl = "╚"
+    corner_br = "╝"
+    
+    message_len = len(message)
+    # Adjust width dynamically or keep fixed, for now fixed at 80
+    width = 80 
+    
+    # Ensure Style.BRIGHT and Style.RESET_ALL are used correctly
+    print(f"\n{color_code}{Style.BRIGHT}{corner_tl}{border_char * (width - 2)}{corner_tr}{Style.RESET_ALL}")
+    print(f"{color_code}{Style.BRIGHT}{side_char} {message.center(width - 4)} {side_char}{Style.RESET_ALL}")
+    print(f"{color_code}{Style.BRIGHT}{corner_bl}{border_char * (width - 2)}{corner_br}{Style.RESET_ALL}\n")

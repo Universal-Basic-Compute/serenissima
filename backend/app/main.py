@@ -19,10 +19,10 @@ from typing import Optional, List, Dict, Any # Added Dict, Any
 import logging
 import pytz
 from urllib3.util.retry import Retry
-from colorama import Fore, Style # For log_header color
+# from colorama import Fore, Style # No longer needed here directly
 
 # Import helpers
-from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors # LogColors will be used as Fore
+from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors, log_header # Added log_header
 
 # Add the current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -120,15 +120,9 @@ log = logging.getLogger(__name__)
 # but activity_helpers.py is more suitable for such a utility.
 # Let's assume it's NOT in activity_helpers.py for now and define a simple one.
 # If it IS in activity_helpers.py, the import above should be:
-# from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors as Fore, log_header
+# from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors, log_header
 
-def log_header(message: str, color_code: str = Fore.CYAN): # Simple version
-    """Prints a header message."""
-    # This is a simplified version. If the colorful one is needed, ensure colorama is handled.
-    # For now, just print. The Fore.MAGENTA will work if colorama is imported and Fore is LogColors.
-    # The flake8 error was about Fore, so let's ensure it's aliased.
-    print(f"\n{color_code}--- {message} ---{Style.RESET_ALL if 'Style' in globals() else ''}\n")
-
+# log_header is now imported from activity_helpers.py
 
 # Add CORS middleware
 app.add_middleware(
@@ -2941,7 +2935,7 @@ async def try_create_activity_endpoint(request_data: TryCreateActivityRequest):
     Attempts to create a specific activity for a citizen.
     Delegates logic to the game engine.
     """
-    log_header(f"Received request to try-create activity: {request_data.activityType} for {request_data.citizenUsername}", color_code=LogColors.HEADER) # Use LogColors.HEADER or specific color
+    log_header(f"Received request to try-create activity: {request_data.activityType} for {request_data.citizenUsername}", color_code=LogColors.HEADER)
     
     try:
         # Initialize Airtable tables (consider moving to a dependency injection pattern for larger apps)

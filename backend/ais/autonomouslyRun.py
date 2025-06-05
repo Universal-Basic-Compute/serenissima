@@ -33,7 +33,7 @@ if PROJECT_ROOT not in sys.path:
 
 # Import shared utilities if available, e.g., for VENICE_TIMEZONE
 try:
-    from backend.engine.utils.activity_helpers import VENICE_TIMEZONE, _escape_airtable_value
+    from backend.engine.utils.activity_helpers import VENICE_TIMEZONE, _escape_airtable_value, log_header
 except ImportError:
     # Fallback if utils are not found or script is run standalone
     import pytz
@@ -164,28 +164,7 @@ except ImportError:
         BRIGHT = ''
         RESET_ALL = '' # Autoreset handles this, but keep for compatibility
 
-def log_header(message: str, color_code: str = Fore.CYAN):
-    """Prints a header message with a colorful border if colorama is available."""
-    if colorama_available:
-        border_char = "═"
-        side_char = "║"
-        corner_tl = "╔"
-        corner_tr = "╗"
-        corner_bl = "╚"
-        corner_br = "╝"
-        
-        message_len = len(message)
-        # Adjust width dynamically or keep fixed, for now fixed at 80
-        width = 80 
-        
-        print(f"\n{color_code}{Style.BRIGHT}{corner_tl}{border_char * (width - 2)}{corner_tr}")
-        print(f"{color_code}{Style.BRIGHT}{side_char} {message.center(width - 4)} {side_char}")
-        print(f"{color_code}{Style.BRIGHT}{corner_bl}{border_char * (width - 2)}{corner_br}{Style.RESET_ALL}\n")
-    else:
-        border = "=" * (len(message) + 4)
-        print(f"\n{border}")
-        print(f"  {message}  ")
-        print(f"{border}\n")
+# log_header is now imported from activity_helpers
 
 # --- Helper function to count entities in API response ---
 
