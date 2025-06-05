@@ -172,6 +172,40 @@ export async function POST(request: Request) {
       console.log(`[API /activities/try-create] Processing cancel_land_offer:`, activityParameters);
     }
     // buy_available_land est déjà loggué plus haut
+
+    if (activityType === 'adjust_land_lease_price') {
+      console.log(`[API /activities/try-create] Processing adjust_land_lease_price:`, activityParameters);
+    }
+    if (activityType === 'adjust_building_rent_price') {
+      console.log(`[API /activities/try-create] Processing adjust_building_rent_price:`, activityParameters);
+    }
+    if (activityType === 'adjust_building_lease_price') {
+      console.log(`[API /activities/try-create] Processing adjust_building_lease_price:`, activityParameters);
+    }
+    if (activityType === 'bid_on_building') {
+      console.log(`[API /activities/try-create] Processing bid_on_building:`, activityParameters);
+    }
+    if (activityType === 'respond_to_building_bid') {
+      console.log(`[API /activities/try-create] Processing respond_to_building_bid:`, activityParameters);
+    }
+    if (activityType === 'withdraw_building_bid') {
+      console.log(`[API /activities/try-create] Processing withdraw_building_bid:`, activityParameters);
+    }
+    if (activityType === 'manage_markup_buy_contract') {
+      console.log(`[API /activities/try-create] Processing manage_markup_buy_contract:`, activityParameters);
+    }
+    if (activityType === 'manage_storage_query_contract') {
+      console.log(`[API /activities/try-create] Processing manage_storage_query_contract:`, activityParameters);
+    }
+    if (activityType === 'adjust_business_wages') {
+      console.log(`[API /activities/try-create] Processing adjust_business_wages:`, activityParameters);
+    }
+    if (activityType === 'change_business_manager') {
+      console.log(`[API /activities/try-create] Processing change_business_manager:`, activityParameters);
+    }
+    if (activityType === 'update_citizen_profile') {
+      console.log(`[API /activities/try-create] Processing update_citizen_profile:`, activityParameters);
+    }
     
     // Endpoint générique sur le moteur Python pour initier des activités/actions
     let parsedPythonEngineUrl: URL;
