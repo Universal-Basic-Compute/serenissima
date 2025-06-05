@@ -18,6 +18,11 @@ import requests # Added for API calls
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
+# Add project root to sys.path for consistent imports
+PROJECT_ROOT_DELEGATE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if PROJECT_ROOT_DELEGATE not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT_DELEGATE)
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
