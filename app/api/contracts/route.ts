@@ -175,12 +175,12 @@ export async function GET(request: Request) {
         }
         
         const contractData: Record<string, any> = {
-          // Use ContractId as 'id' for frontend consistency, include airtableRecordId for debugging/direct ops
-          id: record.get('ContractId') || record.id, 
-          airtableRecordId: record.id,
-          contractId: record.get('ContractId'), // Keep original ContractId field as well
-          Type: record.get('Type'), // Keep original casing from Airtable for direct field names
-          Buyer: buyerUsername, // Original Buyer username
+          // Use Airtable record.id as 'id' for fetching activities, keep ContractId for display/logic
+          id: record.id, 
+          airtableRecordId: record.id, // Redundant but explicit
+          contractId: record.get('ContractId'), 
+          Type: record.get('Type'), 
+          Buyer: buyerUsername, 
           Seller: sellerUsername, // Original Seller username
           BuyerName: buyerName, // Enriched name
           SellerName: sellerName, // Enriched name

@@ -108,8 +108,20 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [refreshKey, setRefreshKey] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   // Combined state for all relevant land contracts (listings and offers)
-  const [activeLandContracts, setActiveLandContracts] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // Extend contract type to include activities and loading state for them
+  interface EnrichedContract extends Polygon { // Assuming Polygon is a base or similar type, adjust if needed
+    activities?: any[];
+    isLoadingActivities?: boolean;
+    // Add other contract-specific fields if not in Polygon type
+    id: string; // Ensure id is present
+    Type?: string;
+    Seller?: string;
+    Buyer?: string;
+    PricePerResource?: number;
+    // ... any other fields from your contract structure
+  }
+  const [activeLandContracts, setActiveLandContracts] = useState<EnrichedContract[]>([]);
+  const [isLoading, setIsLoading] = useState(false); // Overall loading for contracts
   const [offerAmount, setOfferAmount] = useState<number>(200000); // Default offer amount, start of slider range
   const [showOfferInput, setShowOfferInput] = useState<boolean>(false);
   // showPurchaseConfirmation and isPurchasing might be reused or adapted if direct purchase confirmation is kept for some flow
@@ -325,16 +337,44 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             if (response.status === 404) {
               console.log(`No active contracts found for land ${selectedPolygonId} (API returned 404).`);
               setActiveLandContracts([]);
-              return; // Explicitly return to avoid proceeding to .finally() too early in this path
+              setIsLoading(false); // Ensure loading is set to false
+              return;
             }
             throw new Error(`Failed to fetch land contracts: ${response.status} ${response.statusText}`);
           }
 
           const responseData = await response.json();
+          let baseContracts: EnrichedContract[] = [];
           
           if (responseData.success && Array.isArray(responseData.contracts)) {
             console.log(`Found ${responseData.contracts.length} active contract(s) for land ${selectedPolygonId}:`, responseData.contracts);
-            setActiveLandContracts(responseData.contracts);
+            baseContracts = responseData.contracts.map((c: any) => ({ 
+              ...c, 
+              isLoadingActivities: true, // Initialize loading state for activities
+              activities: [] 
+            }));
+            setActiveLandContracts(baseContracts); // Set base contracts first
+
+            // Now fetch activities for these contracts
+            const contractsWithActivitiesPromises = baseContracts.map(async (contract) => {
+              try {
+                const actResponse = await fetch(`${API_BASE_URL}/api/contracts/${contract.id}/activities`);
+                if (actResponse.ok) {
+                  const actData = await actResponse.json();
+                  if (actData.success && actData.activities) {
+                    return { ...contract, activities: actData.activities, isLoadingActivities: false };
+                  }
+                }
+                return { ...contract, activities: [], isLoadingActivities: false }; // No activities or error
+              } catch (activityError) {
+                console.error(`Error fetching activities for contract ${contract.id}:`, activityError);
+                return { ...contract, activities: [], isLoadingActivities: false };
+              }
+            });
+
+            const finalContracts = await Promise.all(contractsWithActivitiesPromises);
+            setActiveLandContracts(finalContracts);
+
           } else {
             console.log(`No active contracts or unexpected data format for land ${selectedPolygonId}:`, responseData);
             setActiveLandContracts([]);
@@ -343,19 +383,25 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             }
           }
         } catch (error) {
-          console.error(`Error fetching land contracts (attempt ${4 - retries}/3):`, error);
+          console.error(`Error fetching land contracts or activities (attempt ${4 - retries}/3):`, error);
           if (retries > 1) {
             console.log(`Retrying in ${delay}ms...`);
             await new Promise(resolve => setTimeout(resolve, delay));
             return fetchActiveLandContractsWithRetry(retries - 1, delay * 2);
           } else {
-            console.warn('All retry attempts for land contracts failed.');
+            console.warn('All retry attempts for land contracts/activities failed.');
             setActiveLandContracts([]);
           }
+        } finally {
+          // This finally block might run before async activity fetches complete if not careful.
+          // setIsLoading(false) should be set after all data (contracts + activities) is processed or failed.
+          // The current structure sets it after baseContracts are fetched, then updates with activities.
+          // This is okay if the UI handles isLoadingActivities per contract.
         }
       };
 
       fetchActiveLandContractsWithRetry().finally(() => {
+        // This ensures isLoading is set to false after all attempts for contracts (and their activities)
         setIsLoading(false);
       });
     } else {
