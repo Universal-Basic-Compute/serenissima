@@ -25,15 +25,12 @@ PROJECT_ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'
 if PROJECT_ROOT_PATH not in sys.path:
     sys.path.insert(0, PROJECT_ROOT_PATH)
 
-# Logging functions
-def log_header(message):
-    """Print a header message with a colorful border."""
-    border = "=" * 80
-    print(f"\n{Fore.CYAN}{border}")
-    print(f"{Fore.CYAN}{Style.BRIGHT}{message.center(80)}")
-    print(f"{Fore.CYAN}{border}{Style.RESET_ALL}\n")
+from backend.engine.utils.activity_helpers import log_header as shared_log_header, LogColors # Import shared log_header
 
-def log_section(message):
+# Logging functions
+# log_header is now imported as shared_log_header
+
+def log_section(message): # log_section remains local as it's not in activity_helpers
     """Print a section header with a colorful border."""
     border = "-" * 80
     print(f"\n{Fore.YELLOW}{border}")
@@ -1600,7 +1597,7 @@ Your response must be a JSON object with:
 def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: Optional[str] = None, target_land_id_arg: Optional[str] = None, additional_message_arg: Optional[str] = None, kinos_model_override_arg: Optional[str] = None):
     """Main function to process AI building strategies."""
     model_status = f"override: {kinos_model_override_arg}" if kinos_model_override_arg else "default"
-    log_header(f"AI Building Strategy Process (dry_run={dry_run}, citizen={citizen_username_arg or 'all'}, landId={target_land_id_arg or 'AI choice'}, addMessage='{additional_message_arg or ''}', kinos_model={model_status})")
+    shared_log_header(f"AI Building Strategy Process (dry_run={dry_run}, citizen={citizen_username_arg or 'all'}, landId={target_land_id_arg or 'AI choice'}, addMessage='{additional_message_arg or ''}', kinos_model={model_status})") # Uses default Fore.CYAN
     
     # Import traceback for detailed error logging
     import traceback
@@ -1645,7 +1642,7 @@ def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: 
             print("Skipping AI citizen with no username")
             continue
         
-        log_header(f"Processing AI citizen: {ai_username}")
+        shared_log_header(f"Processing AI citizen: {ai_username}", color_code=LogColors.OKBLUE) # Example with a different color
         
         try:
             # Get lands for the AI to consider (specific land or all lands)
@@ -1825,7 +1822,7 @@ def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: 
         log_data("Strategy results", ai_strategy_results)
     
     # Print final summary
-    log_section("AI Building Strategy Results Summary")
+    shared_log_header("AI Building Strategy Results Summary", color_code=LogColors.HEADER) # Using shared_log_header for section too
     headers = ["AI Citizen", "Status"]
     rows = [[ai_name, "SUCCESS" if success else "FAILED"] for ai_name, success in ai_strategy_results.items()]
     log_table(headers, rows)

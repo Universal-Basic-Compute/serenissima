@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timezone
 import uuid
 
-from backend.engine.utils.activity_helpers import LogColors, get_contract_record
+from backend.engine.utils.activity_helpers import LogColors, get_contract_record, log_header
 # Import create_notification from the new notification_helpers module
 from backend.engine.utils.notification_helpers import create_notification
 
@@ -19,6 +19,7 @@ def process_finalize_manage_markup_buy_contract_fn(tables: dict, activity_record
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
     citizen_username = activity_fields.get('Citizen') # Buyer
 
+    log_header(f"Finalize Markup Buy Contract: {citizen_username}", LogColors.HEADER)
     log.info(f"{LogColors.PROCESS}Processing 'finalize_manage_markup_buy_contract' activity {activity_guid} by {citizen_username}.{LogColors.ENDC}")
 
     try:

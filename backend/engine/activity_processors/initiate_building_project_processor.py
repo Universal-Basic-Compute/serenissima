@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 from pyairtable import Table
-from backend.engine.utils.activity_helpers import _escape_airtable_value, VENICE_TIMEZONE
+from backend.engine.utils.activity_helpers import _escape_airtable_value, VENICE_TIMEZONE, log_header, LogColors
 
 log = logging.getLogger(__name__)
 
@@ -26,6 +26,8 @@ def process_initiate_building_project_fn(
     activity_type = fields.get('Type')
     citizen = fields.get('Citizen')
     details_str = fields.get('Details')
+
+    log_header(f"Initiate Building Project ({activity_type}): {citizen}", LogColors.HEADER)
     
     try:
         details = json.loads(details_str) if details_str else {}

@@ -2,12 +2,30 @@ import os
 import requests
 import argparse
 import pathlib
+import sys # Added for sys.path modification
 from dotenv import load_dotenv
 import mimetypes # Pour déterminer le type MIME si nécessaire, bien que requests le fasse souvent.
 import posixpath # Pour la jonction correcte des segments de chemin d'URL
 
 # Default API URL, can be overridden by env var or arg
 DEFAULT_FASTAPI_URL = "https://backend.serenissima.ai/"
+
+# Add project root to sys.path for backend imports
+backend_scripts_dir = os.path.dirname(__file__)
+project_root_dir = os.path.abspath(os.path.join(backend_scripts_dir, '..', '..'))
+if project_root_dir not in sys.path:
+    sys.path.insert(0, project_root_dir)
+
+try:
+    from backend.engine.utils.activity_helpers import log_header, LogColors
+    # Assuming colorama is already handled by activity_helpers or this script's direct imports
+except ImportError:
+    print("Failed to import log_header from backend.engine.utils.activity_helpers. Ensure PYTHONPATH is set or script is run from project root.")
+    # Define a fallback simple log_header if import fails, so the script can still run
+    def log_header(message, color_code=None): # color_code is unused in this fallback
+        print(f"\n{'=' * 80}\n{message.center(80)}\n{'=' * 80}\n")
+    class LogColors: # Dummy class
+        HEADER = None # Unused in fallback
 
 def upload_file(api_url: str, api_key: str, file_path: str, destination_path: str) -> bool:
     """
@@ -154,6 +172,8 @@ def main():
                         help="La clé API pour l'endpoint de téléversement (par défaut: UPLOAD_API_KEY de .env).")
     
     args = parser.parse_args()
+
+    log_header("Public Asset Upload Script") # Uses default Fore.CYAN
 
     if not args.api_key:
         print("Erreur: La clé API de téléversement est requise. Fournissez-la via --api_key ou la variable d'environnement UPLOAD_API_KEY.")

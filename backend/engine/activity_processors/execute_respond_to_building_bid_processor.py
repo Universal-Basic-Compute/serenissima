@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from backend.engine.utils.activity_helpers import (
     LogColors, get_citizen_record, get_contract_record, get_building_record,
-    VENICE_TIMEZONE
+    VENICE_TIMEZONE, log_header
 )
 # Import create_notification from the new notification_helpers module
 from backend.engine.utils.notification_helpers import create_notification
@@ -24,6 +24,7 @@ def process_execute_respond_to_building_bid_fn(tables: dict, activity_record: di
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
     owner_username = activity_fields.get('Citizen') # Building owner responding
 
+    log_header(f"Execute Respond to Building Bid: {owner_username}", LogColors.HEADER)
     log.info(f"{LogColors.PROCESS}Processing 'execute_respond_to_building_bid' activity {activity_guid} by owner {owner_username}.{LogColors.ENDC}")
 
     try:
