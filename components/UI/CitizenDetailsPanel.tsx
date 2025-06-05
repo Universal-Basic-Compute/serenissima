@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { getCurrentCitizenUsername } from '@/lib/utils/walletUtils'; // Import for current user
+import { eventBus, EventTypes } from '@/lib/utils/eventBus'; // Import eventBus
 // Citizen type might still be needed if 'citizen' prop has more fields than CitizenRelevanciesList expects for formatting
 // import { Citizen } from '@/components/PolygonViewer/types'; 
 import InfoIcon from './InfoIcon';
@@ -84,6 +86,47 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [cachedTransports, setCachedTransports] = useState<Record<string, any[]>>({});
   // State for active tab in the first column
   const [activeLeftTab, setActiveLeftTab] = useState<'relations' | 'citizen'>('relations');
+  // State for current logged-in citizen username
+  const [internalCurrentCitizenUsername, setInternalCurrentCitizenUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleWalletChange = (walletData?: { profile?: { username?: string | null }; isConnected?: boolean; address?: string | null; publicKey?: any; [key: string]: any }) => {
+      console.log('[CitizenDetailsPanel] handleWalletChange received walletData:', JSON.stringify(walletData || {note: "payload was undefined"}, null, 2));
+      let newUsername: string | null = null;
+      const explicitlyDisconnected = walletData && walletData.isConnected === false;
+
+      if (explicitlyDisconnected) {
+        newUsername = null;
+        console.log('[CitizenDetailsPanel] User explicitly disconnected via WALLET_CHANGED event.');
+      } else if (walletData && walletData.profile && typeof walletData.profile.username === 'string' && walletData.profile.username.trim() !== '') {
+        newUsername = walletData.profile.username.trim();
+        console.log('[CitizenDetailsPanel] Username from WALLET_CHANGED event payload (profile):', newUsername);
+      } else {
+        const usernameFromStorage = getCurrentCitizenUsername();
+        console.log('[CitizenDetailsPanel] Username from getCurrentCitizenUsername (fallback or no/invalid profile.username in payload):', usernameFromStorage);
+        newUsername = usernameFromStorage;
+      }
+      
+      if (internalCurrentCitizenUsername !== newUsername) {
+        console.log(`[CitizenDetailsPanel] Updating internalCurrentCitizenUsername from "${internalCurrentCitizenUsername || 'null'}" to "${newUsername || 'null'}"`);
+        setInternalCurrentCitizenUsername(newUsername);
+      } else {
+        console.log(`[CitizenDetailsPanel] Username ("${newUsername || 'null'}") is the same as previous ("${internalCurrentCitizenUsername || 'null'}"). No state update needed.`);
+      }
+    };
+
+    const initialUsernameOnMount = getCurrentCitizenUsername();
+    setInternalCurrentCitizenUsername(initialUsernameOnMount);
+    console.log('[CitizenDetailsPanel] Initial username check on mount:', initialUsernameOnMount || 'null');
+
+    const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, handleWalletChange);
+    console.log('[CitizenDetailsPanel] Emitting REQUEST_WALLET_STATUS to get current wallet state.');
+    eventBus.emit(EventTypes.REQUEST_WALLET_STATUS);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []); // Empty dependency array ensures this runs once on mount and cleans up on unmount.
 
   const getKinosModelForSocialClass = (socialClass?: string): string => {
     const lowerSocialClass = socialClass?.toLowerCase();
@@ -176,29 +219,17 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     setIsLoadingRelevancies(true);
     
     try {
-      // Get current username from localStorage
-      let currentUsername = null;
-      try {
-        const profileStr = localStorage.getItem('citizenProfile');
-        if (profileStr) {
-          const profile = JSON.parse(profileStr);
-          if (profile && profile.username) {
-            currentUsername = profile.username;
-          }
-        }
-      } catch (error) {
-        console.error('Error getting current username:', error);
-      }
-      
-      if (!currentUsername) {
-        console.warn('No current username found, cannot fetch relevancies');
+      // Use internalCurrentCitizenUsername state
+      if (!internalCurrentCitizenUsername) {
+        console.warn('[CitizenDetailsPanel] No current username found (internal state), cannot fetch relevancies for', targetCitizen);
+        setRelevancies([]); // Clear relevancies if user is not logged in
         setIsLoadingRelevancies(false);
         return;
       }
       
       // Fetch relevancies where targetCitizen = opened citizen's username
       // and relevantToCitizen = current user's username or "all"
-      const response = await fetch(`/api/relevancies?targetCitizen=${targetCitizen}&relevantToCitizen=${currentUsername}`);
+      const response = await fetch(`/api/relevancies?targetCitizen=${targetCitizen}&relevantToCitizen=${internalCurrentCitizenUsername}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -292,27 +323,16 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     }
 
     setIsLoadingRelationship(true);
-    let currentUsername = null;
-    try {
-      const profileStr = localStorage.getItem('citizenProfile');
-      if (profileStr) {
-        const profile = JSON.parse(profileStr);
-        if (profile && profile.username) {
-          currentUsername = profile.username;
-        }
-      }
-    } catch (error) {
-      console.error('Error getting current username for relationship:', error);
-    }
-
-    if (!currentUsername) {
-      console.warn('No current username found, cannot fetch relationship');
-      setRelationship(null); 
+    // Use internalCurrentCitizenUsername state
+    if (!internalCurrentCitizenUsername) {
+      console.warn('[CitizenDetailsPanel] No current username found (internal state), cannot fetch relationship with', viewedCitizenUsername);
+      setRelationship(null);
+      setIsLoadingRelationship(false);
       return;
     }
 
     // Avoid fetching relationship with oneself, or handle as a special case
-    if (currentUsername === viewedCitizenUsername) {
+    if (internalCurrentCitizenUsername === viewedCitizenUsername) {
       const selfRelationship = { strengthScore: 100, type: "Self" }; // Use camelCase
       setRelationship(selfRelationship);
       setCachedRelationships(prev => ({ ...prev, [viewedCitizenUsername]: selfRelationship }));
@@ -320,10 +340,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       return;
     }
 
-    // setIsLoadingRelationship(true); // Already set at the beginning of the function
+    // setIsLoadingRelationship(true); // Already set
     try {
       // API should handle finding relationship regardless of (citizen1, citizen2) order
-      const response = await fetch(`/api/relationships?citizen1=${currentUsername}&citizen2=${viewedCitizenUsername}`);
+      const response = await fetch(`/api/relationships?citizen1=${internalCurrentCitizenUsername}&citizen2=${viewedCitizenUsername}`);
       if (response.ok) {
         const data = await response.json();
         // Check if data.relationship exists, even if it's null (which means no relationship found)
@@ -370,49 +390,44 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     try {
       // Always use the regular messages API
       // Use citizen.username, citizen.citizenId (camelCase)
-      console.log(`Fetching messages for citizen ${citizen.username || citizen.citizenId} using /api/messages`); 
+      console.log(`Fetching messages for citizen ${citizen.username || citizen.citizenId} using /api/messages`);
 
-      // Get current citizen from localStorage
-      let currentUsername = 'visitor';
-        const savedProfile = localStorage.getItem('citizenProfile');
-        if (savedProfile) {
-          try {
-            const profile = JSON.parse(savedProfile);
-            if (profile.username) {
-              currentUsername = profile.username;
-            }
-          } catch (error) {
-            console.error('Error parsing citizen profile:', error);
-          }
-        }
+      // Use internalCurrentCitizenUsername state
+      if (!internalCurrentCitizenUsername) {
+        console.warn('[CitizenDetailsPanel] No current username (internal state), cannot fetch message history for', citizen.username || citizen.citizenId);
+        setMessages([]);
+        setIsLoadingHistory(false);
+        setMessagesFetchFailed(true); // Indicate failure due to no user
+        return;
+      }
 
-        const response = await fetch('/api/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            currentCitizen: currentUsername,
-            // Use citizen.username, citizen.citizenId (camelCase)
-            otherCitizen: citizen.username || citizen.citizenId 
-          })
-        });
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentCitizen: internalCurrentCitizenUsername,
+          // Use citizen.username, citizen.citizenId (camelCase)
+          otherCitizen: citizen.username || citizen.citizenId
+        })
+      });
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch message history: ${response.status}`);
-        }
+      if (!response.ok) {
+        throw new Error(`Failed to fetch message history: ${response.status}`);
+      }
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (data.success && data.messages) {
-          // Assuming API returns msg.messageId, msg.sender, msg.content, msg.createdAt (camelCase)
-          const formattedMessages = data.messages.map((msg: any) => ({
-            id: msg.messageId, 
-            role: msg.sender === currentUsername ? 'user' : 'assistant',
-            content: msg.content,
-            timestamp: msg.createdAt 
-          }));
-          setMessages(formattedMessages);
+      if (data.success && data.messages) {
+        // Assuming API returns msg.messageId, msg.sender, msg.content, msg.createdAt (camelCase)
+        const formattedMessages = data.messages.map((msg: any) => ({
+          id: msg.messageId,
+          role: msg.sender === internalCurrentCitizenUsername ? 'user' : 'assistant',
+          content: msg.content,
+          timestamp: msg.createdAt
+        }));
+        setMessages(formattedMessages);
         } else {
           setMessages([]);
         }
@@ -428,20 +443,13 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   // Function to send messages
   const sendMessage = async (content: string) => {
     // Use citizen.citizenId (camelCase)
-    if (!content.trim() || !citizen || !citizen.citizenId) return; 
-    
-    // Get current citizen from localStorage
-    let currentUsername = 'visitor';
-    const savedProfile = localStorage.getItem('citizenProfile');
-    if (savedProfile) {
-      try {
-        const profile = JSON.parse(savedProfile);
-        if (profile.username) {
-          currentUsername = profile.username;
-        }
-      } catch (error) {
-        console.error('Error parsing citizen profile:', error);
-      }
+    if (!content.trim() || !citizen || !citizen.citizenId) return;
+
+    // Use internalCurrentCitizenUsername state
+    if (!internalCurrentCitizenUsername) {
+      alert("You must be logged in to send messages.");
+      console.warn('[CitizenDetailsPanel] Cannot send message, current user not identified (internal state).');
+      return;
     }
     
     // Optimistically add citizen message to UI
@@ -467,9 +475,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sender: currentUsername,
+          sender: internalCurrentCitizenUsername, // Use state variable
           // Use citizen.username, citizen.citizenId (camelCase)
-          receiver: citizen.username || citizen.citizenId, 
+          receiver: citizen.username || citizen.citizenId,
           content: content,
           type: 'message'
         })
@@ -496,12 +504,14 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         // The message will appear for the recipient when they open their chat with the sender.
 
         // After successful primary message send, call Kinos AI
-        if (citizen.username && currentUsername && citizen.username !== currentUsername) {
+        if (citizen.username && internalCurrentCitizenUsername && citizen.username !== internalCurrentCitizenUsername) { // Use state variable
           // Prepare addSystem payload
           let addSystemPayload = null;
-          
+            
           // senderProfile (current user) - moved to outer scope
           let senderProfileObj = null;
+          // Use internalCurrentCitizenUsername to fetch profile if needed, or rely on WalletProvider context
+          // For simplicity, if WalletProvider updates localStorage.citizenProfile, this is fine.
           const savedProfile = localStorage.getItem('citizenProfile');
           if (savedProfile) try { senderProfileObj = JSON.parse(savedProfile); } catch(e) { console.error("Error parsing sender profile from localStorage for Kinos context:", e); }
 
@@ -525,19 +535,19 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             const targetNotifications = notifData?.success ? notifData.notifications : [];
 
             // Fetch relevancies for AI (citizen) relevant to Sender (currentUsername)
-            const relevanciesForKinosRes = await fetch(`/api/relevancies?relevantToCitizen=${citizen.username}&targetCitizen=${currentUsername}&limit=${relevancyLimit}`);
+            const relevanciesForKinosRes = await fetch(`/api/relevancies?relevantToCitizen=${citizen.username}&targetCitizen=${internalCurrentCitizenUsername}&limit=${relevancyLimit}`); // Use state variable
             const relevanciesForKinosData = relevanciesForKinosRes.ok ? await relevanciesForKinosRes.json() : null;
             const relevanciesForContext = relevanciesForKinosData?.success ? relevanciesForKinosData.relevancies : [];
             
-            // Fetch problems involving AI (citizen) or Sender (currentUsername)
+            // Fetch problems involving AI (citizen) or Sender (internalCurrentCitizenUsername)
             let allProblems = [];
             const problemsTargetRes = await fetch(`/api/problems?citizen=${citizen.username}&status=active&limit=${problemLimit}`);
             const problemsTargetData = problemsTargetRes.ok ? await problemsTargetRes.json() : null;
             if (problemsTargetData?.success && problemsTargetData.problems) {
               allProblems.push(...problemsTargetData.problems);
             }
-            // Fetch problems for the sender (currentUsername)
-            const problemsSenderRes = await fetch(`/api/problems?citizen=${currentUsername}&status=active&limit=${problemLimit}`);
+            // Fetch problems for the sender (internalCurrentCitizenUsername)
+            const problemsSenderRes = await fetch(`/api/problems?citizen=${internalCurrentCitizenUsername}&status=active&limit=${problemLimit}`); // Use state variable
             const problemsSenderData = problemsSenderRes.ok ? await problemsSenderRes.json() : null;
             if (problemsSenderData?.success && problemsSenderData.problems) {
               problemsSenderData.problems.forEach(p => {
@@ -597,7 +607,7 @@ Your response:`;
             }
 
             const kinosResponse = await fetch(
-              `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${citizen.username}/channels/${currentUsername}/messages`,
+              `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${citizen.username}/channels/${internalCurrentCitizenUsername}/messages`, // Use state variable
               {
                 method: 'POST',
                 headers: {
@@ -625,7 +635,7 @@ Your response:`;
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                       sender: citizen.username, // AI is the sender
-                      receiver: currentUsername, // User is the receiver
+                      receiver: internalCurrentCitizenUsername, // User is the receiver - Use state variable
                       content: kinosData.content,
                       type: 'message_ai_augmented'
                     }),
@@ -767,52 +777,68 @@ Your response:`;
     // setIsLoadingBuildings(false); // Handled by dedicated effect
 
     // Use citizen.citizenId, citizen.username (camelCase)
-    if (citizen && citizen.citizenId && citizen.username) { 
+    // Also depend on internalCurrentCitizenUsername to refetch when logged-in user changes
+    if (citizen && citizen.citizenId && citizen.username) {
         // --- Relevancies (Opportunities) ---
-        if (cachedRelevancies.hasOwnProperty(citizen.username)) {
-            setRelevancies(cachedRelevancies[citizen.username]);
-            setIsLoadingRelevancies(false);
+        // Fetch only if internalCurrentCitizenUsername is available
+        if (internalCurrentCitizenUsername) {
+            if (cachedRelevancies.hasOwnProperty(citizen.username) && cachedRelevancies[citizen.username].forUser === internalCurrentCitizenUsername) {
+                setRelevancies(cachedRelevancies[citizen.username].data);
+                setIsLoadingRelevancies(false);
+            } else {
+                setRelevancies([]);
+                fetchRelevancies(citizen.username);
+            }
         } else {
-            setRelevancies([]); // Clear data from previous citizen
-            fetchRelevancies(citizen.username); // This will manage its own loading state
+            setRelevancies([]); // Clear if no logged-in user
+            setIsLoadingRelevancies(false);
         }
 
         // --- Relationship ---
-        if (cachedRelationships.hasOwnProperty(citizen.username)) {
-            setRelationship(cachedRelationships[citizen.username]);
-            setIsLoadingRelationship(false);
+        // Fetch only if internalCurrentCitizenUsername is available
+        if (internalCurrentCitizenUsername) {
+            const cacheKey = `${citizen.username}_${internalCurrentCitizenUsername}`;
+            if (cachedRelationships.hasOwnProperty(cacheKey)) {
+                setRelationship(cachedRelationships[cacheKey]);
+                setIsLoadingRelationship(false);
+            } else {
+                setRelationship(null);
+                fetchRelationship(citizen.username);
+            }
         } else {
-            setRelationship(null); // Clear data from previous citizen
-            fetchRelationship(citizen.username); // This will manage its own loading state and self-view
+            setRelationship(null); // Clear if no logged-in user
+            setIsLoadingRelationship(false);
         }
 
-        // --- Problems ---
+        // --- Problems (not dependent on current user) ---
         if (cachedProblems.hasOwnProperty(citizen.username)) {
             setProblems(cachedProblems[citizen.username]);
             setIsLoadingProblems(false);
         } else {
-            setProblems([]); // Clear data from previous citizen
-            fetchProblems(citizen.username); // This will manage its own loading state
+            setProblems([]);
+            fetchProblems(citizen.username);
         }
         
-        // --- Message History (existing logic with fetch-once ref) ---
-        // Use citizen.citizenId (camelCase)
-        if (!messagesFetchAttemptedRef.current[citizen.citizenId]) { 
-            fetchMessageHistory();
+        // --- Message History ---
+        // Fetch only if internalCurrentCitizenUsername is available
+        if (internalCurrentCitizenUsername) {
+            // Use citizen.citizenId (camelCase)
+            if (!messagesFetchAttemptedRef.current[citizen.citizenId]) {
+                fetchMessageHistory();
+            }
         } else {
-            // Message fetch already attempted
+            setMessages([]); // Clear messages if no logged-in user
+            setIsLoadingHistory(false);
         }
       
-        // --- Activities (existing logic with fetch-once ref) ---
+        // --- Activities (not dependent on current user) ---
         // Use citizen.citizenId (camelCase)
-        if (!activitiesFetchAttemptedRef.current[citizen.citizenId]) { 
-            setActivities([]); 
-            fetchCitizenActivities(citizen.citizenId); 
-        } else {
-            // Activities fetch already attempted
+        if (!activitiesFetchAttemptedRef.current[citizen.citizenId]) {
+            setActivities([]);
+            fetchCitizenActivities(citizen.citizenId);
         }
 
-        // --- Transport Resources ---
+        // --- Transport Resources (not dependent on current user) ---
         if (cachedTransports.hasOwnProperty(citizen.username)) {
             setTransportResources(cachedTransports[citizen.username]);
             setIsLoadingTransports(false);
@@ -851,7 +877,7 @@ Your response:`;
       isMounted = false;
       window.removeEventListener('keydown', handleEscKey);
     };
-  }, [citizen?.citizenId, citizen?.username, onClose, cachedRelevancies, cachedRelationships, cachedProblems, cachedTransports]); // Main effect dependencies
+  }, [citizen?.citizenId, citizen?.username, onClose, cachedRelevancies, cachedRelationships, cachedProblems, cachedTransports, internalCurrentCitizenUsername]); // Added internalCurrentCitizenUsername
 
   // Effect to set a random "no relationship" message
   useEffect(() => {
