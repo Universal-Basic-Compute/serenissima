@@ -212,7 +212,7 @@ def create_admin_notification(tables, purchases: List[Dict]) -> None:
 
 def process_ai_land_purchases(dry_run: bool = False):
     """Main function to process AI land purchases."""
-    print(f"Starting AI land purchase process (dry_run={dry_run})")
+    log_header(f"AI Land Purchase Process (dry_run={dry_run})", LogColors.HEADER)
     
     # Initialize Airtable connection
     tables = initialize_airtable()
