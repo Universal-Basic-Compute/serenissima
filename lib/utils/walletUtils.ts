@@ -144,6 +144,7 @@ export async function connectAndPersistWallet(address: string): Promise<any> {
 }
 
 /**
+ * @deprecated Prefer `useWalletContext().citizenProfile?.username` in React components.
  * Retrieves the current citizen's username from storage.
  * Prefers sessionStorage, then falls back to localStorage.
  * @returns The citizen's username or null if not found.

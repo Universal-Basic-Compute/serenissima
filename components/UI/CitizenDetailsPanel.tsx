@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { getCurrentCitizenUsername } from '@/lib/utils/walletUtils'; // Import for current user
+import { useWalletContext } from '@/components/UI/WalletProvider'; // Import useWalletContext
 import { eventBus, EventTypes } from '@/lib/utils/eventBus'; // Import eventBus
 // Citizen type might still be needed if 'citizen' prop has more fields than CitizenRelevanciesList expects for formatting
-// import { Citizen } from '@/components/PolygonViewer/types'; 
+// import { Citizen } from '@/components/PolygonViewer/types';
 import InfoIcon from './InfoIcon';
 import ReactMarkdown from 'react-markdown'; // Added import
 import remarkGfm from 'remark-gfm'; // Added import
@@ -89,57 +89,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [cachedTransports, setCachedTransports] = useState<Record<string, any[]>>({});
   // State for active tab in the first column
   const [activeLeftTab, setActiveLeftTab] = useState<'relations' | 'citizen'>('relations');
-  // State for current logged-in citizen username
-  const [internalCurrentCitizenUsername, setInternalCurrentCitizenUsername] = useState<string | null>(null);
-  const initialLogDoneRef = useRef(false); // Ref to track if initial log has been made
-
-  useEffect(() => {
-    const handleWalletChange = (walletData?: { profile?: { username?: string | null }; isConnected?: boolean; address?: string | null; publicKey?: any; [key: string]: any }) => {
-      console.log('[CitizenDetailsPanel] handleWalletChange received walletData:', JSON.stringify(walletData || {note: "payload was undefined"}, null, 2));
-      let newUsername: string | null = null;
-      const explicitlyDisconnected = walletData && walletData.isConnected === false;
-
-      if (explicitlyDisconnected) {
-        newUsername = null;
-        console.log('[CitizenDetailsPanel] User explicitly disconnected via WALLET_CHANGED event.');
-      } else if (walletData && walletData.profile && typeof walletData.profile.username === 'string' && walletData.profile.username.trim() !== '') {
-        newUsername = walletData.profile.username.trim();
-        console.log('[CitizenDetailsPanel] Username from WALLET_CHANGED event payload (profile):', newUsername);
-      } else {
-        const usernameFromStorage = getCurrentCitizenUsername();
-        console.log('[CitizenDetailsPanel] Username from getCurrentCitizenUsername (fallback or no/invalid profile.username in payload):', usernameFromStorage);
-        newUsername = usernameFromStorage;
-      }
-      
-      if (internalCurrentCitizenUsername !== newUsername) {
-        console.log(`[CitizenDetailsPanel] Updating internalCurrentCitizenUsername from "${internalCurrentCitizenUsername || 'null'}" to "${newUsername || 'null'}"`);
-        setInternalCurrentCitizenUsername(newUsername);
-      } else {
-        console.log(`[CitizenDetailsPanel] Username ("${newUsername || 'null'}") is the same as previous ("${internalCurrentCitizenUsername || 'null'}"). No state update needed.`);
-      }
-    };
-
-    const initialUsernameOnMount = getCurrentCitizenUsername();
-    setInternalCurrentCitizenUsername(initialUsernameOnMount);
-    if (!initialLogDoneRef.current) {
-      console.log('[CitizenDetailsPanel] Initial username check on mount (first run):', initialUsernameOnMount || 'null');
-      initialLogDoneRef.current = true;
-    }
-
-    const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, handleWalletChange);
-
-    if (!hasRequestedWalletStatusGlobally) {
-      console.log('[CitizenDetailsPanel] Globally emitting REQUEST_WALLET_STATUS for the first time.');
-      eventBus.emit(EventTypes.REQUEST_WALLET_STATUS);
-      hasRequestedWalletStatusGlobally = true;
-    } else {
-      console.log('[CitizenDetailsPanel] REQUEST_WALLET_STATUS already emitted globally. This instance will rely on existing WALLET_CHANGED broadcasts.');
-    }
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []); // Empty dependency array ensures this runs once on mount and cleans up on unmount.
+  
+  const { citizenProfile: currentCitizenProfileFromContext } = useWalletContext();
+  const internalCurrentCitizenUsername = currentCitizenProfileFromContext?.username;
+  // No need for initialLogDoneRef or useEffect to manage internalCurrentCitizenUsername,
+  // as it's now derived directly from the context. WalletProvider handles event subscriptions.
 
   const getKinosModelForSocialClass = (socialClass?: string): string => {
     const lowerSocialClass = socialClass?.toLowerCase();

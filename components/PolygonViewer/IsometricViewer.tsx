@@ -156,10 +156,12 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
   // State for bridge orientation (now part of interactionMode)
   const [selectedBridgeForOrientationId, setSelectedBridgeForOrientationId] = useState<string | null>(null);
   const [orientingBridgeAngle, setOrientingBridgeAngle] = useState<number | null>(null);
-  const [isUserConsiglioDeiDieci, setIsUserConsiglioDeiDieci] = useState<boolean>(false);
+  const [isUserConsiglioDeiDieci, setIsUserConsiglioDeiDieci] = useState<boolean>(false); // This will be updated by context
 
   // New state for unified interaction mode
   type InteractionMode = 'normal' | 'orient_bridge' | 'place_water_point' | 'create_water_route';
+
+  const { citizenProfile } = useWalletContext(); // Use wallet context
 
   // Helper function to get current hour and month in Venice (approximated by Rome timezone)
   const getVeniceDateTimeParts = () => {
@@ -864,30 +866,16 @@ number => {
   }, [calculateTotalDistance]); // Removed fetchWaterPoints
   
   // Effect to check user role on mount
-  // Effect to check user role on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      console.log('[IsometricViewer] Checking user role for ConsiglioDeiDieci...');
-      try {
-        const profileStr = localStorage.getItem('citizenProfile');
-        console.log('[IsometricViewer] citizenProfile from localStorage:', profileStr);
-        if (profileStr) {
-          const profile = JSON.parse(profileStr);
-          console.log('[IsometricViewer] Parsed profile:', profile);
-          const isConsiglio = profile.username === 'ConsiglioDeiDieci';
-          setIsUserConsiglioDeiDieci(isConsiglio);
-          console.log('[IsometricViewer] setIsUserConsiglioDeiDieci called with:', isConsiglio);
-        } else {
-          setIsUserConsiglioDeiDieci(false);
-          console.log('[IsometricViewer] citizenProfile not found in localStorage, setIsUserConsiglioDeiDieci called with: false');
-        }
-      } catch (error) {
-        console.error('[IsometricViewer] Error checking if user is ConsiglioDeiDieci:', error);
-        setIsUserConsiglioDeiDieci(false);
-        console.log('[IsometricViewer] Error occurred, setIsUserConsiglioDeiDieci called with: false');
-      }
+    if (citizenProfile) {
+      const isConsiglio = citizenProfile.username === 'ConsiglioDeiDieci';
+      setIsUserConsiglioDeiDieci(isConsiglio);
+      console.log(`[IsometricViewer] User role check: ${citizenProfile.username}, IsConsiglio: ${isConsiglio}`);
+    } else {
+      setIsUserConsiglioDeiDieci(false);
+      console.log('[IsometricViewer] User role check: No citizen profile, not Consiglio.');
     }
-  }, []);
+  }, [citizenProfile]); // Re-run when citizenProfile from context changes
   
   // Function to handle water route clicks
   const handleWaterRouteClick = useCallback((point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => {

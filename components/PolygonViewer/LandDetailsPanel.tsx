@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import ListLandForSaleModal from '../UI/ListLandForSaleModal';
 import { Polygon } from './types';
 import { eventBus, EventTypes } from '../../lib/utils/eventBus';
-import { getCurrentCitizenUsername } from '../../lib/utils/walletUtils';
+import { useWalletContext } from '@/components/UI/WalletProvider'; // Import useWalletContext
 import { FaMapMarkedAlt, FaTimes } from 'react-icons/fa';
 import LandInfoColumn from './LandInfoColumn';
 import LandChatColumn from './LandChatColumn';
@@ -138,62 +138,11 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const KINOS_API_CHANNEL_BASE_URL = 'https://api.kinos-engine.ai/v2';
   const KINOS_CHANNEL_BLUEPRINT = 'serenissima-ai';
 
-
-  // State for current citizen username, reactive to login changes
-  const [internalCurrentCitizenUsername, setInternalCurrentCitizenUsername] = useState<string | null>(getCurrentCitizenUsername());
-
-  useEffect(() => {
-    const handleWalletChange = (walletData?: { profile?: { username?: string | null }; isConnected?: boolean; address?: string | null; publicKey?: any; [key: string]: any }) => {
-      console.log('[LandDetailsPanel] handleWalletChange received walletData:', JSON.stringify(walletData || {note: "payload was undefined"}, null, 2));
-      let newUsername: string | null = null;
-
-      const explicitlyDisconnected = walletData && walletData.isConnected === false;
-
-      if (explicitlyDisconnected) {
-        newUsername = null;
-        console.log('[LandDetailsPanel] User explicitly disconnected via WALLET_CHANGED event.');
-      } else if (walletData && walletData.profile && typeof walletData.profile.username === 'string' && walletData.profile.username.trim() !== '') {
-        // Primary source: username from event profile if valid
-        newUsername = walletData.profile.username.trim();
-        console.log('[LandDetailsPanel] Username from WALLET_CHANGED event payload (profile):', newUsername);
-      } else {
-        // Fallback: get from storage. This covers:
-        // - walletData is undefined/null
-        // - walletData.isConnected is true or undefined (i.e., not explicitly false)
-        // - walletData.profile is missing or profile.username is invalid/empty
-        // This will also be hit on initial REQUEST_WALLET_STATUS if the event doesn't have profile.username but user is logged in.
-        const usernameFromStorage = getCurrentCitizenUsername();
-        console.log('[LandDetailsPanel] Username from getCurrentCitizenUsername (fallback or no/invalid profile.username in payload):', usernameFromStorage);
-        newUsername = usernameFromStorage;
-      }
-      
-      if (internalCurrentCitizenUsername !== newUsername) {
-        console.log(`[LandDetailsPanel] Updating internalCurrentCitizenUsername from "${internalCurrentCitizenUsername || 'null'}" to "${newUsername || 'null'}"`);
-        setInternalCurrentCitizenUsername(newUsername);
-      } else {
-        console.log(`[LandDetailsPanel] Username ("${newUsername || 'null'}") is the same as previous ("${internalCurrentCitizenUsername || 'null'}"). No state update needed.`);
-      }
-    };
-
-    // Set initial state directly from localStorage/sessionStorage on mount
-    const initialUsernameOnMount = getCurrentCitizenUsername();
-    setInternalCurrentCitizenUsername(initialUsernameOnMount);
-    console.log('[LandDetailsPanel] Initial username check on mount:', initialUsernameOnMount || 'null');
-
-    // Subscribe to wallet changes
-    const subscription = eventBus.subscribe(EventTypes.WALLET_CHANGED, handleWalletChange);
-    
-    // Request current status on mount AFTER subscription is set up.
-    console.log('[LandDetailsPanel] Emitting REQUEST_WALLET_STATUS to get current wallet state.');
-    eventBus.emit(EventTypes.REQUEST_WALLET_STATUS);
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []); // Empty dependency array ensures this runs once on mount and cleans up on unmount.
+  const { citizenProfile } = useWalletContext();
+  const currentCitizenUsername = citizenProfile?.username;
 
   // Find the selected polygon
-  const selectedPolygon = selectedPolygonId 
+  const selectedPolygon = selectedPolygonId
     ? polygons.find(p => p.id === selectedPolygonId)
     : null;
   
@@ -265,7 +214,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // }, [selectedPolygonId]);
 
   const fetchLandMessageHistory = async (landId: string) => {
-    if (!landId || !internalCurrentCitizenUsername) return;
+    if (!landId || !currentCitizenUsername) return;
 
     if (messagesFetchAttemptedRef.current[landId]) {
       console.log(`[LandDetailsPanel] Already attempted to fetch messages for land ${landId}, skipping`);
@@ -276,12 +225,12 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     setIsLoadingHistory(true);
     setMessagesFetchFailed(false);
     try {
-      console.log(`[LandDetailsPanel] Fetching message history for land ${landId} and user ${internalCurrentCitizenUsername}`);
+      console.log(`[LandDetailsPanel] Fetching message history for land ${landId} and user ${currentCitizenUsername}`);
       const response = await fetch('/api/messages', { // Assuming POST to /api/messages for fetching history
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          currentCitizen: internalCurrentCitizenUsername,
+          currentCitizen: currentCitizenUsername,
           otherCitizen: landId, // Use landId as the "other party" for context
           messageTypeContext: 'land_chat' // Specific context for backend
         }),
@@ -294,7 +243,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       if (data.success && data.messages) {
         const formattedMessages = data.messages.map((msg: any) => ({
           id: msg.messageId || msg.id, // Prefer messageId if available
-          role: msg.sender === internalCurrentCitizenUsername ? 'user' : 'assistant',
+          role: msg.sender === currentCitizenUsername ? 'user' : 'assistant',
           content: msg.content,
           timestamp: msg.createdAt || msg.timestamp, // Prefer createdAt
         }));
@@ -431,7 +380,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       // Or if it's a global ref for the current panel:
       // messagesFetchAttemptedRef.current = {}; // Or set the specific landId to false
 
-      if (internalCurrentCitizenUsername) {
+      if (currentCitizenUsername) {
         fetchLandMessageHistory(selectedPolygonId);
       } else {
         // User not logged in, clear messages and don't fetch
@@ -443,13 +392,12 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       setIsVisible(false);
       setMessages([]); // Clear messages when panel closes
     }
-  }, [selectedPolygonId, preventAutoClose, internalCurrentCitizenUsername]);
+  }, [selectedPolygonId, preventAutoClose, currentCitizenUsername]); // Updated dependency
   
   // Early return if not visible or no selected polygon
   if (!visible || !selectedPolygonId) return null;
 
-  // Use the state variable for currentCitizenUsername
-  const currentCitizenUsername = internalCurrentCitizenUsername; 
+  // currentCitizenUsername is now derived from useWalletContext()
   const isOwner = dynamicOwner && currentCitizenUsername && normalizeIdentifier(dynamicOwner) === normalizeIdentifier(currentCitizenUsername);
 
   // Derive specific contracts from activeLandContracts
