@@ -28,18 +28,18 @@ def process_cancel_land_offer_fn(tables: dict, activity_record: dict, building_t
     log.info(f"{LogColors.PROCESS}Processing 'execute_cancel_land_offer' activity {activity_guid} by canceller {activity_citizen_username}.{LogColors.ENDC}")
 
     try:
-        details_str = activity_fields.get('Details')
-        if not details_str:
-            log.error(f"{LogColors.FAIL}Activity {activity_guid} is missing 'Details'.{LogColors.ENDC}")
+        notes_str = activity_fields.get('Notes') # Changed Details to Notes
+        if not notes_str:
+            log.error(f"{LogColors.FAIL}Activity {activity_guid} is missing 'Notes'.{LogColors.ENDC}") # Changed Details to Notes
             return False
         
-        details = json.loads(details_str)
+        details = json.loads(notes_str) # Changed details_str to notes_str
         offer_contract_custom_id = details.get('offerContractId')
         # land_id_context = details.get('landId') # For context
         # canceller_username_from_details = details.get('cancellerUsername') # Should match activity performer
 
         if not offer_contract_custom_id:
-            log.error(f"{LogColors.FAIL}Missing offerContractId in activity {activity_guid} details: {details}{LogColors.ENDC}")
+            log.error(f"{LogColors.FAIL}Missing offerContractId in activity {activity_guid} notes: {details}{LogColors.ENDC}") # Changed details to notes
             return False
 
         # Get canceller citizen record (though username from activity is primary identifier)

@@ -14,7 +14,7 @@ from .eat_activity_creator import (
     try_create_eat_at_tavern_activity
 )
 from .fetch_from_galley_activity_creator import try_create as try_create_fetch_from_galley_activity
-from .bid_on_land_activity_creator import try_create as try_create_bid_on_land_activity
+# bid_on_land_activity_creator is removed as it's redundant with make_offer_for_land_creator
 from .leave_venice_activity_creator import try_create as try_create_leave_venice_activity
 from .deliver_construction_materials_creator import try_create_deliver_construction_materials_activity
 from .construct_building_creator import try_create_construct_building_activity
@@ -44,6 +44,7 @@ from .bid_on_building_activity_creator import try_create as try_create_bid_on_bu
 from .deliver_resource_batch_activity_creator import try_create as try_create_deliver_resource_batch_activity # New, for galley final deliveries
 
 # Land Management Activity Creators
+# Note: bid_on_land_activity_creator.py was removed. make_offer_for_land_creator.py is used instead.
 from .list_land_for_sale_creator import try_create as try_create_list_land_for_sale_activity
 from .make_offer_for_land_creator import try_create as try_create_make_offer_for_land_activity
 from .accept_land_offer_creator import try_create as try_create_accept_land_offer_activity

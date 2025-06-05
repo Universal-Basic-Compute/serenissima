@@ -92,7 +92,7 @@ def try_create(
         "FromBuilding": from_building,
         "ToBuilding": to_building,
         "Path": json.dumps(path_data.get('path', [])),
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "landId": land_id,
             "expectedPrice": expected_price,
             "activityType": "buy_available_land",
@@ -115,11 +115,11 @@ def try_create(
         "Citizen": citizen,
         "FromBuilding": to_building,  # Citizen is already at the courthouse/town_hall
         "ToBuilding": to_building,    # Stays at the same location
-        "Details": details_json,
+        "Notes": details_json, # Changed Details to Notes. The original "Notes" field content is now part of details_json or needs to be added there if still relevant.
         "Status": "created",
         "Title": f"Finalizing purchase of land {land_id}",
         "Description": f"Completing the purchase of land {land_id} for {expected_price} Ducats",
-        "Notes": f"Second step of buy_available_land process. Will transfer land ownership and process payment.",
+        # "Notes" field now contains details_json. If the simple text note is still needed, it should be part of details_json.
         "CreatedAt": travel_start_date,  # Created at the same time as the goto activity
         "StartDate": purchase_start_date,  # But starts after the goto activity ends
         "EndDate": purchase_end_date,

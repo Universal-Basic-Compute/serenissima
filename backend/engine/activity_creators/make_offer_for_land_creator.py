@@ -135,7 +135,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         "ActivityId": finalize_activity_id, "Citizen": citizen_username, "Type": "finalize_make_offer_for_land", "Status": "created", # Use username
         "StartDate": finalize_start_time_utc.isoformat(), "EndDate": finalize_end_time_utc.isoformat(),
         "FromBuilding": target_office_building_id, 
-        "Details": json.dumps(finalize_activity_details),
+        "Notes": json.dumps(finalize_activity_details), # Changed Details to Notes
         "Title": f"Make Offer for Land {land_id}",
         "Description": f"{citizen_username} is finalizing an offer of {offer_price} ducats for land {land_id} at {target_office_record['fields'].get('Name', target_office_building_id)}.",
         "Thought": f"I hope my offer of {offer_price} ducats for land {land_id} is considered.",

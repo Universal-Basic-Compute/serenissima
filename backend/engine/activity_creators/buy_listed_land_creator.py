@@ -130,7 +130,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         "ActivityId": execute_activity_id, "Citizen": citizen_username, "Type": "execute_buy_listed_land", "Status": "created", # Use username
         "StartDate": execute_start_time_utc.isoformat(), "EndDate": execute_end_time_utc.isoformat(),
         "FromBuilding": target_office_building_id,
-        "Details": execute_activity_details,
+        "Notes": execute_activity_details, # Changed Details to Notes
         "Title": f"Buy Listed Land {land_id}",
         "Description": f"{citizen_username} is finalizing the purchase of land {land_id} from listing {listing_contract_id} for {price} ducats at {target_office_record['fields'].get('Name', target_office_building_id)}.",
         "Thought": f"This land {land_id} is listed at a good price. Time to buy it.",
