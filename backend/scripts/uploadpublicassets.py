@@ -223,12 +223,42 @@ def main():
             for filename in files:
                 local_file_path = os.path.join(root, filename)
                 
-                # Calculer le chemin de destination relatif par rapport au dossier source
-                relative_path_to_file = os.path.relpath(local_file_path, source_dir)
-                # Le chemin de destination pour l'API est le dossier parent du fichier relatif
-                destination_on_server = os.path.dirname(relative_path_to_file)
-                # Remplacer les séparateurs de chemin Windows par des slashes pour l'URL/API
-                destination_on_server = destination_on_server.replace(os.path.sep, '/')
+                # Convertir source_dir et local_file_path en objets Path pour une manipulation plus aisée
+                source_dir_path_obj = pathlib.Path(source_dir)
+                local_file_path_obj = pathlib.Path(local_file_path)
+
+                # Déterminer le chemin du fichier relatif au source_dir
+                # Cela nous donne la structure des sous-dossiers à l'intérieur de source_dir
+                path_of_file_within_source_dir = local_file_path_obj.relative_to(source_dir_path_obj)
+                # Le répertoire de destination sur le serveur sera le parent de ce chemin relatif
+                # ex: si le fichier est 'sounds/water/file.mp3' par rapport à source_dir, alors ceci est 'sounds/water'
+                dir_structure_within_source = path_of_file_within_source_dir.parent
+
+                # Maintenant, déterminer le chemin de base sur le serveur si "public" est dans source_dir
+                source_dir_parts = source_dir_path_obj.parts
+                public_folder_index = -1
+                for i, part in enumerate(source_dir_parts):
+                    if part.lower() == "public":
+                        public_folder_index = i
+                        break
+                
+                server_upload_root_prefix = ""
+                if public_folder_index != -1:
+                    # Si "public" est trouvé, le chemin sur le serveur commence par les parties de source_dir *après* "public"
+                    # ex: si source_dir = /chemin/vers/projet/public/sounds,
+                    # server_upload_root_prefix devient "sounds"
+                    server_upload_root_prefix_parts = source_dir_parts[public_folder_index + 1:]
+                    server_upload_root_prefix = posixpath.join(*server_upload_root_prefix_parts)
+                
+                # Combiner server_upload_root_prefix avec la structure de répertoires de dir_structure_within_source
+                # dir_structure_within_source.parts donnera ('sounds', 'water') ou ('water',) ou ()
+                destination_on_server = posixpath.join(server_upload_root_prefix, *dir_structure_within_source.parts)
+                
+                # Normaliser le chemin (ex: "sounds/." devient "sounds")
+                destination_on_server = posixpath.normpath(destination_on_server)
+                # Si le chemin normalisé est juste ".", cela signifie la racine, donc chaîne vide.
+                if destination_on_server == ".":
+                    destination_on_server = ""
 
                 if upload_file(args.api_url, args.api_key, local_file_path, destination_on_server):
                     successful_uploads += 1
