@@ -26,7 +26,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   // Normalize profile data to ensure consistent casing (camelCase)
   const normalizeProfileData = (profile: any): any => {
-    if (!profile) return null;
+    if (!profile || typeof profile !== 'object') { // Handle null or non-object input
+      console.log('[WalletProvider] normalizeProfileData received null or non-object, returning null.');
+      return null;
+    }
     const normalized = { ...profile };
 
     const fieldsToNormalize = [
@@ -56,6 +59,28 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     return normalized;
   };
+
+  // Centralized function to set citizen profile state, localStorage, and emit event
+  const setAndLogCitizenProfile = (profile: any, source: string) => {
+    console.log(`[WalletProvider] Attempting to set profile from "${source}". Raw profile:`, JSON.stringify(profile, null, 2));
+    
+    const normalizedProfile = normalizeProfileData(profile); // Normalize first
+    console.log(`[WalletProvider] Normalized profile from "${source}":`, JSON.stringify(normalizedProfile, null, 2));
+
+    setCitizenProfile(normalizedProfile); // Update state
+
+    if (normalizedProfile) {
+      localStorage.setItem('citizenProfile', JSON.stringify(normalizedProfile));
+    } else {
+      localStorage.removeItem('citizenProfile');
+    }
+    // Emit event with the (potentially null) normalized profile and current connection status
+    eventBus.emit(EventTypes.WALLET_CHANGED, { 
+      profile: normalizedProfile, 
+      isConnected: !!walletAddress, // Use current walletAddress state
+      address: walletAddress     // Pass current walletAddress state
+    });
+  };
   
   // Register citizen with the API
   const registerCitizen = async (walletAddress: string) => {
@@ -77,15 +102,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       
       if (data.success) {
-        console.log('Citizen registration successful:', data.citizen);
-        console.log('[WalletProvider] registerCitizen - data.citizen:', data.citizen); // DEBUG
-        return data.citizen;
+        console.log('[WalletProvider] registerCitizen successful:', data.citizen);
+        return data.citizen; // Return raw citizen data
       } else {
-        console.error('Registration error:', data.error);
+        console.error('[WalletProvider] registerCitizen error:', data.error);
         return null;
       }
     } catch (error) {
-      console.error('Error registering citizen:', error);
+      console.error('[WalletProvider] Error in registerCitizen:', error);
       return null;
     }
   };
@@ -97,18 +121,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('[WalletProvider] fetchCitizenProfile - raw data.citizen:', data.citizen); // DEBUG
-        const normalizedProfile = normalizeProfileData(data.citizen);
-        console.log('[WalletProvider] fetchCitizenProfile - normalizedProfile:', normalizedProfile); // DEBUG
-        setCitizenProfile(normalizedProfile);
-        localStorage.setItem('citizenProfile', JSON.stringify(normalizedProfile));
-        return normalizedProfile;
+        console.log('[WalletProvider] fetchCitizenProfile successful:', data.citizen);
+        return data.citizen; // Return raw citizen data
       } else {
-        console.error('Failed to fetch citizen profile:', response.status);
+        console.error('[WalletProvider] Failed to fetch citizen profile:', response.status);
         return null;
       }
     } catch (error) {
-      console.error('Error fetching citizen profile:', error);
+      console.error('[WalletProvider] Error in fetchCitizenProfile:', error);
       return null;
     }
   };
@@ -144,21 +164,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('walletAddress', address);
       
       // Register or fetch the citizen profile
-      let profileData = await registerCitizen(address);
-      
-      if (profileData) {
-        const normalizedProfile = normalizeProfileData(profileData);
-        setCitizenProfile(normalizedProfile);
-        localStorage.setItem('citizenProfile', JSON.stringify(normalizedProfile));
-      } else {
-        // If registration fails, fetchCitizenProfile will handle normalization and setting state
-        await fetchCitizenProfile(address);
+      let rawProfileData = await registerCitizen(address);
+      if (!rawProfileData) { // If registration failed or returned no profile, try fetching
+        console.log('[WalletProvider] Registration did not return profile, trying fetchCitizenProfile for', address);
+        rawProfileData = await fetchCitizenProfile(address);
       }
       
-      // Dispatch event to notify components about wallet change
-      window.dispatchEvent(new Event('walletChanged'));
+      setAndLogCitizenProfile(rawProfileData, "connectWallet_after_register_or_fetch");
+      // Event emission is now handled by setAndLogCitizenProfile
+      
     } catch (error) {
-      console.error('Error connecting wallet:', error);
+      console.error('[WalletProvider] Error connecting wallet:', error);
       
       if (error instanceof Error) {
         if (error.message.includes('Citizen rejected')) {
@@ -174,13 +190,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   
   // Function to update citizen profile
   const updateCitizenProfile = async (updatedProfile: any) => {
-    if (updatedProfile) {
-      console.log('[WalletProvider] updateCitizenProfile - raw updatedProfile:', updatedProfile); // DEBUG
-      const normalizedProfile = normalizeProfileData(updatedProfile);
-      console.log('[WalletProvider] updateCitizenProfile - normalizedProfile:', normalizedProfile); // DEBUG
-      setCitizenProfile(normalizedProfile);
-      localStorage.setItem('citizenProfile', JSON.stringify(normalizedProfile));
-    }
+    // This function is typically called from ProfileEditor upon successful update.
+    // The updatedProfile here should be the new, complete profile from the backend.
+    setAndLogCitizenProfile(updatedProfile, "updateCitizenProfile_external");
   };
 
   // Initialize wallet from localStorage on component mount
@@ -202,43 +214,51 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           if (storedProfile) {
             try {
               const parsedProfile = JSON.parse(storedProfile);
-              console.log('[WalletProvider] initWallet - raw parsedProfile from localStorage:', parsedProfile); // DEBUG
-              const normalizedProfile = normalizeProfileData(parsedProfile);
-              console.log('[WalletProvider] initWallet - normalizedProfile from localStorage:', normalizedProfile); // DEBUG
-              setCitizenProfile(normalizedProfile);
+              setAndLogCitizenProfile(parsedProfile, "initWallet_localStorage");
             } catch (e) {
-              console.error('Error parsing stored citizen profile:', e);
-              // If parsing fails, fetch from API
-              await fetchCitizenProfile(storedAddress);
+              console.error('[WalletProvider] Error parsing stored citizen profile:', e);
+              localStorage.removeItem('citizenProfile'); // Clear corrupted profile
+              if (storedAddress) {
+                 const fetchedProfile = await fetchCitizenProfile(storedAddress);
+                 setAndLogCitizenProfile(fetchedProfile, "initWallet_fetch_after_parse_error");
+              } else {
+                 setAndLogCitizenProfile(null, "initWallet_no_address_after_parse_error");
+              }
             }
-          } else {
-            // If no stored profile, fetch from API
-            await fetchCitizenProfile(storedAddress);
+          } else if (storedAddress) { // No stored profile, but have address
+            const fetchedProfile = await fetchCitizenProfile(storedAddress);
+            setAndLogCitizenProfile(fetchedProfile, "initWallet_fetch_no_stored_profile");
+          } else { // No stored address, no profile
+            setAndLogCitizenProfile(null, "initWallet_no_address_no_profile");
           }
+        } else { // No stored address, so no user is connected from previous session
+            setAndLogCitizenProfile(null, "initWallet_no_stored_address");
         }
       } catch (error) {
-        console.error('Error initializing wallet:', error);
+        console.error('[WalletProvider] Error initializing wallet:', error);
+        setAndLogCitizenProfile(null, "initWallet_exception");
       } finally {
         setIsInitialized(true);
       }
     };
     
-    // Add event listener for profile updates
-    const handleProfileUpdate = (event: CustomEvent) => {
+    // Add event listener for profile updates from external sources (like ProfileEditor)
+    const handleExternalProfileUpdate = (event: CustomEvent) => {
       if (event.detail) {
-        console.log('[WalletProvider] handleProfileUpdate - event.detail:', event.detail); // DEBUG
-        updateCitizenProfile(event.detail);
+        console.log('[WalletProvider] Received citizenProfileUpdated event:', event.detail);
+        // The event.detail should be the full, updated profile object
+        setAndLogCitizenProfile(event.detail, "handleExternalProfileUpdate_event");
       }
     };
     
-    window.addEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
+    window.addEventListener('citizenProfileUpdated', handleExternalProfileUpdate as EventListener);
     
     initWallet();
     
     return () => {
-      window.removeEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
+      window.removeEventListener('citizenProfileUpdated', handleExternalProfileUpdate as EventListener);
     };
-  }, []);
+  }, []); // walletAddress is not needed in deps here, setWalletAddress will trigger re-renders if it changes.
   
   const isConnected = !!walletAddress;
   
