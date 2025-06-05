@@ -288,9 +288,20 @@ export const HoverTooltip: React.FC = () => {
     if (citizen) {
       // If we have the citizen data, display it
       // Ensure we have the correct property names for image and social class
-      // Prioritize citizen.username for the image path, then citizen.id, then 'default'
-      const identifierForImage = citizen.username || citizen.id || 'default';
-      const imageUrl = citizen.imageUrl || `https://backend.serenissima.ai/public_assets/images/citizens/${identifierForImage}.jpg`;
+      
+      let imageUrl;
+      if (citizen.imageUrl) { // citizen.imageUrl is from safeCitizen, so it's a non-empty string or null
+        if (citizen.imageUrl.startsWith('/')) {
+          imageUrl = `https://backend.serenissima.ai/public_assets${citizen.imageUrl}`;
+        } else {
+          // Assumed to be a full URL or already correctly formed relative path not starting with '/'
+          imageUrl = citizen.imageUrl; 
+        }
+      } else { // If citizen.imageUrl is null (or was empty and became null via safeCitizen)
+        // Prioritize citizen.username for the image path, then citizen.id, then 'default'
+        const identifierForImage = citizen.username || citizen.id || 'default';
+        imageUrl = `https://backend.serenissima.ai/public_assets/images/citizens/${identifierForImage}.jpg`;
+      }
     
       // This console.log can be removed or kept, but the one above is more comprehensive now.
       // console.log('TOOLTIP: Using image URL:', imageUrl); 
