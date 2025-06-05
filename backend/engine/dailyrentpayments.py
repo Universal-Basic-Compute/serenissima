@@ -36,6 +36,11 @@ log = logging.getLogger("daily_rent_payments")
 # Load environment variables
 load_dotenv()
 
+# Add the project root to sys.path to allow imports from backend.engine
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM # Import relationship helper
 
 def initialize_airtable():
