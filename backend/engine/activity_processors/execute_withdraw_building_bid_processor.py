@@ -2,9 +2,12 @@ import logging
 import json
 from datetime import datetime, timezone
 
+# Import get_citizen_record and get_contract_record from activity_helpers
 from backend.engine.utils.activity_helpers import (
-    LogColors, get_citizen_record, get_contract_record, create_notification_record
+    LogColors, get_citizen_record, get_contract_record
 )
+# Import create_notification from the new notification_helpers module
+from backend.engine.utils.notification_helpers import create_notification
 
 log = logging.getLogger(__name__)
 
@@ -65,10 +68,24 @@ def process_execute_withdraw_building_bid_fn(tables: dict, activity_record: dict
         log.info(f"{LogColors.SUCCESS}Building bid contract {building_bid_contract_id} status updated to 'withdrawn_by_buyer'.{LogColors.ENDC}")
 
         # Notifications
-        if contract_seller_username: # Notify seller if there is one
-            create_notification_record(tables, contract_seller_username, "building_bid_withdrawn", f"The bid from {bidder_username} for your building {building_id_custom} has been withdrawn.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
+        notification_details = {"contractId": building_bid_contract_id, "buildingId": building_id_custom}
         
-        create_notification_record(tables, bidder_username, "building_bid_withdrawal_confirmed", f"Your bid for building {building_id_custom} has been successfully withdrawn.", details_json=json.dumps({"contractId": building_bid_contract_id, "buildingId": building_id_custom}))
+        if contract_seller_username: # Notify seller if there is one
+            create_notification(
+                tables, 
+                contract_seller_username, 
+                "building_bid_withdrawn", 
+                f"The bid from {bidder_username} for your building {building_id_custom} has been withdrawn.", 
+                details=notification_details
+            )
+        
+        create_notification(
+            tables, 
+            bidder_username, 
+            "building_bid_withdrawal_confirmed", 
+            f"Your bid for building {building_id_custom} has been successfully withdrawn.", 
+            details=notification_details
+        )
         
         return True
 
