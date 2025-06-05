@@ -179,7 +179,8 @@ const LandMarketColumn: React.FC<LandMarketColumnProps> = ({
           )}
           
           {/* "Make an Offer" input/button */}
-          {currentCitizenUsername && !isOwner && !myBuyOffer && !landListingByOwner && !isAvailableFromState && (
+          {/* Condition changed: removed !landListingByOwner to allow making offers even if land is listed */}
+          {currentCitizenUsername && !isOwner && !myBuyOffer && !isAvailableFromState && (
             showOfferInput ? (
               <div className="flex flex-col w-full space-y-3 mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <label htmlFor="offerRange" className="block text-sm font-medium text-gray-700">
