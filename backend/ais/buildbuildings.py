@@ -63,6 +63,20 @@ def log_data(label, data, indent=2):
     indented_data = textwrap.indent(formatted_data, ' ' * indent)
     print(indented_data)
 
+# Adapter to make custom logging functions compatible with log_ref.info/error calls
+class CustomLoggerAdapter:
+    def info(self, message: str):
+        # The message might already contain color codes from the caller.
+        # Our log_info function will prepend its own prefix (e.g., [INFO])
+        # and handle the overall color styling.
+        log_info(message)
+
+    def error(self, message: str):
+        log_error(message)
+
+# Global instance of the logger adapter, named 'log' as intended by previous fixes.
+log = CustomLoggerAdapter()
+
 def send_error_message_to_kinos_ai(ai_username: str, error_context: str, error_message: str, original_ai_response: Optional[str] = None):
     """Sends a system message to the Kinos AI about an error in processing its strategy."""
     try:
