@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 // Importer des icônes si nécessaire, par exemple react-icons
 // import { FaShip, FaPassport, FaHome, FaBed } from 'react-icons/fa';
 
@@ -893,7 +895,11 @@ ${commonPromptInstructions}`;
                     : 'bg-stone-200 text-stone-800 rounded-bl-none'
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                <div className="text-sm markdown-content-arrival"> {/* Added a wrapper class for potential styling */}
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
                 <p className={`text-xs mt-1 ${msg.sender === currentUserUsername ? 'text-orange-100' : 'text-stone-500'}`}>
                   {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
