@@ -187,7 +187,7 @@ def try_create(
         "FromBuilding": None,  # Starting from current position
         "ToBuilding": target_office_building_id,
         "Path": json.dumps(path_to_office.get('path', [])),
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "resourceType": resource_type,
             "targetAmount": target_amount,
             "pricePerResource": price_per_resource,
@@ -214,7 +214,7 @@ def try_create(
         "Citizen": citizen,
         "FromBuilding": target_office_building_id,
         "ToBuilding": target_office_building_id,  # Same location
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "resourceType": resource_type,
             "targetAmount": target_amount,
             "pricePerResource": price_per_resource,

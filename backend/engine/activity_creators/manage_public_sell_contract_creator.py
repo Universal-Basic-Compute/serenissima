@@ -131,7 +131,7 @@ def try_create(
         "FromBuilding": None,  # Starting from current position
         "ToBuilding": seller_building_id,
         "Path": json.dumps(path_to_seller.get('path', [])),
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "contractId": contract_id,
             "resourceType": resource_type,
             "pricePerResource": price_per_resource,
@@ -159,7 +159,7 @@ def try_create(
         "Citizen": citizen_username,
         "FromBuilding": seller_building_id,
         "ToBuilding": seller_building_id,  # Same location
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "contractId": contract_id,
             "resourceType": resource_type,
             "pricePerResource": price_per_resource,
@@ -188,7 +188,7 @@ def try_create(
         "FromBuilding": seller_building_id,
         "ToBuilding": target_market_building_id,
         "Path": json.dumps(path_to_market.get('path', [])),
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "contractId": contract_id,
             "resourceType": resource_type,
             "pricePerResource": price_per_resource,
@@ -216,7 +216,7 @@ def try_create(
         "Citizen": citizen_username,
         "FromBuilding": target_market_building_id,
         "ToBuilding": target_market_building_id,  # Same location
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "contractId": contract_id,
             "resourceType": resource_type,
             "pricePerResource": price_per_resource,
