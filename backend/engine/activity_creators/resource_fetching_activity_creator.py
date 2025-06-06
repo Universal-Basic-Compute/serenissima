@@ -112,46 +112,54 @@ def try_create(
     log.info(f"Attempting to create resource fetching activity for {citizen_username} from {final_from_building_custom_id or 'unknown source'} to {destination_log_name} with explicit start: {start_time_utc_iso}")
 
     try:
-        effective_start_dt: datetime.datetime
-        effective_end_dt: datetime.datetime
-        current_path_points = []
-        current_transporter = None
+        initial_trigger_time_dt: datetime.datetime
+        current_path_points = [] # Initialize here
+        current_transporter = None # Initialize here
 
         if start_time_utc_iso:
-            effective_start_dt = datetime.datetime.fromisoformat(start_time_utc_iso.replace("Z", "+00:00"))
-            if effective_start_dt.tzinfo is None: effective_start_dt = pytz.UTC.localize(effective_start_dt)
+            initial_trigger_time_dt = datetime.datetime.fromisoformat(start_time_utc_iso.replace("Z", "+00:00"))
+            if initial_trigger_time_dt.tzinfo is None: initial_trigger_time_dt = pytz.UTC.localize(initial_trigger_time_dt)
         else:
-            effective_start_dt = current_time_utc # Default to now if no explicit start
+            initial_trigger_time_dt = current_time_utc # Default to now if no explicit start
 
-        if final_from_building_custom_id and to_building_custom_id and final_from_building_custom_id == to_building_custom_id:
-            log.info(f"FromBuilding and ToBuilding are the same ({final_from_building_custom_id}). Setting travel time to 1 minute for {citizen_username}.")
-            effective_end_dt = effective_start_dt + datetime.timedelta(minutes=1)
-        elif path_data and path_data.get('timing', {}).get('durationSeconds') is not None:
-            duration_seconds = path_data['timing']['durationSeconds']
-            effective_end_dt = effective_start_dt + datetime.timedelta(seconds=duration_seconds)
+        travel_duration_seconds = 0
+        # path_data is from current citizen location to final_from_building_custom_id
+        if path_data and path_data.get('timing') and path_data['timing'].get('durationSeconds') is not None:
+            travel_duration_seconds = path_data['timing']['durationSeconds']
             current_path_points = path_data.get('path', [])
             current_transporter = path_data.get('transporter')
-        else: # No path_data or no duration, use default travel time
-            log.warning(f"Path data is None or lacks duration for fetch_resource activity for {citizen_username}. Using default travel time.")
-            effective_end_dt = effective_start_dt + datetime.timedelta(minutes=30) # Default 30 mins
+            log.info(f"Path data provided for {citizen_username} to {final_from_building_custom_id or 'unknown source'}. Travel duration: {travel_duration_seconds}s.")
+        elif not (final_from_building_custom_id and to_building_custom_id and final_from_building_custom_id == to_building_custom_id):
+            # This case: Not an internal transfer AND (no path_data OR path_data lacks duration).
+            # Implies travel is needed but not specified, so use default.
+            log.warning(f"Path data is None or lacks duration for {citizen_username} to non-local FromBuilding {final_from_building_custom_id or 'unknown source'}. Using default travel time of 30 mins.")
+            travel_duration_seconds = 30 * 60 
+        # If it's an internal transfer (From == To) and no path_data, travel_duration_seconds remains 0. Correct.
+
+        arrival_at_from_building_dt = initial_trigger_time_dt + datetime.timedelta(seconds=travel_duration_seconds)
+        
+        pickup_action_duration_minutes = 5 # Default pickup time once at FromBuilding
+        if final_from_building_custom_id and to_building_custom_id and final_from_building_custom_id == to_building_custom_id:
+            pickup_action_duration_minutes = 1 # Quicker for internal transfer
+            log.info(f"Internal transfer at {final_from_building_custom_id or 'unknown source'}. Pickup action time set to {pickup_action_duration_minutes} minute for {citizen_username}.")
+        
+        activity_actual_start_dt = arrival_at_from_building_dt
+        activity_actual_end_dt = arrival_at_from_building_dt + datetime.timedelta(minutes=pickup_action_duration_minutes)
 
         activity_id_str = f"fetch_{citizen_custom_id}_{uuid.uuid4()}"
         
         from_building_name = final_from_building_custom_id if final_from_building_custom_id else "an unknown location"
-        # to_building_name = to_building_custom_id # Assuming to_building_custom_id is always provided
         to_building_name_for_log = to_building_custom_id if to_building_custom_id else "inventaire personnel"
-
 
         activity_payload = {
             "ActivityId": activity_id_str,
             "Type": "fetch_resource",
             "Citizen": citizen_username,
-            # "ContractId": contract_custom_id, # Will be set conditionally below
             "FromBuilding": final_from_building_custom_id, 
             "ToBuilding": to_building_custom_id,   
-            "CreatedAt": effective_start_dt.isoformat(),
-            "StartDate": effective_start_dt.isoformat(),
-            "EndDate": effective_end_dt.isoformat(),
+            "CreatedAt": initial_trigger_time_dt.isoformat(), # Time the intention/trigger occurred
+            "StartDate": activity_actual_start_dt.isoformat(),    # Actual start of pickup at FromBuilding
+            "EndDate": activity_actual_end_dt.isoformat(),        # Actual end of pickup at FromBuilding
             "Path": json.dumps(current_path_points), 
             "Transporter": current_transporter, 
         }
