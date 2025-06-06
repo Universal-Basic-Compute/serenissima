@@ -254,24 +254,14 @@ export default function TwoDPage() {
     setCitizenForPanelDirect(null);
   }, []);
 
-  // Effect to determine client-side initial status after mount AND set initial loading image
+  // Effect for initial loading image (runs once)
   useEffect(() => {
-    // Define loading images (can be moved outside if static and shared, but here for clarity)
-    let loadingImageFiles = [ // Changed to let to allow in-place shuffle
+    // Define loading images
+    let loadingImageFiles = [
       'renaissance-architectural-construction.png',
       'renaissance-venetian-merchant-s-ledger.png',
       'secretive-venetian-council-of-ten-meeting.png',
-      '1.png',
-      '2.png',
-      '3.png',
-      '4.png',
-      '5.png',
-      '6.png',
-      '7.png',
-      '8.png',
-      '9.png',
-      '10.png',
-      '11.png'
+      '1.png', '2.png', '3.png', '4.png', '5.png', '6.png', '7.png', '8.png', '9.png', '10.png', '11.png'
     ];
 
     // Shuffle the loadingImageFiles array (Fisher-Yates shuffle)
@@ -280,7 +270,6 @@ export default function TwoDPage() {
       [loadingImageFiles[i], loadingImageFiles[j]] = [loadingImageFiles[j], loadingImageFiles[i]];
     }
 
-    // Set initial loading image (client-side only)
     const selectInitialLoadingImage = () => {
       if (loadingImageFiles.length === 0) return null;
       const cache = getLoadingImageCache();
@@ -289,10 +278,7 @@ export default function TwoDPage() {
 
       const viableImageFiles = loadingImageFiles.filter(fileName => {
         const cacheEntry = cache[fileName];
-        if (cacheEntry?.failed && cacheEntry.lastAttempt && (now - cacheEntry.lastAttempt < oneDayMs)) {
-          return false;
-        }
-        return true;
+        return !(cacheEntry?.failed && cacheEntry.lastAttempt && (now - cacheEntry.lastAttempt < oneDayMs));
       });
 
       let selectedFileName: string;
@@ -306,65 +292,57 @@ export default function TwoDPage() {
       return `https://backend.serenissima.ai/public_assets/images/loading/${selectedFileName}`;
     };
     setCurrentLoadingImage(selectInitialLoadingImage());
+  }, []); // Empty dependency array ensures this runs only once on mount
 
+  // Effect to determine client-side initial status and manage ambient audio
+  useEffect(() => {
     // Determine app status
     const clientDeterminedStatus = determineInitialAppStatus();
-    if (clientDeterminedStatus === 'ready') {
-      // If localStorage indicates we should skip daily update,
-      // then directly call handleDailyUpdateClose.
-      // This will emit DAILY_UPDATE_PANEL_CLOSED, which in turn sets appStatus to 'ready'
-      // and canShowMainPanels to true.
+    // Only call handleDailyUpdateClose if appStatus is currently 'dailyUpdate' AND clientDeterminedStatus IS 'ready'
+    if (appStatus === 'dailyUpdate' && clientDeterminedStatus === 'ready') {
       console.log("Client-side check: Daily update already shown or not needed. Transitioning to ready state via handleDailyUpdateClose.");
       handleDailyUpdateClose();
     }
     // If clientDeterminedStatus is 'dailyUpdate', no action is needed here,
     // as the state is already 'dailyUpdate'. The DailyUpdatePanel will show.
-    // The existing useEffect for loginStatusChecked will also run and can call handleDailyUpdateClose
-    // if the user is not logged in, which is the correct behavior.
 
-      // Initialize Ambient Audio Manager after a user interaction or when app is ready
-      const initAmbientAudio = async () => {
-        if (!isAmbientAudioInitialized) {
-          console.log('Attempting to initialize AmbientAudioManager...');
-          const success = await ambientAudioManager.initialize();
-          if (success) {
-            setIsAmbientAudioInitialized(true);
-            console.log('AmbientAudioManager initialized by app/page.tsx.');
-            if (appStatus === 'ready') { // Start playing if app is already ready
-              ambientAudioManager.start();
-            }
-          } else {
-            console.warn('AmbientAudioManager failed to initialize on page load.');
+    // Initialize Ambient Audio Manager
+    const initAmbientAudio = async () => {
+      if (!isAmbientAudioInitialized) {
+        console.log('Attempting to initialize AmbientAudioManager...');
+        const success = await ambientAudioManager.initialize();
+        if (success) {
+          setIsAmbientAudioInitialized(true);
+          console.log('AmbientAudioManager initialized by app/page.tsx.');
+          if (appStatus === 'ready') { // Start playing if app is already ready
+            ambientAudioManager.start();
           }
+        } else {
+          console.warn('AmbientAudioManager failed to initialize on page load.');
         }
-      };
-
-      // Attempt initialization. User interaction might be needed for AudioContext.
-      // We can also tie this to a button or the first user click.
-      // For now, let's try to initialize it. If it fails due to autoplay,
-      // it should resume on first user interaction if IsometricViewer handles that.
-      // A more robust way would be to initialize on first click if not already.
-      const handleFirstInteraction = async () => {
-        await initAmbientAudio();
-        window.removeEventListener('click', handleFirstInteraction);
-        window.removeEventListener('keydown', handleFirstInteraction);
-      };
-
-      if (typeof window !== 'undefined') {
-        window.addEventListener('click', handleFirstInteraction, { once: true });
-        window.addEventListener('keydown', handleFirstInteraction, { once: true });
       }
-      // Attempt to initialize immediately if possible (e.g. if user has interacted before)
-      initAmbientAudio();
+    };
 
-      // Initialize WeatherService
-      weatherService.initialize().then(() => {
-        console.log('WeatherService initialized by app/page.tsx.');
-      }).catch(error => {
-        console.error('Failed to initialize WeatherService from app/page.tsx:', error);
-      });
+    const handleFirstInteraction = async () => {
+      await initAmbientAudio();
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
 
-  }, [handleDailyUpdateClose, appStatus, isAmbientAudioInitialized]);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('click', handleFirstInteraction, { once: true });
+      window.addEventListener('keydown', handleFirstInteraction, { once: true });
+    }
+    initAmbientAudio(); // Attempt immediate initialization
+
+    // Initialize WeatherService
+    weatherService.initialize().then(() => {
+      console.log('WeatherService initialized by app/page.tsx.');
+    }).catch(error => {
+      console.error('Failed to initialize WeatherService from app/page.tsx:', error);
+    });
+
+  }, [appStatus, isAmbientAudioInitialized, handleDailyUpdateClose]); // Dependencies for app status and audio logic
 
   // State for path statistics
   const [pathStats, setPathStats] = useState<{
