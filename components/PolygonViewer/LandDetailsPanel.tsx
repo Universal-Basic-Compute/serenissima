@@ -117,6 +117,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     Type?: string;
     Seller?: string;
     Buyer?: string;
+    SellerName?: string; // Added optional SellerName
+    BuyerName?: string;  // Added optional BuyerName
     PricePerResource?: number;
     // ... any other fields from your contract structure
   }
