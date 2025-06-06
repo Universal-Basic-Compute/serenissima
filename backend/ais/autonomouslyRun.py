@@ -534,7 +534,37 @@ def make_kinos_call(
                 log.info(f"{LogColors.OKBLUE}No JSON block found in Kinos markdown for {ai_username}. {parsing_error_info}Attempting substring extraction.{LogColors.ENDC}")
 
             if not parsed_response: # If direct and markdown parse failed
-                # Attempt 3: Find first '{' and last '}'
+                # Attempt 3: If </think> tag exists, parse JSON after it
+                think_tag_end_str = "</think>"
+                think_tag_index = latest_ai_response_content.find(think_tag_end_str)
+                if think_tag_index != -1:
+                    log.info(f"{LogColors.OKBLUE}Found '{think_tag_end_str}' tag. Attempting to parse JSON after it for {ai_username}.{LogColors.ENDC}")
+                    content_after_think = latest_ai_response_content[think_tag_index + len(think_tag_end_str):]
+                    
+                    first_brace_after_think = content_after_think.find('{')
+                    last_brace_after_think = content_after_think.rfind('}')
+
+                    if first_brace_after_think != -1 and last_brace_after_think != -1 and last_brace_after_think > first_brace_after_think:
+                        json_str_after_think_raw = content_after_think[first_brace_after_think : last_brace_after_think + 1]
+                        pre_cleaned_after_think = _pre_clean_json_candidate(json_str_after_think_raw)
+                        json_str_after_think_cleaned = _clean_json_string(pre_cleaned_after_think)
+                        try:
+                            parsed_response = json.loads(json_str_after_think_cleaned)
+                            parsing_method_used = "after_think_tag_substring_cleaned"
+                            log.info(f"{LogColors.OKGREEN}Successfully parsed (pre-cleaned & cleaned) JSON substring after '{think_tag_end_str}' tag for {ai_username}.{LogColors.ENDC}")
+                        except json.JSONDecodeError as e_after_think:
+                            parsing_error_info += f"JSON after '{think_tag_end_str}' tag parse (pre-cleaned & cleaned) failed (Error: {e_after_think}). "
+                            log.warning(f"{LogColors.WARNING}Failed to parse JSON substring after '{think_tag_end_str}' tag for {ai_username}. Error: {e_after_think}. Substring: {json_str_after_think_cleaned[:200]}... {parsing_error_info}Attempting general substring extraction.{LogColors.ENDC}")
+                    else:
+                        parsing_error_info += f"No valid JSON structure found after '{think_tag_end_str}' tag. "
+                        log.info(f"{LogColors.OKBLUE}No JSON structure found after '{think_tag_end_str}' tag for {ai_username}. {parsing_error_info}Attempting general substring extraction.{LogColors.ENDC}")
+                else:
+                    parsing_error_info += f"No '{think_tag_end_str}' tag found. "
+                    log.info(f"{LogColors.OKBLUE}No '{think_tag_end_str}' tag found for {ai_username}. {parsing_error_info}Attempting general substring extraction.{LogColors.ENDC}")
+
+            if not parsed_response: # If direct, markdown, and after_think_tag parse failed
+                # Attempt 4: Find first '{' and last '}' in the whole response
+                log.info(f"{LogColors.OKBLUE}Attempting general substring extraction for {ai_username} as a last resort.{LogColors.ENDC}")
                 first_brace_idx = latest_ai_response_content.find('{')
                 last_brace_idx = latest_ai_response_content.rfind('}')
                 if first_brace_idx != -1 and last_brace_idx != -1 and last_brace_idx > first_brace_idx:
@@ -543,19 +573,19 @@ def make_kinos_call(
                     potential_json_str_cleaned = _clean_json_string(pre_cleaned_substring)
                     try:
                         parsed_response = json.loads(potential_json_str_cleaned)
-                        parsing_method_used = "substring_cleaned"
-                        log.info(f"{LogColors.OKGREEN}Successfully parsed (pre-cleaned & cleaned) JSON substring for {ai_username}.{LogColors.ENDC}")
+                        parsing_method_used = "general_substring_cleaned"
+                        log.info(f"{LogColors.OKGREEN}Successfully parsed (pre-cleaned & cleaned) general JSON substring for {ai_username}.{LogColors.ENDC}")
                     except json.JSONDecodeError as e_substring:
-                        parsing_error_info += f"Substring JSON parse (pre-cleaned & cleaned) failed (Error: {e_substring} at pos {e_substring.pos}). "
+                        parsing_error_info += f"General substring JSON parse (pre-cleaned & cleaned) failed (Error: {e_substring} at pos {e_substring.pos}). "
                         # Log context around the error position
                         error_context_start = max(0, e_substring.pos - 30)
                         error_context_end = min(len(potential_json_str_cleaned), e_substring.pos + 30)
                         error_snippet = potential_json_str_cleaned[error_context_start:error_context_end]
                         pointer_str = ' ' * (e_substring.pos - error_context_start) + '^'
-                        log.warning(f"{LogColors.WARNING}Failed to parse (pre-cleaned & cleaned) JSON substring for {ai_username}. Error context:\n{error_snippet}\n{pointer_str}{LogColors.ENDC}")
+                        log.warning(f"{LogColors.WARNING}Failed to parse (pre-cleaned & cleaned) general JSON substring for {ai_username}. Error context:\n{error_snippet}\n{pointer_str}{LogColors.ENDC}")
                 else:
-                    parsing_error_info += "No suitable JSON-like substring found. "
-                    log.warning(f"{LogColors.WARNING}No suitable JSON-like substring found for {ai_username}.{LogColors.ENDC}")
+                    parsing_error_info += "No suitable general JSON-like substring found. "
+                    log.warning(f"{LogColors.WARNING}No suitable general JSON-like substring found for {ai_username}.{LogColors.ENDC}")
         
         if parsed_response:
             log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username} (method: {parsing_method_used}): {json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
