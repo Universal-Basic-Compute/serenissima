@@ -100,6 +100,11 @@ const ArrivalPage: React.FC = () => {
   const [isAiInitiating, setIsAiInitiating] = useState<boolean>(false); // For AI's first message
   const [inputValue, setInputValue] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [tipForLoadingBubble, setTipForLoadingBubble] = useState<string | null>(null);
+  const tipTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // State for pre-fetched AI data packages
+  const [aiDataPackages, setAiDataPackages] = useState<Record<string, any | null>>({});
 
   // Contexte pour Kinos, similaire à Compagno
   const [contextualDataForChat, setContextualDataForChat] = useState<{
