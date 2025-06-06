@@ -161,40 +161,53 @@ You operate in the tradition of the actual Consiglio dei Dieci, balancing the pr
 def initialize_airtable_tables() -> Optional[Dict[str, Table]]:
     """Initializes and returns a dictionary of Airtable Table objects."""
     
-    api_key_str: Optional[str] = None
-    if isinstance(AIRTABLE_API_KEY, str):
-        api_key_str = AIRTABLE_API_KEY.strip()
-        if not api_key_str:  # Was empty string or all whitespace
-            api_key_str = None
-    elif AIRTABLE_API_KEY is not None: # It's not a string and not None (e.g. unexpected type like int or complex tuple)
-        log.warning(f"{LogColors.WARNING}AIRTABLE_API_KEY is of unexpected type: {type(AIRTABLE_API_KEY)}. Treating as not set.{LogColors.ENDC}")
-        # api_key_str remains None
+    # These module-level variables are processed at script load:
+    # _env_var = os.getenv("VAR_NAME")
+    # VAR_NAME = _env_var[0] if isinstance(_env_var, tuple) and len(_env_var) == 1 and isinstance(_env_var[0], str) else _env_var
+    current_api_key = AIRTABLE_API_KEY 
+    current_base_id = AIRTABLE_BASE_ID
 
-    base_id_str: Optional[str] = None
-    if isinstance(AIRTABLE_BASE_ID, str):
-        base_id_str = AIRTABLE_BASE_ID.strip()
-        if not base_id_str:  # Was empty string or all whitespace
-            base_id_str = None
-    elif AIRTABLE_BASE_ID is not None: # It's not a string and not None
-        log.warning(f"{LogColors.WARNING}AIRTABLE_BASE_ID is of unexpected type: {type(AIRTABLE_BASE_ID)}. Treating as not set.{LogColors.ENDC}")
-        # base_id_str remains None
+    log.debug(f"Module-level AIRTABLE_API_KEY: type={type(current_api_key)}, value='{str(current_api_key)[:50]}...'")
+    log.debug(f"Module-level AIRTABLE_BASE_ID: type={type(current_base_id)}, value='{str(current_base_id)[:50]}...'")
 
-    if not api_key_str or not base_id_str:
-        log_api_key_status = 'Set (but invalid type or empty after strip)' if AIRTABLE_API_KEY and not api_key_str else 'Set' if api_key_str else 'Not Set'
-        log_base_id_status = 'Set (but invalid type or empty after strip)' if AIRTABLE_BASE_ID and not base_id_str else 'Set' if base_id_str else 'Not Set'
-        log.error(f"{LogColors.FAIL}Airtable API Key or Base ID not configured or invalid (API Key: {log_api_key_status}, Base ID: {log_base_id_status}).{LogColors.ENDC}")
+    final_api_key: Optional[str] = None
+    if isinstance(current_api_key, str):
+        final_api_key = current_api_key.strip()
+        if not final_api_key: # Was empty or all whitespace
+            final_api_key = None 
+    elif current_api_key is not None: # Not a string and not None
+        log.error(f"Airtable API Key is of unexpected type after module-level processing: {type(current_api_key)}. Value: '{str(current_api_key)[:50]}...'")
         return None
     
+    final_base_id: Optional[str] = None
+    if isinstance(current_base_id, str):
+        final_base_id = current_base_id.strip()
+        if not final_base_id: # Was empty or all whitespace
+            final_base_id = None
+    elif current_base_id is not None: # Not a string and not None
+        log.error(f"Airtable Base ID is of unexpected type after module-level processing: {type(current_base_id)}. Value: '{str(current_base_id)[:50]}...'")
+        return None
+
+    if not final_api_key:
+        log.error(f"{LogColors.FAIL}Airtable API Key is missing or invalid after processing.{LogColors.ENDC}")
+        return None
+    if not final_base_id:
+        log.error(f"{LogColors.FAIL}Airtable Base ID is missing or invalid after processing.{LogColors.ENDC}")
+        return None
+    
+    log.info(f"Attempting Airtable initialization with API Key (type: {type(final_api_key)}): '{final_api_key[:7]}...' and Base ID (type: {type(final_base_id)}): '{final_base_id[:7]}...'")
+
     try:
-        api = Api(api_key_str) 
+        api = Api(final_api_key) 
         tables = {
-            'messages': api.table(base_id_str, 'MESSAGES'),
-            'notifications': api.table(base_id_str, 'NOTIFICATIONS'),
+            'messages': api.table(final_base_id, 'MESSAGES'),
+            'notifications': api.table(final_base_id, 'NOTIFICATIONS'),
         }
         log.info(f"{LogColors.OKGREEN}Airtable tables (messages, notifications) initialized successfully.{LogColors.ENDC}")
         return tables
     except Exception as e:
         log.error(f"{LogColors.FAIL}Failed to initialize Airtable tables: {e}{LogColors.ENDC}")
+        log.error(f"  (Used API Key: '{final_api_key[:7]}...', Base ID: '{final_base_id[:7]}...')")
         return None
 
 def fetch_daily_communications(tables: Dict[str, Table]) -> List[str]:
