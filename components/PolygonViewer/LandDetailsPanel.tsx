@@ -572,7 +572,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           sender: currentCitizenUsername,
           receiver: selectedPolygon.id, // Land ID as receiver context
           content: content,
-          type: 'land_message' // Specific type for land chat
+          type: 'land_message', // Specific type for land chat
+          channel: `land_${selectedPolygon.id}` // Add channel for land messages
         }),
       });
       if (!persistUserMessageResponse.ok) {
@@ -663,7 +664,8 @@ Respond to ${interactorDisplayName}'s message. Be business-like, focused on game
               sender: selectedPolygon.id, // Land ID as sender (AI)
               receiver: currentCitizenUsername,
               content: kinosData.content,
-              type: 'land_message_ai_augmented'
+              type: 'land_message_ai_augmented',
+              channel: `land_${selectedPolygon.id}` // Add channel for AI land messages
             }),
           });
           if (!persistAiResponse.ok) {

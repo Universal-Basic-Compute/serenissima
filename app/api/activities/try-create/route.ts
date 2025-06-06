@@ -123,12 +123,14 @@ export async function POST(request: Request) {
     // Log des paramètres spécifiques pour send_message
     if (activityType === 'send_message') {
       const inReplyTo = activityParameters?.notes?.inReplyToMessageId; // Changed details to notes
+      const channel = activityParameters?.channel; // Extract channel if present
       console.log(`[API /activities/try-create] Processing send_message with parameters:`, 
         `Receiver: ${activityParameters?.receiverUsername}`,
         `Message Type: ${activityParameters?.messageType || 'message'}`,
         `Content Length: ${activityParameters?.content ? (activityParameters.content as string).length : 0} characters`,
         `Target Building: ${activityParameters?.targetBuildingId || 'Receiver location'}`,
-        inReplyTo ? `In Reply To: ${inReplyTo}` : 'Not a reply or ID not provided in notes' // Changed details to notes
+        inReplyTo ? `In Reply To: ${inReplyTo}` : 'Not a reply or ID not provided in notes', // Changed details to notes
+        channel ? `Channel: ${channel}` : 'No channel specified' // Log channel
       );
     }
     

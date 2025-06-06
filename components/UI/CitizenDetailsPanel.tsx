@@ -446,7 +446,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           // Use citizen.username, citizen.citizenId (camelCase)
           receiver: citizen.username || citizen.citizenId,
           content: content,
-          type: 'message'
+          type: 'message',
+          channel: [internalCurrentCitizenUsername, citizen.username || citizen.citizenId].sort().join('_') // Add sorted channel
         })
       });
 
@@ -604,7 +605,8 @@ Your response:`;
                       sender: citizen.username, // AI is the sender
                       receiver: internalCurrentCitizenUsername, // User is the receiver - Use state variable
                       content: kinosData.content,
-                      type: 'message_ai_augmented'
+                      type: 'message_ai_augmented',
+                      channel: [internalCurrentCitizenUsername, citizen.username].sort().join('_') // Add sorted channel for AI response
                     }),
                   });
                   if (!persistResponse.ok) {

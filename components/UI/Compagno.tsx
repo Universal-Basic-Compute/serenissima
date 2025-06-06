@@ -621,7 +621,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           sender: actualSenderUsername, // Use actualSenderUsername
           receiver: selectedCitizen, // This can be username itself for self-chat
           content: content,
-          type: messageType
+          type: messageType,
+          channel: [actualSenderUsername, selectedCitizen].sort().join('_') // Add sorted channel
         })
       });
       
@@ -747,7 +748,8 @@ Your response:`;
                       sender: aiKinUsername, // AI is the sender
                       receiver: actualSenderUsername,    // User is the receiver, use actualSenderUsername
                       content: kinosData.content,
-                      type: 'message_ai_augmented'
+                      type: 'message_ai_augmented',
+                      channel: [aiKinUsername, actualSenderUsername].sort().join('_') // Add sorted channel for AI response
                     }),
                   });
                   if (!persistResponse.ok) {

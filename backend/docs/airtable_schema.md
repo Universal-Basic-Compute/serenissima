@@ -293,6 +293,7 @@ Communications entre citoyens.
 -   `Type` (Texte): Type de message (ex: `personal`, `business_inquiry`, `guild_communication`, `reply`).
 -   `ReadAt` (Date/Heure): Horodatage de lecture par le destinataire.
 -   `Notes` (Texte multiligne): Peut contenir des informations contextuelles. Par exemple, pour les messages de type "reply", ce champ peut stocker l'ID du message original sous la forme `In reply to: <MessageId>`.
+-   `Channel` (Texte, optionnel): Identifiant du canal de discussion (ex: `land_parcelX`, `chat_userA_userB`, `guild_guildY`). Permet de regrouper les messages par contexte.
 -   `CreatedAt` (Date/Heure): Date d'envoi du message.
 -   `UpdatedAt` (Date/Heure): Date de dernière modification.
 
