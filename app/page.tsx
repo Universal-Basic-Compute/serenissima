@@ -214,7 +214,7 @@ export default function TwoDPage() {
   // Effect to determine client-side initial status after mount AND set initial loading image
   useEffect(() => {
     // Define loading images (can be moved outside if static and shared, but here for clarity)
-    const loadingImageFiles = [
+    let loadingImageFiles = [ // Changed to let to allow in-place shuffle
       'renaissance-architectural-construction.png',
       'renaissance-venetian-merchant-s-ledger.png',
       'secretive-venetian-council-of-ten-meeting.png',
@@ -230,6 +230,12 @@ export default function TwoDPage() {
       '10.png',
       '11.png'
     ];
+
+    // Shuffle the loadingImageFiles array (Fisher-Yates shuffle)
+    for (let i = loadingImageFiles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [loadingImageFiles[i], loadingImageFiles[j]] = [loadingImageFiles[j], loadingImageFiles[i]];
+    }
 
     // Set initial loading image (client-side only)
     const selectInitialLoadingImage = () => {
