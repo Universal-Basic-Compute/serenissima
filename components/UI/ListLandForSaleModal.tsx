@@ -111,27 +111,22 @@ const ListLandForSaleModal: React.FC<ListLandForSaleModalProps> = ({
             {/* Price input */}
             <div className="mb-4">
               <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                Listing Price (in ⚜️ ducats)
+                Listing Price: <span className="font-semibold text-amber-700">{price.toLocaleString()} ⚜️</span>
               </label>
-              <div className="relative rounded-md shadow-sm">
-                <input
-                  type="number"
-                  id="price"
-                  value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
-                  min="1"
-                  step="1"
-                  className="focus:ring-amber-500 focus:border-amber-500 block w-full pl-4 pr-12 py-3 sm:text-lg border-amber-300 rounded-md"
-                  placeholder="Enter price"
-                  required
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <span className="text-amber-600">⚜️</span>
-                </div>
+              <input
+                type="range"
+                id="price"
+                value={price}
+                onChange={(e) => setPrice(Number(e.target.value))}
+                min="50000"     // Min price for the slider
+                max="50000000"  // Max price for the slider
+                step="50000"    // Step for the slider
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>50k ⚜️</span>
+                <span>50M ⚜️</span>
               </div>
-              <p className="mt-1 text-sm text-gray-500">
-                Recommended price range: 5,000,000 - 50,000,000 ⚜️
-              </p>
             </div>
             
             {/* Error message */}
