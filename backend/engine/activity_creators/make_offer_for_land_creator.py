@@ -4,6 +4,7 @@ import logging
 import json
 from datetime import timedelta
 import uuid
+from typing import Dict, Any, Optional # Added import
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 if PROJECT_ROOT not in sys.path:
