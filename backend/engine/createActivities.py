@@ -67,7 +67,6 @@ from backend.engine.utils.activity_helpers import (
     is_nighttime as is_nighttime_helper,
     get_path_between_points,
     get_citizen_current_load,
-    get_closest_inn,
     get_citizen_workplace,
     get_citizen_home,
     get_building_type_info,
