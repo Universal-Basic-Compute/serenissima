@@ -488,7 +488,7 @@ def make_kinos_call(
                 # raw_reflection_content is already latest_ai_response_content
 
         if parsed_response:
-            log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username}: {json.dumps(parsed_response, indent=2)[:500]}...{LogColors.ENDC}")
+            log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username}: {json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
             if parsing_error_occurred: # If we successfully parsed after an initial failure (e.g. from markdown)
                 parsed_response["parsing_error_info"] = "Initial direct JSON parse failed, but successfully parsed from markdown block."
             return parsed_response
