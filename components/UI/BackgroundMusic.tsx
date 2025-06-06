@@ -47,7 +47,16 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const previousTrackUrlRef = useRef<string | null>(null); // Ref to store the URL of the previously played track
   const [showControls, setShowControls] = useState(false);
   const isMountedRef = useRef(true);
-  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Use a ref for the timeout ID
+  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // State and Refs for tab visibility and volume control
+  const [isTabVisible, setIsTabVisible] = useState(true);
+  const originalVolumeRef = useRef(volume); // Stores the user-set volume
+  const wasPlayingBeforeHiddenRef = useRef(isPlaying); // Stores play state when tab is hidden
+  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null); // For managing fade intervals
+
+  const FADE_DURATION = 1000; // 1 second for fade
+  const FADE_STEPS = 20;      // Number of steps for fade
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -55,6 +64,64 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       isMountedRef.current = false;
     };
   }, []);
+
+  const fadeOut = useCallback(() => {
+    if (!audioRef.current) return;
+    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+
+    const audio = audioRef.current;
+    const currentVol = audio.volume;
+    const stepTime = FADE_DURATION / FADE_STEPS;
+    const volDecrement = currentVol / FADE_STEPS;
+    let step = 0;
+
+    fadeIntervalRef.current = setInterval(() => {
+      if (!isMountedRef.current) { // Check if component is still mounted
+        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+        return;
+      }
+      if (step < FADE_STEPS) {
+        audio.volume = Math.max(0, currentVol - volDecrement * (step + 1)); // Ensure it reaches 0
+        step++;
+      } else {
+        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+        audio.pause();
+      }
+    }, stepTime);
+  }, [FADE_DURATION, FADE_STEPS]);
+
+  const fadeIn = useCallback(() => {
+    if (!audioRef.current) return;
+    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+  
+    const audio = audioRef.current;
+    const targetVol = originalVolumeRef.current;
+    audio.volume = 0; // Start from 0
+  
+    // Only play if it was playing before or if it's a fresh play command
+    // and the tab is now visible (which is implied if fadeIn is called by visibility handler)
+    audio.play().catch(error => console.error("[BackgroundMusic] Error playing on fade in:", error));
+    // setIsPlaying(true); // This will be set by the play() promise or user interaction
+  
+    const stepTime = FADE_DURATION / FADE_STEPS;
+    const volIncrement = targetVol / FADE_STEPS;
+    let step = 0;
+  
+    fadeIntervalRef.current = setInterval(() => {
+      if (!isMountedRef.current) { // Check if component is still mounted
+        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+        return;
+      }
+      if (step < FADE_STEPS) {
+        audio.volume = Math.min(targetVol, volIncrement * (step + 1)); // Ensure it reaches targetVol
+        step++;
+      } else {
+        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+        audio.volume = targetVol; // Ensure it reaches the target
+      }
+    }, stepTime);
+  }, [FADE_DURATION, FADE_STEPS]);
+
 
   // Load available tracks
   useEffect(() => {
@@ -68,22 +135,26 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
           const data = await response.json();
           console.log('[BackgroundMusic] Fetched data:', data); 
           if (data.tracks && Array.isArray(data.tracks)) {
+            if (!isMountedRef.current) return;
             console.log('[BackgroundMusic] Setting tracks:', data.tracks);
             setTracks(data.tracks);
             setIsLoading(false);
           } else {
             console.error('[BackgroundMusic] No tracks array in response or not an array. Data:', data);
+            if (!isMountedRef.current) return;
             setTracks([]);
             setIsLoading(false);
           }
         } else {
           const errorText = await response.text();
           console.error('[BackgroundMusic] Failed to load music tracks. Status:', response.status, 'Response text:', errorText);
+          if (!isMountedRef.current) return;
           setTracks([]);
           setIsLoading(false);
         }
       } catch (error) {
         console.error('[BackgroundMusic] Error loading music tracks (in catch block):', error);
+        if (!isMountedRef.current) return;
         setTracks([]);
         setIsLoading(false);
       }
@@ -94,14 +165,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       loadTracks();
     } else {
       console.log('[BackgroundMusic] App not ready, deferring track loading.');
-      // Optionnel: vous pouvez mettre setIsLoading(false) ici si vous ne voulez pas afficher "Loading music..."
-      // tant que l'application n'est pas prête. Actuellement, il restera sur "Loading music..."
-      // jusqu'à ce que isAppReady devienne true et que loadTracks() soit appelé.
-      // Si vous voulez un état "En attente de l'application..." :
-      // setIsLoading(false); // Et ajuster le message dans le rendu.
-      // Pour l'instant, laissons le comportement actuel où il attendra isAppReady.
     }
-  }, [isAppReady]); // Déclenche l'effet si isAppReady change
+  }, [isAppReady]);
 
   // Play a random track
   const playRandomTrack = useCallback(() => {
@@ -112,23 +177,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       console.log('[BackgroundMusic] playRandomTrack: No tracks available, returning.');
       return;
     }
-
-    // Clear any pending pause timeout
-    const audio = audioRef.current;
-    if (audio) {
-      // Access the timeout ID from the 'ended' event handler's scope if possible,
-      // or manage it at a higher scope if needed.
-      // For now, we assume a way to clear it. A better approach would be to lift
-      // pauseTimeoutId to be a ref or state if it needs to be cleared from here.
-      // Let's assume the 'ended' handler's cleanup is sufficient or will be improved.
-      // To be more direct, we can stop the current audio and clear its onended handler temporarily.
-      if (audio.onended) {
-        // This is a bit of a hack. Ideally, the timeout ID should be a ref.
-        // For now, we'll rely on the fact that starting a new track should supersede the pause.
-      }
-    }
     
-    // Get a random track that's different from the current one
     let newTrackUrl;
     if (tracks.length === 1) {
       newTrackUrl = tracks[0];
@@ -139,35 +188,34 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       } while (newTrackUrl === previousTrackUrlRef.current && tracks.length > 1);
     }
 
-    console.log(`[BackgroundMusic] Playing new track: ${newTrackUrl}`);
-    setCurrentTrack(newTrackUrl); // Update state for display
-    previousTrackUrlRef.current = newTrackUrl; // Update ref for next selection
+    console.log(`[BackgroundMusic] Selected new track: ${newTrackUrl}`);
+    if (!isMountedRef.current) return;
+    setCurrentTrack(newTrackUrl);
+    previousTrackUrlRef.current = newTrackUrl;
 
-    setIsPaused(false); // Ensure isPaused is reset
+    setIsPaused(false);
 
     if (audioRef.current) {
-      // Stop current track if playing
-      if (!audioRef.current.paused) {
-        audioRef.current.pause();
-      }
-      audioRef.current.currentTime = 0; // Reset time
-
-      console.log(`[BackgroundMusic] playRandomTrack: Setting src to ${newTrackUrl} and playing.`);
+      if (!audioRef.current.paused) audioRef.current.pause();
+      audioRef.current.currentTime = 0;
       audioRef.current.src = newTrackUrl;
-      audioRef.current.volume = volume;
-      audioRef.current.play().then(() => {
-        console.log(`[BackgroundMusic] playRandomTrack: Audio playback started for ${newTrackUrl}.`);
-        setIsPlaying(true); // Set isPlaying to true only after play() promise resolves
-      }).catch(error => {
-        console.error('[BackgroundMusic] playRandomTrack: Error playing audio:', error);
-        // If autoplay is blocked, we'll need citizen interaction
+      
+      if (isTabVisible) { // Only play if tab is visible
+        console.log(`[BackgroundMusic] Tab visible, attempting to play ${newTrackUrl} with fadeIn.`);
+        fadeIn(); // fadeIn will handle playing and volume ramp
+        setIsPlaying(true);
+      } else {
+        console.log(`[BackgroundMusic] Tab not visible. ${newTrackUrl} loaded but not playing. Will play on tab visibility if intended.`);
+        // Set volume but don't play. Visibility handler will play if wasPlayingBeforeHiddenRef is true.
+        audioRef.current.volume = originalVolumeRef.current; 
         setIsPlaying(false);
-      });
+      }
     } else {
-      console.log('[BackgroundMusic] playRandomTrack: audioRef.current is null, cannot play.');
-      setIsPlaying(false); // Ensure isPlaying is false if audioRef is null
+      if (!isMountedRef.current) return;
+      setIsPlaying(false);
     }
-  }, [tracks, volume, audioRef, setCurrentTrack, setIsPaused, setIsPlaying]); // Removed currentTrack from deps
+  }, [tracks, audioRef, setCurrentTrack, setIsPaused, setIsPlaying, originalVolumeRef, isTabVisible, fadeIn]);
+
 
   // Initialize audio and play first track
   useEffect(() => {
@@ -250,6 +298,45 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     isPausedRef.current = isPaused;
   }, [isPaused]);
 
+  // Tab Visibility Change Handler
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!isMountedRef.current) return;
+
+      if (document.hidden) {
+        setIsTabVisible(false);
+        if (isPlaying && audioRef.current && !audioRef.current.paused) {
+          wasPlayingBeforeHiddenRef.current = true;
+          // originalVolumeRef.current should already reflect the user's desired volume
+          fadeOut(); // This will pause after fade
+        } else {
+          wasPlayingBeforeHiddenRef.current = false;
+        }
+      } else { // Tab became visible
+        setIsTabVisible(true);
+        // originalVolumeRef.current should be up-to-date via the volume useEffect
+        if (wasPlayingBeforeHiddenRef.current && audioRef.current) {
+          if (audioRef.current.src !== currentTrack && currentTrack) {
+            audioRef.current.src = currentTrack; // Ensure correct track is loaded
+          }
+          fadeIn(); // This will call play() and ramp volume
+          setIsPlaying(true);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // Initial check in case the tab is already hidden when component mounts
+    if (document.hidden) {
+        handleVisibilityChange();
+    }
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+    };
+  }, [isPlaying, currentTrack, fadeOut, fadeIn, volume]); // volume added to ensure originalVolumeRef is current for fadeIn
+
   // Listen for global audio settings changes
   useEffect(() => {
     const handleAudioSettingsChanged = (event: CustomEvent) => {
@@ -328,43 +415,64 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     }
   }, [playRandomTrack, setCurrentTrack, setIsPlaying, setIsPaused]); // playRandomTrack is now more stable
 
-  // Update volume when it changes
+  // Update volume when it changes & keep originalVolumeRef in sync
   useEffect(() => {
-    if (audioRef.current) {
+    originalVolumeRef.current = volume; // Keep ref in sync with slider
+    if (audioRef.current && isTabVisible && !fadeIntervalRef.current) {
+      // Only directly set volume if tab is visible and not currently fading
       audioRef.current.volume = volume;
     }
-  }, [volume]);
+  }, [volume, isTabVisible]);
 
   // Toggle play/pause
   const togglePlayPause = () => {
+    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+  
     if (isPlaying) {
       audioRef.current?.pause();
-    } else {
+      setIsPlaying(false);
+      wasPlayingBeforeHiddenRef.current = false; // User explicitly paused
+    } else { // User wants to play
       if (currentTrack) {
-        audioRef.current?.play().catch(console.error);
+        if (!isTabVisible) { // If tab hidden, user interaction implies intent to play
+          wasPlayingBeforeHiddenRef.current = true; // Set intent
+          // originalVolumeRef.current is already tracking slider 'volume'
+          fadeIn(); // This will play and fade volume up
+          setIsTabVisible(true); // Conceptually make tab visible for audio logic
+        } else { // Tab visible
+          audioRef.current!.volume = originalVolumeRef.current; // Ensure correct volume
+          audioRef.current?.play().catch(console.error);
+        }
+        setIsPlaying(true);
       } else {
+        // If no current track, playRandomTrack will handle it
+        // It will also respect isTabVisible or wasPlayingBeforeHiddenRef
+        wasPlayingBeforeHiddenRef.current = true; // Set intent to play a new track
+        if (!isTabVisible) setIsTabVisible(true); // Make tab conceptually visible
         playRandomTrack();
       }
     }
-    setIsPlaying(!isPlaying);
   };
 
   // Skip to next track
   const nextTrack = () => {
     console.log('[BackgroundMusic] nextTrack called.');
-    // Clear any pending pause timeout immediately
-    if (pauseTimeoutRef.current) {
+    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+    if (pauseTimeoutRef.current) { // Clear pause between tracks timeout
       clearTimeout(pauseTimeoutRef.current);
       pauseTimeoutRef.current = null;
-      console.log('[BackgroundMusic] nextTrack: Cleared pending pause timeout.');
     }
-    // Stop current track and play a new random one
+  
     if (audioRef.current && !audioRef.current.paused) {
       audioRef.current.pause();
-      audioRef.current.currentTime = 0; // Reset time
+      audioRef.current.currentTime = 0;
     }
-    setIsPlaying(false); // Ensure isPlaying is false before starting new track
-    playRandomTrack();
+    
+    wasPlayingBeforeHiddenRef.current = true; // User wants to play the next track
+    if (!isTabVisible) {
+        setIsTabVisible(true); // Make tab conceptually visible for audio logic
+    }
+    playRandomTrack(); // playRandomTrack will handle fadeIn if needed
   };
 
   // Format track name for display
