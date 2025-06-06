@@ -343,46 +343,6 @@ if __name__ == "__main__":
 
     cli_args = parser.parse_args()
     main(cli_args)
-    random.shuffle(pair_participants)
-    speaker = pair_participants[0]
-    listener = pair_participants[1]
-
-    log.info(f"{LogColors.OKCYAN}Processing encounter: {speaker} will initiate conversation with {listener} at {location_id}.{LogColors.ENDC}")
-
-    if dry_run:
-        log.info(f"    [DRY RUN] Would call generate_conversation_turn for {speaker} to initiate with {listener}.")
-    else:
-        try:
-            # Call generate_conversation_turn with interaction_mode="conversation_opener"
-            new_opening_message = generate_conversation_turn(
-                tables=tables,
-                kinos_api_key=kinos_api_key,
-                speaker_username=speaker,
-                listener_username=listener,
-                api_base_url=api_base_url,
-                interaction_mode="conversation_opener" # New mode for opening line
-            )
-            if new_opening_message:
-                log.info(f"    Opening line by {speaker} to {listener} generated and persisted. ID: {new_opening_message.get('id')}")
-                log.debug(f"    Content: {new_opening_message.get('fields', {}).get('Content', '')[:100]}...")
-                
-                # Augment trust score after successful conversation opener
-                update_trust_score_for_activity(
-                    tables=tables,
-                    citizen1_username=speaker,
-                    citizen2_username=listener,
-                    trust_change_amount=TRUST_SCORE_MINOR_POSITIVE,
-                    activity_type_for_notes="encounter_initiated",
-                    success=True,
-                    notes_detail=f"{speaker} initiated conversation with {listener} at {location_id}.",
-                    activity_record_for_kinos=new_opening_message.get('fields') if new_opening_message else None
-                )
-                log.info(f"    Augmented trust between {speaker} and {listener} due to encounter initiation.")
-            else:
-                log.warning(f"    Failed to generate or persist opening line from {speaker} to {listener}.")
-        
-        except Exception as e_turn:
-            log.error(f"    Error during conversation opener generation for {speaker} to {listener}: {e_turn}")
 
 def main(args):
     """Main function to process encounters."""
@@ -418,9 +378,7 @@ def main(args):
         random.shuffle(location_ids_to_process)
 
     for location_id in location_ids_to_process:
-        if processed_pairs_total >= MAX_ENCOUNTERS_PER_RUN and not args.location and not args.citizen:
-            log.info(f"Reached max encounters per run ({MAX_ENCOUNTERS_PER_RUN}). Stopping.")
-            break
+        # Removed MAX_ENCOUNTERS_PER_RUN check here
 
         citizens_at_location = citizens_by_loc[location_id]
         location_name = location_id # Default to ID
@@ -440,11 +398,7 @@ def main(args):
 
         processed_pairs_at_location = 0
         for pair in citizen_pairs:
-            if processed_pairs_total >= MAX_ENCOUNTERS_PER_RUN and not args.location and not args.citizen:
-                break
-            if processed_pairs_at_location >= MAX_ENCOUNTERS_PER_LOCATION and not args.location and not args.citizen:
-                log.info(f"Reached max encounters for location {location_name}. Moving to next location.")
-                break
+            # Removed MAX_ENCOUNTERS_PER_RUN and MAX_ENCOUNTERS_PER_LOCATION checks here
 
             citizen1_record, citizen2_record = pair
             citizen1_username = citizen1_record['fields'].get('Username')
@@ -464,9 +418,9 @@ def main(args):
             processed_pairs_total += 1
             processed_pairs_at_location +=1
 
-            if processed_pairs_total < MAX_ENCOUNTERS_PER_RUN : # Check before sleeping
-                 log.info(f"Waiting {DELAY_BETWEEN_PAIRS_SECONDS}s before next pair...")
-                 time.sleep(DELAY_BETWEEN_PAIRS_SECONDS)
+            # Removed MAX_ENCOUNTERS_PER_RUN check before sleep
+            log.info(f"Waiting {DELAY_BETWEEN_PAIRS_SECONDS}s before next pair...")
+            time.sleep(DELAY_BETWEEN_PAIRS_SECONDS)
 
 
     log.info(f"\n{LogColors.OKGREEN}Encounter processing finished. Total pairs processed: {processed_pairs_total}.{LogColors.ENDC}")
