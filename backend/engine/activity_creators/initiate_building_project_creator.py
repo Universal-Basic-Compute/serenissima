@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 from backend.engine.utils.activity_helpers import (
     _escape_airtable_value, 
     VENICE_TIMEZONE,
-    find_path_between_buildings,
+    find_path_between_buildings_or_coords, # Changed import
     get_building_record,
     get_citizen_record
 )
@@ -140,7 +140,7 @@ def try_create(
         return {"success": False, "message": error_msg, "activity_fields": None, "reason": "invalid_point_details"}
     
     # Calculate path to land
-    path_to_land = find_path_between_buildings(None, None, transport_api_url, current_position_coords=current_position, target_position_coords=land_position)
+    path_to_land = find_path_between_buildings_or_coords(current_position, land_position, api_base_url, transport_api_url=transport_api_url)
     if not path_to_land or not path_to_land.get('path'): # path_to_land itself is the path data or None
         error_msg = f"Could not find path to land {land_id}"
         log.error(error_msg)
@@ -156,7 +156,7 @@ def try_create(
     land_inspection_end_date = (datetime.fromisoformat(inspect_end_date.replace('Z', '+00:00')) + timedelta(minutes=15)).isoformat()
     
     # Calculate path from land to office
-    path_to_office = find_path_between_buildings(None, target_office_building_record, transport_api_url, current_position_coords=land_position)
+    path_to_office = find_path_between_buildings_or_coords(land_position, target_office_building_record, api_base_url, transport_api_url=transport_api_url)
     if not path_to_office or not path_to_office.get('path'): # path_to_office itself is the path data or None
         error_msg = f"Could not find path from land {land_id} to office {target_office_building_id}"
         log.error(error_msg)
