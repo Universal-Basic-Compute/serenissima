@@ -39,10 +39,11 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
   return (
     <>
       {/* Main wallet button UI */}
-      {isConnected && citizenProfile && citizenProfile.username ? ( // Vérifier si citizenProfile.username existe
-        <div className={`${className} flex-shrink-0`} ref={dropdownRef}>
-          <button 
-            onClick={() => setDropdownOpen(!dropdownOpen)}
+      {isConnected ? (
+        citizenProfile && citizenProfile.username ? ( // Cas 1: Connecté, profil complet
+          <div className={`${className} flex-shrink-0`} ref={dropdownRef}>
+            <button 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
             className="bg-amber-50 px-4 py-2 rounded-lg shadow-md hover:bg-amber-100 transition-colors flex items-center border-2 border-amber-300"
           >
             <PlayerProfile
@@ -277,20 +278,193 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
           className={`bg-white px-4 py-2 rounded shadow hover:bg-purple-100 transition-colors ${className}`}
         >
           Connect Wallet
-        </button>
-      ) : isConnected && citizenProfile && !citizenProfile.username ? ( // Nouvel utilisateur, profil incomplet
-        <button
-          onClick={() => router.push('/arrival')}
-          className={`bg-red-800 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md text-lg font-serif transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 ${className}`}
-          style={{ backgroundColor: '#800020' }} // Burgundy color
-        >
-          Enter Venice
-        </button>
-      ) : isConnected && !citizenProfile ? ( // Connecté mais le profil est en cours de chargement ou introuvable
-        <div className={`${className} px-4 py-2 rounded shadow bg-gray-200 text-gray-700`}>
-          Loading Profile...
+          </button>
+          {/* ... (le reste du menu déroulant reste ici) ... */}
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl py-1 z-20 border-2 border-amber-300 overflow-hidden">
+              <div className="px-4 py-3 border-b border-amber-100 bg-amber-50">
+                <p className="text-xs text-amber-700">Wallet</p>
+                <p className="text-sm truncate font-medium">{walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}</p>
+                {citizenProfile.familyMotto && (
+                  <p className="text-xs italic text-amber-600 mt-1">"{citizenProfile.familyMotto}"</p>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  if (citizenProfile) {
+                    // Ensure citizenId is part of the event payload, using coatOfArms as the ID
+                    const eventPayload = {
+                      ...citizenProfile,
+                      citizenId: citizenProfile.coatOfArms || citizenProfile.username // Use coatOfArms as ID, fallback to username if ID is missing
+                    };
+                    eventBus.emit('showCitizenPanelEvent', eventPayload);
+                  }
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+              >
+                My Profile
+              </button>
+              <button
+                onClick={() => {
+                  // setShowProfileEditor(true); // Supprimé
+                  window.dispatchEvent(new CustomEvent('requestShowProfileEditor'));
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+              >
+                Edit Profile
+              </button>
+              <button
+                onClick={() => {
+                  setShowEconomyPanel(true);
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+              >
+                <span className="flex items-center">
+                  <FaChartLine className="mr-2" />
+                  Economy
+                </span>
+              </button>
+              <a
+                href="https://t.me/serenissima_ubc_bot" 
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setDropdownOpen(false)}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+              >
+                <span className="flex items-center">
+                  <FaTelegramPlane className="mr-2" />
+                  Telegram
+                </span>
+              </a>
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('showTransferMenu'));
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+              >
+                Inject <span className="compute-token">$COMPUTE</span>
+              </button>
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('showWithdrawMenu'));
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+              >
+                Cash out <span className="compute-token">$COMPUTE</span>
+              </button>
+              <button
+                onClick={() => {
+                  setDropdownOpen(false);
+                  if (onSettingsClick) {
+                    onSettingsClick();
+                  }
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+              >
+                Settings
+              </button>
+              <button
+                onClick={async () => {
+                  // Clear current wallet connection
+                  localStorage.removeItem('citizenProfile');
+                  
+                  // Disconnect the current wallet first
+                  sessionStorage.removeItem('walletAddress');
+                  localStorage.removeItem('walletAddress');
+                  
+                  // Dispatch event to notify components about wallet change
+                  window.dispatchEvent(new Event('walletChanged'));
+                  
+                  // Force Phantom to forget the connection by directly accessing the window.solana object
+                  if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom) {
+                    try {
+                      // First try to disconnect using Phantom's own method
+                      window.solana.disconnect();
+                      
+                      // Then reload the page to completely reset the connection state
+                      // This is the most reliable way to force Phantom to show the account selector
+                      window.location.reload();
+                    } catch (e) {
+                      console.warn("Could not access Phantom browser API:", e);
+                      // If we couldn't access the Phantom API, just try to connect
+                      connectWallet();
+                    }
+                  } else {
+                    // If window.solana is not available, just try to connect
+                    connectWallet();
+                  }
+                  
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
+              >
+                Switch Account
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    // First, update the UI state immediately
+                    setDropdownOpen(false);
+                    
+                    // Clear current wallet connection
+                    localStorage.removeItem('citizenProfile');
+                    
+                    // Disconnect the current wallet first
+                    sessionStorage.removeItem('walletAddress');
+                    localStorage.removeItem('walletAddress');
+                    
+                    // Dispatch event to notify components about wallet change
+                    window.dispatchEvent(new Event('walletChanged'));
+                    
+                    // Force Phantom to forget the connection by directly accessing the window.solana object
+                    if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom) {
+                      try {
+                        // First try to disconnect using Phantom's own method
+                        window.solana.disconnect();
+                        
+                        // Then reload the page to completely reset the connection state
+                        // This is the most reliable way to force Phantom to show the account selector
+                        window.location.reload();
+                      } catch (e) {
+                        console.warn("Could not access Phantom browser API:", e);
+                        // If we couldn't access the Phantom API, just try to connect
+                        connectWallet();
+                      }
+                    } else {
+                      // If window.solana is not available, just try to connect
+                      connectWallet();
+                    }
+                  } catch (error) {
+                    console.error("Error disconnecting wallet:", error);
+                    alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
+                  }
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-red-500 hover:text-white transition-colors"
+              >
+                Disconnect
+              </button>
+            </div>
+          )}
         </div>
-      ) : ( // Non connecté
+        ) : citizenProfile && !citizenProfile.username ? ( // Cas 2: Connecté, profil incomplet
+          <button
+            onClick={() => router.push('/arrival')}
+            className={`bg-red-800 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md text-lg font-serif transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 ${className}`}
+            style={{ backgroundColor: '#800020' }} // Burgundy color
+          >
+            Enter Venice
+          </button>
+        ) : ( // Cas 3: Connecté, mais profil en cours de chargement ou introuvable
+          <div className={`${className} px-4 py-2 rounded shadow bg-gray-200 text-gray-700`}>
+            Loading Profile...
+          </div>
+        )
+      ) : ( // Cas 4: Non connecté
         <button 
           onClick={connectWallet}
           className={`bg-white px-4 py-2 rounded shadow hover:bg-purple-100 transition-colors ${className}`}
@@ -306,5 +480,4 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
       )}
     </>
   );
-  
 }
