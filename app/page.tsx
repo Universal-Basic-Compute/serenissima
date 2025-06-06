@@ -169,7 +169,7 @@ export default function TwoDPage() {
   const [showCitizenRegistry, setShowCitizenRegistry] = useState<boolean>(false); // State for CitizenRegistry
   const [showTransferMenu, setShowTransferMenu] = useState<boolean>(false); // State for TransferComputeMenu
   const [showProfileEditor, setShowProfileEditor] = useState<boolean>(false); // State for ProfileEditor
-  const [showEnterVeniceButton, setShowEnterVeniceButton] = useState<boolean>(false); // State for the "Enter Venice" button
+  // const [showEnterVeniceButton, setShowEnterVeniceButton] = useState<boolean>(false); // Supprimé
   const [transportMode, setTransportMode] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
 
@@ -944,33 +944,39 @@ export default function TwoDPage() {
     };
   }, [citizenProfile, walletAddress]); // Dependencies ensure this re-runs if connection state changes
 
-  // Effect to handle ProfileEditor visibility and "Enter Venice" button
+  // Effect to handle ProfileEditor visibility
   useEffect(() => {
     const handleRequestOpenProfileEditor = () => {
       console.log('[app/page.tsx] Received requestShowProfileEditor event');
-      setShowEnterVeniceButton(false); // Ensure "Enter Venice" button is hidden if manual edit is requested
+      // setShowEnterVeniceButton(false); // Plus nécessaire ici
       setShowProfileEditor(true);
     };
     window.addEventListener('requestShowProfileEditor', handleRequestOpenProfileEditor);
 
-    // Logic for new/incomplete profiles
+    // La logique pour les nouveaux profils/incomplets est maintenant gérée par WalletButton.tsx
+    // Cependant, nous devons toujours gérer le 'profilePrompted' pour éviter des ouvertures répétées
+    // de ProfileEditor si l'utilisateur ferme /arrival sans compléter.
     if (walletAddress && citizenProfile && !citizenProfile.username) {
       const hasBeenPromptedForProfileThisSession = sessionStorage.getItem('profilePrompted');
       if (!hasBeenPromptedForProfileThisSession) {
-        console.log('[app/page.tsx] New user or incomplete profile, showing "Enter Venice" button.');
-        setShowProfileEditor(false); // Ensure ProfileEditor is not shown automatically
-        setShowEnterVeniceButton(true);
+        // Le bouton "Enter Venice" s'affichera via WalletButton.
+        // On marque ici que l'invite a eu lieu pour cette session.
         sessionStorage.setItem('profilePrompted', 'true');
       }
-    } else {
-      // If profile is complete or user is not connected, hide the "Enter Venice" button
-      setShowEnterVeniceButton(false);
+      // Si l'utilisateur revient de /arrival sans username, ProfileEditor pourrait s'ouvrir
+      // si une autre logique le déclenche (par exemple, un clic sur "Edit Profile").
+      // Si l'on veut forcer l'ouverture de ProfileEditor après /arrival si username est null :
+      // const cameFromArrival = sessionStorage.getItem('cameFromArrival');
+      // if (cameFromArrival) {
+      //   setShowProfileEditor(true);
+      //   sessionStorage.removeItem('cameFromArrival');
+      // }
+
     }
 
     // Clear the session prompt flag on disconnect
     if (!walletAddress) {
       sessionStorage.removeItem('profilePrompted');
-      setShowEnterVeniceButton(false); // Also hide button on disconnect
     }
 
     return () => {
@@ -1581,18 +1587,7 @@ export default function TwoDPage() {
         />
       )}
 
-      {/* "Enter Venice" Button for new users */}
-      {canShowMainPanels && showEnterVeniceButton && (
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-40">
-          <button
-            onClick={() => router.push('/arrival')}
-            className="bg-red-800 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-lg shadow-xl text-2xl font-serif transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50"
-            style={{ backgroundColor: '#800020' }} // Burgundy color
-          >
-            Enter Venice
-          </button>
-        </div>
-      )}
+      {/* "Enter Venice" Button for new users - Supprimé d'ici, géré par WalletButton */}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; // Importer useRouter
 import { useWalletContext } from './WalletProvider';
 import PlayerProfile from './PlayerProfile';
 import { eventBus } from '@/lib/utils/eventBus'; // Import eventBus
@@ -15,6 +16,7 @@ interface WalletButtonProps {
 
 export default function WalletButton({ className = '', onSettingsClick }: WalletButtonProps) {
   const { walletAddress, citizenProfile, isConnected, connectWallet } = useWalletContext();
+  const router = useRouter(); // Initialiser useRouter
   const [dropdownOpen, setDropdownOpen] = useState(false);
   // const [showProfileEditor, setShowProfileEditor] = useState(false); // Supprimé
   const [showEconomyPanel, setShowEconomyPanel] = useState(false);
@@ -37,7 +39,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
   return (
     <>
       {/* Main wallet button UI */}
-      {isConnected && citizenProfile ? (
+      {isConnected && citizenProfile && citizenProfile.username ? ( // Vérifier si citizenProfile.username existe
         <div className={`${className} flex-shrink-0`} ref={dropdownRef}>
           <button 
             onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -270,6 +272,25 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
           )}
         </div>
       ) : (
+        <button 
+          onClick={connectWallet}
+          className={`bg-white px-4 py-2 rounded shadow hover:bg-purple-100 transition-colors ${className}`}
+        >
+          Connect Wallet
+        </button>
+      ) : isConnected && citizenProfile && !citizenProfile.username ? ( // Nouvel utilisateur, profil incomplet
+        <button
+          onClick={() => router.push('/arrival')}
+          className={`bg-red-800 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md text-lg font-serif transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 ${className}`}
+          style={{ backgroundColor: '#800020' }} // Burgundy color
+        >
+          Enter Venice
+        </button>
+      ) : isConnected && !citizenProfile ? ( // Connecté mais le profil est en cours de chargement ou introuvable
+        <div className={`${className} px-4 py-2 rounded shadow bg-gray-200 text-gray-700`}>
+          Loading Profile...
+        </div>
+      ) : ( // Non connecté
         <button 
           onClick={connectWallet}
           className={`bg-white px-4 py-2 rounded shadow hover:bg-purple-100 transition-colors ${className}`}
