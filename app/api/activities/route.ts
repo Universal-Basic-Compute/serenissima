@@ -192,29 +192,43 @@ export async function GET(request: Request) {
     // If 'ongoing' was requested (and not 'timeRange=24h'), apply precise JavaScript filter
     if (ongoing && timeRange !== '24h') {
       const now = new Date();
+      console.log(`Applying JS 'ongoing' filter. Current time: ${now.toISOString()}. Initial activities count: ${fetchedActivities.length}`);
+      
       fetchedActivities = fetchedActivities.filter((activity: any) => {
+        const activityIdForLog = activity.activityId || activity.id || 'UnknownID'; // Use activity.id as fallback for Airtable record ID
+        const activityTypeForLog = activity.type || 'UnknownType';
+
         if (!activity.startDate) {
-            console.warn(`Activity ${activity.activityId} missing startDate, cannot apply precise ongoing JS filter.`);
+            console.warn(`Activity ${activityIdForLog} (Type: ${activityTypeForLog}) missing startDate. Excluding from 'ongoing'.`);
             return false;
         }
         const startDateObj = new Date(activity.startDate);
+        if (isNaN(startDateObj.getTime())) {
+            console.warn(`Activity ${activityIdForLog} (Type: ${activityTypeForLog}) has invalid startDate format: '${activity.startDate}'. Excluding from 'ongoing'.`);
+            return false;
+        }
+
         if (now < startDateObj) { // Activity hasn't started yet
             return false;
         }
 
-        // If EndDate is blank (null/undefined in JS), it's ongoing if it has started
-        if (!activity.endDate) {
+        // Activity has started. Now check endDate.
+        if (!activity.endDate) { // If EndDate is blank (null/undefined in JS), it's ongoing.
             return true;
         }
 
-        // If EndDate exists, check if 'now' is before or at EndDate
         const endDateObj = new Date(activity.endDate);
-        return now <= endDateObj;
+        if (isNaN(endDateObj.getTime())) {
+            console.warn(`Activity ${activityIdForLog} (Type: ${activityTypeForLog}) has invalid endDate format: '${activity.endDate}'. Assuming it hasn't ended for 'ongoing' filter.`);
+            return true; // If endDate is invalid, assume it hasn't ended yet.
+        }
+
+        return now <= endDateObj; // Ongoing if current time is before or at the end date.
       });
       console.log(`Filtered down to ${fetchedActivities.length} truly ongoing activities using JS time check.`);
     }
     
-    console.log(`Found ${fetchedActivities.length} activities. HasPath filter: ${hasPath}`);
+    console.log(`Found ${fetchedActivities.length} activities. HasPath filter: ${hasPath}, Ongoing filter: ${ongoing}`);
     
     return NextResponse.json({
       success: true,
