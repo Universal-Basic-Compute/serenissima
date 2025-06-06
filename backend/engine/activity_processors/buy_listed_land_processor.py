@@ -34,12 +34,12 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
     log.info(f"{LogColors.PROCESS}Processing 'execute_buy_listed_land' activity {activity_guid} by buyer {activity_citizen_username}.{LogColors.ENDC}")
 
     try:
-        details_str = activity_fields.get('Details')
-        if not details_str:
-            log.error(f"{LogColors.FAIL}Activity {activity_guid} is missing 'Details'.{LogColors.ENDC}")
+        notes_str = activity_fields.get('Notes') # Changed from 'Details' to 'Notes'
+        if not notes_str:
+            log.error(f"{LogColors.FAIL}Activity {activity_guid} is missing 'Notes' (expected JSON details here).{LogColors.ENDC}") # Changed Details to Notes
             return False
         
-        details = json.loads(details_str)
+        details = json.loads(notes_str) # Parse from notes_str
         listing_contract_custom_id = details.get('listingContractId')
         land_id_being_bought = details.get('landId')
         purchase_price = float(details.get('price'))
