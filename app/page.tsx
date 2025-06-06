@@ -1571,13 +1571,7 @@ export default function TwoDPage() {
 
       {/* Version Indicator and Flush Cache Button - Bottom Center */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center space-y-2">
-        <button
-          onClick={handleFlushCaches}
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg shadow-md text-xs flex items-center"
-          title="Flush All Client Caches & Reload"
-        >
-          <FaSyncAlt className="mr-1" /> Flush Caches
-        </button>
+        {/* Flush Caches button removed */}
         <div className="text-xs text-gray-400">v0.2.2</div>
       </div>
 
