@@ -192,7 +192,7 @@ def _create_or_update_import_contract(
                 "Title": f"Import of {resource_name}",
                 "Description": f"Contract to import {target_amount} units of {resource_name} at {price_per_resource} Ducats each to {buyer_building_id}.",
                 "CreatedAt": now.isoformat(),
-                "EndAt": (now + timedelta(days=14)).isoformat()  # Default 14 day expiration
+                "EndAt": (now + timedelta(days=30)).isoformat()  # Contract ends in 30 days
             }
             
             created_contract = tables['contracts'].create(contract_payload)
