@@ -55,6 +55,13 @@ const stepIntroMessages: Record<ArrivalStep, string> = {
   inn: "AI citizens actively participate in Venice's social and economic fabric - this innkeeper's connections could introduce you to profitable contacts, exclusive deals, or emerging market trends."
 };
 
+const stepAIRoles: Record<ArrivalStep, string> = {
+  galley: "Captain",
+  customs: "Custom's House Worker",
+  home: "Your Guide",
+  inn: "Innkeeper"
+};
+
 const stepsConfig: Record<ArrivalStep, { title: string; slideshowImage: string; chatPlaceholder: string }> = {
   galley: {
     title: 'Arrival by Galley',
@@ -810,8 +817,14 @@ ${commonPromptInstructions}`;
               />
             </div>
             <h2 className="text-2xl font-serif text-orange-700 drop-shadow-sm">
-              {getCurrentAI()?.firstName} {getCurrentAI()?.lastName} {/* Display First and Last Name */}
+              {getCurrentAI()?.firstName} {getCurrentAI()?.lastName}
+              {currentStep && stepAIRoles[currentStep] && (
+                <span className="text-lg text-stone-600 ml-2">({stepAIRoles[currentStep]})</span>
+              )}
             </h2>
+            {getCurrentAI()?.username && (
+              <p className="text-sm italic text-orange-600">({getCurrentAI()?.username})</p>
+            )}
             {/* Social class display removed from here */}
           </div>
         ) : (
