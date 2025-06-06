@@ -43,6 +43,13 @@ log = logging.getLogger("distribute_leases")
 # Load environment variables
 load_dotenv()
 
+# Add project root to sys.path for backend imports
+# This script is in backend/engine, so root is two levels up.
+SCRIPT_DIR_LEASES = os.path.dirname(__file__)
+PROJECT_ROOT_LEASES = os.path.abspath(os.path.join(SCRIPT_DIR_LEASES, '..', '..'))
+if PROJECT_ROOT_LEASES not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT_LEASES)
+
 from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
 from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM # Import relationship helper
 
