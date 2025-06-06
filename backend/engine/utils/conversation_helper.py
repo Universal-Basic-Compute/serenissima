@@ -207,7 +207,8 @@ def make_kinos_channel_call(
         
         if ai_message_content:
             log.info(f"Received Kinos response from channel {channel_name} for speaker {speaker_username}. Length: {len(ai_message_content)}")
-            log.debug(f"Kinos raw response content: {ai_message_content}")
+            # Log full raw response at INFO level
+            log.info(f"{LogColors.LIGHTBLUE}Full Kinos raw response content from channel call by {speaker_username} to {channel_name}:\n{ai_message_content}{LogColors.ENDC}")
             return ai_message_content
         else:
             log.warning(f"Kinos response from channel {channel_name} for {speaker_username} missing 'content'. Response: {kinos_response_data}")
