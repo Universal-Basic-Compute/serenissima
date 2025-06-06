@@ -118,23 +118,23 @@ def get_recent_thought_logs(tables: Dict[str, Table], hours_ago: int = 24) -> Li
         # Airtable's DATETIME_FORMAT for IS_AFTER comparison
         threshold_time_str = threshold_time_utc.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         
-        formula = f"AND({{Type}}='thought_log', IS_AFTER({{CreatedAt}}, DATETIME_PARSE('{threshold_time_str}')))"
+        formula = f"IS_AFTER({{CreatedAt}}, DATETIME_PARSE('{threshold_time_str}'))"
         
-        log.info(f"{LogColors.OKBLUE}Fetching recent thought logs with formula: {formula}{LogColors.ENDC}")
+        log.info(f"{LogColors.OKBLUE}Fetching recent messages with formula: {formula}{LogColors.ENDC}")
         # Fetch relevant fields: Sender (Username) and Content
         thought_records = tables["messages"].all(formula=formula, fields=["Sender", "Content", "CreatedAt"])
         
         # Sort by CreatedAt to maintain chronological order for the AI context
         thought_records.sort(key=lambda r: r.get('fields', {}).get('CreatedAt', ''))
 
-        log.info(f"{LogColors.OKGREEN}Found {len(thought_records)} recent thought logs.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}Found {len(thought_records)} recent messages.{LogColors.ENDC}")
         return [r['fields'] for r in thought_records] # Return list of fields dicts
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error fetching recent thought logs: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error fetching recent messages: {e}{LogColors.ENDC}")
         return []
 
 def generate_daily_update_summary(thoughts: List[Dict[str, Any]]) -> Optional[str]:
-    """Generates a daily update summary using Kinos AI based on provided thoughts."""
+    """Generates a daily update summary using Kinos AI based on provided messages & thoughts."""
     if not KINOS_API_KEY:
         log.error(f"{LogColors.FAIL}Kinos API key not configured. Cannot generate daily update.{LogColors.ENDC}")
         return None # Return None if Kinos API key is missing
@@ -160,7 +160,7 @@ def generate_daily_update_summary(thoughts: List[Dict[str, Any]]) -> Optional[st
         add_system_json = json.dumps(add_system_context)
         
         kinos_prompt = (
-            "Based on the recent thoughts from various citizens of Venice provided in the 'addSystem' context, "
+            "Based on the recent thoughts & messages from various citizens of Venice provided in the 'addSystem' context, "
             "please generate an engaging daily update for the public. It will be displayed in Telegram, so keep it relatively short. "
             "The update should summarize the general mood, key events, or interesting developments in Venice, especially if they are developments from one day to the next. "
             "Structure your response as follows:[PARAGRAPHBREAK]"
