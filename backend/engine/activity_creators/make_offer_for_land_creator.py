@@ -115,7 +115,10 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
 
     if path_data and path_data.get("path"):
         path_json = json.dumps(path_data["path"])
-        travel_duration_minutes = path_data["duration_minutes"]
+        travel_duration_minutes = path_data.get("duration_minutes")
+        if travel_duration_minutes is None:
+            log.warning(f"{LogColors.WARNING}Key 'duration_minutes' not found in path_data for land offer by {citizen_username}. Defaulting to 30 minutes.{LogColors.ENDC}")
+            travel_duration_minutes = 30
         
         goto_activity_id = str(uuid.uuid4())
         goto_start_time_utc = now_utc_dt
