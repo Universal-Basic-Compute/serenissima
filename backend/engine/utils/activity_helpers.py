@@ -719,6 +719,15 @@ def find_path_between_buildings_or_coords(
         data = response.json()
         if data.get("success") and "path" in data:
             log.info(f"{LogColors.OKGREEN}Found path with {len(data['path'])} points.{LogColors.ENDC}")
+            # Add duration_minutes if durationSeconds is available from the transport API
+            if isinstance(data.get("timing"), dict) and "durationSeconds" in data["timing"]:
+                try:
+                    duration_seconds = float(data["timing"]["durationSeconds"])
+                    # Round up to the nearest whole minute
+                    data["duration_minutes"] = math.ceil(duration_seconds / 60.0) 
+                    log.info(f"{LogColors.OKBLUE}Calculated duration_minutes: {data['duration_minutes']} from durationSeconds: {duration_seconds}{LogColors.ENDC}")
+                except (ValueError, TypeError) as e_dur_parse:
+                    log.warning(f"{LogColors.WARNING}Could not parse durationSeconds '{data['timing']['durationSeconds']}' to calculate duration_minutes: {e_dur_parse}{LogColors.ENDC}")
             return data
         else:
             log.warning(f"{LogColors.WARNING}No path found or API error: {data.get('error', 'Unknown error')}{LogColors.ENDC}")
