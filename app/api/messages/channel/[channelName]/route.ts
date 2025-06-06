@@ -22,14 +22,13 @@ const escapeAirtableValue = (value: string | number | boolean): string => {
   return String(value);
 };
 
-interface GetParams {
-  params: {
-    channelName: string;
-  };
-}
+import { NextRequest } from 'next/server'; // Import NextRequest
 
-export async function GET(request: Request, { params }: GetParams) {
-  const { channelName } = params;
+export async function GET(
+  request: NextRequest, // Use NextRequest for better type safety
+  context: { params: Promise<{ channelName: string }> }
+) {
+  const { channelName } = await context.params; // Await the params
 
   if (!channelName) {
     return NextResponse.json(
