@@ -666,9 +666,11 @@ def update_citizen_record(tables, username: str, personality_text: str, core_per
             update_data["CoatOfArms"] = coat_of_arms
             
             # If we have a coat of arms URL and a new coat of arms description, update the image URL
-            if coat_of_arms_url:
-                log.info(f"Updating CoatOfArmsImageUrl with: {coat_of_arms_url}")
-                update_data["CoatOfArmsImageUrl"] = coat_of_arms_url
+            # The field CoatOfArmsImageUrl no longer exists in Airtable.
+            # The frontend constructs this URL dynamically: https://backend.serenissima.ai/public_assets/images/coat-of-arms/{username}.png
+            # if coat_of_arms_url:
+            #     log.info(f"Updating CoatOfArmsImageUrl with: {coat_of_arms_url}")
+            #     update_data["CoatOfArmsImageUrl"] = coat_of_arms_url
         
         # Update the citizen record
         tables['citizens'].update(citizen['id'], update_data)
