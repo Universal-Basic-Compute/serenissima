@@ -84,6 +84,9 @@ const ArrivalPage: React.FC = () => {
   } | null>(null);
   const [isPreparingContext, setIsPreparingContext] = useState<boolean>(false);
 
+  // Nouvel état pour stocker les messages récupérés avant l'initiation de l'IA
+  const [fetchedMessagesForStep, setFetchedMessagesForStep] = useState<Message[] | null>(null);
+
 
   const getCurrentAI = useCallback((): AIProfile | null => {
     switch (currentStep) {
@@ -439,34 +442,26 @@ Your first message to ${userName}:`;
     }
   }, [getKinosModelForSocialClass]); // Removed contextualDataForChat from deps, it's passed as arg
 
-  // Charger les messages et le contexte lorsque l'IA actuelle ou l'utilisateur change
+  // Effet 1: Récupérer les messages et le contexte lorsque l'IA ou l'utilisateur change
   useEffect(() => {
     const currentAI = getCurrentAI();
     if (currentAI && currentUserUsername !== DEFAULT_HUMAN_USERNAME) {
-      setIsAiInitiating(true);
-      setChatMessages([]); // Clear messages from previous AI/step
+      setIsAiInitiating(true); 
+      setChatMessages([]); 
 
       fetchChatMessages(currentUserUsername, currentAI.username)
         .then(existingMessages => {
-          fetchContextualInformation(currentAI, currentUserUsername)
-            .then((fetchedContextData) => { // Utiliser les données de contexte retournées
-              if (existingMessages.length === 0 && fetchedContextData) {
-                sendSystemInitiationMessage(currentAI, currentUserProfile, currentStep, fetchedContextData)
-                  .finally(() => setIsAiInitiating(false));
-              } else {
-                setIsAiInitiating(false);
-              }
-            }).catch(() => {
-              setIsAiInitiating(false);
-              console.error("Erreur lors de fetchContextualInformation dans useEffect");
-            });
-        }).catch(() => {
-          setIsAiInitiating(false);
-          console.error("Erreur lors de fetchChatMessages dans useEffect");
+          setFetchedMessagesForStep(existingMessages);
+          // fetchContextualInformation mettra à jour l'état contextualDataForChat
+          fetchContextualInformation(currentAI, currentUserUsername);
+        })
+        .catch((error) => {
+          console.error("Erreur lors de fetchChatMessages dans Effet 1:", error);
+          setIsAiInitiating(false); 
+          setFetchedMessagesForStep([]); 
         });
     } else if (currentAI) { // AI est là, mais utilisateur est GuestUser
         setIsAiInitiating(false);
-        // Only set placeholder if chatMessages is empty or doesn't already contain the placeholder for the current AI
         const placeholderMessageId = `placeholder-${currentAI.username}`;
         if (chatMessages.length === 0 || !chatMessages.some(msg => msg.messageId === placeholderMessageId)) {
             setChatMessages([{
@@ -478,14 +473,35 @@ Your first message to ${userName}:`;
                 createdAt: new Date().toISOString(),
             }]);
         }
-        // Only set context to null if it's not already null
         if (contextualDataForChat !== null) {
             setContextualDataForChat(null);
         }
+        setFetchedMessagesForStep(null); // Réinitialiser pour l'invité
     } else {
       setIsAiInitiating(false);
+      setFetchedMessagesForStep(null); // Réinitialiser s'il n'y a pas d'IA
     }
-  }, [currentStep, currentUserUsername, getCurrentAI, fetchChatMessages, fetchContextualInformation, currentUserProfile, sendSystemInitiationMessage]);
+  }, [currentStep, currentUserUsername, getCurrentAI, fetchChatMessages, fetchContextualInformation]);
+
+  // Effet 2: Initier la conversation IA si les conditions sont remplies
+  useEffect(() => {
+    const currentAI = getCurrentAI();
+    
+    if (currentAI && currentUserUsername !== DEFAULT_HUMAN_USERNAME && 
+        fetchedMessagesForStep && fetchedMessagesForStep.length === 0 && 
+        contextualDataForChat) {
+      
+      // S'assurer que isAiInitiating est vrai avant d'envoyer, et faux après
+      if (!isAiInitiating) setIsAiInitiating(true); 
+      sendSystemInitiationMessage(currentAI, currentUserProfile, currentStep, contextualDataForChat)
+        .finally(() => setIsAiInitiating(false));
+    } else if (fetchedMessagesForStep !== null) {
+      // Si les messages ont été récupérés (ou une tentative a été faite) et que nous n'initialisons pas, alors le chargement est terminé.
+      // Cela couvre le cas où il y a des messages existants ou pas de contexte.
+      setIsAiInitiating(false);
+    }
+    // Ne pas exécuter cet effet si fetchedMessagesForStep est null (signifie que l'Effet 1 ne l'a pas encore défini pour l'IA actuelle)
+  }, [fetchedMessagesForStep, contextualDataForChat, currentStep, currentUserUsername, getCurrentAI, sendSystemInitiationMessage, currentUserProfile, isAiInitiating]);
 
 
   // Scroll vers le bas lorsque de nouveaux messages sont ajoutés
