@@ -58,6 +58,7 @@ interface WalletContextType {
   isInitialized: boolean;
   connectWallet: () => Promise<void>;
   updateCitizenProfile: (updatedProfile: any) => Promise<void>;
+  clearWalletState: () => void; // Nouvelle fonction pour effacer l'état
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -310,7 +311,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     isConnecting,
     isInitialized,
     connectWallet,
-    updateCitizenProfile
+    updateCitizenProfile,
+    clearWalletState: () => { // Implémentation de clearWalletState
+      console.log("[WalletProvider] clearWalletState called.");
+      setWalletAddress(null);
+      setCitizenProfile(null);
+      localStorage.removeItem('walletAddress');
+      localStorage.removeItem('citizenProfile');
+      sessionStorage.removeItem('walletAddress'); // Effacer aussi de sessionStorage
+      localStorage.removeItem('walletConnectedAt');
+      
+      // Émettre un événement pour informer les autres parties de l'application
+      eventBus.emit(EventTypes.WALLET_CHANGED, { 
+        profile: null, 
+        isConnected: false, 
+        address: null 
+      });
+    }
   };
 
   const handleUsernameSubmitted = async (chosenUsername: string) => {

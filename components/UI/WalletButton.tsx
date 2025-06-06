@@ -15,7 +15,7 @@ interface WalletButtonProps {
 }
 
 export default function WalletButton({ className = '', onSettingsClick }: WalletButtonProps) {
-  const { walletAddress, citizenProfile, isConnected, connectWallet } = useWalletContext();
+  const { walletAddress, citizenProfile, isConnected, connectWallet, clearWalletState } = useWalletContext(); // Ajouter clearWalletState
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showProfileEditor, setShowProfileEditor] = useState(false);
   const [showEconomyPanel, setShowEconomyPanel] = useState(false);
@@ -155,15 +155,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
                 </button>
                 <button
                   onClick={async () => {
-                    // Clear current wallet connection
-                    localStorage.removeItem('citizenProfile');
-                    
-                    // Disconnect the current wallet first
-                    sessionStorage.removeItem('walletAddress');
-                    localStorage.removeItem('walletAddress');
-                    
-                    // Dispatch event to notify components about wallet change
-                    window.dispatchEvent(new Event('walletChanged'));
+                    if (clearWalletState) clearWalletState(); // Effacer l'état du contexte et localStorage
                     
                     // Force Phantom to forget the connection by directly accessing the window.solana object
                     if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom) {
@@ -194,11 +186,8 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
                     try {
                       setDropdownOpen(false); // Close dropdown first
                       
-                      // Clear storage items. WalletProvider will see this on reload.
-                      localStorage.removeItem('citizenProfile');
-                      sessionStorage.removeItem('walletAddress');
-                      localStorage.removeItem('walletAddress');
-                      
+                      if (clearWalletState) clearWalletState(); // Effacer l'état du contexte et localStorage
+                                            
                       // Attempt to disconnect Phantom wallet adapter if available
                       if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom && typeof window.solana.disconnect === 'function') {
                         try {
@@ -208,11 +197,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
                           console.warn("Error attempting to disconnect Phantom wallet via WalletButton:", e);
                         }
                       }
-                      
-                      // Dispatch event to notify other components (e.g., WalletProvider to update its state if needed before reload)
-                      // However, the reload will be the primary mechanism for state reset.
-                      window.dispatchEvent(new Event('walletChanged')); 
-                                            
+                                                                
                       // Force a page reload to ensure a clean state
                       window.location.reload();
 
