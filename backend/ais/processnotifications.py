@@ -13,7 +13,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from app.citizen_utils import find_citizen_by_identifier
+from backend.app.citizen_utils import find_citizen_by_identifier # Correction du chemin d'importation
 from backend.engine.utils.activity_helpers import log_header, LogColors
 
 def initialize_airtable():
