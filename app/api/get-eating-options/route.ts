@@ -19,7 +19,15 @@ function escapeAirtableValue(value: string | number | boolean): string {
   return String(value);
 }
 
-const FOOD_RESOURCE_TYPES = ["bread", "fish", "wine", "fruit", "vegetables", "cheese", "olive_oil", "ale", "cider", "mead", "spirits", "cooked_meal", "water_skin_potable"]; // Liste étendue
+const FOOD_RESOURCE_TYPES = [
+  // Raw Food Materials
+  "grain", "olives", "vegetables", "fish", "meat", "game_meat", "salt", "spices",
+  // Processed Food Materials
+  "flour", "olive_oil", "preserved_fish",
+  // Finished Food Products
+  "bread", "cheese", "pastries", "sugar_confections", "wine", "spiced_wine"
+  // "fruit" was in the old list, "ale", "cider", "mead", "spirits", "cooked_meal", "water_skin_potable" are removed based on new list.
+];
 
 interface EatingOption {
   source: 'inventory' | 'home' | 'tavern';

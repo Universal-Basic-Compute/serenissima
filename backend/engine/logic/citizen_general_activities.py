@@ -459,18 +459,18 @@ def _handle_eat_at_tavern_or_goto(
     if not is_leisure_time_for_class(citizen_social_class, now_venice_dt):
         return None
     if not citizen_position: return None
-    
+
     citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
     if citizen_ducats < TAVERN_MEAL_COST_ESTIMATE: return None
 
     log.info(f"{LogColors.OKCYAN}[Faim - Taverne] Citoyen {citizen_name} ({citizen_social_class}): Affamé et en période de loisirs. Recherche taverne.{LogColors.ENDC}")
     closest_tavern_record = get_closest_inn(tables, citizen_position) # Inn also serves as tavern
-    if not closest_tavern_record: return None # Changed from False
+    if not closest_tavern_record: return None
 
     tavern_name_display = _get_bldg_display_name_module(tables, closest_tavern_record)
     tavern_pos = _get_building_position_coords(closest_tavern_record)
     tavern_custom_id = closest_tavern_record['fields'].get('BuildingId', closest_tavern_record['id'])
-    if not tavern_pos or not tavern_custom_id: return None # Changed from False
+    if not tavern_pos or not tavern_custom_id: return None
 
     # Check if tavern sells food (simplified check)
     tavern_sells_food = False
@@ -867,7 +867,7 @@ def _handle_shop_for_food_at_retail(
         return False
     
     home_custom_id = home_record['fields'].get('BuildingId')
-    if not home_custom_id: return False
+    if not home_custom_id: return False # Should not happen if home_record is valid
 
     citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
     if citizen_ducats < FOOD_SHOPPING_COST_ESTIMATE: # Estimate for 1-2 units of food
