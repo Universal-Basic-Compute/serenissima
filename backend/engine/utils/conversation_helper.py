@@ -55,10 +55,10 @@ def get_kinos_model_for_social_class(username: Optional[str], social_class: Opti
     elif lower_social_class in ['cittadini', 'forestieri']:
         return 'gemini-2.5-flash-preview-05-20'
     elif lower_social_class in ['popolani', 'facchini']:
-        return 'local' # Or another appropriate small model
-    else:
-        log.warning(f"Unknown social class '{social_class}' for user '{username}', defaulting to gemini-2.5-flash-preview-05-20.")
-        return 'gemini-2.5-flash-preview-05-20'
+        return 'local' 
+    else: # Default for unknown or unspecified social classes
+        log.info(f"Social class '{social_class}' for user '{username}' not in specific Kinos model tiers, or class is None. Defaulting Kinos model to 'local'.")
+        return 'local'
 
 def make_api_get_request_helper(endpoint: str, api_base_url: str, params: Optional[Dict] = None) -> Optional[Dict]:
     """Simplified helper to make GET requests to the game API."""
