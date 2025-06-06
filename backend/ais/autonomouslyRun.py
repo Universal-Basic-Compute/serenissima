@@ -550,14 +550,39 @@ def call_try_create_activity_api(
             if attempt < MAX_RETRIES:
                 log_ref.info(f"Retrying in {RETRY_DELAY_SECONDS} seconds...")
                 time.sleep(RETRY_DELAY_SECONDS) # RETRY_DELAY_SECONDS is global
-            else:
-                log_ref.error(f"{LogColors.FAIL}API POST request to {api_url} (try-create) failed after {MAX_RETRIES + 1} attempts: {last_exception_try_create}{LogColors.ENDC}", exc_info=True)
-        except json.JSONDecodeError as e_json:
+            else: # This is the final attempt that failed
+                detailed_error_log_message = str(last_exception_try_create)
+                if isinstance(last_exception_try_create, requests.exceptions.HTTPError) and last_exception_try_create.response is not None:
+                    try:
+                        api_error_details_for_log = last_exception_try_create.response.json()
+                        detailed_error_log_message += f" - API Response: {json.dumps(api_error_details_for_log)}"
+                    except json.JSONDecodeError:
+                        detailed_error_log_message += f" - API Response (text): {last_exception_try_create.response.text[:200]}" # Log snippet of text if not JSON
+                log_ref.error(f"{LogColors.FAIL}API POST request to {api_url} (try-create) failed after {MAX_RETRIES + 1} attempts: {detailed_error_log_message}{LogColors.ENDC}", exc_info=True)
+        except json.JSONDecodeError as e_json: # This handles JSON decode errors for successful (2xx) responses
             last_exception_try_create = e_json
-            log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response from POST {api_url} (try-create) on attempt {attempt + 1}: {e_json}{LogColors.ENDC}", exc_info=True)
-            break
+            log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response from POST {api_url} (try-create) on attempt {attempt + 1} (after successful status code): {e_json}{LogColors.ENDC}", exc_info=True)
+            break # Stop retrying if successful status but bad JSON
             
-    return {"success": False, "error": str(last_exception_try_create) if last_exception_try_create else "Unknown error after retries for try-create"}
+    # After the loop, if we haven't returned success, construct the error payload
+    error_payload = {"success": False}
+    if last_exception_try_create:
+        error_payload["error"] = str(last_exception_try_create)
+        if isinstance(last_exception_try_create, requests.exceptions.HTTPError) and last_exception_try_create.response is not None:
+            error_payload["api_status_code"] = last_exception_try_create.response.status_code
+            try:
+                api_response_json = last_exception_try_create.response.json()
+                error_payload["api_message"] = api_response_json.get("message")
+                error_payload["api_reason"] = api_response_json.get("reason")
+                error_payload["api_activity_details_on_error"] = api_response_json.get("activity") # if present in error
+                # Add any other fields from the API's error response you want to capture
+                if "details" in api_response_json: error_payload["api_error_details"] = api_response_json["details"]
+            except json.JSONDecodeError:
+                error_payload["api_response_text"] = last_exception_try_create.response.text[:500] # First 500 chars if not JSON
+    else:
+        error_payload["error"] = "Unknown error after retries for try-create (last_exception_try_create was None)"
+        
+    return error_payload
 
 
 # --- Thought Cleaning Function (adapted from generatethoughts.py) ---
