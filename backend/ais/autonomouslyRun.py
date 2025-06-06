@@ -477,12 +477,15 @@ def make_kinos_call(
             return None
         
         log.info(f"{LogColors.OKGREEN}Received Kinos response for {LogColors.BOLD}{ai_username}{LogColors.ENDC}{LogColors.OKGREEN}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
-        # Log full raw response at DEBUG level
-        log.debug(f"{LogColors.LIGHTBLUE}Full Kinos raw response content for {ai_username}:\n{latest_ai_response_content}{LogColors.ENDC}")
-        # Log snippet at INFO level if not DEBUG
-        if not log.isEnabledFor(logging.DEBUG):
-            log.info(f"{LogColors.LIGHTBLUE}Kinos raw response snippet for {ai_username}: {latest_ai_response_content[:300]}...{LogColors.ENDC}")
+        # Log full raw response at INFO level
+        log.info(f"{LogColors.LIGHTBLUE}Full Kinos raw response content for {ai_username}:\n{latest_ai_response_content}{LogColors.ENDC}")
 
+        # Remove content within <think>...</think> tags
+        cleaned_for_think_tags = re.sub(r"<think>.*?</think>", "", latest_ai_response_content, flags=re.DOTALL)
+        if cleaned_for_think_tags != latest_ai_response_content:
+            log.info(f"{LogColors.OKBLUE}Removed <think>...</think> content. New length: {len(cleaned_for_think_tags)}. Cleaned content snippet for parsing: {cleaned_for_think_tags[:300]}...{LogColors.ENDC}")
+        
+        content_to_parse = cleaned_for_think_tags.strip() # Use the cleaned content for parsing
 
         parsed_response = None
         parsing_method_used = "none"
@@ -523,7 +526,7 @@ def make_kinos_call(
 
         # Attempt 1: Direct JSON parse
         try:
-            pre_cleaned_direct_content = _pre_clean_json_candidate(latest_ai_response_content)
+            pre_cleaned_direct_content = _pre_clean_json_candidate(content_to_parse) # Use content_to_parse
             cleaned_direct_content = _clean_json_string(pre_cleaned_direct_content)
             parsed_response = json.loads(cleaned_direct_content)
             parsing_method_used = "direct_cleaned"
@@ -533,7 +536,7 @@ def make_kinos_call(
             log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. {parsing_error_info}Attempting markdown extraction.{LogColors.ENDC}")
             
             # Attempt 2: Extract last JSON block from markdown
-            json_matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", latest_ai_response_content, re.MULTILINE))
+            json_matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", content_to_parse, re.MULTILINE)) # Use content_to_parse
             if json_matches:
                 last_json_match = json_matches[-1]
                 json_str_markdown_raw = last_json_match.group(1).strip()
@@ -552,11 +555,13 @@ def make_kinos_call(
 
             if not parsed_response: # If direct and markdown parse failed
                 # Attempt 3: If </think> tag exists, parse JSON after it
-                think_tag_end_str = "</think>"
-                think_tag_index = latest_ai_response_content.find(think_tag_end_str)
+                # This step might be redundant now that <think> tags are removed upfront,
+                # but keeping it as a fallback if the initial removal was incomplete or if other tags appear.
+                think_tag_end_str = "</think>" # Or any other problematic tag
+                think_tag_index = content_to_parse.find(think_tag_end_str) # Use content_to_parse
                 if think_tag_index != -1:
-                    log.info(f"{LogColors.OKBLUE}Found '{think_tag_end_str}' tag. Attempting to parse JSON after it for {ai_username}.{LogColors.ENDC}")
-                    content_after_think = latest_ai_response_content[think_tag_index + len(think_tag_end_str):]
+                    log.info(f"{LogColors.OKBLUE}Found '{think_tag_end_str}' tag (even after initial clean). Attempting to parse JSON after it for {ai_username}.{LogColors.ENDC}")
+                    content_after_think = content_to_parse[think_tag_index + len(think_tag_end_str):]
                     
                     first_brace_after_think = content_after_think.find('{')
                     last_brace_after_think = content_after_think.rfind('}')
@@ -576,16 +581,17 @@ def make_kinos_call(
                         parsing_error_info += f"No valid JSON structure found after '{think_tag_end_str}' tag. "
                         log.info(f"{LogColors.OKBLUE}No JSON structure found after '{think_tag_end_str}' tag for {ai_username}. {parsing_error_info}Attempting general substring extraction.{LogColors.ENDC}")
                 else:
-                    parsing_error_info += f"No '{think_tag_end_str}' tag found. "
-                    log.info(f"{LogColors.OKBLUE}No '{think_tag_end_str}' tag found for {ai_username}. {parsing_error_info}Attempting general substring extraction.{LogColors.ENDC}")
+                    # This is expected if the initial <think> removal worked.
+                    # parsing_error_info += f"No '{think_tag_end_str}' tag found. " # Avoid adding this if initial clean was successful
+                    log.info(f"{LogColors.OKBLUE}No further '{think_tag_end_str}' tag found for {ai_username}. {parsing_error_info or ''}Attempting general substring extraction.{LogColors.ENDC}")
 
             if not parsed_response: # If direct, markdown, and after_think_tag parse failed
-                # Attempt 4: Find first '{' and last '}' in the whole response
+                # Attempt 4: Find first '{' and last '}' in the (potentially cleaned) response
                 log.info(f"{LogColors.OKBLUE}Attempting general substring extraction for {ai_username} as a last resort.{LogColors.ENDC}")
-                first_brace_idx = latest_ai_response_content.find('{')
-                last_brace_idx = latest_ai_response_content.rfind('}')
+                first_brace_idx = content_to_parse.find('{') # Use content_to_parse
+                last_brace_idx = content_to_parse.rfind('}') # Use content_to_parse
                 if first_brace_idx != -1 and last_brace_idx != -1 and last_brace_idx > first_brace_idx:
-                    potential_json_str_raw = latest_ai_response_content[first_brace_idx : last_brace_idx+1]
+                    potential_json_str_raw = content_to_parse[first_brace_idx : last_brace_idx+1] # Use content_to_parse
                     pre_cleaned_substring = _pre_clean_json_candidate(potential_json_str_raw)
                     potential_json_str_cleaned = _clean_json_string(pre_cleaned_substring)
                     try:
@@ -610,12 +616,12 @@ def make_kinos_call(
                 parsed_response["parsing_info"] = f"Successfully parsed using {parsing_method_used} method after prior attempts failed. ({parsing_error_info.strip()})"
             return parsed_response
         else: # All parsing attempts failed
-            log.warning(f"{LogColors.WARNING}All JSON parsing attempts failed for Kinos response for {LogColors.BOLD}{ai_username}{LogColors.ENDC}{LogColors.WARNING}. Treating entire response as reflection. Final error summary: {parsing_error_info}{LogColors.ENDC}")
+            log.warning(f"{LogColors.WARNING}All JSON parsing attempts failed for Kinos response for {LogColors.BOLD}{ai_username}{LogColors.ENDC}{LogColors.WARNING}. Treating entire (think-tag-cleaned) response as reflection. Final error summary: {parsing_error_info}{LogColors.ENDC}")
             return {
                 "actions": [], 
-                "reflection": latest_ai_response_content, # The full raw content
+                "reflection": content_to_parse, # The full raw content, after <think> tag removal
                 "error_parsing_json": True, 
-                "error_message": f"Failed to parse JSON from Kinos response after multiple attempts. Details: {parsing_error_info.strip()}"
+                "error_message": f"Failed to parse JSON from Kinos response after multiple attempts. Details: {parsing_error_info.strip() if parsing_error_info else 'Unknown parsing error after cleaning.'}"
             }
 
     except requests.exceptions.RequestException as e:
