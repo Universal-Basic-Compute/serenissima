@@ -16,6 +16,7 @@ import argparse
 import logging
 import time
 import re # Added for unescaping
+import random # Added for prompt variation
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
 
