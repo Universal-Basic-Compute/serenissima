@@ -1281,7 +1281,8 @@ def create_activity_record(
     transporter_username: Optional[str] = None, # Username of the transporter, if any
     title: Optional[str] = None, # Optional title for the activity
     description: Optional[str] = None, # Optional description
-    thought: Optional[str] = None # Optional thought from the citizen
+    thought: Optional[str] = None, # Optional thought from the citizen
+    priority_override: Optional[int] = None # Optional priority for the activity
 ) -> Optional[Dict]:
     """Creates a new activity record in Airtable."""
     activity_guid = f"{activity_type.lower().replace('_', '-')}-{citizen_username.lower()}-{uuid.uuid4().hex[:8]}"
@@ -1304,6 +1305,7 @@ def create_activity_record(
     if title: payload["Title"] = title
     if description: payload["Description"] = description
     if thought: payload["Thought"] = thought
+    if priority_override is not None: payload["Priority"] = priority_override
     
     # Add CreatedAt timestamp
     payload["CreatedAt"] = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
