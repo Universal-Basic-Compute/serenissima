@@ -131,10 +131,21 @@ def persist_message(
     kinos_message_id: Optional[str] = None
 ) -> Optional[Dict]:
     """Persists a message to the Airtable MESSAGES table."""
+    
+    # Remove <think>...</think> tags from content before persisting
+    cleaned_content = content
+    if isinstance(content, str): # Ensure content is a string before regex
+        cleaned_content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+        if not cleaned_content and content: # If cleaning resulted in empty string but original had content
+            log.warning(f"Message content from {sender_username} to {receiver_username} became empty after removing <think> tags. Original: '{content[:100]}...'")
+            # Decide if an empty message should be stored or not. For now, let's store it if it was originally non-empty.
+            # If you want to prevent storing empty messages after cleaning, you could return None here.
+            # cleaned_content = "[Content removed due to <think> tags]" # Or some placeholder
+
     payload = {
         "Sender": sender_username,
         "Receiver": receiver_username,
-        "Content": content,
+        "Content": cleaned_content, # Use cleaned content
         "Type": message_type,
         "Channel": channel_name,
         "CreatedAt": datetime.now(VENICE_TIMEZONE).isoformat(),
