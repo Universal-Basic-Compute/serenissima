@@ -503,13 +503,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         if (activityType === 'make_offer_for_land') {
           // Utiliser le message descriptif du backend s'il est disponible
           if (result.message) {
-            successMessage = `${result.message} Votre citoyen va maintenant se rendre au bureau désigné pour soumettre l'offre. (Première étape ID: ${firstActivityId})`;
+            successMessage = `${result.message} Your citizen will now travel to the designated office to submit the offer.`;
           } else { // Fallback si le message du backend est manquant
             const landIdParam = parameters.landId || 'selected land';
-            successMessage = `Votre démarche pour faire une offre sur le terrain ${landIdParam} a commencé ! Votre citoyen va se rendre au bureau désigné. Première étape : ${firstActivityType} (ID: ${firstActivityId}).`;
+            successMessage = `Your endeavor to make an offer for land ${landIdParam} has begun! Your citizen will now travel to the designated office. First step: ${firstActivityType}.`;
           }
         } else {
-          successMessage = `Action "${activityType}" initiée avec succès !`;
+          successMessage = `Action "${activityType}" initiated successfully!`;
           if (result.activity && result.activity.ActivityId) {
             successMessage += ` ID de la première activité : ${result.activity.ActivityId}.`;
           } else if (result.message) { // Fallback to backend message if activityId is not directly available but message is
