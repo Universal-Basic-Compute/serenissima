@@ -466,15 +466,22 @@ Your first message to ${userName}:`;
         });
     } else if (currentAI) { // AI est là, mais utilisateur est GuestUser
         setIsAiInitiating(false);
-        setChatMessages([{
-            messageId: `placeholder-${currentAI.username}`,
-            sender: currentAI.username,
-            receiver: DEFAULT_HUMAN_USERNAME,
-            content: stepsConfig[currentStep].chatPlaceholder, // This is the AI's first line
-            type: 'message',
-            createdAt: new Date().toISOString(),
-        }]);
-        setContextualDataForChat(null); // Pas de contexte pour GuestUser
+        // Only set placeholder if chatMessages is empty or doesn't already contain the placeholder for the current AI
+        const placeholderMessageId = `placeholder-${currentAI.username}`;
+        if (chatMessages.length === 0 || !chatMessages.some(msg => msg.messageId === placeholderMessageId)) {
+            setChatMessages([{
+                messageId: placeholderMessageId,
+                sender: currentAI.username,
+                receiver: DEFAULT_HUMAN_USERNAME,
+                content: stepsConfig[currentStep].chatPlaceholder,
+                type: 'message',
+                createdAt: new Date().toISOString(),
+            }]);
+        }
+        // Only set context to null if it's not already null
+        if (contextualDataForChat !== null) {
+            setContextualDataForChat(null);
+        }
     } else {
       setIsAiInitiating(false);
     }
