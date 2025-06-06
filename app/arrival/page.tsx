@@ -146,15 +146,14 @@ const ArrivalPage: React.FC = () => {
   };
 
   // Fonction pour récupérer les informations contextuelles pour Kinos
-  const fetchContextualInformation = useCallback(async (targetAI: AIProfile | null, humanUsername: string): Promise<typeof contextualDataForChat | null> => {
+  const fetchContextualInformation = useCallback(async (targetAI: AIProfile | null, humanUsername: string): Promise<void> => {
     if (!targetAI || !humanUsername || humanUsername === DEFAULT_HUMAN_USERNAME) {
       setContextualDataForChat(null);
-      return null;
+      return;
     }
     setIsPreparingContext(true);
-    let newContextData: typeof contextualDataForChat = null;
     try {
-      const senderProfile = currentUserProfile; // Profil de l'utilisateur humain
+      const senderProfile = currentUserProfile; 
       const aiDataPackageResponse = await fetch(`/api/get-data-package?citizenUsername=${targetAI.username}`);
       
       let aiDataPackage = null;
@@ -169,27 +168,28 @@ const ArrivalPage: React.FC = () => {
         console.error(`Erreur HTTP lors de la récupération du data package pour ${targetAI.username}: ${aiDataPackageResponse.status}`);
       }
       
-      newContextData = {
+      const newContextData = {
         senderProfile,
-        targetProfile: targetAI, // Profil de base de l'IA
-        aiDataPackage // Paquet de données complet
+        targetProfile: targetAI, 
+        aiDataPackage 
       };
-      // Only update state if new data is different to prevent potential loops if object references change but content doesn't
-      // This is a shallow comparison, for deep comparison a library or custom function would be needed
-      if (JSON.stringify(newContextData) !== JSON.stringify(contextualDataForChat)) {
-        setContextualDataForChat(newContextData);
-      }
+
+      setContextualDataForChat(prevContextData => {
+        if (JSON.stringify(newContextData) !== JSON.stringify(prevContextData)) {
+          return newContextData;
+        }
+        return prevContextData;
+      });
     } catch (error) {
       console.error("Erreur lors de la récupération des données contextuelles pour Kinos:", error);
-      if (contextualDataForChat !== null) { // Only set to null if it's not already null
-        setContextualDataForChat(null);
-      }
-      newContextData = null;
+      setContextualDataForChat(prevContextData => {
+        if (prevContextData !== null) return null;
+        return prevContextData;
+      });
     } finally {
       setIsPreparingContext(false);
     }
-    return newContextData;
-  }, [currentUserProfile]);
+  }, [currentUserProfile]); // contextualDataForChat retiré des dépendances
 
 
   // Fonction pour charger les messages du chat
