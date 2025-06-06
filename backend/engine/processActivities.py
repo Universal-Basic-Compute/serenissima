@@ -528,8 +528,49 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         log.error(f"{LogColors.FAIL}Failed to fetch building or resource definitions. Exiting.{LogColors.ENDC}")
         return
 
+    # Shuffle the order of citizens to process if not targeting a specific citizen
+    if not target_citizen_username:
+        try:
+            all_citizens_records = tables['citizens'].all(fields=['Username']) # Fetch all citizens
+            random.shuffle(all_citizens_records) # Shuffle them
+            # Now, when get_concluded_unprocessed_activities is called without target_citizen_username,
+            # it fetches for all, but the outer loop in this script (if it iterates citizens) would be randomized.
+            # However, get_concluded_unprocessed_activities fetches activities first, then we process them.
+            # To randomize citizen processing order, we should fetch activities and then group by citizen, then shuffle citizens.
+            # For now, let's adjust the activity fetching and processing loop.
+            log.info(f"{LogColors.OKBLUE}Citizen processing order will be randomized.{LogColors.ENDC}")
+        except Exception as e_shuffle:
+            log.error(f"{LogColors.FAIL}Error preparing for randomized citizen processing: {e_shuffle}{LogColors.ENDC}")
+            # Proceed without randomization if shuffling setup fails
+
     activities_to_process_raw = get_concluded_unprocessed_activities(tables, target_citizen_username, forced_utc_datetime_for_check)
     
+    # If processing for all citizens, group activities by citizen and shuffle the citizen order
+    if not target_citizen_username:
+        activities_by_citizen_for_processing: Dict[str, List[Dict]] = {}
+        for act_raw in activities_to_process_raw:
+            citizen_name_for_group = act_raw['fields'].get('Citizen')
+            if citizen_name_for_group:
+                if citizen_name_for_group not in activities_by_citizen_for_processing:
+                    activities_by_citizen_for_processing[citizen_name_for_group] = []
+                activities_by_citizen_for_processing[citizen_name_for_group].append(act_raw)
+        
+        citizen_processing_order = list(activities_by_citizen_for_processing.keys())
+        random.shuffle(citizen_processing_order)
+        
+        # Reconstruct activities_to_process_raw in the new randomized citizen order,
+        # while keeping activities for each citizen sorted by their original start time.
+        shuffled_activities_to_process_raw = []
+        for citizen_name_ordered in citizen_processing_order:
+            citizen_acts = activities_by_citizen_for_processing[citizen_name_ordered]
+            # Sort this citizen's activities by StartDate before adding to the main list
+            # This requires parsing StartDate first for all activities.
+            # For simplicity in this step, we'll sort them later if needed, or assume they are somewhat ordered from DB.
+            # The main sort by StartDate happens after this block.
+            shuffled_activities_to_process_raw.extend(citizen_acts)
+        activities_to_process_raw = shuffled_activities_to_process_raw
+        log.info(f"Randomized processing order for {len(citizen_processing_order)} citizens with activities.")
+
     # Sort activities by StartDate to process them in chronological order of their intended start
     activities_to_process = []
     for act_raw in activities_to_process_raw:
