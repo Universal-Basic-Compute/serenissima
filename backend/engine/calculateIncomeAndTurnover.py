@@ -97,13 +97,13 @@ def calculate_citizen_financials():
         if wallet:
             wallet_to_record_id[wallet.lower()] = record_id
     
-    print(f"{LogColors.OKGREEN}✓ Fetched {len(citizen_info)} citizens.{LogColors.ENDC}")
+    print(f"{LogColors.OKGREEN}[OK] Fetched {len(citizen_info)} citizens.{LogColors.ENDC}")
 
     # 2. Fetch all transactions
     print(f"\n{LogColors.OKCYAN}--- Section 2: Fetching Transaction Data ---{LogColors.ENDC}")
     print(f"{LogColors.OKBLUE}Fetching transactions from table '{AIRTABLE_TRANSACTIONS_TABLE_NAME}'...{LogColors.ENDC}")
     all_transactions = transactions_table.all()
-    print(f"{LogColors.OKGREEN}✓ Fetched {len(all_transactions)} transactions.{LogColors.ENDC}")
+    print(f"{LogColors.OKGREEN}[OK] Fetched {len(all_transactions)} transactions.{LogColors.ENDC}")
 
     # 3. Define time windows
     print(f"\n{LogColors.OKCYAN}--- Section 3: Defining Time Windows ---{LogColors.ENDC}")
@@ -256,7 +256,7 @@ def calculate_citizen_financials():
                     payer_not_in_citizens_count +=1
                     # print(f"{LogColors.WARNING}    Tx {tx_id_log}: Turnover payer ID '{turnover_payer_id}' (from identifier '{buyer_identifier_raw}' or notes) not in citizen_info.{LogColors.ENDC}")
     
-    print(f"{LogColors.OKGREEN}✓ Transaction processing complete.{LogColors.ENDC}")
+    print(f"{LogColors.OKGREEN}[OK] Transaction processing complete.{LogColors.ENDC}")
     print(f"{LogColors.OKBLUE}  Processed transactions: {processed_tx_count}{LogColors.ENDC}")
     if skipped_tx_no_date > 0:
         print(f"{LogColors.WARNING}  Skipped transactions (no/invalid date): {skipped_tx_no_date}{LogColors.ENDC}")
@@ -295,9 +295,9 @@ def calculate_citizen_financials():
         try:
             # Pyairtable's batch_update handles splitting into chunks of 10 automatically
             citizens_table.batch_update(updates)
-            print(f"{LogColors.OKGREEN}✓ Airtable update successful.{LogColors.ENDC}")
+            print(f"{LogColors.OKGREEN}[OK] Airtable update successful.{LogColors.ENDC}")
         except Exception as e:
-            print(f"{LogColors.FAIL}✗ Error updating Airtable: {e}{LogColors.ENDC}")
+            print(f"{LogColors.FAIL}[FAIL] Error updating Airtable: {e}{LogColors.ENDC}")
             # Optionally, print details of records that failed if possible
             # For example, log 'updates' or parts of it.
     else:
