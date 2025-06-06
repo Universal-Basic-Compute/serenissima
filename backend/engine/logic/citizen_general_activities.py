@@ -1864,7 +1864,37 @@ def dispatch_specific_activity_request(
         log.info(f"Redirecting activityType 'make_offer_for_land' to 'bid_on_land' for citizen {citizen_username}.")
         activity_type = "bid_on_land"
 
-    if activity_type == "eat":
+    if activity_type == "eat_from_inventory":
+        log.info(f"Dispatching to _handle_eat_from_inventory for {citizen_name}.")
+        if not is_hungry:
+            return {"success": False, "message": f"{citizen_name} is not hungry.", "activity": None, "reason": "not_hungry"}
+        first_activity_of_chain = _handle_eat_from_inventory(*handler_args)
+        if first_activity_of_chain:
+            return {"success": True, "message": f"Eating from inventory endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain['fields']['Type']}.", "activity": first_activity_of_chain['fields']}
+        else:
+            return {"success": False, "message": f"Could not initiate eating from inventory for {citizen_name}.", "activity": None, "reason": "no_food_in_inventory_or_error"}
+
+    elif activity_type == "eat_at_home":
+        log.info(f"Dispatching to _handle_eat_at_home_or_goto for {citizen_name}.")
+        if not is_hungry:
+            return {"success": False, "message": f"{citizen_name} is not hungry.", "activity": None, "reason": "not_hungry"}
+        first_activity_of_chain = _handle_eat_at_home_or_goto(*handler_args)
+        if first_activity_of_chain:
+            return {"success": True, "message": f"Eating at home endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain['fields']['Type']}.", "activity": first_activity_of_chain['fields']}
+        else:
+            return {"success": False, "message": f"Could not initiate eating at home for {citizen_name}.", "activity": None, "reason": "no_food_at_home_or_path_issue"}
+
+    elif activity_type == "eat_at_tavern":
+        log.info(f"Dispatching to _handle_eat_at_tavern_or_goto for {citizen_name}.")
+        if not is_hungry:
+            return {"success": False, "message": f"{citizen_name} is not hungry.", "activity": None, "reason": "not_hungry"}
+        first_activity_of_chain = _handle_eat_at_tavern_or_goto(*handler_args)
+        if first_activity_of_chain:
+            return {"success": True, "message": f"Eating at tavern endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain['fields']['Type']}.", "activity": first_activity_of_chain['fields']}
+        else:
+            return {"success": False, "message": f"Could not initiate eating at tavern for {citizen_name}.", "activity": None, "reason": "no_tavern_found_or_funds_issue"}
+            
+    elif activity_type == "eat": # Generic "eat" with strategy
         strategy = params.get("strategy", "default_order")
         strategy_applied = strategy
 
@@ -2420,7 +2450,8 @@ def dispatch_specific_activity_request(
 
     else: # Fallback for unsupported or not-yet-implemented high-level types
         supported_orchestrated_types = [
-            'eat', 'leave_venice', 'seek_shelter',
+            'eat', 'eat_from_inventory', 'eat_at_home', 'eat_at_tavern', 
+            'leave_venice', 'seek_shelter',
             'initiate_building_project', 
             'send_message', 'manage_public_storage_offer', 'bid_on_land',
             'buy_listed_land', 'buy_available_land', # Added buy_available_land
