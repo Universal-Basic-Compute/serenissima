@@ -203,6 +203,7 @@ export default function BuildingMarkers({
                 boxShadow: haloColorValue 
                   ? `0 0 15px 5px ${haloColorValue}` // Increased halo size and spread
                   : `0 ${Math.max(1, Math.round(scale * 0.5))}px ${Math.max(2, Math.round(scale * 1.5))}px rgba(0,0,0,0.075)`, // Apply halo or scaled default shadow
+                overflow: 'hidden', // Ensures the image is clipped by the borderRadius
               }}
             >
               <img
