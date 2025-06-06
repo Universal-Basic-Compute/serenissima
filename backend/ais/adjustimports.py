@@ -4,6 +4,7 @@ import json
 import traceback
 import logging
 import argparse # Added argparse
+import random # Added for 10% chance
 from datetime import datetime, timedelta
 import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Tuple, Any
@@ -785,12 +786,13 @@ def create_or_update_import_contract(
         # Ensure building_id and resource_type are sanitized for use in an ID if necessary (e.g., no spaces, special chars)
         # For now, assuming they are simple strings/IDs.
         custom_contract_id = f"contract-import-{building_id}-{resource_type}"
-        
+    
         VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
         now_venice = datetime.now(VENICE_TIMEZONE)
         now_iso = now_venice.isoformat()
-        end_date_venice = now_venice + timedelta(weeks=1)
-        end_date_iso = end_date_venice.isoformat()  # Contract ends in 1 week
+        # Contract ends in 1 month
+        end_date_venice = now_venice + timedelta(days=30) 
+        end_date_iso = end_date_venice.isoformat()
 
         # Check if a contract with this custom_contract_id already exists
         existing_contract_record = None
