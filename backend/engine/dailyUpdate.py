@@ -211,6 +211,18 @@ def generate_daily_update_summary(thoughts: List[Dict[str, Any]]) -> Optional[st
                 "The entire output must be a single Telegram-ready message. Use Markdown for italics (`_text_`) and strikethrough (`~text~`) if appropriate.[PARAGRAPHBREAK]"
                 "CRITICAL FOR FORMATTING: Use [LINEBREAK] for single line breaks (e.g., between question and answer). Use [PARAGRAPHBREAK] for breaks between Q&A pairs. Do NOT use literal newline characters like '\\n'.[PARAGRAPHBREAK]"
                 "Provide ONLY the Telegram message content, without any surrounding explanations."
+            ),
+            ( # Template 5: Classic Bulletin with Title
+                "Based on the citizen insights from 'addSystem', compile a classic daily bulletin for the Venetian populace. This is for Telegram, so keep it concise. "
+                "The bulletin should cover the general mood, significant events, or interesting developments. "
+                "Format your response as follows:[PARAGRAPHBREAK]"
+                "1. Start with a catchy *Title* for the bulletin (e.g., *Venice Daily Chronicle*, *Rialto Report*). Use bold Markdown. [PARAGRAPHBREAK]"
+                "2. Follow with a short introductory paragraph (1-2 sentences) summarizing the day's essence. Use [PARAGRAPHBREAK].[PARAGRAPHBREAK]"
+                "3. Present a list of 3 to 5 bullet points highlighting specific notable events, observations, or citizen sentiments. Each bullet should be concise. Use standard Markdown list syntax (e.g., `* Item 1` or `- Item 1`). Ensure each bullet point starts on a new line by using [LINEBREAK] if it's not already the start of a new paragraph. Use bold for emphasis within bullets; avoid emojis.[PARAGRAPHBREAK]"
+                "4. Conclude with a brief closing sentence or a forward-looking thought. [PARAGRAPHBREAK]"
+                "The entire output must be a single Telegram-ready message. Use Markdown for formatting (bold: `*text*` or `**text**`; italics: `_text_`; strikethrough: `~text~`).[PARAGRAPHBREAK]"
+                "IMPORTANT FOR LINE BREAKS: Use [LINEBREAK] for all single line breaks. Use [PARAGRAPHBREAK] for paragraph breaks (blank lines). Do NOT use literal newline characters like '\\n'.[PARAGRAPHBREAK]"
+                "Answer with ONLY the Telegram message content, no extra conversational text or explanations."
             )
         ]
         
