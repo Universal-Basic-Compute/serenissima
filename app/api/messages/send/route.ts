@@ -45,6 +45,7 @@ export async function POST(request: Request) {
     const receiver = pascalBody.Receiver;
     const content = pascalBody.Content;
     const type = pascalBody.Type || 'message'; // Default to 'message' if Type is not provided
+    const channel = pascalBody.Channel; // Extract Channel
     
     if (!sender || !receiver || !content) {
       return NextResponse.json(
@@ -66,7 +67,8 @@ export async function POST(request: Request) {
         'Receiver': receiver,
         'Content': content,
         'Type': type,
-        'CreatedAt': createdAt
+        'CreatedAt': createdAt,
+        ...(channel && { 'Channel': channel }) // Add Channel if provided
       });
       
       return NextResponse.json({
@@ -77,6 +79,7 @@ export async function POST(request: Request) {
           receiver,
           content,
           type,
+          channel: channel || null, // Include channel in the response
           createdAt,
           readAt: null
         }
