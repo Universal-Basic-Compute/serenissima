@@ -38,8 +38,23 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
   isLoadingMarketData,
 }) => {
   const [isImageHovered, setIsImageHovered] = useState(false);
+  const hoverIntentRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (!selectedPolygon) return null;
+
+  const handleMouseEnter = () => {
+    if (hoverIntentRef.current) {
+      clearTimeout(hoverIntentRef.current);
+      hoverIntentRef.current = null;
+    }
+    setIsImageHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    hoverIntentRef.current = setTimeout(() => {
+      setIsImageHovered(false);
+    }, 200); // Délai de 200ms avant de cacher
+  };
 
   return (
     <div className="flex flex-col">
@@ -87,9 +102,9 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
             <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
               <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Overview</h3>
               <div 
-                className="flex flex-col items-center relative" // Added relative for positioning the zoomed image
-                onMouseEnter={() => setIsImageHovered(true)}
-                onMouseLeave={() => setIsImageHovered(false)}
+                className="flex flex-col items-center relative" // Relative for potential local popups, but zoomed is now fixed
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
                 {selectedPolygon.id && (
                   <>
@@ -104,11 +119,15 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
                       }}
                     />
                     {isImageHovered && (
-                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 translate-y-[-105%] z-20 p-1 bg-white border-2 border-amber-500 rounded-lg shadow-xl">
+                      <div 
+                        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-1 bg-white border-2 border-amber-500 rounded-lg shadow-xl"
+                        onMouseEnter={handleMouseEnter} // Keep open if mouse moves onto the zoomed image
+                        onMouseLeave={handleMouseLeave} // Hide if mouse leaves the zoomed image
+                      >
                         <img
                           src={`/images/lands/${selectedPolygon.id}.png`}
                           alt={`Zoomed image of ${selectedPolygon.historicalName || selectedPolygon.id}`}
-                          className="w-[600px] h-[600px] object-cover rounded" // 4x the size (150px * 4 = 600px)
+                          className="w-[600px] h-[600px] object-cover rounded"
                           style={{ aspectRatio: '1/1' }}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/images/default_land_image.png';
