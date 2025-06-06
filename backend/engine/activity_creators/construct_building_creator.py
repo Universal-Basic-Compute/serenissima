@@ -151,6 +151,7 @@ def try_create_construct_building_activity(
             activity_payload["Type"] = "construct_building"
             # Field used by construct_building_processor
             activity_payload["BuildingToConstruct"] = target_building_custom_id
+            activity_payload["WorkDurationMinutes"] = work_duration_minutes # Add to main payload
             activity_payload["FromBuilding"] = target_building_custom_id 
             activity_payload["ToBuilding"] = target_building_custom_id   
             activity_payload["Path"] = "[]" 
@@ -160,7 +161,8 @@ def try_create_construct_building_activity(
             target_bldg_name = target_building_record['fields'].get('Name', target_building_record['fields'].get('Type', target_building_custom_id))
             activity_payload["Description"] = f"Working on construction: {target_bldg_name}"
 
-            details_payload["work_duration_minutes"] = work_duration_minutes
+            # details_payload["work_duration_minutes"] is still useful if Notes are parsed for other reasons
+            details_payload["work_duration_minutes"] = work_duration_minutes 
             
             log.info(f"Creating 'construct_building' directly for {citizen_username} at {target_building_custom_id} for contract {contract_custom_id_or_airtable_id}.")
 
