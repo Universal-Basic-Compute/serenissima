@@ -32,12 +32,12 @@ def process_list_land_for_sale_fn(tables: dict, activity_record: dict, building_
     log.info(f"{LogColors.PROCESS}Processing 'finalize_list_land_for_sale' activity {activity_guid} for citizen {activity_citizen_username}.{LogColors.ENDC}")
 
     try:
-        details_str = activity_fields.get('Details')
-        if not details_str:
-            log.error(f"{LogColors.FAIL}Activity {activity_guid} is missing 'Details' field.{LogColors.ENDC}")
+        notes_str = activity_fields.get('Notes') # Changed from 'Details' to 'Notes'
+        if not notes_str:
+            log.error(f"{LogColors.FAIL}Activity {activity_guid} is missing 'Notes' field (expected JSON details here).{LogColors.ENDC}") # Changed Details to Notes
             return False
         
-        details = json.loads(details_str)
+        details = json.loads(notes_str) # Parse from notes_str
         land_id_to_list = details.get('landId')
         price = details.get('price')
         seller_username = details.get('sellerUsername') # This should match the citizen performing the activity
