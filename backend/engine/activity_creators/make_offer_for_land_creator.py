@@ -14,6 +14,7 @@ from backend.engine.utils.activity_helpers import (
     get_building_record,
     find_path_between_buildings_or_coords,
     get_closest_building_of_type,
+    _get_building_position_coords, # Added import
     VENICE_TIMEZONE
 )
 
@@ -42,29 +43,43 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
 
     log.info(f"{LogColors.OKCYAN}Attempting to create 'make_offer_for_land' activity chain for {citizen_username} for land {land_id} at price {offer_price}. Target seller: {target_seller_username or 'N/A'}.{LogColors.ENDC}")
 
-    # 1. Determine citizen's current location
+    # 1. Determine citizen's current location for pathfinding and distance calculations
     citizen_position_str = citizen_record['fields'].get('Position')
-    from_location_data = None
+    start_location_for_pathfinding: Optional[Dict[str, Any]] = None # Can be coords or building_record
+    start_coords_for_distance_calc: Optional[Dict[str, float]] = None # Must be coords
+
     if citizen_position_str:
         try:
             pos_data = json.loads(citizen_position_str)
             if 'lat' in pos_data and 'lng' in pos_data:
-                from_location_data = {"lat": pos_data['lat'], "lng": pos_data['lng']}
+                start_coords_for_distance_calc = {"lat": float(pos_data['lat']), "lng": float(pos_data['lng'])}
+                start_location_for_pathfinding = start_coords_for_distance_calc
             elif 'building_id' in pos_data:
-                 from_location_data = {"building_id": pos_data['building_id']}
+                building_id_from_pos = pos_data['building_id']
+                building_record = get_building_record(tables, building_id_from_pos)
+                if building_record:
+                    start_location_for_pathfinding = building_record
+                    start_coords_for_distance_calc = _get_building_position_coords(building_record)
+                else:
+                    log.warning(f"{LogColors.WARNING}Could not find building record for ID '{building_id_from_pos}' from citizen {citizen_username} position.{LogColors.ENDC}")
         except json.JSONDecodeError:
             if isinstance(citizen_position_str, str) and citizen_position_str.startswith("bld_"):
-                from_location_data = {"building_id": citizen_position_str}
+                building_record = get_building_record(tables, citizen_position_str)
+                if building_record:
+                    start_location_for_pathfinding = building_record
+                    start_coords_for_distance_calc = _get_building_position_coords(building_record)
+                else:
+                    log.warning(f"{LogColors.WARNING}Could not find building record for ID '{citizen_position_str}' from citizen {citizen_username} position string.{LogColors.ENDC}")
             else:
                 log.warning(f"{LogColors.WARNING}Could not parse citizen {citizen_username} position: {citizen_position_str}.{LogColors.ENDC}")
     
-    if not from_location_data:
-        log.warning(f"{LogColors.WARNING}Citizen {citizen_username} has no valid current location. Cannot create goto_location activity.{LogColors.ENDC}")
+    if not start_location_for_pathfinding or not start_coords_for_distance_calc:
+        log.warning(f"{LogColors.WARNING}Citizen {citizen_username} has no valid current location. Cannot create 'make_offer_for_land' chain.{LogColors.ENDC}")
         return []
 
     # 2. Determine the target office building
     target_office_record = None
-    target_office_building_id = None
+    target_office_building_id = None # This will store the custom BuildingId
     preferred_office_types = ["town_hall", "public_archives", "notary_office"]
 
     if user_specified_target_office_id:
@@ -76,9 +91,10 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
             log.warning(f"{LogColors.WARNING}User-specified target office {user_specified_target_office_id} not found. Proceeding to fallback search.{LogColors.ENDC}")
 
     if not target_office_record:
-        log.info(f"{LogColors.OKCYAN}Searching for closest appropriate office from types: {preferred_office_types}.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKCYAN}Searching for closest appropriate office from types: {preferred_office_types} relative to {start_coords_for_distance_calc}.{LogColors.ENDC}")
         for office_type in preferred_office_types:
-            found_office = get_closest_building_of_type(tables, from_location_data, office_type)
+            # get_closest_building_of_type expects coordinates for reference_position
+            found_office = get_closest_building_of_type(tables, start_coords_for_distance_calc, office_type)
             if found_office:
                 target_office_record = found_office
                 target_office_building_id = target_office_record['fields'].get('BuildingId')
@@ -90,7 +106,9 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
             return []
 
     # 3. Find path to the target office building
-    path_data = find_path_between_buildings_or_coords(tables, from_location_data, {"building_id": target_office_building_id}, transport_api_url)
+    # find_path_between_buildings_or_coords can take a building record or coordinates.
+    # target_office_record is a full building record.
+    path_data = find_path_between_buildings_or_coords(start_location_for_pathfinding, target_office_record, transport_api_url)
     current_end_time_utc = now_utc_dt
 
     if path_data and path_data.get("path"):
