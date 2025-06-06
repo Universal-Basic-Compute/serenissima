@@ -23,7 +23,7 @@ export function useWallet() {
     
     if (storedWallet) {
       console.log("Found stored wallet address, setting as connected");
-      setWalletAddressState(storedWallet);
+      setWalletAddressState(storedWallet); // Update hook's local state
       
       // Try to load citizen profile from localStorage first
       const storedProfile = localStorage.getItem('citizenProfile');
@@ -73,9 +73,10 @@ export function useWallet() {
       console.log("Adapter is connected but not in storage");
       const address = adapter.publicKey?.toString() || null;
       if (address) {
-        console.log("Setting wallet address from adapter:", address);
-        setWalletAddressState(address);
-        setWalletAddress(address);
+        console.log("useWallet Hook: Adapter is connected, reflecting address in hook state:", address);
+        setWalletAddressState(address); // Update hook's local state
+        // setWalletAddress(address); // DO NOT write to localStorage here to avoid conflict with WalletProvider
+                                   // WalletProvider should be the source of truth for localStorage.
       }
     } else {
       console.log("No stored wallet address and adapter not connected");
@@ -176,12 +177,16 @@ export function useWallet() {
       console.log("Wallet connected, address:", address);
       
       if (address) {
-        setWalletAddressState(address);
+        setWalletAddressState(address); // Update hook's local state
         // Store wallet in both session and local storage
-        setWalletAddress(address);
+        // setWalletAddress(address); // DO NOT write to localStorage here if WalletProvider handles it.
+                                   // This connectWallet function in useWallet hook is largely duplicative
+                                   // of WalletProvider's logic and ideally should be removed or refactored
+                                   // to use WalletProvider's connectWallet.
         
         // Store wallet in Airtable and check for username
-        const citizenData = await storeWalletInAirtable(address);
+        // This API call is also duplicative if WalletProvider handles registration.
+        const citizenData = await storeWalletInAirtable(address); 
         
         if (citizenData) {
           // Check if the citizen has a username
