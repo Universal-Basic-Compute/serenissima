@@ -564,6 +564,19 @@ def get_closest_building_of_type(
     """
     log.info(f"{LogColors.OKBLUE}Searching for the closest '{building_type}' to position: {reference_position}{LogColors.ENDC}")
     try:
+        # Attempt to convert max_distance_meters to float if it's a string or other unexpected type
+        max_distance_meters_internal = max_distance_meters # Use a new variable for the converted value
+        if isinstance(max_distance_meters, str):
+            try:
+                max_distance_meters_internal = float(max_distance_meters)
+                log.warning(f"{LogColors.WARNING}max_distance_meters was a string '{max_distance_meters}', converted to float {max_distance_meters_internal}. Consider fixing the caller.{LogColors.ENDC}")
+            except ValueError:
+                log.error(f"{LogColors.FAIL}max_distance_meters string '{max_distance_meters}' could not be converted to float. Ignoring max_distance_meters constraint.{LogColors.ENDC}")
+                max_distance_meters_internal = None
+        elif max_distance_meters is not None and not isinstance(max_distance_meters, (int, float)):
+            log.error(f"{LogColors.FAIL}max_distance_meters has unexpected type {type(max_distance_meters)} ('{max_distance_meters}'). Ignoring max_distance_meters constraint.{LogColors.ENDC}")
+            max_distance_meters_internal = None
+        
         # Filter by type directly in the formula for efficiency
         formula = f"{{Type}}='{_escape_airtable_value(building_type)}'"
         buildings_of_type = tables['buildings'].all(formula=formula)
@@ -580,7 +593,7 @@ def get_closest_building_of_type(
             if building_position:
                 distance = _calculate_distance_meters(reference_position, building_position)
                 if distance < min_distance:
-                    if max_distance_meters is None or distance <= max_distance_meters:
+                    if max_distance_meters_internal is None or distance <= max_distance_meters_internal:
                         min_distance = distance
                         closest_building = building_record
             else:
@@ -589,8 +602,8 @@ def get_closest_building_of_type(
         if closest_building:
             building_id_log = closest_building['fields'].get('BuildingId', closest_building['id'])
             log.info(f"{LogColors.OKGREEN}Closest '{building_type}' found: {building_id_log} at distance {min_distance:.2f}m.{LogColors.ENDC}")
-            if max_distance_meters is not None and min_distance > max_distance_meters:
-                log.info(f"{LogColors.OKBLUE}However, it exceeds the max distance of {max_distance_meters}m.{LogColors.ENDC}")
+            if max_distance_meters_internal is not None and min_distance > max_distance_meters_internal:
+                log.info(f"{LogColors.OKBLUE}However, it exceeds the max distance of {max_distance_meters_internal}m.{LogColors.ENDC}")
                 return None # Exceeds max distance
         else:
             log.info(f"{LogColors.OKBLUE}No buildings of type '{building_type}' with valid positions found (or none within max_distance if specified).{LogColors.ENDC}")
