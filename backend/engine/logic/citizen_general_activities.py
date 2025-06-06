@@ -1957,13 +1957,40 @@ def dispatch_specific_activity_request(
             transport_api_url,
             api_base_url
         )
-        first_activity_of_chain_fields = activities_chain[0] if activities_chain else None
         
-        if first_activity_of_chain_fields and isinstance(first_activity_of_chain_fields, dict) and 'ActivityId' in first_activity_of_chain_fields:
-            return {"success": True, "message": f"Buy listed land endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain_fields.get('Type', 'N/A')}.", "activity": first_activity_of_chain_fields}
+        created_airtable_records = []
+        if activities_chain and isinstance(activities_chain, list): # Renamed activities_to_create_payloads to activities_chain to match existing code
+            for activity_payload in activities_chain:
+                if not isinstance(activity_payload, dict):
+                    log.error(f"{LogColors.FAIL}Creator for {activity_type} returned non-dict item in list: {activity_payload}{LogColors.ENDC}")
+                    return {"success": False, "message": f"Internal error: activity creator for {original_activity_type} returned invalid payload.", "activity": None, "reason": "invalid_creator_payload"}
+                try:
+                    # Ensure essential fields are present if not set by creator
+                    if 'ActivityId' not in activity_payload or not activity_payload['ActivityId']:
+                         activity_payload['ActivityId'] = f"{activity_payload.get('Type', 'unknown').lower().replace('_', '-')}-{citizen_username.lower()}-{uuid.uuid4().hex[:8]}"
+                    if 'Citizen' not in activity_payload:
+                         activity_payload['Citizen'] = citizen_username
+                    if 'Status' not in activity_payload:
+                         activity_payload['Status'] = 'created'
+                    if 'CreatedAt' not in activity_payload:
+                         activity_payload['CreatedAt'] = now_utc_dt.isoformat()
+                    if 'UpdatedAt' in activity_payload: # Ensure UpdatedAt is not sent
+                        del activity_payload['UpdatedAt']
+
+                    created_record = tables['activities'].create(activity_payload)
+                    created_airtable_records.append(created_record)
+                    log.info(f"{LogColors.SUCCESS}Successfully created activity {created_record['fields'].get('ActivityId')} of type {created_record['fields'].get('Type')} for {citizen_username}.{LogColors.ENDC}")
+                except Exception as e:
+                    log.error(f"{LogColors.FAIL}Failed to create activity in Airtable for {citizen_username}. Payload: {json.dumps(activity_payload, indent=2)}. Error: {e}{LogColors.ENDC}")
+                    return {"success": False, "message": f"Error creating activity chain for {original_activity_type}: {e}", "activity": None, "reason": "airtable_creation_error"}
+        
+        if created_airtable_records:
+            first_created_activity_fields = created_airtable_records[0]['fields']
+            message = f"Buy listed land endeavor (originally {original_activity_type}) initiated for {citizen_name}. First activity: {first_created_activity_fields.get('Type', 'N/A')}."
+            return {"success": True, "message": message, "activity": first_created_activity_fields}
         else:
-            log.warning(f"buy_listed_land_creator did not return a valid activity for {citizen_name}. Returned: {activities_chain}")
-            return {"success": False, "message": f"Could not initiate 'buy_listed_land' endeavor for {citizen_name}.", "activity": None, "reason": "buy_listed_land_creation_failed"}
+            log.warning(f"{LogColors.WARNING}Activity creator for '{original_activity_type}' did not return any activities to create for {citizen_name}. Returned: {activities_chain}{LogColors.ENDC}")
+            return {"success": False, "message": f"Could not initiate '{original_activity_type}' endeavor for {citizen_name}.", "activity": None, "reason": f"{original_activity_type}_creation_failed_no_payloads"}
 
     elif activity_type == "list_land_for_sale":
         log.info(f"Dispatching to list_land_for_sale_creator for {citizen_name} with params: {activity_parameters}")
