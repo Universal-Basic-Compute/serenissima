@@ -46,12 +46,6 @@ from backend.engine.utils.activity_helpers import LogColors, log_header, _escape
 
 # _escape_airtable_value is now imported
 
-# def _escape_airtable_value(value: str) -> str: # Original local definition
-    """Escapes single quotes for Airtable formulas."""
-    if isinstance(value, str):
-        return value.replace("'", "\\'")
-    return str(value)
-
 def initialize_airtable():
     """Initialize Airtable connection."""
     api_key = os.environ.get('AIRTABLE_API_KEY')
