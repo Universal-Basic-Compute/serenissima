@@ -269,7 +269,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       if (event.detail) {
         console.log('[WalletProvider] Received citizenProfileUpdated event:', event.detail);
         // The event.detail should be the full, updated profile object
-        setAndLogCitizenProfile(event.detail, "handleExternalProfileUpdate_event");
+        // Pass the current walletAddress from the provider's state
+        setAndLogCitizenProfile(event.detail, "handleExternalProfileUpdate_event", walletAddress);
       }
     };
     
