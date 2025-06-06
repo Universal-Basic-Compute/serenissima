@@ -42,8 +42,8 @@ if not all([AIRTABLE_API_KEY, AIRTABLE_BASE_ID]):
     sys.exit(1)
 
 api = Api(AIRTABLE_API_KEY)
-citizens_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_CITIZENS_TABLE_NAME)
-transactions_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_TRANSACTIONS_TABLE_NAME)
+citizens_table = api.table(AIRTABLE_BASE_ID, AIRTABLE_CITIZENS_TABLE_NAME)
+transactions_table = api.table(AIRTABLE_BASE_ID, AIRTABLE_TRANSACTIONS_TABLE_NAME)
 
 def parse_timestamp(timestamp_str):
     """Safely parse Airtable timestamp string to timezone-aware datetime object."""
