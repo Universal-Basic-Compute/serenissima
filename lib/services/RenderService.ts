@@ -73,6 +73,13 @@ export class RenderService {
     // DEBUG: Log current globalAlpha
     // console.log(`[RenderService.drawBuilding] ID: ${typeIndicator} (type: ${buildingType}), isSelected: ${isSelected}, isHovered: ${isHovered}, ctx.globalAlpha: ${ctx.globalAlpha}, color: ${color}`);
 
+    // Determine if it's a bridge for styling AND shape logic
+    const isBridgeByType = buildingType && 
+                           (buildingType.toLowerCase().includes('bridge') || 
+                            buildingType.toLowerCase().includes('ponte'));
+    const isBridgeByCategory = buildingCategory && buildingCategory.toLowerCase() === 'bridge';
+    const isActuallyABridge = isBridgeByType || isBridgeByCategory;
+
     // Apply different styles based on state
     if (isSelected) {
       // Selected state: much brighter with a thicker border
@@ -94,11 +101,8 @@ export class RenderService {
     // Draw the appropriate shape based on the building's point type
     ctx.beginPath();
 
-    const isBridgeByType = buildingType && 
-                           (buildingType.toLowerCase().includes('bridge') || 
-                            buildingType.toLowerCase().includes('ponte'));
-    const isBridgeByCategory = buildingCategory && buildingCategory.toLowerCase() === 'bridge';
-    const isActuallyABridge = isBridgeByType || isBridgeByCategory;
+    // Note: isActuallyABridge and its components (isBridgeByType, isBridgeByCategory)
+    // are now defined earlier in this function for styling purposes.
     const isMerchantGalley = buildingType?.toLowerCase() === 'merchant_galley';
 
     if (isActuallyABridge && rotation !== undefined) {
