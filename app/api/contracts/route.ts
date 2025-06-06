@@ -91,7 +91,28 @@ export async function GET(request: Request) {
     // Build the filter formula based on parameters
     const formulaParts: string[] = [];
     const loggableFilters: Record<string, string> = {};
-    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection']; // Parameters handled by pagination/sorting logic
+    // Add username and scope to reservedParams
+    const reservedParams = ['limit', 'offset', 'sortField', 'sortDirection', 'username', 'scope'];
+
+    const usernameParam = url.searchParams.get('username');
+    const scopeParam = url.searchParams.get('scope');
+
+    if (usernameParam) {
+      const escapedUsername = escapeAirtableValue(usernameParam);
+      formulaParts.push(`OR({Buyer} = '${escapedUsername}', {Seller} = '${escapedUsername}')`);
+      loggableFilters['username (applied to Buyer/Seller)'] = usernameParam;
+    }
+
+    if (scopeParam === 'userNonPublic') {
+      // Assuming 'public_sell' is the primary type for public contracts.
+      // If other types like 'public_buy' or 'public_auction' exist, they should be added here.
+      formulaParts.push(`NOT({Type} = 'public_sell')`);
+      loggableFilters['scope (applied to Type)'] = scopeParam;
+    } else if (scopeParam) {
+      // Log if a scope parameter is provided but not handled
+      loggableFilters['scope (unhandled)'] = scopeParam;
+      console.warn(`Unhandled scope parameter: ${scopeParam}`);
+    }
 
     for (const [key, value] of url.searchParams.entries()) {
       if (reservedParams.includes(key.toLowerCase())) {
