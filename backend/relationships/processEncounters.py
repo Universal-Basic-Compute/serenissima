@@ -151,7 +151,7 @@ def process_encounter_pair(
                     activity_type_for_notes="encounter_initiated",
                     success=True,
                     notes_detail=f"{speaker} initiated conversation with {listener} at {location_id}.",
-                    activity_record_for_kinos=None # No specific activity record for this general encounter trust update
+                    activity_record_for_kinos=new_opening_message.get('fields') if new_opening_message else None
                 )
                 log.info(f"    Augmented trust between {speaker} and {listener} due to encounter initiation.")
             else:
