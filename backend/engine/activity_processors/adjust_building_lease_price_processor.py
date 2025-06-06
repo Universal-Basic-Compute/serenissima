@@ -14,11 +14,12 @@ from backend.engine.utils.activity_helpers import (
     get_building_record,
     get_citizen_record,
     # update_citizen_ducats, # Retiré d'ici
-    create_notification_record,
+    # create_notification_record, # Removed from here
     LogColors,
     VENICE_TIMEZONE,
     update_citizen_ducats # Import from activity_helpers
 )
+from backend.engine.utils.notification_helpers import create_notification # Added import
 # from backend.engine.utils.financial_helpers import update_citizen_ducats # Original incorrect import
 
 log = logging.getLogger(__name__)
@@ -112,7 +113,7 @@ def process_file_building_lease_adjustment_fn(
             notif_content_operator = (f"The landowner, {citizen_username}, has adjusted the lease price for the building "
                                       f"'{building_to_adjust_airtable_record['fields'].get('Name', building_id_to_adjust)}' "
                                       f"that you operate. New lease price: {new_lease_price:.2f} Ducats.")
-            create_notification_record(tables, building_operator_username, "lease_price_changed_operator", notif_content_operator,
+            create_notification(tables, building_operator_username, "lease_price_changed_operator", notif_content_operator,
                                        asset_type="building", asset_id=building_id_to_adjust,
                                        details_json=json.dumps({"buildingId": building_id_to_adjust, "newLeasePrice": new_lease_price, "landOwner": citizen_username}))
         
@@ -121,7 +122,7 @@ def process_file_building_lease_adjustment_fn(
             notif_content_owner = (f"The landowner, {citizen_username}, has adjusted the lease price for the building "
                                    f"'{building_to_adjust_airtable_record['fields'].get('Name', building_id_to_adjust)}' "
                                    f"that you own (but is on their land). New lease price: {new_lease_price:.2f} Ducats.")
-            create_notification_record(tables, building_owner_username, "lease_price_changed_owner", notif_content_owner,
+            create_notification(tables, building_owner_username, "lease_price_changed_owner", notif_content_owner,
                                        asset_type="building", asset_id=building_id_to_adjust,
                                        details_json=json.dumps({"buildingId": building_id_to_adjust, "newLeasePrice": new_lease_price, "landOwner": citizen_username}))
 
@@ -129,7 +130,7 @@ def process_file_building_lease_adjustment_fn(
         notif_content_landowner = (f"You have successfully adjusted the lease price for building "
                                    f"'{building_to_adjust_airtable_record['fields'].get('Name', building_id_to_adjust)}' "
                                    f"on your land {land_id_of_building} to {new_lease_price:.2f} Ducats.")
-        create_notification_record(tables, citizen_username, "lease_price_adjusted_self", notif_content_landowner,
+        create_notification(tables, citizen_username, "lease_price_adjusted_self", notif_content_landowner,
                                    asset_type="building", asset_id=building_id_to_adjust,
                                    details_json=json.dumps({"buildingId": building_id_to_adjust, "newLeasePrice": new_lease_price}))
         return True
