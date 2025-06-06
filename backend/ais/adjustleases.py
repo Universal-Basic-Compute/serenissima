@@ -16,7 +16,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from app.citizen_utils import find_citizen_by_identifier
+from backend.app.citizen_utils import find_citizen_by_identifier
 # LogColors and log_header will be imported from activity_helpers
 
 # Configuration for API calls
