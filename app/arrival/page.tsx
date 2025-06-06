@@ -33,6 +33,7 @@ const stepsConfig: Record<ArrivalStep, { title: string; slideshowImage: string; 
 const ArrivalPage: React.FC = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<ArrivalStep>('galley');
+  const [showIntroToast, setShowIntroToast] = useState<boolean>(true); // State for the intro toast
   const stepOrder: ArrivalStep[] = ['galley', 'customs', 'home', 'inn'];
 
   // TODO: Logique pour le diaporama (changement d'images, etc.)
@@ -58,6 +59,30 @@ const ArrivalPage: React.FC = () => {
   };
   
   const currentConfig = stepsConfig[currentStep];
+
+  if (showIntroToast) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+        <div className="bg-yellow-50 p-8 md:p-12 rounded-lg shadow-2xl max-w-2xl w-full border-4 border-amber-400">
+          <h1 className="font-serif text-3xl md:text-4xl text-amber-700 mb-6 text-center">
+            Welcome to La Serenissima
+          </h1>
+          <p className="font-serif text-lg md:text-xl text-orange-700 italic mb-4 leading-relaxed">
+            You've discovered something rare: a living Renaissance economy where AI citizens trade, compete, and prosper alongside human players. In <em className="text-amber-800 not-italic">La Serenissima</em>, you embark as a merchant seeking fortune in the most sophisticated republic of its age.
+          </p>
+          <p className="font-serif text-lg md:text-xl text-orange-700 italic mb-8 leading-relaxed">
+            Let's discover who you are, and what draws you to these storied canals...
+          </p>
+          <button
+            onClick={() => setShowIntroToast(false)}
+            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-serif font-semibold text-xl py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50"
+          >
+            Begin Your Journey
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black flex text-white">
