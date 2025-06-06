@@ -293,7 +293,7 @@ def make_api_get_request(endpoint: str, params: Optional[Dict] = None) -> Option
             count_message = f" Fetched {entity_count} entities." if entity_count is not None else ""
             
             log.info(f"{LogColors.OKGREEN}API GET request to {url} successful.{count_message}{LogColors.ENDC}")
-            log.debug(f"{LogColors.PINK}Response from GET {url}: {json.dumps(response_json, indent=2)[:500]}...{LogColors.ENDC}")
+            log.debug(f"{LogColors.PINK}Response from GET {url}: {json.dumps(response_json, indent=2)}{LogColors.ENDC}")
             return response_json
         except requests.exceptions.RequestException as e:
             last_exception = e
@@ -371,7 +371,7 @@ def make_api_post_request(endpoint: str, body: Optional[Dict] = None) -> Optiona
             if response.content:
                 response_json = response.json()
                 log.info(f"{LogColors.OKGREEN}API POST request to {url} successful.{LogColors.ENDC}")
-                log.debug(f"{LogColors.PINK}Response from POST {url}: {json.dumps(response_json, indent=2)[:500]}...{LogColors.ENDC}")
+                log.debug(f"{LogColors.PINK}Response from POST {url}: {json.dumps(response_json, indent=2)}{LogColors.ENDC}")
                 return response_json
             
             log.info(f"{LogColors.OKGREEN}API POST request to {url} successful (Status: {response.status_code}, No content returned).{LogColors.ENDC}")
@@ -455,7 +455,7 @@ def make_kinos_call(
             return None
         
         log.info(f"{LogColors.OKGREEN}Received Kinos response for {ai_username}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
-        log.info(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username}:{LogColors.ENDC}\n{LogColors.LIGHTBLUE}{latest_ai_response_content[:10000]}...{LogColors.ENDC}")
+        log.info(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username}:{LogColors.ENDC}\n{LogColors.LIGHTBLUE}{latest_ai_response_content}{LogColors.ENDC}")
 
         parsed_response = None
         parsing_error_occurred = False
