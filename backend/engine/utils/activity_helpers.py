@@ -306,8 +306,8 @@ def get_land_record(tables: Dict[str, Table], land_id_value: str) -> Optional[Di
 
     formula = f"{{LandId}} = '{_escape_airtable_value(land_id_value)}'"
     try:
-        # Assuming 'LANDS' is the correct table key used by the caller when populating the 'tables' dict.
-        records = tables['LANDS'].all(formula=formula, max_records=1)
+        # Utiliser la clé 'lands' (minuscule) pour accéder à la table des terrains.
+        records = tables['lands'].all(formula=formula, max_records=1)
         if records:
             return records[0]
         else:
