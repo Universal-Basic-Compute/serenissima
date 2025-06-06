@@ -76,12 +76,13 @@ def username_exists(tables, username: str) -> bool:
         # If there's an error, assume it might exist to be safe
         return True
 
-def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = None) -> Optional[Dict[str, Any]]:
+def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = None, add_message: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """Generate a new citizen using Kinos Engine API.
     
     Args:
-        social_class: Requested social class (will be ignored, always creates Facchini)
-        additional_prompt_text: Optional text to append to the Kinos API prompt.
+        social_class: Requested social class.
+        additional_prompt_text: Optional text to append to the Kinos API prompt (from --add-prompt).
+        add_message: Optional text to append to the Kinos API prompt (from --addMessage).
         
     Returns:
         A dictionary containing the citizen data, or None if generation failed
@@ -105,6 +106,9 @@ def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = 
         
         if additional_prompt_text:
             prompt += f"\n\n{additional_prompt_text}"
+        
+        if add_message:
+            prompt += f"\n\n{add_message}"
             
         # Call Kinos Engine API
         response = requests.post(
@@ -245,12 +249,13 @@ def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = 
         log.error(f"Error generating citizen: {e}")
         return None
 
-def generate_citizen_batch(social_classes: Dict[str, int], additional_prompt_text: Optional[str] = None) -> list:
+def generate_citizen_batch(social_classes: Dict[str, int], additional_prompt_text: Optional[str] = None, add_message: Optional[str] = None) -> list:
     """Generate a batch of citizens based on specified social class distribution.
     
     Args:
         social_classes: Dictionary mapping social class names to counts.
-        additional_prompt_text: Optional text to append to the Kinos API prompt for each citizen.
+        additional_prompt_text: Optional text to append to the Kinos API prompt for each citizen (from --add-prompt).
+        add_message: Optional text to append to the Kinos API prompt for each citizen (from --addMessage).
         
     Returns:
         List of generated citizen dictionaries
@@ -261,7 +266,7 @@ def generate_citizen_batch(social_classes: Dict[str, int], additional_prompt_tex
         log.info(f"Generating {count} citizens of class {social_class}")
         
         for i in range(count):
-            citizen = generate_citizen(social_class, additional_prompt_text)
+            citizen = generate_citizen(social_class, additional_prompt_text, add_message)
             if citizen:
                 citizens.append(citizen)
                 # Add a small delay to avoid rate limiting
@@ -283,6 +288,7 @@ if __name__ == "__main__":
     parser.add_argument("--facchini", type=int, default=0, help="Number of facchini to generate")
     parser.add_argument("--output", type=str, help="Output JSON file path")
     parser.add_argument("--add-prompt", type=str, help="Additional text to append to the generation prompt for Kinos API.")
+    parser.add_argument("--addMessage", type=str, help="Another message to append to the Kinos generation prompt.")
     parser.add_argument("--dry-run", action="store_true", help="Simulate the script execution without making any changes to Airtable.")
     
     args = parser.parse_args()
@@ -302,7 +308,7 @@ if __name__ == "__main__":
         print("No social class specified via arguments, defaulting to generating 1 Facchini.")
         social_classes = {"Facchini": 1}
     
-    citizens = generate_citizen_batch(social_classes, args.add_prompt)
+    citizens = generate_citizen_batch(social_classes, args.add_prompt, args.addMessage)
     
     if args.output:
         with open(args.output, 'w') as f:
