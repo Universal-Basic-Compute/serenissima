@@ -33,6 +33,21 @@ const KINOS_API_CHANNEL_BASE_URL = 'https://api.kinos-engine.ai/v2';
 const KINOS_CHANNEL_BLUEPRINT = 'serenissima-ai';
 const DEFAULT_HUMAN_USERNAME = 'GuestUser'; // Fallback si le profil n'est pas chargé
 
+// Moved outside the component to stabilize dependencies
+const getKinosModelForSocialClass = (username?: string, socialClass?: string): string => {
+  if (username === 'NLR') return 'gemini-2.5-pro-preview-05-06';
+  const lowerSocialClass = socialClass?.toLowerCase();
+  switch (lowerSocialClass) {
+    case 'nobili': return 'gemini-2.5-pro-preview-05-06';
+    case 'cittadini': case 'forestieri': return 'gemini-2.5-flash-preview-05-20';
+    case 'popolani': case 'facchini': return 'local';
+    default: return 'gemini-2.5-flash-preview-05-20';
+  }
+};
+
+let tempIdCounter = 0;
+const generateTempId = () => `temp-client-msg-${tempIdCounter++}`;
+
 const stepIntroMessages: Record<ArrivalStep, string> = {
   galley: "AI citizens in Serenissima have their own goals, businesses, and relationships - engaging with this captain could lead to future shipping partnerships, exclusive trade routes, or valuable market intelligence.",
   customs: "Every AI citizen operates with distinct motivations and insider knowledge - this inspector's network could provide regulatory shortcuts, import opportunities, or warnings about market changes.",
@@ -93,6 +108,7 @@ const ArrivalPage: React.FC = () => {
 
   // Nouvel état pour stocker les messages récupérés avant l'initiation de l'IA
   const [fetchedMessagesForStep, setFetchedMessagesForStep] = useState<Message[] | null>(null);
+  const initiationDoneRef = useRef<Record<string, boolean>>({});
 
 
   const getCurrentAI = useCallback((): AIProfile | null => {
@@ -123,7 +139,7 @@ const ArrivalPage: React.FC = () => {
       console.error(`Error fetching citizen ${username}:`, error);
       return null;
     }
-  }, []);
+  }, []); // Keep empty if setChatMessages is the only external dependency from component scope
 
   // Récupérer le nom d'utilisateur actuel et le profil au montage
   useEffect(() => {
@@ -140,17 +156,6 @@ const ArrivalPage: React.FC = () => {
       }
     }
   }, []);
-
-  const getKinosModelForSocialClass = (username?: string, socialClass?: string): string => {
-    if (username === 'NLR') return 'gemini-2.5-pro-preview-05-06';
-    const lowerSocialClass = socialClass?.toLowerCase();
-    switch (lowerSocialClass) {
-      case 'nobili': return 'gemini-2.5-pro-preview-05-06';
-      case 'cittadini': case 'forestieri': return 'gemini-2.5-flash-preview-05-20';
-      case 'popolani': case 'facchini': return 'local';
-      default: return 'gemini-2.5-flash-preview-05-20';
-    }
-  };
 
   // Fonction pour récupérer les informations contextuelles pour Kinos
   const fetchContextualInformation = useCallback(async (targetAI: AIProfile | null, humanUsername: string): Promise<void> => {
@@ -196,7 +201,7 @@ const ArrivalPage: React.FC = () => {
     } finally {
       setIsPreparingContext(false);
     }
-  }, [currentUserProfile]); // contextualDataForChat retiré des dépendances
+  }, [currentUserProfile]);
 
 
   // Fonction pour charger les messages du chat
@@ -415,7 +420,7 @@ Your first message to ${userName}:`;
         const kinosData = await kinosResponse.json();
         if (kinosData.content) {
           const aiFirstMessage: Message = {
-            messageId: kinosData.message_id || kinosData.id || `kinos-init-msg-${Date.now()}`,
+            messageId: kinosData.message_id || kinosData.id || generateTempId(),
             sender: aiProfile.username,
             receiver: humanProfile.username,
             content: kinosData.content,
@@ -507,8 +512,28 @@ Your first message to ${userName}:`;
       // Cela couvre le cas où il y a des messages existants ou pas de contexte.
       setIsAiInitiating(false);
     }
-    // Ne pas exécuter cet effet si fetchedMessagesForStep est null (signifie que l'Effet 1 ne l'a pas encore défini pour l'IA actuelle)
-  }, [fetchedMessagesForStep, contextualDataForChat, currentStep, currentUserUsername, getCurrentAI, sendSystemInitiationMessage, currentUserProfile, isAiInitiating]);
+    const keyForInitiation = `${currentStep}-${currentAI?.username}`;
+
+    if (currentAI && currentUserUsername !== DEFAULT_HUMAN_USERNAME &&
+        fetchedMessagesForStep && fetchedMessagesForStep.length === 0 &&
+        contextualDataForChat && !initiationDoneRef.current[keyForInitiation]) {
+
+      setIsAiInitiating(true);
+      initiationDoneRef.current[keyForInitiation] = true;
+
+      sendSystemInitiationMessage(currentAI, currentUserProfile, currentStep, contextualDataForChat)
+        .finally(() => {
+          setIsAiInitiating(false);
+        });
+    } else if (fetchedMessagesForStep && fetchedMessagesForStep.length > 0) {
+      setIsAiInitiating(false);
+      if (currentAI && !initiationDoneRef.current[keyForInitiation]) {
+        initiationDoneRef.current[keyForInitiation] = true;
+      }
+    } else if (!currentAI || currentUserUsername === DEFAULT_HUMAN_USERNAME || !contextualDataForChat) {
+        setIsAiInitiating(false);
+    }
+  }, [fetchedMessagesForStep, contextualDataForChat, currentStep, currentUserUsername, getCurrentAI, sendSystemInitiationMessage, currentUserProfile]);
 
 
   // Scroll vers le bas lorsque de nouveaux messages sont ajoutés
@@ -528,7 +553,7 @@ Your first message to ${userName}:`;
     setIsSendingMessage(true);
 
     const tempUserMessage: Message = {
-      messageId: `temp-${Date.now()}`,
+      messageId: generateTempId(),
       sender: currentUserUsername,
       receiver: currentAI.username,
       content: messageContent,
@@ -664,7 +689,7 @@ ${commonPromptInstructions}`;
         const kinosData = await kinosResponse.json();
         if (kinosData.content) {
           const aiMessage: Message = {
-            messageId: kinosData.message_id || kinosData.id || `kinos-msg-${Date.now()}`,
+            messageId: kinosData.message_id || kinosData.id || generateTempId(),
             sender: currentAI.username,
             receiver: currentUserUsername,
             content: kinosData.content,
