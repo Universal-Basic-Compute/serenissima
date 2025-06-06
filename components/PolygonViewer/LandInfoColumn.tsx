@@ -37,7 +37,7 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
   normalizeIdentifier,
   isLoadingMarketData,
 }) => {
-  // canvasRef, landRendered state, renderLandTopView function, and related useEffects are removed.
+  const [isImageHovered, setIsImageHovered] = useState(false);
 
   if (!selectedPolygon) return null;
 
@@ -86,19 +86,38 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
             {/* Land Overview (Top View) */}
             <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
               <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Overview</h3>
-              <div className="flex flex-col items-center">
+              <div 
+                className="flex flex-col items-center relative" // Added relative for positioning the zoomed image
+                onMouseEnter={() => setIsImageHovered(true)}
+                onMouseLeave={() => setIsImageHovered(false)}
+              >
                 {selectedPolygon.id && (
-                  <img
-                    src={`/images/lands/${selectedPolygon.id}.png`}
-                    alt={`Image of ${selectedPolygon.historicalName || selectedPolygon.id}`}
-                    className="w-[150px] h-[150px] border border-amber-100 rounded-lg mb-2 object-cover"
-                    style={{ aspectRatio: '1/1' }}
-                    onError={(e) => {
-                      // Optionnel : Gérer les erreurs de chargement d'image, par exemple afficher une image par défaut
-                      (e.target as HTMLImageElement).src = '/images/default_land_image.png'; 
-                      (e.target as HTMLImageElement).alt = 'Default land image';
-                    }}
-                  />
+                  <>
+                    <img
+                      src={`/images/lands/${selectedPolygon.id}.png`}
+                      alt={`Image of ${selectedPolygon.historicalName || selectedPolygon.id}`}
+                      className="w-[150px] h-[150px] border border-amber-100 rounded-lg mb-2 object-cover cursor-pointer"
+                      style={{ aspectRatio: '1/1' }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/default_land_image.png'; 
+                        (e.target as HTMLImageElement).alt = 'Default land image';
+                      }}
+                    />
+                    {isImageHovered && (
+                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 translate-y-[-105%] z-20 p-1 bg-white border-2 border-amber-500 rounded-lg shadow-xl">
+                        <img
+                          src={`/images/lands/${selectedPolygon.id}.png`}
+                          alt={`Zoomed image of ${selectedPolygon.historicalName || selectedPolygon.id}`}
+                          className="w-[600px] h-[600px] object-cover rounded" // 4x the size (150px * 4 = 600px)
+                          style={{ aspectRatio: '1/1' }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/default_land_image.png';
+                            (e.target as HTMLImageElement).alt = 'Default land image';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
                 {selectedPolygon?.buildingPoints && (
                   <div className="text-center mt-1">
