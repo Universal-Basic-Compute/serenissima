@@ -131,31 +131,6 @@ export async function POST(request: NextRequest) {
         // For now, keeping the 200 response as primary operation (Ducats update) succeeded.
     }
     
-    // Update ConsiglioDeiDieci's Ducats
-    try {
-        const consiglioRecords = await base(CITIZENS_TABLE_NAME)
-            .select({ filterByFormula: `{Username} = 'ConsiglioDeiDieci'`, maxRecords: 1 })
-            .firstPage();
-
-        if (consiglioRecords && consiglioRecords.length > 0) {
-            const consiglioCitizen = consiglioRecords[0] as AirtableRecord<FieldSet>;
-            const currentConsiglioDucats = Number(consiglioCitizen.fields.Ducats) || 0;
-            const newConsiglioDucats = currentConsiglioDucats + ducats; // Add the same amount
-
-            await base(CITIZENS_TABLE_NAME).update([
-                {
-                    id: consiglioCitizen.id,
-                    fields: { Ducats: newConsiglioDucats },
-                },
-            ]);
-            console.log(`ConsiglioDeiDieci Ducats updated from ${currentConsiglioDucats} to ${newConsiglioDucats}`);
-        } else {
-            console.warn('ConsiglioDeiDieci citizen not found, could not update their Ducats.');
-        }
-    } catch (consiglioError) {
-        console.error('Error updating ConsiglioDeiDieci Ducats:', consiglioError);
-    }
-
     // Prepare the citizen profile to return
     const citizenProfileToReturn: CitizenProfile = {
       id: updatedAirtableCitizen.id,
