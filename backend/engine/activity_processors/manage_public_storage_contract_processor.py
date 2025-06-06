@@ -74,7 +74,7 @@ def process_register_public_storage_offer_fn(
     ):
         log.error(f"Citizen {citizen_username} failed to pay registration fee of {CONTRACT_REGISTRATION_FEE} Ducats for contract {contract_id_to_manage}.")
         # Create a problem or notification for the citizen about insufficient funds.
-        create_notification_record(
+        create_notification( # Changed to create_notification
             tables, citizen_username, "insufficient_funds_for_fee",
             f"You could not pay the {CONTRACT_REGISTRATION_FEE} Ducat fee to register storage offer {contract_id_to_manage}.",
             asset_type="contract", asset_id=contract_id_to_manage,
