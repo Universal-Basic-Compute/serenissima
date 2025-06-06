@@ -127,12 +127,8 @@ def try_create(
     
     land_record = land_records[0]
     
-    # Check if citizen owns the land
-    land_owner = land_record['fields'].get('Owner')
-    if land_owner != citizen:
-        error_msg = f"Citizen {citizen} does not own land {land_id}"
-        log.error(error_msg)
-        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "land_not_owned_by_citizen"}
+    # La vérification de la propriété du terrain par le citoyen a été supprimée conformément à la nouvelle exigence.
+    # Le citoyen n'a plus besoin de posséder le terrain pour initier le projet.
     
     # Get land position (we'll use the point_details for a more precise location)
     land_position = None
