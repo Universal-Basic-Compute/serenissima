@@ -6,3 +6,4 @@ uvicorn[standard]
 fastapi
 pyairtable
 python-multipart
+demjson3==3.0.6
