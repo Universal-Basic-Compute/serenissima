@@ -144,7 +144,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       console.error('[WalletProvider] Error in registerCitizen:', error);
       throw error; // Relancer pour que connectWallet puisse le gérer
     }
-  };
+  // }; // This closing brace was extra and caused the parsing error
   
   // Fetch citizen profile
   const fetchCitizenProfile = async (walletAddress: string) => {
