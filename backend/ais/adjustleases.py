@@ -17,6 +17,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from backend.app.citizen_utils import find_citizen_by_identifier
+from backend.engine.utils.activity_helpers import LogColors, log_header
 # LogColors and log_header will be imported from activity_helpers
 
 # Configuration for API calls
