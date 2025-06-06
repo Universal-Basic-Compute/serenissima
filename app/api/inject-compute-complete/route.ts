@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       console.error(`Citizen not found for wallet: ${wallet_address}`);
       return NextResponse.json({ detail: 'Citizen not found for the provided wallet address.' }, { status: 404 });
     }
-    const airtableCitizen = citizenRecords[0] as AirtableRecord<FieldSet>;
+    const airtableCitizen = citizenRecords[0] as unknown as AirtableRecord<FieldSet>;
     console.log(`Citizen found: ${airtableCitizen.id}, current Ducats: ${airtableCitizen.fields.Ducats}`);
 
     // Update citizen's Ducats balance
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       console.error(`Failed to update citizen ${airtableCitizen.id} Ducats.`);
       return NextResponse.json({ detail: 'Failed to update citizen balance after successful on-chain transaction. Please contact support.' }, { status: 500 });
     }
-    const updatedAirtableCitizen = updatedCitizenRecords[0] as AirtableRecord<FieldSet>;
+    const updatedAirtableCitizen = updatedCitizenRecords[0] as unknown as AirtableRecord<FieldSet>;
     console.log(`Citizen ${updatedAirtableCitizen.id} Ducats updated to: ${updatedAirtableCitizen.fields.Ducats}`);
 
     // Create a transaction record for the citizen
