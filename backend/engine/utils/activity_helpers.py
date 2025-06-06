@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 class LogColors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
+    LIGHTBLUE = '\033[94m' # Alias pour OKBLUE, utilisé pour la sortie Kinos
     OKCYAN = '\033[96m'
     ACTIVITY = '\033[96m'  # Ajout de la couleur ACTIVITY, identique à OKCYAN
     PROCESS = '\033[96m'  # Ajout de la couleur PROCESS, identique à OKCYAN/ACTIVITY/INFO
