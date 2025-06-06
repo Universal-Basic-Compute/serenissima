@@ -162,38 +162,55 @@ def generate_daily_update_summary(thoughts: List[Dict[str, Any]]) -> Optional[st
 
         # Define multiple prompt templates
         prompt_templates = [
-            (
-                "From the recent citizen dialogues in 'addSystem', craft a concise daily dispatch for Venice. "
-                "This will be shared on Telegram. Focus on the city's pulse, significant happenings, or noteworthy shifts from day to day. "
+            ( # Template 1: Narrative Style
+                "From the recent citizen dialogues and events in 'addSystem', weave a short, engaging narrative or descriptive piece for the Venetian public. "
+                "This will be shared on Telegram, so keep it concise. Capture the city's atmosphere, a key development, or an interesting anecdote. "
                 "Structure:[PARAGRAPHBREAK]"
-                "1. An opening paragraph (one or two sentences) capturing the essence of recent events or key highlights. Use [PARAGRAPHBREAK] for separation.[PARAGRAPHBREAK]"
-                "2. A bulleted list (3-5 points) of specific events, citizen observations, or prevailing sentiments. Keep bullets brief. Use Markdown lists (`* Item` or `- Item`). Precede each bullet with [LINEBREAK] if it's not starting a new paragraph. Emphasize with bold; avoid emojis.[PARAGRAPHBREAK]"
-                "3. A short concluding remark, if fitting.[PARAGRAPHBREAK]"
-                "The entire output must be a single Telegram-ready message. Use Markdown for bold (`*text*` or `**text**`), italics (`_text_`), and strikethrough (`~text~`).[PARAGRAPHBREAK]"
-                "CRITICAL: Use [LINEBREAK] for single line breaks and [PARAGRAPHBREAK] for paragraph breaks (blank lines). Do not use '\\n'.[PARAGRAPHBREAK]"
-                "Provide ONLY the message content, without any surrounding explanations."
+                " - One or two main paragraphs forming a cohesive story or observation. Use [PARAGRAPHBREAK] between paragraphs.[PARAGRAPHBREAK]"
+                " - Optionally, a brief concluding sentence or thought. Use [PARAGRAPHBREAK] before it.[PARAGRAPHBREAK]"
+                "Emphasize key names or events using bold Markdown (`*text*` or `**text**`). Avoid emojis. "
+                "The entire output must be a single Telegram-ready message. Use Markdown for italics (`_text_`) and strikethrough (`~text~`) if appropriate.[PARAGRAPHBREAK]"
+                "CRITICAL FOR FORMATTING: Use [LINEBREAK] for single line breaks within a paragraph if absolutely necessary (prefer flowing text). Use [PARAGRAPHBREAK] for paragraph breaks (equivalent to a blank line). Do NOT use literal newline characters like '\\n'.[PARAGRAPHBREAK]"
+                "Provide ONLY the Telegram message content, without any surrounding explanations or conversational text."
             ),
-            (
-                "Analyze the citizen thoughts provided in 'addSystem'. Produce an engaging daily summary for the Venetian public, suitable for Telegram (keep it brief). "
-                "Highlight the general atmosphere, key occurrences, or interesting changes, particularly those evolving day-to-day. "
+            ( # Template 2: Categorized Highlights (e.g., Good News, Concerns, Market Buzz)
+                "Analyze the citizen thoughts and events provided in 'addSystem'. Produce a categorized daily summary for the Venetian public, suitable for Telegram (keep it brief). "
+                "Highlight key positive developments, notable concerns, and perhaps some market buzz or interesting rumors. "
                 "Format as follows:[PARAGRAPHBREAK]"
-                " - Lead with a succinct introductory paragraph on major events/points. Separate with [PARAGRAPHBREAK].[PARAGRAPHBREAK]"
-                " - List 3-5 bullet points covering notable events, citizen views, or sentiments. Bullets must be concise. Use Markdown (`* Item` or `- Item`). Ensure [LINEBREAK] before each bullet if not a new paragraph. Use bold text; no emojis.[PARAGRAPHBREAK]"
-                " - Optionally, add a brief closing statement.[PARAGRAPHBREAK]"
-                "The response should be a single message for Telegram. Employ Markdown for formatting (bold: `*text*` or `**text**`; italics: `_text_`; strikethrough: `~text~`).[PARAGRAPHBREAK]"
-                "MANDATORY: For all single line breaks, use [LINEBREAK]. For paragraph breaks, use [PARAGRAPHBREAK]. Avoid literal newlines ('\\n').[PARAGRAPHBREAK]"
+                " - A very short overall introductory sentence. [PARAGRAPHBREAK]"
+                " - *Good Tidings:* (or similar positive category title in bold) Briefly describe 1-2 positive events or sentiments. Use [LINEBREAK] between distinct points if needed within this section. [PARAGRAPHBREAK]"
+                " - *Points of Concern:* (or similar concern-focused category title in bold) Briefly mention 1-2 notable worries or negative developments. Use [LINEBREAK] if needed. [PARAGRAPHBREAK]"
+                " - *Whispers on the Rialto:* (or similar market/rumor category title in bold) Share 1-2 intriguing pieces of news or observations. Use [LINEBREAK] if needed. [PARAGRAPHBREAK]"
+                " - Optionally, a brief closing statement. [PARAGRAPHBREAK]"
+                "Use bold Markdown (`*text*` or `**text**`) for category titles and key details. Avoid emojis. "
+                "The response should be a single message for Telegram. Use Markdown for italics (`_text_`) and strikethrough (`~text~`) sparingly.[PARAGRAPHBREAK]"
+                "MANDATORY FOR FORMATTING: Use [LINEBREAK] for single line breaks. Use [PARAGRAPHBREAK] for paragraph breaks. Avoid literal newlines ('\\n').[PARAGRAPHBREAK]"
                 "Respond with ONLY the Telegram message content."
             ),
-            (
-                "Review the citizen communications in 'addSystem'. Compose a captivating daily news update for Venice, designed for Telegram (short and sweet). "
-                "Summarize the city's mood, important events, or intriguing developments, especially daily changes. "
+            ( # Template 3: Town Crier / Proclamation Style
+                "Review the citizen communications and events in 'addSystem'. Compose a series of short, impactful announcements for Venice, as if delivered by a town crier. Designed for Telegram (short and direct). "
+                "Focus on 2-4 most significant pieces of news or decrees. "
                 "Your report structure:[PARAGRAPHBREAK]"
-                "  - Begin with one or two introductory sentences on the main events or key takeaways. Use [PARAGRAPHBREAK] to separate.[PARAGRAPHBREAK]"
-                "  - Follow with 3 to 5 bullet points detailing specific notable incidents, citizen perspectives, or common feelings. Keep them short. Use Markdown list format (`* Item` or `- Item`). Each bullet point must be on a new line (use [LINEBREAK] if needed). Use bold; no emojis.[PARAGRAPHBREAK]"
-                "  - End with a concise closing thought, if applicable.[PARAGRAPHBREAK]"
-                "The entire response must be formatted as one Telegram message. Use Markdown for styling (bold: `*text*` or `**text**`; italics: `_text_`; strikethrough: `~text~`).[PARAGRAPHBREAK]"
-                "ESSENTIAL: Use [LINEBREAK] for single line breaks. Use [PARAGRAPHBREAK] for paragraph breaks. Do not use actual newline characters.[PARAGRAPHBREAK]"
-                "Output ONLY the message content, no additional commentary."
+                "  - Start with a brief, attention-grabbing opening like *Hear ye, hear ye!* or *News from the Doge's Palace!* (in bold/italics). [PARAGRAPHBREAK]"
+                "  - Present each piece of news as a separate, concise announcement (1-2 sentences each). Use [PARAGRAPHBREAK] between announcements.[PARAGRAPHBREAK]"
+                "  - Use bold Markdown (`*text*` or `**text**`) for emphasis on key subjects or outcomes. No emojis.[PARAGRAPHBREAK]"
+                "  - Conclude with a short, formal closing if appropriate, like *So decreed!* or *Spread the word!*. [PARAGRAPHBREAK]"
+                "The entire response must be formatted as one Telegram message. Use Markdown for italics (`_text_`) and strikethrough (`~text~`) if suitable.[PARAGRAPHBREAK]"
+                "ESSENTIAL FOR FORMATTING: Use [LINEBREAK] for any single line breaks needed within an announcement. Use [PARAGRAPHBREAK] for breaks between announcements or major sections. Do not use actual newline characters.[PARAGRAPHBREAK]"
+                "Output ONLY the message content, no additional commentary or conversational fluff."
+            ),
+            ( # Template 4: Q&A Style (Implied Questions)
+                "Based on the recent activities and thoughts in 'addSystem', generate a daily update for the public in a Q&A format. "
+                "Imagine citizens are asking about key developments. Keep it concise for Telegram. "
+                "Structure:[PARAGRAPHBREAK]"
+                " - *What's the talk of the town?* [LINEBREAK] Briefly answer with the main theme or event. [PARAGRAPHBREAK]"
+                " - *Any notable achievements or progress?* [LINEBREAK] Highlight 1-2 positive developments. [PARAGRAPHBREAK]"
+                " - *Are there any new worries for Venetians?* [LINEBREAK] Mention 1-2 concerns or challenges. [PARAGRAPHBREAK]"
+                " - *What might the future hold?* [LINEBREAK] A brief, forward-looking statement or a lingering question. [PARAGRAPHBREAK]"
+                "Use bold Markdown (`*text*` or `**text**`) for the questions and key parts of the answers. Avoid emojis. "
+                "The entire output must be a single Telegram-ready message. Use Markdown for italics (`_text_`) and strikethrough (`~text~`) if appropriate.[PARAGRAPHBREAK]"
+                "CRITICAL FOR FORMATTING: Use [LINEBREAK] for single line breaks (e.g., between question and answer). Use [PARAGRAPHBREAK] for breaks between Q&A pairs. Do NOT use literal newline characters like '\\n'.[PARAGRAPHBREAK]"
+                "Provide ONLY the Telegram message content, without any surrounding explanations."
             )
         ]
         
