@@ -1,11 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 // Importer des icônes si nécessaire, par exemple react-icons
 // import { FaShip, FaPassport, FaHome, FaBed } from 'react-icons/fa';
 
 type ArrivalStep = 'galley' | 'customs' | 'home' | 'inn';
+
+interface NPCProfile {
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  socialClass?: string;
+  // Ajoutez d'autres champs si nécessaire
+}
 
 const stepsConfig: Record<ArrivalStep, { title: string; slideshowImage: string; chatPlaceholder: string }> = {
   galley: {
@@ -36,8 +44,125 @@ const ArrivalPage: React.FC = () => {
   const [showIntroToast, setShowIntroToast] = useState<boolean>(true); // State for the intro toast
   const stepOrder: ArrivalStep[] = ['galley', 'customs', 'home', 'inn'];
 
-  // TODO: Logique pour le diaporama (changement d'images, etc.)
-  // TODO: Logique pour le chat (envoi de messages, réponses PNJ, etc.)
+  const [galleyNPC, setGalleyNPC] = useState<NPCProfile | null>(null);
+  const [customsNPC, setCustomsNPC] = useState<NPCProfile | null>(null);
+  const [homeNPC, setHomeNPC] = useState<NPCProfile | null>(null);
+  const [innNPC, setInnNPC] = useState<NPCProfile | null>(null);
+  const [npcsLoading, setNpcsLoading] = useState<boolean>(true);
+
+  const fetchCitizen = useCallback(async (username: string): Promise<NPCProfile | null> => {
+    try {
+      const response = await fetch(`/api/citizens/${username}`);
+      if (!response.ok) {
+        console.error(`Failed to fetch citizen ${username}: ${response.status}`);
+        return null;
+      }
+      const data = await response.json();
+      return data.success ? data.citizen : null;
+    } catch (error) {
+      console.error(`Error fetching citizen ${username}:`, error);
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    const defaultNPCUsername = "BookishMerchant";
+    
+    const fetchAllNPCs = async () => {
+      setNpcsLoading(true);
+      const defaultProfile = await fetchCitizen(defaultNPCUsername);
+
+      // Fetch Galley NPC (Random Forestieri, AI, InVenice)
+      try {
+        const res = await fetch(`/api/citizens?SocialClass=Forestieri&IsAI=true&InVenice=true`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.citizens.length > 0) {
+            const randomForestieri = data.citizens[Math.floor(Math.random() * data.citizens.length)];
+            setGalleyNPC(randomForestieri);
+          } else {
+            console.warn("No Forestieri found for Galley NPC, using default.");
+            setGalleyNPC(defaultProfile);
+          }
+        } else {
+          console.error("Failed to fetch Forestieri for Galley NPC, using default.");
+          setGalleyNPC(defaultProfile);
+        }
+      } catch (e) { 
+        console.error("Error fetching Galley NPC:", e);
+        setGalleyNPC(defaultProfile); 
+      }
+
+      // Fetch Customs NPC (Occupant of customs_house)
+      try {
+        const buildingRes = await fetch(`/api/buildings?Type=customs_house`);
+        if (buildingRes.ok) {
+          const buildingData = await buildingRes.json();
+          if (buildingData.success && buildingData.buildings.length > 0 && buildingData.buildings[0].occupant) {
+            const occupantUsername = buildingData.buildings[0].occupant; // occupant is camelCase from API
+            const officerProfile = await fetchCitizen(occupantUsername);
+            setCustomsNPC(officerProfile || defaultProfile);
+          } else {
+            console.warn("No customs_house occupant found, using default Customs NPC.");
+            setCustomsNPC(defaultProfile);
+          }
+        } else {
+          console.error("Failed to fetch customs_house building, using default Customs NPC.");
+          setCustomsNPC(defaultProfile);
+        }
+      } catch (e) { 
+        console.error("Error fetching Customs NPC:", e);
+        setCustomsNPC(defaultProfile); 
+      }
+
+      // Fetch Home NPC (Random Cittadini, AI, InVenice)
+      try {
+        const res = await fetch(`/api/citizens?SocialClass=Cittadini&IsAI=true&InVenice=true`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.citizens.length > 0) {
+            const randomCittadini = data.citizens[Math.floor(Math.random() * data.citizens.length)];
+            setHomeNPC(randomCittadini);
+          } else {
+            console.warn("No Cittadini found for Home NPC, using default.");
+            setHomeNPC(defaultProfile);
+          }
+        } else {
+          console.error("Failed to fetch Cittadini for Home NPC, using default.");
+          setHomeNPC(defaultProfile);
+        }
+      } catch (e) { 
+        console.error("Error fetching Home NPC:", e);
+        setHomeNPC(defaultProfile); 
+      }
+
+      // Fetch Inn NPC (Occupant of inn)
+      try {
+        const buildingRes = await fetch(`/api/buildings?Type=inn`);
+        if (buildingRes.ok) {
+          const buildingData = await buildingRes.json();
+          if (buildingData.success && buildingData.buildings.length > 0 && buildingData.buildings[0].occupant) {
+            const occupantUsername = buildingData.buildings[0].occupant; // occupant is camelCase
+            const innkeeperProfile = await fetchCitizen(occupantUsername);
+            setInnNPC(innkeeperProfile || defaultProfile);
+          } else {
+            console.warn("No inn occupant found, using default Inn NPC.");
+            setInnNPC(defaultProfile);
+          }
+        } else {
+          console.error("Failed to fetch inn building, using default Inn NPC.");
+          setInnNPC(defaultProfile);
+        }
+      } catch (e) { 
+        console.error("Error fetching Inn NPC:", e);
+        setInnNPC(defaultProfile); 
+      }
+
+      setNpcsLoading(false);
+    };
+
+    fetchAllNPCs();
+  }, [fetchCitizen]);
 
   const handleNextStep = () => {
     const currentIndex = stepOrder.indexOf(currentStep);
@@ -108,11 +233,12 @@ const ArrivalPage: React.FC = () => {
           {/* Messages du chat ici */}
           <p className="text-stone-600 italic">{currentConfig.chatPlaceholder}</p>
           {/* Exemple de message PNJ */}
-          {currentStep === 'customs' && (
+          {currentStep === 'customs' && !npcsLoading && customsNPC && (
             <div className="mt-4">
-              <p><strong className="text-orange-600 font-semibold">Customs Officer:</strong> Welcome to La Serenissima. Your papers, please. What is your name, and what brings you to our glorious city?</p>
+              <p><strong className="text-orange-600 font-semibold">{customsNPC.firstName || customsNPC.username}:</strong> Welcome to La Serenissima. Your papers, please. What is your name, and what brings you to our glorious city?</p>
             </div>
           )}
+          {/* Vous pouvez ajouter des blocs similaires pour galleyNPC, homeNPC, et innNPC ici si nécessaire */}
         </div>
         
         {/* Zone de saisie du chat (simplifiée pour l'instant) */}
