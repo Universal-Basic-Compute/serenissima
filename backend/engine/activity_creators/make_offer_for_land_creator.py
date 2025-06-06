@@ -109,7 +109,8 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
     # 3. Find path to the target office building
     # find_path_between_buildings_or_coords can take a building record or coordinates.
     # target_office_record is a full building record.
-    path_data = find_path_between_buildings_or_coords(start_location_for_pathfinding, target_office_record, transport_api_url)
+    # Pass api_base_url as the 3rd argument and transport_api_url as the 4th (optional override) argument.
+    path_data = find_path_between_buildings_or_coords(start_location_for_pathfinding, target_office_record, api_base_url, transport_api_url)
     current_end_time_utc = now_utc_dt
 
     if path_data and path_data.get("path"):
