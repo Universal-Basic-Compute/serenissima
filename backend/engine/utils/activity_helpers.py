@@ -260,15 +260,41 @@ def get_citizen_record(tables: Dict[str, Table], username: str) -> Optional[Dict
         log.error(f"{LogColors.FAIL}Error fetching citizen record for {username}: {e}{LogColors.ENDC}")
         return None
 
-def get_contract_record(tables: Dict[str, Table], contract_id: str) -> Optional[Dict]:
-    """Fetches a contract record by ContractId."""
-    # Assuming contract_id is the custom ContractId string, not Airtable record ID
-    formula = f"{{ContractId}} = '{_escape_airtable_value(contract_id)}'"
+def get_contract_record(tables: Dict[str, Table], contract_id_input: str) -> Optional[Dict]:
+    """
+    Fetches a contract record by its Airtable Record ID or custom ContractId field.
+    """
+    if not contract_id_input or not isinstance(contract_id_input, str):
+        log.warning(f"{LogColors.WARNING}Invalid contract_id_input provided to get_contract_record: {contract_id_input}{LogColors.ENDC}")
+        return None
+
     try:
+        # Check if it looks like an Airtable Record ID (typically 'rec' followed by 14 alphanumeric chars, total 17)
+        if contract_id_input.startswith("rec") and len(contract_id_input) == 17:
+            log.debug(f"Attempting to fetch contract by Airtable Record ID: {contract_id_input}")
+            record = tables['contracts'].get(contract_id_input)
+            if record:
+                return record
+            else:
+                # It looked like an Airtable ID but wasn't found.
+                # This could be an error, or it might be a custom ContractId that happens to start with "rec".
+                # For safety, we can fall through to try fetching by custom ContractId field.
+                log.warning(f"{LogColors.WARNING}Contract with Airtable Record ID '{contract_id_input}' not found. Will attempt lookup by custom ContractId field.{LogColors.ENDC}")
+        
+        # If not an Airtable Record ID, or if lookup by Record ID failed, try by custom ContractId field
+        log.debug(f"Attempting to fetch contract by custom ContractId field: {contract_id_input}")
+        formula = f"{{ContractId}} = '{_escape_airtable_value(contract_id_input)}'"
         records = tables['contracts'].all(formula=formula, max_records=1)
-        return records[0] if records else None
+        if records:
+            return records[0]
+        else:
+            # Log warning only if it wasn't an Airtable ID pattern that failed above
+            if not (contract_id_input.startswith("rec") and len(contract_id_input) == 17):
+                 log.warning(f"{LogColors.WARNING}Contract with custom ContractId '{contract_id_input}' not found.{LogColors.ENDC}")
+            return None
+            
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error fetching contract record for {contract_id}: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error fetching contract record for ID '{contract_id_input}': {e}{LogColors.ENDC}")
         return None
 
 def get_land_record(tables: Dict[str, Table], land_id_value: str) -> Optional[Dict]:
