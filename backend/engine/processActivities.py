@@ -563,20 +563,17 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         citizen_processing_order = list(activities_by_citizen_for_processing.keys())
         random.shuffle(citizen_processing_order)
         
-        # Reconstruct activities_to_process_raw in the new randomized citizen order,
-        # while keeping activities for each citizen sorted by their original start time.
+        # Reconstruct activities_to_process_raw in the new randomized citizen order.
+        # Activities for each citizen will also be shuffled.
         shuffled_activities_to_process_raw = []
         for citizen_name_ordered in citizen_processing_order:
             citizen_acts = activities_by_citizen_for_processing[citizen_name_ordered]
-            # Sort this citizen's activities by StartDate before adding to the main list
-            # This requires parsing StartDate first for all activities.
-            # For simplicity in this step, we'll sort them later if needed, or assume they are somewhat ordered from DB.
-            # The main sort by StartDate happens after this block.
+            random.shuffle(citizen_acts) # Shuffle activities for this specific citizen
             shuffled_activities_to_process_raw.extend(citizen_acts)
         activities_to_process_raw = shuffled_activities_to_process_raw
-        log.info(f"Randomized processing order for {len(citizen_processing_order)} citizens with activities.")
+        log.info(f"Randomized processing order for {len(citizen_processing_order)} citizens with activities. Activities within each citizen's batch are also randomized.")
 
-    # Sort activities by StartDate to process them in chronological order of their intended start
+    # Prepare activities for processing (parse dates)
     activities_to_process = []
     for act_raw in activities_to_process_raw:
         try:
@@ -588,10 +585,17 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
                 log.warning(f"Activity {act_raw.get('id', 'N/A')} missing StartDate, cannot sort. It might be processed out of order or skipped if sorting is critical.")
                 # Optionally, append anyway if out-of-order processing is acceptable for activities without StartDate
                 # activities_to_process.append(act_raw) 
-        except Exception as e_parse_sort:
-            log.error(f"Error parsing StartDate for activity {act_raw.get('id', 'N/A')} during sort preparation: {e_parse_sort}. Skipping this activity for sorted processing.")
+        except Exception as e_parse_date: # Renamed variable for clarity
+            log.error(f"Error parsing StartDate for activity {act_raw.get('id', 'N/A')} during date parsing: {e_parse_date}. Skipping this activity.")
 
-    activities_to_process.sort(key=lambda x: x['fields'].get('_ParsedStartDate', datetime.max.replace(tzinfo=timezone.utc)))
+    # If it was a targeted run for a specific citizen, shuffle their activities.
+    # If it was a run for all citizens, activities_to_process is already built from
+    # shuffled citizen order and shuffled activities within each citizen's block.
+    if target_citizen_username and activities_to_process:
+        random.shuffle(activities_to_process)
+        log.info(f"Randomized processing order for {len(activities_to_process)} activities for citizen '{target_citizen_username}'.")
+    
+    # The global sort by StartDate is removed to preserve randomized order.
     
     if not activities_to_process:
         if target_citizen_username:
