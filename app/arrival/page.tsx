@@ -100,17 +100,17 @@ const ArrivalPage: React.FC = () => {
       </div>
 
       {/* Section Chat (1/3 droite) */}
-      <div className="w-1/3 h-full bg-gray-900 flex flex-col p-6 border-l-2 border-amber-700">
-        <h2 className="text-2xl font-serif mb-6 text-amber-400">Your Arrival in Venice</h2>
+      <div className="w-1/3 h-full bg-amber-50 text-stone-800 flex flex-col p-6 border-l-4 border-orange-700 shadow-2xl">
+        <h2 className="text-3xl font-serif mb-6 text-orange-700 drop-shadow-sm">Your Arrival in Venice</h2>
         
         {/* Zone d'affichage du chat */}
-        <div className="flex-grow bg-gray-800 rounded-lg p-4 mb-4 overflow-y-auto">
+        <div className="flex-grow bg-white border-2 border-orange-200 rounded-lg p-4 mb-4 overflow-y-auto shadow-inner">
           {/* Messages du chat ici */}
-          <p className="text-gray-400 italic">{currentConfig.chatPlaceholder}</p>
+          <p className="text-stone-600 italic">{currentConfig.chatPlaceholder}</p>
           {/* Exemple de message PNJ */}
           {currentStep === 'customs' && (
             <div className="mt-4">
-              <p><strong className="text-amber-500">Customs Officer:</strong> Welcome to La Serenissima. Your papers, please. What is your name, and what brings you to our glorious city?</p>
+              <p><strong className="text-orange-600 font-semibold">Customs Officer:</strong> Welcome to La Serenissima. Your papers, please. What is your name, and what brings you to our glorious city?</p>
             </div>
           )}
         </div>
@@ -120,7 +120,7 @@ const ArrivalPage: React.FC = () => {
           <input 
             type="text" 
             placeholder="Type your response..."
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-amber-500"
+            className="w-full p-3 bg-white text-stone-700 rounded-lg border-2 border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-stone-400 shadow-sm"
             // TODO: Gérer la saisie et l'envoi de messages
           />
         </div>
@@ -130,23 +130,17 @@ const ArrivalPage: React.FC = () => {
           <button
             onClick={handlePreviousStep}
             disabled={stepOrder.indexOf(currentStep) === 0}
-            className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md hover:shadow-lg"
           >
             Previous
           </button>
           <button
             onClick={handleNextStep}
-            className="bg-amber-600 hover:bg-amber-500 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+            className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg"
           >
             {stepOrder.indexOf(currentStep) === stepOrder.length - 1 ? 'Finish Arrival' : 'Next'}
           </button>
         </div>
-         <button
-            onClick={() => router.push('/')}
-            className="mt-4 w-full bg-red-700 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
-          >
-            Skip Arrival
-          </button>
       </div>
     </div>
   );
