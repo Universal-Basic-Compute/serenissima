@@ -504,10 +504,6 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
     # Pass the forced_utc_datetime_for_check to process_building_arrivals as well
     process_building_arrivals(tables, dry_run, forced_utc_datetime_override=forced_utc_datetime_for_check)
 
-    # Mark activities that have started as 'in_progress'
-    # This should happen before interruption checks and rescheduling.
-    mark_started_activities_as_in_progress(tables, forced_utc_datetime_for_check, dry_run)
-
     # Handle activity interruptions before processing concluded activities
     if not dry_run: # Interruptions should only happen in a live run
         log.info(f"{LogColors.OKCYAN}Checking for activity interruptions...{LogColors.ENDC}")
@@ -516,6 +512,7 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for activity interruptions.{LogColors.ENDC}")
 
     # Reschedule future ('created') activities based on priority
+    # This must happen BEFORE marking activities as 'in_progress'
     if not dry_run:
         log.info(f"{LogColors.OKCYAN}Rescheduling future activities by priority...{LogColors.ENDC}")
         reschedule_created_activities_by_priority(tables, forced_utc_datetime_for_check, dry_run, target_citizen_username)
@@ -524,6 +521,9 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         # Even in dry_run, call it to see logs, but it won't make changes.
         reschedule_created_activities_by_priority(tables, forced_utc_datetime_for_check, dry_run, target_citizen_username)
 
+    # Mark activities that have started (according to their StartDate) as 'in_progress'
+    # This is done after rescheduling to ensure StartDates are final.
+    mark_started_activities_as_in_progress(tables, forced_utc_datetime_for_check, dry_run)
 
     # Fetch definitions once
     building_type_defs = get_building_type_definitions_from_api()
