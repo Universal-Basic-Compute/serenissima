@@ -16,8 +16,15 @@ log = logging.getLogger(__name__)
 def try_create(
     tables: Dict[str, Any],
     citizen_record: Dict[str, Any],
-    details: Dict[str, Any]
-) -> bool:
+    activity_type_param: str, # Added - though not directly used if creator is specific
+    details: Dict[str, Any],  # This is activity_parameters from dispatcher
+    resource_defs: Dict[str, Any], # Added
+    building_type_defs: Dict[str, Any], # Added
+    now_venice_dt: datetime, # Added
+    now_utc_dt_param: datetime, # Added - renamed to avoid conflict with internal now_utc
+    transport_api_url: str, # Added
+    api_base_url: str # Added
+) -> Optional[List[Dict[str, Any]]]: # Return type changed to Optional[List[Dict]]
     """
     Create the complete manage_public_sell_contract activity chain:
     1. A goto_location activity for travel to the seller's building to prepare goods
@@ -36,13 +43,14 @@ def try_create(
     target_market_building_id = details.get('targetMarketBuildingId')
     
     # Validate required parameters
-    if not (resource_type and price_per_resource is not None and target_amount is not None and 
+    if not (resource_type and price_per_resource is not None and target_amount is not None and
             seller_building_id and target_market_building_id):
         log.error(f"Missing required details for manage_public_sell_contract: resourceType, pricePerResource, targetAmount, sellerBuildingId, or targetMarketBuildingId")
-        return False
+        return None # Changed to None
 
     citizen_username = citizen_record['fields'].get('Username')
-    ts = int(datetime.now(VENICE_TIMEZONE).timestamp())
+    # Use the passed now_venice_dt for timestamp consistency
+    ts = int(now_venice_dt.timestamp())
     
     # Get current citizen position to determine first path
     citizen_position_str = citizen_record['fields'].get('Position')
@@ -52,7 +60,7 @@ def try_create(
             current_position = json.loads(citizen_position_str)
         except json.JSONDecodeError:
             log.error(f"Could not parse citizen position: {citizen_position_str}")
-            return False
+            return None # Changed to None
     
     # Get building records for path calculation
     seller_building_record = get_building_record(tables, seller_building_id)
@@ -60,7 +68,7 @@ def try_create(
     
     if not seller_building_record or not market_building_record:
         log.error(f"Could not find building records for seller ({seller_building_id}) or market ({target_market_building_id})")
-        return False
+        return None # Changed to None
     
     # Verify citizen is owner or operator of seller building
     seller_owner = seller_building_record['fields'].get('Owner')
@@ -68,7 +76,7 @@ def try_create(
     
     if citizen_username != seller_owner and citizen_username != seller_operator:
         log.error(f"Citizen {citizen_username} is neither owner nor operator of building {seller_building_id}")
-        return False
+        return None # Changed to None
     
     # Create activity IDs
     goto_seller_activity_id = f"goto_seller_for_contract_{citizen_username}_{ts}"
@@ -76,17 +84,19 @@ def try_create(
     goto_market_activity_id = f"goto_market_for_contract_{citizen_username}_{ts}"
     register_offer_activity_id = f"register_public_sell_offer_{citizen_username}_{ts}"
     
-    now_utc = datetime.now(timezone.utc)
+    # Use the passed now_utc_dt_param
+    now_utc = now_utc_dt_param 
     
     # Calculate path to seller building
-    path_to_seller = find_path_between_buildings(None, seller_building_record, current_position=current_position)
+    # Pass api_base_url to find_path_between_buildings
+    path_to_seller = find_path_between_buildings(None, seller_building_record, api_base_url, current_position=current_position)
     if not path_to_seller or not path_to_seller.get('path'):
         log.error(f"Could not find path to seller building {seller_building_id}")
-        return False
+        return None # Changed to None
     
     # Calculate seller travel duration
     seller_duration_seconds = path_to_seller.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min
-    goto_seller_start_date = now_utc.isoformat()
+    goto_seller_start_date = now_utc.isoformat() # Start immediately
     goto_seller_end_date = (now_utc + timedelta(seconds=seller_duration_seconds)).isoformat()
     
     # Calculate preparation activity times (15 minutes)
@@ -94,10 +104,11 @@ def try_create(
     prepare_goods_end_date = (datetime.fromisoformat(goto_seller_end_date.replace('Z', '+00:00')) + timedelta(minutes=15)).isoformat()
     
     # Calculate path from seller to market
-    path_to_market = find_path_between_buildings(seller_building_record, market_building_record)
+    # Pass api_base_url to find_path_between_buildings
+    path_to_market = find_path_between_buildings(seller_building_record, market_building_record, api_base_url)
     if not path_to_market or not path_to_market.get('path'):
         log.error(f"Could not find path from seller building {seller_building_id} to market {target_market_building_id}")
-        return False
+        return None # Changed to None
     
     # Calculate market travel duration
     market_duration_seconds = path_to_market.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min
@@ -232,7 +243,7 @@ def try_create(
         log.info(f"Created complete manage_public_sell_contract activity chain for citizen {citizen_username}:")
         for idx, activity in enumerate(activities_to_create, 1):
             log.info(f"  {idx}. {activity['Type']} activity {activity['ActivityId']}")
-        return True
+        return activities_to_create # Return the list of payloads
     except Exception as e:
         log.error(f"Failed to create manage_public_sell_contract activity chain: {e}")
-        return False
+        return None # Changed to None
