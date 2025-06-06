@@ -4098,11 +4098,11 @@ const darkenColor = (colorStr: string, percent: number): string => {
   }, [polygonsToRender, buildings, latLngToScreen, setSelectedPointForCreation, setShowBuildingCreationPanel]);
 
   return (
-    <div ref={wrapperRef} className="w-screen h-screen select-none"> {/* Add select-none and ref to the main div */}
+    <div ref={wrapperRef} className="w-screen h-screen select-none" style={{ cursor: isDragging ? 'grabbing' : 'grab' }}> {/* Add select-none and ref to the main div */}
       <canvas 
         ref={canvasRef} 
         className="w-full h-full"
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        style={{ cursor: 'inherit' }}
       />
       
       {/* Land Markers - Editable land images */}
