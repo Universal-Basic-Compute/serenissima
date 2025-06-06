@@ -252,7 +252,8 @@ const ArrivalPage: React.FC = () => {
         const buildingRes = await fetch(`/api/buildings?Type=customs_house`);
         if (buildingRes.ok) {
           const buildingData = await buildingRes.json();
-          if (buildingData.success && buildingData.buildings.length > 0) {
+          // Check if buildingData itself and buildingData.buildings exist and has items
+          if (buildingData && buildingData.buildings && buildingData.buildings.length > 0) {
             const occupiedBuildings = buildingData.buildings.filter((b: any) => b.occupant);
             if (occupiedBuildings.length > 0) {
               const randomOccupiedBuilding = occupiedBuildings[Math.floor(Math.random() * occupiedBuildings.length)];
@@ -302,7 +303,8 @@ const ArrivalPage: React.FC = () => {
         const buildingRes = await fetch(`/api/buildings?Type=inn`);
         if (buildingRes.ok) {
           const buildingData = await buildingRes.json();
-          if (buildingData.success && buildingData.buildings.length > 0) {
+          // Check if buildingData itself and buildingData.buildings exist and has items
+          if (buildingData && buildingData.buildings && buildingData.buildings.length > 0) {
             const occupiedBuildings = buildingData.buildings.filter((b: any) => b.occupant);
             if (occupiedBuildings.length > 0) {
               const randomOccupiedBuilding = occupiedBuildings[Math.floor(Math.random() * occupiedBuildings.length)];
