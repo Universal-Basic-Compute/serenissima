@@ -41,10 +41,31 @@ def try_create(
     target_office_building_id = activity_parameters.get('targetOfficeBuildingId')  # town_hall or builder's workshop
     
     # Validate required parameters
-    if not (land_id and building_type_definition and point_details):
-        error_msg = "Missing required details for initiate_building_project: landId, buildingTypeDefinition, or pointDetails"
+    if not land_id:
+        error_msg = "Missing required detail for initiate_building_project: landId"
         log.error(error_msg)
-        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "missing_parameters"}
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "missing_landId"}
+    
+    if not building_type_definition: # Handles None or empty dict
+        error_msg = "Missing required detail for initiate_building_project: buildingTypeDefinition"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "missing_buildingTypeDefinition"}
+    
+    if not isinstance(building_type_definition, dict):
+        error_msg = f"Parameter 'buildingTypeDefinition' must be a dictionary. Received type: {type(building_type_definition)}, value: {building_type_definition}"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "invalid_buildingTypeDefinition_type"}
+
+    building_type_id_from_def = building_type_definition.get('id')
+    if not building_type_id_from_def: # Handles missing 'id' key or if building_type_definition['id'] is None/empty string
+        error_msg = f"Missing or invalid 'id' field in 'buildingTypeDefinition'. Received definition: {building_type_definition}"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "missing_or_invalid_id_in_buildingTypeDefinition"}
+
+    if not point_details: # Assuming point_details structure is validated elsewhere or is simple enough
+        error_msg = "Missing required detail for initiate_building_project: pointDetails"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "missing_pointDetails"}
 
     citizen = citizen_record['fields'].get('Username')
     ts = int(now_venice_dt.timestamp()) # Use passed now_venice_dt
