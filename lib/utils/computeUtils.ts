@@ -220,31 +220,53 @@ export async function transferCompute(walletAddress: string, amount: number) {
     }
     
     // Now update the backend database with the completed transaction
-    console.log('Updating backend database...');
+    console.log('Updating backend database with /api/inject-compute-complete...');
     const { getBackendBaseUrl } = await import('@/lib/utils/apiUtils');
-    const response = await fetch(`${getBackendBaseUrl()}/api/inject-compute-complete`, {
+    const apiUrl = `${getBackendBaseUrl()}/api/inject-compute-complete`;
+    const requestBody = {
+      wallet_address: walletAddress,
+      ducats: amount,
+      transaction_signature: signature,
+    };
+    console.log(`Calling ${apiUrl} with body:`, JSON.stringify(requestBody, null, 2));
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        wallet_address: walletAddress,
-        ducats: amount,
-        transaction_signature: signature,
-      }),
+      body: JSON.stringify(requestBody),
     });
+
+    console.log(`Response status from ${apiUrl}: ${response.status}`);
+    const responseText = await response.text();
+    console.log(`Response text from ${apiUrl}:`, responseText);
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to update database after injection');
+      let errorData;
+      try {
+        errorData = JSON.parse(responseText);
+      } catch (e) {
+        console.error(`Failed to parse JSON error response from ${apiUrl}. Raw text: ${responseText}`);
+        throw new Error(`Failed to update database after injection. Server returned ${response.status}. Response: ${responseText}`);
+      }
+      console.error(`Error response from ${apiUrl}:`, errorData);
+      throw new Error(errorData.detail || `Failed to update database after injection. Server returned ${response.status}`);
     }
     
-    const data = await response.json();
-    console.log('Compute injection successful:', data);
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error(`Failed to parse JSON success response from ${apiUrl}. Raw text: ${responseText}`);
+      throw new Error(`Successfully updated database, but failed to parse server response. Raw text: ${responseText}`);
+    }
+    
+    console.log('Compute injection successful, backend response:', data);
     
     return data;
   } catch (error) {
-    console.error('Error injecting compute:', error);
+    console.error('Error in transferCompute function (either on-chain or during backend update):', error);
     throw error;
   }
 }
