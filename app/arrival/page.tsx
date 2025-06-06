@@ -50,6 +50,21 @@ const ArrivalPage: React.FC = () => {
   const [innNPC, setInnNPC] = useState<NPCProfile | null>(null);
   const [npcsLoading, setNpcsLoading] = useState<boolean>(true);
 
+  const getCurrentNPC = useCallback((): NPCProfile | null => {
+    switch (currentStep) {
+      case 'galley':
+        return galleyNPC;
+      case 'customs':
+        return customsNPC;
+      case 'home':
+        return homeNPC;
+      case 'inn':
+        return innNPC;
+      default:
+        return null;
+    }
+  }, [currentStep, galleyNPC, customsNPC, homeNPC, innNPC]);
+
   const fetchCitizen = useCallback(async (username: string): Promise<NPCProfile | null> => {
     try {
       const response = await fetch(`/api/citizens/${username}`);
@@ -226,7 +241,31 @@ const ArrivalPage: React.FC = () => {
 
       {/* Section Chat (1/3 droite) */}
       <div className="w-1/3 h-full bg-amber-50 text-stone-800 flex flex-col p-6 border-l-4 border-orange-700 shadow-2xl">
-        <h2 className="text-3xl font-serif mb-6 text-orange-700 drop-shadow-sm">Your Arrival in Venice</h2>
+        {npcsLoading ? (
+          <div className="flex flex-col items-center justify-center h-40 mb-6">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-700 mb-4"></div>
+            <p className="text-orange-700 font-serif">Loading citizen...</p>
+          </div>
+        ) : getCurrentNPC() ? (
+          <div className="flex flex-col items-center mb-6">
+            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-orange-400 shadow-lg mb-3">
+              <img
+                src={`https://backend.serenissima.ai/public_assets/images/citizens/${getCurrentNPC()?.username}.jpg`}
+                alt={getCurrentNPC()?.firstName || getCurrentNPC()?.username}
+                className="w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';}}
+              />
+            </div>
+            <h2 className="text-2xl font-serif text-orange-700 drop-shadow-sm">
+              {getCurrentNPC()?.firstName || getCurrentNPC()?.username}
+            </h2>
+            {getCurrentNPC()?.socialClass && (
+              <p className="text-sm text-stone-600">{getCurrentNPC()?.socialClass}</p>
+            )}
+          </div>
+        ) : (
+           <h2 className="text-3xl font-serif mb-6 text-orange-700 drop-shadow-sm text-center">Your Arrival in Venice</h2>
+        )}
         
         {/* Zone d'affichage du chat */}
         <div className="flex-grow bg-white border-2 border-orange-200 rounded-lg p-4 mb-4 overflow-y-auto shadow-inner">
