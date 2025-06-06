@@ -3,6 +3,7 @@ import sys
 import json
 import traceback
 import argparse # Added argparse
+import re # Added import for re module
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 import requests
