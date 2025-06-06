@@ -334,6 +334,21 @@ async function fetchCitizenProblems(username: string): Promise<AirtableRecord<Fi
   }
 }
 
+async function fetchCitizenMessages(username: string): Promise<AirtableRecord<FieldSet>[]> {
+  try {
+    const escapedUsername = escapeAirtableValue(username);
+    const records = await airtable('MESSAGES').select({
+      filterByFormula: `OR({Sender} = '${escapedUsername}', {Receiver} = '${escapedUsername}')`,
+      sort: [{ field: 'CreatedAt', direction: 'desc' }],
+      maxRecords: 10,
+    }).all();
+    return [...records]; // Convert ReadonlyArray to Array
+  } catch (error) {
+    console.error(`Error fetching messages for ${username}:`, error);
+    return [];
+  }
+}
+
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -440,6 +455,7 @@ export async function GET(request: Request) {
       citizenLoans: [] as any[],
       strongestRelationships: [] as any[], // Initialize strongestRelationships array
       recentProblems: [] as any[], // Initialize recentProblems array
+      recentMessages: [] as any[], // Initialize recentMessages array
     };
 
     // Fetch and add active contracts
@@ -486,6 +502,10 @@ export async function GET(request: Request) {
     // Fetch and add recent problems
     const recentProblemsRecords = await fetchCitizenProblems(citizenUsername);
     dataPackage.recentProblems = recentProblemsRecords.map(p => ({...normalizeKeysCamelCaseShallow(p.fields), airtableId: p.id}));
+
+    // Fetch and add recent messages
+    const recentMessagesRecords = await fetchCitizenMessages(citizenUsername);
+    dataPackage.recentMessages = recentMessagesRecords.map(m => ({...normalizeKeysCamelCaseShallow(m.fields), airtableId: m.id}));
 
     for (const buildingRecord of ownedBuildingsRecords) {
       const buildingId = buildingRecord.fields.BuildingId as string;
