@@ -127,21 +127,26 @@ export async function GET(request: Request) {
     const receiverId = searchParams.get('receiver'); // New parameter
     const latest = searchParams.get('latest');
 
-    if (!messageType) {
-      return NextResponse.json(
-        { success: false, error: 'Message type parameter is required' },
-        { status: 400 }
-      );
-    }
+    // Message type is no longer required
+    // if (!messageType) {
+    //   return NextResponse.json(
+    //     { success: false, error: 'Message type parameter is required' },
+    //     { status: 400 }
+    //   );
+    // }
 
     const base = initAirtable();
-    let filterConditions = [`{Type} = '${messageType}'`];
+    let filterConditions = [];
+
+    if (messageType) {
+      filterConditions.push(`{Type} = '${messageType}'`);
+    }
 
     if (receiverId) {
       filterConditions.push(`{Receiver} = '${receiverId}'`);
     }
 
-    const filterFormula = filterConditions.length > 1 ? `AND(${filterConditions.join(', ')})` : filterConditions[0];
+    const filterFormula = filterConditions.length > 0 ? `AND(${filterConditions.join(', ')})` : '';
     
     console.log(`[API Messages GET] Filter formula: ${filterFormula}`);
 
@@ -162,32 +167,42 @@ export async function GET(request: Request) {
 
     if (!records || records.length === 0) {
       return NextResponse.json(
-        { success: true, message: null, error: 'No message found for the specified type.' },
-        { status: 200 } // Or 404 if preferred, but 200 with null message is also common
+        { success: true, message: null, messages: [], error: 'No messages found matching the criteria.' }, // Return empty messages array
+        { status: 200 }
       );
     }
     
-    const message = {
+    // If 'latest' is true, return only the first record (which is the latest due to sort order)
+    if (latest === 'true') {
+      const message = {
+        messageId: records[0].id,
+        sender: records[0].get('Sender') as string,
+        receiver: records[0].get('Receiver') as string,
+        content: records[0].get('Content') as string,
+        type: records[0].get('Type') as string,
+        createdAt: records[0].get('CreatedAt') as string,
+        readAt: records[0].get('ReadAt') as string || null,
+      };
+      return NextResponse.json({
+        success: true,
+        message: message 
+      });
+    }
+    
+    // If not 'latest', return all fetched records
+    const allMessages = records.map(record => ({
       messageId: records[0].id,
       sender: records[0].get('Sender') as string,
       receiver: records[0].get('Receiver') as string,
       content: records[0].get('Content') as string,
-      type: records[0].get('Type') as string,
-      createdAt: records[0].get('CreatedAt') as string,
-      readAt: records[0].get('ReadAt') as string || null,
-    };
+      type: record.get('Type') as string,
+      createdAt: record.get('CreatedAt') as string,
+      readAt: record.get('ReadAt') as string || null,
+    }));
 
     return NextResponse.json({
       success: true,
-      message: latest === 'true' ? message : records.map(record => ({ // Return array if not 'latest'
-        messageId: record.id,
-        sender: record.get('Sender') as string,
-        receiver: record.get('Receiver') as string,
-        content: record.get('Content') as string,
-        type: record.get('Type') as string,
-        createdAt: record.get('CreatedAt') as string,
-        readAt: record.get('ReadAt') as string || null,
-      }))
+      messages: allMessages // Return array of all messages
     });
 
   } catch (error) {
