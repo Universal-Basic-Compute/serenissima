@@ -11,7 +11,7 @@ from backend.engine.utils.activity_helpers import create_activity_record, LogCol
 
 log = logging.getLogger(__name__)
 
-def try_create_manage_public_dock_activity(
+def try_create(
     tables: Dict[str, Any],
     citizen_record: Dict[str, Any],
     public_dock_record: Dict[str, Any],
@@ -34,6 +34,11 @@ def try_create_manage_public_dock_activity(
     log.info(f"{LogColors.OKBLUE}Attempting to create 'manage_public_dock' for {citizen_username} at {dock_name} ({dock_custom_id}).{LogColors.ENDC}")
 
     try:
+        # Ensure current_time_utc is timezone-aware (should be UTC)
+        if current_time_utc.tzinfo is None:
+            current_time_utc = pytz.UTC.localize(current_time_utc)
+            log.warning(f"Localized current_time_utc in manage_public_dock_creator for {citizen_username}")
+
         if start_time_utc_iso:
             start_dt_obj = datetime.datetime.fromisoformat(start_time_utc_iso.replace("Z", "+00:00"))
             if start_dt_obj.tzinfo is None:
@@ -82,7 +87,7 @@ def try_create_manage_public_dock_activity(
             return None
 
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error in try_create_manage_public_dock_activity: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error in try_create (manage_public_dock): {e}{LogColors.ENDC}")
         import traceback
         log.error(traceback.format_exc())
         return None
