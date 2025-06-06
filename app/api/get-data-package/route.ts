@@ -349,6 +349,20 @@ async function fetchCitizenMessages(username: string): Promise<AirtableRecord<Fi
   }
 }
 
+async function fetchLastDailyUpdate(): Promise<AirtableRecord<FieldSet> | null> {
+  try {
+    const records = await airtable('MESSAGES').select({
+      filterByFormula: `AND({Type} = 'daily_update', {Sender} = 'ConsiglioDeiDieci')`,
+      sort: [{ field: 'CreatedAt', direction: 'desc' }],
+      maxRecords: 1,
+    }).firstPage();
+    return records.length > 0 ? records[0] : null;
+  } catch (error) {
+    console.error(`Error fetching last daily update:`, error);
+    return null;
+  }
+}
+
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -456,6 +470,7 @@ export async function GET(request: Request) {
       strongestRelationships: [] as any[], // Initialize strongestRelationships array
       recentProblems: [] as any[], // Initialize recentProblems array
       recentMessages: [] as any[], // Initialize recentMessages array
+      latestDailyUpdate: null as any | null, // Initialize latestDailyUpdate
     };
 
     // Fetch and add active contracts
@@ -506,6 +521,12 @@ export async function GET(request: Request) {
     // Fetch and add recent messages
     const recentMessagesRecords = await fetchCitizenMessages(citizenUsername);
     dataPackage.recentMessages = recentMessagesRecords.map(m => ({...normalizeKeysCamelCaseShallow(m.fields), airtableId: m.id}));
+
+    // Fetch and add the last daily update
+    const lastDailyUpdateRecord = await fetchLastDailyUpdate();
+    if (lastDailyUpdateRecord) {
+      dataPackage.latestDailyUpdate = {...normalizeKeysCamelCaseShallow(lastDailyUpdateRecord.fields), airtableId: lastDailyUpdateRecord.id};
+    }
 
     for (const buildingRecord of ownedBuildingsRecords) {
       const buildingId = buildingRecord.fields.BuildingId as string;
