@@ -3,6 +3,7 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useWallet } from '@/lib/hooks/useWallet';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus'; // Added import
+import UsernamePrompt from './UsernamePrompt'; // Import UsernamePrompt
 
 // Normalize profile data to ensure consistent casing (camelCase)
 // Moved outside the component to allow export
