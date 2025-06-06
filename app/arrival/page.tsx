@@ -143,12 +143,13 @@ const ArrivalPage: React.FC = () => {
   };
 
   // Fonction pour récupérer les informations contextuelles pour Kinos
-  const fetchContextualInformation = useCallback(async (targetAI: AIProfile | null, humanUsername: string) => {
+  const fetchContextualInformation = useCallback(async (targetAI: AIProfile | null, humanUsername: string): Promise<typeof contextualDataForChat | null> => {
     if (!targetAI || !humanUsername || humanUsername === DEFAULT_HUMAN_USERNAME) {
       setContextualDataForChat(null);
-      return;
+      return null;
     }
     setIsPreparingContext(true);
+    let newContextData: typeof contextualDataForChat = null;
     try {
       const senderProfile = currentUserProfile; // Profil de l'utilisateur humain
       const aiDataPackageResponse = await fetch(`/api/get-data-package?citizenUsername=${targetAI.username}`);
@@ -165,17 +166,20 @@ const ArrivalPage: React.FC = () => {
         console.error(`Erreur HTTP lors de la récupération du data package pour ${targetAI.username}: ${aiDataPackageResponse.status}`);
       }
       
-      setContextualDataForChat({ 
+      newContextData = { 
         senderProfile, 
         targetProfile: targetAI, // Profil de base de l'IA
         aiDataPackage // Paquet de données complet
-      });
+      };
+      setContextualDataForChat(newContextData);
     } catch (error) {
       console.error("Erreur lors de la récupération des données contextuelles pour Kinos:", error);
       setContextualDataForChat(null);
+      newContextData = null;
     } finally {
       setIsPreparingContext(false);
     }
+    return newContextData;
   }, [currentUserProfile]);
 
 
@@ -422,17 +426,22 @@ Your first message to ${userName}:`;
 
       fetchChatMessages(currentUserUsername, currentAI.username)
         .then(existingMessages => {
-          // Pass contextualDataForChat to sendSystemInitiationMessage
           fetchContextualInformation(currentAI, currentUserUsername)
-            .then(() => { // Context is now ready, access it via state
-              if (existingMessages.length === 0) {
-                sendSystemInitiationMessage(currentAI, currentUserProfile, currentStep, contextualDataForChat)
+            .then((fetchedContextData) => { // Utiliser les données de contexte retournées
+              if (existingMessages.length === 0 && fetchedContextData) {
+                sendSystemInitiationMessage(currentAI, currentUserProfile, currentStep, fetchedContextData)
                   .finally(() => setIsAiInitiating(false));
               } else {
                 setIsAiInitiating(false);
               }
-            }).catch(() => setIsAiInitiating(false));
-        }).catch(() => setIsAiInitiating(false));
+            }).catch(() => {
+              setIsAiInitiating(false);
+              console.error("Erreur lors de fetchContextualInformation dans useEffect");
+            });
+        }).catch(() => {
+          setIsAiInitiating(false);
+          console.error("Erreur lors de fetchChatMessages dans useEffect");
+        });
     } else if (currentAI) { // AI est là, mais utilisateur est GuestUser
         setIsAiInitiating(false);
         setChatMessages([{
@@ -447,7 +456,7 @@ Your first message to ${userName}:`;
     } else {
       setIsAiInitiating(false);
     }
-  }, [currentStep, currentUserUsername, getCurrentAI, fetchChatMessages, fetchContextualInformation, currentUserProfile, sendSystemInitiationMessage, contextualDataForChat]); // Added sendSystemInitiationMessage and contextualDataForChat
+  }, [currentStep, currentUserUsername, getCurrentAI, fetchChatMessages, fetchContextualInformation, currentUserProfile, sendSystemInitiationMessage]);
 
 
   // Scroll vers le bas lorsque de nouveaux messages sont ajoutés
