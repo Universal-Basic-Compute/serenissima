@@ -88,7 +88,7 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
             "Title": f"Offer for Land: {land_name} by {buyer_username}",
             "Description": f"{buyer_username} offers to buy land {land_name} (ID: {land_id_for_offer}) for {offer_price} ducats.",
             "CreatedAt": now_iso,
-            "UpdatedAt": now_iso,
+            # "UpdatedAt": now_iso, # Removed UpdatedAt
             # Buyer field stores the username directly
             # Optional: EndAt for offer expiration
         }
@@ -96,6 +96,10 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
             # Assuming 'Seller' field also stores username directly
             contract_payload["Seller"] = target_seller_username
         # If no target_seller_username, the Seller field might be left null or handled as per game logic for speculative offers
+
+        # Ensure UpdatedAt is not in the payload if it was somehow added
+        if "UpdatedAt" in contract_payload:
+            del contract_payload["UpdatedAt"]
 
         new_contract = tables['contracts'].create(contract_payload)
         log.info(f"{LogColors.SUCCESS}Successfully created land offer contract {new_contract['id']} (Custom ID: {contract_id}) for land {land_id_for_offer} by {buyer_username} at {offer_price} ducats. Activity {activity_guid}.{LogColors.ENDC}")
