@@ -4306,7 +4306,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
           <button 
             onClick={() => setBuildingFilterMode(buildingFilterMode === 'city' ? 'me' : 'city')}
             className={`px-3 py-1 rounded text-white text-sm ${
-              buildingFilterMode === 'me' ? 'bg-orange-600 hover:bg-orange-500' : 'bg-blue-600 hover:bg-blue-500'
+              buildingFilterMode === 'me' ? 'bg-orange-600 hover:bg-orange-500' : 'bg-rose-700 hover:bg-rose-600'
             }`}
           >
             {buildingFilterMode === 'city' ? 'All Buildings' : 'My Buildings'}
@@ -4408,7 +4408,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
                 className={`px-3 py-1 rounded text-white ${
                   pathfindingMode === 'real' 
                     ? 'bg-green-600 hover:bg-green-500' 
-                    : 'bg-blue-600 hover:bg-blue-500'
+                    : 'bg-rose-700 hover:bg-rose-600'
                 }`}
               >
                 {pathfindingMode === 'real' ? 'Real Infrastructure' : 'All Points'}
@@ -4432,7 +4432,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
               }
               console.log('Transport mode toggled to:', !transportMode);
             }}
-            className="absolute bottom-28 left-20 bg-blue-600 text-white px-3 py-1 rounded text-sm"
+            className="absolute bottom-28 left-20 bg-rose-700 hover:bg-rose-600 text-white px-3 py-1 rounded text-sm"
           >
             {transportMode ? 'Disable Transport Mode' : 'Enable Transport Mode'}
           </button>

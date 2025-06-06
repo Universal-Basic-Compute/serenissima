@@ -174,7 +174,7 @@ const LandMarketColumn: React.FC<LandMarketColumnProps> = ({
             <div className="mt-4">
               <h4 className="text-md font-semibold text-amber-700 mb-2">Incoming Offers to Buy:</h4>
               {incomingBuyOffers.map(offer => (
-                <div key={offer.id} className="p-3 mb-2 rounded-lg bg-blue-50 border border-blue-200">
+                <div key={offer.id} className="p-3 mb-2 rounded-lg bg-rose-50 border border-rose-200">
                   <p>Offer from: {offer.BuyerName || offer.Buyer}</p>
                   <p>Amount: {offer.PricePerResource.toLocaleString()} ⚜️ ducats</p>
                   <ActionButton

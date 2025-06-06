@@ -950,7 +950,7 @@ Your response:`;
   const getTimeHorizonColor = (timeHorizon: string): string => {
     switch (timeHorizon.toLowerCase()) {
       case 'short-term':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
+        return 'bg-rose-100 text-rose-800 border-rose-300';
       case 'medium-term':
         return 'bg-amber-100 text-amber-800 border-amber-300';
       case 'long-term':
