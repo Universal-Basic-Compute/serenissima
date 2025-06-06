@@ -482,47 +482,67 @@ def make_kinos_call(
         parsing_method_used = "none"
         parsing_error_info = None # To store info if an earlier parsing attempt failed
 
+        def _clean_json_string(json_str: str) -> str:
+            # Remove trailing commas from arrays and objects
+            # Regex: comma, optional whitespace, then a closing bracket or brace
+            cleaned_str = re.sub(r",\s*([\}\]])", r"\1", json_str)
+            # You might add more cleaning rules here if other common non-standard JSON issues arise
+            if cleaned_str != json_str:
+                log.debug(f"Cleaned JSON string for {ai_username}. Original snippet: {json_str[:100]}..., Cleaned snippet: {cleaned_str[:100]}...")
+            return cleaned_str
+
         # Attempt 1: Direct JSON parse
         try:
-            parsed_response = json.loads(latest_ai_response_content)
-            parsing_method_used = "direct"
-            log.debug(f"{LogColors.LIGHTBLUE}Kinos response for {ai_username} parsed as direct JSON.{LogColors.ENDC}")
+            # Clean before attempting to parse directly, in case the whole response is almost JSON
+            cleaned_direct_content = _clean_json_string(latest_ai_response_content)
+            parsed_response = json.loads(cleaned_direct_content)
+            parsing_method_used = "direct_cleaned"
+            log.debug(f"{LogColors.LIGHTBLUE}Kinos response for {ai_username} parsed as direct (cleaned) JSON.{LogColors.ENDC}")
         except json.JSONDecodeError:
-            parsing_error_info = "Direct JSON parse failed. "
-            log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. {parsing_error_info}Attempting markdown extraction.{LogColors.ENDC}")
+            # Try original direct parse if cleaned one failed (though unlikely to succeed if cleaning was needed)
+            try:
+                parsed_response = json.loads(latest_ai_response_content)
+                parsing_method_used = "direct_original"
+                log.debug(f"{LogColors.LIGHTBLUE}Kinos response for {ai_username} parsed as direct (original) JSON.{LogColors.ENDC}")
+            except json.JSONDecodeError:
+                parsing_error_info = "Direct JSON parse (original and cleaned) failed. "
+                log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. {parsing_error_info}Attempting markdown extraction.{LogColors.ENDC}")
             
-            # Attempt 2: Extract last JSON block from markdown
-            json_matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", latest_ai_response_content, re.MULTILINE))
-            if json_matches:
-                last_json_match = json_matches[-1]
-                json_str_markdown = last_json_match.group(1).strip()
-                try:
-                    parsed_response = json.loads(json_str_markdown)
-                    parsing_method_used = "markdown"
-                    log.info(f"{LogColors.OKGREEN}Successfully extracted and parsed last JSON block from Kinos markdown for {ai_username}.{LogColors.ENDC}")
-                except json.JSONDecodeError as e_markdown:
-                    parsing_error_info += f"Markdown JSON block parse failed (Error: {e_markdown}). "
-                    log.warning(f"{LogColors.WARNING}Failed to parse extracted JSON from markdown for {ai_username}. Error: {e_markdown}. Block: {json_str_markdown[:200]}... {parsing_error_info}Attempting substring extraction.{LogColors.ENDC}")
-            else:
-                parsing_error_info += "No markdown JSON block found. "
-                log.info(f"{LogColors.OKBLUE}No JSON block found in Kinos markdown for {ai_username}. {parsing_error_info}Attempting substring extraction.{LogColors.ENDC}")
-
-            if not parsed_response: # If direct and markdown parse failed
-                # Attempt 3: Find first '{' and last '}'
-                first_brace_idx = latest_ai_response_content.find('{')
-                last_brace_idx = latest_ai_response_content.rfind('}')
-                if first_brace_idx != -1 and last_brace_idx != -1 and last_brace_idx > first_brace_idx:
-                    potential_json_str = latest_ai_response_content[first_brace_idx : last_brace_idx+1]
+            if not parsed_response: # If both direct attempts failed
+                # Attempt 2: Extract last JSON block from markdown
+                json_matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", latest_ai_response_content, re.MULTILINE))
+                if json_matches:
+                    last_json_match = json_matches[-1]
+                    json_str_markdown_raw = last_json_match.group(1).strip()
+                    json_str_markdown_cleaned = _clean_json_string(json_str_markdown_raw)
                     try:
-                        parsed_response = json.loads(potential_json_str)
-                        parsing_method_used = "substring"
-                        log.info(f"{LogColors.OKGREEN}Successfully parsed JSON substring for {ai_username}.{LogColors.ENDC}")
-                    except json.JSONDecodeError as e_substring:
-                        parsing_error_info += f"Substring JSON parse failed (Error: {e_substring}). "
-                        log.warning(f"{LogColors.WARNING}Failed to parse JSON substring for {ai_username}. Error: {e_substring}. Substring: {potential_json_str[:200]}...{LogColors.ENDC}")
+                        parsed_response = json.loads(json_str_markdown_cleaned)
+                        parsing_method_used = "markdown_cleaned"
+                        log.info(f"{LogColors.OKGREEN}Successfully extracted and parsed (cleaned) last JSON block from Kinos markdown for {ai_username}.{LogColors.ENDC}")
+                    except json.JSONDecodeError as e_markdown:
+                        parsing_error_info += f"Markdown JSON block parse (cleaned) failed (Error: {e_markdown}). "
+                        log.warning(f"{LogColors.WARNING}Failed to parse extracted (cleaned) JSON from markdown for {ai_username}. Error: {e_markdown}. Block: {json_str_markdown_cleaned[:200]}... {parsing_error_info}Attempting substring extraction.{LogColors.ENDC}")
                 else:
-                    parsing_error_info += "No suitable JSON-like substring found. "
-                    log.warning(f"{LogColors.WARNING}No suitable JSON-like substring found for {ai_username}.{LogColors.ENDC}")
+                    parsing_error_info += "No markdown JSON block found. "
+                    log.info(f"{LogColors.OKBLUE}No JSON block found in Kinos markdown for {ai_username}. {parsing_error_info}Attempting substring extraction.{LogColors.ENDC}")
+
+                if not parsed_response: # If direct and markdown parse failed
+                    # Attempt 3: Find first '{' and last '}'
+                    first_brace_idx = latest_ai_response_content.find('{')
+                    last_brace_idx = latest_ai_response_content.rfind('}')
+                    if first_brace_idx != -1 and last_brace_idx != -1 and last_brace_idx > first_brace_idx:
+                        potential_json_str_raw = latest_ai_response_content[first_brace_idx : last_brace_idx+1]
+                        potential_json_str_cleaned = _clean_json_string(potential_json_str_raw)
+                        try:
+                            parsed_response = json.loads(potential_json_str_cleaned)
+                            parsing_method_used = "substring_cleaned"
+                            log.info(f"{LogColors.OKGREEN}Successfully parsed (cleaned) JSON substring for {ai_username}.{LogColors.ENDC}")
+                        except json.JSONDecodeError as e_substring:
+                            parsing_error_info += f"Substring JSON parse (cleaned) failed (Error: {e_substring}). "
+                            log.warning(f"{LogColors.WARNING}Failed to parse (cleaned) JSON substring for {ai_username}. Error: {e_substring}. Substring: {potential_json_str_cleaned[:200]}...{LogColors.ENDC}")
+                    else:
+                        parsing_error_info += "No suitable JSON-like substring found. "
+                        log.warning(f"{LogColors.WARNING}No suitable JSON-like substring found for {ai_username}.{LogColors.ENDC}")
         
         if parsed_response:
             log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username} (method: {parsing_method_used}): {json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
