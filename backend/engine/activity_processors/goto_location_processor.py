@@ -45,8 +45,8 @@ def process(
     
     try:
         # Parse the path and notes
-        path = json.loads(path_str) if path_str else []
-        details = json.loads(notes_str) if notes_str else {} # Changed details_str to notes_str
+        path = json.loads(path_str) if path_str and path_str.strip() else []
+        details = json.loads(notes_str) if notes_str and notes_str.strip() else {} # Changed details_str to notes_str and added strip()
         
         # Get the purpose of this movement
         purpose = details.get("activityType", "unknown") # 'details' here is the parsed JSON from 'Notes'
