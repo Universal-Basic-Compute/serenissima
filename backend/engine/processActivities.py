@@ -58,6 +58,7 @@ import requests
 import uuid
 import re
 import math # Added for Haversine distance
+import random # Added import for random module
 from datetime import datetime, timezone, timedelta
 import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Any, Tuple
