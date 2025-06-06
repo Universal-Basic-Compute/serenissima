@@ -226,9 +226,9 @@ const ArrivalPage: React.FC = () => {
       setAisLoading(true);
       const defaultProfile = await fetchCitizen(defaultAIUsername);
 
-      // Fetch Galley AI (Random Forestieri, AI, InVenice)
+      // Fetch Galley AI (Random Forestieri, InVenice)
       try {
-        const res = await fetch(`/api/citizens?SocialClass=Forestieri&IsAI=true&InVenice=true`);
+        const res = await fetch(`/api/citizens?SocialClass=Forestieri&InVenice=true`);
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.citizens.length > 0) {
@@ -269,9 +269,9 @@ const ArrivalPage: React.FC = () => {
         setCustomsAI(defaultProfile); 
       }
 
-      // Fetch Home AI (Random Cittadini, AI, InVenice)
+      // Fetch Home AI (Random Cittadini, InVenice)
       try {
-        const res = await fetch(`/api/citizens?SocialClass=Cittadini&IsAI=true&InVenice=true`);
+        const res = await fetch(`/api/citizens?SocialClass=Cittadini&InVenice=true`);
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.citizens.length > 0) {
