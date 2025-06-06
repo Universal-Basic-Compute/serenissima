@@ -2057,23 +2057,57 @@ def dispatch_specific_activity_request(
 
     elif activity_type == "initiate_building_project":
         log.info(f"Dispatching to initiate_building_project_creator for {citizen_name} with params: {activity_parameters}")
-        # The initiate_building_project_creator.try_create should return the first activity record or None
-        first_activity_of_chain = try_create_initiate_building_project_activity(
+        # The initiate_building_project_creator.try_create might return an Airtable record directly,
+        # OR a dict like {'success': True, 'activity_fields': {...}}
+        creator_response = try_create_initiate_building_project_activity(
             tables,
             citizen_record_full,
             activity_parameters if activity_parameters is not None else {},
-            resource_defs, # Pass resource_defs
-            building_type_defs, # Pass building_type_defs
-            now_venice_dt, # Pass now_venice_dt
-            now_utc_dt, # Pass now_utc_dt
-            transport_api_url, # Pass transport_api_url
-            api_base_url # Pass api_base_url
+            resource_defs,
+            building_type_defs,
+            now_venice_dt,
+            now_utc_dt,
+            transport_api_url,
+            api_base_url
         )
-        if first_activity_of_chain and isinstance(first_activity_of_chain, dict) and 'fields' in first_activity_of_chain:
-            return {"success": True, "message": f"Initiate building project endeavor initiated for {citizen_name}. First activity: {first_activity_of_chain['fields'].get('Type', 'N/A')}.", "activity": first_activity_of_chain['fields']}
+
+        activity_fields_to_return = None
+        # Default success message, might be overridden by creator's message
+        success_message = f"Initiate building project endeavor initiated for {citizen_name}."
+
+        if creator_response and isinstance(creator_response, dict):
+            if 'fields' in creator_response: # Case 1: Creator returned an Airtable record {id: ..., fields: ...}
+                activity_fields_to_return = creator_response['fields']
+                # Append activity type to message if available
+                success_message = f"Initiate building project endeavor initiated for {citizen_name}. First activity: {activity_fields_to_return.get('Type', 'N/A')}."
+            elif creator_response.get('success') is True and 'activity_fields' in creator_response and isinstance(creator_response['activity_fields'], dict):
+                # Case 2: Creator returned {'success': True, 'activity_fields': {...}}
+                activity_fields_to_return = creator_response['activity_fields']
+                success_message = creator_response.get('message', success_message)
+                # Ensure the message reflects the actual activity type if available and not already in creator's message
+                activity_type_from_fields = activity_fields_to_return.get('Type', 'N/A')
+                if activity_type_from_fields not in success_message: # Avoid duplicating if creator message already has it
+                    success_message += f" First activity: {activity_type_from_fields}."
+            elif creator_response.get('success') is True and 'activity' in creator_response and isinstance(creator_response['activity'], dict):
+                # Case 3: Creator returned {'success': True, 'activity': {...activity_fields...}}
+                activity_fields_to_return = creator_response['activity']
+                success_message = creator_response.get('message', success_message)
+                activity_type_from_fields = activity_fields_to_return.get('Type', 'N/A')
+                if activity_type_from_fields not in success_message:
+                    success_message += f" First activity: {activity_type_from_fields}."
+
+
+        if activity_fields_to_return:
+            return {"success": True, "message": success_message, "activity": activity_fields_to_return}
         else:
-            log.warning(f"initiate_building_project_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
-            return {"success": False, "message": f"Could not initiate 'initiate_building_project' endeavor for {citizen_name}.", "activity": None, "reason": "initiate_building_project_creation_failed"}
+            log.warning(f"initiate_building_project_creator did not return a valid activity record or expected success structure for {citizen_name}. Returned: {creator_response}")
+            failure_message = f"Could not initiate 'initiate_building_project' endeavor for {citizen_name}."
+            reason = "initiate_building_project_creation_failed_or_invalid_response"
+            # If creator returned a dict with success=False and a message/reason, use that
+            if isinstance(creator_response, dict) and creator_response.get('success') is False:
+                failure_message = creator_response.get('message', failure_message)
+                reason = creator_response.get('reason', reason)
+            return {"success": False, "message": failure_message, "activity": None, "reason": reason}
 
     elif activity_type == "send_message":
         log.info(f"Dispatching to send_message_creator for {citizen_name} with params: {activity_parameters}")
