@@ -81,36 +81,42 @@ def group_citizens_by_location(tables: Dict[str, Table]) -> Dict[str, List[Dict]
 
         for citizen_record in all_citizens_in_venice:
             citizen_fields = citizen_record.get('fields', {})
-            # Use the 'Point' field directly for grouping. This field should store the BuildingId or a specific point ID within a building.
-            # It's assumed that if two citizens have the same 'Point' value, they are at the same exact location (e.g., same building).
-            location_point_id = citizen_fields.get('Point') 
+            position_str = citizen_fields.get('Position')
             username = citizen_fields.get('Username')
 
-            if not location_point_id or not username:
-                log.debug(f"Citizen {citizen_record.get('id')} missing Point (location ID) or Username. Skipping.")
+            if not position_str or not username:
+                log.debug(f"Citizen {citizen_record.get('id')} missing Position or Username. Skipping.")
                 continue
-            
-            # Ensure location_point_id is a string, as it's used as a dict key.
-            # Airtable lookups/links can sometimes return lists. We take the first if it's a list.
-            if isinstance(location_point_id, list):
-                if location_point_id:
-                    location_point_id = str(location_point_id[0])
-                else:
-                    log.debug(f"Citizen {username} has an empty list for Point. Skipping.")
+
+            try:
+                citizen_coords = json.loads(position_str)
+                if not isinstance(citizen_coords, dict) or 'lat' not in citizen_coords or 'lng' not in citizen_coords:
+                    log.warning(f"Invalid position format for citizen {username}: {position_str}. Skipping.")
                     continue
-            elif not isinstance(location_point_id, str):
-                location_point_id = str(location_point_id)
+                
+                # Find the building the citizen is in
+                # Using a small max_distance to ensure they are "in" the building
+                building_record = get_closest_building_to_position(tables, citizen_coords, max_distance_meters=15)
+                if building_record:
+                    building_id = building_record['fields'].get('BuildingId')
+                    if building_id:
+                        if building_id not in citizens_by_location:
+                            citizens_by_location[building_id] = []
+                        citizens_by_location[building_id].append(citizen_record)
+                    else:
+                        log.warning(f"Building {building_record.get('id')} found for {username} at {citizen_coords} has no BuildingId. Skipping.")
+                # else: log.debug(f"Citizen {username} at {citizen_coords} not found within any building (or building has no position).")
 
-
-            if location_point_id not in citizens_by_location:
-                citizens_by_location[location_point_id] = []
-            citizens_by_location[location_point_id].append(citizen_record)
+            except json.JSONDecodeError:
+                log.warning(f"Could not parse position JSON for citizen {username}: {position_str}. Skipping.")
+            except Exception as e_pos:
+                log.error(f"Error processing position for citizen {username}: {e_pos}. Skipping.")
         
         # Filter out locations with fewer than 2 citizens
-        return {loc_id: citizens for loc_id, citizens in citizens_by_location.items() if len(citizens) >= 2}
+        return {loc: citizens for loc, citizens in citizens_by_location.items() if len(citizens) >= 2}
 
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error grouping citizens by location (Point field): {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error grouping citizens by location: {e}{LogColors.ENDC}")
         return {}
 
 def process_encounter_pair(
