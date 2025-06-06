@@ -135,16 +135,21 @@ def try_create_construct_building_activity(
             activity_payload["Description"] = f"Traveling to construction site: {target_bldg_name}"
             
             details_payload["action_on_arrival"] = "construct_building"
-            details_payload["work_duration_minutes"] = work_duration_minutes
-            # targetBuildingId is ToBuilding. originalContractId is ContractId.
+            # Renamed for clarity when parsed by processor
+            details_payload["work_duration_minutes_on_arrival"] = work_duration_minutes
+            # Add target building ID for the construction phase to DetailsJSON
+            details_payload["target_building_id_on_arrival"] = target_building_custom_id
+            # ContractId is already part of the main activity_payload, so processor can get it from there.
 
-            log.info(f"Creating 'goto_construction_site' for {citizen_username} to {target_building_custom_id} using ContractId: {custom_contract_id_str_for_goto}.")
+            log.info(f"Creating 'goto_construction_site' for {citizen_username} to {target_building_custom_id} using ContractId: {custom_contract_id_str_for_goto}. Details for next phase: {details_payload}")
 
         else: 
             # For direct construct_building, contract_custom_id_or_airtable_id should be the custom string ID.
             activity_payload["ContractId"] = contract_custom_id_or_airtable_id
             activity_payload["ActivityId"] = f"construct_bld_{citizen_custom_id}_{uuid.uuid4()}"
             activity_payload["Type"] = "construct_building"
+            # Field used by construct_building_processor
+            activity_payload["BuildingToConstruct"] = target_building_custom_id
             activity_payload["FromBuilding"] = target_building_custom_id 
             activity_payload["ToBuilding"] = target_building_custom_id   
             activity_payload["Path"] = "[]" 
