@@ -49,7 +49,7 @@ API_BASE_URL = os.getenv("NEXT_PUBLIC_BASE_URL", "http://localhost:3000")
 # Constants
 MAX_ENCOUNTERS_PER_RUN = 10 # Limit total number of pairs processed per run
 MAX_ENCOUNTERS_PER_LOCATION = 3 # Limit pairs processed per location
-DELAY_BETWEEN_TURNS_SECONDS = 5 # Delay between Kinos calls for a single conversation
+DELAY_BETWEEN_TURNS_SECONDS = 0 # Delay between Kinos calls for a single conversation
 DELAY_BETWEEN_PAIRS_SECONDS = 15 # Delay between processing different pairs
 
 def initialize_airtable_tables() -> Optional[Dict[str, Table]]:
