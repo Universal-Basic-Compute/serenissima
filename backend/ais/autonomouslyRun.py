@@ -207,29 +207,30 @@ def _get_entity_count_from_response(response_json: Any) -> Optional[int]:
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
     """Initializes connection to Airtable."""
-    airtable_api_key_env = os.getenv("AIRTABLE_API_KEY")
-    airtable_base_id_env = os.getenv("AIRTABLE_BASE_ID")
+    _env_airtable_api_key = os.getenv("AIRTABLE_API_KEY")
+    _env_airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
 
-    airtable_api_key = airtable_api_key_env.strip() if isinstance(airtable_api_key_env, str) else None
-    
+    # Process API Key
+    airtable_api_key: Optional[str] = None
+    _temp_api_key = _env_airtable_api_key[0] if isinstance(_env_airtable_api_key, tuple) and len(_env_airtable_api_key) == 1 and isinstance(_env_airtable_api_key[0], str) else _env_airtable_api_key
+    if isinstance(_temp_api_key, str):
+        airtable_api_key = _temp_api_key.strip()
+        if not airtable_api_key: airtable_api_key = None
+    elif _temp_api_key is not None:
+        log.warning(f"{LogColors.WARNING}AIRTABLE_API_KEY is of unexpected type: {type(_temp_api_key)}. Treating as not set.{LogColors.ENDC}")
+
+    # Process Base ID
     processed_base_id: Optional[str] = None
-    if isinstance(airtable_base_id_env, str):
-        processed_base_id = airtable_base_id_env.strip()
-        if not processed_base_id: # Was empty string or whitespace
-            processed_base_id = None
-    elif isinstance(airtable_base_id_env, tuple):
-        if airtable_base_id_env and isinstance(airtable_base_id_env[0], str):
-            processed_base_id = airtable_base_id_env[0].strip()
-            if not processed_base_id: # First element was empty string
-                 processed_base_id = None
-        else:
-            log.error(f"{LogColors.FAIL}AIRTABLE_BASE_ID environment variable was a tuple but not in the expected format ('id',): {airtable_base_id_env}. Treating as not set.{LogColors.ENDC}")
-            # processed_base_id remains None
-    # If airtable_base_id_env was None or any other type, processed_base_id remains None
-
+    _temp_base_id = _env_airtable_base_id[0] if isinstance(_env_airtable_base_id, tuple) and len(_env_airtable_base_id) == 1 and isinstance(_env_airtable_base_id[0], str) else _env_airtable_base_id
+    if isinstance(_temp_base_id, str):
+        processed_base_id = _temp_base_id.strip()
+        if not processed_base_id: processed_base_id = None
+    elif _temp_base_id is not None:
+        log.warning(f"{LogColors.WARNING}AIRTABLE_BASE_ID is of unexpected type: {type(_temp_base_id)}. Treating as not set.{LogColors.ENDC}")
+        
     if not airtable_api_key or not processed_base_id:
-        log_api_key_status = 'Set' if airtable_api_key else 'Not Set'
-        log_base_id_status = processed_base_id if processed_base_id else 'Not Set or Invalid Tuple Format'
+        log_api_key_status = 'Set (but invalid type or empty after strip)' if _env_airtable_api_key and not airtable_api_key else 'Set' if airtable_api_key else 'Not Set'
+        log_base_id_status = 'Set (but invalid type or empty after strip)' if _env_airtable_base_id and not processed_base_id else 'Set' if processed_base_id else 'Not Set'
         log.error(f"{LogColors.FAIL}Airtable credentials not found or invalid (API Key: {log_api_key_status}, Base ID: {log_base_id_status}).{LogColors.ENDC}")
         return None
     try:

@@ -54,8 +54,11 @@ KINOS_BLUEPRINT_ID = "serenissima-ai" # As per user's prompt context
 KINOS_KIN_ID_INTELLIGENCE = "ConsiglioDeiDieci" # The Council receives and acts
 KINOS_CHANNEL_ID_INTELLIGENCE = "intelligence_reports" # A dedicated channel for these reports
 
-AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
-AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
+_env_airtable_api_key = os.getenv("AIRTABLE_API_KEY")
+AIRTABLE_API_KEY = _env_airtable_api_key[0] if isinstance(_env_airtable_api_key, tuple) and len(_env_airtable_api_key) == 1 and isinstance(_env_airtable_api_key[0], str) else _env_airtable_api_key
+
+_env_airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
+AIRTABLE_BASE_ID = _env_airtable_base_id[0] if isinstance(_env_airtable_base_id, tuple) and len(_env_airtable_base_id) == 1 and isinstance(_env_airtable_base_id[0], str) else _env_airtable_base_id
 
 # Logging setup
 logging.basicConfig(
@@ -157,36 +160,36 @@ You operate in the tradition of the actual Consiglio dei Dieci, balancing the pr
 
 def initialize_airtable_tables() -> Optional[Dict[str, Table]]:
     """Initializes and returns a dictionary of Airtable Table objects."""
-    # AIRTABLE_API_KEY and AIRTABLE_BASE_ID are loaded from .env at module level
     
-    api_key_val = AIRTABLE_API_KEY.strip() if isinstance(AIRTABLE_API_KEY, str) else None
-    base_id_env_val = AIRTABLE_BASE_ID # This is directly the value from os.getenv at module level
+    api_key_str: Optional[str] = None
+    if isinstance(AIRTABLE_API_KEY, str):
+        api_key_str = AIRTABLE_API_KEY.strip()
+        if not api_key_str:  # Was empty string or all whitespace
+            api_key_str = None
+    elif AIRTABLE_API_KEY is not None: # It's not a string and not None (e.g. unexpected type like int or complex tuple)
+        log.warning(f"{LogColors.WARNING}AIRTABLE_API_KEY is of unexpected type: {type(AIRTABLE_API_KEY)}. Treating as not set.{LogColors.ENDC}")
+        # api_key_str remains None
 
-    processed_base_id: Optional[str] = None
-    if isinstance(base_id_env_val, str):
-        processed_base_id = base_id_env_val.strip()
-        if not processed_base_id: # Was empty string or whitespace
-            processed_base_id = None
-    elif isinstance(base_id_env_val, tuple):
-        if base_id_env_val and isinstance(base_id_env_val[0], str):
-            processed_base_id = base_id_env_val[0].strip()
-            if not processed_base_id: # First element was empty string
-                 processed_base_id = None
-        else:
-            log.error(f"{LogColors.FAIL}AIRTABLE_BASE_ID environment variable was a tuple but not in the expected format ('id',): {base_id_env_val}. Treating as not set.{LogColors.ENDC}")
-            # processed_base_id remains None
-    # If base_id_env_val was None or any other type, processed_base_id remains None
+    base_id_str: Optional[str] = None
+    if isinstance(AIRTABLE_BASE_ID, str):
+        base_id_str = AIRTABLE_BASE_ID.strip()
+        if not base_id_str:  # Was empty string or all whitespace
+            base_id_str = None
+    elif AIRTABLE_BASE_ID is not None: # It's not a string and not None
+        log.warning(f"{LogColors.WARNING}AIRTABLE_BASE_ID is of unexpected type: {type(AIRTABLE_BASE_ID)}. Treating as not set.{LogColors.ENDC}")
+        # base_id_str remains None
 
-    if not api_key_val or not processed_base_id:
-        log_api_key_status = 'Set' if api_key_val else 'Not Set'
-        log_base_id_status = processed_base_id if processed_base_id else 'Not Set or Invalid Tuple Format'
+    if not api_key_str or not base_id_str:
+        log_api_key_status = 'Set (but invalid type or empty after strip)' if AIRTABLE_API_KEY and not api_key_str else 'Set' if api_key_str else 'Not Set'
+        log_base_id_status = 'Set (but invalid type or empty after strip)' if AIRTABLE_BASE_ID and not base_id_str else 'Set' if base_id_str else 'Not Set'
         log.error(f"{LogColors.FAIL}Airtable API Key or Base ID not configured or invalid (API Key: {log_api_key_status}, Base ID: {log_base_id_status}).{LogColors.ENDC}")
         return None
+    
     try:
-        api = Api(api_key_val) # Use the processed api_key_val
+        api = Api(api_key_str) 
         tables = {
-            'messages': api.table(processed_base_id, 'MESSAGES'),
-            'notifications': api.table(processed_base_id, 'NOTIFICATIONS'),
+            'messages': api.table(base_id_str, 'MESSAGES'),
+            'notifications': api.table(base_id_str, 'NOTIFICATIONS'),
         }
         log.info(f"{LogColors.OKGREEN}Airtable tables (messages, notifications) initialized successfully.{LogColors.ENDC}")
         return tables
