@@ -183,9 +183,19 @@ def create_or_get_merchant_galley(
                     rotation_rad = math.atan2(delta_y, delta_x) + (math.pi / 2)
             except Exception: pass
 
-        galley_name_suffix = "Food Galley" if args.food else "Goods Galley" if args.goods else "Market Galley"
+        galley_name_suffix = "Market Galley"
+        galley_subcategory = "retail_goods" # Default
+        if args.food:
+            galley_name_suffix = "Food Galley"
+            galley_subcategory = "retail_food"
+        elif args.goods:
+            galley_name_suffix = "Goods Galley"
+            galley_subcategory = "retail_goods"
+        elif args.construction:
+            galley_name_suffix = "Construction Galley"
+            galley_subcategory = "wholesale_construction" # Or a suitable existing one like "industrial_goods"
+
         galley_name = f"Floating Market - {galley_name_suffix} ({merchant_username})"
-        galley_subcategory = "retail_food" if args.food else "retail_goods"
 
         if dry_run:
             log.info(f"[DRY RUN] Would create merchant_galley: {galley_building_id} (Name: {galley_name}, SubCategory: {galley_subcategory}) at {position_coords}")
@@ -310,7 +320,7 @@ def create_galley_delivery_activity(
 
 def main_process_market_galley(args: argparse.Namespace):
     """Main function to create a market galley."""
-    log_header(f"Market Galley Creation (dry_run={args.dry_run}, food_only={args.food}, goods_only={args.goods}, hour_override={args.hour})", LogColors.HEADER)
+    log_header(f"Market Galley Creation (dry_run={args.dry_run}, food_only={args.food}, goods_only={args.goods}, construction_only={args.construction}, hour_override={args.hour})", LogColors.HEADER)
 
     now_venice_dt_real = datetime.now(VENICE_TIMEZONE)
     if args.hour is not None:
@@ -337,14 +347,26 @@ def main_process_market_galley(args: argparse.Namespace):
 
     # Filter resources
     candidate_resources = []
+    construction_material_ids = [
+        "stone", "limestone", "marble", "cut_stone", 
+        "clay", "bricks", 
+        "mortar", 
+        "building_materials", 
+        "timber"
+    ]
+
     for res_id, res_def in resource_type_defs.items():
         if args.food:
             if res_def.get('subCategory', '').lower() == 'food':
                 candidate_resources.append(res_def)
         elif args.goods:
-            if res_def.get('category', '').lower() != 'food': # Assuming "goods" means non-food
+            # Exclude food and specific construction materials if --goods is chosen alone
+            if res_def.get('category', '').lower() != 'food' and res_id not in construction_material_ids:
                 candidate_resources.append(res_def)
-        else: # No filter, consider all
+        elif args.construction:
+            if res_id in construction_material_ids:
+                candidate_resources.append(res_def)
+        else: # No filter, consider all (original behavior)
             candidate_resources.append(res_def)
 
     if not candidate_resources:
@@ -499,13 +521,15 @@ if __name__ == "__main__":
     parser.add_argument("--dry-run", action="store_true", help="Simulate without making Airtable changes.")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging.")
     parser.add_argument("--food", action="store_true", help="Only include food resources (subCategory 'food').")
-    parser.add_argument("--goods", action="store_true", help="Only include non-food resources (category not 'food').")
+    parser.add_argument("--goods", action="store_true", help="Only include non-food, non-construction resources.")
+    parser.add_argument("--construction", action="store_true", help="Only include specified construction materials.")
     parser.add_argument("--hour", type=int, choices=range(24), metavar="[0-23]", help="Force current hour in Venice time (0-23).")
 
     args = parser.parse_args()
 
-    if args.food and args.goods:
-        log.error("Cannot use --food and --goods simultaneously. Choose one or neither.")
+    active_mode_flags = sum([args.food, args.goods, args.construction])
+    if active_mode_flags > 1:
+        log.error("Cannot use --food, --goods, and --construction simultaneously. Choose one or none (for all resources).")
         sys.exit(1)
 
     if args.verbose:
