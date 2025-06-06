@@ -244,6 +244,22 @@ def get_kinos_api_key() -> Optional[str]:
         log.error(f"{LogColors.FAIL}Kinos API key ({KINOS_API_KEY_ENV_VAR}) not found.{LogColors.ENDC}")
     return api_key
 
+def _get_latest_daily_update(tables: Dict[str, Table]) -> Optional[str]:
+    """Fetches the content of the latest 'daily_update' message."""
+    try:
+        # Assuming 'ConsiglioDeiDieci' is the sender of daily_updates
+        records = tables["messages"].all(
+            formula="AND({Type}='daily_update', {Sender}='ConsiglioDeiDieci')",
+            sort=[("CreatedAt", "desc")],
+            max_records=1
+        )
+        if records:
+            return records[0].get("fields", {}).get("Content")
+        return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error fetching latest daily update: {e}{LogColors.ENDC}")
+        return None
+
 # --- AI Citizen Fetching ---
 
 def get_ai_citizens_for_autonomous_run(
@@ -1148,6 +1164,7 @@ def autonomously_run_ai_citizen(
     # Step 1: Gather Data
     log.info(f"{LogColors.OKCYAN}--- Step 1: Gather Data for {ai_username} ---{LogColors.ENDC}")
     latest_activity_data = _get_latest_activity_api(ai_username)
+    latest_daily_update_content = _get_latest_daily_update(tables)
 
     prompt_step1_context_elements_guided = [
         "your personal ledger (`addSystem.personal_ledger`)",
@@ -1179,7 +1196,8 @@ def autonomously_run_ai_citizen(
         "city_records_structure": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
         "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
         "personal_ledger": ai_citizen_record["fields"],
-        "latest_undertaking": latest_activity_data or {}
+        "latest_undertaking": latest_activity_data or {},
+        "latest_city_dispatch": latest_daily_update_content or "No recent city dispatch available."
     }
     if user_message:
         add_system_step1["user_provided_message"] = user_message
@@ -1240,6 +1258,7 @@ def autonomously_run_ai_citizen(
         "city_records_structure": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
         "previous_get_response": api_get_response_data, # "previous_reports" might be better
         "personal_ledger": ai_citizen_record["fields"],
+        "latest_city_dispatch": latest_daily_update_content or "No recent city dispatch available."
     }
 
     kinos_response_step2 = None
@@ -1315,6 +1334,7 @@ def autonomously_run_ai_citizen(
         "city_records_structure": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
         "post_actions_summary": api_post_responses_summary, # "outcomes_of_decrees" might be better
         "personal_ledger": ai_citizen_record["fields"],
+        "latest_city_dispatch": latest_daily_update_content or "No recent city dispatch available."
     }
 
     kinos_response_step3 = None
@@ -1396,11 +1416,13 @@ def autonomously_run_ai_citizen_unguided(
             initial_data_package = {"dry_run_data": "Simulated initial data package"}
         
         # latest_activity_data_unguided = _get_latest_activity_api(ai_username) # Now part of initial_data_package
+        latest_daily_update_content_unguided = _get_latest_daily_update(tables)
 
         prompt_intro = f"You are {ai_display_name}, a citizen of La Serenissima, navigating the complexities of 15th-century Venetian life. Your objective is to act autonomously and strategically to advance your interests. "
         
         prompt_context_elements = [
             "your intelligence briefing (`addSystem.intelligence_briefing`), which contains your personal details, recent undertakings, owned lands and buildings, and available construction sites",
+            "the latest city dispatch (Daily Update, `addSystem.latest_city_dispatch`)",
             "a summary of available missives (API endpoints, `addSystem.summary_of_available_missives`)", # General API structure notes
             "the compendium of simplified read missives (`POST /api/try-read` details, `addSystem.compendium_of_simplified_reads`)", # Specifics for /api/try-read
             "the guide to decreeing undertakings (Activity Creation Reference, `addSystem.guide_to_decreeing_undertakings`)",
@@ -1442,6 +1464,7 @@ def autonomously_run_ai_citizen_unguided(
             "compendium_of_simplified_reads": READS_REFERENCE_EXTRACTED_TEXT, # Specifics for /api/try-read
             "guide_to_decreeing_undertakings": ACTIVITY_CREATION_REFERENCE_EXTRACTED_TEXT, 
             "current_venice_time": datetime.now(VENICE_TIMEZONE).isoformat(),
+            "latest_city_dispatch": latest_daily_update_content_unguided or "No recent city dispatch available.",
             "outcomes_of_prior_actions": previous_api_results,
             "previous_kinos_response_parsing_error": None # Placeholder
         }
