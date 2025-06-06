@@ -6,11 +6,14 @@ from typing import Dict, Any, Optional
 from backend.engine.utils.activity_helpers import (
     _escape_airtable_value,
     VENICE_TIMEZONE,
+    _escape_airtable_value,
+    VENICE_TIMEZONE,
     get_building_record,
     get_citizen_record,
     update_citizen_ducats, # For fees
-    create_notification_record
+    # create_notification_record # Removed from here
 )
+from backend.engine.utils.notification_helpers import create_notification # Added import
 
 log = logging.getLogger(__name__)
 
