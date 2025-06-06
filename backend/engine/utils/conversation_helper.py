@@ -45,20 +45,14 @@ DEFAULT_TIMEOUT_SECONDS = 120 # Increased timeout for Kinos calls
 # --- Helper Functions (adapted from autonomouslyRun.py and Compagno.tsx) ---
 
 def get_kinos_model_for_social_class(username: Optional[str], social_class: Optional[str]) -> str:
-    """Determines the Kinos model based on social class, similar to Compagno.tsx."""
+    """Determines the Kinos model. Defaults to 'local' unless it's NLR."""
     if username == 'NLR': # Special case for NLR
+        log.info(f"User '{username}' is NLR. Using Kinos model 'gemini-2.5-pro-preview-05-06'.")
         return 'gemini-2.5-pro-preview-05-06'
-
-    lower_social_class = social_class.lower() if social_class else ""
-    if lower_social_class == 'nobili':
-        return 'gemini-2.5-pro-preview-05-06'
-    elif lower_social_class in ['cittadini', 'forestieri']:
-        return 'gemini-2.5-flash-preview-05-20'
-    elif lower_social_class in ['popolani', 'facchini']:
-        return 'local' 
-    else: # Default for unknown or unspecified social classes
-        log.info(f"Social class '{social_class}' for user '{username}' not in specific Kinos model tiers, or class is None. Defaulting Kinos model to 'local'.")
-        return 'local'
+    
+    # For all other users, default to 'local'
+    log.info(f"User '{username}' (Social Class: {social_class}) is not NLR. Defaulting Kinos model to 'local'.")
+    return 'local'
 
 def make_api_get_request_helper(endpoint: str, api_base_url: str, params: Optional[Dict] = None) -> Optional[Dict]:
     """Simplified helper to make GET requests to the game API."""

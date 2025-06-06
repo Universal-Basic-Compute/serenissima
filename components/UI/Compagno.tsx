@@ -97,23 +97,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const getKinosModelForSocialClass = (username?: string, socialClass?: string): string => {
     // Special case for NLR
     if (username === 'NLR') {
+      console.log(`User '${username}' is NLR. Using Kinos model 'gemini-2.5-pro-preview-05-06'.`);
       return 'gemini-2.5-pro-preview-05-06';
     }
 
-    const lowerSocialClass = socialClass?.toLowerCase();
-    switch (lowerSocialClass) {
-      case 'nobili':
-        return 'gemini-2.5-pro-preview-05-06';
-      case 'cittadini':
-      case 'forestieri':
-        return 'gemini-2.5-flash-preview-05-20';
-      case 'popolani':
-      case 'facchini':
-        return 'local';
-      default:
-        console.warn(`Unknown social class '${socialClass}' for user '${username}', defaulting to gemini-2.5-flash-preview-05-20.`);
-        return 'gemini-2.5-flash-preview-05-20'; 
-    }
+    // For all other users, default to 'local'
+    console.log(`User '${username}' (Social Class: ${socialClass}) is not NLR. Defaulting Kinos model to 'local'.`);
+    return 'local';
   };
   
 
