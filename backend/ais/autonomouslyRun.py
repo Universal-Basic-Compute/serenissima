@@ -1411,25 +1411,36 @@ def autonomously_run_ai_citizen_unguided(
             add_system_data["user_missive"] = user_message
         
         # Check if the previous Kinos response had a parsing error
-        if previous_api_results and isinstance(previous_api_results[-1], dict) and previous_api_results[-1].get("response", {}).get("error_parsing_json"):
-            # This assumes previous_api_results[-1] is the dictionary containing the 'response' key
-            response_content = previous_api_results[-1].get("response", {})
-            add_system_data["previous_kinos_response_parsing_error"] = {
-                "message": response_content.get("error_message", "Unknown parsing error."),
-                "raw_content_snippet": response_content.get("reflection", "")[:200] + "..."
-            }
-            log.warning(f"{LogColors.WARNING}Informing Kinos about previous JSON parsing error for {ai_username}.{LogColors.ENDC}")
-        elif previous_api_results and isinstance(previous_api_results[-1], list) and previous_api_results[-1]:
-            # Handle case where previous_api_results[-1] might be a list containing the response dict
-            # This was the likely cause of the AttributeError
-            last_result_item = previous_api_results[-1][0] # Access the first item if it's a list
-            if isinstance(last_result_item, dict) and last_result_item.get("response", {}).get("error_parsing_json"):
-                response_content = last_result_item.get("response", {})
+        # Note: This logic attempts to find a Kinos parsing error flag within the *game API response* stored from the previous turn.
+        # This is likely a logical misdirection, as game API responses wouldn't typically contain Kinos's internal parsing error flags.
+        # However, the fix below addresses the immediate AttributeError.
+        if previous_api_results and isinstance(previous_api_results[-1], dict):
+            last_action_result = previous_api_results[-1]
+            # Use (last_action_result.get("response") or {}) to ensure we have a dict for the next .get()
+            response_field_from_last_action = last_action_result.get("response") or {}
+            
+            if response_field_from_last_action.get("error_parsing_json"):
                 add_system_data["previous_kinos_response_parsing_error"] = {
-                    "message": response_content.get("error_message", "Unknown parsing error."),
-                    "raw_content_snippet": response_content.get("reflection", "")[:200] + "..."
+                    "message": response_field_from_last_action.get("error_message", "Unknown parsing error."),
+                    "raw_content_snippet": response_field_from_last_action.get("reflection", "")[:200] + "..."
                 }
-                log.warning(f"{LogColors.WARNING}Informing Kinos about previous JSON parsing error for {ai_username} (found in list item).{LogColors.ENDC}")
+                log.warning(f"{LogColors.WARNING}Informing Kinos about previous JSON parsing error for {ai_username} (Note: logic checks game API response).{LogColors.ENDC}")
+        
+        # The following 'elif' block for previous_api_results[-1] being a list is highly suspect given how
+        # previous_api_results is constructed (list of dicts). It's likely dead code or based on a
+        # misunderstanding of the data structure. If it were to be hit, it would need a similar safe access pattern.
+        # For now, focusing on the primary 'dict' case that caused the traceback.
+        elif previous_api_results and isinstance(previous_api_results[-1], list) and previous_api_results[-1]:
+            log.warning(f"{LogColors.WARNING}Unexpected list structure for previous_api_results[-1]. This 'elif' block might be problematic.{LogColors.ENDC}")
+            last_result_item_from_list = previous_api_results[-1][0] 
+            if isinstance(last_result_item_from_list, dict):
+                response_field_from_list_item = last_result_item_from_list.get("response") or {}
+                if response_field_from_list_item.get("error_parsing_json"):
+                    add_system_data["previous_kinos_response_parsing_error"] = {
+                        "message": response_field_from_list_item.get("error_message", "Unknown parsing error."),
+                        "raw_content_snippet": response_field_from_list_item.get("reflection", "")[:200] + "..."
+                    }
+                    log.warning(f"{LogColors.WARNING}Informing Kinos about previous JSON parsing error for {ai_username} (found in list item, logic checks game API response).{LogColors.ENDC}")
 
 
         kinos_response = None
