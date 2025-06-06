@@ -651,8 +651,8 @@ def update_citizen_record(tables, username: str, personality_text: str, core_per
         update_data = {
             "Description": personality_text,  # Airtable's "Description" field gets the new "Personality" text
             "CorePersonality": json.dumps(core_personality_array) if core_personality_array else None, # Store array as JSON string
-            "ImagePrompt": image_prompt,
-            "ImageUrl": image_url
+            "ImagePrompt": image_prompt
+            # "ImageUrl": image_url # This field no longer exists in Airtable CITIZENS table
         }
         
         # Only update FamilyMotto if it's empty and a new one is provided
