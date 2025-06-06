@@ -11,7 +11,7 @@ from backend.engine.utils.activity_helpers import (
     LogColors,
     _get_building_position_coords,
     _calculate_distance_meters,
-    get_closest_inn,
+    get_closest_building_of_type, # Changed from get_closest_inn
     get_path_between_points,
     get_citizen_current_load, # Added for daytime activity
     get_citizen_inventory_details, # For checking inventory when full
@@ -65,7 +65,7 @@ def process_forestieri_night_activity(
         return True
 
     log.info(f"{LogColors.OKCYAN}Processing nighttime activity for Forestiero: {citizen_name} (CustomID: {citizen_custom_id}). Finding an inn.{LogColors.ENDC}")
-    closest_inn = get_closest_inn(tables, citizen_position)
+    closest_inn = get_closest_building_of_type(tables, citizen_position, "inn") # Use get_closest_building_of_type
     if closest_inn:
         inn_position_coords = _get_building_position_coords(closest_inn)
         inn_custom_id = closest_inn['fields'].get('BuildingId', closest_inn['id'])
