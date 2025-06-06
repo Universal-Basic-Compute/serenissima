@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { transportService } from '@/lib/services/TransportService';
+import NodeCache from 'node-cache';
+
+// Initialize cache: stdTTL is standard time-to-live in seconds, checkperiod is when to check for expired items.
+// Cache successful paths for 1 hour, errors for 5 minutes.
+const pathCache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
+const ERROR_CACHE_TTL = 300; // 5 minutes for error caching
 
 // Define speeds
 const WALKING_SPEED_MPS = 1.4; // meters per second
@@ -108,6 +114,45 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return distance;
 }
 
+async function fetchTransporterDetails(path: any[]): Promise<string | null> {
+  let transporter = null;
+  const usesGondola = path.some((p: any) => p.transportMode === 'gondola');
+
+  if (usesGondola) {
+    const dockIds = [...new Set(path.filter((p: any) => p.type === 'dock' && p.nodeId).map((p: any) => p.nodeId))];
+    if (dockIds.length > 0) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+      const buildingPromises = dockIds.map(dockId => {
+        const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(dockId)}`, baseUrl);
+        return fetch(buildingUrl.toString())
+          .then(res => {
+            if (res.ok) return res.json();
+            console.warn(`Failed to fetch building details for dock ${dockId} (transporter lookup): ${res.status}`);
+            return null;
+          })
+          .catch(e => {
+            console.error(`Error fetching building details for dock ${dockId} (transporter lookup):`, e);
+            return null;
+          });
+      });
+
+      try {
+        const buildingResults = await Promise.all(buildingPromises);
+        for (const buildingData of buildingResults) {
+          if (buildingData && buildingData.building && buildingData.building.runBy) {
+            transporter = buildingData.building.runBy;
+            console.log(`Identified transporter ${transporter} from one of the docks (parallel fetch for transporter lookup)`);
+            break;
+          }
+        }
+      } catch (e) {
+        console.error(`Error processing parallel building details fetches for docks (transporter lookup):`, e);
+      }
+    }
+  }
+  return transporter;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -140,80 +185,85 @@ export async function GET(request: Request) {
     
     const startPoint = { lat: startLat, lng: startLng };
     const endPoint = { lat: endLat, lng: endLng };
-    
-    // Find the path using the transport service
-    const result = await transportService.findPath(startPoint, endPoint);
+    const pathfindingMode = 'real'; // GET requests implicitly use 'real' mode
 
-    // If path was found successfully, add timing and journey information
-    if (result.success && result.path) {
-      // Ensure transportMode is set on path points for the response
-      if (result.path.length > 0) {
-        result.path[0].transportMode = result.path[0].transportMode || null;
-        for (let i = 1; i < result.path.length; i++) {
-          if (!result.path[i].transportMode) {
-            result.path[i].transportMode = 'walk'; // Default to 'walk'
+    const cacheKey = `path_${startLat}_${startLng}_${endLat}_${endLng}_${pathfindingMode}`;
+    const cachedData = pathCache.get<any>(cacheKey);
+
+    if (cachedData) {
+      console.log(`[Cache HIT] GET /api/transport for key: ${cacheKey}`);
+      if (cachedData.success) {
+        const transportStartDate = startDateParam ? new Date(startDateParam) : new Date();
+        const endDate = new Date(transportStartDate.getTime() + (cachedData.travelTimeSeconds * 1000));
+        
+        return NextResponse.json({
+          success: true,
+          path: cachedData.path,
+          timing: {
+            startDate: transportStartDate.toISOString(),
+            endDate: endDate.toISOString(),
+            durationSeconds: cachedData.travelTimeSeconds,
+            distanceMeters: cachedData.distanceMeters
+          },
+          journey: cachedData.journey,
+          transporter: cachedData.transporter,
+          _cached: true
+        });
+      } else {
+        // Return cached error
+        return NextResponse.json({ success: false, error: cachedData.error, _cached: true });
+      }
+    }
+    console.log(`[Cache MISS] GET /api/transport for key: ${cacheKey}`);
+
+    // Find the path using the transport service
+    const pathResult = await transportService.findPath(startPoint, endPoint, pathfindingMode);
+
+    if (pathResult.success && pathResult.path) {
+      if (pathResult.path.length > 0) {
+        pathResult.path[0].transportMode = pathResult.path[0].transportMode || null;
+        for (let i = 1; i < pathResult.path.length; i++) {
+          if (!pathResult.path[i].transportMode) {
+            pathResult.path[i].transportMode = 'walk';
           }
         }
       }
 
-      const distance = calculatePathDistance(result.path);
-      const travelTimeSeconds = calculatePathTravelTime(result.path);
+      const distance = calculatePathDistance(pathResult.path);
+      const travelTimeSeconds = calculatePathTravelTime(pathResult.path);
+      const journey = extractJourneyFromPath(pathResult.path);
+      const transporter = await fetchTransporterDetails(pathResult.path);
+
+      const dataToCache = {
+        success: true,
+        path: pathResult.path,
+        distanceMeters: distance,
+        travelTimeSeconds: travelTimeSeconds,
+        journey: journey,
+        transporter: transporter
+      };
+      pathCache.set(cacheKey, dataToCache);
       
       const transportStartDate = startDateParam ? new Date(startDateParam) : new Date();
       const endDate = new Date(transportStartDate.getTime() + (travelTimeSeconds * 1000));
       
-      result.timing = {
-        startDate: transportStartDate.toISOString(),
-        endDate: endDate.toISOString(),
-        durationSeconds: travelTimeSeconds,
-        distanceMeters: distance
-      };
-      
-      const journey = extractJourneyFromPath(result.path);
-      result.journey = journey;
-
-      // Determine transporter if gondola is used (similar to POST)
-      let transporter = null;
-      const usesGondola = result.path.some((p: any) => p.transportMode === 'gondola');
-
-      if (usesGondola) {
-        const dockIds = [...new Set(result.path.filter((p: any) => p.type === 'dock' && p.nodeId).map((p: any) => p.nodeId))];
-        if (dockIds.length > 0) {
-          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-          const buildingPromises = dockIds.map(dockId => {
-            const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(dockId)}`, baseUrl);
-            return fetch(buildingUrl.toString())
-              .then(res => {
-                if (res.ok) return res.json();
-                console.warn(`Failed to fetch building details for dock ${dockId} (GET request): ${res.status}`);
-                return null; // Resolve with null on error to not break Promise.all
-              })
-              .catch(e => {
-                console.error(`Error fetching building details for dock ${dockId} (GET request):`, e);
-                return null; // Resolve with null on fetch error
-              });
-          });
-
-          try {
-            const buildingResults = await Promise.all(buildingPromises);
-            for (const buildingData of buildingResults) {
-              if (buildingData && buildingData.building && buildingData.building.runBy) {
-                transporter = buildingData.building.runBy;
-                console.log(`Identified transporter ${transporter} from one of the docks (parallel fetch) for GET request`);
-                break; 
-              }
-            }
-          } catch (e) {
-            // This catch might be redundant if individual fetches handle their errors,
-            // but kept for safety for Promise.all itself.
-            console.error(`Error processing parallel building details fetches for docks (GET request):`, e);
-          }
-        }
-      }
-      result.transporter = transporter;
+      return NextResponse.json({
+        success: true,
+        path: pathResult.path,
+        timing: {
+          startDate: transportStartDate.toISOString(),
+          endDate: endDate.toISOString(),
+          durationSeconds: travelTimeSeconds,
+          distanceMeters: distance
+        },
+        journey: journey,
+        transporter: transporter
+      });
+    } else {
+      // Cache the failure
+      pathCache.set(cacheKey, { success: false, error: pathResult.error }, ERROR_CACHE_TTL);
+      return NextResponse.json(pathResult); // pathResult already contains { success: false, error: ... }
     }
-    
-    return NextResponse.json(result);
   } catch (error) {
     console.error('Error in GET transport route:', error);
     return NextResponse.json(
@@ -251,16 +301,42 @@ export async function POST(request: Request) {
       );
     }
     
-    // Find the path using the transport service with specified mode or default to 'real'
-    let result = await transportService.findPath(startPoint, endPoint, pathfindingMode || 'real');
+    const effectivePathfindingMode = pathfindingMode || 'real';
+
+    const cacheKey = `path_${startPoint.lat}_${startPoint.lng}_${endPoint.lat}_${endPoint.lng}_${effectivePathfindingMode}`;
+    const cachedData = pathCache.get<any>(cacheKey);
+
+    if (cachedData) {
+      console.log(`[Cache HIT] POST /api/transport for key: ${cacheKey}`);
+      if (cachedData.success) {
+        const endDate = new Date(transportStartDate.getTime() + (cachedData.travelTimeSeconds * 1000));
+        return NextResponse.json({
+          success: true,
+          path: cachedData.path,
+          timing: {
+            startDate: transportStartDate.toISOString(),
+            endDate: endDate.toISOString(),
+            durationSeconds: cachedData.travelTimeSeconds,
+            distanceMeters: cachedData.distanceMeters
+          },
+          journey: cachedData.journey,
+          transporter: cachedData.transporter,
+          _cached: true
+        });
+      } else {
+        return NextResponse.json({ success: false, error: cachedData.error, _cached: true });
+      }
+    }
+    console.log(`[Cache MISS] POST /api/transport for key: ${cacheKey}`);
     
-    // If regular pathfinding failed with "not within any polygon" error, try water-only pathfinding
-    if (!result.success && result.error === 'Start or end point is not within any polygon') {
+    let pathResult = await transportService.findPath(startPoint, endPoint, effectivePathfindingMode);
+    
+    if (!pathResult.success && pathResult.error === 'Start or end point is not within any polygon') {
       console.log('Regular pathfinding failed, attempting water-only pathfinding as fallback');
-      result = await transportService.findWaterOnlyPath(startPoint, endPoint, pathfindingMode || 'real');
+      pathResult = await transportService.findWaterOnlyPath(startPoint, endPoint, effectivePathfindingMode);
         
-      // If water-only pathfinding also failed, return a clear error
-      if (!result.success) {
+      if (!pathResult.success) {
+        pathCache.set(cacheKey, { success: false, error: 'No path could be found between the specified points', details: 'Points are not within navigable areas or no valid route exists' }, ERROR_CACHE_TTL);
         return NextResponse.json({
           success: false,
           error: 'No path could be found between the specified points',
@@ -269,79 +345,49 @@ export async function POST(request: Request) {
       }
     }
     
-    // If path was found successfully, calculate the endDate and determine transporter
-    if (result.success && result.path) {
-      // Ensure transportMode is set on path points for the response
-      if (result.path.length > 0) {
-        result.path[0].transportMode = result.path[0].transportMode || null;
-        for (let i = 1; i < result.path.length; i++) {
-          if (!result.path[i].transportMode) {
-            result.path[i].transportMode = 'walk'; // Default to 'walk'
+    if (pathResult.success && pathResult.path) {
+      if (pathResult.path.length > 0) {
+        pathResult.path[0].transportMode = pathResult.path[0].transportMode || null;
+        for (let i = 1; i < pathResult.path.length; i++) {
+          if (!pathResult.path[i].transportMode) {
+            pathResult.path[i].transportMode = 'walk';
           }
         }
       }
 
-      // Calculate the distance of the path
-      const distance = calculatePathDistance(result.path);
-      const travelTimeSeconds = calculatePathTravelTime(result.path);
+      const distance = calculatePathDistance(pathResult.path);
+      const travelTimeSeconds = calculatePathTravelTime(pathResult.path);
+      const journey = extractJourneyFromPath(pathResult.path);
+      const transporter = await fetchTransporterDetails(pathResult.path);
+
+      const dataToCache = {
+        success: true,
+        path: pathResult.path,
+        distanceMeters: distance,
+        travelTimeSeconds: travelTimeSeconds,
+        journey: journey,
+        transporter: transporter
+      };
+      pathCache.set(cacheKey, dataToCache);
       
-      // Calculate endDate by adding travel time to startDate
       const endDate = new Date(transportStartDate.getTime() + (travelTimeSeconds * 1000));
       
-      // Add timing information to the result
-      result.timing = {
-        startDate: transportStartDate.toISOString(),
-        endDate: endDate.toISOString(),
-        durationSeconds: travelTimeSeconds,
-        distanceMeters: distance
-      };
-      
-      // Extract journey information from the path
-      const journey = extractJourneyFromPath(result.path);
-      result.journey = journey;
-
-      // Determine transporter if gondola is used
-      let transporter = null;
-      const usesGondola = result.path.some((p: any) => p.transportMode === 'gondola');
-
-      if (usesGondola) {
-        const dockIds = [...new Set(result.path.filter((p: any) => p.type === 'dock' && p.nodeId).map((p: any) => p.nodeId))];
-        if (dockIds.length > 0) {
-          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-          const buildingPromises = dockIds.map(dockId => {
-            const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(dockId)}`, baseUrl);
-            return fetch(buildingUrl.toString())
-              .then(res => {
-                if (res.ok) return res.json();
-                console.warn(`Failed to fetch building details for dock ${dockId} (POST request): ${res.status}`);
-                return null; // Resolve with null on error to not break Promise.all
-              })
-              .catch(e => {
-                console.error(`Error fetching building details for dock ${dockId} (POST request):`, e);
-                return null; // Resolve with null on fetch error
-              });
-          });
-
-          try {
-            const buildingResults = await Promise.all(buildingPromises);
-            for (const buildingData of buildingResults) {
-              if (buildingData && buildingData.building && buildingData.building.runBy) {
-                transporter = buildingData.building.runBy;
-                console.log(`Identified transporter ${transporter} from one of the docks (parallel fetch) for POST request`);
-                break; 
-              }
-            }
-          } catch (e) {
-            // This catch might be redundant if individual fetches handle their errors,
-            // but kept for safety for Promise.all itself.
-            console.error(`Error processing parallel building details fetches for docks (POST request):`, e);
-          }
-        }
-      }
-      result.transporter = transporter; // Add transporter to the result, will be null if not found/not applicable
+      return NextResponse.json({
+        success: true,
+        path: pathResult.path,
+        timing: {
+          startDate: transportStartDate.toISOString(),
+          endDate: endDate.toISOString(),
+          durationSeconds: travelTimeSeconds,
+          distanceMeters: distance
+        },
+        journey: journey,
+        transporter: transporter
+      });
+    } else {
+      pathCache.set(cacheKey, { success: false, error: pathResult.error }, ERROR_CACHE_TTL);
+      return NextResponse.json(pathResult);
     }
-    
-    return NextResponse.json(result);
   } catch (error) {
     console.error('Error in transport route:', error);
     return NextResponse.json(
