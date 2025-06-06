@@ -129,6 +129,10 @@ def process_encounter_pair(
     dry_run: bool = False
 ):
     """Generates a 3-turn conversation between two citizens."""
+    # Ensure citizen1_username is alphabetically first
+    if citizen1_username > citizen2_username:
+        citizen1_username, citizen2_username = citizen2_username, citizen1_username
+    
     log.info(f"{LogColors.OKCYAN}Processing encounter between {citizen1_username} and {citizen2_username} at {location_id}.{LogColors.ENDC}")
 
     conversation_participants = [citizen1_username, citizen2_username]
