@@ -72,7 +72,12 @@ def process_cancel_land_offer_fn(tables: dict, activity_record: dict, building_t
 
         # Update offer contract status
         now_iso = datetime.now(timezone.utc).isoformat()
-        tables['contracts'].update(offer_contract_record['id'], {"Status": "cancelled", "UpdatedAt": now_iso, "Notes": f"Cancelled by offerer on {now_iso} via activity {activity_guid}."})
+        update_payload = {
+            "Status": "cancelled", 
+            "Notes": f"Cancelled by offerer on {now_iso} via activity {activity_guid}."
+            # UpdatedAt is handled by Airtable, so it's removed from the payload
+        }
+        tables['contracts'].update(offer_contract_record['id'], update_payload)
         log.info(f"{LogColors.SUCCESS}Offer contract {offer_contract_custom_id} status updated to 'cancelled'. Activity {activity_guid}.{LogColors.ENDC}")
         
         return True
