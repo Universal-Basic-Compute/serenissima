@@ -241,18 +241,34 @@ const ArrivalPage: React.FC = () => {
       setAisLoading(true);
       const defaultProfile = await fetchCitizen(defaultAIUsername);
 
-      // Fetch Galley AI (Random Forestieri, InVenice)
+      if (!defaultProfile || !defaultProfile.username) {
+        console.error(`Default AI profile "${defaultAIUsername}" could not be loaded or is missing a username. Arrival sequence might be impaired.`);
+        // Set all AIs to null if default is unusable, or handle error more gracefully
+        setGalleyAI(null);
+        setCustomsAI(null);
+        setHomeAI(null);
+        setInnAI(null);
+        setAisLoading(false);
+        return;
+      }
+
+      // Helper to select a random citizen with a valid username
+      const selectValidCitizen = (citizens: AIProfile[], type: string): AIProfile | null => {
+        const validCitizens = citizens.filter(c => c.username);
+        if (validCitizens.length > 0) {
+          return validCitizens[Math.floor(Math.random() * validCitizens.length)];
+        }
+        console.warn(`No valid citizens (with username) found for ${type} AI.`);
+        return null;
+      };
+
+      // Fetch Galley AI (Random Forestieri, InVenice, with username)
       try {
         const res = await fetch(`/api/citizens?SocialClass=Forestieri&InVenice=true`);
         if (res.ok) {
           const data = await res.json();
-          if (data.success && data.citizens.length > 0) {
-            const randomForestieri = data.citizens[Math.floor(Math.random() * data.citizens.length)];
-            setGalleyAI(randomForestieri);
-          } else {
-            console.warn("No Forestieri found for Galley AI, using default.");
-            setGalleyAI(defaultProfile);
-          }
+          const selected = data.success ? selectValidCitizen(data.citizens, "Galley") : null;
+          setGalleyAI(selected || defaultProfile);
         } else {
           console.error("Failed to fetch Forestieri for Galley AI, using default.");
           setGalleyAI(defaultProfile);
@@ -262,25 +278,18 @@ const ArrivalPage: React.FC = () => {
         setGalleyAI(defaultProfile); 
       }
 
-      // Fetch Customs AI (Random Occupant of customs_house)
+      // Fetch Customs AI (Random Occupant of customs_house, with username)
       try {
         const buildingRes = await fetch(`/api/buildings?Type=customs_house`);
         if (buildingRes.ok) {
           const buildingData = await buildingRes.json();
-          // Check if buildingData itself and buildingData.buildings exist and has items
           if (buildingData && buildingData.buildings && buildingData.buildings.length > 0) {
-            const occupiedBuildings = buildingData.buildings.filter((b: any) => b.occupant);
-            if (occupiedBuildings.length > 0) {
-              const randomOccupiedBuilding = occupiedBuildings[Math.floor(Math.random() * occupiedBuildings.length)];
-              const occupantUsername = randomOccupiedBuilding.occupant;
-              const officerProfile = await fetchCitizen(occupantUsername);
-              setCustomsAI(officerProfile || defaultProfile);
-            } else {
-              console.warn("No customs_house occupant found in any returned buildings, using default Customs AI.");
-              setCustomsAI(defaultProfile);
-            }
+            const occupants = buildingData.buildings.map((b: any) => b.occupant).filter(Boolean);
+            const occupantProfiles = (await Promise.all(occupants.map((occ: string) => fetchCitizen(occ)))).filter(p => p && p.username) as AIProfile[];
+            const selected = selectValidCitizen(occupantProfiles, "Customs");
+            setCustomsAI(selected || defaultProfile);
           } else {
-            console.warn("No buildings of type customs_house found or API call unsuccessful, using default Customs AI.");
+            console.warn("No customs_house or no occupants found, using default Customs AI.");
             setCustomsAI(defaultProfile);
           }
         } else {
@@ -292,18 +301,13 @@ const ArrivalPage: React.FC = () => {
         setCustomsAI(defaultProfile); 
       }
 
-      // Fetch Home AI (Random Cittadini, InVenice)
+      // Fetch Home AI (Random Cittadini, InVenice, with username)
       try {
         const res = await fetch(`/api/citizens?SocialClass=Cittadini&InVenice=true`);
         if (res.ok) {
           const data = await res.json();
-          if (data.success && data.citizens.length > 0) {
-            const randomCittadini = data.citizens[Math.floor(Math.random() * data.citizens.length)];
-            setHomeAI(randomCittadini);
-          } else {
-            console.warn("No Cittadini found for Home AI, using default.");
-            setHomeAI(defaultProfile);
-          }
+          const selected = data.success ? selectValidCitizen(data.citizens, "Home") : null;
+          setHomeAI(selected || defaultProfile);
         } else {
           console.error("Failed to fetch Cittadini for Home AI, using default.");
           setHomeAI(defaultProfile);
@@ -313,25 +317,18 @@ const ArrivalPage: React.FC = () => {
         setHomeAI(defaultProfile); 
       }
 
-      // Fetch Inn AI (Random Occupant of inn)
+      // Fetch Inn AI (Random Occupant of inn, with username)
       try {
         const buildingRes = await fetch(`/api/buildings?Type=inn`);
         if (buildingRes.ok) {
           const buildingData = await buildingRes.json();
-          // Check if buildingData itself and buildingData.buildings exist and has items
           if (buildingData && buildingData.buildings && buildingData.buildings.length > 0) {
-            const occupiedBuildings = buildingData.buildings.filter((b: any) => b.occupant);
-            if (occupiedBuildings.length > 0) {
-              const randomOccupiedBuilding = occupiedBuildings[Math.floor(Math.random() * occupiedBuildings.length)];
-              const occupantUsername = randomOccupiedBuilding.occupant;
-              const innkeeperProfile = await fetchCitizen(occupantUsername);
-              setInnAI(innkeeperProfile || defaultProfile);
-            } else {
-              console.warn("No inn occupant found in any returned buildings, using default Inn AI.");
-              setInnAI(defaultProfile);
-            }
+            const occupants = buildingData.buildings.map((b: any) => b.occupant).filter(Boolean);
+            const occupantProfiles = (await Promise.all(occupants.map((occ: string) => fetchCitizen(occ)))).filter(p => p && p.username) as AIProfile[];
+            const selected = selectValidCitizen(occupantProfiles, "Inn");
+            setInnAI(selected || defaultProfile);
           } else {
-            console.warn("No buildings of type inn found or API call unsuccessful, using default Inn AI.");
+            console.warn("No inn or no occupants found, using default Inn AI.");
             setInnAI(defaultProfile);
           }
         } else {
@@ -498,42 +495,34 @@ Your first message to ${userName}:`;
   // Effet 2: Initier la conversation IA si les conditions sont remplies
   useEffect(() => {
     const currentAI = getCurrentAI();
-    
-    if (currentAI && currentUserUsername !== DEFAULT_HUMAN_USERNAME && 
-        fetchedMessagesForStep && fetchedMessagesForStep.length === 0 && 
-        contextualDataForChat) {
-      
-      // S'assurer que isAiInitiating est vrai avant d'envoyer, et faux après
-      if (!isAiInitiating) setIsAiInitiating(true); 
-      sendSystemInitiationMessage(currentAI, currentUserProfile, currentStep, contextualDataForChat)
-        .finally(() => setIsAiInitiating(false));
-    } else if (fetchedMessagesForStep !== null) {
-      // Si les messages ont été récupérés (ou une tentative a été faite) et que nous n'initialisons pas, alors le chargement est terminé.
-      // Cela couvre le cas où il y a des messages existants ou pas de contexte.
-      setIsAiInitiating(false);
-    }
     const keyForInitiation = `${currentStep}-${currentAI?.username}`;
 
-    if (currentAI && currentUserUsername !== DEFAULT_HUMAN_USERNAME &&
+    if (currentAI && currentAI.username && currentUserUsername !== DEFAULT_HUMAN_USERNAME &&
         fetchedMessagesForStep && fetchedMessagesForStep.length === 0 &&
         contextualDataForChat && !initiationDoneRef.current[keyForInitiation]) {
 
-      setIsAiInitiating(true);
+      // Il est important de mettre isAiInitiating à true ici, car Effet 1 pourrait l'avoir mis à false
+      // si les données sont arrivées rapidement avant que cette condition ne soit vérifiée.
+      if (!isAiInitiating) setIsAiInitiating(true);
       initiationDoneRef.current[keyForInitiation] = true;
 
       sendSystemInitiationMessage(currentAI, currentUserProfile, currentStep, contextualDataForChat)
         .finally(() => {
           setIsAiInitiating(false);
         });
-    } else if (fetchedMessagesForStep && fetchedMessagesForStep.length > 0) {
-      setIsAiInitiating(false);
-      if (currentAI && !initiationDoneRef.current[keyForInitiation]) {
+    } else if (currentAI && currentAI.username && fetchedMessagesForStep && fetchedMessagesForStep.length > 0) {
+      // Messages chargés depuis l'historique, ou l'IA a déjà répondu.
+      // Marquer l'initiation comme faite pour cette IA/étape si ce n'est pas déjà le cas.
+      if (!initiationDoneRef.current[keyForInitiation]) {
         initiationDoneRef.current[keyForInitiation] = true;
       }
-    } else if (!currentAI || currentUserUsername === DEFAULT_HUMAN_USERNAME || !contextualDataForChat) {
-        setIsAiInitiating(false);
+      if (isAiInitiating) setIsAiInitiating(false); // Assurer que le chargement s'arrête
+    } else if (!currentAI || !currentAI.username || currentUserUsername === DEFAULT_HUMAN_USERNAME || !contextualDataForChat || !fetchedMessagesForStep) {
+      // Conditions non remplies pour l'initiation (ex: utilisateur invité, pas d'IA, pas de contexte, messages pas encore récupérés)
+      // ou l'initiation est déjà faite (vérifié par !initiationDoneRef.current[keyForInitiation] plus haut)
+      if (isAiInitiating) setIsAiInitiating(false);
     }
-  }, [fetchedMessagesForStep, contextualDataForChat, currentStep, currentUserUsername, getCurrentAI, sendSystemInitiationMessage, currentUserProfile]);
+  }, [fetchedMessagesForStep, contextualDataForChat, currentStep, currentUserUsername, getCurrentAI, sendSystemInitiationMessage, currentUserProfile, isAiInitiating]);
 
 
   // Scroll vers le bas lorsque de nouveaux messages sont ajoutés
