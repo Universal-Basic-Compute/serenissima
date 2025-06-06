@@ -574,8 +574,9 @@ Your response:`;
               kinosBody.addSystem = addSystemPayload;
             }
 
+            const sortedChannelName = [internalCurrentCitizenUsername, citizen.username].sort().join('_');
             const kinosResponse = await fetch(
-              `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${citizen.username}/channels/${internalCurrentCitizenUsername}/messages`, // Use state variable
+              `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${citizen.username}/channels/${sortedChannelName}/messages`,
               {
                 method: 'POST',
                 headers: {

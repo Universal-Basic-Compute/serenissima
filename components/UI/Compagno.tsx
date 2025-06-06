@@ -658,11 +658,10 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
           try {
             const aiKinUsername = selectedCitizen; // The AI kin we are talking to (can be self)
-            // const channelUsername = username;    // OLD: The channel is always associated with the human user
-            const channelUsername = actualSenderUsername; // NEW: Use the reliably fetched sender username
+            const sortedChannelName = [actualSenderUsername, selectedCitizen].sort().join('_'); // Standardized channel name
 
             const aiDisplayName = contextualDataForChat?.targetProfile?.firstName || aiKinUsername;
-            const senderDisplayName = contextualDataForChat?.senderProfile?.firstName || channelUsername; // channelUsername here is now actualSenderUsername
+            const senderDisplayName = contextualDataForChat?.senderProfile?.firstName || actualSenderUsername;
             
             let kinosPromptContent = '';
             if (isSelfChat) {
@@ -715,7 +714,7 @@ Your response:`;
             }
 
             const kinosResponse = await fetch(
-              `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${aiKinUsername}/channels/${channelUsername}/messages`,
+              `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${aiKinUsername}/channels/${sortedChannelName}/messages`,
               {
                 method: 'POST',
                 headers: {
