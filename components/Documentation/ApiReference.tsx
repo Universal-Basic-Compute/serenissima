@@ -2454,6 +2454,9 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             This results in one or more records in the `ACTIVITIES` table.
             The endpoint returns the result from the Python engine, indicating the outcome of the attempt to initiate the endeavor and potentially the first activity created in the chain.
           </p>
+          <p className="mb-2 text-sm italic">
+            Note: Certain <code>activityType</code> values trigger complex behaviors. For example, <code>activityType: "eat"</code> will cause the citizen to attempt to eat from their inventory, then their home, then a tavern, creating the necessary travel activities if needed.
+          </p>
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
