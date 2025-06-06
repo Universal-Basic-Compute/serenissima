@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import Airtable from 'airtable';
 
 // Helper to escape single quotes for Airtable formulas
@@ -10,7 +10,7 @@ function escapeAirtableValue(value: string): string {
 }
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { contractId: string } }
 ) {
   const contractId = params.contractId;
