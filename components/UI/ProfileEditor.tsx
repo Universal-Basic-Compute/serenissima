@@ -47,8 +47,9 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: citizenProfile.id,
-          username,
+          id: citizenProfile.id, // This is the Airtable Record ID
+          currentCitizenUsername: citizenProfile.username, // Pass current username for activity service
+          username, // New username (if changed)
           firstName,
           lastName,
           familyMotto,
@@ -58,24 +59,45 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
       
       const data = await response.json();
       
+      // The response from /api/citizens/update (which proxies /api/activities/try-create)
+      // might not directly contain `data.citizen` in the same way.
+      // It will likely return the result of the activity creation.
+      // We need to ensure the `citizenProfileUpdated` event receives the *actual updated profile*.
+      // The `try-create` for `update_citizen_profile` *should* return the updated citizen profile
+      // in its `activityResult.citizen` or similar field.
+      // Let's assume for now the backend's `try-create` for this activity type
+      // returns a structure like { success: true, activityResult: { citizen: {...} } }
+      // or { success: true, citizen: {...} } if it's simplified.
+
       if (data.success) {
-        // Update local storage with the new profile data
-        localStorage.setItem('citizenProfile', JSON.stringify(data.citizen));
-        
-        // Dispatch an event to notify other components about the profile update
-        window.dispatchEvent(new CustomEvent('citizenProfileUpdated', { 
-          detail: data.citizen 
-        }));
-        
-        // Call the success callback if provided
-        if (onSuccess) {
-          onSuccess(data.citizen);
+        const updatedCitizenProfile = data.citizen || (data.activityResult && data.activityResult.citizen);
+
+        if (updatedCitizenProfile) {
+          // Update local storage with the new profile data
+          localStorage.setItem('citizenProfile', JSON.stringify(updatedCitizenProfile));
+          
+          // Dispatch an event to notify other components about the profile update
+          window.dispatchEvent(new CustomEvent('citizenProfileUpdated', { 
+            detail: updatedCitizenProfile 
+          }));
+          
+          // Call the success callback if provided
+          if (onSuccess) {
+            onSuccess(updatedCitizenProfile);
+          }
+          
+          // Close the editor
+          onClose();
+        } else {
+          // This case means the API call was "successful" but didn't return the expected citizen profile.
+          // This could happen if the /api/activities/try-create response structure is different.
+          console.warn('Profile update API call succeeded, but no updated citizen profile was returned in the response.', data);
+          setError('Profile updated, but could not refresh data. Please reload.');
+          // Optionally, still close or provide a way to manually refresh.
+          onClose(); // Close anyway, user might see stale data until next load.
         }
-        
-        // Close the editor
-        onClose();
       } else {
-        setError(data.error || 'Failed to update profile');
+        setError(data.error || data.details || 'Failed to update profile');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
