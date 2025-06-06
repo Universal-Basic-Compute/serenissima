@@ -243,8 +243,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           currentCitizen: currentCitizenUsername,
-          otherCitizen: landId, // Use landId as the "other party" for context
-          messageTypeContext: 'land_chat' // Specific context for backend
+          otherCitizen: landId, // Keep for context if backend uses it
+          channel: `land_${landId}`, // Explicitly send the channel for filtering
+          messageTypeContext: 'land_chat' // Keep for context if backend uses it
         }),
       });
 
