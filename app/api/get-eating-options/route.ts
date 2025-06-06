@@ -145,17 +145,31 @@ export async function GET(request: Request) {
   }
 
   const options: EatingOption[] = [];
+  const debugInfo: Record<string, any> = {
+    queries: {},
+    results: {},
+    foodResourceTypesUsed: FOOD_RESOURCE_TYPES,
+  };
 
   try {
     const citizen = await fetchCitizenByName(citizenUsername);
     if (!citizen) {
-      return NextResponse.json({ success: false, error: `Citizen ${citizenUsername} not found` }, { status: 404 });
+      return NextResponse.json({ success: false, error: `Citizen ${citizenUsername} not found`, debug: debugInfo }, { status: 404 });
     }
+    debugInfo.citizenRecord = citizen;
     const citizenDucats = (citizen.fields.Ducats as number) || 0;
+    debugInfo.citizenDucats = citizenDucats;
 
     // 1. Check Inventory
-    const inventoryResources = await fetchResources('citizen', citizenUsername, citizenUsername, FOOD_RESOURCE_TYPES);
-    inventoryResources.forEach(res => {
+    const inventoryResourceTypesFilter = FOOD_RESOURCE_TYPES.map(rt => `{Type} = '${escapeAirtableValue(rt)}'`);
+    const inventoryOrFilter = `OR(${inventoryResourceTypesFilter.join(', ')})`;
+    const inventoryFormula = `AND({AssetType} = 'citizen', {Asset} = '${escapeAirtableValue(citizenUsername)}', {Owner} = '${escapeAirtableValue(citizenUsername)}', ${inventoryOrFilter})`;
+    debugInfo.queries.inventory = inventoryFormula;
+    const inventoryResources = await airtable('RESOURCES').select({ filterByFormula: inventoryFormula }).all();
+    const formattedInventoryResources = inventoryResources.map(r => ({ id: r.id, fields: r.fields }));
+    debugInfo.results.inventory = formattedInventoryResources;
+
+    formattedInventoryResources.forEach(res => {
       const quantity = (res.fields.Count as number) || 0;
       if (quantity > 0) {
         options.push({
@@ -169,11 +183,20 @@ export async function GET(request: Request) {
 
     // 2. Check Home
     const homeBuilding = await fetchCitizenHome(citizenUsername);
+    debugInfo.homeBuildingRecord = homeBuilding;
     if (homeBuilding && homeBuilding.fields.BuildingId) {
       const homeBuildingId = homeBuilding.fields.BuildingId as string;
       const homeBuildingName = homeBuilding.fields.Name as string || homeBuildingId;
-      const homeResources = await fetchResources('building', homeBuildingId, citizenUsername, FOOD_RESOURCE_TYPES);
-      homeResources.forEach(res => {
+
+      const homeResourceTypesFilter = FOOD_RESOURCE_TYPES.map(rt => `{Type} = '${escapeAirtableValue(rt)}'`);
+      const homeOrFilter = `OR(${homeResourceTypesFilter.join(', ')})`;
+      const homeResourcesFormula = `AND({AssetType} = 'building', {Asset} = '${escapeAirtableValue(homeBuildingId)}', {Owner} = '${escapeAirtableValue(citizenUsername)}', ${homeOrFilter})`;
+      debugInfo.queries.homeResources = homeResourcesFormula;
+      const homeResources = await airtable('RESOURCES').select({ filterByFormula: homeResourcesFormula }).all();
+      const formattedHomeResources = homeResources.map(r => ({ id: r.id, fields: r.fields }));
+      debugInfo.results.homeResources = formattedHomeResources;
+      
+      formattedHomeResources.forEach(res => {
         const quantity = (res.fields.Count as number) || 0;
         if (quantity > 0) {
           options.push({
@@ -189,35 +212,75 @@ export async function GET(request: Request) {
     }
 
     // 3. Check Taverns
-    const tavernOffers = await fetchTavernsWithFood(FOOD_RESOURCE_TYPES);
-    tavernOffers.forEach(offer => {
-      if (citizenDucats >= (offer.price || 0)) {
-        options.push({
-          source: 'tavern',
-          details: `${offer.resourceType} à ${offer.tavernName} (Prix: ${offer.price || 0} Ducats, Disponible: ${(offer.quantityAvailable || 0).toFixed(1)})`,
-          resourceType: offer.resourceType as string,
-          buildingId: offer.tavernId as string,
-          buildingName: offer.tavernName as string,
-          price: offer.price as number,
-          quantity: offer.quantityAvailable as number,
-        });
-      } else {
-         options.push({
-          source: 'tavern',
-          details: `${offer.resourceType} à ${offer.tavernName} (Prix: ${offer.price || 0} Ducats, Disponible: ${(offer.quantityAvailable || 0).toFixed(1)}) - Fonds insuffisants`,
-          resourceType: offer.resourceType as string,
-          buildingId: offer.tavernId as string,
-          buildingName: offer.tavernName as string,
-          price: offer.price as number,
-          quantity: offer.quantityAvailable as number,
-        });
-      }
-    });
+    const tavernFoodOffersDebug: any[] = [];
+    const tavernResourceTypeFilters = FOOD_RESOURCE_TYPES.map(rt => `{ResourceType} = '${escapeAirtableValue(rt)}'`);
+    const tavernOrResourceTypeFilter = `OR(${tavernResourceTypeFilters.join(', ')})`;
+    const tavernBuildingFormula = "AND(OR({Type}='tavern', {Type}='inn'), {IsConstructed}=TRUE())";
+    debugInfo.queries.tavernBuildings = tavernBuildingFormula;
+    const tavernRecords = await airtable('BUILDINGS').select({
+      filterByFormula: tavernBuildingFormula,
+      fields: ["BuildingId", "Name", "Type"]
+    }).all();
+    const formattedTavernRecords = tavernRecords.map(r => ({ id: r.id, fields: r.fields }));
+    debugInfo.results.tavernBuildings = formattedTavernRecords;
 
-    return NextResponse.json({ success: true, citizenUsername, options });
+    for (const tavern of tavernRecords) {
+      const tavernBuildingId = tavern.fields.BuildingId as string;
+      const tavernName = tavern.fields.Name as string || tavernBuildingId;
+      if (!tavernBuildingId) continue;
+
+      const contractFormula = `AND({SellerBuilding} = '${escapeAirtableValue(tavernBuildingId)}', {Type} = 'public_sell', {Status} = 'active', ${tavernOrResourceTypeFilter})`;
+      const foodContracts = await airtable('CONTRACTS').select({
+        filterByFormula: contractFormula,
+        fields: ["ResourceType", "PricePerResource", "TargetAmount", "ContractId"]
+      }).all();
+      const formattedFoodContracts = foodContracts.map(r => ({ id: r.id, fields: r.fields }));
+      
+      tavernFoodOffersDebug.push({
+        tavernId: tavernBuildingId,
+        tavernName: tavernName,
+        query: contractFormula,
+        results: formattedFoodContracts,
+      });
+
+      for (const contract of foodContracts) {
+        const offer = {
+          tavernId: tavernBuildingId,
+          tavernName: tavernName,
+          resourceType: contract.fields.ResourceType as string,
+          price: contract.fields.PricePerResource as number,
+          quantityAvailable: contract.fields.TargetAmount as number,
+          contractId: (contract.fields.ContractId || contract.id) as string,
+        };
+        if (citizenDucats >= (offer.price || 0)) {
+          options.push({
+            source: 'tavern',
+            details: `${offer.resourceType} à ${offer.tavernName} (Prix: ${offer.price || 0} Ducats, Disponible: ${(offer.quantityAvailable || 0).toFixed(1)})`,
+            resourceType: offer.resourceType,
+            buildingId: offer.tavernId,
+            buildingName: offer.tavernName,
+            price: offer.price,
+            quantity: offer.quantityAvailable,
+          });
+        } else {
+           options.push({
+            source: 'tavern',
+            details: `${offer.resourceType} à ${offer.tavernName} (Prix: ${offer.price || 0} Ducats, Disponible: ${(offer.quantityAvailable || 0).toFixed(1)}) - Fonds insuffisants`,
+            resourceType: offer.resourceType,
+            buildingId: offer.tavernId,
+            buildingName: offer.tavernName,
+            price: offer.price,
+            quantity: offer.quantityAvailable,
+          });
+        }
+      }
+    }
+    debugInfo.tavernFoodChecks = tavernFoodOffersDebug;
+
+    return NextResponse.json({ success: true, citizenUsername, options, debug: debugInfo });
 
   } catch (error: any) {
     console.error(`[API get-eating-options] Error for ${citizenUsername}:`, error);
-    return NextResponse.json({ success: false, error: error.message || 'Failed to fetch eating options' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'Failed to fetch eating options', debug: debugInfo }, { status: 500 });
   }
 }
