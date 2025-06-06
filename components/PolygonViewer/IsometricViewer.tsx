@@ -3523,7 +3523,7 @@ const darkenColor = (colorStr: string, percent: number): string => {
   // Listen for hover state changes and update local state
   useEffect(() => {
     const handleHoverStateChanged = (newState: HoverState) => {
-      console.log('[IsometricViewer] Hover state changed:', newState); // DEBUG
+      //console.log('[IsometricViewer] Hover state changed:', newState); // DEBUG
       setCurrentHoverState(newState);
     };
     

@@ -34,7 +34,7 @@ export const HoverTooltip: React.FC = () => {
   
   useEffect(() => {
     const handleHoverStateChanged = throttle((newState: HoverState) => {
-      console.log('TOOLTIP: Hover state changed event received:', newState);
+      //console.log('TOOLTIP: Hover state changed event received:', newState);
       setHoverState(newState);
       
       // Fetch additional data based on hover type
