@@ -662,6 +662,81 @@ def make_kinos_call(
                 else: # No general substring was found to even try demjson3 on
                     parsing_error_info += "No general substring available for demjson3 attempt. "
                     log.warning(f"{LogColors.WARNING}No general substring was identified to attempt demjson3 parsing for {ai_username}.{LogColors.ENDC}")
+
+            # Attempt 5: Further fallbacks if all above failed
+            if not parsed_response:
+                pre_cleaned_full_content = _pre_clean_json_candidate(content_to_parse) # content_to_parse is Kinos output after <think> removal
+
+                # Strategy 5a: Try demjson3 on the *entire* pre-cleaned content
+                # This is useful if the general substring extraction was too aggressive.
+                # Only try if pre_cleaned_full_content is different from potential_json_str_cleaned (which was already tried with demjson3)
+                if pre_cleaned_full_content != potential_json_str_cleaned:
+                    log.info(f"{LogColors.OKBLUE}Attempting demjson3 parse on the *entire pre-cleaned* Kinos response for {ai_username}.{LogColors.ENDC}")
+                    try:
+                        parsed_response = demjson3.decode(pre_cleaned_full_content)
+                        parsing_method_used = "demjson3_on_full_pre_cleaned_content"
+                        log.info(f"{LogColors.OKGREEN}Successfully parsed with demjson3 on the *entire pre-cleaned* Kinos response for {ai_username}.{LogColors.ENDC}")
+                    except demjson3.JSONDecodeError as e_demjson_full:
+                        parsing_error_info += f"demjson3 on full pre-cleaned content failed (Error: {e_demjson_full}). "
+                        log.warning(f"{LogColors.WARNING}demjson3 parse on full pre-cleaned content failed for {ai_username}: {e_demjson_full}{LogColors.ENDC}")
+                elif potential_json_str_cleaned: # Check if potential_json_str_cleaned was actually available for the previous demjson3 attempt
+                    log.info(f"{LogColors.OKBLUE}Full pre-cleaned content is same as general substring already tried with demjson3. Skipping redundant demjson3 parse on full content.{LogColors.ENDC}")
+                else: # This case means potential_json_str_cleaned was empty/None, so pre_cleaned_full_content is the first candidate for demjson3 on full content
+                    log.info(f"{LogColors.OKBLUE}General substring was not found. Attempting demjson3 parse on the *entire pre-cleaned* Kinos response for {ai_username}.{LogColors.ENDC}")
+                    try:
+                        parsed_response = demjson3.decode(pre_cleaned_full_content)
+                        parsing_method_used = "demjson3_on_full_pre_cleaned_content_as_first_demjson_attempt"
+                        log.info(f"{LogColors.OKGREEN}Successfully parsed with demjson3 on the *entire pre-cleaned* Kinos response for {ai_username}.{LogColors.ENDC}")
+                    except demjson3.JSONDecodeError as e_demjson_full_alt:
+                        parsing_error_info += f"demjson3 on full pre-cleaned content (alt path) failed (Error: {e_demjson_full_alt}). "
+                        log.warning(f"{LogColors.WARNING}demjson3 parse on full pre-cleaned content (alt path) failed for {ai_username}: {e_demjson_full_alt}{LogColors.ENDC}")
+
+
+                # Strategy 5b: Regex-based reconstruction of "actions" and "reflection"
+                if not parsed_response:
+                    log.info(f"{LogColors.OKBLUE}Attempting regex-based extraction of 'actions' and 'reflection' for {ai_username} from full pre-cleaned content.{LogColors.ENDC}")
+                    actions_match = re.search(r'"actions"\s*:\s*(\[.*?\])', pre_cleaned_full_content, re.DOTALL)
+                    reflection_match = re.search(r'"reflection"\s*:\s*("((?:\\.|[^"\\])*)")', pre_cleaned_full_content, re.DOTALL) # Improved reflection string capture
+
+                    extracted_kv_parts = []
+                    if actions_match:
+                        actions_str_candidate = actions_match.group(1)
+                        # Basic validation for array structure
+                        if actions_str_candidate.startswith('[') and actions_str_candidate.endswith(']'):
+                            extracted_kv_parts.append(f'"actions": {actions_str_candidate}')
+                            log.debug(f"Regex extracted 'actions' part for {ai_username}")
+                        else:
+                            log.warning(f"Regex found 'actions' but content '{actions_str_candidate[:50]}...' doesn't look like an array for {ai_username}")
+                    
+                    if reflection_match:
+                        reflection_str_candidate = reflection_match.group(1) # This is the quoted string "..."
+                        # Basic validation for string structure
+                        if reflection_str_candidate.startswith('"') and reflection_str_candidate.endswith('"'):
+                            extracted_kv_parts.append(f'"reflection": {reflection_str_candidate}')
+                            log.debug(f"Regex extracted 'reflection' part for {ai_username}")
+                        else:
+                             log.warning(f"Regex found 'reflection' but content '{reflection_str_candidate[:50]}...' doesn't look like a JSON string for {ai_username}")
+
+                    if extracted_kv_parts:
+                        reconstructed_json_str = "{" + ", ".join(extracted_kv_parts) + "}"
+                        log.info(f"{LogColors.OKBLUE}Reconstructed JSON string for {ai_username}: {reconstructed_json_str[:200]}...{LogColors.ENDC}")
+                        try:
+                            parsed_response = demjson3.decode(reconstructed_json_str)
+                            parsing_method_used = "regex_reconstruction_demjson3"
+                            log.info(f"{LogColors.OKGREEN}Successfully parsed regex-reconstructed JSON with demjson3 for {ai_username}.{LogColors.ENDC}")
+                        except demjson3.JSONDecodeError as e_reconstruct_demjson:
+                            parsing_error_info += f"Regex reconstruction (demjson3) failed (Error: {e_reconstruct_demjson}). "
+                            log.warning(f"{LogColors.WARNING}Failed to parse regex-reconstructed JSON with demjson3 for {ai_username}: {e_reconstruct_demjson}. Trying strict json.loads.{LogColors.ENDC}")
+                            try:
+                                parsed_response = json.loads(reconstructed_json_str) # Strict parse as a final fallback for this reconstruction
+                                parsing_method_used = "regex_reconstruction_jsonloads"
+                                log.info(f"{LogColors.OKGREEN}Successfully parsed regex-reconstructed JSON with json.loads for {ai_username}.{LogColors.ENDC}")
+                            except json.JSONDecodeError as e_reconstruct_json:
+                                parsing_error_info += f"Regex reconstruction (json.loads) failed (Error: {e_reconstruct_json}). "
+                                log.warning(f"{LogColors.WARNING}Failed to parse regex-reconstructed JSON with json.loads for {ai_username}: {e_reconstruct_json}{LogColors.ENDC}")
+                    else:
+                        log.info(f"{LogColors.OKBLUE}Could not extract 'actions' or 'reflection' via regex for {ai_username} for reconstruction.{LogColors.ENDC}")
+                        parsing_error_info += "Regex extraction of actions/reflection found nothing for reconstruction. "
         
         if parsed_response:
             log.info(f"{LogColors.LIGHTBLUE}Full Kinos parsed JSON response for {ai_username} (method: {parsing_method_used}):\n{json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
