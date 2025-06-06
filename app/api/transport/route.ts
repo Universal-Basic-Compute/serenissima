@@ -3,8 +3,9 @@ import { transportService } from '@/lib/services/TransportService';
 import NodeCache from 'node-cache';
 
 // Initialize cache: stdTTL is standard time-to-live in seconds, checkperiod is when to check for expired items.
-// Cache successful paths for 1 hour, errors for 5 minutes.
-const pathCache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
+// Cache successful paths for 7 days (7 * 24 * 60 * 60 seconds), errors for 5 minutes.
+const SEVEN_DAYS_IN_SECONDS = 7 * 24 * 60 * 60;
+const pathCache = new NodeCache({ stdTTL: SEVEN_DAYS_IN_SECONDS, checkperiod: 600 });
 const ERROR_CACHE_TTL = 300; // 5 minutes for error caching
 
 // Define speeds
