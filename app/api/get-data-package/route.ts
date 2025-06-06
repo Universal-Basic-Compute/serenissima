@@ -193,6 +193,20 @@ async function fetchWorkplaceBuilding(username: string): Promise<AirtableRecord<
   }
 }
 
+async function fetchHomeBuilding(username: string): Promise<AirtableRecord<FieldSet> | null> {
+  try {
+    // A citizen typically has one primary home (Occupant, Category=home)
+    const records = await airtable('BUILDINGS').select({
+      filterByFormula: `AND({Occupant} = '${escapeAirtableValue(username)}', {Category} = 'home')`,
+      maxRecords: 1, 
+    }).firstPage();
+    return records.length > 0 ? records[0] : null;
+  } catch (error) {
+    console.error(`Error fetching home building for ${username}:`, error);
+    return null;
+  }
+}
+
 interface BuildingResourceDetails {
   // Define structure based on /api/building-resources/:buildingId response
   // This is a simplified version, expand as needed
@@ -340,6 +354,7 @@ export async function GET(request: Request) {
     const ownedBuildingsRecords = await fetchOwnedBuildings(citizenUsername);
     const managedBuildingsRecords = await fetchManagedBuildings(citizenUsername);
     const workplaceBuildingRecord = await fetchWorkplaceBuilding(citizenUsername);
+    const homeBuildingRecord = await fetchHomeBuilding(citizenUsername);
 
     const ownedLandsData = [];
     for (const landRecord of ownedLandsRecords) {
@@ -417,8 +432,9 @@ export async function GET(request: Request) {
       lastActivity: lastActivityRecord ? {...normalizeKeysCamelCaseShallow(lastActivityRecord.fields), airtableId: lastActivityRecord.id} : null,
       ownedLands: ownedLandsData,
       ownedBuildings: [] as any[],
-      managedBuildings: [] as any[], // Initialize managedBuildings array
-      workplaceBuilding: null as any | null, // Initialize workplaceBuilding
+      managedBuildings: [] as any[],
+      workplaceBuilding: null as any | null,
+      homeBuilding: null as any | null, // Initialize homeBuilding
       activeContracts: [] as any[],
       guildDetails: null as any | null,
       citizenLoans: [] as any[],
@@ -449,6 +465,11 @@ export async function GET(request: Request) {
     // Add workplace building to dataPackage
     if (workplaceBuildingRecord) {
       dataPackage.workplaceBuilding = {...normalizeKeysCamelCaseShallow(workplaceBuildingRecord.fields), airtableId: workplaceBuildingRecord.id};
+    }
+
+    // Add home building to dataPackage
+    if (homeBuildingRecord) {
+      dataPackage.homeBuilding = {...normalizeKeysCamelCaseShallow(homeBuildingRecord.fields), airtableId: homeBuildingRecord.id};
     }
 
     // Fetch and add strongest relationships
