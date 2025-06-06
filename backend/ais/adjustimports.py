@@ -834,8 +834,12 @@ def create_or_update_import_contract(
             # This means if an existing import contract is found, we only update amount/price/enddate.
             # If it's a *new* import contract, Seller fields are omitted.
 
-            print(f"Updated import contract {custom_contract_id} for {resource_type} at building {building_id}: TargetAmount={amount_to_request_in_contract} units. Seller/Transporter to be assigned.") # Use amount_to_request_in_contract
-            tables["contracts"].update(airtable_record_id, update_fields)
+            # Only update existing contract with a 10% chance
+            if random.random() < 0.1:
+                print(f"Updating existing import contract {custom_contract_id} for {resource_type} at building {building_id}: TargetAmount={amount_to_request_in_contract} units. Seller/Transporter to be assigned.") # Use amount_to_request_in_contract
+                tables["contracts"].update(airtable_record_id, update_fields)
+            else:
+                print(f"Skipped updating existing import contract {custom_contract_id} for {resource_type} at building {building_id} due to 10% chance rule.")
 
         else:
             # Create a new contract
