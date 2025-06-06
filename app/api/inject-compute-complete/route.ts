@@ -106,10 +106,24 @@ export async function POST(request: NextRequest) {
       ExecutedAt: new Date().toISOString(),
     };
 
+    // Ensure only intended fields are sent to Airtable for the transaction record.
+    // This prevents any unintended fields (like computed system fields) from being included.
+    const finalTransactionData: FieldSet = {
+      Type: citizenTransactionData.Type,
+      AssetType: citizenTransactionData.AssetType,
+      Asset: citizenTransactionData.Asset,
+      Seller: citizenTransactionData.Seller,
+      Buyer: citizenTransactionData.Buyer,
+      Price: citizenTransactionData.Price,
+      Notes: citizenTransactionData.Notes,
+      ExecutedAt: citizenTransactionData.ExecutedAt,
+      // Computed fields like CreatedAt and UpdatedAt should not be included here.
+    };
+
     let citizenTransactionId: string | null = null;
     try {
       const createdTransactionRecords = await base(TRANSACTIONS_TABLE_NAME).create([
-        { fields: citizenTransactionData },
+        { fields: finalTransactionData },
       ]);
       if (createdTransactionRecords && createdTransactionRecords.length > 0) {
         citizenTransactionId = createdTransactionRecords[0].id;
