@@ -21,6 +21,7 @@ from pyairtable import Api, Base, Table
 import argparse
 import logging
 import math # Importer le module math
+import random # Importer le module random
 
 # Add the project root to sys.path
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -408,18 +409,33 @@ def process_automated_imports(dry_run: bool = False, specific_buyer_building_id:
                 
                 import_price_float = float(import_price)
 
-                if not check_existing_import_contract(tables, ai_username, building_custom_id, resource_id):
-                    contract_created_or_not_needed = create_automated_import_contract(
+                existing_contract_found = check_existing_import_contract(tables, ai_username, building_custom_id, resource_id)
+                should_create_or_update = False
+
+                if not existing_contract_found:
+                    should_create_or_update = True
+                    log.info(f"No active import contract found for {resource_id} in {building_name_log} ({building_custom_id}). Will attempt to create.")
+                else: # Existing contract found
+                    if random.random() < 0.1: # 10% chance to update
+                        should_create_or_update = True
+                        log.info(f"Active import contract found for {resource_id} in {building_name_log} ({building_custom_id}). Attempting update (10% chance).")
+                    else:
+                        log.info(f"Active import contract found for {resource_id} in {building_name_log} ({building_custom_id}). Skipping update (90% chance).")
+                        contracts_skipped_count += 1
+                
+                if should_create_or_update:
+                    # create_automated_import_contract now returns True if an activity was successfully initiated, False otherwise (e.g. amount_to_request <=0)
+                    activity_initiated = create_automated_import_contract(
                         tables, ai_username, building_custom_id, resource_id, 
-                        import_price_float, dynamic_desired_stock_value_per_building_per_resource, # Pass the dynamic value
+                        import_price_float, dynamic_desired_stock_value_per_building_per_resource,
                         dry_run=dry_run
                     )
-                    if contract_created_or_not_needed:
-                        contracts_created_count += 1
-                else:
-                    contracts_skipped_count += 1
+                    if activity_initiated:
+                        contracts_created_count += 1 # This counter now means "activity initiated for creation or update"
+                    # If activity_initiated is False, it means create_automated_import_contract decided not to proceed (e.g., amount_to_request <= 0)
+                    # In this case, it's effectively skipped, which is fine.
     
-    log.info(f"Automated import adjustment process completed. Contracts created/simulated: {contracts_created_count}, Contracts skipped (already existing): {contracts_skipped_count}")
+    log.info(f"Automated import adjustment process completed. Activities initiated for contract creation/update: {contracts_created_count}, Contracts skipped (existing and no update attempt or not needed): {contracts_skipped_count}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Automated import contract creation for AI citizens.")
