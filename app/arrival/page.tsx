@@ -557,10 +557,14 @@ Your first message to ${userName}:`;
 
   // Effet 1: Récupérer les messages et le contexte lorsque l'IA ou l'utilisateur change
   useEffect(() => {
+    // Réinitialiser le contexte et les messages récupérés lors du changement d'étape ou d'utilisateur
+    setContextualDataForChat(null);
+    setFetchedMessagesForStep(null);
+
     const currentAI = getCurrentAI();
     if (currentAI && currentUserUsername !== DEFAULT_HUMAN_USERNAME) {
-      setIsAiInitiating(true); 
-      setChatMessages([]); 
+      setIsAiInitiating(true); // Indiquer le chargement/préparation pour la nouvelle IA
+      setChatMessages([]); // Effacer les messages affichés précédemment
 
       fetchChatMessages(currentUserUsername, currentAI.username)
         .then(existingMessages => {
@@ -600,10 +604,14 @@ Your first message to ${userName}:`;
         if (contextualDataForChat !== null) {
             setContextualDataForChat(null);
         }
-        setFetchedMessagesForStep(null); // Réinitialiser pour l'invité
+        setFetchedMessagesForStep(null); // Déjà fait ci-dessus, mais par sécurité
+        // contextualDataForChat est déjà réinitialisé ci-dessus
     } else {
+      // Pas d'IA actuelle, ou l'utilisateur est un invité
       setIsAiInitiating(false);
-      setFetchedMessagesForStep(null); // Réinitialiser s'il n'y a pas d'IA
+      setFetchedMessagesForStep(null); // Déjà fait ci-dessus, mais par sécurité
+      // contextualDataForChat est déjà réinitialisé ci-dessus
+      setChatMessages([]); // Effacer les messages du chat s'il n'y a pas d'IA ou si c'est un invité
     }
   }, [currentStep, currentUserUsername, getCurrentAI, fetchChatMessages, fetchContextualInformation, aiDataPackages, aisLoading]);
 
