@@ -10,22 +10,22 @@ type ArrivalStep = 'galley' | 'customs' | 'home' | 'inn';
 const stepsConfig: Record<ArrivalStep, { title: string; slideshowImage: string; chatPlaceholder: string }> = {
   galley: {
     title: 'Arrival by Galley',
-    slideshowImage: '/images/arrival/galley.jpg', // Remplacer par vos images réelles
+    slideshowImage: '/arrival/galley.png',
     chatPlaceholder: 'The sea air is brisk. You see the Venetian skyline approaching...',
   },
   customs: {
     title: 'Venetian Customs',
-    slideshowImage: '/images/arrival/customs.jpg',
+    slideshowImage: '/arrival/customs.png',
     chatPlaceholder: 'A stern-faced official eyes your papers. "State your name and purpose!"',
   },
   home: {
     title: 'Finding Your Lodging',
-    slideshowImage: '/images/arrival/home.jpg',
+    slideshowImage: '/arrival/home.png',
     chatPlaceholder: 'You\'ve been assigned modest quarters. It\'s a start.',
   },
   inn: {
     title: 'The Local Inn',
-    slideshowImage: '/images/arrival/inn.jpg',
+    slideshowImage: '/arrival/inn.png',
     chatPlaceholder: 'Perhaps a drink at the inn to gather your bearings and hear some local gossip?',
   },
 };
