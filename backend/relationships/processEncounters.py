@@ -24,6 +24,11 @@ try:
         get_citizen_record, get_building_record, get_closest_building_to_position,
         log_header
     )
+    # Import for trust score update
+    from backend.engine.utils.relationship_helpers import (
+        update_trust_score_for_activity,
+        TRUST_SCORE_MINOR_POSITIVE
+    )
 except ImportError as e:
     print(f"Error importing modules: {e}. Ensure PYTHONPATH is set correctly or script is run from project root.")
     sys.exit(1)
@@ -136,6 +141,19 @@ def process_encounter_pair(
             if new_opening_message:
                 log.info(f"    Opening line by {speaker} to {listener} generated and persisted. ID: {new_opening_message.get('id')}")
                 log.debug(f"    Content: {new_opening_message.get('fields', {}).get('Content', '')[:100]}...")
+                
+                # Augment trust score after successful conversation opener
+                update_trust_score_for_activity(
+                    tables=tables,
+                    citizen1_username=speaker,
+                    citizen2_username=listener,
+                    trust_change_amount=TRUST_SCORE_MINOR_POSITIVE,
+                    activity_type_for_notes="encounter_initiated",
+                    success=True,
+                    notes_detail=f"{speaker} initiated conversation with {listener} at {location_id}.",
+                    activity_record_for_kinos=None # No specific activity record for this general encounter trust update
+                )
+                log.info(f"    Augmented trust between {speaker} and {listener} due to encounter initiation.")
             else:
                 log.warning(f"    Failed to generate or persist opening line from {speaker} to {listener}.")
         
