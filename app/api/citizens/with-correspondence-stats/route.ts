@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     // 1. Fetch all citizens from the CITIZENS table, including their positions
     const allCitizenRecords = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        fields: ['Username', 'FirstName', 'LastName', 'CoatOfArmsImageUrl', 'Position'],
+        fields: ['Username', 'FirstName', 'LastName', 'Position'], // Removed CoatOfArmsImageUrl
       })
       .all();
 
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
           username: username,
           firstName: record.get('FirstName') as string || '',
           lastName: record.get('LastName') as string || '',
-          coatOfArmsImageUrl: record.get('CoatOfArmsImageUrl') as string || null,
+          coatOfArmsImageUrl: username ? `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${username}.png` : null,
           position: positionStr,
         });
       }
