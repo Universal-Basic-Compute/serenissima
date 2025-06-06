@@ -1,22 +1,3 @@
-import logging
-from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime
-import pytz # Pour la gestion des fuseaux horaires
-import os
-import json
-import requests
-from dotenv import load_dotenv
-
-# Importer les helpers nécessaires depuis activity_helpers
-from .activity_helpers import _escape_airtable_value, VENICE_TIMEZONE, LogColors
-
-log = logging.getLogger(__name__)
-
-# Configuration pour les appels API Kinos et Next.js
-load_dotenv() # S'assurer que .env est chargé pour KINOS_API_KEY et BASE_URL
-KINOS_API_URL_BASE = "https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins"
-NEXT_JS_BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
-
 # Constantes pour les montants de changement de TrustScore
 TRUST_SCORE_SUCCESS_SIMPLE = 1.0
 TRUST_SCORE_FAILURE_SIMPLE = -1.0
@@ -40,6 +21,25 @@ DEFAULT_NORMALIZED_STRENGTH_SCORE = 0.0 # Score de base pour StrengthScore (0-10
 # Les fonctions convert_latent_to_normalized_score, convert_normalized_to_latent_score,
 # convert_latent_strength_to_normalized_score, convert_normalized_strength_to_latent_score
 # ne sont plus nécessaires et seront supprimées.
+
+import logging
+from typing import Dict, Any, Optional, List, Tuple
+from datetime import datetime
+import pytz # Pour la gestion des fuseaux horaires
+import os
+import json
+import requests
+from dotenv import load_dotenv
+
+# Importer les helpers nécessaires depuis activity_helpers
+from .activity_helpers import _escape_airtable_value, VENICE_TIMEZONE, LogColors
+
+log = logging.getLogger(__name__)
+
+# Configuration pour les appels API Kinos et Next.js
+load_dotenv() # S'assurer que .env est chargé pour KINOS_API_KEY et BASE_URL
+KINOS_API_URL_BASE = "https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins"
+NEXT_JS_BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
 
 def apply_scaled_score_change(current_score: float, raw_delta: float, scale_factor: float = RAW_POINT_SCALE_FACTOR, min_score: float = 0.0, max_score: float = 100.0) -> float:
     """
