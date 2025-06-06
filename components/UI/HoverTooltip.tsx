@@ -35,17 +35,22 @@ export const HoverTooltip: React.FC = () => {
   useEffect(() => {
     const handleHoverStateChanged = throttle((newState: HoverState) => {
       //console.log('TOOLTIP: Hover state changed event received:', newState);
-      setHoverState(newState);
+      setHoverState(newState); // Update local copy of the hover state
+
+      // Reset tooltip data and building-specific image path by default
+      // This ensures that data from a previous hover type does not persist.
+      setTooltipData(null);
+      setBuildingImagePath(null);
       
       // Fetch additional data based on hover type
       if (newState.type === 'building' && newState.id) {
-        fetchBuildingData(newState.id);
+        fetchBuildingData(newState.id); // This will call setTooltipData and setBuildingImagePath
       } else if (newState.type === 'polygon' && newState.id) {
-        fetchPolygonData(newState.id);
+        fetchPolygonData(newState.id); // This will call setTooltipData
       } else if (newState.type === 'citizen') {
-        handleCitizenHover(newState);
+        handleCitizenHover(newState); // This will call setTooltipData
       } else if (newState.type === 'resource') {
-        handleResourceHover(newState);
+        handleResourceHover(newState); // This will call setTooltipData
       } else if (newState.type === 'canalPoint' && newState.id) {
         setTooltipData({
           type: 'canalPoint',
@@ -61,9 +66,9 @@ export const HoverTooltip: React.FC = () => {
           type: 'problem',
           problem: newState.data
         });
-      } else if (newState.type === 'none') {
-        setTooltipData(null);
       }
+      // If newState.type is 'none' or any other unhandled type,
+      // tooltipData and buildingImagePath remain null due to the reset at the beginning of this function.
     }, 100); // 100ms throttle
     
     const handleMouseMove = (e: MouseEvent) => {

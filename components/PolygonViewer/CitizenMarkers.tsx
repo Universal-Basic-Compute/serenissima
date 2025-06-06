@@ -268,6 +268,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const handleCitizenLeave = () => {
     setHoveredConnections(null);
     setHoveredCitizenPaths([]);
+    hoverStateService.clearHoverState(); // Explicitly clear hover state
   };
   
   useEffect(() => {
