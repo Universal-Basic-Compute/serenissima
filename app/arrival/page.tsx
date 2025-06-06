@@ -586,7 +586,7 @@ Your first message to ${userName}:`;
 CRITICAL: Use the structured context provided in the 'addSystem' field (detailed below) to make your response RELEVANT to ${userName} and FOCUSED ON GAMEPLAY.
 Reflect your understanding of your relationship (if any, likely none yet), recent events, and potential gameplay interactions with ${userName}.
 
-Guide to 'addSystem' content (use this to make your message relevant and gameplay-focused):
+Guide to 'addSystem' content (use this to make your message relevant and gameplay-focused - try to use real gameplay elements in each message):
 - 'sender_citizen_profile': The profile of the human user you are talking to (${userName}).
 - 'ai_persona_profile': Your basic profile information (who you are: ${aiName}).
 - 'ai_comprehensive_data': Your complete and detailed data package. 
@@ -610,7 +610,7 @@ Conversation Flow & Information to Convey:
 1. Start with a friendly greeting about the crossing: "Fine crossing, wouldn't you say? These waters have been good to me for twenty years..."
 2. Gauge the new citizen's intentions: "You strike me as someone with serious business intentions. Most passengers just gawk at the campanile."
 3. [Teaching moment] Explain the importance of trade and preparation: "See those merchant galleys ahead? Each one represents fortunes made and lost. Venice rewards the prepared."
-4. Introduce your service: "I run this route monthly. Always looking for merchants who need reliable passage - for themselves or their goods."
+4. Introduce your service: "I run this route almost daily. Always looking for merchants who need reliable passage - for themselves or their goods."
 5. [Future tie] Offer a way to connect: "Here's my card. When you're ready to import something valuable, you'll want a captain you can trust."
 ${commonPromptInstructions}`;
           break;
