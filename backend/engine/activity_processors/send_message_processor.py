@@ -70,6 +70,7 @@ def _process_direct_message(
     content = details.get('content')
     message_type = details.get('messageType', 'message')
     in_reply_to = details.get('inReplyToMessageId')
+    channel = details.get('channel') # Extract channel
     
     if not (sender and receiver_username and content):
         log.error(f"Missing data for direct message: sender={sender}, receiver={receiver_username}, content={'present' if content else 'missing'}")
@@ -86,15 +87,19 @@ def _process_direct_message(
             "Receiver": receiver_username,
             "Content": content,
             "Type": message_type,
-            "CreatedAt": datetime.now(timezone.utc).isoformat()
+            "CreatedAt": datetime.now(timezone.utc).isoformat(),
+            "ReadAt": None # Mark as unread initially
         }
         
-        # Add InReplyTo if this is a reply
+        # Add Notes if this is a reply
         if in_reply_to:
-            message_fields["InReplyTo"] = in_reply_to
+            message_fields["Notes"] = f"In reply to: {in_reply_to}"
         
-        tables["messages"].create(message_fields)
-        log.info(f"Created direct message from {sender} to {receiver_username} with ID: {message_id}")
+        if channel:
+            message_fields["Channel"] = channel
+            
+        created_message_record = tables["messages"].create(message_fields)
+        log.info(f"Created direct message from {sender} to {receiver_username} with ID: {created_message_record['id']} (Custom MessageId: {message_id}). Channel: {channel or 'N/A'}")
         
         # Create a notification for the receiver
         notification_fields = {
@@ -183,6 +188,7 @@ def _process_message_delivery(
     content = details.get('content')
     message_type = details.get('messageType', 'personal')
     in_reply_to_id = details.get('inReplyToMessageId') # Extract from parsed Details
+    channel = details.get('channel') # Extract channel
     
     if not (sender and receiver_username and content):
         log.error(f"Missing data for message delivery: sender={sender}, receiver={receiver_username}, content={'present' if content else 'missing'}")
@@ -208,14 +214,19 @@ def _process_message_delivery(
             "Receiver": receiver_username,
             "Content": content,
             "Type": message_type,
-            "CreatedAt": datetime.now(timezone.utc).isoformat()
+            "CreatedAt": datetime.now(timezone.utc).isoformat(),
+            "ReadAt": None # Mark as unread initially
         }
         
         if in_reply_to_id:
             message_fields["Notes"] = f"In reply to: {in_reply_to_id}"
             log.info(f"Message {message_id} from {sender} to {receiver_username} is a reply to {in_reply_to_id}. Storing in Notes.")
+        
+        if channel:
+            message_fields["Channel"] = channel
+            log.info(f"Message {message_id} from {sender} to {receiver_username} assigned to channel: {channel}.")
 
-        tables["messages"].create(message_fields)
+        created_message_record = tables["messages"].create(message_fields) # Capture created record for logging ID
         
         # 2. Check if a relationship exists between sender and receiver
         relationship_formula = f"OR(AND({{Citizen1}}='{_escape_airtable_value(sender)}', {{Citizen2}}='{_escape_airtable_value(receiver_username)}'), AND({{Citizen1}}='{_escape_airtable_value(receiver_username)}', {{Citizen2}}='{_escape_airtable_value(sender)}'))"
@@ -284,6 +295,9 @@ def _process_message_delivery(
         }
         
         tables["notifications"].create(notification_fields)
+        
+        # Log the ID of the created message record
+        log.info(f"Created message record with ID: {created_message_record['id']} (Custom MessageId: {message_id}). Channel: {channel or 'N/A'}.")
         
         # 4. Create a reply_to_message activity for the receiver
         # Get current position of the receiver
