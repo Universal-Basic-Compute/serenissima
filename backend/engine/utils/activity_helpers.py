@@ -1282,7 +1282,8 @@ def create_activity_record(
     title: Optional[str] = None, # Optional title for the activity
     description: Optional[str] = None, # Optional description
     thought: Optional[str] = None, # Optional thought from the citizen
-    priority_override: Optional[int] = None # Optional priority for the activity
+    priority_override: Optional[int] = None, # Optional priority for the activity
+    resources_json_payload: Optional[str] = None # New parameter for the Resources field
 ) -> Optional[Dict]:
     """Creates a new activity record in Airtable."""
     activity_guid = f"{activity_type.lower().replace('_', '-')}-{citizen_username.lower()}-{uuid.uuid4().hex[:8]}"
@@ -1302,6 +1303,7 @@ def create_activity_record(
     elif notes: payload["Notes"] = notes # Use simple notes if no details_json
     if contract_id: payload["ContractId"] = contract_id
     if transporter_username: payload["Transporter"] = transporter_username
+    if resources_json_payload: payload["Resources"] = resources_json_payload # Populate Resources field
     if title: payload["Title"] = title
     if description: payload["Description"] = description
     if thought: payload["Thought"] = thought

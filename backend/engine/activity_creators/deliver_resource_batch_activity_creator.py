@@ -56,13 +56,16 @@ def try_create(
     duration_seconds = float(path_timing['durationSeconds'])
     duration_hours = duration_seconds / 3600.0
 
-    details_payload = {
-        "resources_manifest": resources_manifest,
+    # Prepare the JSON string for the 'Resources' field directly
+    resources_manifest_json_str = json.dumps(resources_manifest)
+
+    # Prepare the details payload for the 'Notes' field (excluding resources_manifest)
+    details_for_notes_payload = {
         "original_contract_id": contract_id_ref,
-        "from_building_id": from_building_custom_id, 
+        "from_building_id": from_building_custom_id,
         "to_building_id": to_building_custom_id
     }
-    details_json_str = json.dumps(details_payload)
+    details_for_notes_json_str = json.dumps(details_for_notes_payload)
 
     from_location_display = from_building_custom_id if from_building_custom_id else "origin point"
     title = f"Deliver Batch to {to_building_custom_id}"
@@ -85,10 +88,11 @@ def try_create(
         from_building_id=from_building_custom_id, # Can be None
         to_building_id=to_building_custom_id,
         path_json=json.dumps(path_data.get('path', [])),
-        details_json=details_json_str,
-        notes=notes,
-        contract_id=contract_id_ref, 
-        transporter_username=path_data.get('transporter'), 
+        resources_json_payload=resources_manifest_json_str, # Pass the manifest to the new parameter
+        details_json=details_for_notes_json_str, # Pass the remaining details to Notes
+        notes=notes, # Original notes parameter, if any, will be overridden by details_json if details_json is not None
+        contract_id=contract_id_ref,
+        transporter_username=path_data.get('transporter'),
         title=title,
         description=description,
         thought=thought,
