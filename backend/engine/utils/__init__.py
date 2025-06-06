@@ -54,14 +54,9 @@ from .activity_helpers import (
 )
 
 from .relationship_helpers import (
-    update_trust_score_for_activity,
-    TRUST_SCORE_MAJOR_POSITIVE,
-    TRUST_SCORE_SIGNIFICANT_POSITIVE,
-    TRUST_SCORE_MINOR_POSITIVE,
-    TRUST_SCORE_NEUTRAL,
-    TRUST_SCORE_MINOR_NEGATIVE,
-    TRUST_SCORE_SIGNIFICANT_NEGATIVE,
-    TRUST_SCORE_MAJOR_NEGATIVE
+    update_trust_score_for_activity
+    # Les constantes TRUST_SCORE_* ne sont plus réexportées ici pour éviter les cycles d'import.
+    # Les modules qui en ont besoin devront les importer directement depuis .relationship_helpers.
 )
 
 from .conversation_helper import (
