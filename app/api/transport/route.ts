@@ -177,27 +177,36 @@ export async function GET(request: Request) {
       const usesGondola = result.path.some((p: any) => p.transportMode === 'gondola');
 
       if (usesGondola) {
-        for (const point of result.path) {
-          if (point.type === 'dock' && point.nodeId) {
-            try {
-              const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                              (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-              const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(point.nodeId)}`, baseUrl);
-              const buildingResponse = await fetch(buildingUrl.toString());
+        const dockIds = [...new Set(result.path.filter((p: any) => p.type === 'dock' && p.nodeId).map((p: any) => p.nodeId))];
+        if (dockIds.length > 0) {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+          const buildingPromises = dockIds.map(dockId => {
+            const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(dockId)}`, baseUrl);
+            return fetch(buildingUrl.toString())
+              .then(res => {
+                if (res.ok) return res.json();
+                console.warn(`Failed to fetch building details for dock ${dockId} (GET request): ${res.status}`);
+                return null; // Resolve with null on error to not break Promise.all
+              })
+              .catch(e => {
+                console.error(`Error fetching building details for dock ${dockId} (GET request):`, e);
+                return null; // Resolve with null on fetch error
+              });
+          });
 
-              if (buildingResponse.ok) {
-                const buildingData = await buildingResponse.json();
-                if (buildingData.building && buildingData.building.runBy) {
-                  transporter = buildingData.building.runBy;
-                  console.log(`Identified transporter ${transporter} from dock ${point.nodeId} for GET request`);
-                  break; 
-                }
-              } else {
-                console.warn(`Failed to fetch building details for dock ${point.nodeId} (GET request): ${buildingResponse.status}`);
+          try {
+            const buildingResults = await Promise.all(buildingPromises);
+            for (const buildingData of buildingResults) {
+              if (buildingData && buildingData.building && buildingData.building.runBy) {
+                transporter = buildingData.building.runBy;
+                console.log(`Identified transporter ${transporter} from one of the docks (parallel fetch) for GET request`);
+                break; 
               }
-            } catch (e) {
-              console.error(`Error fetching building details for dock ${point.nodeId} (GET request):`, e);
             }
+          } catch (e) {
+            // This catch might be redundant if individual fetches handle their errors,
+            // but kept for safety for Promise.all itself.
+            console.error(`Error processing parallel building details fetches for docks (GET request):`, e);
           }
         }
       }
@@ -296,32 +305,36 @@ export async function POST(request: Request) {
       const usesGondola = result.path.some((p: any) => p.transportMode === 'gondola');
 
       if (usesGondola) {
-        for (const point of result.path) {
-          // Check if the point itself is a dock or if a segment starting/ending here is gondola
-          // and this point is a dock.
-          // The transportMode is on the segment, so we'd ideally check segments.
-          // For simplicity, if any point in the path is a dock and gondolas are used,
-          // we try to get its operator. This might need refinement if path structure is complex.
-          if (point.type === 'dock' && point.nodeId) {
-            try {
-              const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                              (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-              const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(point.nodeId)}`, baseUrl);
-              const buildingResponse = await fetch(buildingUrl.toString());
+        const dockIds = [...new Set(result.path.filter((p: any) => p.type === 'dock' && p.nodeId).map((p: any) => p.nodeId))];
+        if (dockIds.length > 0) {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+          const buildingPromises = dockIds.map(dockId => {
+            const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(dockId)}`, baseUrl);
+            return fetch(buildingUrl.toString())
+              .then(res => {
+                if (res.ok) return res.json();
+                console.warn(`Failed to fetch building details for dock ${dockId} (POST request): ${res.status}`);
+                return null; // Resolve with null on error to not break Promise.all
+              })
+              .catch(e => {
+                console.error(`Error fetching building details for dock ${dockId} (POST request):`, e);
+                return null; // Resolve with null on fetch error
+              });
+          });
 
-              if (buildingResponse.ok) {
-                const buildingData = await buildingResponse.json();
-                if (buildingData.building && buildingData.building.runBy) {
-                  transporter = buildingData.building.runBy;
-                  console.log(`Identified transporter ${transporter} from dock ${point.nodeId}`);
-                  break; // Use the first dock operator found in the path
-                }
-              } else {
-                console.warn(`Failed to fetch building details for dock ${point.nodeId}: ${buildingResponse.status}`);
+          try {
+            const buildingResults = await Promise.all(buildingPromises);
+            for (const buildingData of buildingResults) {
+              if (buildingData && buildingData.building && buildingData.building.runBy) {
+                transporter = buildingData.building.runBy;
+                console.log(`Identified transporter ${transporter} from one of the docks (parallel fetch) for POST request`);
+                break; 
               }
-            } catch (e) {
-              console.error(`Error fetching building details for dock ${point.nodeId}:`, e);
             }
+          } catch (e) {
+            // This catch might be redundant if individual fetches handle their errors,
+            // but kept for safety for Promise.all itself.
+            console.error(`Error processing parallel building details fetches for docks (POST request):`, e);
           }
         }
       }
