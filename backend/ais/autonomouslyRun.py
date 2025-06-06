@@ -17,6 +17,7 @@ import random # Import the random module
 import traceback
 import argparse
 import logging
+import demjson3 # Import demjson3
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -642,9 +643,25 @@ def make_kinos_call(
                         error_snippet = potential_json_str_cleaned[error_context_start:error_context_end]
                         pointer_str = ' ' * (e_substring.pos - error_context_start) + '^'
                         log.warning(f"{LogColors.WARNING}Failed to parse (pre-cleaned & cleaned) general JSON substring for {ai_username}. Error context:\n{error_snippet}\n{pointer_str}{LogColors.ENDC}")
+                        parsing_error_info += f"General substring JSON parse (pre-cleaned & cleaned) failed (Error: {e_substring}). " # Ensure parsing_error_info is updated
                 else:
                     parsing_error_info += "No suitable general JSON-like substring found. "
                     log.warning(f"{LogColors.WARNING}No suitable general JSON-like substring found for {ai_username}.{LogColors.ENDC}")
+
+            if not parsed_response: # If general substring also failed, try demjson3 on the cleaned general substring
+                log.info(f"{LogColors.OKBLUE}Attempting demjson3 parse for {ai_username} as a final resort on the general substring.{LogColors.ENDC}")
+                if first_brace_idx != -1 and last_brace_idx != -1 and last_brace_idx > first_brace_idx:
+                    # Use potential_json_str_cleaned which is the result of _pre_clean_json_candidate and _clean_json_string
+                    try:
+                        parsed_response = demjson3.decode(potential_json_str_cleaned)
+                        parsing_method_used = "demjson3_on_general_substring"
+                        log.info(f"{LogColors.OKGREEN}Successfully parsed with demjson3 on general substring for {ai_username}.{LogColors.ENDC}")
+                    except demjson3.JSONDecodeError as e_demjson_substring:
+                        parsing_error_info += f"demjson3 on general substring failed (Error: {e_demjson_substring}). "
+                        log.warning(f"{LogColors.WARNING}demjson3 parse on general substring failed for {ai_username}: {e_demjson_substring}{LogColors.ENDC}")
+                else: # No general substring was found to even try demjson3 on
+                    parsing_error_info += "No general substring available for demjson3 attempt. "
+                    log.warning(f"{LogColors.WARNING}No general substring was identified to attempt demjson3 parsing for {ai_username}.{LogColors.ENDC}")
         
         if parsed_response:
             log.info(f"{LogColors.LIGHTBLUE}Full Kinos parsed JSON response for {ai_username} (method: {parsing_method_used}):\n{json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
