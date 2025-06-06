@@ -15,8 +15,15 @@ log = logging.getLogger(__name__)
 def try_create(
     tables: Dict[str, Any],
     citizen_record: Dict[str, Any],
-    details: Dict[str, Any]
-) -> bool:
+    activity_type_param: str, # Added - though not directly used if creator is specific
+    details: Dict[str, Any],  # This is activity_parameters from dispatcher
+    resource_defs: Dict[str, Any], # Added
+    building_type_defs: Dict[str, Any], # Added
+    now_venice_dt: datetime, # Added
+    now_utc_dt_param: datetime, # Added - renamed to avoid conflict with internal now_utc
+    transport_api_url: str, # Added
+    api_base_url: str # Added
+) -> Optional[List[Dict[str, Any]]]: # Return type changed to Optional[List[Dict]]
     """
     Create the complete manage_import_contract activity chain at once:
     1. A goto_location activity for travel to the buyer's building (to assess needs)
@@ -35,20 +42,21 @@ def try_create(
     target_office_building_id = details.get('targetOfficeBuildingId')  # customs_house or broker_s_office
     
     # Validate required parameters
-    if not (resource_type and price_per_resource is not None and target_amount is not None and 
+    if not (resource_type and price_per_resource is not None and target_amount is not None and
             target_office_building_id):
         log.error(f"Missing required details for manage_import_contract: resourceType, pricePerResource, targetAmount, or targetOfficeBuildingId")
-        return False
+        return None # Changed to None
 
     citizen = citizen_record['fields'].get('Username')
-    ts = int(datetime.now(VENICE_TIMEZONE).timestamp())
+    # Use the passed now_venice_dt for timestamp consistency
+    ts = int(now_venice_dt.timestamp())
     
     # Get building record for office
     office_building_record = get_building_record(tables, target_office_building_id)
     
     if not office_building_record:
         log.error(f"Could not find building record for {target_office_building_id}")
-        return False
+        return None # Changed to None
     
     # Get buyer building record if specified
     buyer_building_record = None
@@ -56,7 +64,7 @@ def try_create(
         buyer_building_record = get_building_record(tables, buyer_building_id)
         if not buyer_building_record:
             log.error(f"Could not find building record for buyer building {buyer_building_id}")
-            return False
+            return None # Changed to None
     
     # Get current citizen position to determine first path
     citizen_position_str = citizen_record['fields'].get('Position')
@@ -66,7 +74,7 @@ def try_create(
             current_position = json.loads(citizen_position_str)
         except json.JSONDecodeError:
             log.error(f"Could not parse citizen position: {citizen_position_str}")
-            return False
+            return None # Changed to None
     
     # Determine if we need to go to buyer building first or if citizen is already there
     citizen_at_buyer_building = False
@@ -82,17 +90,19 @@ def try_create(
     goto_office_activity_id = f"goto_office_{_escape_airtable_value(resource_type)}_{citizen}_{ts}"
     register_activity_id = f"register_import_{_escape_airtable_value(resource_type)}_{citizen}_{ts}"
     
-    now_utc = datetime.utcnow()
+    # Use the passed now_utc_dt_param
+    now_utc = now_utc_dt_param
     
     # Skip the buyer building step entirely and go directly to the office
     # Calculate activity times for direct path to office
-    path_to_office = find_path_between_buildings(None, office_building_record, current_position=current_position)
+    # Pass api_base_url to find_path_between_buildings
+    path_to_office = find_path_between_buildings(None, office_building_record, api_base_url, current_position=current_position)
     if not path_to_office or not path_to_office.get('path'):
         log.error(f"Could not find path to office building {target_office_building_id}")
-        return False
+        return None # Changed to None
     
     # Set start times
-    assess_start_date = now_utc.isoformat()
+    assess_start_date = now_utc.isoformat() # This is effectively CreatedAt for the chain
     goto_office_start_date = assess_start_date
     
     # Calculate office travel duration
@@ -169,10 +179,10 @@ def try_create(
         log.info(f"Created complete manage_import_contract activity chain for citizen {citizen}:")
         for idx, activity in enumerate(activities_to_create, 1):
             log.info(f"  {idx}. {activity['Type']} activity {activity['ActivityId']}")
-        return True
+        return activities_to_create # Return the list of payloads
     except Exception as e:
         log.error(f"Failed to create manage_import_contract activity chain: {e}")
-        return False
+        return None # Changed to None
 
 def _get_building_position(building_record):
     """Extract position from building record."""
