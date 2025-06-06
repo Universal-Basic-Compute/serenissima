@@ -10,7 +10,7 @@ if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
   throw new Error('Airtable API key or Base ID is not configured in environment variables.');
 }
 
-const airtableBase = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+const airtableBase = new Airtable({ apiKey: AIRTABLE_API_KEY, requestTimeout: 60000 }).base(AIRTABLE_BASE_ID); // Increased timeout to 60s
 const messagesTable = airtableBase(AIRTABLE_MESSAGES_TABLE);
 
 interface AirtableMessageRecord extends FieldSet {
