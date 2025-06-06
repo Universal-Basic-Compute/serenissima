@@ -527,10 +527,28 @@ def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, f
         log.error(f"{LogColors.FAIL}Failed to fetch building or resource definitions. Exiting.{LogColors.ENDC}")
         return
 
-    activities_to_process = get_concluded_unprocessed_activities(tables, target_citizen_username, forced_utc_datetime_for_check)
+    activities_to_process_raw = get_concluded_unprocessed_activities(tables, target_citizen_username, forced_utc_datetime_for_check)
+    
+    # Sort activities by StartDate to process them in chronological order of their intended start
+    activities_to_process = []
+    for act_raw in activities_to_process_raw:
+        try:
+            start_date_str = act_raw['fields'].get('StartDate')
+            if start_date_str:
+                act_raw['fields']['_ParsedStartDate'] = dateutil_parser.isoparse(start_date_str)
+                activities_to_process.append(act_raw)
+            else:
+                log.warning(f"Activity {act_raw.get('id', 'N/A')} missing StartDate, cannot sort. It might be processed out of order or skipped if sorting is critical.")
+                # Optionally, append anyway if out-of-order processing is acceptable for activities without StartDate
+                # activities_to_process.append(act_raw) 
+        except Exception as e_parse_sort:
+            log.error(f"Error parsing StartDate for activity {act_raw.get('id', 'N/A')} during sort preparation: {e_parse_sort}. Skipping this activity for sorted processing.")
+
+    activities_to_process.sort(key=lambda x: x['fields'].get('_ParsedStartDate', datetime.max.replace(tzinfo=timezone.utc)))
+    
     if not activities_to_process:
         if target_citizen_username:
-            log.info(f"{LogColors.OKBLUE}No concluded, unprocessed activities found for citizen '{target_citizen_username}'.{LogColors.ENDC}")
+            log.info(f"{LogColors.OKBLUE}No concluded, unprocessed (and sortable) activities found for citizen '{target_citizen_username}'.{LogColors.ENDC}")
         else:
             log.info(f"{LogColors.OKBLUE}No activities to process.{LogColors.ENDC}")
         return
