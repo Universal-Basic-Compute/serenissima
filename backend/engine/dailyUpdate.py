@@ -32,6 +32,7 @@ if PROJECT_ROOT not in sys.path:
 
 # Import shared utilities
 from backend.engine.utils.activity_helpers import VENICE_TIMEZONE, _escape_airtable_value, LogColors, log_header
+from colorama import Fore, Style # Added for consistent logging with scheduler
 
 # Configuration
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
@@ -42,7 +43,7 @@ KINOS_KIN_ID = "ConsiglioDeiDieci"
 KINOS_CHANNEL_ID = "dailyUpdates"
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = "-1002585507870" # Default chat ID, can be overridden
+TELEGRAM_CHAT_ID = "1864364329" # Changed to match scheduler.py
 
 # Logging setup
 logging.basicConfig(
@@ -79,7 +80,8 @@ def send_telegram_notification(message: str, chat_id_override: Optional[str] = N
     chat_id_to_use = chat_id_override or TELEGRAM_CHAT_ID
 
     if not bot_token or not chat_id_to_use:
-        log.warning(f"{LogColors.WARNING}Telegram bot token or chat ID not configured. Cannot send notification.{LogColors.ENDC}")
+        # Match scheduler's logging style for this part
+        print(f"{Fore.YELLOW}⚠ Telegram bot token or chat ID not configured in dailyUpdate.py. Cannot send notification.{Style.RESET_ALL}")
         return False
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
@@ -103,14 +105,17 @@ def send_telegram_notification(message: str, chat_id_override: Optional[str] = N
     }
     try:
         response = requests.post(url, json=payload, timeout=10)
-        response.raise_for_status()
-        log.info(f"{LogColors.OKGREEN}Telegram notification sent successfully to chat ID {chat_id_to_use}.{LogColors.ENDC}")
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        # Match scheduler's logging style
+        print(f"{Fore.GREEN}✓ Telegram notification sent successfully from dailyUpdate.py to chat ID {chat_id_to_use}.{Style.RESET_ALL}")
         return True
     except requests.exceptions.RequestException as e:
-        log.error(f"{LogColors.FAIL}Failed to send Telegram notification to chat ID {chat_id_to_use}: {e}{LogColors.ENDC}")
+        # Match scheduler's logging style
+        print(f"{Fore.RED}✗ Failed to send Telegram notification from dailyUpdate.py to chat ID {chat_id_to_use}: {e}{Style.RESET_ALL}")
         return False
     except Exception as e_gen:
-        log.error(f"{LogColors.FAIL}An unexpected error occurred while sending Telegram notification to chat ID {chat_id_to_use}: {e_gen}{LogColors.ENDC}")
+        # Match scheduler's logging style
+        print(f"{Fore.RED}✗ An unexpected error occurred in dailyUpdate.py while sending Telegram notification to chat ID {chat_id_to_use}: {e_gen}{Style.RESET_ALL}")
         return False
 
 # --- Core Logic ---
