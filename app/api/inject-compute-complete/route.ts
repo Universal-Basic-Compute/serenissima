@@ -116,8 +116,10 @@ export async function POST(request: NextRequest) {
       Buyer: citizenTransactionData.Buyer,
       Price: citizenTransactionData.Price,
       Notes: citizenTransactionData.Notes,
-      ExecutedAt: citizenTransactionData.ExecutedAt,
-      // Computed fields like CreatedAt and UpdatedAt should not be included here.
+      // The field 'ExecutedAt' from the schema is not being populated here.
+      // Instead, the execution timestamp is sent to 'CreatedAt'.
+      CreatedAt: citizenTransactionData.ExecutedAt, // Using the value originally prepared for ExecutedAt
+      // Computed fields like UpdatedAt should not be included.
     };
 
     let citizenTransactionId: string | null = null;
