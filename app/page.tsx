@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'; // useRouter est déjà importé
 import Link from 'next/link';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook, FaTimes } from 'react-icons/fa';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
@@ -169,6 +169,7 @@ export default function TwoDPage() {
   const [showCitizenRegistry, setShowCitizenRegistry] = useState<boolean>(false); // State for CitizenRegistry
   const [showTransferMenu, setShowTransferMenu] = useState<boolean>(false); // State for TransferComputeMenu
   const [showProfileEditor, setShowProfileEditor] = useState<boolean>(false); // State for ProfileEditor
+  const [showEnterVeniceButton, setShowEnterVeniceButton] = useState<boolean>(false); // State for the "Enter Venice" button
   const [transportMode, setTransportMode] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
 
@@ -943,27 +944,33 @@ export default function TwoDPage() {
     };
   }, [citizenProfile, walletAddress]); // Dependencies ensure this re-runs if connection state changes
 
-  // Effect to handle ProfileEditor visibility
+  // Effect to handle ProfileEditor visibility and "Enter Venice" button
   useEffect(() => {
     const handleRequestOpenProfileEditor = () => {
       console.log('[app/page.tsx] Received requestShowProfileEditor event');
+      setShowEnterVeniceButton(false); // Ensure "Enter Venice" button is hidden if manual edit is requested
       setShowProfileEditor(true);
     };
     window.addEventListener('requestShowProfileEditor', handleRequestOpenProfileEditor);
 
-    // Automatic opening if profile is incomplete
+    // Logic for new/incomplete profiles
     if (walletAddress && citizenProfile && !citizenProfile.username) {
       const hasBeenPromptedForProfileThisSession = sessionStorage.getItem('profilePrompted');
       if (!hasBeenPromptedForProfileThisSession) {
-        console.log('[app/page.tsx] New user or incomplete profile, showing ProfileEditor.');
-        setShowProfileEditor(true);
+        console.log('[app/page.tsx] New user or incomplete profile, showing "Enter Venice" button.');
+        setShowProfileEditor(false); // Ensure ProfileEditor is not shown automatically
+        setShowEnterVeniceButton(true);
         sessionStorage.setItem('profilePrompted', 'true');
       }
+    } else {
+      // If profile is complete or user is not connected, hide the "Enter Venice" button
+      setShowEnterVeniceButton(false);
     }
 
     // Clear the session prompt flag on disconnect
     if (!walletAddress) {
       sessionStorage.removeItem('profilePrompted');
+      setShowEnterVeniceButton(false); // Also hide button on disconnect
     }
 
     return () => {
@@ -1572,6 +1579,19 @@ export default function TwoDPage() {
             }
           }}
         />
+      )}
+
+      {/* "Enter Venice" Button for new users */}
+      {canShowMainPanels && showEnterVeniceButton && (
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-40">
+          <button
+            onClick={() => router.push('/arrival')}
+            className="bg-red-800 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-lg shadow-xl text-2xl font-serif transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50"
+            style={{ backgroundColor: '#800020' }} // Burgundy color
+          >
+            Enter Venice
+          </button>
+        </div>
       )}
     </div>
   );
