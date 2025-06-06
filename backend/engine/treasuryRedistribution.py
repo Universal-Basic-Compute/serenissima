@@ -38,6 +38,8 @@ log = logging.getLogger("treasury_redistribution")
 # Load environment variables
 load_dotenv()
 
+from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
+
 # Constants for redistribution percentages by social class
 REDISTRIBUTION_PERCENTAGES = {
     "Nobili": 0.40,  # 40% to Nobili
@@ -358,7 +360,7 @@ def send_telegram_notification(message):
 
 def redistribute_treasury(dry_run: bool = False):
     """Main function to redistribute treasury funds to citizens."""
-    log.info(f"Starting treasury redistribution process (dry_run: {dry_run})")
+    log_header(f"Treasury Redistribution Process (dry_run={dry_run})", LogColors.HEADER)
     
     # Test Telegram connection
     telegram_connected = test_telegram_connection()

@@ -30,7 +30,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 # Import shared utilities
-from backend.engine.utils.activity_helpers import VENICE_TIMEZONE, _escape_airtable_value, LogColors
+from backend.engine.utils.activity_helpers import VENICE_TIMEZONE, _escape_airtable_value, LogColors, log_header
 
 # Configuration
 load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
@@ -269,7 +269,7 @@ def generate_daily_update_summary(thoughts: List[Dict[str, Any]]) -> Optional[st
 
 def process_daily_update(dry_run: bool = False):
     """Main function to generate and send the daily update."""
-    log.info(f"{LogColors.HEADER}Starting Daily Update Process (dry_run={dry_run})...{LogColors.ENDC}")
+    log_header(f"Daily Update Process (dry_run={dry_run})", LogColors.HEADER)
 
     tables = initialize_airtable()
     if not tables:

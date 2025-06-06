@@ -36,7 +36,7 @@ from pyairtable import Api, Table
 from dotenv import load_dotenv
 
 # Importer les fonctions nécessaires depuis activity_helpers
-from backend.engine.utils.activity_helpers import _escape_airtable_value
+from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors, log_header
 
 # Set up logging
 logging.basicConfig(
@@ -596,7 +596,7 @@ def get_citizen_owned_vacant_suitable_homes(
 
 def process_housing_mobility(dry_run: bool = False):
     """Main function to process housing mobility."""
-    log.info(f"Starting housing mobility process (dry_run: {dry_run})")
+    log_header(f"Citizen Housing Mobility Process (dry_run={dry_run})", LogColors.HEADER)
     
     tables = initialize_airtable()
     all_building_type_definitions = get_building_types_from_api()

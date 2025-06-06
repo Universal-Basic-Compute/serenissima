@@ -40,7 +40,7 @@ API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000") # Unused in th
 from backend.engine.utils.activity_helpers import VENICE_TIMEZONE # Import VENICE_TIMEZONE
 PAYMENT_INTERVAL_HOURS = 23 # Process contracts not paid in the last 23 hours
 
-from backend.engine.utils.activity_helpers import LogColors, _escape_airtable_value # Import _escape_airtable_value
+from backend.engine.utils.activity_helpers import LogColors, log_header, _escape_airtable_value # Import log_header
 from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM # Import relationship helper
 
 # --- Helper Functions ---
@@ -167,7 +167,7 @@ def create_notification(tables: Dict[str, Table], citizen_username: str, title: 
 # --- Main Processing Logic ---
 
 def process_storage_payments(dry_run: bool = False):
-    log.info(f"{LogColors.HEADER}Starting Storage Contract Payment processing (dry_run={dry_run})...{LogColors.ENDC}")
+    log_header(f"Storage Contract Payment Processing (dry_run={dry_run})", LogColors.HEADER)
 
     tables = initialize_airtable()
     if not tables: return

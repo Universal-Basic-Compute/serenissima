@@ -31,6 +31,15 @@ log = logging.getLogger("affect_public_buildings")
 # Load environment variables
 load_dotenv()
 
+# Add project root to sys.path for backend imports
+# This script is in backend/engine/decrees, so root is three levels up.
+DECREE_SCRIPT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT_DECREE = os.path.abspath(os.path.join(DECREE_SCRIPT_DIR, '..', '..', '..'))
+if PROJECT_ROOT_DECREE not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT_DECREE)
+
+from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
+
 # Constants for building types affected by the decree
 AFFECTED_BUILDING_TYPES = [
     "bridge", 
@@ -167,7 +176,7 @@ def create_notification(tables, citizen: str, building_type: str, building_name:
 
 def assign_buildings_to_land_owners(dry_run: bool = False):
     """Main function to assign public buildings to land owners."""
-    log.info(f"Starting public building assignment process (dry_run: {dry_run})")
+    log_header(f"Public Building Assignment to Land Owners (dry_run={dry_run})", LogColors.HEADER)
     
     tables = initialize_airtable()
     

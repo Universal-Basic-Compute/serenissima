@@ -16,6 +16,15 @@ from pyairtable import Api, Table
 # Load environment variables
 load_dotenv()
 
+# Add project root to sys.path for backend imports
+# This script is in backend/engine, so root is two levels up.
+MAINT_SCRIPT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT_MAINT = os.path.abspath(os.path.join(MAINT_SCRIPT_DIR, '..', '..'))
+if PROJECT_ROOT_MAINT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT_MAINT)
+
+from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -167,9 +176,9 @@ def send_admin_notification(recipient_id, total_collected, buildings_processed, 
         return False
 
 
-def collect_maintenance_costs():
+def collect_maintenance_costs(dry_run: bool = False): # Added dry_run parameter to match call
     """Main function to collect maintenance costs from all building owners."""
-    logger.info("Starting maintenance cost collection process")
+    log_header(f"Building Maintenance Collection (dry_run={dry_run})", LogColors.HEADER)
     
     # Get all buildings
     buildings = get_all_buildings()
@@ -252,4 +261,9 @@ def collect_maintenance_costs():
 
 
 if __name__ == "__main__":
-    collect_maintenance_costs()
+    parser = argparse.ArgumentParser(description="Collect building maintenance costs.")
+    parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
+    # Add other arguments if needed, e.g., --verbose
+    args = parser.parse_args()
+
+    collect_maintenance_costs(dry_run=args.dry_run)

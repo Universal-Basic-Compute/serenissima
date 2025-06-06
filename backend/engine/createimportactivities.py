@@ -40,7 +40,9 @@ from backend.engine.utils.activity_helpers import (
     VENICE_TIMEZONE, 
     calculate_haversine_distance_meters,
     get_building_types_from_api, # Import new helper
-    get_resource_types_from_api  # Import new helper
+    get_resource_types_from_api,  # Import new helper
+    LogColors, # Import LogColors
+    log_header # Import log_header
 )
 
 import uuid # Added for generating ResourceId
@@ -52,16 +54,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("process_imports")
 
-class LogColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+# LogColors is now imported from activity_helpers
 
 # Load environment variables
 load_dotenv()
@@ -695,7 +688,7 @@ def create_delivery_activity(tables, citizen: Dict, galley_building_id: str,
 
 def process_imports(dry_run: bool = False, night_mode: bool = False, forced_hour_override: Optional[int] = None):
     """Main function to process import contracts."""
-    log.info(f"🚢 Starting import processing (dry_run=**{dry_run}**, night_mode=**{night_mode}**, forced_hour_override=**{forced_hour_override}**)")
+    log_header(f"Import Processing (dry_run={dry_run}, night_mode={night_mode}, forced_hour={forced_hour_override})", LogColors.HEADER)
 
     # Determine current Venice time, potentially overridden
     now_venice_dt_real = datetime.now(VENICE_TIMEZONE)

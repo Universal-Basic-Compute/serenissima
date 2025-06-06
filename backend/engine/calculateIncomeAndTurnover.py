@@ -25,17 +25,11 @@ else:
     print("Attempting to load credentials from environment variables directly.")
     # No explicit action needed here, os.getenv will pick them up if set in the environment
 
-# Define ANSI color codes for logging
-class LogColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+# Import LogColors and log_header from shared utils
+# Add project root to sys.path for backend imports
+if PROJECT_ROOT_CALC_FINANCIALS not in sys.path: # Ensure PROJECT_ROOT_CALC_FINANCIALS is defined if this script is run standalone
+    sys.path.insert(0, PROJECT_ROOT_CALC_FINANCIALS)
+from backend.engine.utils.activity_helpers import LogColors, log_header
 
 # Airtable Configuration
 AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
@@ -73,9 +67,7 @@ def calculate_citizen_financials():
     Calculates daily, weekly, and monthly income and turnover for all citizens
     and updates their records in Airtable.
     """
-    print(f"{LogColors.HEADER}==============================================================")
-    print(f"=== Starting Calculation of Citizen Financials ===")
-    print(f"=============================================================={LogColors.ENDC}")
+    log_header("Citizen Financials Calculation", LogColors.HEADER)
 
     # 1. Fetch all citizens and create lookup maps
     print(f"\n{LogColors.OKCYAN}--- Section 1: Fetching Citizen Data ---{LogColors.ENDC}")

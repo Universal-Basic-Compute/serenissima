@@ -35,6 +35,15 @@ log = logging.getLogger("daily_loan_payments")
 # Load environment variables
 load_dotenv()
 
+# Add project root to sys.path for backend imports
+# This script is in backend/engine, so root is two levels up.
+LOAN_SCRIPT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT_LOAN = os.path.abspath(os.path.join(LOAN_SCRIPT_DIR, '..', '..'))
+if PROJECT_ROOT_LOAN not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT_LOAN)
+
+from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
+
 def initialize_airtable():
     """Initialize Airtable connection."""
     api_key = os.environ.get('AIRTABLE_API_KEY')
@@ -436,7 +445,7 @@ def create_admin_summary(tables, payment_summary) -> None:
 
 def process_daily_loan_payments(dry_run: bool = False):
     """Main function to process daily loan payments."""
-    log.info(f"Starting daily loan payments process (dry_run: {dry_run})")
+    log_header(f"Daily Loan Payments Process (dry_run={dry_run})", LogColors.HEADER)
     
     tables = initialize_airtable()
     active_loans = get_active_loans(tables)

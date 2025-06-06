@@ -29,7 +29,7 @@ from dotenv import load_dotenv
 
 # --- Configuration ---
 
-from backend.engine.utils.activity_helpers import _escape_airtable_value # Import _escape_airtable_value
+from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors, log_header # Import LogColors and log_header
 
 logging.basicConfig(
     level=logging.INFO,
@@ -356,7 +356,7 @@ def clean_merchant_galleys(
 
 # --- Main Execution ---
 def main(dry_run: bool):
-    log.info(f"{LogColors.HEADER}Starting Table Cleaning script (dry_run: {dry_run})...{LogColors.ENDC}")
+    log_header(f"Table Cleaning Script (dry_run={dry_run})", LogColors.HEADER)
 
     tables = initialize_airtable_tables()
     if not tables:

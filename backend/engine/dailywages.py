@@ -41,7 +41,7 @@ log = logging.getLogger("daily_wages")
 load_dotenv()
 
 # Import helper functions
-from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors # Import LogColors
+from backend.engine.utils.activity_helpers import _escape_airtable_value, LogColors, log_header # Import log_header
 from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM
 
 def initialize_airtable():
@@ -380,7 +380,7 @@ def process_wage_payment(tables, citizen: Dict, dry_run: bool = False) -> tuple[
 
 def process_daily_wages(dry_run: bool = False):
     """Main function to process daily wage payments."""
-    log.info(f"Starting daily wage payments process (dry_run: {dry_run})")
+    log_header(f"Daily Wage Payments Process (dry_run={dry_run})", LogColors.HEADER)
     
     tables = initialize_airtable()
     employed_citizens = get_employed_citizens(tables)

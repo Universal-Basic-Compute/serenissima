@@ -39,6 +39,15 @@ log = logging.getLogger("immigration")
 # Load environment variables
 load_dotenv()
 
+# Add project root to sys.path for backend imports
+# This script is in backend/engine, so root is two levels up.
+IMMIGRATION_SCRIPT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT_IMMIGRATION = os.path.abspath(os.path.join(IMMIGRATION_SCRIPT_DIR, '..', '..'))
+if PROJECT_ROOT_IMMIGRATION not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT_IMMIGRATION)
+
+from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
+
 # Constants for building types and their corresponding social classes
 BUILDING_TO_SOCIAL_CLASS = {
     "canal_house": "Nobili",
@@ -286,7 +295,7 @@ def create_admin_notification(tables, immigration_summary) -> None:
 
 def process_immigration(dry_run: bool = False):
     """Main function to process immigration."""
-    log.info(f"Starting immigration process (dry_run: {dry_run})")
+    log_header(f"Immigration Process (dry_run={dry_run})", LogColors.HEADER)
     
     tables = initialize_airtable()
     vacant_buildings = get_vacant_housing_buildings(tables)

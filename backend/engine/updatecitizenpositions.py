@@ -35,6 +35,15 @@ log = logging.getLogger("update_citizen_positions")
 # Load environment variables
 load_dotenv()
 
+# Add project root to sys.path for backend imports
+# This script is in backend/engine, so root is two levels up.
+POS_SCRIPT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT_POS = os.path.abspath(os.path.join(POS_SCRIPT_DIR, '..', '..'))
+if PROJECT_ROOT_POS not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT_POS)
+
+from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
+
 def initialize_airtable():
     """Initialize Airtable connection."""
     api_key = os.environ.get('AIRTABLE_API_KEY')
@@ -258,7 +267,7 @@ def update_citizen_position(tables, citizen_id: str, position: Dict) -> bool:
 
 def update_citizen_positions(dry_run: bool = False):
     """Main function to update citizen positions."""
-    log.info(f"🔄 Starting citizen position update (dry_run: **{dry_run}**)")
+    log_header(f"Update Citizen Positions (dry_run={dry_run})", LogColors.HEADER)
     
     tables = initialize_airtable()
     activities = get_active_activities(tables)

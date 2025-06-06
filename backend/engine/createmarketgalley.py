@@ -30,6 +30,7 @@ if PROJECT_ROOT not in sys.path:
 # Import utility functions from activity_helpers
 from backend.engine.utils.activity_helpers import (
     LogColors,
+    log_header, # Import log_header
     VENICE_TIMEZONE,
     _escape_airtable_value,
     get_resource_types_from_api,
@@ -309,7 +310,7 @@ def create_galley_delivery_activity(
 
 def main_process_market_galley(args: argparse.Namespace):
     """Main function to create a market galley."""
-    log.info(f"{LogColors.HEADER}Starting Market Galley Creation (dry_run={args.dry_run}, food_only={args.food}, goods_only={args.goods}, hour_override={args.hour}){LogColors.ENDC}")
+    log_header(f"Market Galley Creation (dry_run={args.dry_run}, food_only={args.food}, goods_only={args.goods}, hour_override={args.hour})", LogColors.HEADER)
 
     now_venice_dt_real = datetime.now(VENICE_TIMEZONE)
     if args.hour is not None:

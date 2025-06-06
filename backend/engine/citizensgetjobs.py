@@ -35,7 +35,18 @@ log = logging.getLogger("citizens_get_jobs")
 # Load environment variables
 load_dotenv()
 
-def _escape_airtable_value(value: str) -> str:
+# Add project root to sys.path for backend imports
+# This script is in backend/engine, so root is two levels up.
+ENGINE_SCRIPT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT_JOBS = os.path.abspath(os.path.join(ENGINE_SCRIPT_DIR, '..', '..'))
+if PROJECT_ROOT_JOBS not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT_JOBS)
+
+from backend.engine.utils.activity_helpers import LogColors, log_header, _escape_airtable_value # Import shared LogColors, log_header and _escape_airtable_value
+
+# _escape_airtable_value is now imported
+
+# def _escape_airtable_value(value: str) -> str: # Original local definition
     """Escapes single quotes for Airtable formulas."""
     if isinstance(value, str):
         return value.replace("'", "\\'")
@@ -423,7 +434,7 @@ def create_admin_summary(tables, assignment_summary) -> None:
 
 def assign_jobs_to_citizens(dry_run: bool = False, noupdate: bool = False):
     """Main function to assign jobs to unemployed citizens."""
-    log.info(f"Starting job assignment process (dry_run: {dry_run})")
+    log_header(f"Job Assignment Process (dry_run={dry_run}, noupdate_desc_img={noupdate})", LogColors.HEADER)
     
     tables = initialize_airtable()
     unemployed_citizens = get_unemployed_citizens(tables)

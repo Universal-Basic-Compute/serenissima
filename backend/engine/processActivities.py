@@ -83,6 +83,7 @@ from backend.engine.utils.activity_helpers import (
     _escape_airtable_value,
     calculate_haversine_distance_meters,
     LogColors, # Import LogColors
+    log_header, # Import log_header
     VENICE_TIMEZONE # Import VENICE_TIMEZONE
 )
 
@@ -403,10 +404,11 @@ def mark_started_activities_as_in_progress(
 
 
 def main(dry_run: bool = False, target_citizen_username: Optional[str] = None, forced_venice_hour_override: Optional[int] = None):
+    header_message = "Process Activities Script"
     if target_citizen_username:
-        log.info(f"{LogColors.OKCYAN}Starting Process Activities script for citizen '{target_citizen_username}' (dry_run={dry_run})...{LogColors.ENDC}")
-    else:
-        log.info(f"{LogColors.OKCYAN}Starting Process Activities script for all citizens (dry_run={dry_run})...{LogColors.ENDC}")
+        header_message += f" for Citizen '{target_citizen_username}'"
+    header_message += f" (dry_run={dry_run}, forced_hour={forced_venice_hour_override})"
+    log_header(header_message, LogColors.HEADER)
 
     forced_utc_datetime_for_check: Optional[datetime] = None
     if forced_venice_hour_override is not None:

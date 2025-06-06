@@ -33,7 +33,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 # Ajout des imports nécessaires pour le calcul de distance et l'échappement
-from backend.engine.utils.activity_helpers import calculate_haversine_distance_meters, _get_building_position_coords, _escape_airtable_value
+from backend.engine.utils.activity_helpers import calculate_haversine_distance_meters, _get_building_position_coords, _escape_airtable_value, LogColors, log_header
 
 # Set up logging
 logging.basicConfig(
@@ -437,7 +437,7 @@ def create_admin_notification(tables, housing_summary) -> None:
 
 def house_homeless_citizens(dry_run: bool = False):
     """Main function to house homeless citizens."""
-    log.info("Starting housing process for homeless citizens")
+    log_header(f"Housing Homeless Citizens Process (dry_run={dry_run})", LogColors.HEADER)
     
     tables = initialize_airtable()
     all_building_type_definitions = get_building_types_from_api()

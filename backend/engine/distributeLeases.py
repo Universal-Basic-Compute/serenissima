@@ -43,6 +43,7 @@ log = logging.getLogger("distribute_leases")
 # Load environment variables
 load_dotenv()
 
+from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
 from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM # Import relationship helper
 
 def initialize_airtable():
@@ -642,7 +643,7 @@ def create_admin_summary(tables, lease_summary) -> None:
 
 def distribute_leases(dry_run: bool = False):
     """Main function to distribute lease payments from building owners to land owners."""
-    log.info(f"Starting lease distribution process (dry_run: {dry_run})")
+    log_header(f"Lease Distribution Process (dry_run={dry_run})", LogColors.HEADER)
     
     # Test Telegram connection
     telegram_connected = test_telegram_connection()

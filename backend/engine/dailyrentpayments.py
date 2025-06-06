@@ -41,6 +41,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
 from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_MEDIUM, TRUST_SCORE_FAILURE_MEDIUM # Import relationship helper
 
 def initialize_airtable():
@@ -369,7 +370,7 @@ def create_admin_summary(tables, rent_summary) -> None:
 
 def process_daily_rent_payments(dry_run: bool = False):
     """Main function to process daily rent payments."""
-    log.info(f"Starting daily rent payments process (dry_run: {dry_run})")
+    log_header(f"Daily Rent Payments Process (dry_run={dry_run})", LogColors.HEADER)
     
     tables = initialize_airtable()
     
