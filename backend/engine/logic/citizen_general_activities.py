@@ -1936,6 +1936,56 @@ def dispatch_specific_activity_request(
         else:
             return {"success": False, "message": f"Could not find or initiate shelter endeavor for {citizen_name}.", "activity": None, "reason": "no_shelter_option_found"}
 
+    elif activity_type == "fetch_resource":
+        log.info(f"Dispatching to resource_fetching_activity_creator for {citizen_name} with params: {activity_parameters}")
+        # Parameters for try_create_resource_fetching_activity:
+        # tables, citizen_airtable_id, citizen_custom_id, citizen_username,
+        # contract_custom_id, from_building_custom_id, to_building_custom_id,
+        # resource_type_id, amount, path_data, current_time_utc, resource_defs, start_time_utc_iso
+        
+        # Extract parameters from activity_parameters
+        contract_id_param = params.get("contractId") # This is the custom ContractId string
+        from_building_id_param = params.get("fromBuildingId")
+        to_building_id_param = params.get("toBuildingId") # Can be None
+        resource_type_id_param = params.get("resourceTypeId")
+        amount_param = float(params.get("amount", 0.0))
+        
+        # Path data is tricky here. If the AI requests a fetch_resource, it implies the citizen
+        # might need to travel to the from_building first.
+        # The resource_fetching_activity_creator expects path_data from current location to from_building.
+        # For orchestrated creation, we might need to calculate this path here if not provided.
+        # For now, assume path_data might be None or provided if AI is smart.
+        # If path_data is None, the creator might assume citizen is already at from_building or handle it.
+        # Let's assume for now that if AI calls this, it's for an immediate fetch from a known location,
+        # or the creator handles finding the source if from_building_id_param is None.
+
+        path_data_param = params.get("pathData") # Optional: AI might provide pre-calculated path
+
+        if not resource_type_id_param or amount_param <= 0:
+            return {"success": False, "message": "Missing resourceTypeId or invalid amount for fetch_resource.", "activity": None, "reason": "missing_fetch_parameters"}
+
+        # The resource_fetching_activity_creator.try_create function is imported as try_create_resource_fetching_activity
+        first_activity_of_chain = try_create_resource_fetching_activity(
+            tables=tables,
+            citizen_airtable_id=citizen_airtable_id,
+            citizen_custom_id=citizen_custom_id,
+            citizen_username=citizen_username,
+            contract_custom_id=contract_id_param,
+            from_building_custom_id=from_building_id_param,
+            to_building_custom_id=to_building_id_param,
+            resource_type_id=resource_type_id_param,
+            amount=amount_param,
+            path_data=path_data_param, # Pass path_data if provided
+            current_time_utc=now_utc_dt,
+            resource_defs=resource_defs,
+            start_time_utc_iso=params.get("startTimeUtcIso") # Allow explicit start time
+        )
+        if first_activity_of_chain and isinstance(first_activity_of_chain, dict) and 'fields' in first_activity_of_chain:
+            return {"success": True, "message": f"Fetch resource endeavor initiated for {citizen_name}. Activity: {first_activity_of_chain['fields'].get('Type', 'N/A')}.", "activity": first_activity_of_chain['fields']}
+        else:
+            log.warning(f"resource_fetching_activity_creator did not return a valid activity record for {citizen_name}. Returned: {first_activity_of_chain}")
+            return {"success": False, "message": f"Could not initiate 'fetch_resource' endeavor for {citizen_name}.", "activity": None, "reason": "fetch_resource_creation_failed"}
+            
     # TODO: Add more handlers for other high-level activityTypes like "work_at_business", "shop_for_item", etc.
     # These would involve:
     # 1. Checking prerequisites (e.g., has workplace, has money).
@@ -2451,7 +2501,7 @@ def dispatch_specific_activity_request(
     else: # Fallback for unsupported or not-yet-implemented high-level types
         supported_orchestrated_types = [
             'eat', 'eat_from_inventory', 'eat_at_home', 'eat_at_tavern', 
-            'leave_venice', 'seek_shelter',
+            'leave_venice', 'seek_shelter', 'fetch_resource', # Added fetch_resource
             'initiate_building_project', 
             'send_message', 'manage_public_storage_offer', 'bid_on_land',
             'buy_listed_land', 'buy_available_land', # Added buy_available_land
