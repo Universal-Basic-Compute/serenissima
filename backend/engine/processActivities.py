@@ -216,7 +216,7 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
             'transactions': api.table(base_id, 'TRANSACTIONS'),
             'problems': api.table(base_id, 'PROBLEMS'),
             'relationships': api.table(base_id, 'RELATIONSHIPS'), # Ajout de la table RELATIONSHIPS
-            'LANDS': api.table(base_id, 'LANDS'), # Ajout de la table LANDS
+            'lands': api.table(base_id, 'LANDS'), # Utiliser la clé 'lands' (minuscule)
             'notifications': api.table(base_id, 'NOTIFICATIONS') # Ajout de la table NOTIFICATIONS
         }
 
