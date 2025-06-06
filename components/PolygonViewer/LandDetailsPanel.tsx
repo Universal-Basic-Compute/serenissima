@@ -237,20 +237,15 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     setIsLoadingHistory(true);
     setMessagesFetchFailed(false);
     try {
-      console.log(`[LandDetailsPanel] Fetching message history for land ${landId} and user ${currentCitizenUsername}`);
-      const response = await fetch('/api/messages', { // Assuming POST to /api/messages for fetching history
-        method: 'POST',
+      const channelName = `land_${landId}`;
+      console.log(`[LandDetailsPanel] Fetching message history for channel ${channelName} (user: ${currentCitizenUsername})`);
+      const response = await fetch(`/api/messages/channel/${encodeURIComponent(channelName)}`, {
+        method: 'GET',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          currentCitizen: currentCitizenUsername,
-          otherCitizen: landId, // Keep for context if backend uses it
-          channel: `land_${landId}`, // Explicitly send the channel for filtering
-          messageTypeContext: 'land_chat' // Keep for context if backend uses it
-        }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch message history for land ${landId}: ${response.status}`);
+        throw new Error(`Failed to fetch message history for channel ${channelName}: ${response.status}`);
       }
       const data = await response.json();
       if (data.success && data.messages) {

@@ -355,10 +355,6 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     
     setIsLoadingHistory(true);
     try {
-      // Always use the regular messages API
-      // Use citizen.username, citizen.citizenId (camelCase)
-      console.log(`Fetching messages for citizen ${citizen.username || citizen.citizenId} using /api/messages`);
-
       // Use internalCurrentCitizenUsername state
       if (!internalCurrentCitizenUsername) {
         console.warn('[CitizenDetailsPanel] No current username (internal state), cannot fetch message history for', citizen.username || citizen.citizenId);
@@ -367,21 +363,20 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         setMessagesFetchFailed(true); // Indicate failure due to no user
         return;
       }
+      
+      const otherCitizenUsername = citizen.username || citizen.citizenId;
+      const sortedChannelName = [internalCurrentCitizenUsername, otherCitizenUsername].sort().join('_');
+      console.log(`[CitizenDetailsPanel] Fetching messages for channel ${sortedChannelName}`);
 
-      const response = await fetch('/api/messages', {
-        method: 'POST',
+      const response = await fetch(`/api/messages/channel/${encodeURIComponent(sortedChannelName)}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          currentCitizen: internalCurrentCitizenUsername,
-          // Use citizen.username, citizen.citizenId (camelCase)
-          otherCitizen: citizen.username || citizen.citizenId
-        })
+        }
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch message history: ${response.status}`);
+        throw new Error(`Failed to fetch message history for channel ${sortedChannelName}: ${response.status}`);
       }
 
       const data = await response.json();

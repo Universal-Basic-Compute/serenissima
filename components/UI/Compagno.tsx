@@ -508,20 +508,17 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     setIsLoadingCitizenMessages(true);
     
     try {
-      const response = await fetch('/api/messages', {
-        method: 'POST',
+      const sortedChannelName = [username, otherCitizen].sort().join('_');
+      console.log(`[Compagno] Fetching messages for channel ${sortedChannelName}`);
+      const response = await fetch(`/api/messages/channel/${encodeURIComponent(sortedChannelName)}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          currentCitizen: username,
-          otherCitizen: otherCitizen,
-          channel: [username, otherCitizen].sort().join('_') // Add sorted channel for fetching
-        })
+        }
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch messages: ${response.status}`);
+        throw new Error(`Failed to fetch messages for channel ${sortedChannelName}: ${response.status}`);
       }
       
       const data = await response.json();
