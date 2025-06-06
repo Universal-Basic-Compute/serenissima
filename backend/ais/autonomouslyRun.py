@@ -458,42 +458,64 @@ def make_kinos_call(
         log.info(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username}:{LogColors.ENDC}\n{LogColors.LIGHTBLUE}{latest_ai_response_content}{LogColors.ENDC}")
 
         parsed_response = None
-        parsing_error_occurred = False
-        raw_reflection_content = latest_ai_response_content # Default reflection is the full content
+        parsing_method_used = "none"
+        parsing_error_info = None # To store info if an earlier parsing attempt failed
 
-        # Attempt 1: Parse the entire response content as JSON
+        # Attempt 1: Direct JSON parse
         try:
             parsed_response = json.loads(latest_ai_response_content)
-            log.debug(f"{LogColors.LIGHTBLUE}Kinos response for {ai_username} is direct JSON.{LogColors.ENDC}")
+            parsing_method_used = "direct"
+            log.debug(f"{LogColors.LIGHTBLUE}Kinos response for {ai_username} parsed as direct JSON.{LogColors.ENDC}")
         except json.JSONDecodeError:
-            log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. Attempting to extract from markdown.{LogColors.ENDC}")
+            parsing_error_info = "Direct JSON parse failed. "
+            log.warning(f"{LogColors.WARNING}Kinos response for {ai_username} is not direct JSON. {parsing_error_info}Attempting markdown extraction.{LogColors.ENDC}")
             
-            # Attempt 2: Extract the *last* JSON block from markdown
+            # Attempt 2: Extract last JSON block from markdown
             json_matches = list(re.finditer(r"```json\s*([\s\S]*?)\s*```", latest_ai_response_content, re.MULTILINE))
             if json_matches:
-                last_json_match = json_matches[-1] # Get the last match
-                json_str = last_json_match.group(1).strip()
-                raw_reflection_content = json_str # If JSON block found, use its content as potential reflection
+                last_json_match = json_matches[-1]
+                json_str_markdown = last_json_match.group(1).strip()
                 try:
-                    parsed_response = json.loads(json_str)
-                    log.info(f"{LogColors.OKGREEN}Successfully extracted and parsed last JSON block from Kinos text response for {ai_username}.{LogColors.ENDC}")
-                except json.JSONDecodeError as e_inner:
-                    log.warning(f"{LogColors.WARNING}Failed to parse extracted last JSON block for {ai_username}. Error: {e_inner}. Block: {json_str[:200]}...{LogColors.ENDC}")
-                    parsing_error_occurred = True
-                    # Keep raw_reflection_content as the content of the malformed JSON block
+                    parsed_response = json.loads(json_str_markdown)
+                    parsing_method_used = "markdown"
+                    log.info(f"{LogColors.OKGREEN}Successfully extracted and parsed last JSON block from Kinos markdown for {ai_username}.{LogColors.ENDC}")
+                except json.JSONDecodeError as e_markdown:
+                    parsing_error_info += f"Markdown JSON block parse failed (Error: {e_markdown}). "
+                    log.warning(f"{LogColors.WARNING}Failed to parse extracted JSON from markdown for {ai_username}. Error: {e_markdown}. Block: {json_str_markdown[:200]}... {parsing_error_info}Attempting substring extraction.{LogColors.ENDC}")
             else:
-                # No JSON block found, the entire response is considered non-JSON reflection
-                log.info(f"{LogColors.OKBLUE}No JSON block found in Kinos response for {ai_username}. Treating entire response as reflection.{LogColors.ENDC}")
-                parsing_error_occurred = True # No JSON structure at all
-                # raw_reflection_content is already latest_ai_response_content
+                parsing_error_info += "No markdown JSON block found. "
+                log.info(f"{LogColors.OKBLUE}No JSON block found in Kinos markdown for {ai_username}. {parsing_error_info}Attempting substring extraction.{LogColors.ENDC}")
 
+            if not parsed_response: # If direct and markdown parse failed
+                # Attempt 3: Find first '{' and last '}'
+                first_brace_idx = latest_ai_response_content.find('{')
+                last_brace_idx = latest_ai_response_content.rfind('}')
+                if first_brace_idx != -1 and last_brace_idx != -1 and last_brace_idx > first_brace_idx:
+                    potential_json_str = latest_ai_response_content[first_brace_idx : last_brace_idx+1]
+                    try:
+                        parsed_response = json.loads(potential_json_str)
+                        parsing_method_used = "substring"
+                        log.info(f"{LogColors.OKGREEN}Successfully parsed JSON substring for {ai_username}.{LogColors.ENDC}")
+                    except json.JSONDecodeError as e_substring:
+                        parsing_error_info += f"Substring JSON parse failed (Error: {e_substring}). "
+                        log.warning(f"{LogColors.WARNING}Failed to parse JSON substring for {ai_username}. Error: {e_substring}. Substring: {potential_json_str[:200]}...{LogColors.ENDC}")
+                else:
+                    parsing_error_info += "No suitable JSON-like substring found. "
+                    log.warning(f"{LogColors.WARNING}No suitable JSON-like substring found for {ai_username}.{LogColors.ENDC}")
+        
         if parsed_response:
-            log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username}: {json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
-            if parsing_error_occurred: # If we successfully parsed after an initial failure (e.g. from markdown)
-                parsed_response["parsing_error_info"] = "Initial direct JSON parse failed, but successfully parsed from markdown block."
+            log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username} (method: {parsing_method_used}): {json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
+            if parsing_error_info and parsing_method_used != "direct": # Add info if a fallback method succeeded
+                parsed_response["parsing_info"] = f"Successfully parsed using {parsing_method_used} method after prior attempts failed. ({parsing_error_info.strip()})"
             return parsed_response
-        else: # Parsing failed completely or no JSON structure found
-            return {"actions": [], "reflection": raw_reflection_content, "error_parsing_json": True, "error_message": "Failed to parse JSON from Kinos response."}
+        else: # All parsing attempts failed
+            log.warning(f"{LogColors.WARNING}All JSON parsing attempts failed for Kinos response for {ai_username}. Treating entire response as reflection. Final error summary: {parsing_error_info}{LogColors.ENDC}")
+            return {
+                "actions": [], 
+                "reflection": latest_ai_response_content, 
+                "error_parsing_json": True, 
+                "error_message": f"Failed to parse JSON from Kinos response after multiple attempts. Details: {parsing_error_info.strip()}"
+            }
 
     except requests.exceptions.RequestException as e:
         log.error(f"{LogColors.FAIL}Kinos API request error for {ai_username}: {e}{LogColors.ENDC}", exc_info=True)
