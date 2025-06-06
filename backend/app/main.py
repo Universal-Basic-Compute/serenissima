@@ -2953,7 +2953,8 @@ async def try_create_activity_endpoint(request_data: TryCreateActivityRequest):
             'activities': api_engine.table(airtable_base_id_engine, 'ACTIVITIES'),
             'contracts': api_engine.table(airtable_base_id_engine, 'CONTRACTS'),
             'resources': api_engine.table(airtable_base_id_engine, 'RESOURCES'),
-            'relationships': api_engine.table(airtable_base_id_engine, 'RELATIONSHIPS')
+            'relationships': api_engine.table(airtable_base_id_engine, 'RELATIONSHIPS'),
+            'LANDS': api_engine.table(airtable_base_id_engine, 'LANDS') # Assurer que la table LANDS est initialisée
         }
 
         # Import necessary functions from the engine
