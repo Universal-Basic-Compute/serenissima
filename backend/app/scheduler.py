@@ -176,7 +176,8 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                 6: [("ais/answertomessages.py --model local", "AI message responses", 0)], # 6:00 VT
                 8: [("engine/treasuryRedistribution.py", "Treasury redistribution", 0), # 8:00 VT
                     ("ais/answertomessages.py --model local", "AI message responses", 0), # 8:00 VT
-                    ("engine/createmarketgalley.py --food", "Create Market Galley (Food)", 0)], # 8:00 VT
+                    ("engine/createmarketgalley.py --food", "Create Market Galley (Food)", 0), # 8:00 VT
+                    ("relationships/processEncounters.py", "Process Citizen Encounters", 0)], # 8:00 VT
                 9: [("engine/distributeLeases.py", "Lease distribution", 0), # 9:00 VT
                     ("engine/dailyUpdate.py", "Daily Update Generation", 30)], # 9:30 VT
                 10: [("engine/citizensgetjobs.py", "Citizen job assignment", 0), # 10:00 VT
@@ -196,8 +197,7 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                      ("ais/answertomessages.py --model local", "AI message responses", 0)], # 16:00 VT
                 17: [("engine/dailywages.py", "Daily wage payments", 0)], # 17:00 VT
                 18: [("engine/dailyrentpayments.py", "Daily rent payments", 0)], # 18:00 VT
-                19: [("engine/calculateIncomeAndTurnover.py", "Citizen Income and Turnover Calculation", 0), # 19:00 VT
-                     ("relationships/processEncounters.py", "Process Citizen Encounters", 0)], # 19:00 VT
+                19: [("engine/calculateIncomeAndTurnover.py", "Citizen Income and Turnover Calculation", 0)], # 19:00 VT
                 20: [("ais/bidonlands.py", "AI land bidding", 0), # 20:00 VT
                      ("ais/delegateBusinesses.py", "AI Business Delegation", 0), # 20:00 VT
                      ("engine/createmarketgalley.py --construction", "Create Market Galley (Construction)", 0)], # 20:00 VT
