@@ -110,7 +110,7 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
         log.info(f"{LogColors.PROCESS}Transferred {purchase_price} ducats from buyer {buyer_username} to seller {seller_username}. Activity {activity_guid}.{LogColors.ENDC}")
 
         # Transfer land ownership (store username string)
-        tables['lands'].update(land_record['id'], {'Owner': buyer_username})
+        tables['LANDS'].update(land_record['id'], {'Owner': buyer_username}) # Changed 'lands' to 'LANDS'
         log.info(f"{LogColors.PROCESS}Transferred ownership of land {land_id_being_bought} to buyer {buyer_username}. Activity {activity_guid}.{LogColors.ENDC}")
 
         # Update listing contract status
