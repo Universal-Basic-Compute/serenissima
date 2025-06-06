@@ -84,11 +84,11 @@ def _handle_inspect_land_plot(
             return False
         
         land_record = land_records[0]
-        land_owner = land_record['fields'].get('Owner')
+        # land_owner = land_record['fields'].get('Owner') # Ownership check removed
         
-        if land_owner != citizen:
-            log.error(f"Citizen {citizen} does not own land {land_id}")
-            return False
+        # if land_owner != citizen: # Ownership check removed
+        #     log.error(f"Citizen {citizen} does not own land {land_id}")
+        #     return False
         
         # Check if the building type is valid
         building_type = building_type_definition.get('id')
