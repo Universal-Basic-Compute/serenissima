@@ -34,10 +34,10 @@ def try_create(
     target_building_id = details.get('targetBuildingId')  # Optional specific meeting place
     conversation_length = details.get('conversationLength', 3)  # Default to 3 exchanges
     
-    # Extract inReplyToMessageId from the nested 'details' field if present
+    # Extract inReplyToMessageId from the nested 'notes' field if present
     # The 'details' argument to this function *is* activityParameters from the API call.
-    activity_params_details_field = details.get('details', {}) 
-    in_reply_to_message_id = activity_params_details_field.get('inReplyToMessageId')
+    activity_params_notes_field = details.get('notes', {}) 
+    in_reply_to_message_id = activity_params_notes_field.get('inReplyToMessageId')
     
     # Validate required parameters
     if not (receiver_username and content):
@@ -203,11 +203,13 @@ def try_create(
         "Citizen": sender,
         "FromBuilding": destination_building_id if destination_type != 'receiver_location' else None,
         "ToBuilding": destination_building_id if destination_type != 'receiver_location' else None,
-        "Notes": details_json, # Changed Details to Notes
+        "Notes": details_json, # This contains the actual message details for the processor
         "Status": "created",
         "Title": f"Delivering a message to {receiver_username}",
         "Description": f"Having a conversation with {receiver_username} to deliver a {message_type} message",
-        "Notes": f"Second step of send_message process. Will create a message record and potentially update relationship.",
+        # The following descriptive note was overwriting the essential details_json.
+        # It can be removed or stored in a different field if necessary, e.g., "InternalComment".
+        # "InternalComment": f"Second step of send_message process. Will create a message record and potentially update relationship.",
         "CreatedAt": travel_start_date,  # Created at the same time as the goto activity
         "StartDate": message_start_date,  # But starts after the goto activity ends
         "EndDate": message_end_date,
