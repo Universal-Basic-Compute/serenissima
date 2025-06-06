@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional, List
 from backend.engine.utils.activity_helpers import (
     _escape_airtable_value, 
     VENICE_TIMEZONE,
-    find_path_between_buildings,
+    find_path_between_buildings_or_coords, # Changed from find_path_between_buildings
     get_building_record,
     get_citizen_record
 )
@@ -88,8 +88,8 @@ def try_create(
     now_utc = now_utc_dt_param 
     
     # Calculate path to seller building
-    # Pass api_base_url to find_path_between_buildings
-    path_to_seller = find_path_between_buildings(None, seller_building_record, api_base_url, current_position=current_position)
+    # Pass api_base_url to find_path_between_buildings_or_coords
+    path_to_seller = find_path_between_buildings_or_coords(current_position, seller_building_record, api_base_url)
     if not path_to_seller or not path_to_seller.get('path'):
         log.error(f"Could not find path to seller building {seller_building_id}")
         return None # Changed to None
@@ -104,8 +104,8 @@ def try_create(
     prepare_goods_end_date = (datetime.fromisoformat(goto_seller_end_date.replace('Z', '+00:00')) + timedelta(minutes=15)).isoformat()
     
     # Calculate path from seller to market
-    # Pass api_base_url to find_path_between_buildings
-    path_to_market = find_path_between_buildings(seller_building_record, market_building_record, api_base_url)
+    # Pass api_base_url to find_path_between_buildings_or_coords
+    path_to_market = find_path_between_buildings_or_coords(seller_building_record, market_building_record, api_base_url)
     if not path_to_market or not path_to_market.get('path'):
         log.error(f"Could not find path from seller building {seller_building_id} to market {target_market_building_id}")
         return None # Changed to None

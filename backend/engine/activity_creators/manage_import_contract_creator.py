@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional, List, Union # Added Union
 from backend.engine.utils.activity_helpers import (
     _escape_airtable_value, 
     VENICE_TIMEZONE,
-    find_path_between_buildings,
+    find_path_between_buildings_or_coords, # Changed from find_path_between_buildings
     get_building_record,
     get_closest_building_of_type, # Added for finding office
     _get_building_position_coords # Added for reference position
@@ -153,8 +153,8 @@ def try_create(
     
     # Skip the buyer building step entirely and go directly to the office
     # Calculate activity times for direct path to office
-    # Pass api_base_url to find_path_between_buildings
-    path_to_office = find_path_between_buildings(None, office_building_record, api_base_url, current_position=current_position)
+    # Pass api_base_url to find_path_between_buildings_or_coords
+    path_to_office = find_path_between_buildings_or_coords(current_position, office_building_record, api_base_url)
     if not path_to_office or not path_to_office.get('path'):
         err_msg = f"Could not find path to office building {target_office_building_id}"
         log.error(err_msg)
