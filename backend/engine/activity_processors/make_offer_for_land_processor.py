@@ -30,12 +30,12 @@ def process_make_offer_for_land_fn(tables: dict, activity_record: dict, building
     log.info(f"{LogColors.PROCESS}Processing 'finalize_make_offer_for_land' activity {activity_guid} for citizen {activity_citizen_username}.{LogColors.ENDC}")
 
     try:
-        details_str = activity_fields.get('Details')
-        if not details_str:
-            log.error(f"{LogColors.FAIL}Activity {activity_guid} is missing 'Details'.{LogColors.ENDC}")
+        notes_str = activity_fields.get('Notes') # Changed from 'Details' to 'Notes'
+        if not notes_str:
+            log.error(f"{LogColors.FAIL}Activity {activity_guid} is missing 'Notes' (expected JSON details here).{LogColors.ENDC}")
             return False
         
-        details = json.loads(details_str)
+        details = json.loads(notes_str) # Parse from notes_str
         land_id_for_offer = details.get('landId')
         offer_price = details.get('offerPrice')
         buyer_username = details.get('buyerUsername') # Citizen making the offer
