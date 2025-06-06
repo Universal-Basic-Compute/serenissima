@@ -252,12 +252,18 @@ const ArrivalPage: React.FC = () => {
         const buildingRes = await fetch(`/api/buildings?Type=customs_house`);
         if (buildingRes.ok) {
           const buildingData = await buildingRes.json();
-          if (buildingData.success && buildingData.buildings.length > 0 && buildingData.buildings[0].occupant) {
-            const occupantUsername = buildingData.buildings[0].occupant; // occupant is camelCase from API
-            const officerProfile = await fetchCitizen(occupantUsername);
-            setCustomsAI(officerProfile || defaultProfile);
+          if (buildingData.success && buildingData.buildings.length > 0) {
+            const occupiedBuilding = buildingData.buildings.find((b: any) => b.occupant);
+            if (occupiedBuilding) {
+              const occupantUsername = occupiedBuilding.occupant;
+              const officerProfile = await fetchCitizen(occupantUsername);
+              setCustomsAI(officerProfile || defaultProfile);
+            } else {
+              console.warn("No customs_house occupant found in any returned buildings, using default Customs AI.");
+              setCustomsAI(defaultProfile);
+            }
           } else {
-            console.warn("No customs_house occupant found, using default Customs AI.");
+            console.warn("No buildings of type customs_house found or API call unsuccessful, using default Customs AI.");
             setCustomsAI(defaultProfile);
           }
         } else {
@@ -295,12 +301,18 @@ const ArrivalPage: React.FC = () => {
         const buildingRes = await fetch(`/api/buildings?Type=inn`);
         if (buildingRes.ok) {
           const buildingData = await buildingRes.json();
-          if (buildingData.success && buildingData.buildings.length > 0 && buildingData.buildings[0].occupant) {
-            const occupantUsername = buildingData.buildings[0].occupant; // occupant is camelCase
-            const innkeeperProfile = await fetchCitizen(occupantUsername);
-            setInnAI(innkeeperProfile || defaultProfile);
+          if (buildingData.success && buildingData.buildings.length > 0) {
+            const occupiedBuilding = buildingData.buildings.find((b: any) => b.occupant);
+            if (occupiedBuilding) {
+              const occupantUsername = occupiedBuilding.occupant;
+              const innkeeperProfile = await fetchCitizen(occupantUsername);
+              setInnAI(innkeeperProfile || defaultProfile);
+            } else {
+              console.warn("No inn occupant found in any returned buildings, using default Inn AI.");
+              setInnAI(defaultProfile);
+            }
           } else {
-            console.warn("No inn occupant found, using default Inn AI.");
+            console.warn("No buildings of type inn found or API call unsuccessful, using default Inn AI.");
             setInnAI(defaultProfile);
           }
         } else {
