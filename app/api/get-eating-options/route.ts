@@ -30,7 +30,7 @@ const FOOD_RESOURCE_TYPES = [
 ];
 
 interface EatingOption {
-  source: 'inventory' | 'home' | 'tavern';
+  source: 'inventory' | 'home' | 'tavern' | 'retail_food_shop';
   details: string; 
   resourceType?: string;
   buildingId?: string; 
@@ -143,6 +143,101 @@ async function fetchTavernsWithFood(resourceTypes: string[]): Promise<any[]> {
     return [];
   }
 }
+
+async function fetchRetailFoodOffers(resourceTypes: string[]): Promise<any[]> {
+  if (resourceTypes.length === 0) return [];
+  const resourceTypeFilters = resourceTypes.map(rt => `{ResourceType} = '${escapeAirtableValue(rt)}'`);
+  const orResourceTypeFilter = `OR(${resourceTypeFilters.join(', ')})`;
+
+  const debugRetailFoodOffers: any[] = [];
+
+  try {
+    // 1. Fetch all retail_food buildings
+    const retailShopRecords = await airtable('BUILDINGS').select({
+      filterByFormula: "AND({SubCategory}='retail_food', {IsConstructed}=TRUE())",
+      fields: ["BuildingId", "Name", "Type", "Owner", "RunBy"] 
+    }).all();
+
+    if (retailShopRecords.length === 0) return [];
+
+    const retailFoodShopOffers = [];
+
+    for (const shop of retailShopRecords) {
+      const shopBuildingId = shop.fields.BuildingId as string;
+      const shopName = shop.fields.Name as string || shopBuildingId;
+      const shopOwnerOrOperator = (shop.fields.RunBy || shop.fields.Owner) as string;
+
+      if (!shopBuildingId || !shopOwnerOrOperator) continue;
+
+      const contractFormula = `AND({SellerBuilding} = '${escapeAirtableValue(shopBuildingId)}', {Type} = 'public_sell', {Status} = 'active', ${orResourceTypeFilter})`;
+      const foodContracts = await airtable('CONTRACTS').select({
+        filterByFormula: contractFormula,
+        fields: ["ResourceType", "PricePerResource", "TargetAmount", "ContractId", "Seller"]
+      }).all();
+      
+      const shopContractsDebug = {
+        shopId: shopBuildingId,
+        shopName: shopName,
+        shopOwnerOrOperator: shopOwnerOrOperator,
+        contractQuery: contractFormula,
+        contractsFound: foodContracts.map(c => ({id: c.id, fields: c.fields})),
+        stockChecks: [] as any[]
+      };
+
+      for (const contract of foodContracts) {
+        const resourceToBuy = contract.fields.ResourceType as string;
+        const price = contract.fields.PricePerResource as number;
+        const contractSeller = contract.fields.Seller as string;
+
+        // Ensure the contract seller matches the shop owner/operator for stock ownership consistency
+        if (contractSeller !== shopOwnerOrOperator) {
+            shopContractsDebug.stockChecks.push({
+                resourceType: resourceToBuy,
+                contractId: contract.id,
+                status: `Skipped: Contract seller (${contractSeller}) does not match shop owner/operator (${shopOwnerOrOperator}).`
+            });
+            continue;
+        }
+
+        const stockCheckFormula = `AND({Asset} = '${escapeAirtableValue(shopBuildingId)}', {AssetType} = 'building', {Owner} = '${escapeAirtableValue(shopOwnerOrOperator)}', {Type} = '${escapeAirtableValue(resourceToBuy)}', {Count} > 0)`;
+        const stockRecords = await airtable('RESOURCES').select({
+          filterByFormula: stockCheckFormula,
+          fields: ["Count"],
+          maxRecords: 1
+        }).firstPage();
+
+        const stockAvailable = stockRecords.length > 0 ? (stockRecords[0].fields.Count as number) : 0;
+        
+        shopContractsDebug.stockChecks.push({
+            resourceType: resourceToBuy,
+            contractId: contract.id,
+            stockQuery: stockCheckFormula,
+            stockFound: stockAvailable
+        });
+
+        if (stockAvailable > 0) {
+          retailFoodShopOffers.push({
+            shopId: shopBuildingId,
+            shopName: shopName,
+            resourceType: resourceToBuy,
+            price: price,
+            quantityAvailable: stockAvailable, // Actual stock in shop
+            contractId: contract.fields.ContractId || contract.id,
+          });
+        }
+      }
+      debugRetailFoodOffers.push(shopContractsDebug);
+    }
+    // Add debugRetailFoodOffers to a global debug object if needed, or return it separately
+    // For now, it's logged implicitly if errors occur or can be added to the main debugInfo
+    return retailFoodShopOffers; 
+  } catch (error) {
+    console.error(`Error fetching retail food offers:`, error);
+    // Optionally, add error to a global debug object
+    return [];
+  }
+}
+
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -284,6 +379,42 @@ export async function GET(request: Request) {
       }
     }
     debugInfo.tavernFoodChecks = tavernFoodOffersDebug;
+
+    // 4. Check Retail Food Shops
+    const retailFoodShopOffers = await fetchRetailFoodOffers(FOOD_RESOURCE_TYPES);
+    // Storing detailed debug for retail shops might be too verbose for the main response.
+    // The fetchRetailFoodOffers function can log its own debug details or they can be selectively added.
+    debugInfo.results.retailFoodShops = retailFoodShopOffers.map(offer => ({ // Simplified debug output
+        shopName: offer.shopName,
+        resourceType: offer.resourceType,
+        price: offer.price,
+        quantity: offer.quantityAvailable
+    }));
+
+    retailFoodShopOffers.forEach(offer => {
+      if (citizenDucats >= (offer.price || 0)) {
+        options.push({
+          source: 'retail_food_shop',
+          details: `${offer.resourceType} chez ${offer.shopName} (Prix: ${offer.price || 0} Ducats, Stock: ${(offer.quantityAvailable || 0).toFixed(1)})`,
+          resourceType: offer.resourceType as string,
+          buildingId: offer.shopId as string,
+          buildingName: offer.shopName as string,
+          price: offer.price as number,
+          quantity: offer.quantityAvailable as number,
+        });
+      } else {
+         options.push({
+          source: 'retail_food_shop',
+          details: `${offer.resourceType} chez ${offer.shopName} (Prix: ${offer.price || 0} Ducats, Stock: ${(offer.quantityAvailable || 0).toFixed(1)}) - Fonds insuffisants`,
+          resourceType: offer.resourceType as string,
+          buildingId: offer.shopId as string,
+          buildingName: offer.shopName as string,
+          price: offer.price as number,
+          quantity: offer.quantityAvailable as number,
+        });
+      }
+    });
+
 
     return NextResponse.json({ success: true, citizenUsername, options, debug: debugInfo });
 
