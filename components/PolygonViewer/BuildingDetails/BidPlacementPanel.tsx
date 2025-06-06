@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaTimes, FaPaperPlane, FaSpinner } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 interface BidPlacementPanelProps {
   buildingId: string;
@@ -76,7 +77,7 @@ const BidPlacementPanel: React.FC<BidPlacementPanelProps> = ({
       
       const result = await response.json();
       if (result.success) {
-        alert(`Bid process initiated for ${bidAmount} Ducats on ${buildingName}! This will involve several steps for your citizen.`);
+        toast.success(`Bid process initiated for ${bidAmount} Ducats on ${buildingName}! This will involve several steps for your citizen.`);
         onBidPlaced(); // Callback to refresh UI or close panel
       } else {
         throw new Error(result.message || result.error || 'API returned success:false for bid initiation.');

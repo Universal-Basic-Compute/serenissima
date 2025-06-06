@@ -6,6 +6,7 @@ import "./globals.css";
 import ClientWalletProvider from "@/components/UI/ClientWalletProvider";
 import Compagno from "@/components/UI/Compagno";
 import ContextMenuPreventer from "@/components/UI/ContextMenuPreventer";
+import { Toaster } from 'react-hot-toast';
 // BackgroundMusic sera déplacé vers app/page.tsx
 // Add this to ensure buildings are always visible
 
@@ -31,6 +32,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased">
         <ClientWalletProvider>
+          <Toaster position="top-center" reverseOrder={false} />
           {children}
           {/* BackgroundMusic a été déplacé vers app/page.tsx pour un meilleur contrôle basé sur l'état */}
           {showCompagno && <Compagno />}
