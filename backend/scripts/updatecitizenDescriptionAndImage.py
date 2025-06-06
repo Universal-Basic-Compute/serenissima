@@ -186,7 +186,8 @@ def get_citizen_info(tables, username: str) -> Optional[Dict]:
         
         if building_ids:
             for building_id in building_ids:
-                resources_formula = f"{{BuildingId}}='{building_id}'"
+                # Corrected formula to use Asset and AssetType
+                resources_formula = f"AND({{Asset}}='{building_id}', {{AssetType}}='building')"
                 building_resources = tables['resources'].all(formula=resources_formula)
                 resources.extend(building_resources[:10])  # Limit to 10 resources per building
         
