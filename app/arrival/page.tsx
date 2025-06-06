@@ -247,15 +247,16 @@ const ArrivalPage: React.FC = () => {
         setGalleyAI(defaultProfile); 
       }
 
-      // Fetch Customs AI (Occupant of customs_house)
+      // Fetch Customs AI (Random Occupant of customs_house)
       try {
         const buildingRes = await fetch(`/api/buildings?Type=customs_house`);
         if (buildingRes.ok) {
           const buildingData = await buildingRes.json();
           if (buildingData.success && buildingData.buildings.length > 0) {
-            const occupiedBuilding = buildingData.buildings.find((b: any) => b.occupant);
-            if (occupiedBuilding) {
-              const occupantUsername = occupiedBuilding.occupant;
+            const occupiedBuildings = buildingData.buildings.filter((b: any) => b.occupant);
+            if (occupiedBuildings.length > 0) {
+              const randomOccupiedBuilding = occupiedBuildings[Math.floor(Math.random() * occupiedBuildings.length)];
+              const occupantUsername = randomOccupiedBuilding.occupant;
               const officerProfile = await fetchCitizen(occupantUsername);
               setCustomsAI(officerProfile || defaultProfile);
             } else {
@@ -296,15 +297,16 @@ const ArrivalPage: React.FC = () => {
         setHomeAI(defaultProfile); 
       }
 
-      // Fetch Inn AI (Occupant of inn)
+      // Fetch Inn AI (Random Occupant of inn)
       try {
         const buildingRes = await fetch(`/api/buildings?Type=inn`);
         if (buildingRes.ok) {
           const buildingData = await buildingRes.json();
           if (buildingData.success && buildingData.buildings.length > 0) {
-            const occupiedBuilding = buildingData.buildings.find((b: any) => b.occupant);
-            if (occupiedBuilding) {
-              const occupantUsername = occupiedBuilding.occupant;
+            const occupiedBuildings = buildingData.buildings.filter((b: any) => b.occupant);
+            if (occupiedBuildings.length > 0) {
+              const randomOccupiedBuilding = occupiedBuildings[Math.floor(Math.random() * occupiedBuildings.length)];
+              const occupantUsername = randomOccupiedBuilding.occupant;
               const innkeeperProfile = await fetchCitizen(occupantUsername);
               setInnAI(innkeeperProfile || defaultProfile);
             } else {
