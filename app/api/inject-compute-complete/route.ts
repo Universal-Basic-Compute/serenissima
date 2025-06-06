@@ -115,10 +115,20 @@ export async function POST(request: NextRequest) {
         citizenTransactionId = createdTransactionRecords[0].id;
         console.log(`Transaction record created for citizen: ${citizenTransactionId}`);
       } else {
-        console.warn(`Failed to create transaction record for citizen ${updatedAirtableCitizen.id}.`);
+        console.warn(`Failed to create transaction record for citizen ${updatedAirtableCitizen.id}. Airtable's response might be empty or not as expected.`);
       }
-    } catch (txError) {
-        console.warn(`Error creating transaction record for citizen ${updatedAirtableCitizen.id}:`, txError);
+    } catch (txError: any) { // Catch as 'any' to access properties like 'message' or 'stack'
+        console.error(`CRITICAL: Error creating transaction record for citizen ${updatedAirtableCitizen.id}. Details:`, txError);
+        if (txError.message) {
+            console.error("Airtable error message:", txError.message);
+        }
+        if (txError.stack) {
+            console.error("Airtable error stack:", txError.stack);
+        }
+        // Log the data we attempted to send
+        console.error("Attempted transaction data:", JSON.stringify(citizenTransactionData, null, 2));
+        // Optionally, you could add a field to the response to indicate this partial failure
+        // For now, keeping the 200 response as primary operation (Ducats update) succeeded.
     }
     
     // Update ConsiglioDeiDieci's Ducats
