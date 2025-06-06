@@ -183,7 +183,7 @@ def try_create(
         "FromBuilding": None,  # Starting from current position
         "ToBuilding": None,    # Going to a land plot, not a building
         "Path": json.dumps(path_to_land.get('path', [])),
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "landId": land_id,
             "buildingTypeDefinition": building_type_definition,
             "pointDetails": point_details,
@@ -208,7 +208,7 @@ def try_create(
         "Citizen": citizen,
         "FromBuilding": None,  # At a land plot, not a building
         "ToBuilding": None,    # At a land plot, not a building
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "landId": land_id,
             "buildingTypeDefinition": building_type_definition,
             "pointDetails": point_details,
@@ -235,7 +235,7 @@ def try_create(
         "FromBuilding": None,  # Coming from a land plot, not a building
         "ToBuilding": target_office_building_id,
         "Path": json.dumps(path_to_office.get('path', [])),
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "landId": land_id,
             "buildingTypeDefinition": building_type_definition,
             "pointDetails": point_details,
@@ -261,7 +261,7 @@ def try_create(
         "Citizen": citizen,
         "FromBuilding": target_office_building_id,
         "ToBuilding": target_office_building_id,  # Same location
-        "Details": json.dumps({
+        "Notes": json.dumps({ # Changed Details to Notes
             "landId": land_id,
             "buildingTypeDefinition": building_type_definition,
             "pointDetails": point_details,
