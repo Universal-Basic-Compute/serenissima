@@ -1371,12 +1371,12 @@ def update_citizen_ducats(
 def log_header(message: str, color_code: str = Fore.CYAN):
     """Prints a header message with a colorful border if colorama is available."""
     # colorama_available check is implicit now, as Fore/Style would fail on import if not present
-    border_char = "═"
-    side_char = "║"
-    corner_tl = "╔"
-    corner_tr = "╗"
-    corner_bl = "╚"
-    corner_br = "╝"
+    border_char = "-"  # ASCII equivalent
+    side_char = "|"    # ASCII equivalent
+    corner_tl = "+"    # ASCII equivalent
+    corner_tr = "+"    # ASCII equivalent
+    corner_bl = "+"    # ASCII equivalent
+    corner_br = "+"    # ASCII equivalent
     
     message_len = len(message)
     # Adjust width dynamically or keep fixed, for now fixed at 80
