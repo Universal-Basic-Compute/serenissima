@@ -37,14 +37,8 @@ const DEFAULT_HUMAN_USERNAME = 'GuestUser'; // Fallback si le profil n'est pas c
 
 // Moved outside the component to stabilize dependencies
 const getKinosModelForSocialClass = (username?: string, socialClass?: string): string => {
-  if (username === 'NLR') return 'gemini-2.5-pro-preview-05-06';
-  const lowerSocialClass = socialClass?.toLowerCase();
-  switch (lowerSocialClass) {
-    case 'nobili': return 'gemini-2.5-pro-preview-05-06';
-    case 'cittadini': case 'forestieri': return 'gemini-2.5-flash-preview-05-20';
-    case 'popolani': case 'facchini': return 'local';
-    default: return 'gemini-2.5-flash-preview-05-20';
-  }
+  // For the arrival page chat, always use the specified model
+  return "gemini-2.5-pro-preview-06-05";
 };
 
 let tempIdCounter = 0;
