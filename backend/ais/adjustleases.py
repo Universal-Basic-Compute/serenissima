@@ -18,6 +18,7 @@ if PROJECT_ROOT not in sys.path:
 
 from backend.app.citizen_utils import find_citizen_by_identifier
 from backend.engine.utils.activity_helpers import LogColors, log_header
+from backend.engine.dailyUpdate import send_telegram_notification as send_telegram_notification_from_daily_update
 # LogColors and log_header will be imported from activity_helpers
 
 # Configuration for API calls
@@ -394,12 +395,16 @@ If you decide not to adjust any leases at this time, return an empty array.
                 content = response_data.get('response', '')
                 
                 # Log the entire response for debugging
-                print(f"FULL AI RESPONSE FROM {ai_username}:")
+                print(f"FULL AI RESPONSE DATA FROM {ai_username}:")
                 print("="*80)
-                print(content)
+                try:
+                    print(json.dumps(response_data, indent=2, ensure_ascii=False))
+                except Exception as e_json_dump:
+                    print(f"Could not dump response_data as JSON: {e_json_dump}. Raw response_data: {response_data}")
                 print("="*80)
                 
-                print(f"AI {ai_username} response length: {len(content)} characters")
+                # content is response_data.get('response', '')
+                print(f"AI {ai_username} response content length: {len(content)} characters")
                 print(f"AI {ai_username} response preview: {content[:200]}...")
                 
                 # Try to extract the JSON decision from the response
@@ -555,9 +560,35 @@ def create_admin_notification(tables, ai_lease_adjustments: Dict[str, List[Dict]
         }
         
         tables["notifications"].create(notification)
-        print("📜 Created admin notification with AI lease adjustment summary")
+        print("📜 Created admin notification with AI lease adjustment summary (Airtable)")
+
+        # Also send a Telegram notification
+        try:
+            # We use the same 'message' content that was prepared for the Airtable notification
+            # The send_telegram_notification_from_daily_update function might have its own formatting or target chat_id.
+            # For simplicity, we send the already formatted message.
+            # Markdown in Telegram is a bit different from Airtable's.
+            # Basic Markdown like **bold** and *italic* might work.
+            # Convert Airtable's **bold** to Telegram's *bold* if necessary, or keep as is.
+            # Telegram uses *bold* or __bold__. Airtable uses **bold**.
+            # Let's try sending the message as is first.
+            # If specific formatting is needed, the message string might need adjustment.
+            telegram_message_content = message # Use the message formatted for Airtable
+            
+            # Replace Airtable's **bold** with Telegram's *bold*
+            telegram_message_content_tg_formatted = telegram_message_content.replace("⚜️", "Ducats") # Replace emoji if problematic
+            telegram_message_content_tg_formatted = re.sub(r'\*\*(.*?)\*\*', r'*\1*', telegram_message_content_tg_formatted)
+
+
+            if send_telegram_notification_from_daily_update(telegram_message_content_tg_formatted):
+                print("📢 Successfully sent Telegram notification for AI lease adjustments.")
+            else:
+                print("⚠️ Failed to send Telegram notification for AI lease adjustments.")
+        except Exception as e_tg:
+            print(f"Error sending Telegram notification: {str(e_tg)}")
+
     except Exception as e:
-        print(f"Error creating admin notification: {str(e)}")
+        print(f"Error creating admin notification (Airtable): {str(e)}")
 
 # --- API Call Helper ---
 # Note: This script uses print for logging, so log_ref.info/error will become print.
