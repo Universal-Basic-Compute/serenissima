@@ -41,9 +41,17 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
       {/* Main wallet button UI */}
       {isConnected && citizenProfile ? (
         citizenProfile.username ? (
-          <div className={`${className} flex-shrink-0`} ref={dropdownRef}>
-            <button 
-              onClick={() => setDropdownOpen(!dropdownOpen)}
+          (!citizenProfile.firstName || !citizenProfile.lastName) ? (
+            <button
+              onClick={() => router.push('/arrival')}
+              className={`bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-colors duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50 ${className}`}
+            >
+              Enter La Serenissima
+            </button>
+          ) : (
+            <div className={`${className} flex-shrink-0`} ref={dropdownRef}>
+              <button 
+                onClick={() => setDropdownOpen(!dropdownOpen)}
               className="bg-amber-50 px-4 py-2 rounded-lg shadow-md hover:bg-amber-100 transition-colors flex items-center border-2 border-amber-300"
             >
               <PlayerProfile
@@ -213,6 +221,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
               </div>
             )}
           </div>
+          ) /* Fin de la condition (!citizenProfile.firstName || !citizenProfile.lastName) */
         ) : null /* Cas où username est null est maintenant géré par UsernamePrompt via WalletProvider */
       ) : isConnected ? (
         // User is connected, but citizenProfile is null (e.g., profile fetch failed or pending, ou en attente du UsernamePrompt)
