@@ -24,12 +24,16 @@ def process_manage_import_contract_fn(
     fields = activity_record.get('fields', {})
     activity_type = fields.get('Type')
     citizen = fields.get('Citizen')
-    details_str = fields.get('Details')
+    notes_str = fields.get('Notes') # Changed from 'Details'
     
     try:
-        details = json.loads(details_str) if details_str else {}
-    except Exception as e:
-        log.error(f"Error parsing Details for {activity_type}: {e}")
+        # Ensure notes_str is not None and not just whitespace before parsing
+        details = json.loads(notes_str) if notes_str and notes_str.strip() else {}
+    except json.JSONDecodeError as e: # Catch specific JSONDecodeError
+        log.error(f"Error parsing Notes as JSON for {activity_type} (Citizen: {citizen}, ActivityId: {activity_record.get('id')}): {e}. Notes content: '{notes_str[:200]}...'")
+        return False
+    except Exception as e: # Catch any other unexpected errors during parsing
+        log.error(f"Unexpected error parsing Notes for {activity_type} (Citizen: {citizen}, ActivityId: {activity_record.get('id')}): {e}")
         return False
     
     # Handle goto_location activity (part of chain)
