@@ -22,7 +22,11 @@ Core activity categories include:
 Main activities (non-exhaustive list, now including "actions"):
 - **Production**: A citizen at their workplace transforms resources.
 - **Fetch Resource**: A citizen moves to retrieve resources.
-- **Meal Activities (`eat_from_inventory`, `eat_at_home`, `eat_at_tavern`)**.
+- **Meal Activities**:
+    - **`eat`**: A generic request to eat. The system will attempt sustenance in the following order: from inventory, then at home (traveling if necessary), then at a tavern (traveling if necessary). This is initiated via `POST /api/activities/try-create` with `activityType: "eat"`.
+    - `eat_from_inventory`: Specifically eat from personal inventory.
+    - `eat_at_home`: Specifically eat at home.
+    - `eat_at_tavern`: Specifically eat at a tavern.
 - **Idle**: Waiting or non-specific activity.
 - **`bid_on_land` (as an activity)**: May involve travel (`goto_citizen` or `goto_notary`), followed by the bidding logic.
 - **`send_message` (as an activity)**: Could involve a short "writing" activity or be processed quickly, but will always have a record.

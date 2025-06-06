@@ -92,7 +92,7 @@ CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE = [
     "POST /api/try-read - Execute a predefined GET request. Body: {requestType, parameters: {username?, buildingId?, ...}} (Consult compendium_of_simplified_reads for details)",
 
     # Initiating ALL Endeavors (Activities & Strategic Actions)
-    "POST /api/activities/try-create - PRIMARY METHOD TO TAKE ACTION. Request the game engine to initiate an endeavor. Body: {citizenUsername, activityType, activityParameters (optional)}. The engine will create the necessary activity records. Consult 'guide_to_decreeing_undertakings' (activities.md) for available 'activityType's and their 'activityParameters'.",
+    "POST /api/activities/try-create - PRIMARY METHOD TO TAKE ACTION. Request the game engine to initiate an endeavor. Body: {citizenUsername, activityType, activityParameters (optional)}. The engine will create the necessary activity records. Consult 'guide_to_decreeing_undertakings' (activities.md) for available 'activityType's and their 'activityParameters'. Example: `activityType: \"eat\"` will attempt sustenance from inventory, then home, then tavern.",
     
     # Direct Activity Creation (Advanced - use if ALL details are known and try-create is not suitable)
     "POST /api/actions/create-activity - Directly create a detailed activity record. Body: {citizenUsername, activityType, title, description, thought, activityDetails, notes (optional)}. Consult 'guide_to_decreeing_undertakings' (activities.md) for activity details."
@@ -962,7 +962,7 @@ API_DOCUMENTATION_SUMMARY = {
     "base_url": API_BASE_URL,
     "notes": (
         "You are an AI citizen interacting with the La Serenissima API. Key guidelines:\n"
-        "1.  **Initiate Endeavors (Activities & Actions) via `/api/activities/try-create`**: This is your primary method to start any endeavor. Provide `activityType` (e.g., 'rest', 'bid_on_land', 'send_message') and `activityParameters`. The game engine will create the necessary activity records. Consult `backend/docs/activities.md` and `backend/docs/actions.md` for `activityType`s and their parameters.\n"
+        "1.  **Initiate Endeavors (Activities & Actions) via `/api/activities/try-create`**: This is your primary method to start any endeavor. Provide `activityType` (e.g., 'rest', 'bid_on_land', 'send_message', 'eat') and `activityParameters`. The game engine will create the necessary activity records. For example, `activityType: \"eat\"` will attempt sustenance from inventory, then home, then tavern. Consult `backend/docs/activities.md` and `backend/docs/actions.md` for `activityType`s and their parameters.\n"
         "2.  **Simplified GETs via `/api/try-read`**: For common information gathering, use `POST /api/try-read`. Consult the `compendium_of_missive_details` (ReadsReference.tsx extract) in `addSystem` for available `requestType` values and their `parameters`.\n"
         "3.  **Dynamic GET Filtering**: For direct GET requests to list endpoints (e.g., /api/buildings, /api/citizens, /api/contracts), you can filter results by providing Airtable field names as query parameters (e.g., `/api/buildings?Owner=NLR&Category=business`). Airtable fields are PascalCase (see `backend/docs/airtable_schema.md`).\n"
         "4.  **Direct Activity Creation via `/api/actions/create-activity`**: Use this if you have *all* details for a specific activity record, including title, description, thought, and fully structured `activityDetails`.\n"
