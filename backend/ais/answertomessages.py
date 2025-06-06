@@ -609,7 +609,7 @@ def process_ai_messages(kinos_model_override_arg: Optional[str] = None, instant_
             
             print(f"\n{LogColors.HEADER}{'='*80}{LogColors.ENDC}")
             print(f"{LogColors.OKBLUE}MESSAGE ID: {message_id}{LogColors.ENDC}")
-            print(f"{LogColors.OKBLUE}FROM: {sender_username} → TO: {ai_username}{LogColors.ENDC}")
+            print(f"{LogColors.OKBLUE}FROM: {sender_username} -> TO: {ai_username}{LogColors.ENDC}")
             print(f"{LogColors.OKBLUE}(Processing 1 of {len(sender_messages)} messages from this sender){LogColors.ENDC}")
             print(f"{LogColors.HEADER}{'-'*80}{LogColors.ENDC}")
             print(f"{LogColors.OKCYAN}MESSAGE CONTENT:{LogColors.ENDC}")
