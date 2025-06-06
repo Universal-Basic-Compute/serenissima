@@ -235,15 +235,11 @@ def try_create(
     }
     activities_to_create.append(register_offer_payload)
 
-    try:
-        # Create all activities in sequence
-        for activity_payload in activities_to_create:
-            tables["activities"].create(activity_payload)
-        
-        log.info(f"Created complete manage_public_sell_contract activity chain for citizen {citizen_username}:")
-        for idx, activity in enumerate(activities_to_create, 1):
-            log.info(f"  {idx}. {activity['Type']} activity {activity['ActivityId']}")
-        return activities_to_create # Return the list of payloads
-    except Exception as e:
-        log.error(f"Failed to create manage_public_sell_contract activity chain: {e}")
-        return None # Changed to None
+    # The creator should now return the list of payloads, and the dispatcher will handle creation.
+    log.info(f"Prepared manage_public_sell_contract activity chain for citizen {citizen_username}:")
+    for idx, activity_payload_log in enumerate(activities_to_create, 1):
+        log.info(f"  {idx}. {activity_payload_log['Type']} activity payload {activity_payload_log['ActivityId']} prepared.")
+    return activities_to_create # Return the list of payloads
+
+    # The try-except block for Airtable creation is removed as creation is deferred to the dispatcher.
+    # Any errors during payload preparation (like pathfinding) are already handled and return None.
