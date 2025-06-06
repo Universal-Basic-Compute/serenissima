@@ -33,6 +33,13 @@ const KINOS_API_CHANNEL_BASE_URL = 'https://api.kinos-engine.ai/v2';
 const KINOS_CHANNEL_BLUEPRINT = 'serenissima-ai';
 const DEFAULT_HUMAN_USERNAME = 'GuestUser'; // Fallback si le profil n'est pas chargé
 
+const stepIntroMessages: Record<ArrivalStep, string> = {
+  galley: "AI citizens in Serenissima have their own goals, businesses, and relationships - engaging with this captain could lead to future shipping partnerships, exclusive trade routes, or valuable market intelligence.",
+  customs: "Every AI citizen operates with distinct motivations and insider knowledge - this inspector's network could provide regulatory shortcuts, import opportunities, or warnings about market changes.",
+  home: "AI citizens build lasting relationships and remember your interactions - this merchant's mentorship could unlock business partnerships, financial backing, or access to established trade networks.",
+  inn: "AI citizens actively participate in Venice's social and economic fabric - this innkeeper's connections could introduce you to profitable contacts, exclusive deals, or emerging market trends."
+};
+
 const stepsConfig: Record<ArrivalStep, { title: string; slideshowImage: string; chatPlaceholder: string }> = {
   galley: {
     title: 'Arrival by Galley',
@@ -796,6 +803,12 @@ ${commonPromptInstructions}`;
         
         {/* Zone d'affichage du chat */}
         <div className="flex-grow bg-white border-2 border-orange-200 rounded-lg p-4 mb-4 overflow-y-auto shadow-inner flex flex-col space-y-2">
+          {/* Message d'introduction contextuel */}
+          {currentStep && stepIntroMessages[currentStep] && (
+            <div className="mb-4 p-3 text-sm text-stone-700 bg-amber-100 border border-amber-200 rounded-md shadow">
+              <p className="italic">{stepIntroMessages[currentStep]}</p>
+            </div>
+          )}
           {chatMessages.map((msg, index) => (
             <div
               key={msg.messageId || `msg-${index}`}
