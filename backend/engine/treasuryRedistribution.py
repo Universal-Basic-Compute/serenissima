@@ -38,6 +38,13 @@ log = logging.getLogger("treasury_redistribution")
 # Load environment variables
 load_dotenv()
 
+# Add project root to sys.path for backend imports
+# This script is in backend/engine, so root is two levels up.
+SCRIPT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 from backend.engine.utils.activity_helpers import LogColors, log_header # Import shared LogColors and log_header
 
 # Constants for redistribution percentages by social class
