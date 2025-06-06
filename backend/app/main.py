@@ -1490,12 +1490,12 @@ async def execute_transaction(transaction_id: str, data: dict):
                 
                 if land_records:
                     land_airtable_record = land_records[0]
-                    lands_table.update(land_airtable_record["id"], {"Citizen": buyer_username})
-                    print(f"Updated land owner in Airtable to {buyer_username}")
+                    lands_table.update(land_airtable_record["id"], {"Owner": buyer_username}) # Changed "Citizen" to "Owner"
+                    print(f"Updated land owner in Airtable to {buyer_username} in field 'Owner'.")
                 else:
                     print(f"Land record not found for {land_id_from_contract}, creating new record.")
-                    lands_table.create({"LandId": land_id_from_contract, "Citizen": buyer_username})
-                    print(f"Created new land record with owner {buyer_username}")
+                    lands_table.create({"LandId": land_id_from_contract, "Owner": buyer_username}) # Changed "Citizen" to "Owner"
+                    print(f"Created new land record with owner {buyer_username} in field 'Owner'.")
             except Exception as land_error:
                 print(f"ERROR updating land ownership in Airtable: {str(land_error)}")
                 traceback.print_exc(file=sys.stdout)
