@@ -515,7 +515,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         },
         body: JSON.stringify({
           currentCitizen: username,
-          otherCitizen: otherCitizen
+          otherCitizen: otherCitizen,
+          channel: [username, otherCitizen].sort().join('_') // Add sorted channel for fetching
         })
       });
       

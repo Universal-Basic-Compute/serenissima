@@ -35,6 +35,14 @@ const initAirtable = () => {
   return new Airtable({ apiKey: AIRTABLE_API_KEY, requestTimeout: 30000 }).base(AIRTABLE_BASE_ID);
 };
 
+// Helper to escape single quotes for Airtable formulas
+const escapeAirtableValue = (value: string | number | boolean): string => {
+  if (typeof value === 'string') {
+    return value.replace(/'/g, "\\'");
+  }
+  return String(value);
+};
+
 export async function POST(request: Request) {
   try {
     // Parse the request body
@@ -43,10 +51,11 @@ export async function POST(request: Request) {
 
     const currentCitizen = body.CurrentCitizen; // Use PascalCase key
     const otherCitizen = body.OtherCitizen; // Use PascalCase key
-    
-    if (!currentCitizen || !otherCitizen) {
+    const channel = body.Channel; // Extract Channel
+
+    if (!currentCitizen) {
       return NextResponse.json(
-        { success: false, error: 'Both currentCitizen and otherCitizen are required' },
+        { success: false, error: 'currentCitizen is required' },
         { status: 400 }
       );
     }
@@ -58,22 +67,38 @@ export async function POST(request: Request) {
       // Build filter formula to get messages
       let filterFormula = '';
 
-      if (currentCitizen === otherCitizen) {
-        // Self-chat: Fetch messages where sender and receiver are the current citizen,
-        // and any guild applications sent TO the current citizen.
-        filterFormula = `OR(
-          AND({Sender} = '${currentCitizen}', {Receiver} = '${currentCitizen}'),
-          AND({Type} = 'guild_application', {Receiver} = '${currentCitizen}')
-        )`;
+      if (channel) {
+        // If channel is provided, it's the primary filter.
+        filterFormula = `{Channel} = '${escapeAirtableValue(channel)}'`;
+        console.log(`[API Messages POST] Filtering by channel: ${channel}`);
       } else {
-        // Chat with another citizen: Fetch messages between them,
-        // and guild applications exchanged *between* them.
-        filterFormula = `OR(
-          AND({Sender} = '${currentCitizen}', {Receiver} = '${otherCitizen}'),
-          AND({Sender} = '${otherCitizen}', {Receiver} = '${currentCitizen}'),
-          AND({Type} = 'guild_application', {Sender} = '${currentCitizen}', {Receiver} = '${otherCitizen}'}),
-          AND({Type} = 'guild_application', {Sender} = '${otherCitizen}', {Receiver} = '${currentCitizen}'})
-        )`;
+        // Fallback to old logic if no channel is provided in the request
+        if (!otherCitizen) { // otherCitizen becomes required if no channel
+            return NextResponse.json(
+                { success: false, error: 'otherCitizen is required when channel is not provided' },
+                { status: 400 }
+            );
+        }
+        console.log(`[API Messages POST] Filtering by sender/receiver: ${currentCitizen}, ${otherCitizen} (no channel provided)`);
+        if (currentCitizen === otherCitizen) {
+          // Self-chat: Fetch messages where sender and receiver are the current citizen,
+          // and any guild applications sent TO the current citizen.
+          // This will fetch messages regardless of whether they have a Channel field or not.
+          filterFormula = `OR(
+            AND({Sender} = '${escapeAirtableValue(currentCitizen)}', {Receiver} = '${escapeAirtableValue(currentCitizen)}'),
+            AND({Type} = 'guild_application', {Receiver} = '${escapeAirtableValue(currentCitizen)}')
+          )`;
+        } else {
+          // Chat with another citizen: Fetch messages between them,
+          // and guild applications exchanged *between* them.
+          // This will fetch messages regardless of whether they have a Channel field or not.
+          filterFormula = `OR(
+            AND({Sender} = '${escapeAirtableValue(currentCitizen)}', {Receiver} = '${escapeAirtableValue(otherCitizen)}'),
+            AND({Sender} = '${escapeAirtableValue(otherCitizen)}', {Receiver} = '${escapeAirtableValue(currentCitizen)}'),
+            AND({Type} = 'guild_application', {Sender} = '${escapeAirtableValue(currentCitizen)}', {Receiver} = '${escapeAirtableValue(otherCitizen)}'}),
+            AND({Type} = 'guild_application', {Sender} = '${escapeAirtableValue(otherCitizen)}', {Receiver} = '${escapeAirtableValue(currentCitizen)}'})
+          )`;
+        }
       }
       
       // Fetch messages from Airtable
