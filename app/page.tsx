@@ -44,6 +44,7 @@ import {
 import { transferCompute } from '@/lib/utils/computeUtils'; // Importer transferCompute
 import { useWalletContext } from '@/components/UI/WalletProvider'; // Importer useWalletContext
 // LandDetailsPanel est déjà dans components/PolygonViewer, pas besoin d'importer ici s'il est utilisé par IsometricViewer
+import { FaSyncAlt } from 'react-icons/fa'; // Pour l'icône du bouton
 
 // Declare global window type
 declare global {
@@ -187,6 +188,48 @@ export default function TwoDPage() {
   const [currentUserUsername, setCurrentUserUsername] = useState<string | null>(null); // Pour stocker le nom d'utilisateur
   const [isAmbientAudioInitialized, setIsAmbientAudioInitialized] = useState(false);
   const { walletAddress, citizenProfile, updateCitizenProfile } = useWalletContext(); // Obtenir les données du contexte du portefeuille
+
+  const handleFlushCaches = async () => {
+    console.log("Attempting to flush all client-side caches...");
+
+    // 1. Clear localStorage
+    try {
+      localStorage.clear();
+      console.log("localStorage cleared.");
+    } catch (e) {
+      console.error("Error clearing localStorage:", e);
+    }
+
+    // 2. Clear sessionStorage
+    try {
+      sessionStorage.clear();
+      console.log("sessionStorage cleared.");
+    } catch (e) {
+      console.error("Error clearing sessionStorage:", e);
+    }
+
+    // 3. Clear Service Worker caches (if any)
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+          console.log("ServiceWorker unregistered:", registration);
+        }
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+        console.log("All ServiceWorker caches deleted.");
+      } catch (e) {
+        console.error("Error clearing ServiceWorker caches:", e);
+      }
+    } else {
+      console.log("No active ServiceWorker found to clear caches from.");
+    }
+    
+    // 4. Force a hard reload
+    console.log("Forcing a hard reload of the page.");
+    window.location.reload(true); // true for hard reload
+  };
 
   // const handleLoadingComplete = () => { // Supprimé car InitialLoadingScreen est retiré
   //   console.log('InitialLoadingScreen complete, showing Daily Update panel.');
@@ -1549,7 +1592,14 @@ export default function TwoDPage() {
       */}
 
       {/* Version Indicator - Bottom Right */}
-      <div className="absolute bottom-4 right-4 z-50">
+      <div className="absolute bottom-4 right-4 z-50 flex flex-col items-end space-y-2">
+        <button
+          onClick={handleFlushCaches}
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg shadow-md text-xs flex items-center"
+          title="Flush All Client Caches & Reload"
+        >
+          <FaSyncAlt className="mr-1" /> Flush Caches
+        </button>
         <div className="text-xs text-gray-400">v0.2.2</div>
       </div>
 
