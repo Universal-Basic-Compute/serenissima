@@ -484,8 +484,18 @@ def make_kinos_call(
         parsing_error_info = None # To store info if an earlier parsing attempt failed
 
         def _pre_clean_json_candidate(json_candidate_str: str) -> str:
-            """Converts Python-style True/False/None to JSON-style true/false/null."""
+            """
+            Cleans a JSON candidate string by:
+            1. Removing JavaScript-style comments (// and /* */).
+            2. Converting Python-style True/False/None to JSON-style true/false/null.
+            """
             s = json_candidate_str
+
+            # Remove single-line comments (//...)
+            s = re.sub(r"//.*", "", s)
+            # Remove multi-line comments (/*...*/)
+            s = re.sub(r"/\*.*?\*/", "", s, flags=re.DOTALL) # DOTALL makes . match newlines
+
             # Replace : True, : False, : None ensuring space after colon
             s = re.sub(r':\s*True\b', ': true', s)
             s = re.sub(r':\s*False\b', ': false', s)
@@ -494,8 +504,9 @@ def make_kinos_call(
             s = re.sub(r'\bTrue\b', 'true', s)
             s = re.sub(r'\bFalse\b', 'false', s)
             s = re.sub(r'\bNone\b', 'null', s)
+            
             if s != json_candidate_str:
-                log.debug(f"Pre-cleaned JSON (True/False/None) for {ai_username}. Original snippet: {json_candidate_str[:100]}..., Cleaned snippet: {s[:100]}...")
+                log.debug(f"Pre-cleaned JSON (comments, True/False/None) for {ai_username}. Original snippet: {json_candidate_str[:100]}..., Cleaned snippet: {s[:100]}...")
             return s
 
         def _clean_json_string(json_str: str) -> str:
