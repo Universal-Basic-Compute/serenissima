@@ -25,7 +25,7 @@ def process_initiate_building_project_fn(
     fields = activity_record.get('fields', {})
     activity_type = fields.get('Type')
     citizen = fields.get('Citizen')
-    details_str = fields.get('Details')
+    details_str = fields.get('Notes') # Changed 'Details' to 'Notes'
 
     log_header(f"Initiate Building Project ({activity_type}): {citizen}", LogColors.HEADER)
     
