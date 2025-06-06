@@ -239,7 +239,87 @@ def generate_conversation_turn(
     listener_profile = listener_profile_record['fields']
     
     speaker_social_class = speaker_profile.get('SocialClass')
-    
+    speaker_current_point_id = speaker_profile.get('Point') # e.g., building_lat_lng_idx
+    listener_current_point_id = listener_profile.get('Point')
+
+    shared_building_name: Optional[str] = None
+    shared_building_id: Optional[str] = None
+
+    if speaker_current_point_id and speaker_current_point_id == listener_current_point_id:
+        # Both are at the same point, try to get building details from this point ID
+        # Assuming point ID might be the BuildingId or related to it.
+        # A more robust way would be to parse BuildingId from Point if format is consistent,
+        # or query buildings table by Point.
+        # For now, let's assume Point ID can be used to fetch the building.
+        # This might need adjustment based on how Point relates to BuildingId.
+        # If Point is directly a BuildingId for single-point buildings:
+        potential_building_id = speaker_current_point_id
+        # A more robust lookup:
+        # formula_building_at_point = f"OR({{Point}}='{_escape_airtable_value(speaker_current_point_id)}', CONTAINS({{Point}}, '{_escape_airtable_value(speaker_current_point_id)}'))"
+        # For simplicity, if Point is often the BuildingId:
+        
+        # Attempt to fetch building by assuming Point might be the BuildingId
+        # This is a simplification. A better approach would be to query buildings table
+        # with a formula like CONTAINS({Point}, '{speaker_current_point_id}') if Point can be a list for larger buildings
+        # or directly {Point} = '{speaker_current_point_id}' if it's always a single point ID.
+        # For now, we'll try to use get_building_record with the point_id.
+        # This assumes that for single-point buildings, Point might be the BuildingId.
+        # Or, if Point is like "building_lat_lng_idx", and BuildingId is "building_lat_lng", this won't directly match.
+        # A more reliable way is to fetch the building based on the citizen's current location if Point isn't directly the BuildingId.
+        # Let's assume for now that if they are at the same Point, and that Point corresponds to a BuildingId:
+        
+        # We need a reliable way to get BuildingId from Point.
+        # If Point is "building_lat_lng_idx", we need to find a building whose Point list contains this.
+        # Or, if the citizen's Position is used, find the building at that position.
+        # For now, let's try a direct lookup assuming Point might be a BuildingId for simple cases.
+        # This part is tricky without knowing the exact relationship between Point and BuildingId.
+        
+        # Let's try to get the building by the speaker's Point field.
+        # This assumes the Point field in CITIZENS refers to a BuildingId or a parsable building identifier.
+        # A more robust solution would be to query the BUILDINGS table for a record where its Point field (or list of points)
+        # matches the citizen's Point field.
+        
+        # Simplification: If Point is often the BuildingId for the building they are in.
+        # This is a strong assumption.
+        # A better way: Get speaker's current building based on their Position or a dedicated "CurrentBuilding" field if it existed.
+        # For now, we'll try a direct lookup using the Point field as if it were a BuildingId.
+        # This will likely fail if Point is not a direct BuildingId.
+        
+        # Let's refine: if speaker_current_point_id starts with "building_", it's likely a building point.
+        # We need to find the building record that *contains* this point.
+        # This is complex without iterating all buildings.
+        # A simpler, but less accurate assumption: if their Point fields match AND start with "building_",
+        # they are in *some* building together. We might not know its name without a proper lookup.
+
+        # Let's assume `speaker_current_point_id` can be used with `get_building_record` if it's a BuildingId.
+        # This is often NOT the case. `Point` in Citizen is usually more granular.
+        # A better approach:
+        # 1. Get speaker's position.
+        # 2. Find building at that position.
+        # 3. Check if listener is also at that building.
+
+        speaker_pos_str = speaker_profile.get('Position')
+        if speaker_pos_str:
+            try:
+                speaker_coords = json.loads(speaker_pos_str)
+                # Find building at speaker's coords
+                from backend.engine.utils.activity_helpers import get_closest_building_to_position # Local import
+                current_building_rec = get_closest_building_to_position(tables, speaker_coords, max_distance_meters=10) # 10m tolerance
+
+                if current_building_rec:
+                    current_building_id = current_building_rec['fields'].get('BuildingId')
+                    # Now check if listener is also at this building_id
+                    listener_pos_str = listener_profile.get('Position')
+                    if listener_pos_str:
+                        listener_coords = json.loads(listener_pos_str)
+                        listener_building_rec = get_closest_building_to_position(tables, listener_coords, max_distance_meters=10)
+                        if listener_building_rec and listener_building_rec['fields'].get('BuildingId') == current_building_id:
+                            shared_building_id = current_building_id
+                            shared_building_name = current_building_rec['fields'].get('Name', current_building_id)
+                            log.info(f"Speaker and Listener are both in building: {shared_building_name} (ID: {shared_building_id})")
+            except Exception as e_shared_bldg:
+                log.warning(f"Could not determine shared building: {e_shared_bldg}")
+
     # 2. Determine Kinos channel name
     channel_name = "_".join(sorted([speaker_username, listener_username]))
 
@@ -265,9 +345,13 @@ def generate_conversation_turn(
     }
 
     # 4. Construct Kinos prompt
+    location_context = ""
+    if shared_building_name:
+        location_context = f"You are both currently in {shared_building_name}. "
+
     system_explanation = (
         f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
-        f"You are currently in conversation with {listener_profile.get('FirstName', listener_username)}. "
+        f"You are currently in conversation with {listener_profile.get('FirstName', listener_username)}. {location_context}"
         f"Review your knowledge in `addSystem` (your data package, problems, relationship, listener's problems, and recent conversation history). "
         f"Continue the conversation naturally, keeping your persona and objectives in mind. Your response should be direct speech.[/SYSTEM]\n\n"
     )
