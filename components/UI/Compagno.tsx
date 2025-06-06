@@ -1868,17 +1868,23 @@ Your response:`;
                       <textarea
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder={`Message ${selectedCitizen === username ? (citizens.find(u => u.username === selectedCitizen)?.firstName || 'yourself') : (citizens.find(u => u.username === selectedCitizen)?.firstName || selectedCitizen)}... (Shift + Enter for new line)`}
-                        className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
-                        rows={3}
+                        placeholder={`Message ${selectedCitizen === username ? (citizens.find(u => u.username === selectedCitizen)?.firstName || 'yourself') : (citizens.find(u => u.username === selectedCitizen)?.firstName || selectedCitizen)}... (Shift+Enter for new line)`}
+                        className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none custom-scrollbar"
+                        rows={1} // Start with 1 row, it will auto-grow
                         disabled={isTyping || isPreparingContext}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             if (!isPreparingContext && inputValue.trim()) handleSubmit(e as any);
                           }
+                          // Auto-resize logic will be handled by CSS or a small JS snippet if needed,
+                          // but for now, let's rely on a reasonable max-height and scrollbar.
                         }}
-                        style={{ maxHeight: '120px' }}
+                        style={{ 
+                          minHeight: '40px', // Minimum height for one line
+                          maxHeight: '120px', // Max height for about 5-6 lines
+                          overflowY: 'auto' // Ensure scrollbar appears if content exceeds max-height
+                        }}
                       />
                       <button 
                         type="submit"
