@@ -11,9 +11,9 @@ function escapeAirtableValue(value: string): string {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { contractId: string } }
+  context: { params: Promise<{ contractId: string }> }
 ) {
-  const contractId = params.contractId;
+  const { contractId } = await context.params;
 
   if (!contractId) {
     return NextResponse.json(
