@@ -74,12 +74,18 @@ export async function GET(request: Request) {
       console.log('Applying 24-hour time range filter (no timezone).');
       applyDefaultStatusExclusion = false; // Specific time range filter applied
     } else if (ongoing) {
-      // If ongoing=true, filter for statuses 'created' or 'in_progress' at the Airtable level.
-      // The precise JavaScript time-based filter will then determine true "ongoing" status.
+      // If ongoing=true, filter for statuses 'created' or 'in_progress' at the Airtable level,
+      // AND ensure StartDate is not in the future.
+      // The precise JavaScript time-based filter will then determine true "ongoing" status based on EndDate.
       filterByFormulaParts.push(`OR({Status} = 'created', {Status} = 'in_progress')`);
+      // Ensure the activity has started or is starting now
+      filterByFormulaParts.push(`IS_BEFORE({StartDate}, DATETIME_FORMAT(SET_TIMEZONE(NOW(), 'GMT'), 'YYYY-MM-DDTHH:mm:ss.SSSZ'))`);
+      // An alternative to IS_BEFORE might be NOT(IS_AFTER({StartDate}, NOW())), depending on Airtable's NOW() precision and timezone handling.
+      // Using DATETIME_FORMAT(SET_TIMEZONE(NOW(), 'GMT'), 'YYYY-MM-DDTHH:mm:ss.SSSZ') ensures we compare against a UTC-like timestamp string.
       loggableFilters['ongoing'] = 'true';
       loggableFilters['Status_ongoing_include'] = 'created, in_progress';
-      console.log('Applying Airtable status filter for ongoing activities (Status = created OR Status = in_progress). JS will handle precise time logic.');
+      loggableFilters['StartDate_ongoing_filter'] = 'is_not_future';
+      console.log('Applying Airtable filters for ongoing activities: Status (created/in_progress) AND StartDate is not in the future. JS will handle precise EndDate logic.');
       applyDefaultStatusExclusion = false; // Specific 'ongoing' filter applied
     }
 
