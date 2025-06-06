@@ -299,6 +299,7 @@ def generate_intelligence_report(tables: Dict[str, Table], kinos_api_key_val: st
 
     payload = {
         "message": main_prompt_message,
+        "model": "gemini-2.5-pro-preview-06-05",
         "addSystem": json.dumps(add_system_payload),
         "min_files": 0, # No files needed for this interaction
         "max_files": 0,
@@ -402,7 +403,7 @@ def main(args):
 
     if report:
         log.info("Intelligence Report Summary:")
-        log.info(report[:500] + "..." if len(report) > 500 else report)
+        log.info(report[:5000] + "..." if len(report) > 5000 else report)
         send_intelligence_notification(tables, report, args.dry_run)
     else:
         log.warning(f"{LogColors.WARNING}Failed to generate intelligence report.{LogColors.ENDC}")
