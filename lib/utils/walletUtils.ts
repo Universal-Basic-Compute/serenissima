@@ -60,11 +60,11 @@ export function clearWalletAddress(): void {
   window.dispatchEvent(new Event('walletChanged'));
   
   // Force a page reload to completely reset the connection state
-  setTimeout(() => {
-    window.location.reload();
-  }, 100);
+  // setTimeout(() => {
+  //   window.location.reload(); // Callers should handle reload if necessary
+  // }, 100); 
   
-  console.log("Wallet address cleared from storage");
+  console.log("Wallet address cleared from storage. Page reload should be handled by caller if needed.");
 }
 
 /**

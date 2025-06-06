@@ -59,10 +59,11 @@ export function useWallet() {
             };
           
             // Update state with backend data
-            setCitizenProfile(backendProfile);
+            setCitizenProfile(backendProfile); // Update hook's local state
             
             // Also update localStorage
-            localStorage.setItem('citizenProfile', JSON.stringify(backendProfile));
+            // localStorage.setItem('citizenProfile', JSON.stringify(backendProfile)); // WalletProvider should handle this
+            console.log("useWallet Hook: citizenProfile state updated from backend, localStorage update deferred to WalletProvider.");
           }
         })
         .catch(error => {
@@ -205,8 +206,9 @@ export function useWallet() {
               Ducats: citizenData.ducats,
               walletAddress: address
             };
-            setCitizenProfile(citizenProfile);
-            localStorage.setItem('citizenProfile', JSON.stringify(citizenProfile));
+            setCitizenProfile(citizenProfile); // Update hook's local state
+            // localStorage.setItem('citizenProfile', JSON.stringify(citizenProfile)); // WalletProvider should handle this
+            console.log("useWallet Hook: citizenProfile state updated after connect, localStorage update deferred to WalletProvider.");
           }
         }
       }

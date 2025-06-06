@@ -175,16 +175,15 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
                         // This is the most reliable way to force Phantom to show the account selector
                         window.location.reload();
                       } catch (e) {
-                        console.warn("Could not access Phantom browser API:", e);
-                        // If we couldn't access the Phantom API, just try to connect
-                        connectWallet();
+                        console.warn("Could not access Phantom browser API during Switch Account:", e);
+                        // If Phantom disconnect fails, still reload to clear state from our side
+                        window.location.reload();
                       }
                     } else {
-                      // If window.solana is not available, just try to connect
-                      connectWallet();
+                      // If window.solana is not available, just reload
+                      window.location.reload();
                     }
-                    
-                    setDropdownOpen(false);
+                    // No need to call setDropdownOpen(false) as page reloads.
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
                 >
@@ -193,37 +192,30 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
                 <button
                   onClick={async () => {
                     try {
-                      // First, update the UI state immediately
-                      setDropdownOpen(false);
+                      setDropdownOpen(false); // Close dropdown first
                       
-                      // Clear current wallet connection
+                      // Clear storage items. WalletProvider will see this on reload.
                       localStorage.removeItem('citizenProfile');
-                      
-                      // Disconnect the current wallet first
                       sessionStorage.removeItem('walletAddress');
                       localStorage.removeItem('walletAddress');
                       
-                      // Dispatch event to notify components about wallet change
-                      window.dispatchEvent(new Event('walletChanged'));
-                      
-                      // Force Phantom to forget the connection by directly accessing the window.solana object
-                      if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom) {
+                      // Attempt to disconnect Phantom wallet adapter if available
+                      if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom && typeof window.solana.disconnect === 'function') {
                         try {
-                          // First try to disconnect using Phantom's own method
-                          window.solana.disconnect();
-                          
-                          // Then reload the page to completely reset the connection state
-                          // This is the most reliable way to force Phantom to show the account selector
-                          window.location.reload();
+                          await window.solana.disconnect();
+                          console.log("Phantom wallet disconnected successfully via WalletButton.");
                         } catch (e) {
-                          console.warn("Could not access Phantom browser API:", e);
-                          // If we couldn't access the Phantom API, just try to connect
-                          connectWallet();
+                          console.warn("Error attempting to disconnect Phantom wallet via WalletButton:", e);
                         }
-                      } else {
-                        // If window.solana is not available, just try to connect
-                        connectWallet();
                       }
+                      
+                      // Dispatch event to notify other components (e.g., WalletProvider to update its state if needed before reload)
+                      // However, the reload will be the primary mechanism for state reset.
+                      window.dispatchEvent(new Event('walletChanged')); 
+                                            
+                      // Force a page reload to ensure a clean state
+                      window.location.reload();
+
                     } catch (error) {
                       console.error("Error disconnecting wallet:", error);
                       alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
