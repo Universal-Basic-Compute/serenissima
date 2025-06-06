@@ -21,6 +21,7 @@ class LogColors:
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
     ACTIVITY = '\033[96m'  # Ajout de la couleur ACTIVITY, identique à OKCYAN
+    PROCESS = '\033[96m'  # Ajout de la couleur PROCESS, identique à OKCYAN/ACTIVITY/INFO
     CYAN = '\033[96m'     # Alias pour OKCYAN
     INFO = '\033[96m'     # Alias pour OKCYAN/ACTIVITY
     OKGREEN = '\033[92m'
