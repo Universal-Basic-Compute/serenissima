@@ -245,19 +245,40 @@ def get_kinos_api_key() -> Optional[str]:
 
 # --- AI Citizen Fetching ---
 
-def get_ai_citizens_for_autonomous_run(tables: Dict[str, Table], specific_username: Optional[str] = None) -> List[Dict]:
-    """Fetches AI citizens eligible for autonomous run."""
+def get_ai_citizens_for_autonomous_run(
+    tables: Dict[str, Table], 
+    specific_username: Optional[str] = None,
+    social_classes_to_include: Optional[List[str]] = None
+) -> List[Dict]:
+    """Fetches AI citizens eligible for autonomous run, filtered by username or social classes."""
     try:
         base_formula_parts = ["{IsAI}=1", "{InVenice}=1"]
+        
         if specific_username:
             base_formula_parts.append(f"{{Username}}='{_escape_airtable_value(specific_username)}'")
             log.info(f"{LogColors.OKBLUE}Fetching specific AI citizen for autonomous run: {specific_username}{LogColors.ENDC}")
         else:
-            # Default to Nobili, Cittadini, Forestieri if no specific citizen is requested
-            social_class_filter = "OR({SocialClass}='Nobili', {SocialClass}='Cittadini', {SocialClass}='Forestieri')"
-            base_formula_parts.append(social_class_filter)
-            log.info(f"{LogColors.OKBLUE}Fetching all eligible AI citizens (Nobili, Cittadini, Forestieri) for autonomous run.{LogColors.ENDC}")
-        
+            effective_social_classes = []
+            if social_classes_to_include and len(social_classes_to_include) > 0:
+                effective_social_classes = social_classes_to_include
+                log.info(f"{LogColors.OKBLUE}Fetching AI citizens of specified social classes: {', '.join(effective_social_classes)}{LogColors.ENDC}")
+            else:
+                # Default to Nobili, Cittadini, Forestieri if no specific citizen and no specific classes are requested
+                effective_social_classes = ['Nobili', 'Cittadini', 'Forestieri']
+                log.info(f"{LogColors.OKBLUE}Fetching all eligible AI citizens (Default: Nobili, Cittadini, Forestieri) for autonomous run.{LogColors.ENDC}")
+
+            if effective_social_classes:
+                class_conditions = [f"{{SocialClass}}='{_escape_airtable_value(sc)}'" for sc in effective_social_classes]
+                if len(class_conditions) == 1:
+                    social_class_filter = class_conditions[0]
+                else:
+                    social_class_filter = "OR(" + ", ".join(class_conditions) + ")"
+                base_formula_parts.append(social_class_filter)
+            else:
+                # This case should ideally not be reached if logic is correct (defaults apply if list is empty)
+                # but if it does, it means no social class filter, fetching all AI in Venice.
+                log.warning(f"{LogColors.WARNING}No specific social classes provided and default did not apply. Fetching all AI citizens in Venice.{LogColors.ENDC}")
+
         formula = "AND(" + ", ".join(base_formula_parts) + ")"
         citizens = tables["citizens"].all(formula=formula)
         
@@ -1603,8 +1624,9 @@ def process_all_ai_autonomously(
     dry_run: bool = False,
     specific_citizen_username: Optional[str] = None,
     kinos_model_override: Optional[str] = None,
-    unguided_mode: bool = False, 
-    user_message: Optional[str] = None
+    unguided_mode: bool = False,
+    user_message: Optional[str] = None,
+    social_classes_cli_args: Optional[List[str]] = None
 ):
     """Main function to process autonomous runs for AI citizens."""
     run_mode = "DRY RUN" if dry_run else "LIVE RUN"
@@ -1629,7 +1651,7 @@ def process_all_ai_autonomously(
     if specific_citizen_username:
         # Process only the specified citizen
         log_header(f"Processing specific citizen: {specific_citizen_username}", color_code=Fore.CYAN if colorama_available else '')
-        ai_citizens_to_process = get_ai_citizens_for_autonomous_run(tables, specific_citizen_username)
+        ai_citizens_to_process = get_ai_citizens_for_autonomous_run(tables, specific_citizen_username, None) # Social class args ignored for specific citizen
         if not ai_citizens_to_process:
             log.warning(f"{LogColors.WARNING}Specific citizen {specific_citizen_username} not found or not eligible. Exiting.{LogColors.ENDC}")
             return
@@ -1664,9 +1686,9 @@ def process_all_ai_autonomously(
         main_loop_count += 1
         log_header(f"Main Loop Iteration: {main_loop_count}", color_code=Fore.CYAN if colorama_available else '')
         
-        ai_citizens_to_process = get_ai_citizens_for_autonomous_run(tables, None) # Gets Nobili, Cittadini, Forestieri
+        ai_citizens_to_process = get_ai_citizens_for_autonomous_run(tables, None, social_classes_cli_args)
         if not ai_citizens_to_process:
-            log.warning(f"{LogColors.WARNING}No eligible AI citizens found in this iteration. Waiting before retry.{LogColors.ENDC}")
+            log.warning(f"{LogColors.WARNING}No eligible AI citizens found in this iteration based on specified classes or default. Waiting before retry.{LogColors.ENDC}")
             time.sleep(60) # Wait a minute if no one is found
             continue
 
@@ -1754,6 +1776,13 @@ if __name__ == "__main__":
         type=str,
         help="An additional message to include in the context for the AI's first Kinos call."
     )
+    # Arguments for social class filtering
+    parser.add_argument("--nobili", action="store_true", help="Include Nobili class AI citizens.")
+    parser.add_argument("--cittadini", action="store_true", help="Include Cittadini class AI citizens.")
+    parser.add_argument("--forestieri", action="store_true", help="Include Forestieri class AI citizens.")
+    parser.add_argument("--popolani", action="store_true", help="Include Popolani class AI citizens.")
+    parser.add_argument("--facchini", action="store_true", help="Include Facchini class AI citizens.")
+    
     args = parser.parse_args()
 
     kinos_model_to_use = args.model
@@ -1770,11 +1799,20 @@ if __name__ == "__main__":
         run_unguided_mode = False
     elif args.unguided: # Explicitly asking for unguided (which is default anyway)
         run_unguided_mode = True
+
+    # Collect specified social classes
+    social_classes_from_args = []
+    if args.nobili: social_classes_from_args.append('Nobili')
+    if args.cittadini: social_classes_from_args.append('Cittadini')
+    if args.forestieri: social_classes_from_args.append('Forestieri')
+    if args.popolani: social_classes_from_args.append('Popolani')
+    if args.facchini: social_classes_from_args.append('Facchini')
         
     process_all_ai_autonomously(
         dry_run=args.dry_run,
         specific_citizen_username=args.citizen,
         kinos_model_override=kinos_model_to_use,
         unguided_mode=run_unguided_mode,
-        user_message=args.addMessage # Pass the new message
+        user_message=args.addMessage, # Pass the new message
+        social_classes_cli_args=social_classes_from_args if social_classes_from_args else None
     )
