@@ -207,32 +207,32 @@ def _get_entity_count_from_response(response_json: Any) -> Optional[int]:
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
     """Initializes connection to Airtable."""
-    _env_airtable_api_key = os.getenv("AIRTABLE_API_KEY")
-    _env_airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
+    env_api_key = os.getenv("AIRTABLE_API_KEY")
+    env_base_id = os.getenv("AIRTABLE_BASE_ID")
 
-    # Process API Key
     airtable_api_key: Optional[str] = None
-    _temp_api_key = _env_airtable_api_key[0] if isinstance(_env_airtable_api_key, tuple) and len(_env_airtable_api_key) == 1 and isinstance(_env_airtable_api_key[0], str) else _env_airtable_api_key
-    if isinstance(_temp_api_key, str):
-        airtable_api_key = _temp_api_key.strip()
-        if not airtable_api_key: airtable_api_key = None
-    elif _temp_api_key is not None:
-        log.warning(f"{LogColors.WARNING}AIRTABLE_API_KEY is of unexpected type: {type(_temp_api_key)}. Treating as not set.{LogColors.ENDC}")
+    if isinstance(env_api_key, str):
+        airtable_api_key = env_api_key.strip()
+        if not airtable_api_key: # Was empty or all whitespace
+            airtable_api_key = None
+    elif env_api_key is not None: # Not a string and not None (e.g. if dotenv somehow loaded it as another type)
+        log.warning(f"{LogColors.WARNING}AIRTABLE_API_KEY from environment is of unexpected type: {type(env_api_key)}. Treating as not set.{LogColors.ENDC}")
 
-    # Process Base ID
     processed_base_id: Optional[str] = None
-    _temp_base_id = _env_airtable_base_id[0] if isinstance(_env_airtable_base_id, tuple) and len(_env_airtable_base_id) == 1 and isinstance(_env_airtable_base_id[0], str) else _env_airtable_base_id
-    if isinstance(_temp_base_id, str):
-        processed_base_id = _temp_base_id.strip()
-        if not processed_base_id: processed_base_id = None
-    elif _temp_base_id is not None:
-        log.warning(f"{LogColors.WARNING}AIRTABLE_BASE_ID is of unexpected type: {type(_temp_base_id)}. Treating as not set.{LogColors.ENDC}")
-        
-    if not airtable_api_key or not processed_base_id:
-        log_api_key_status = 'Set (but invalid type or empty after strip)' if _env_airtable_api_key and not airtable_api_key else 'Set' if airtable_api_key else 'Not Set'
-        log_base_id_status = 'Set (but invalid type or empty after strip)' if _env_airtable_base_id and not processed_base_id else 'Set' if processed_base_id else 'Not Set'
-        log.error(f"{LogColors.FAIL}Airtable credentials not found or invalid (API Key: {log_api_key_status}, Base ID: {log_base_id_status}).{LogColors.ENDC}")
+    if isinstance(env_base_id, str):
+        processed_base_id = env_base_id.strip()
+        if not processed_base_id: # Was empty or all whitespace
+            processed_base_id = None
+    elif env_base_id is not None: # Not a string and not None
+        log.warning(f"{LogColors.WARNING}AIRTABLE_BASE_ID from environment is of unexpected type: {type(env_base_id)}. Treating as not set.{LogColors.ENDC}")
+
+    if not airtable_api_key:
+        log.error(f"{LogColors.FAIL}Airtable API Key is missing or invalid. Please check AIRTABLE_API_KEY environment variable.{LogColors.ENDC}")
         return None
+    if not processed_base_id:
+        log.error(f"{LogColors.FAIL}Airtable Base ID is missing or invalid. Please check AIRTABLE_BASE_ID environment variable.{LogColors.ENDC}")
+        return None
+        
     try:
         # Configure a custom retry strategy
         retry_strategy = Retry(
@@ -244,17 +244,17 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
         api = Api(airtable_api_key, retry_strategy=retry_strategy)
         tables = {
             "citizens": api.table(processed_base_id, "CITIZENS"),
-            "messages": api.table(processed_base_id, "MESSAGES"), 
+            "messages": api.table(processed_base_id, "MESSAGES"),
             "notifications": api.table(processed_base_id, "NOTIFICATIONS"),
             "buildings": api.table(processed_base_id, "BUILDINGS"),
             "lands": api.table(processed_base_id, "LANDS"),
             "resources": api.table(processed_base_id, "RESOURCES"),
             "contracts": api.table(processed_base_id, "CONTRACTS"),
         }
-        log.info(f"{LogColors.OKGREEN}Airtable connection initialized successfully (citizens, messages, notifications, buildings, lands, resources, contracts).{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}Airtable connection initialized successfully.{LogColors.ENDC}")
         return tables
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Failed to initialize Airtable: {e}{LogColors.ENDC}", exc_info=True)
+        log.error(f"{LogColors.FAIL}Failed to initialize Airtable with API Key '{str(airtable_api_key)[:7]}...' and Base ID '{str(processed_base_id)[:7]}...': {e}{LogColors.ENDC}", exc_info=True)
         return None
 
 def get_kinos_api_key() -> Optional[str]:

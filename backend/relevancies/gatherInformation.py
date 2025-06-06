@@ -54,12 +54,6 @@ KINOS_BLUEPRINT_ID = "serenissima-ai" # As per user's prompt context
 KINOS_KIN_ID_INTELLIGENCE = "ConsiglioDeiDieci" # The Council receives and acts
 KINOS_CHANNEL_ID_INTELLIGENCE = "intelligence_reports" # A dedicated channel for these reports
 
-_env_airtable_api_key = os.getenv("AIRTABLE_API_KEY")
-AIRTABLE_API_KEY = _env_airtable_api_key[0] if isinstance(_env_airtable_api_key, tuple) and len(_env_airtable_api_key) == 1 and isinstance(_env_airtable_api_key[0], str) else _env_airtable_api_key
-
-_env_airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
-AIRTABLE_BASE_ID = _env_airtable_base_id[0] if isinstance(_env_airtable_base_id, tuple) and len(_env_airtable_base_id) == 1 and isinstance(_env_airtable_base_id[0], str) else _env_airtable_base_id
-
 # Logging setup
 logging.basicConfig(
     level=logging.INFO,
@@ -160,54 +154,44 @@ You operate in the tradition of the actual Consiglio dei Dieci, balancing the pr
 
 def initialize_airtable_tables() -> Optional[Dict[str, Table]]:
     """Initializes and returns a dictionary of Airtable Table objects."""
-    
-    # These module-level variables are processed at script load:
-    # _env_var = os.getenv("VAR_NAME")
-    # VAR_NAME = _env_var[0] if isinstance(_env_var, tuple) and len(_env_var) == 1 and isinstance(_env_var[0], str) else _env_var
-    current_api_key = AIRTABLE_API_KEY 
-    current_base_id = AIRTABLE_BASE_ID
+    env_api_key = os.getenv("AIRTABLE_API_KEY")
+    env_base_id = os.getenv("AIRTABLE_BASE_ID")
 
-    log.debug(f"Module-level AIRTABLE_API_KEY: type={type(current_api_key)}, value='{str(current_api_key)[:50]}...'")
-    log.debug(f"Module-level AIRTABLE_BASE_ID: type={type(current_base_id)}, value='{str(current_base_id)[:50]}...'")
+    airtable_api_key: Optional[str] = None
+    if isinstance(env_api_key, str):
+        airtable_api_key = env_api_key.strip()
+        if not airtable_api_key: # Was empty or all whitespace
+            airtable_api_key = None
+    elif env_api_key is not None:
+        log.warning(f"{LogColors.WARNING}AIRTABLE_API_KEY from environment is of unexpected type: {type(env_api_key)}. Treating as not set.{LogColors.ENDC}")
 
-    final_api_key: Optional[str] = None
-    if isinstance(current_api_key, str):
-        final_api_key = current_api_key.strip()
-        if not final_api_key: # Was empty or all whitespace
-            final_api_key = None 
-    elif current_api_key is not None: # Not a string and not None
-        log.error(f"Airtable API Key is of unexpected type after module-level processing: {type(current_api_key)}. Value: '{str(current_api_key)[:50]}...'")
+    airtable_base_id: Optional[str] = None
+    if isinstance(env_base_id, str):
+        airtable_base_id = env_base_id.strip()
+        if not airtable_base_id: # Was empty or all whitespace
+            airtable_base_id = None
+    elif env_base_id is not None:
+        log.warning(f"{LogColors.WARNING}AIRTABLE_BASE_ID from environment is of unexpected type: {type(env_base_id)}. Treating as not set.{LogColors.ENDC}")
+
+    if not airtable_api_key:
+        log.error(f"{LogColors.FAIL}Airtable API Key is missing or invalid. Please check AIRTABLE_API_KEY environment variable.{LogColors.ENDC}")
         return None
-    
-    final_base_id: Optional[str] = None
-    if isinstance(current_base_id, str):
-        final_base_id = current_base_id.strip()
-        if not final_base_id: # Was empty or all whitespace
-            final_base_id = None
-    elif current_base_id is not None: # Not a string and not None
-        log.error(f"Airtable Base ID is of unexpected type after module-level processing: {type(current_base_id)}. Value: '{str(current_base_id)[:50]}...'")
+    if not airtable_base_id:
+        log.error(f"{LogColors.FAIL}Airtable Base ID is missing or invalid. Please check AIRTABLE_BASE_ID environment variable.{LogColors.ENDC}")
         return None
 
-    if not final_api_key:
-        log.error(f"{LogColors.FAIL}Airtable API Key is missing or invalid after processing.{LogColors.ENDC}")
-        return None
-    if not final_base_id:
-        log.error(f"{LogColors.FAIL}Airtable Base ID is missing or invalid after processing.{LogColors.ENDC}")
-        return None
-    
-    log.info(f"Attempting Airtable initialization with API Key (type: {type(final_api_key)}): '{final_api_key[:7]}...' and Base ID (type: {type(final_base_id)}): '{final_base_id[:7]}...'")
+    log.info(f"Attempting Airtable initialization with API Key: '{airtable_api_key[:7]}...' and Base ID: '{airtable_base_id[:7]}...'")
 
     try:
-        api = Api(final_api_key) 
+        api = Api(airtable_api_key)
         tables = {
-            'messages': api.table(final_base_id, 'MESSAGES'),
-            'notifications': api.table(final_base_id, 'NOTIFICATIONS'),
+            'messages': api.table(airtable_base_id, 'MESSAGES'),
+            'notifications': api.table(airtable_base_id, 'NOTIFICATIONS'),
         }
         log.info(f"{LogColors.OKGREEN}Airtable tables (messages, notifications) initialized successfully.{LogColors.ENDC}")
         return tables
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Failed to initialize Airtable tables: {e}{LogColors.ENDC}")
-        log.error(f"  (Used API Key: '{final_api_key[:7]}...', Base ID: '{final_base_id[:7]}...')")
+        log.error(f"{LogColors.FAIL}Failed to initialize Airtable tables with API Key '{str(airtable_api_key)[:7]}...' and Base ID '{str(airtable_base_id)[:7]}...': {e}{LogColors.ENDC}")
         return None
 
 def fetch_daily_communications(tables: Dict[str, Table]) -> List[str]:
