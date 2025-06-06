@@ -40,4 +40,5 @@ from .execute_withdraw_building_bid_processor import process_execute_withdraw_bu
 from .finalize_manage_markup_buy_contract_processor import process_finalize_manage_markup_buy_contract_fn 
 from .finalize_manage_storage_query_contract_processor import process_finalize_manage_storage_query_contract_fn
 from .finalize_update_citizen_profile_processor import process_finalize_update_citizen_profile_fn # New
+from .manage_public_dock_processor import process as process_manage_public_dock # Corrected import
 # Add other processors here as they are created
