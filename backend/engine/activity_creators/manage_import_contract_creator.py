@@ -7,7 +7,9 @@ from backend.engine.utils.activity_helpers import (
     _escape_airtable_value, 
     VENICE_TIMEZONE,
     find_path_between_buildings,
-    get_building_record
+    get_building_record,
+    get_closest_building_of_type, # Added for finding office
+    _get_building_position_coords # Added for reference position
 )
 
 log = logging.getLogger(__name__)
@@ -41,33 +43,67 @@ def try_create(
     buyer_building_id = details.get('buyerBuildingId')
     target_office_building_id = details.get('targetOfficeBuildingId')  # customs_house or broker_s_office
     
-    # Validate required parameters
-    if not (resource_type and price_per_resource is not None and target_amount is not None and
-            target_office_building_id):
-        err_msg = "Missing required details for manage_import_contract: resourceType, pricePerResource, targetAmount, or targetOfficeBuildingId"
+    # Validate required parameters (targetOfficeBuildingId will be handled/found below)
+    if not (resource_type and price_per_resource is not None and target_amount is not None):
+        err_msg = "Missing required details for manage_import_contract: resourceType, pricePerResource, or targetAmount"
         log.error(err_msg)
         return {"success": False, "message": err_msg, "reason": "missing_contract_details"}
 
     citizen = citizen_record['fields'].get('Username')
     # Use the passed now_venice_dt for timestamp consistency
     ts = int(now_venice_dt.timestamp())
-    
-    # Get building record for office
-    office_building_record = get_building_record(tables, target_office_building_id)
-    
-    if not office_building_record:
-        err_msg = f"Could not find office building record for {target_office_building_id}"
-        log.error(err_msg)
-        return {"success": False, "message": err_msg, "reason": "office_building_not_found"}
-    
-    # Get buyer building record if specified
+
+    # Get buyer building record if specified (needed for reference position if office not specified)
     buyer_building_record = None
     if buyer_building_id:
         buyer_building_record = get_building_record(tables, buyer_building_id)
         if not buyer_building_record:
+            # If buyerBuildingId is provided but not found, it's an error.
             err_msg = f"Could not find building record for buyer building {buyer_building_id}"
             log.error(err_msg)
             return {"success": False, "message": err_msg, "reason": "buyer_building_not_found"}
+
+    # Determine target_office_building_id if not provided
+    if not target_office_building_id:
+        log.info(f"targetOfficeBuildingId not provided for manage_import_contract. Attempting to find a suitable office.")
+        reference_pos_for_office_search = None
+        if buyer_building_record:
+            reference_pos_for_office_search = _get_building_position(buyer_building_record)
+        
+        if not reference_pos_for_office_search: # Fallback to citizen's current position
+            citizen_pos_str_office = citizen_record['fields'].get('Position')
+            if citizen_pos_str_office:
+                try:
+                    reference_pos_for_office_search = json.loads(citizen_pos_str_office)
+                except json.JSONDecodeError:
+                    log.warning(f"Could not parse citizen position for office search: {citizen_pos_str_office}")
+        
+        if not reference_pos_for_office_search:
+            err_msg = "Cannot determine reference position to find a suitable trade office."
+            log.error(err_msg)
+            return {"success": False, "message": err_msg, "reason": "cannot_determine_reference_position_for_office"}
+
+        # Try finding customs_house first, then broker_s_office
+        found_office_rec = get_closest_building_of_type(tables, reference_pos_for_office_search, "customs_house")
+        if not found_office_rec:
+            found_office_rec = get_closest_building_of_type(tables, reference_pos_for_office_search, "broker_s_office")
+        
+        if found_office_rec:
+            target_office_building_id = found_office_rec['fields'].get('BuildingId')
+            log.info(f"Dynamically selected office: {target_office_building_id} ({found_office_rec['fields'].get('Name', 'Unknown Name')})")
+        else:
+            err_msg = "No suitable trade office (customs_house or broker_s_office) found automatically."
+            log.error(err_msg)
+            return {"success": False, "message": err_msg, "reason": "no_trade_office_found"}
+
+    # Now, target_office_building_id should be set (either from input or dynamically found)
+    # Get building record for the determined office
+    office_building_record = get_building_record(tables, target_office_building_id)
+    if not office_building_record: # This check is now more critical
+        err_msg = f"Could not find office building record for determined/provided ID: {target_office_building_id}"
+        log.error(err_msg)
+        return {"success": False, "message": err_msg, "reason": "office_building_not_found"}
+    
     
     # Get current citizen position to determine first path
     citizen_position_str = citizen_record['fields'].get('Position')
