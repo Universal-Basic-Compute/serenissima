@@ -85,7 +85,9 @@ from backend.engine.utils.activity_helpers import (
     calculate_haversine_distance_meters,
     LogColors, # Import LogColors
     log_header, # Import log_header
-    VENICE_TIMEZONE # Import VENICE_TIMEZONE
+    VENICE_TIMEZONE, # Import VENICE_TIMEZONE
+    _get_building_position_coords, # Added import
+    get_path_between_points # Added import
 )
 
 # Set up logging
