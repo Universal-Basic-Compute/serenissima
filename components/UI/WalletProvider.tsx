@@ -144,60 +144,28 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       console.error('[WalletProvider] Error in registerCitizen:', error);
       throw error; // Relancer pour que connectWallet puisse le gérer
     }
-  // }; // This closing brace was extra and caused the parsing error
+  }; // Corrected: This is the end of registerCitizen
   
   // Fetch citizen profile
-  const fetchCitizenProfile = async (walletAddress: string) => {
+  const fetchCitizenProfile = async (walletAddr: string) => { // Renamed parameter for clarity
     try {
-      const response = await fetch(`/api/citizens/wallet/${walletAddress}`);
+      const response = await fetch(`/api/citizens/wallet/${walletAddr}`);
       
       if (response.ok) {
         const data = await response.json();
         console.log('[WalletProvider] fetchCitizenProfile successful:', data.citizen);
         return data.citizen; // Return raw citizen data
       } else if (response.status === 404) {
-        console.log(`[WalletProvider] No citizen found for wallet ${walletAddress} via fetchCitizenProfile.`);
+        console.log(`[WalletProvider] No citizen found for wallet ${walletAddr} via fetchCitizenProfile.`);
         return null; // Explicitement null si 404
       } else {
-        console.error('[WalletProvider] Failed to fetch citizen profile:', response.status);
+        console.error(`[WalletProvider] Failed to fetch citizen profile for ${walletAddr}:`, response.status);
         return null;
       }
     } catch (error) {
-      console.error('[WalletProvider] Error in fetchCitizenProfile:', error);
-        throw new Error(`Registration failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('[WalletProvider] registerCitizen successful:', data.citizen);
-        return data.citizen; // Return raw citizen data
-      } else {
-        console.error('[WalletProvider] registerCitizen error:', data.error);
-        return null;
-      }
-    } catch (error) {
-      console.error('[WalletProvider] Error in registerCitizen:', error);
-      return null;
-    }
-  };
-  
-  // Fetch citizen profile
-  const fetchCitizenProfile = async (walletAddress: string) => {
-    try {
-      const response = await fetch(`/api/citizens/wallet/${walletAddress}`);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('[WalletProvider] fetchCitizenProfile successful:', data.citizen);
-        return data.citizen; // Return raw citizen data
-      } else {
-        console.error('[WalletProvider] Failed to fetch citizen profile:', response.status);
-        return null;
-      }
-    } catch (error) {
-      console.error('[WalletProvider] Error in fetchCitizenProfile:', error);
-      return null;
+      console.error(`[WalletProvider] Error in fetchCitizenProfile for ${walletAddr}:`, error);
+      // Ne pas relancer l'erreur ici, retourner null pour que le flux de connexion puisse continuer
+      return null; 
     }
   };
   
