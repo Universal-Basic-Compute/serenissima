@@ -399,7 +399,7 @@ def generate_conversation_turn(
             f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
             f"You are currently in conversation with {listener_profile.get('FirstName', listener_username)}. {location_context}"
             f"Review your knowledge in `addSystem` (your data package, problems, relationship, listener's problems, and recent conversation history). "
-            f"Answer naturally, keeping your persona and objectives in mind. Your response should be direct speech.[/SYSTEM]\n\n"
+            f"Answer naturally in English, keeping your persona and objectives in mind. Your response should be direct speech.[/SYSTEM]\n\n"
         )
         # History part for conversation mode
         history_prompt_part = ""

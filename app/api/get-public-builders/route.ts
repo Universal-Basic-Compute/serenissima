@@ -21,7 +21,7 @@ async function getCitizenDetails(username: string): Promise<any | null> {
       .select({
         filterByFormula: `{Username} = '${username}'`,
         maxRecords: 1,
-        fields: ["Username", "FirstName", "LastName", "SocialClass", "ImageUrl", "CoatOfArmsImageUrl", "Color", "FamilyMotto"] // Specify needed fields
+        fields: ["Username", "FirstName", "LastName", "SocialClass", "Color", "FamilyMotto"] // Specify needed fields
       })
       .firstPage();
 
@@ -35,8 +35,6 @@ async function getCitizenDetails(username: string): Promise<any | null> {
         firstName: citizen.FirstName,
         lastName: citizen.LastName,
         socialClass: citizen.SocialClass,
-        imageUrl: citizen.ImageUrl,
-        coatOfArmsImageUrl: citizen.CoatOfArmsImageUrl,
         color: citizen.Color,
         familyMotto: citizen.FamilyMotto,
       };
@@ -95,7 +93,7 @@ export async function GET(request: Request) {
           resourceName: resourceDef?.name || resourceTypeId,
           resourceCategory: resourceDef?.category || 'Unknown',
           resourceSubCategory: resourceDef?.subCategory || null,
-          imageUrl: resourceDef?.icon ? `/resources/${resourceDef.icon}` : `/resources/${formattedResourceType}.png`,
+          imageUrl: resourceDef?.icon ? `/images/resources/${resourceDef.icon}` : `/images/resources/${formattedResourceType}.png`,
           sellerBuilding: contractFields.SellerBuilding,
           pricePerResource: contractFields.PricePerResource,
           price: contractFields.PricePerResource, // Alias for consistency
