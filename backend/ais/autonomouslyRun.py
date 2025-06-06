@@ -314,14 +314,14 @@ def make_api_get_request(endpoint: str, params: Optional[Dict] = None) -> Option
             entity_count = _get_entity_count_from_response(response_json)
             count_message = f" Fetched {entity_count} entities." if entity_count is not None else ""
             
-            log.info(f"{LogColors.OKGREEN}API GET request to {url} successful.{count_message}{LogColors.ENDC}")
-            log.debug(f"{LogColors.PINK}Response from GET {url}: {json.dumps(response_json, indent=2)}{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}API GET request to {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.OKGREEN} successful.{count_message}{LogColors.ENDC}")
+            log.debug(f"{LogColors.PINK}Full response from GET {url}:\n{json.dumps(response_json, indent=2)}{LogColors.ENDC}")
             return response_json
         except requests.exceptions.RequestException as e:
             last_exception = e
-            log.warning(f"{LogColors.WARNING}API GET request to {url} failed on attempt {attempt + 1}: {e}{LogColors.ENDC}")
+            log.warning(f"{LogColors.WARNING}API GET request to {LogColors.BOLD}{url}{LogColors.ENDC}{LogColors.WARNING} failed on attempt {attempt + 1}: {e}{LogColors.ENDC}")
             if attempt < MAX_RETRIES:
-                log.info(f"Retrying in {RETRY_DELAY_SECONDS} seconds...")
+                log.info(f"{LogColors.OKBLUE}Retrying in {RETRY_DELAY_SECONDS} seconds...{LogColors.ENDC}")
                 time.sleep(RETRY_DELAY_SECONDS)
             else:
                 log.error(f"{LogColors.FAIL}API GET request to {url} failed after {MAX_RETRIES + 1} attempts: {last_exception}{LogColors.ENDC}", exc_info=True)
@@ -476,8 +476,13 @@ def make_kinos_call(
             log.warning(f"{LogColors.WARNING}Latest Kinos assistant message for {ai_username} has no content. Message object: {assistant_messages[0]}{LogColors.ENDC}")
             return None
         
-        log.info(f"{LogColors.OKGREEN}Received Kinos response for {ai_username}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
-        log.info(f"{LogColors.LIGHTBLUE}Kinos raw response content for {ai_username}:{LogColors.ENDC}\n{LogColors.LIGHTBLUE}{latest_ai_response_content}{LogColors.ENDC}")
+        log.info(f"{LogColors.OKGREEN}Received Kinos response for {LogColors.BOLD}{ai_username}{LogColors.ENDC}{LogColors.OKGREEN}. Length: {len(latest_ai_response_content)}{LogColors.ENDC}")
+        # Log full raw response at DEBUG level
+        log.debug(f"{LogColors.LIGHTBLUE}Full Kinos raw response content for {ai_username}:\n{latest_ai_response_content}{LogColors.ENDC}")
+        # Log snippet at INFO level if not DEBUG
+        if not log.isEnabledFor(logging.DEBUG):
+            log.info(f"{LogColors.LIGHTBLUE}Kinos raw response snippet for {ai_username}: {latest_ai_response_content[:300]}...{LogColors.ENDC}")
+
 
         parsed_response = None
         parsing_method_used = "none"
@@ -600,15 +605,15 @@ def make_kinos_call(
                     log.warning(f"{LogColors.WARNING}No suitable general JSON-like substring found for {ai_username}.{LogColors.ENDC}")
         
         if parsed_response:
-            log.debug(f"{LogColors.LIGHTBLUE}Kinos parsed JSON response for {ai_username} (method: {parsing_method_used}): {json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
-            if parsing_error_info and parsing_method_used != "direct": # Add info if a fallback method succeeded
+            log.debug(f"{LogColors.LIGHTBLUE}Full Kinos parsed JSON response for {ai_username} (method: {parsing_method_used}):\n{json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
+            if parsing_error_info and parsing_method_used != "direct_cleaned" and parsing_method_used != "direct_original": # Add info if a fallback method succeeded
                 parsed_response["parsing_info"] = f"Successfully parsed using {parsing_method_used} method after prior attempts failed. ({parsing_error_info.strip()})"
             return parsed_response
         else: # All parsing attempts failed
-            log.warning(f"{LogColors.WARNING}All JSON parsing attempts failed for Kinos response for {ai_username}. Treating entire response as reflection. Final error summary: {parsing_error_info}{LogColors.ENDC}")
+            log.warning(f"{LogColors.WARNING}All JSON parsing attempts failed for Kinos response for {LogColors.BOLD}{ai_username}{LogColors.ENDC}{LogColors.WARNING}. Treating entire response as reflection. Final error summary: {parsing_error_info}{LogColors.ENDC}")
             return {
                 "actions": [], 
-                "reflection": latest_ai_response_content, 
+                "reflection": latest_ai_response_content, # The full raw content
                 "error_parsing_json": True, 
                 "error_message": f"Failed to parse JSON from Kinos response after multiple attempts. Details: {parsing_error_info.strip()}"
             }
@@ -647,26 +652,28 @@ def call_try_create_activity_api(
     for attempt in range(MAX_RETRIES + 1): # MAX_RETRIES is global
         try:
             log_ref.info(f"{LogColors.OKBLUE}Making API POST request to: {LogColors.BOLD}{api_url}{LogColors.ENDC}{LogColors.OKBLUE} for try-create (Attempt {attempt + 1}/{MAX_RETRIES + 1}){LogColors.ENDC}")
-            log_ref.debug(f"{LogColors.LIGHTBLUE}Payload for try-create: {json.dumps(payload, indent=2)}{LogColors.ENDC}")
+            log_ref.debug(f"{LogColors.LIGHTBLUE}Full payload for try-create:\n{json.dumps(payload, indent=2)}{LogColors.ENDC}")
             
             response = requests.post(api_url, headers=headers, json=payload, timeout=DEFAULT_TIMEOUT_POST) # DEFAULT_TIMEOUT_POST is global
             response.raise_for_status()
-            response_json = response.json()
+            response_json = response.json() # Assuming response is always JSON if successful
             
             if response_json.get("success"):
-                log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {citizen_username} via API. Response: {response_json.get('message', 'OK')}{LogColors.ENDC}")
+                log_ref.info(f"{LogColors.OKGREEN}Successfully initiated activity '{activity_type}' for {LogColors.BOLD}{citizen_username}{LogColors.ENDC}{LogColors.OKGREEN} via API. Response: {response_json.get('message', 'OK')}{LogColors.ENDC}")
                 activity_info = response_json.get("activity") or (response_json.get("activities")[0] if isinstance(response_json.get("activities"), list) and response_json.get("activities") else None)
-                if activity_info and activity_info.get("id"):
-                    log_ref.info(f"  Activity ID: {activity_info['id']}")
+                if activity_info and activity_info.get("id"): # activity_info is already a dict (fields)
+                    log_ref.info(f"  Activity ID (Airtable Record ID): {activity_info['id']}")
+                log_ref.debug(f"{LogColors.PINK}Full response from try-create for {activity_type} / {citizen_username}:\n{json.dumps(response_json, indent=2)}{LogColors.ENDC}")
             else:
-                log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {citizen_username} failed: {response_json.get('error', 'Unknown error')}{LogColors.ENDC}")
+                log_ref.error(f"{LogColors.FAIL}API call to initiate activity '{activity_type}' for {LogColors.BOLD}{citizen_username}{LogColors.ENDC}{LogColors.FAIL} failed: {response_json.get('error', 'Unknown error')}{LogColors.ENDC}")
+                log_ref.debug(f"{LogColors.FAIL}Full error response from try-create for {activity_type} / {citizen_username}:\n{json.dumps(response_json, indent=2)}{LogColors.ENDC}")
             return response_json # Return the full response
 
         except requests.exceptions.RequestException as e:
             last_exception_try_create = e
-            log_ref.warning(f"{LogColors.WARNING}API POST request to {api_url} (try-create) failed on attempt {attempt + 1}: {e}{LogColors.ENDC}")
+            log_ref.warning(f"{LogColors.WARNING}API POST request to {LogColors.BOLD}{api_url}{LogColors.ENDC}{LogColors.WARNING} (try-create) failed on attempt {attempt + 1}: {e}{LogColors.ENDC}")
             if attempt < MAX_RETRIES:
-                log_ref.info(f"Retrying in {RETRY_DELAY_SECONDS} seconds...")
+                log_ref.info(f"{LogColors.OKBLUE}Retrying in {RETRY_DELAY_SECONDS} seconds...{LogColors.ENDC}")
                 time.sleep(RETRY_DELAY_SECONDS) # RETRY_DELAY_SECONDS is global
             else: # This is the final attempt that failed
                 detailed_error_log_message = str(last_exception_try_create)
@@ -676,10 +683,11 @@ def call_try_create_activity_api(
                         detailed_error_log_message += f" - API Response: {json.dumps(api_error_details_for_log)}"
                     except json.JSONDecodeError:
                         detailed_error_log_message += f" - API Response (text): {last_exception_try_create.response.text[:200]}" # Log snippet of text if not JSON
-                log_ref.error(f"{LogColors.FAIL}API POST request to {api_url} (try-create) failed after {MAX_RETRIES + 1} attempts: {detailed_error_log_message}{LogColors.ENDC}", exc_info=True)
+                log_ref.error(f"{LogColors.FAIL}API POST request to {LogColors.BOLD}{api_url}{LogColors.ENDC}{LogColors.FAIL} (try-create) failed after {MAX_RETRIES + 1} attempts: {detailed_error_log_message}{LogColors.ENDC}", exc_info=True)
         except json.JSONDecodeError as e_json: # This handles JSON decode errors for successful (2xx) responses
             last_exception_try_create = e_json
-            log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response from POST {api_url} (try-create) on attempt {attempt + 1} (after successful status code): {e_json}{LogColors.ENDC}", exc_info=True)
+            response_text_snippet = response.text[:500] if response and hasattr(response, 'text') else "[No response text available]"
+            log_ref.error(f"{LogColors.FAIL}Failed to decode JSON response from POST {LogColors.BOLD}{api_url}{LogColors.ENDC}{LogColors.FAIL} (try-create) on attempt {attempt + 1} (Status: {response.status_code if response else 'N/A'}). Error: {e_json}. Response text snippet: {response_text_snippet}{LogColors.ENDC}", exc_info=True)
             break # Stop retrying if successful status but bad JSON
             
     # After the loop, if we haven't returned success, construct the error payload
