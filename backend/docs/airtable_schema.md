@@ -293,7 +293,11 @@ Communications entre citoyens.
 -   `Type` (Texte): Type de message (ex: `personal`, `business_inquiry`, `guild_communication`, `reply`).
 -   `ReadAt` (Date/Heure): Horodatage de lecture par le destinataire.
 -   `Notes` (Texte multiligne): Peut contenir des informations contextuelles. Par exemple, pour les messages de type "reply", ce champ peut stocker l'ID du message original sous la forme `In reply to: <MessageId>`.
--   `Channel` (Texte, optionnel): Identifiant du canal de discussion (ex: `land_parcelX`, `chat_userA_userB`, `guild_guildY`). Permet de regrouper les messages par contexte.
+-   `Channel` (Texte, optionnel): Identifiant du canal de discussion. Permet de regrouper les messages par contexte.
+    -   Pour les discussions entre citoyens : `username1_username2` (noms triés par ordre alphabétique). Ex: `alice_bob`.
+    -   Pour les discussions sur un terrain avec un propriétaire : `landID_username1_username2` (où `landID` est l'ID du terrain, `username1` est l'utilisateur actuel, `username2` est le propriétaire, triés). Ex: `polygon-123_alice_bob`.
+    -   Pour les discussions publiques sur un terrain (sans propriétaire spécifique ou si l'utilisateur n'est pas connecté) : `land_landID`. Ex: `land_polygon-456`.
+    -   Pour les guildes : `guild_guildID`. Ex: `guild_weavers`.
 -   `CreatedAt` (Date/Heure): Date d'envoi du message.
 -   `UpdatedAt` (Date/Heure): Date de dernière modification.
 

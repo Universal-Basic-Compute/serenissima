@@ -237,8 +237,15 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     setIsLoadingHistory(true);
     setMessagesFetchFailed(false);
     try {
-      const channelName = `land_${landId}`;
-      console.log(`[LandDetailsPanel] Fetching message history for channel ${channelName} (user: ${currentCitizenUsername})`);
+      let channelName;
+      // Use dynamicOwner from the panel's state, which should be up-to-date
+      if (dynamicOwner && currentCitizenUsername) {
+        const participants = [currentCitizenUsername, dynamicOwner].sort().join('_');
+        channelName = `land_${landId}_${participants}`;
+      } else {
+        channelName = `land_${landId}`;
+      }
+      console.log(`[LandDetailsPanel] Fetching message history for channel ${channelName} (user: ${currentCitizenUsername}, owner: ${dynamicOwner})`);
       const response = await fetch(`/api/messages/channel/${encodeURIComponent(channelName)}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -561,6 +568,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
 
     try {
       // 1. Persist user's message
+      let messageChannel;
+      if (dynamicOwner && currentCitizenUsername) {
+        const participants = [currentCitizenUsername, dynamicOwner].sort().join('_');
+        messageChannel = `land_${selectedPolygon.id}_${participants}`;
+      } else {
+        messageChannel = `land_${selectedPolygon.id}`;
+      }
+
       const persistUserMessageResponse = await fetch('/api/messages/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -569,7 +584,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           receiver: dynamicOwner || selectedPolygon.id, // Use owner's username if available, else polygonId
           content: content,
           type: 'land_message', // Specific type for land chat
-          channel: `land_${selectedPolygon.id}`
+          channel: messageChannel
         }),
       });
       if (!persistUserMessageResponse.ok) {
@@ -653,6 +668,15 @@ Respond to ${interactorDisplayName}'s message. Be business-like, focused on game
           setMessages(prev => [...prev, aiMessage]);
 
           // 3. Persist AI's response
+          // Determine channel for AI response persistence, same logic as user message
+          let aiMessageChannel;
+          if (dynamicOwner && currentCitizenUsername) {
+            const participants = [currentCitizenUsername, dynamicOwner].sort().join('_');
+            aiMessageChannel = `land_${selectedPolygon.id}_${participants}`;
+          } else {
+            aiMessageChannel = `land_${selectedPolygon.id}`;
+          }
+
           const persistAiResponse = await fetch('/api/messages/send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -661,7 +685,7 @@ Respond to ${interactorDisplayName}'s message. Be business-like, focused on game
               receiver: currentCitizenUsername,
               content: kinosData.content,
               type: 'land_message_ai_augmented',
-              channel: `land_${selectedPolygon.id}`
+              channel: aiMessageChannel
             }),
           });
           if (!persistAiResponse.ok) {
