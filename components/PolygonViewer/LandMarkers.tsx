@@ -727,6 +727,12 @@ export default function LandMarkers({
                 }
                 handleClick(polygon);
               }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                if (onLandRightClick) {
+                  onLandRightClick(polygon.id, e.clientX, e.clientY);
+                }
+              }}
               onMouseEnter={() => handleMouseEnter(polygon)}
               onMouseLeave={handleMouseLeave}
             >
@@ -777,9 +783,9 @@ export default function LandMarkers({
           return (
             <div
               key={polygon.id}
-              className="absolute"
+              className="absolute" // Removed pointer-events-none to allow context menu
               style={{
-                pointerEvents: 'none', // Make non-interactive
+                pointerEvents: 'auto', // Changed from 'none' to allow context menu
                 position: 'absolute',
                 left: `${finalX}px`,
                 top: `${finalY}px`,
@@ -792,7 +798,12 @@ export default function LandMarkers({
                 opacity: opacity, // Base opacity
                 border: hasDock ? '2px solid rgba(255, 165, 0, 0.7)' : 'none',
               }}
-              // onClick, onMouseEnter, onMouseLeave, onContextMenu removed
+              onContextMenu={(e) => {
+                e.preventDefault();
+                if (onLandRightClick) {
+                  onLandRightClick(polygon.id, e.clientX, e.clientY);
+                }
+              }}
             >
               <img
                 src={imageUrl}
