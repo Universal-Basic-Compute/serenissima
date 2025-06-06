@@ -131,7 +131,7 @@ Gère les accords commerciaux entre citoyens ou avec le public.
 Suit les activités et actions en cours et terminées des citoyens. Avec l'unification du système, cette table enregistre toutes les entreprises initiées par les citoyens, qu'il s'agisse d'activités de longue durée ou d'actions stratégiques discrètes.
 
 -   `ActivityId` (Texte): Identifiant personnalisé unique (ex: `goto_work_username_timestamp`, `make_offer_for_land_username_timestamp`).
--   `Type` (Texte): Type d'activité ou d'action (ex: `rest`, `goto_home`, `production`, `bid_on_land` (peut être conservé pour des enchères plus complexes), `send_message`, `manage_public_sell_contract`, `list_land_for_sale`, `make_offer_for_land`, `accept_land_offer`, `buy_listed_land`, `cancel_land_listing`, `cancel_land_offer`, `buy_available_land`, `inspect_building_for_purchase`, `submit_building_purchase_offer`).
+-   `Type` (Texte): Type d'activité ou d'action (ex: `rest`, `goto_home`, `production`, `bid_on_land` (peut être conservé pour des enchères plus complexes), `send_message`, `manage_public_sell_contract`, `manage_public_dock`, `list_land_for_sale`, `make_offer_for_land`, `accept_land_offer`, `buy_listed_land`, `cancel_land_listing`, `cancel_land_offer`, `buy_available_land`, `inspect_building_for_purchase`, `submit_building_purchase_offer`).
 -   `Citizen` (Texte): `Username` du citoyen effectuant l'activité/action.
 -   `FromBuilding` (Texte): `BuildingId` personnalisé du lieu de départ/actuel.
 -   `ToBuilding` (Texte): `BuildingId` personnalisé de la destination.
