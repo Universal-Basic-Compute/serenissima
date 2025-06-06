@@ -180,10 +180,10 @@ async function fetchManagedBuildings(username: string): Promise<AirtableRecord<F
 
 async function fetchWorkplaceBuilding(username: string): Promise<AirtableRecord<FieldSet> | null> {
   try {
-    // A citizen typically has one primary workplace (Occupant)
+    // A citizen typically has one primary workplace (Occupant) which is a business
     // If multiple are possible, logic might need adjustment (e.g., sort by UpdatedAt or specific type)
     const records = await airtable('BUILDINGS').select({
-      filterByFormula: `{Occupant} = '${escapeAirtableValue(username)}'`,
+      filterByFormula: `AND({Occupant} = '${escapeAirtableValue(username)}', {Category} = 'business')`,
       maxRecords: 1, // Assuming one primary workplace as Occupant
     }).firstPage();
     return records.length > 0 ? records[0] : null;
