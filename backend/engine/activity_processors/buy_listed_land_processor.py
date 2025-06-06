@@ -115,7 +115,13 @@ def process_buy_listed_land_fn(tables: dict, activity_record: dict, building_typ
 
         # Update listing contract status
         now_iso = datetime.now(timezone.utc).isoformat()
-        tables['contracts'].update(listing_contract_record['id'], {"Status": "completed", "Buyer": buyer_username, "UpdatedAt": now_iso, "Notes": f"Completed: Land bought by {buyer_username} on {now_iso}."})
+        update_payload_contracts = {
+            "Status": "completed", 
+            "Buyer": buyer_username, 
+            "Notes": f"Completed: Land bought by {buyer_username} on {now_iso}."
+            # UpdatedAt is handled by Airtable
+        }
+        tables['contracts'].update(listing_contract_record['id'], update_payload_contracts)
         log.info(f"{LogColors.PROCESS}Listing contract {listing_contract_custom_id} status updated to 'completed'. Activity {activity_guid}.{LogColors.ENDC}")
 
         # Create transaction record
