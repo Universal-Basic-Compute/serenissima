@@ -41,7 +41,7 @@ def try_create(
     final_from_building_custom_id = original_from_building_id
 
     if original_from_building_id is None:
-        log.info(f"from_building_custom_id is None for {citizen_username}. Attempting to find and validate a nearby building as source.")
+        log.info(f"from_building_custom_id is None for {citizen_username} requesting {amount} of {resource_type_id} for {to_building_custom_id or 'personal inventory'}. Attempting to find and validate a nearby building as source.")
         determined_nearby_source_id = None
         try:
             citizen_record = tables['citizens'].get(citizen_airtable_id)
@@ -101,10 +101,23 @@ def try_create(
             return None # Error during dynamic source determination
         
         final_from_building_custom_id = determined_nearby_source_id
+
+        # If dynamic source finding resulted in the source being the destination building itself,
+        # and the original request didn't specify a source (i.e., we had to find one),
+        # then no fetch is needed as the resource (if any) is already at the destination from this perspective.
+        if final_from_building_custom_id is not None and final_from_building_custom_id == to_building_custom_id:
+            log.info(f"Dynamic source finding for fetch to '{to_building_custom_id}' identified the destination itself as the source. "
+                     f"No fetch activity needed for {citizen_username} as resources are effectively already at the destination from this dynamic search. Requested: {amount:.2f} of {resource_type_id}.")
+            # This prevents creating a "fetch from X to X" when X was dynamically chosen as the source for a fetch to X.
+            return None 
     
-    if final_from_building_custom_id is None and original_from_building_id is None:
-        # This means original was None, and dynamic determination failed (no nearby, no stock, etc.)
-        log.warning(f"Could not determine a valid source building for {citizen_username} to fetch {resource_type_id}. Aborting fetch_resource creation.")
+    # Check if a valid source building could be determined or was provided.
+    if final_from_building_custom_id is None:
+        # This covers cases where:
+        # 1. original_from_building_id was None, and dynamic determination failed (no nearby, no stock, etc.)
+        # 2. original_from_building_id was None, and dynamic determination led to source == destination (handled above, returns None)
+        # So, if we reach here and final_from_building_custom_id is still None, it means no valid source.
+        log.warning(f"Could not determine a valid source building for {citizen_username} to fetch {resource_type_id} for {to_building_custom_id or 'personal inventory'}. Aborting fetch_resource creation.")
         return None
     
     # If to_building_custom_id is None, it implies the citizen is fetching for their own inventory (e.g., homeless)
