@@ -81,42 +81,24 @@ def group_citizens_by_location(tables: Dict[str, Table]) -> Dict[str, List[Dict]
 
         for citizen_record in all_citizens_in_venice:
             citizen_fields = citizen_record.get('fields', {})
-            position_str = citizen_fields.get('Position')
+            position_str = citizen_fields.get('Position') # This is the JSON string "{\"lat\": ..., \"lng\": ...}"
             username = citizen_fields.get('Username')
 
             if not position_str or not username:
-                log.debug(f"Citizen {citizen_record.get('id')} missing Position or Username. Skipping.")
+                log.debug(f"Citizen {citizen_record.get('id')} missing Position string or Username. Skipping.")
                 continue
-
-            try:
-                citizen_coords = json.loads(position_str)
-                if not isinstance(citizen_coords, dict) or 'lat' not in citizen_coords or 'lng' not in citizen_coords:
-                    log.warning(f"Invalid position format for citizen {username}: {position_str}. Skipping.")
-                    continue
-                
-                # Find the building the citizen is in
-                # Using a small max_distance to ensure they are "in" the building
-                building_record = get_closest_building_to_position(tables, citizen_coords, max_distance_meters=15)
-                if building_record:
-                    building_id = building_record['fields'].get('BuildingId')
-                    if building_id:
-                        if building_id not in citizens_by_location:
-                            citizens_by_location[building_id] = []
-                        citizens_by_location[building_id].append(citizen_record)
-                    else:
-                        log.warning(f"Building {building_record.get('id')} found for {username} at {citizen_coords} has no BuildingId. Skipping.")
-                # else: log.debug(f"Citizen {username} at {citizen_coords} not found within any building (or building has no position).")
-
-            except json.JSONDecodeError:
-                log.warning(f"Could not parse position JSON for citizen {username}: {position_str}. Skipping.")
-            except Exception as e_pos:
-                log.error(f"Error processing position for citizen {username}: {e_pos}. Skipping.")
+            
+            # Use the raw position_str as the key for grouping.
+            # This ensures only citizens with IDENTICAL Position strings are grouped.
+            if position_str not in citizens_by_location:
+                citizens_by_location[position_str] = []
+            citizens_by_location[position_str].append(citizen_record)
         
-        # Filter out locations with fewer than 2 citizens
-        return {loc: citizens for loc, citizens in citizens_by_location.items() if len(citizens) >= 2}
+        # Filter out locations (exact position strings) with fewer than 2 citizens
+        return {pos_str_key: citizens for pos_str_key, citizens in citizens_by_location.items() if len(citizens) >= 2}
 
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error grouping citizens by location: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error grouping citizens by exact Position string: {e}{LogColors.ENDC}")
         return {}
 
 def process_encounter_pair(
