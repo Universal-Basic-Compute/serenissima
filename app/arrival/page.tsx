@@ -15,6 +15,24 @@ interface AIProfile {
   // Ajoutez d'autres champs si nécessaire
 }
 
+// Interface pour les messages, similaire à Compagno
+interface Message {
+  id?: string; // ID Airtable
+  messageId?: string; // ID Kinos ou ID temporaire
+  role?: 'user' | 'assistant'; // Rôle dans la conversation Kinos
+  sender?: string; // Username de l'expéditeur
+  receiver?: string; // Username du destinataire
+  content: string;
+  type?: string; // ex: 'message', 'message_ai_augmented'
+  timestamp?: string; // Timestamp Kinos
+  createdAt?: string; // Timestamp Airtable
+  readAt?: string | null;
+}
+
+const KINOS_API_CHANNEL_BASE_URL = 'https://api.kinos-engine.ai/v2';
+const KINOS_CHANNEL_BLUEPRINT = 'serenissima-ai';
+const DEFAULT_HUMAN_USERNAME = 'GuestUser'; // Fallback si le profil n'est pas chargé
+
 const stepsConfig: Record<ArrivalStep, { title: string; slideshowImage: string; chatPlaceholder: string }> = {
   galley: {
     title: 'Arrival by Galley',
@@ -50,6 +68,25 @@ const ArrivalPage: React.FC = () => {
   const [innAI, setInnAI] = useState<AIProfile | null>(null);
   const [aisLoading, setAisLoading] = useState<boolean>(true);
 
+  const [currentUserUsername, setCurrentUserUsername] = useState<string>(DEFAULT_HUMAN_USERNAME);
+  const [currentUserProfile, setCurrentUserProfile] = useState<any | null>(null);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [isSendingMessage, setIsSendingMessage] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState<string>('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Contexte pour Kinos, similaire à Compagno
+  const [contextualDataForChat, setContextualDataForChat] = useState<{
+    senderProfile: any | null;
+    targetProfile: AIProfile | null;
+    relationship: any | null;
+    targetNotifications: any[] | null;
+    relevancies: any[] | null;
+    problems: any[] | null;
+  } | null>(null);
+  const [isPreparingContext, setIsPreparingContext] = useState<boolean>(false);
+
+
   const getCurrentAI = useCallback((): AIProfile | null => {
     switch (currentStep) {
       case 'galley':
@@ -79,6 +116,124 @@ const ArrivalPage: React.FC = () => {
       return null;
     }
   }, []);
+
+  // Récupérer le nom d'utilisateur actuel et le profil au montage
+  useEffect(() => {
+    const storedProfile = localStorage.getItem('citizenProfile');
+    if (storedProfile) {
+      try {
+        const profile = JSON.parse(storedProfile);
+        if (profile.username) {
+          setCurrentUserUsername(profile.username);
+          setCurrentUserProfile(profile);
+        }
+      } catch (e) {
+        console.error("Erreur lors de la lecture du profil citoyen depuis localStorage:", e);
+      }
+    }
+  }, []);
+
+  const getKinosModelForSocialClass = (username?: string, socialClass?: string): string => {
+    if (username === 'NLR') return 'gemini-2.5-pro-preview-05-06';
+    const lowerSocialClass = socialClass?.toLowerCase();
+    switch (lowerSocialClass) {
+      case 'nobili': return 'gemini-2.5-pro-preview-05-06';
+      case 'cittadini': case 'forestieri': return 'gemini-2.5-flash-preview-05-20';
+      case 'popolani': case 'facchini': return 'local';
+      default: return 'gemini-2.5-flash-preview-05-20';
+    }
+  };
+
+  // Fonction pour récupérer les informations contextuelles pour Kinos
+  const fetchContextualInformation = useCallback(async (targetAI: AIProfile | null, humanUsername: string) => {
+    if (!targetAI || !humanUsername || humanUsername === DEFAULT_HUMAN_USERNAME) {
+      setContextualDataForChat(null);
+      return;
+    }
+    setIsPreparingContext(true);
+    try {
+      const senderProfile = currentUserProfile; // Déjà dans l'état
+      const targetProfile = targetAI; // L'IA actuelle
+
+      let relationship = null;
+      if (humanUsername !== targetAI.username) {
+        const relRes = await fetch(`/api/relationships?citizen1=${humanUsername}&citizen2=${targetAI.username}`);
+        const relData = relRes.ok ? await relRes.json() : null;
+        relationship = relData?.success ? relData.relationship : null;
+      } else { // Devrait pas arriver dans ce contexte, mais pour être complet
+        relationship = { strengthScore: 100, type: "Self" };
+      }
+
+      const determinedKinosModel = getKinosModelForSocialClass(targetAI.username, targetAI.socialClass);
+      const isLocalModel = determinedKinosModel === 'local';
+      const notificationLimit = isLocalModel ? 3 : 10;
+      const relevancyLimit = isLocalModel ? 3 : 10;
+      const problemLimit = isLocalModel ? 2 : 5;
+
+      const notifRes = await fetch(`/api/notifications`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ citizen: targetAI.username, limit: notificationLimit }),
+      });
+      const notifData = notifRes.ok ? await notifRes.json() : null;
+      const targetNotifications = notifData?.success ? notifData.notifications : [];
+
+      const relevanciesRes = await fetch(`/api/relevancies?relevantToCitizen=${targetAI.username}&targetCitizen=${humanUsername}&limit=${relevancyLimit}`);
+      const relevanciesData = relevanciesRes.ok ? await relevanciesRes.json() : null;
+      const relevancies = relevanciesData?.success ? relevanciesData.relevancies : [];
+
+      let problems: any[] = [];
+      // Fetch problems for targetAI
+      const problemsTargetRes = await fetch(`/api/problems?citizen=${targetAI.username}&status=active&limit=${problemLimit}`);
+      const problemsTargetData = problemsTargetRes.ok ? await problemsTargetRes.json() : null;
+      if (problemsTargetData?.success && problemsTargetData.problems) {
+        problems.push(...problemsTargetData.problems);
+      }
+      // Fetch problems for human user
+      const problemsSenderRes = await fetch(`/api/problems?citizen=${humanUsername}&status=active&limit=${problemLimit}`);
+      const problemsSenderData = problemsSenderRes.ok ? await problemsSenderRes.json() : null;
+       if (problemsSenderData?.success && problemsSenderData.problems) {
+        problemsSenderData.problems.forEach((p: any) => {
+          if (!problems.find(existing => existing.problemId === p.problemId)) {
+            problems.push(p);
+          }
+        });
+      }
+      
+      setContextualDataForChat({ senderProfile, targetProfile, relationship, targetNotifications, relevancies, problems });
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données contextuelles:", error);
+      setContextualDataForChat(null);
+    } finally {
+      setIsPreparingContext(false);
+    }
+  }, [currentUserProfile]);
+
+
+  // Fonction pour charger les messages du chat
+  const fetchChatMessages = useCallback(async (humanUsername: string, aiUsername: string | undefined) => {
+    if (!aiUsername || humanUsername === DEFAULT_HUMAN_USERNAME) {
+      setChatMessages([]); // Pas de messages si l'IA n'est pas définie ou si l'utilisateur est un invité
+      return;
+    }
+    const channelName = [humanUsername, aiUsername].sort().join('_');
+    try {
+      const response = await fetch(`/api/messages/channel/${encodeURIComponent(channelName)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.messages) {
+          setChatMessages(data.messages);
+        } else {
+          setChatMessages([]);
+        }
+      } else {
+        setChatMessages([]);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des messages du chat:", error);
+      setChatMessages([]);
+    }
+  }, []);
+
 
   useEffect(() => {
     const defaultAIUsername = "BookishMerchant";
@@ -177,7 +332,175 @@ const ArrivalPage: React.FC = () => {
     };
 
     fetchAllAIs();
-  }, [fetchCitizen]);
+  }, [fetchCitizen]); // fetchCitizen est stable grâce à useCallback
+
+  // Charger les messages et le contexte lorsque l'IA actuelle ou l'utilisateur change
+  useEffect(() => {
+    const currentAI = getCurrentAI();
+    if (currentAI && currentUserUsername !== DEFAULT_HUMAN_USERNAME) {
+      fetchChatMessages(currentUserUsername, currentAI.username);
+      fetchContextualInformation(currentAI, currentUserUsername);
+    } else if (currentAI) { // AI est là, mais utilisateur est GuestUser
+        // Afficher le message placeholder de l'IA comme seul message
+        setChatMessages([{
+            messageId: `placeholder-${currentAI.username}`,
+            sender: currentAI.username,
+            receiver: DEFAULT_HUMAN_USERNAME,
+            content: stepsConfig[currentStep].chatPlaceholder,
+            type: 'message',
+            createdAt: new Date().toISOString(),
+        }]);
+        setContextualDataForChat(null); // Pas de contexte pour GuestUser
+    }
+  }, [currentStep, currentUserUsername, fetchChatMessages, fetchContextualInformation, getCurrentAI]);
+
+
+  // Scroll vers le bas lorsque de nouveaux messages sont ajoutés
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages]);
+
+  const handleSendMessage = async () => {
+    const messageContent = inputValue.trim();
+    if (!messageContent || currentUserUsername === DEFAULT_HUMAN_USERNAME) return;
+
+    const currentAI = getCurrentAI();
+    if (!currentAI) return;
+
+    setIsSendingMessage(true);
+
+    const tempUserMessage: Message = {
+      messageId: `temp-${Date.now()}`,
+      sender: currentUserUsername,
+      receiver: currentAI.username,
+      content: messageContent,
+      type: 'message',
+      createdAt: new Date().toISOString(),
+    };
+    setChatMessages(prev => [...prev, tempUserMessage]);
+    setInputValue('');
+
+    try {
+      // 1. Persist user message to Airtable
+      const persistUserMsgResponse = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sender: currentUserUsername,
+          receiver: currentAI.username,
+          content: messageContent,
+          type: 'message',
+          channel: [currentUserUsername, currentAI.username].sort().join('_'),
+        }),
+      });
+      if (!persistUserMsgResponse.ok) console.error("Échec de la persistance du message utilisateur");
+      // Optionnel: mettre à jour le message temporaire avec l'ID réel si l'API le renvoie
+
+      // 2. Call Kinos AI
+      let kinosPromptContent = 
+`You are ${currentAI.firstName || currentAI.username}, an AI citizen of Venice. You are responding to a message from ${currentUserProfile?.firstName || currentUserUsername}.
+IMPORTANT: Your response should be human-like and conversational.
+DO NOT use overly formal language or write excessively long paragraphs unless the context truly calls for it.
+Aim for natural, pertinent, and engaging dialogue.
+
+CRITICAL: Use the structured context provided in the 'addSystem' field (detailed below) to make your response RELEVANT to ${currentUserProfile?.firstName || currentUserUsername} and FOCUSED ON GAMEPLAY.
+Reflect your understanding of your relationship, recent events, and potential gameplay interactions with ${currentUserProfile?.firstName || currentUserUsername}.
+
+Guide to 'addSystem' content (use this to make your message relevant and gameplay-focused):
+- 'ai_citizen_profile': Your own detailed profile (status, wealth, etc.).
+- 'sender_citizen_profile': The profile of ${currentUserProfile?.firstName || currentUserUsername}.
+- 'relationship_with_sender': Your existing relationship status with ${currentUserProfile?.firstName || currentUserUsername}.
+- 'recent_notifications_for_ai': Recent news/events you've received that might be relevant to your conversation.
+- 'recent_relevancies_ai_to_sender': Why ${currentUserProfile?.firstName || currentUserUsername} (or things related to them) are specifically relevant to you. This is key for a relevant response!
+- 'recent_problems_involving_ai_or_sender': Recent issues involving you or ${currentUserProfile?.firstName || currentUserUsername} that could be part of your discussion.
+
+--- USER'S MESSAGE TO YOU ---
+${messageContent}
+--- END OF USER'S MESSAGE ---
+
+Remember: Your reply should be human-like, conversational, RELEVANT to ${currentUserProfile?.firstName || currentUserUsername} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
+Your response:`;
+      
+      const kinosBody: any = {
+        content: kinosPromptContent,
+        model: getKinosModelForSocialClass(currentAI.username, currentAI.socialClass),
+      };
+      if (contextualDataForChat) {
+        kinosBody.addSystem = JSON.stringify({
+            ai_citizen_profile: contextualDataForChat.targetProfile,
+            sender_citizen_profile: contextualDataForChat.senderProfile,
+            relationship_with_sender: contextualDataForChat.relationship,
+            recent_notifications_for_ai: contextualDataForChat.targetNotifications,
+            recent_relevancies_ai_to_sender: contextualDataForChat.relevancies,
+            recent_problems_involving_ai_or_sender: contextualDataForChat.problems
+        });
+      }
+      
+      const kinosResponse = await fetch(
+        `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${currentAI.username}/channels/${[currentUserUsername, currentAI.username].sort().join('_')}/messages`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(kinosBody),
+        }
+      );
+
+      if (kinosResponse.ok) {
+        const kinosData = await kinosResponse.json();
+        if (kinosData.content) {
+          const aiMessage: Message = {
+            messageId: kinosData.message_id || kinosData.id || `kinos-msg-${Date.now()}`,
+            sender: currentAI.username,
+            receiver: currentUserUsername,
+            content: kinosData.content,
+            type: 'message_ai_augmented',
+            createdAt: kinosData.timestamp || new Date().toISOString(),
+            role: 'assistant',
+          };
+          setChatMessages(prev => [...prev, aiMessage]);
+
+          // 3. Persist AI message to Airtable
+          await fetch('/api/messages/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sender: currentAI.username,
+              receiver: currentUserUsername,
+              content: kinosData.content,
+              type: 'message_ai_augmented',
+              channel: [currentUserUsername, currentAI.username].sort().join('_'),
+            }),
+          });
+        }
+      } else {
+        console.error("Erreur de l'API Kinos:", kinosResponse.status, await kinosResponse.text());
+         const fallbackAiMessage: Message = {
+            messageId: `fallback-ai-${Date.now()}`,
+            sender: currentAI.username,
+            receiver: currentUserUsername,
+            content: "I'm currently unable to respond in detail. Please try again later.",
+            type: 'message',
+            createdAt: new Date().toISOString(),
+          };
+          setChatMessages(prev => [...prev, fallbackAiMessage]);
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du message:", error);
+       const fallbackAiMessage: Message = {
+            messageId: `error-ai-${Date.now()}`,
+            sender: currentAI?.username || 'AI',
+            receiver: currentUserUsername,
+            content: "An unexpected error occurred. I cannot reply at this moment.",
+            type: 'message',
+            createdAt: new Date().toISOString(),
+          };
+      setChatMessages(prev => [...prev, fallbackAiMessage]);
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
 
   const handleNextStep = () => {
     const currentIndex = stepOrder.indexOf(currentStep);
@@ -266,27 +589,58 @@ const ArrivalPage: React.FC = () => {
         )}
         
         {/* Zone d'affichage du chat */}
-        <div className="flex-grow bg-white border-2 border-orange-200 rounded-lg p-4 mb-4 overflow-y-auto shadow-inner">
-          {/* Messages du chat ici */}
-          <p className="text-stone-600 italic">{currentConfig.chatPlaceholder}</p>
-          {/* Exemple de message AI */}
-          {currentStep === 'customs' && !aisLoading && customsAI && (
-            <div className="mt-4">
-              <p><strong className="text-orange-600 font-semibold">{customsAI.firstName || customsAI.username}:</strong> Welcome to La Serenissima. Your papers, please. What is your name, and what brings you to our glorious city?</p>
+        <div className="flex-grow bg-white border-2 border-orange-200 rounded-lg p-4 mb-4 overflow-y-auto shadow-inner flex flex-col space-y-2">
+          {chatMessages.map((msg, index) => (
+            <div
+              key={msg.messageId || `msg-${index}`}
+              className={`flex ${msg.sender === currentUserUsername ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[80%] p-3 rounded-lg ${
+                  msg.sender === currentUserUsername
+                    ? 'bg-orange-500 text-white rounded-br-none'
+                    : 'bg-stone-200 text-stone-800 rounded-bl-none'
+                }`}
+              >
+                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                <p className={`text-xs mt-1 ${msg.sender === currentUserUsername ? 'text-orange-100' : 'text-stone-500'}`}>
+                  {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+          ))}
+          {isSendingMessage && chatMessages[chatMessages.length-1]?.sender === currentUserUsername && (
+             <div className="flex justify-start">
+                <div className="max-w-[80%] p-3 rounded-lg bg-stone-200 text-stone-800 rounded-bl-none">
+                    <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                </div>
             </div>
           )}
-          {/* Vous pouvez ajouter des blocs similaires pour galleyAI, homeAI, et innAI ici si nécessaire */}
+          <div ref={messagesEndRef} />
         </div>
         
-        {/* Zone de saisie du chat (simplifiée pour l'instant) */}
-        <div className="mb-6">
+        {/* Zone de saisie du chat */}
+        <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="mb-6 flex">
           <input 
             type="text" 
-            placeholder="Type your response..."
-            className="w-full p-3 bg-white text-stone-700 rounded-lg border-2 border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-stone-400 shadow-sm"
-            // TODO: Gérer la saisie et l'envoi de messages
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder={currentUserUsername === DEFAULT_HUMAN_USERNAME ? "Connect your wallet to chat" : "Type your response..."}
+            className="flex-grow p-3 bg-white text-stone-700 rounded-l-lg border-2 border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-stone-400 shadow-sm"
+            disabled={isSendingMessage || aisLoading || currentUserUsername === DEFAULT_HUMAN_USERNAME}
           />
-        </div>
+          <button
+            type="submit"
+            className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 rounded-r-lg transition-colors shadow-md hover:shadow-lg disabled:opacity-50"
+            disabled={isSendingMessage || aisLoading || !inputValue.trim() || currentUserUsername === DEFAULT_HUMAN_USERNAME}
+          >
+            Send
+          </button>
+        </form>
 
         {/* Boutons de Navigation */}
         <div className="flex justify-between">
