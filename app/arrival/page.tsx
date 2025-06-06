@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 // Importer des icônes si nécessaire, par exemple react-icons
 // import { FaShip, FaPassport, FaHome, FaBed } from 'react-icons/fa';
