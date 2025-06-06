@@ -16,7 +16,7 @@ import pytz # For timezone.utc
 PROJECT_ROOT_CBS = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 from backend.engine.utils.activity_helpers import get_building_record, get_citizen_record, VENICE_TIMEZONE, LogColors, _escape_airtable_value, dateutil_parser
-from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_MINOR_POSITIVE, TRUST_SCORE_MINOR_NEGATIVE
+from backend.engine.utils import update_trust_score_for_activity, TRUST_SCORE_MINOR_POSITIVE, TRUST_SCORE_MINOR_NEGATIVE
 
 log = logging.getLogger(__name__)
 
