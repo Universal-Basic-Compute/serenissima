@@ -44,7 +44,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
           (!citizenProfile.firstName || !citizenProfile.lastName) ? (
             <button
               onClick={() => router.push('/arrival')}
-              className={`bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-colors duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50 ${className}`}
+              className={`bg-red-800 hover:bg-red-900 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-colors duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-opacity-50 ${className}`}
             >
               Enter La Serenissima
             </button>
