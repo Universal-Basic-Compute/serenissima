@@ -64,6 +64,7 @@ from backend.engine.activity_creators import (
     try_create_initiate_building_project_activity, # Import new creator for building projects
     try_create_fetch_from_storage_activity,
     try_create_fishing_activity, # Import new creator
+    try_create_manage_public_dock_activity, # Import new creator
     # try_create_fetch_from_galley_activity is not used by process_citizen_activity
 )
 from backend.engine.activity_creators.send_message_creator import try_create as try_create_send_message_chain # Import for send_message
@@ -1653,6 +1654,99 @@ def _handle_porter_tasks(
         return True # Activity created by porter logic
     return False
 
+def _handle_manage_public_dock(
+    tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
+    now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
+    citizen_position: Optional[Dict], citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, citizen_name: str, citizen_position_str: Optional[str],
+    citizen_social_class: str
+) -> Optional[Dict]:
+    """Prio 66: Handles managing a public dock if the citizen runs one and it needs attention."""
+    if not (is_work_time(citizen_social_class, now_venice_dt) or is_leisure_time_for_class(citizen_social_class, now_venice_dt)):
+        return None # Only manage docks during active hours
+
+    try:
+        docks_run_by_citizen = tables['buildings'].all(
+            formula=f"AND({{RunBy}}='{_escape_airtable_value(citizen_username)}', {{Type}}='public_dock')"
+        )
+    except Exception as e_fetch_docks:
+        log.error(f"{LogColors.FAIL}[Gestion Quai Public] Erreur récupération des quais pour {citizen_name}: {e_fetch_docks}{LogColors.ENDC}")
+        return None
+
+    if not docks_run_by_citizen:
+        return None
+
+    for dock_record in docks_run_by_citizen:
+        dock_custom_id_val = dock_record['fields'].get('BuildingId')
+        dock_name_display = _get_bldg_display_name_module(tables, dock_record)
+        checked_at_str = dock_record['fields'].get('CheckedAt')
+        needs_management = True
+        MANAGEMENT_DURATION_HOURS = 2.0 # Duration of the management activity
+
+        if checked_at_str:
+            try:
+                checked_at_dt = datetime.fromisoformat(checked_at_str.replace("Z", "+00:00"))
+                if checked_at_dt.tzinfo is None: checked_at_dt = pytz.UTC.localize(checked_at_dt)
+                if (now_utc_dt - checked_at_dt) < timedelta(hours=12): # Manage if not checked in last 12 hours
+                    needs_management = False
+            except ValueError:
+                log.warning(f"{LogColors.WARNING}[Gestion Quai Public] Format de date invalide pour CheckedAt ({checked_at_str}) pour {dock_name_display}. Supposition : gestion nécessaire.{LogColors.ENDC}")
+
+        if needs_management:
+            log.info(f"{LogColors.OKCYAN}[Gestion Quai Public] {dock_name_display} (géré par {citizen_name}) nécessite une gestion (Dernière vérif.: {checked_at_str or 'Jamais'}).{LogColors.ENDC}")
+
+            if not citizen_position:
+                log.warning(f"{LogColors.WARNING}[Gestion Quai Public] {citizen_name} n'a pas de position. Impossible de créer l'activité de gestion.{LogColors.ENDC}")
+                continue
+
+            dock_pos = _get_building_position_coords(dock_record)
+            if not dock_pos:
+                log.warning(f"{LogColors.WARNING}[Gestion Quai Public] {dock_name_display} n'a pas de position. Impossible de créer l'activité de gestion.{LogColors.ENDC}")
+                continue
+
+            if _calculate_distance_meters(citizen_position, dock_pos) > 20: # If not already at the dock
+                path_to_dock = get_path_between_points(citizen_position, dock_pos, transport_api_url)
+                if not (path_to_dock and path_to_dock.get('success')):
+                    log.warning(f"{LogColors.WARNING}[Gestion Quai Public] Impossible de trouver un chemin vers {dock_name_display} pour {citizen_name}.{LogColors.ENDC}")
+                    continue
+
+                # Create goto_location activity first
+                goto_notes = f"Se rendant à {dock_name_display} pour gérer les opérations."
+                action_details = {
+                    "action_on_arrival": "manage_public_dock",
+                    "duration_hours_on_arrival": MANAGEMENT_DURATION_HOURS,
+                    "target_dock_id_on_arrival": dock_custom_id_val
+                }
+                from backend.engine.activity_creators.goto_location_creator import try_create as try_create_goto_location_activity
+                
+                goto_activity = try_create_goto_location_activity(
+                    tables=tables,
+                    citizen_record=citizen_record,
+                    destination_building_id=dock_custom_id_val,
+                    path_data=path_to_dock,
+                    current_time_utc=now_utc_dt,
+                    notes=goto_notes,
+                    details_payload=action_details,
+                    start_time_utc_iso=None # Immediate start for travel
+                )
+                if goto_activity:
+                    log.info(f"{LogColors.OKGREEN}[Gestion Quai Public] Activité 'goto_location' créée pour {citizen_name} vers {dock_name_display}.{LogColors.ENDC}")
+                    # The manage_public_dock activity will be chained by the goto_location processor.
+                    return goto_activity # Return the first activity of the chain
+            else: # Already at the dock
+                manage_activity = try_create_manage_public_dock_activity(
+                    tables=tables,
+                    citizen_record=citizen_record,
+                    public_dock_record=dock_record,
+                    duration_hours=MANAGEMENT_DURATION_HOURS,
+                    current_time_utc=now_utc_dt,
+                    start_time_utc_iso=None # Immediate start
+                )
+                if manage_activity:
+                    log.info(f"{LogColors.OKGREEN}[Gestion Quai Public] Activité 'manage_public_dock' créée directement pour {citizen_name} à {dock_name_display}.{LogColors.ENDC}")
+                    return manage_activity
+    return None
+
+
 def _handle_general_goto_work(
     tables: Dict[str, Table], citizen_record: Dict, is_night: bool, resource_defs: Dict, building_type_defs: Dict,
     now_venice_dt: datetime, now_utc_dt: datetime, transport_api_url: str, api_base_url: str,
@@ -2453,6 +2547,7 @@ def process_citizen_activity(
         (50, _handle_shopping_tasks, "Shopping personnel (si loisir)"), # General shopping
         (60, _handle_porter_tasks, "Tâches de porteur (si travail, au Guild Hall)"),
         (65, _handle_check_business_status, "Vérifier le statut de l'entreprise (si travail/loisir)"),
+        (66, _handle_manage_public_dock, "Gérer le quai public (si travail/loisir et nécessaire)"),
         
         # Movement to work if not already there and it's work time
         (70, _handle_general_goto_work, "Aller au travail (général, si heure de travail)"),
