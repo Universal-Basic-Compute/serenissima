@@ -16,6 +16,7 @@ from .eat_activity_creator import (
 from .fetch_from_galley_activity_creator import try_create as try_create_fetch_from_galley_activity
 # bid_on_land_activity_creator is removed as it's redundant with make_offer_for_land_creator
 from .leave_venice_activity_creator import try_create as try_create_leave_venice_activity
+from .manage_public_dock_activity_creator import try_create as try_create_manage_public_dock_activity # Import for manage_public_dock
 from .deliver_construction_materials_creator import try_create_deliver_construction_materials_activity
 from .construct_building_creator import try_create_construct_building_activity
 from .secure_warehouse_activity_creator import try_create as try_create_secure_warehouse_activity
