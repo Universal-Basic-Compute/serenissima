@@ -216,18 +216,22 @@ def generate_conversation_turn(
     tables: Dict[str, Table],
     kinos_api_key: str,
     speaker_username: str,
-    listener_username: str,
+    listener_username: str, # For reflection, this is the citizen being observed
     api_base_url: str,
     kinos_model_override: Optional[str] = None,
-    max_history_messages: int = 5
+    max_history_messages: int = 5,
+    interaction_mode: str = "conversation" # "conversation" or "reflection"
 ) -> Optional[Dict]:
     """
-    Generates one turn of a conversation where speaker_username's AI persona responds.
-    Persists the generated message and returns the Airtable record of the new message.
+    Generates one turn of a conversation or an internal reflection.
+    Persists the generated message/reflection and returns its Airtable record.
     """
-    log.info(f"Generating conversation turn: Speaker: {speaker_username}, Listener: {listener_username}")
+    if interaction_mode == "reflection":
+        log.info(f"Generating internal reflection for {speaker_username} about {listener_username}.")
+    else:
+        log.info(f"Generating conversation turn: Speaker: {speaker_username}, Listener: {listener_username}")
 
-    # 1. Get Speaker and Listener profiles (basic info)
+    # 1. Get Speaker and Listener (observed citizen) profiles
     speaker_profile_record = get_citizen_record(tables, speaker_username)
     listener_profile_record = get_citizen_record(tables, listener_username)
 
@@ -346,17 +350,42 @@ def generate_conversation_turn(
 
     # 4. Construct Kinos prompt
     location_context = ""
-    if shared_building_name:
+    if shared_building_name: # This implies they are in the same building
         location_context = f"You are both currently in {shared_building_name}. "
+    elif speaker_current_point_id and listener_current_point_id and speaker_current_point_id == listener_current_point_id:
+        # If point IDs match but building name couldn't be resolved, use a generic location.
+        location_context = f"You are both currently at the same location (Point ID: {speaker_current_point_id}). "
+    else: # Fallback if shared location is not confirmed (should ideally not happen if called from processEncounters correctly)
+        location_context = ""
 
-    system_explanation = (
-        f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
-        f"You are currently in conversation with {listener_profile.get('FirstName', listener_username)}. {location_context}"
-        f"Review your knowledge in `addSystem` (your data package, problems, relationship, listener's problems, and recent conversation history). "
-        f"Answer naturally, keeping your persona and objectives in mind. Your response should be direct speech.[/SYSTEM]\n\n"
-    )
 
-    prompt = system_explanation + f"{speaker_profile.get('FirstName', speaker_username)} (you): "
+    if interaction_mode == "reflection":
+        system_explanation = (
+            f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
+            f"{location_context}You have noticed {listener_profile.get('FirstName', listener_username)} (Social Class: {listener_profile.get('SocialClass', 'unknown')}) is also here. "
+            f"Review your knowledge in `addSystem` (your data package, problems, your relationship with them, their problems, and any recent direct conversation history with them). "
+            f"What are your internal thoughts or observations about their presence and this encounter? Consider any opportunities, risks, or social implications. "
+            f"Your response should be your internal monologue or reflection, not direct speech to them. "
+            f"Keep it concise and focused on potential gameplay impact or character development.[/SYSTEM]\n\n"
+        )
+        prompt = system_explanation + f"{speaker_profile.get('FirstName', speaker_username)}'s internal thoughts about {listener_profile.get('FirstName', listener_username)}: "
+    else: # conversation mode
+        system_explanation = (
+            f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
+            f"You are currently in conversation with {listener_profile.get('FirstName', listener_username)}. {location_context}"
+            f"Review your knowledge in `addSystem` (your data package, problems, relationship, listener's problems, and recent conversation history). "
+            f"Answer naturally, keeping your persona and objectives in mind. Your response should be direct speech.[/SYSTEM]\n\n"
+        )
+        # History part for conversation mode
+        history_prompt_part = ""
+        if add_system_payload["conversation_history"]:
+            history_prompt_part += "PREVIOUS MESSAGES IN THIS CONVERSATION (most recent last):\n"
+            for msg_fields in add_system_payload["conversation_history"]: # Iterate over fields directly
+                sender = msg_fields.get('Sender', 'Unknown')
+                content = msg_fields.get('Content', '')
+                history_prompt_part += f"{sender}: {content}\n"
+            history_prompt_part += "\n"
+        prompt = system_explanation + history_prompt_part + f"{speaker_profile.get('FirstName', speaker_username)} (you): "
 
     # 5. Determine Kinos model
     effective_kinos_model = kinos_model_override or get_kinos_model_for_social_class(speaker_username, speaker_social_class)
@@ -375,18 +404,29 @@ def generate_conversation_turn(
         log.error(f"Kinos failed to generate a message for {speaker_username} to {listener_username}.")
         return None
 
-    # 7. Persist message
+    # 7. Persist message/reflection
+    message_receiver = listener_username
+    message_type_to_persist = "message_ai_augmented"
+    
+    if interaction_mode == "reflection":
+        message_receiver = speaker_username # Reflection is "to self"
+        message_type_to_persist = "encounter_reflection"
+        log.info(f"Persisting reflection from {speaker_username} about {listener_username} (to self).")
+    
     persisted_message_record = persist_message(
         tables,
         sender_username=speaker_username,
-        receiver_username=listener_username,
+        receiver_username=message_receiver,
         content=ai_message_content,
-        message_type="message_ai_augmented", # Or a more specific type if needed
-        channel_name=channel_name
+        message_type=message_type_to_persist,
+        channel_name=channel_name # Channel remains the pair for context, type differentiates
     )
 
     if persisted_message_record:
-        log.info(f"Successfully generated and persisted conversation turn from {speaker_username}.")
+        if interaction_mode == "reflection":
+            log.info(f"Successfully generated and persisted reflection from {speaker_username} about {listener_username}.")
+        else:
+            log.info(f"Successfully generated and persisted conversation turn from {speaker_username}.")
         return persisted_message_record # Return the full Airtable record
     else:
         log.error(f"Failed to persist Kinos message from {speaker_username}.")
@@ -436,11 +476,12 @@ if __name__ == '__main__':
         speaker_username=citizen1_test_username,
         listener_username=citizen2_test_username,
         api_base_url=next_public_base_url,
+        interaction_mode="conversation" # Explicitly "conversation" for this example
         # kinos_model_override="local" # Optional: force a model
     )
 
     if new_message_record:
-        log.info(f"Conversation turn generated and saved. Message ID: {new_message_record.get('id')}")
+        log.info(f"Conversation turn/reflection generated and saved. Message ID: {new_message_record.get('id')}")
         log.info(f"Content: {new_message_record.get('fields', {}).get('Content')}")
     else:
         log.error("Failed to generate conversation turn.")
@@ -459,3 +500,19 @@ if __name__ == '__main__':
     #     log.info(f"Content: {reply_message_record.get('fields', {}).get('Content')}")
     # else:
     #     log.error("Failed to generate reply.")
+
+    # Example for reflection
+    # log.info(f"\nAttempting to generate reflection: {citizen1_test_username} about {citizen2_test_username}")
+    # reflection_message_record = generate_conversation_turn(
+    #     tables=example_tables,
+    #     kinos_api_key=kinos_key,
+    #     speaker_username=citizen1_test_username,
+    #     listener_username=citizen2_test_username,
+    #     api_base_url=next_public_base_url,
+    #     interaction_mode="reflection"
+    # )
+    # if reflection_message_record:
+    #     log.info(f"Reflection generated and saved. Message ID: {reflection_message_record.get('id')}")
+    #     log.info(f"Content: {reflection_message_record.get('fields', {}).get('Content')}")
+    # else:
+    #     log.error("Failed to generate reflection.")

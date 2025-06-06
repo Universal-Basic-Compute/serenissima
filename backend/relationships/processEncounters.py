@@ -50,7 +50,7 @@ API_BASE_URL = os.getenv("NEXT_PUBLIC_BASE_URL", "http://localhost:3000")
 MAX_ENCOUNTERS_PER_RUN = 10 # Limit total number of pairs processed per run
 MAX_ENCOUNTERS_PER_LOCATION = 3 # Limit pairs processed per location
 DELAY_BETWEEN_TURNS_SECONDS = 0 # Delay between Kinos calls for a single conversation
-DELAY_BETWEEN_PAIRS_SECONDS = 15 # Delay between processing different pairs
+DELAY_BETWEEN_PAIRS_SECONDS = 0 # Delay between processing different pairs
 
 def initialize_airtable_tables() -> Optional[Dict[str, Table]]:
     """Initializes and returns a dictionary of Airtable Table objects."""
@@ -107,51 +107,38 @@ def process_encounter_pair(
     api_base_url: str,
     citizen1_username: str,
     citizen2_username: str,
-    location_id: str, # BuildingId
+    location_id: str, # Represents the shared location (e.g., Position string or BuildingId)
     dry_run: bool = False
 ):
-    """Generates a 3-turn conversation between two citizens."""
-    # Ensure citizen1_username is alphabetically first
-    if citizen1_username > citizen2_username:
-        citizen1_username, citizen2_username = citizen2_username, citizen1_username
+    """Generates an internal reflection for citizen1 about citizen2 being at the same location."""
+    # Ensure citizen1_username is alphabetically first for consistency if needed,
+    # but for reflection, the order might matter based on who is "observing".
+    # Let's assume the order passed is intentional: citizen1 reflects on citizen2.
     
-    log.info(f"{LogColors.OKCYAN}Processing encounter between {citizen1_username} and {citizen2_username} at {location_id}.{LogColors.ENDC}")
+    log.info(f"{LogColors.OKCYAN}Processing encounter: {citizen1_username} reflecting on {citizen2_username} at {location_id}.{LogColors.ENDC}")
 
-    conversation_participants = [citizen1_username, citizen2_username]
-
-    for i in range(3): # 3 turns
-        speaker_idx = i % 2
-        listener_idx = (i + 1) % 2
-
-        speaker = conversation_participants[speaker_idx]
-        listener = conversation_participants[listener_idx]
-
-        log.info(f"  Turn {i+1}: {speaker} (speaker) to {listener} (listener).")
-        if dry_run:
-            log.info(f"    [DRY RUN] Would call generate_conversation_turn for {speaker} to talk to {listener}.")
-        else:
-            try:
-                new_message = generate_conversation_turn(
-                    tables=tables,
-                    kinos_api_key=kinos_api_key,
-                    speaker_username=speaker,
-                    listener_username=listener,
-                    api_base_url=api_base_url
-                )
-                if new_message:
-                    log.info(f"    Message generated and persisted. ID: {new_message.get('id')}")
-                    log.debug(f"    Content: {new_message.get('fields', {}).get('Content', '')[:100]}...")
-                else:
-                    log.warning(f"    Failed to generate or persist message for turn {i+1} ({speaker} to {listener}).")
-                    break # Stop this encounter if a turn fails
-
-                if i < 2: # If not the last turn
-                    log.info(f"    Waiting {DELAY_BETWEEN_TURNS_SECONDS}s before next turn...")
-                    time.sleep(DELAY_BETWEEN_TURNS_SECONDS)
-
-            except Exception as e_turn:
-                log.error(f"    Error during conversation turn {i+1} ({speaker} to {listener}): {e_turn}")
-                break # Stop this encounter on error
+    if dry_run:
+        log.info(f"    [DRY RUN] Would call generate_conversation_turn for {citizen1_username} to reflect on {citizen2_username}.")
+    else:
+        try:
+            # Call generate_conversation_turn with interaction_mode="reflection"
+            # The speaker is citizen1_username, the "listener" (observed) is citizen2_username.
+            new_reflection_message = generate_conversation_turn(
+                tables=tables,
+                kinos_api_key=kinos_api_key,
+                speaker_username=citizen1_username,
+                listener_username=citizen2_username, # citizen2 is the one being observed/reflected upon
+                api_base_url=api_base_url,
+                interaction_mode="reflection" # Specify the new mode
+            )
+            if new_reflection_message:
+                log.info(f"    Reflection by {citizen1_username} about {citizen2_username} generated and persisted. ID: {new_reflection_message.get('id')}")
+                log.debug(f"    Content: {new_reflection_message.get('fields', {}).get('Content', '')[:100]}...")
+            else:
+                log.warning(f"    Failed to generate or persist reflection for {citizen1_username} about {citizen2_username}.")
+        
+        except Exception as e_turn:
+            log.error(f"    Error during reflection generation for {citizen1_username} about {citizen2_username}: {e_turn}")
 
 def main(args):
     """Main function to process encounters."""
