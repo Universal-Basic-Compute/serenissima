@@ -91,6 +91,7 @@ export async function POST(request: Request) {
         fields: {
           Wallet: walletAddress,
           Username: requestedUsername,
+          CitizenId: requestedUsername, // Set CitizenId to be the same as Username
           FirstName: '', // Initialize as empty, user can edit later
           LastName: '',  // Initialize as empty
           Ducats: 100, // Starting amount
