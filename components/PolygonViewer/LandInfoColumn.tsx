@@ -89,7 +89,7 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
               <div className="flex flex-col items-center">
                 {selectedPolygon.id && (
                   <img
-                    src={`/api/lands/${selectedPolygon.id}/image`}
+                    src={`/images/lands/${selectedPolygon.id}.png`}
                     alt={`Image of ${selectedPolygon.historicalName || selectedPolygon.id}`}
                     className="w-[150px] h-[150px] border border-amber-100 rounded-lg mb-2 object-cover"
                     style={{ aspectRatio: '1/1' }}
