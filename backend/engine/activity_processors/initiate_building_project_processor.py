@@ -246,8 +246,8 @@ def _create_building_project(
             "BuildingId": building_id,
             "Name": f"{building_name} (Under Construction)",
             "Type": building_type,
-            "Category": building_type_info.get('category', 'business'),
-            "SubCategory": building_type_info.get('subCategory', ''),
+            "Category": building_type_info.get('category'),  # Allow None if not in definition
+            "SubCategory": building_type_info.get('subCategory'),  # Allow None if not in definition
             "LandId": land_id,
             "Position": json.dumps(point_details),
             "Point": json.dumps(point_details),
