@@ -236,20 +236,9 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
               </div>
             )}
           </div>
-        ) : (
-          // User is connected, profile exists, but username is null (new user)
-          <button
-            onClick={() => {
-              sessionStorage.setItem('cameFromWalletButtonEnterVenice', 'true'); // Flag for /arrival
-              router.push('/arrival');
-            }}
-            className={`font-serif font-extrabold text-2xl py-4 px-10 rounded-md shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-500 focus:ring-opacity-60 ${className} bg-gradient-to-br from-rose-700 via-red-800 to-stone-900 text-amber-100 hover:text-white border-2 border-amber-400 hover:border-amber-200 hover:shadow-amber-400/40 active:scale-95`}
-          >
-            Enter La Serenissima
-          </button>
-        )
+        ) : null /* Cas où username est null est maintenant géré par UsernamePrompt via WalletProvider */
       ) : isConnected ? (
-        // User is connected, but citizenProfile is null (e.g., profile fetch failed or pending)
+        // User is connected, but citizenProfile is null (e.g., profile fetch failed or pending, ou en attente du UsernamePrompt)
         <div className={`${className}`} ref={dropdownRef}>
           <button 
             onClick={() => setDropdownOpen(!dropdownOpen)}

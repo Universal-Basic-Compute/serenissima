@@ -69,6 +69,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [citizenProfile, setCitizenProfile] = useState<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
+  const [usernamePromptError, setUsernamePromptError] = useState<string | null>(null);
 
   // Centralized function to set citizen profile state, localStorage, and emit event
   const setAndLogCitizenProfile = (profile: any, source: string, currentWalletAddr: string | null) => {
@@ -104,20 +106,64 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     });
   };
   
-  // Register citizen with the API
-  const registerCitizen = async (walletAddress: string) => {
+  // Register citizen with the API - now accepts username
+  const registerCitizen = async (walletAddr: string, usernameToRegister?: string) => {
     try {
-      console.log('Registering citizen with wallet address:', walletAddress);
+      console.log(`Registering citizen. Wallet: ${walletAddr}, Username: ${usernameToRegister}`);
       
+      const payload: { walletAddress: string; username?: string } = { walletAddress: walletAddr };
+      if (usernameToRegister) {
+        payload.username = usernameToRegister;
+      }
+
       const response = await fetch('/api/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ walletAddress }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
+      const data = await response.json(); // Toujours essayer de parser la réponse
+
       if (!response.ok) {
+        // Si la réponse n'est pas OK, utiliser l'erreur de la réponse JSON si disponible
+        const errorMsg = data?.error || `Registration failed: ${response.status}`;
+        console.error('[WalletProvider] registerCitizen error from API:', errorMsg, data);
+        throw new Error(errorMsg); // Lancer une erreur pour être attrapée par connectWallet
+      }
+      
+      if (data.success) {
+        console.log('[WalletProvider] registerCitizen successful:', data.citizen);
+        return data.citizen; // Return raw citizen data
+      } else {
+        // Si success est false mais la réponse était OK (ex: 200 mais avec une erreur logique)
+        const errorMsg = data?.error || 'Registration returned success:false';
+        console.error('[WalletProvider] registerCitizen logical error:', errorMsg, data);
+        throw new Error(errorMsg); // Lancer une erreur
+      }
+    } catch (error) {
+      console.error('[WalletProvider] Error in registerCitizen:', error);
+      throw error; // Relancer pour que connectWallet puisse le gérer
+    }
+  };
+  
+  // Fetch citizen profile
+  const fetchCitizenProfile = async (walletAddress: string) => {
+    try {
+      const response = await fetch(`/api/citizens/wallet/${walletAddress}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[WalletProvider] fetchCitizenProfile successful:', data.citizen);
+        return data.citizen; // Return raw citizen data
+      } else if (response.status === 404) {
+        console.log(`[WalletProvider] No citizen found for wallet ${walletAddress} via fetchCitizenProfile.`);
+        return null; // Explicitement null si 404
+      } else {
+        console.error('[WalletProvider] Failed to fetch citizen profile:', response.status);
+        return null;
+      }
+    } catch (error) {
+      console.error('[WalletProvider] Error in fetchCitizenProfile:', error);
         throw new Error(`Registration failed: ${response.status}`);
       }
 
@@ -177,23 +223,27 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       
       // Connect to Phantom wallet
       const { publicKey } = await window.solana.connect();
-      const address = publicKey.toString();
+      const newAddress = publicKey.toString();
       
-      console.log('Connected to wallet:', address);
+      console.log('Connected to wallet:', newAddress);
+      setWalletAddress(newAddress); // Met à jour l'état du walletAddress ici
+      localStorage.setItem('walletAddress', newAddress);
       
-      // Store wallet address
-      setWalletAddress(address);
-      localStorage.setItem('walletAddress', address);
+      // Essayer de récupérer le profil existant avec le nouveau walletAddress
+      let profileData = await fetchCitizenProfile(newAddress);
       
-      // Register or fetch the citizen profile
-      let rawProfileData = await registerCitizen(address);
-      if (!rawProfileData) { // If registration failed or returned no profile, try fetching
-        console.log('[WalletProvider] Registration did not return profile, trying fetchCitizenProfile for', address);
-        rawProfileData = await fetchCitizenProfile(address);
+      if (profileData && profileData.username) {
+        // Le profil existe et a un nom d'utilisateur, tout va bien
+        console.log(`[WalletProvider] Existing profile found for ${newAddress} with username ${profileData.username}`);
+        setAndLogCitizenProfile(profileData, "connectWallet_existing_profile_found", newAddress);
+      } else {
+        // Pas de profil existant, ou profil existant sans nom d'utilisateur (ne devrait plus arriver)
+        // Afficher le prompt pour le nom d'utilisateur
+        console.log(`[WalletProvider] No existing profile or no username for ${newAddress}. Showing username prompt.`);
+        setShowUsernamePrompt(true);
+        // La logique de `handleUsernameSubmitted` s'occupera de l'enregistrement et de la mise à jour du profil.
+        // Ne pas appeler setAndLogCitizenProfile ici si on attend le prompt.
       }
-      
-      setAndLogCitizenProfile(rawProfileData, "connectWallet_after_register_or_fetch", address); // Pass address
-      // Event emission is now handled by setAndLogCitizenProfile
       
     } catch (error) {
       console.error('[WalletProvider] Error connecting wallet:', error);
@@ -294,10 +344,47 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     connectWallet,
     updateCitizenProfile
   };
+
+  const handleUsernameSubmitted = async (chosenUsername: string) => {
+    if (!walletAddress) {
+      setUsernamePromptError("Wallet address is not available. Cannot register.");
+      return;
+    }
+    setIsConnecting(true); // Indiquer que nous traitons quelque chose
+    setUsernamePromptError(null);
+    try {
+      // Appeler registerCitizen avec le nom d'utilisateur choisi
+      const newProfile = await registerCitizen(walletAddress, chosenUsername);
+      setAndLogCitizenProfile(newProfile, "handleUsernameSubmitted_register", walletAddress);
+      setShowUsernamePrompt(false); // Fermer le prompt en cas de succès
+    } catch (error: any) {
+      console.error("[WalletProvider] Error during username submission (registerCitizen call):", error);
+      setUsernamePromptError(error.message || "Failed to set username. It might be taken or invalid.");
+      // Ne pas fermer le prompt si l'enregistrement échoue, pour que l'utilisateur puisse réessayer
+    } finally {
+      setIsConnecting(false);
+    }
+  };
   
   return (
     <WalletContext.Provider value={wallet}>
       {children}
+      {showUsernamePrompt && (
+        <UsernamePrompt 
+          onUsernameSubmit={handleUsernameSubmitted}
+          onClose={() => {
+            // Théoriquement, l'utilisateur ne devrait pas pouvoir fermer sans soumettre
+            // Mais si c'est le cas, il faudrait déconnecter ou gérer l'état.
+            // Pour l'instant, on suppose que la soumission est la seule sortie.
+            // Si on ajoute un bouton "Annuler" au prompt, il faudrait déconnecter le portefeuille ici.
+            setShowUsernamePrompt(false);
+            setUsernamePromptError(null);
+            // Potentiellement déconnecter le portefeuille si l'utilisateur annule le choix du nom
+            // clearWalletAddress(); // Assurez-vous que cette fonction existe et fait ce qu'il faut
+          }}
+          initialError={usernamePromptError}
+        />
+      )}
     </WalletContext.Provider>
   );
 }
