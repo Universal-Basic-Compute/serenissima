@@ -835,27 +835,31 @@ def handle_activity_interruptions(tables: Dict[str, Table], now_utc_for_check_ov
     if now_utc_for_check_override:
         log.info(f"{LogColors.WARNING}handle_activity_interruptions is using provided time for check: {now_utc_to_use.isoformat()}{LogColors.ENDC}")
 
+    activities_by_citizen: Dict[str, List[Dict]] = {}
     try:
-        all_citizens = tables['citizens'].all(fields=['Username']) # Only need Username
-    except Exception as e_fetch_citizens:
-        log.error(f"{LogColors.FAIL}Failed to fetch citizens for interruption check: {e_fetch_citizens}{LogColors.ENDC}")
+        # Fetch all 'created' or 'in_progress' activities for ALL citizens in one go
+        all_relevant_activities_formula = "OR({Status}='created', {Status}='in_progress')"
+        all_potentially_interruptible_activities = tables['activities'].all(formula=all_relevant_activities_formula)
+        
+        # Group activities by citizen
+        for activity in all_potentially_interruptible_activities:
+            citizen_username = activity['fields'].get('Citizen')
+            if citizen_username:
+                if citizen_username not in activities_by_citizen:
+                    activities_by_citizen[citizen_username] = []
+                activities_by_citizen[citizen_username].append(activity)
+        log.info(f"Fetched {len(all_potentially_interruptible_activities)} potentially interruptible activities for {len(activities_by_citizen)} citizens.")
+
+    except Exception as e_fetch_all_activities:
+        log.error(f"{LogColors.FAIL}Failed to fetch all 'created' or 'in_progress' activities for interruption check: {e_fetch_all_activities}{LogColors.ENDC}")
         return
 
-    for citizen_data in all_citizens:
-        citizen_username = citizen_data['fields'].get('Username')
-        if not citizen_username:
-            continue
-
-        # Fetch all 'created' or 'in_progress' activities for this citizen
-        formula = f"AND({{Citizen}}='{_escape_airtable_value(citizen_username)}', OR({{Status}}='created', {{Status}}='in_progress'))"
-        try:
-            citizen_activities = tables['activities'].all(formula=formula)
-        except Exception as e_fetch_activities:
-            log.error(f"{LogColors.FAIL}Failed to fetch activities for citizen {citizen_username} during interruption check: {e_fetch_activities}{LogColors.ENDC}")
+    for citizen_username, citizen_activities in activities_by_citizen.items():
+        if not citizen_activities: # Should not happen if grouping is correct
             continue
 
         currently_active_for_citizen: List[Dict] = []
-        for activity in citizen_activities:
+        for activity in citizen_activities: # Already filtered by citizen
             start_date_str = activity['fields'].get('StartDate')
             end_date_str = activity['fields'].get('EndDate')
 
