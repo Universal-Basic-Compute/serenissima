@@ -248,7 +248,7 @@ const ArrivalPage: React.FC = () => {
           </div>
         ) : getCurrentAI() ? (
           <div className="flex flex-col items-center mb-6">
-            <div className="w-32 h-32 rounded-lg overflow-hidden border-4 border-orange-400 shadow-lg mb-3"> {/* Changed to rounded-lg */}
+            <div className="w-40 h-40 rounded-lg overflow-hidden border-4 border-orange-400 shadow-lg mb-3"> {/* Image size increased */}
               <img
                 src={`https://backend.serenissima.ai/public_assets/images/citizens/${getCurrentAI()?.username}.jpg`}
                 alt={`${getCurrentAI()?.firstName} ${getCurrentAI()?.lastName}`} // Changed alt text
