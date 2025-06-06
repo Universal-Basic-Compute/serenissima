@@ -99,20 +99,26 @@ def get_relationship_details(tables: Dict[str, Table], username1: str, username2
         log.error(f"Error fetching relationship for {user1_ordered}-{user2_ordered}: {e}")
     return None
 
-def get_conversation_history(tables: Dict[str, Table], channel_name: str, limit: int = 5) -> List[Dict]:
+def get_conversation_history(tables: Dict[str, Table], channel_name: Any, limit: int = 5) -> List[Dict]: # Changed type hint for channel_name to Any for robustness check
     """Fetches the last few messages for a given channel."""
-    log.info(f"Fetching conversation history for channel {channel_name} (limit {limit})...")
+    # Ensure channel_name is definitely a string before use
+    str_channel_name = str(channel_name)
+    
+    log.info(f"Fetching conversation history for channel {str_channel_name} (limit {limit})...")
     try:
         # Assuming 'Channel' field exists in MESSAGES table
         messages = tables['messages'].all(
-            formula=f"{{Channel}}='{_escape_airtable_value(channel_name)}'",
+            formula=f"{{Channel}}='{_escape_airtable_value(str_channel_name)}'",
             sort=[('-CreatedAt', 'desc')], # Get latest messages first
             max_records=limit
         )
         # Messages are fetched latest first, so reverse to get chronological order for the prompt
         return [msg['fields'] for msg in reversed(messages)]
     except Exception as e:
-        log.error(f"Error fetching conversation history for channel {channel_name}: {e}")
+        log.error(f"Error fetching conversation history for channel {str_channel_name}: {e}")
+        # Add specific logging if the error is the one reported
+        if isinstance(e, AttributeError) and "'tuple' object has no attribute 'startswith'" in str(e):
+            log.error(f"Type of original channel_name parameter was: {type(channel_name)}")
     return []
 
 def persist_message(
@@ -347,19 +353,10 @@ def generate_conversation_turn(
         f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
         f"You are currently in conversation with {listener_profile.get('FirstName', listener_username)}. {location_context}"
         f"Review your knowledge in `addSystem` (your data package, problems, relationship, listener's problems, and recent conversation history). "
-        f"Continue the conversation naturally, keeping your persona and objectives in mind. Your response should be direct speech.[/SYSTEM]\n\n"
+        f"Answer naturally, keeping your persona and objectives in mind. Your response should be direct speech.[/SYSTEM]\n\n"
     )
-    
-    history_prompt_part = ""
-    if add_system_payload["conversation_history"]:
-        history_prompt_part += "PREVIOUS MESSAGES IN THIS CONVERSATION (most recent last):\n"
-        for msg in add_system_payload["conversation_history"]:
-            sender = msg.get('Sender', 'Unknown')
-            content = msg.get('Content', '')
-            history_prompt_part += f"{sender}: {content}\n"
-        history_prompt_part += "\n"
 
-    prompt = system_explanation + history_prompt_part + f"{speaker_profile.get('FirstName', speaker_username)} (you): "
+    prompt = system_explanation + f"{speaker_profile.get('FirstName', speaker_username)} (you): "
 
     # 5. Determine Kinos model
     effective_kinos_model = kinos_model_override or get_kinos_model_for_social_class(speaker_username, speaker_social_class)
