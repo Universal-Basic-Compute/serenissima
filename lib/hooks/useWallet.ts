@@ -13,92 +13,53 @@ export function useWallet() {
 
   // Initialize wallet adapter
   useEffect(() => {
-    console.log("Initializing wallet adapter...");
-    const adapter = new PhantomWalletAdapter();
-    setWalletAdapter(adapter);
+    // console.log("Initializing wallet adapter (useWallet hook - largely deprecated)...");
+    // const adapter = new PhantomWalletAdapter();
+    // setWalletAdapter(adapter);
     
-    // Check if wallet is already connected in session or local storage
-    const storedWallet = getWalletAddress();
-    console.log("Stored wallet address:", storedWallet);
+    // // Check if wallet is already connected in session or local storage
+    // const storedWallet = getWalletAddress();
+    // console.log("useWallet hook: Stored wallet address:", storedWallet);
     
-    if (storedWallet) {
-      console.log("Found stored wallet address, setting as connected");
-      setWalletAddressState(storedWallet); // Update hook's local state
+    // if (storedWallet) {
+    //   console.log("useWallet hook: Found stored wallet address, setting as connected in hook state");
+    //   setWalletAddressState(storedWallet); // Update hook's local state
       
-      // Try to load citizen profile from localStorage first
-      const storedProfile = localStorage.getItem('citizenProfile');
-      if (storedProfile) {
-        try {
-          const parsedProfile = JSON.parse(storedProfile);
-          console.log('Loaded citizen profile from localStorage:', parsedProfile);
-          setCitizenProfile(parsedProfile);
-        } catch (e) {
-          console.error('Error parsing stored profile:', e);
-        }
-      }
-      
-      // Also fetch citizen profile data from backend to ensure it's up to date
-      fetch(`${getBackendBaseUrl()}/api/wallet/${storedWallet}`)
-        .then(response => {
-          if (response.ok) return response.json();
-          throw new Error('Failed to fetch citizen profile');
-        })
-        .then(data => {
-          console.log('Fetched citizen profile from backend:', data);
-          if (data.citizen_name) {
-            const backendProfile = {
-              username: data.citizen_name,
-              firstName: data.first_name || data.citizen_name.split(' ')[0] || '',
-              lastName: data.last_name || data.citizen_name.split(' ').slice(1).join(' ') || '',
-              coatOfArmsImageUrl: data.coat_of_arms_image,
-              familyMotto: data.family_motto,
-              coatOfArms: data.family_coat_of_arms,
-              Ducats: data.ducats,
-              color: data.color || '#8B4513',
-              walletAddress: storedWallet
-            };
-          
-            // Update state with backend data
-            setCitizenProfile(backendProfile); // Update hook's local state
-            
-            // Also update localStorage
-            // localStorage.setItem('citizenProfile', JSON.stringify(backendProfile)); // WalletProvider should handle this
-            console.log("useWallet Hook: citizenProfile state updated from backend, localStorage update deferred to WalletProvider.");
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching citizen profile:', error);
-        });
-    } else if (adapter.connected) {
-      // If adapter is connected but not in storage, update both
-      console.log("Adapter is connected but not in storage");
-      const address = adapter.publicKey?.toString() || null;
-      if (address) {
-        console.log("useWallet Hook: Adapter is connected, reflecting address in hook state:", address);
-        setWalletAddressState(address); // Update hook's local state
-        // setWalletAddress(address); // DO NOT write to localStorage here to avoid conflict with WalletProvider
-                                   // WalletProvider should be the source of truth for localStorage.
-      }
-    } else {
-      console.log("No stored wallet address and adapter not connected");
-    }
+    //   const storedProfile = localStorage.getItem('citizenProfile');
+    //   if (storedProfile) {
+    //     try {
+    //       const parsedProfile = JSON.parse(storedProfile);
+    //       setCitizenProfile(parsedProfile);
+    //     } catch (e) {
+    //       console.error('useWallet hook: Error parsing stored profile:', e);
+    //     }
+    //   }
+    //   // Backend fetch for profile update is removed to avoid conflicts. WalletProvider handles this.
+    // } else if (adapter.connected) {
+    //   const address = adapter.publicKey?.toString() || null;
+    //   if (address) {
+    //     console.log("useWallet Hook: Adapter is connected, reflecting address in hook state:", address);
+    //     setWalletAddressState(address);
+    //   }
+    // } else {
+    //   // console.log("useWallet hook: No stored wallet address and adapter not connected");
+    // }
     
-    setIsInitialized(true);
+    setIsInitialized(true); // Mark as initialized so consumers don't wait indefinitely
     
-    return () => {
-      // Clean up adapter when component unmounts
-      if (adapter) {
-        console.log("Cleaning up wallet adapter");
-        adapter.disconnect();
-      }
-    };
+    // return () => {
+    //   if (adapter) {
+    //     adapter.disconnect();
+    //   }
+    // };
   }, []);
 
-  // Listen for wallet changes
+  // Listen for wallet changes (e.g., from WalletProvider)
   useEffect(() => {
     const handleWalletChanged = () => {
-      const currentWallet = getWalletAddress();
-      setWalletAddressState(currentWallet);
+      // const currentWallet = getWalletAddress(); // Read from localStorage for its own state
+      // setWalletAddressState(currentWallet);
+      // console.log("useWallet hook: walletChanged event detected, updated hook state.");
     };
     
     window.addEventListener('walletChanged', handleWalletChanged);
@@ -108,10 +69,11 @@ export function useWallet() {
     };
   }, []);
 
-  // Listen for citizen profile updates
+  // Listen for citizen profile updates (e.g., from WalletProvider)
   useEffect(() => {
     const handleProfileUpdated = (event: CustomEvent) => {
-      setCitizenProfile(event.detail);
+      // setCitizenProfile(event.detail);
+      // console.log("useWallet hook: citizenProfileUpdated event detected, updated hook state.");
     };
     
     window.addEventListener('citizenProfileUpdated', handleProfileUpdated as EventListener);
@@ -121,109 +83,53 @@ export function useWallet() {
     };
   }, []);
 
-  // Connect wallet function
+  // Connect wallet function - This should ideally be removed or use WalletProvider's connectWallet
   const connectWallet = async () => {
-    console.log("Connecting wallet...");
-    if (!walletAdapter) {
-      console.log("Wallet adapter not initialized");
-      return;
-    }
-    
-    const adapter = walletAdapter;
-    
-    console.log("Connecting wallet, current state:", adapter.connected ? "connected" : "disconnected");
-    
-    if (adapter.connected) {
-      // If already connected, disconnect first
-      console.log("Disconnecting wallet...");
-      try {
-        // First disconnect the adapter
-        await adapter.disconnect();
-        
-        // Clear wallet from both storages
-        clearWalletAddress();
-        localStorage.removeItem('citizenProfile'); // Also clear citizen profile from storage
-        
-        // Update state after successful disconnect
-        setWalletAddressState(null);
-        setCitizenProfile(null); // Also clear the citizen profile
-        
-        // Dispatch a custom event to notify other components
-        window.dispatchEvent(new CustomEvent('walletChanged'));
-        
-        console.log("Wallet disconnected successfully");
-        
-        // Force page reload to completely reset the connection state
-        window.location.reload();
-        return; // Return early since we're reloading the page
-      } catch (error) {
-        console.error("Error during disconnect flow:", error);
-        alert(`Failed to disconnect wallet: ${error instanceof Error ? error.message : String(error)}`);
-        return;
-      }
-    }
-  
-    // Check if Phantom is installed
-    if (adapter.readyState !== WalletReadyState.Installed) {
-      console.log("Phantom wallet not installed, opening website");
-      window.open('https://phantom.app/', '_blank');
-      return;
-    }
-    
-    try {
-      console.log("Attempting to connect to wallet...");
-      await adapter.connect();
-      
-      const address = adapter.publicKey?.toString() || null;
-      console.log("Wallet connected, address:", address);
-      
-      if (address) {
-        setWalletAddressState(address); // Update hook's local state
-        // Store wallet in both session and local storage
-        // setWalletAddress(address); // DO NOT write to localStorage here if WalletProvider handles it.
-                                   // This connectWallet function in useWallet hook is largely duplicative
-                                   // of WalletProvider's logic and ideally should be removed or refactored
-                                   // to use WalletProvider's connectWallet.
-        
-        // Store wallet in Airtable and check for username
-        // This API call is also duplicative if WalletProvider handles registration.
-        const citizenData = await storeWalletInAirtable(address); 
-        
-        if (citizenData) {
-          // Check if the citizen has a username
-          if (citizenData.citizen_name === undefined || citizenData.citizen_name === null || citizenData.citizen_name === '') {
-            // If no username, show the prompt
-            window.dispatchEvent(new CustomEvent('showUsernamePrompt'));
-          } else {
-            // Store the citizen profile information
-            console.log('Setting citizen profile with data:', citizenData);
-            const citizenProfile = {
-              username: citizenData.citizen_name,
-              firstName: citizenData.first_name || citizenData.citizen_name.split(' ')[0] || '',
-              lastName: citizenData.last_name || citizenData.citizen_name.split(' ').slice(1).join(' ') || '',
-              coatOfArmsImageUrl: citizenData.coat_of_arms_image,
-              familyMotto: citizenData.family_motto,
-              Ducats: citizenData.ducats,
-              walletAddress: address
-            };
-            setCitizenProfile(citizenProfile); // Update hook's local state
-            // localStorage.setItem('citizenProfile', JSON.stringify(citizenProfile)); // WalletProvider should handle this
-            console.log("useWallet Hook: citizenProfile state updated after connect, localStorage update deferred to WalletProvider.");
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error connecting to wallet:', error);
-      alert(`Failed to connect wallet: ${error instanceof Error ? error.message : String(error)}`);
-    }
+    console.warn("useWallet hook's connectWallet called. This function is deprecated and may cause conflicts. Please use useWalletContext().connectWallet instead.");
+    // if (!walletAdapter) {
+    //   return;
+    // }
+    // const adapter = walletAdapter;
+    // if (adapter.connected) {
+    //   // Disconnect logic
+    //   try {
+    //     await adapter.disconnect();
+    //     clearWalletAddress(); // Utility function
+    //     localStorage.removeItem('citizenProfile');
+    //     setWalletAddressState(null);
+    //     setCitizenProfile(null);
+    //     window.dispatchEvent(new CustomEvent('walletChanged'));
+    //     window.location.reload();
+    //   } catch (error) {
+    //     console.error("useWallet hook: Error during disconnect flow:", error);
+    //   }
+    //   return;
+    // }
+    // if (adapter.readyState !== WalletReadyState.Installed) {
+    //   window.open('https://phantom.app/', '_blank');
+    //   return;
+    // }
+    // try {
+    //   await adapter.connect();
+    //   const address = adapter.publicKey?.toString() || null;
+    //   if (address) {
+    //     setWalletAddressState(address);
+    //     // The rest of the logic (Airtable, profile prompt) is now handled by WalletProvider.
+    //     // This hook should not duplicate it.
+    //     // Forcing a dispatch of walletChanged so WalletProvider can pick up if it missed the initial connection.
+    //     window.dispatchEvent(new CustomEvent('walletChanged')); 
+    //   }
+    // } catch (error) {
+    //   console.error('useWallet hook: Error connecting to wallet:', error);
+    // }
   };
 
   return {
-    walletAddress,
-    citizenProfile,
-    isConnected: !!walletAddress,
-    isConnecting,
-    isInitialized,
-    connectWallet
+    walletAddress: null, // Return null to ensure it doesn't provide a conflicting address
+    citizenProfile: null, // Return null for profile as well
+    isConnected: false, // Always return false
+    isConnecting: false, // Always return false
+    isInitialized, // isInitialized can be true, indicating the hook itself has "run"
+    connectWallet // Provide the (now warning) connectWallet function
   };
 }
