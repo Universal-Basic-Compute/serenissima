@@ -160,51 +160,53 @@ const ArrivalPage: React.FC = () => {
     }
   }, []);
 
-  // Fonction pour récupérer les informations contextuelles pour Kinos
+  // Fonction pour récupérer les informations contextuelles pour Kinos (utilise maintenant les data packages préchargés)
   const fetchContextualInformation = useCallback(async (targetAI: AIProfile | null, humanUsername: string): Promise<void> => {
-    if (!targetAI || !humanUsername || humanUsername === DEFAULT_HUMAN_USERNAME) {
+    if (!targetAI || !targetAI.username || !humanUsername || humanUsername === DEFAULT_HUMAN_USERNAME) {
       setContextualDataForChat(null);
       return;
     }
     setIsPreparingContext(true);
     try {
-      const senderProfile = currentUserProfile; 
-      const aiDataPackageResponse = await fetch(`/api/get-data-package?citizenUsername=${targetAI.username}`);
+      const senderProfile = currentUserProfile; // Profil de l'utilisateur humain (déjà dans l'état)
+      const preFetchedPackage = aiDataPackages[targetAI.username]; // Récupérer le paquet de données préchargé
+
+      if (preFetchedPackage === undefined && aisLoading) {
+        // Le paquet n'est pas encore là et les IA sont toujours en cours de chargement, attendre.
+        // Ce useEffect sera rappelé lorsque aiDataPackages ou aisLoading changera.
+        console.log(`[Context] Data package for ${targetAI.username} not yet available, AIs still loading. Waiting.`);
+        setIsPreparingContext(false); // Peut-être pas nécessaire de le mettre à false ici si on attend un nouveau cycle
+        return;
+      }
       
-      let aiDataPackage = null;
-      if (aiDataPackageResponse.ok) {
-        const packageData = await aiDataPackageResponse.json();
-        if (packageData.success) {
-          aiDataPackage = packageData.data;
-        } else {
-          console.error(`Échec de la récupération du data package pour ${targetAI.username}:`, packageData.error);
-        }
-      } else {
-        console.error(`Erreur HTTP lors de la récupération du data package pour ${targetAI.username}: ${aiDataPackageResponse.status}`);
+      if (!preFetchedPackage) {
+        console.warn(`[Context] Data package for ${targetAI.username} was not pre-fetched or failed to load. Proceeding without it.`);
       }
       
       const newContextData = {
         senderProfile,
-        targetProfile: targetAI, 
-        aiDataPackage 
+        targetProfile: targetAI,
+        aiDataPackage: preFetchedPackage || null, // Utiliser null si le paquet n'a pas pu être chargé
       };
 
+      // Éviter les re-render inutiles si les données contextuelles n'ont pas réellement changé
       setContextualDataForChat(prevContextData => {
         if (JSON.stringify(newContextData) !== JSON.stringify(prevContextData)) {
           return newContextData;
         }
         return prevContextData;
       });
+
     } catch (error) {
-      console.error("Erreur lors de la récupération des données contextuelles pour Kinos:", error);
+      console.error("Erreur lors de l'assemblage des données contextuelles pour Kinos:", error);
       setContextualDataForChat(prevContextData => {
-        if (prevContextData !== null) return null;
+        if (prevContextData !== null) return null; // Forcer la mise à jour si une erreur se produit
         return prevContextData;
       });
     } finally {
       setIsPreparingContext(false);
     }
-  }, [currentUserProfile]);
+  }, [currentUserProfile, aiDataPackages, aisLoading]); // Dépend de aiDataPackages et aisLoading
 
 
   // Fonction pour charger les messages du chat
@@ -237,11 +239,34 @@ const ArrivalPage: React.FC = () => {
   }, []);
 
 
+  // Fonction pour charger et stocker le data package d'une IA
+  const fetchAndStoreAIDataPackage = useCallback(async (aiUsername: string | undefined) => {
+    if (!aiUsername) return null; // Retourner null si pas de username
+    try {
+      const response = await fetch(`/api/get-data-package?citizenUsername=${aiUsername}`);
+      if (response.ok) {
+        const packageData = await response.json();
+        if (packageData.success) {
+          setAiDataPackages(prev => ({ ...prev, [aiUsername]: packageData.data }));
+          return packageData.data; // Retourner les données du paquet
+        } else {
+          console.error(`Échec de la récupération du data package pour ${aiUsername}:`, packageData.error);
+        }
+      } else {
+        console.error(`Erreur HTTP lors de la récupération du data package pour ${aiUsername}: ${response.status}`);
+      }
+    } catch (error) {
+      console.error(`Erreur réseau lors de la récupération du data package pour ${aiUsername}:`, error);
+    }
+    setAiDataPackages(prev => ({ ...prev, [aiUsername]: null })); // Stocker null en cas d'échec
+    return null; // Retourner null en cas d'échec
+  }, []); // Stable car pas de dépendances externes au composant
+
   useEffect(() => {
     const defaultAIUsername = "BookishMerchant";
     
-    const fetchAllAIs = async () => {
-      setAisLoading(true);
+    const fetchAllAIsAndPackages = async () => {
+      setAisLoading(true); // Indique le chargement des profils ET des paquets
       const defaultProfile = await fetchCitizen(defaultAIUsername);
 
       if (!defaultProfile || !defaultProfile.username) {
@@ -265,89 +290,118 @@ const ArrivalPage: React.FC = () => {
         return null;
       };
 
-      // Fetch Galley AI (Random Forestieri, InVenice, with username)
-      try {
-        const res = await fetch(`/api/citizens?SocialClass=Forestieri&InVenice=true`);
-        if (res.ok) {
-          const data = await res.json();
-          const selected = data.success ? selectValidCitizen(data.citizens, "Galley") : null;
-          setGalleyAI(selected || defaultProfile);
-        } else {
-          console.error("Failed to fetch Forestieri for Galley AI, using default.");
-          setGalleyAI(defaultProfile);
-        }
-      } catch (e) { 
-        console.error("Error fetching Galley AI:", e);
-        setGalleyAI(defaultProfile); 
-      }
+      const aiPromises = [];
 
-      // Fetch Customs AI (Random Occupant of customs_house, with username)
-      try {
-        const buildingRes = await fetch(`/api/buildings?Type=customs_house`);
-        if (buildingRes.ok) {
-          const buildingData = await buildingRes.json();
-          if (buildingData && buildingData.buildings && buildingData.buildings.length > 0) {
-            const occupants = buildingData.buildings.map((b: any) => b.occupant).filter(Boolean);
-            const occupantProfiles = (await Promise.all(occupants.map((occ: string) => fetchCitizen(occ)))).filter(p => p && p.username) as AIProfile[];
-            const selected = selectValidCitizen(occupantProfiles, "Customs");
-            setCustomsAI(selected || defaultProfile);
-          } else {
-            console.warn("No customs_house or no occupants found, using default Customs AI.");
-            setCustomsAI(defaultProfile);
+      // Galley AI
+      aiPromises.push(
+        (async () => {
+          try {
+            const res = await fetch(`/api/citizens?SocialClass=Forestieri&InVenice=true`);
+            let galleyProfile = defaultProfile;
+            if (res.ok) {
+              const data = await res.json();
+              const selected = data.success ? selectValidCitizen(data.citizens, "Galley") : null;
+              galleyProfile = selected || defaultProfile;
+            } else {
+              console.error("Failed to fetch Forestieri for Galley AI, using default.");
+            }
+            setGalleyAI(galleyProfile);
+            if (galleyProfile?.username) await fetchAndStoreAIDataPackage(galleyProfile.username);
+          } catch (e) { 
+            console.error("Error processing Galley AI:", e);
+            setGalleyAI(defaultProfile); 
+            if (defaultProfile?.username) await fetchAndStoreAIDataPackage(defaultProfile.username);
           }
-        } else {
-          console.error("Failed to fetch customs_house building, using default Customs AI.");
-          setCustomsAI(defaultProfile);
-        }
-      } catch (e) { 
-        console.error("Error fetching Customs AI:", e);
-        setCustomsAI(defaultProfile); 
-      }
+        })()
+      );
 
-      // Fetch Home AI (Random Cittadini, InVenice, with username)
-      try {
-        const res = await fetch(`/api/citizens?SocialClass=Cittadini&InVenice=true`);
-        if (res.ok) {
-          const data = await res.json();
-          const selected = data.success ? selectValidCitizen(data.citizens, "Home") : null;
-          setHomeAI(selected || defaultProfile);
-        } else {
-          console.error("Failed to fetch Cittadini for Home AI, using default.");
-          setHomeAI(defaultProfile);
-        }
-      } catch (e) { 
-        console.error("Error fetching Home AI:", e);
-        setHomeAI(defaultProfile); 
-      }
-
-      // Fetch Inn AI (Random Occupant of inn, with username)
-      try {
-        const buildingRes = await fetch(`/api/buildings?Type=inn`);
-        if (buildingRes.ok) {
-          const buildingData = await buildingRes.json();
-          if (buildingData && buildingData.buildings && buildingData.buildings.length > 0) {
-            const occupants = buildingData.buildings.map((b: any) => b.occupant).filter(Boolean);
-            const occupantProfiles = (await Promise.all(occupants.map((occ: string) => fetchCitizen(occ)))).filter(p => p && p.username) as AIProfile[];
-            const selected = selectValidCitizen(occupantProfiles, "Inn");
-            setInnAI(selected || defaultProfile);
-          } else {
-            console.warn("No inn or no occupants found, using default Inn AI.");
-            setInnAI(defaultProfile);
+      // Customs AI
+      aiPromises.push(
+        (async () => {
+          try {
+            const buildingRes = await fetch(`/api/buildings?Type=customs_house`);
+            let customsProfile = defaultProfile;
+            if (buildingRes.ok) {
+              const buildingData = await buildingRes.json();
+              if (buildingData && buildingData.buildings && buildingData.buildings.length > 0) {
+                const occupants = buildingData.buildings.map((b: any) => b.occupant).filter(Boolean);
+                const occupantProfiles = (await Promise.all(occupants.map((occ: string) => fetchCitizen(occ)))).filter(p => p && p.username) as AIProfile[];
+                const selected = selectValidCitizen(occupantProfiles, "Customs");
+                customsProfile = selected || defaultProfile;
+              } else {
+                console.warn("No customs_house or no occupants found, using default Customs AI.");
+              }
+            } else {
+              console.error("Failed to fetch customs_house building, using default Customs AI.");
+            }
+            setCustomsAI(customsProfile);
+            if (customsProfile?.username) await fetchAndStoreAIDataPackage(customsProfile.username);
+          } catch (e) { 
+            console.error("Error processing Customs AI:", e);
+            setCustomsAI(defaultProfile); 
+            if (defaultProfile?.username) await fetchAndStoreAIDataPackage(defaultProfile.username);
           }
-        } else {
-          console.error("Failed to fetch inn building, using default Inn AI.");
-          setInnAI(defaultProfile);
-        }
-      } catch (e) { 
-        console.error("Error fetching Inn AI:", e);
-        setInnAI(defaultProfile); 
-      }
+        })()
+      );
+      
+      // Home AI
+      aiPromises.push(
+        (async () => {
+          try {
+            const res = await fetch(`/api/citizens?SocialClass=Cittadini&InVenice=true`);
+            let homeProfile = defaultProfile;
+            if (res.ok) {
+              const data = await res.json();
+              const selected = data.success ? selectValidCitizen(data.citizens, "Home") : null;
+              homeProfile = selected || defaultProfile;
+            } else {
+              console.error("Failed to fetch Cittadini for Home AI, using default.");
+            }
+            setHomeAI(homeProfile);
+            if (homeProfile?.username) await fetchAndStoreAIDataPackage(homeProfile.username);
+          } catch (e) { 
+            console.error("Error processing Home AI:", e);
+            setHomeAI(defaultProfile); 
+            if (defaultProfile?.username) await fetchAndStoreAIDataPackage(defaultProfile.username);
+          }
+        })()
+      );
 
-      setAisLoading(false);
+      // Inn AI
+      aiPromises.push(
+        (async () => {
+          try {
+            const buildingRes = await fetch(`/api/buildings?Type=inn`);
+            let innProfile = defaultProfile;
+            if (buildingRes.ok) {
+              const buildingData = await buildingRes.json();
+              if (buildingData && buildingData.buildings && buildingData.buildings.length > 0) {
+                const occupants = buildingData.buildings.map((b: any) => b.occupant).filter(Boolean);
+                const occupantProfiles = (await Promise.all(occupants.map((occ: string) => fetchCitizen(occ)))).filter(p => p && p.username) as AIProfile[];
+                const selected = selectValidCitizen(occupantProfiles, "Inn");
+                innProfile = selected || defaultProfile;
+              } else {
+                console.warn("No inn or no occupants found, using default Inn AI.");
+              }
+            } else {
+              console.error("Failed to fetch inn building, using default Inn AI.");
+            }
+            setInnAI(innProfile);
+            if (innProfile?.username) await fetchAndStoreAIDataPackage(innProfile.username);
+          } catch (e) { 
+            console.error("Error processing Inn AI:", e);
+            setInnAI(defaultProfile); 
+            if (defaultProfile?.username) await fetchAndStoreAIDataPackage(defaultProfile.username);
+          }
+        })()
+      );
+
+      await Promise.all(aiPromises);
+      setAisLoading(false); // Tous les profils et paquets de données ont été traités (succès ou échec)
     };
 
-    fetchAllAIs();
-  }, [fetchCitizen]); // fetchCitizen est stable grâce à useCallback
+    fetchAllAIsAndPackages();
+  }, [fetchCitizen, fetchAndStoreAIDataPackage]);
 
   // Fonction pour que l'IA initie la conversation
   const sendSystemInitiationMessage = useCallback(async (
@@ -506,13 +560,24 @@ Your first message to ${userName}:`;
       fetchChatMessages(currentUserUsername, currentAI.username)
         .then(existingMessages => {
           setFetchedMessagesForStep(existingMessages);
-          // fetchContextualInformation mettra à jour l'état contextualDataForChat
-          fetchContextualInformation(currentAI, currentUserUsername);
+          // fetchContextualInformation mettra à jour l'état contextualDataForChat.
+          // Il dépend maintenant de aiDataPackages et aisLoading.
+          // Si le paquet de données est prêt (aiDataPackages[currentAI.username!] existe) OU si aisLoading est false (tout est chargé ou a échoué),
+          // alors on peut essayer de construire le contexte.
+          if ((aiDataPackages && currentAI.username && aiDataPackages[currentAI.username!]) || !aisLoading) {
+            fetchContextualInformation(currentAI, currentUserUsername);
+          } else {
+            console.log(`[Effet 1] Différer fetchContextualInformation pour ${currentAI.username} car aisLoading: ${aisLoading} ou paquet non prêt.`);
+          }
         })
         .catch((error) => {
           console.error("Erreur lors de fetchChatMessages dans Effet 1:", error);
           setIsAiInitiating(false); 
-          setFetchedMessagesForStep([]); 
+          setFetchedMessagesForStep([]);
+          // Même en cas d'erreur de fetchChatMessages, essayer de charger le contexte si possible
+          if ((aiDataPackages && currentAI.username && aiDataPackages[currentAI.username!]) || !aisLoading) {
+            fetchContextualInformation(currentAI, currentUserUsername);
+          }
         });
     } else if (currentAI) { // AI est là, mais utilisateur est GuestUser
         setIsAiInitiating(false);
@@ -535,7 +600,7 @@ Your first message to ${userName}:`;
       setIsAiInitiating(false);
       setFetchedMessagesForStep(null); // Réinitialiser s'il n'y a pas d'IA
     }
-  }, [currentStep, currentUserUsername, getCurrentAI, fetchChatMessages, fetchContextualInformation]);
+  }, [currentStep, currentUserUsername, getCurrentAI, fetchChatMessages, fetchContextualInformation, aiDataPackages, aisLoading]);
 
   // Effet 2: Initier la conversation IA si les conditions sont remplies
   useEffect(() => {
