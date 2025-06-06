@@ -15,7 +15,8 @@ SCRIPTS_RESPECTING_FORCED_HOUR = [
     "engine/createActivities.py",
     "engine/processActivities.py",
     "engine/createimportactivities.py", # Added this as it now supports --hour
-    "engine/createmarketgalley.py" # Added for market galley creation
+    "engine/createmarketgalley.py", # Added for market galley creation
+    "relevancies/gatherInformation.py" # Added for intelligence gathering
     # Add other scripts here if they are updated to support --hour
 ]
 import subprocess
@@ -172,7 +173,8 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                     ("ais/generatethoughts.py --model local", "AI Thought Generation", 0)], # 7:00 VT
                 # Other tasks scheduled at their specific hours (Venice Time)
                 5: [("ais/automated_adjustimports.py", "Automated AI Import Contract Creation", 0), # 5:00 VT
-                    ("ais/automated_adjustmarkupbuys.py", "Automated Markup Buys", 0)], # 5:00 VT
+                    ("ais/automated_adjustmarkupbuys.py", "Automated Markup Buys", 0), # 5:00 VT
+                    ("relevancies/gatherInformation.py", "Daily Intelligence Report Generation", 0)], # 5:00 VT
                 6: [("ais/answertomessages.py --model local", "AI message responses", 0)], # 6:00 VT
                 8: [("engine/treasuryRedistribution.py", "Treasury redistribution", 0), # 8:00 VT
                     ("ais/answertomessages.py --model local", "AI message responses", 0), # 8:00 VT
