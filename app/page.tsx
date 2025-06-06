@@ -1591,8 +1591,8 @@ export default function TwoDPage() {
       )}
       */}
 
-      {/* Version Indicator - Bottom Right */}
-      <div className="absolute bottom-4 right-4 z-50 flex flex-col items-end space-y-2">
+      {/* Version Indicator and Flush Cache Button - Bottom Center */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center space-y-2">
         <button
           onClick={handleFlushCaches}
           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg shadow-md text-xs flex items-center"
