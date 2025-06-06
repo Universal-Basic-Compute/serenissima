@@ -461,66 +461,68 @@ def _handle_eat_at_tavern_or_goto(
     if not citizen_position: return None
 
     citizen_ducats = float(citizen_record['fields'].get('Ducats', 0))
-    if citizen_ducats < TAVERN_MEAL_COST_ESTIMATE: return None
+    if citizen_ducats < TAVERN_MEAL_COST_ESTIMATE: return None # TAVERN_MEAL_COST_ESTIMATE can be a generic food provider cost estimate
 
-    log.info(f"{LogColors.OKCYAN}[Faim - Taverne] Citoyen {citizen_name} ({citizen_social_class}): Affamé et en période de loisirs. Recherche taverne.{LogColors.ENDC}")
-    closest_tavern_record = get_closest_inn(tables, citizen_position) # Inn also serves as tavern
-    if not closest_tavern_record: return None
+    log.info(f"{LogColors.OKCYAN}[Faim - Fournisseur Externe] Citoyen {citizen_name} ({citizen_social_class}): Affamé et en période de loisirs. Recherche fournisseur de nourriture.{LogColors.ENDC}")
+    closest_food_provider_record = get_closest_food_provider(tables, citizen_position)
+    if not closest_food_provider_record: return None
 
-    tavern_name_display = _get_bldg_display_name_module(tables, closest_tavern_record)
-    tavern_pos = _get_building_position_coords(closest_tavern_record)
-    tavern_custom_id = closest_tavern_record['fields'].get('BuildingId', closest_tavern_record['id'])
-    if not tavern_pos or not tavern_custom_id: return None
+    provider_name_display = _get_bldg_display_name_module(tables, closest_food_provider_record)
+    provider_pos = _get_building_position_coords(closest_food_provider_record)
+    provider_custom_id = closest_food_provider_record['fields'].get('BuildingId', closest_food_provider_record['id'])
+    if not provider_pos or not provider_custom_id: return None
 
-    # Check if tavern sells food (simplified check)
-    tavern_sells_food = False
+    # Check if food provider sells food
+    provider_sells_food = False
     # food_resource_types = ["bread", "fish", "preserved_fish"] # Replaced by constant
     for food_type_id_check in FOOD_RESOURCE_TYPES_FOR_EATING:
         formula_food_contract = (
-            f"AND({{Type}}='public_sell', {{SellerBuilding}}='{_escape_airtable_value(tavern_custom_id)}', "
+            f"AND({{Type}}='public_sell', {{SellerBuilding}}='{_escape_airtable_value(provider_custom_id)}', "
             f"{{ResourceType}}='{_escape_airtable_value(food_type_id_check)}', {{TargetAmount}}>0, "
             f"{{EndAt}}>'{now_utc_dt.isoformat()}', {{CreatedAt}}<='{now_utc_dt.isoformat()}' )"
         )
         try:
             if tables['contracts'].all(formula=formula_food_contract, max_records=1):
-                tavern_sells_food = True; break
+                provider_sells_food = True; break
         except Exception: pass # Ignore errors in this simplified check for now
     
-    if not tavern_sells_food: return None
+    if not provider_sells_food: return None
 
-    is_at_tavern = _calculate_distance_meters(citizen_position, tavern_pos) < 20
+    is_at_provider = _calculate_distance_meters(citizen_position, provider_pos) < 20
     
-    if is_at_tavern:
+    if is_at_provider:
+        # Use eat_at_tavern_activity creator, but it's generic enough for any food provider
         eat_activity = try_create_eat_at_tavern_activity(
             tables, citizen_custom_id, citizen_username, citizen_airtable_id, 
-            tavern_custom_id, current_time_utc=now_utc_dt, resource_defs=resource_defs,
+            provider_custom_id, current_time_utc=now_utc_dt, resource_defs=resource_defs,
             start_time_utc_iso=None # Immediate start
         )
         if eat_activity:
-            log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_at_tavern' créée à {tavern_name_display}.{LogColors.ENDC}")
+            log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_at_provider' (eat_at_tavern) créée à {provider_name_display}.{LogColors.ENDC}")
         return eat_activity
     else:
-        path_to_tavern = get_path_between_points(citizen_position, tavern_pos, transport_api_url)
-        if not (path_to_tavern and path_to_tavern.get('success')): return None
+        path_to_provider = get_path_between_points(citizen_position, provider_pos, transport_api_url)
+        if not (path_to_provider and path_to_provider.get('success')): return None
 
-        goto_tavern_activity = try_create_travel_to_inn_activity(
+        # Use travel_to_inn_activity creator, but it's generic enough for any food provider
+        goto_provider_activity = try_create_travel_to_inn_activity(
             tables, citizen_custom_id, citizen_username, citizen_airtable_id, 
-            tavern_custom_id, path_to_tavern, current_time_utc=now_utc_dt
+            provider_custom_id, path_to_provider, current_time_utc=now_utc_dt
             # start_time_utc_iso is None for immediate start of travel
         )
-        if goto_tavern_activity:
-            log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'travel_to_inn' (vers taverne) créée vers {tavern_name_display}.{LogColors.ENDC}")
-            next_start_time_iso = goto_tavern_activity['fields']['EndDate']
+        if goto_provider_activity:
+            log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'travel_to_food_provider' (travel_to_inn) créée vers {provider_name_display}.{LogColors.ENDC}")
+            next_start_time_iso = goto_provider_activity['fields']['EndDate']
             eat_activity_chained = try_create_eat_at_tavern_activity(
                 tables, citizen_custom_id, citizen_username, citizen_airtable_id,
-                tavern_custom_id, current_time_utc=now_utc_dt, resource_defs=resource_defs,
+                provider_custom_id, current_time_utc=now_utc_dt, resource_defs=resource_defs,
                 start_time_utc_iso=next_start_time_iso
             )
             if eat_activity_chained:
-                log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_at_tavern' chaînée après 'travel_to_inn', début à {next_start_time_iso}.{LogColors.ENDC}")
+                log.info(f"{LogColors.OKGREEN}[Faim] Citoyen {citizen_name}: Activité 'eat_at_provider' (eat_at_tavern) chaînée après 'travel_to_food_provider', début à {next_start_time_iso}.{LogColors.ENDC}")
             else:
-                log.warning(f"{LogColors.WARNING}[Faim] Citoyen {citizen_name}: Échec de la création de 'eat_at_tavern' chaînée après 'travel_to_inn'.{LogColors.ENDC}")
-            return goto_tavern_activity # Return the first activity of the chain
+                log.warning(f"{LogColors.WARNING}[Faim] Citoyen {citizen_name}: Échec de la création de 'eat_at_provider' (eat_at_tavern) chaînée.{LogColors.ENDC}")
+            return goto_provider_activity # Return the first activity of the chain
         return None # Failed to create travel_to_inn
 
 def _handle_deposit_inventory_at_work(
@@ -862,8 +864,11 @@ def _handle_shop_for_food_at_retail(
     if not citizen_position: return False
 
     home_record = get_citizen_home(tables, citizen_username)
+    # For shopping, having a home is not strictly necessary if they can store in inventory,
+    # but the current logic delivers to home. We can adjust this if needed.
+    # For now, let's keep the home requirement for this specific handler.
     if not home_record:
-        log.info(f"{LogColors.OKBLUE}[Achat Nourriture Détail] Citoyen {citizen_name} ({citizen_social_class}): Sans domicile.{LogColors.ENDC}")
+        log.info(f"{LogColors.OKBLUE}[Achat Nourriture Détail] Citoyen {citizen_name} ({citizen_social_class}): Sans domicile. Cette logique d'achat livre à domicile.{LogColors.ENDC}")
         return False
     
     home_custom_id = home_record['fields'].get('BuildingId')
@@ -1048,14 +1053,46 @@ def _handle_shop_for_food_at_retail(
         else:
             log.info(f"{LogColors.OKBLUE}[Achat Nourriture] Citoyen {citizen_name} n'est pas à {shop_display_name}. Création de l'activité 'travel_to_inn'.{LogColors.ENDC}")
             # Path to shop is in best_deal_info["path_to_shop"]
-            if try_create_travel_to_inn_activity(
+            # The travel_to_inn creator is generic enough for any destination.
+            # The subsequent 'eat_at_tavern' activity will handle the purchase logic.
+            # We need to ensure the 'eat_at_tavern' activity knows this is a retail purchase.
+            # This can be done by adding details to the 'goto_location' (travel_to_inn) activity,
+            # which are then passed to the chained 'eat_at_tavern' activity.
+            
+            # For now, the existing travel_to_inn and eat_at_tavern creators are used.
+            # The eat_at_tavern processor will need to be aware of retail purchases if different logic applies.
+            # The current eat_at_tavern creator doesn't take specific food item details, it assumes a generic meal.
+            # This might need adjustment if we want them to buy a *specific* item from the shop.
+            # For now, let's assume they go to the shop and the 'eat_at_tavern' activity implies buying *something* there.
+
+            goto_activity = try_create_travel_to_inn_activity( # This creates a 'goto_location'
                 tables, citizen_custom_id, citizen_username, citizen_airtable_id,
-                shop_custom_id_for_activity, # Use shop ID as inn ID
-                best_deal_info["path_to_shop"], # This path was from citizen's current location to the shop
+                shop_custom_id_for_activity, 
+                best_deal_info["path_to_shop"], 
                 now_utc_dt
-            ):
-                log.info(f"{LogColors.OKGREEN}[Achat Nourriture] Citoyen {citizen_name}: Activité 'travel_to_inn' (vers magasin) créée pour aller manger {food_display_name}.{LogColors.ENDC}")
-                return True
+            )
+            if goto_activity:
+                log.info(f"{LogColors.OKGREEN}[Achat Nourriture] Citoyen {citizen_name}: Activité 'goto_location' (vers magasin {shop_display_name}) créée pour acheter et manger {food_display_name}.{LogColors.ENDC}")
+                # Chain the 'eat_at_tavern' activity to occur upon arrival
+                next_start_time_iso = goto_activity['fields']['EndDate']
+                eat_activity_details = {
+                    "is_retail_purchase": True,
+                    "food_resource_id": best_deal_info["food_type_id"],
+                    "price": price_for_this_meal,
+                    "original_contract_id": best_deal_info["contract_rec"]['fields'].get('ContractId', best_deal_info["contract_rec"]['id'])
+                }
+                chained_eat_activity = try_create_eat_at_tavern_activity(
+                    tables, citizen_custom_id, citizen_username, citizen_airtable_id,
+                    shop_custom_id_for_activity, # Target building is the shop
+                    now_utc_dt, resource_defs,
+                    start_time_utc_iso=next_start_time_iso,
+                    details_payload=eat_activity_details # Pass purchase details
+                )
+                if chained_eat_activity:
+                    log.info(f"{LogColors.OKGREEN}[Achat Nourriture] Activité 'eat_at_provider' (eat_at_tavern) chaînée pour {food_display_name} à {shop_display_name}, début à {next_start_time_iso}.{LogColors.ENDC}")
+                else:
+                    log.warning(f"{LogColors.WARNING}[Achat Nourriture] Échec de la création de 'eat_at_provider' (eat_at_tavern) chaînée.{LogColors.ENDC}")
+                return True # Return True as the initial travel activity was created
     else:
         log.info(f"{LogColors.OKBLUE}[Achat Nourriture] Aucune offre de nourriture appropriée trouvée pour {citizen_name} selon les critères de priorité.{LogColors.ENDC}")
         

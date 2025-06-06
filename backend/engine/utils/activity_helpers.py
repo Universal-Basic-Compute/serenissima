@@ -520,36 +520,44 @@ def get_citizen_current_load(tables: Dict[str, Table], citizen_username: str) ->
         log.error(f"{LogColors.FAIL}Error calculating current load for citizen {citizen_username}: {e}{LogColors.ENDC}")
     return current_load
 
-def get_closest_inn(tables: Dict[str, Table], citizen_position: Dict[str, float]) -> Optional[Dict]:
-    """Finds the closest building of type 'inn' to the citizen's position."""
-    log.info(f"{LogColors.OKBLUE}Searching for the closest inn to position: {citizen_position}{LogColors.ENDC}")
+def get_closest_food_provider(tables: Dict[str, Table], citizen_position: Dict[str, float]) -> Optional[Dict]:
+    """
+    Finds the closest building that provides food (inn, tavern, or retail_food shop)
+    to the citizen's position.
+    """
+    log.info(f"{LogColors.OKBLUE}Searching for the closest food provider (inn, tavern, retail_food) to position: {citizen_position}{LogColors.ENDC}")
     try:
-        inns = tables['buildings'].all(formula="{Type}='inn'")
-        if not inns:
-            log.info(f"{LogColors.OKBLUE}No inns found in the database.{LogColors.ENDC}")
+        # Formula to find inns, taverns, or constructed retail_food shops
+        formula = "AND(OR({Type}='inn', {Type}='tavern', {SubCategory}='retail_food'), {IsConstructed}=TRUE())"
+        food_providers = tables['buildings'].all(formula=formula)
+        
+        if not food_providers:
+            log.info(f"{LogColors.OKBLUE}No inns, taverns, or retail_food shops found in the database.{LogColors.ENDC}")
             return None
 
-        closest_inn = None
+        closest_provider = None
         min_distance = float('inf')
 
-        for inn_record in inns:
-            inn_position = _get_building_position_coords(inn_record)
-            if inn_position:
-                distance = _calculate_distance_meters(citizen_position, inn_position)
+        for provider_record in food_providers:
+            provider_position = _get_building_position_coords(provider_record)
+            if provider_position:
+                distance = _calculate_distance_meters(citizen_position, provider_position)
                 if distance < min_distance:
                     min_distance = distance
-                    closest_inn = inn_record
+                    closest_provider = provider_record
             else:
-                log.warning(f"{LogColors.WARNING}Inn {inn_record.get('id')} has no valid position data.{LogColors.ENDC}")
+                log.warning(f"{LogColors.WARNING}Food provider {provider_record.get('id')} has no valid position data.{LogColors.ENDC}")
         
-        if closest_inn:
-            inn_id_log = closest_inn['fields'].get('BuildingId', closest_inn['id'])
-            log.info(f"{LogColors.OKGREEN}Closest inn found: {inn_id_log} at distance {min_distance:.2f}m.{LogColors.ENDC}")
+        if closest_provider:
+            provider_id_log = closest_provider['fields'].get('BuildingId', closest_provider['id'])
+            provider_type_log = closest_provider['fields'].get('Type', 'N/A')
+            provider_subcategory_log = closest_provider['fields'].get('SubCategory', 'N/A')
+            log.info(f"{LogColors.OKGREEN}Closest food provider found: {provider_id_log} (Type: {provider_type_log}, SubCat: {provider_subcategory_log}) at distance {min_distance:.2f}m.{LogColors.ENDC}")
         else:
-            log.info(f"{LogColors.OKBLUE}No inns with valid positions found.{LogColors.ENDC}")
-        return closest_inn
+            log.info(f"{LogColors.OKBLUE}No food providers with valid positions found.{LogColors.ENDC}")
+        return closest_provider
     except Exception as e:
-        log.error(f"{LogColors.FAIL}Error finding closest inn: {e}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}Error finding closest food provider: {e}{LogColors.ENDC}")
         return None
 
 def get_closest_building_of_type(
