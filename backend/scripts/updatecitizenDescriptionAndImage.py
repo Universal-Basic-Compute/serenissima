@@ -613,7 +613,7 @@ def generate_and_upload_coat_of_arms_image(prompt: str, username: str) -> Option
         public_url = upload_file_to_backend(
             local_file_path=tmp_file_path,
             filename_on_server=f"{username}.png", # Use username as filename
-            destination_folder_on_server="coat-of-arms", # Server folder for CoAs
+            destination_folder_on_server="images/coat-of-arms", # Server folder for CoAs
             api_url=BACKEND_API_URL_GLOBAL,
             api_key=UPLOAD_API_KEY_GLOBAL
         )
