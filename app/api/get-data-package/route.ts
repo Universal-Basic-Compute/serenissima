@@ -166,6 +166,33 @@ async function fetchOwnedBuildings(username: string): Promise<AirtableRecord<Fie
   }
 }
 
+async function fetchManagedBuildings(username: string): Promise<AirtableRecord<FieldSet>[]> {
+  try {
+    const records = await airtable('BUILDINGS').select({
+      filterByFormula: `{RunBy} = '${escapeAirtableValue(username)}'`,
+    }).all();
+    return [...records];
+  } catch (error) {
+    console.error(`Error fetching managed buildings for ${username}:`, error);
+    return [];
+  }
+}
+
+async function fetchWorkplaceBuilding(username: string): Promise<AirtableRecord<FieldSet> | null> {
+  try {
+    // A citizen typically has one primary workplace (Occupant)
+    // If multiple are possible, logic might need adjustment (e.g., sort by UpdatedAt or specific type)
+    const records = await airtable('BUILDINGS').select({
+      filterByFormula: `{Occupant} = '${escapeAirtableValue(username)}'`,
+      maxRecords: 1, // Assuming one primary workplace as Occupant
+    }).firstPage();
+    return records.length > 0 ? records[0] : null;
+  } catch (error) {
+    console.error(`Error fetching workplace building for ${username}:`, error);
+    return null;
+  }
+}
+
 interface BuildingResourceDetails {
   // Define structure based on /api/building-resources/:buildingId response
   // This is a simplified version, expand as needed
@@ -310,7 +337,9 @@ export async function GET(request: Request) {
 
     const lastActivityRecord = await fetchLastActivity(citizenUsername);
     const ownedLandsRecords = await fetchOwnedLands(citizenUsername);
-    const ownedBuildingsRecords = await fetchOwnedBuildings(citizenUsername); // Fetch owned buildings
+    const ownedBuildingsRecords = await fetchOwnedBuildings(citizenUsername);
+    const managedBuildingsRecords = await fetchManagedBuildings(citizenUsername);
+    const workplaceBuildingRecord = await fetchWorkplaceBuilding(citizenUsername);
 
     const ownedLandsData = [];
     for (const landRecord of ownedLandsRecords) {
@@ -387,10 +416,12 @@ export async function GET(request: Request) {
       citizen: {...normalizeKeysCamelCaseShallow(citizenRecord.fields), airtableId: citizenRecord.id},
       lastActivity: lastActivityRecord ? {...normalizeKeysCamelCaseShallow(lastActivityRecord.fields), airtableId: lastActivityRecord.id} : null,
       ownedLands: ownedLandsData,
-      ownedBuildings: [] as any[], // Initialize ownedBuildings array
-      activeContracts: [] as any[], // Initialize activeContracts array
-      guildDetails: null as any | null, // Initialize guildDetails
-      citizenLoans: [] as any[], // Initialize citizenLoans array
+      ownedBuildings: [] as any[],
+      managedBuildings: [] as any[], // Initialize managedBuildings array
+      workplaceBuilding: null as any | null, // Initialize workplaceBuilding
+      activeContracts: [] as any[],
+      guildDetails: null as any | null,
+      citizenLoans: [] as any[],
       strongestRelationships: [] as any[], // Initialize strongestRelationships array
       recentProblems: [] as any[], // Initialize recentProblems array
     };
@@ -411,6 +442,14 @@ export async function GET(request: Request) {
     // Fetch and add citizen loans
     const citizenLoansRecords = await fetchCitizenLoans(citizenUsername);
     dataPackage.citizenLoans = citizenLoansRecords.map(l => ({...normalizeKeysCamelCaseShallow(l.fields), airtableId: l.id}));
+
+    // Add managed buildings to dataPackage
+    dataPackage.managedBuildings = managedBuildingsRecords.map(b => ({...normalizeKeysCamelCaseShallow(b.fields), airtableId: b.id}));
+
+    // Add workplace building to dataPackage
+    if (workplaceBuildingRecord) {
+      dataPackage.workplaceBuilding = {...normalizeKeysCamelCaseShallow(workplaceBuildingRecord.fields), airtableId: workplaceBuildingRecord.id};
+    }
 
     // Fetch and add strongest relationships
     const strongestRelationshipsRecords = await fetchCitizenRelationships(citizenUsername);
