@@ -23,7 +23,7 @@ def try_create(
     now_utc_dt: datetime, # Added
     transport_api_url: str, # Added
     api_base_url: str # Added
-) -> Optional[Dict]: # Changed return type from bool to Optional[Dict]
+) -> Dict[str, Any]:
     """
     Create the complete initiate_building_project activity chain:
     1. A goto_location activity for travel to the land plot for inspection
@@ -42,8 +42,9 @@ def try_create(
     
     # Validate required parameters
     if not (land_id and building_type_definition and point_details):
-        log.error(f"Missing required details for initiate_building_project: landId, buildingTypeDefinition, or pointDetails")
-        return False
+        error_msg = "Missing required details for initiate_building_project: landId, buildingTypeDefinition, or pointDetails"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "missing_parameters"}
 
     citizen = citizen_record['fields'].get('Username')
     ts = int(now_venice_dt.timestamp()) # Use passed now_venice_dt
@@ -55,8 +56,9 @@ def try_create(
         try:
             current_position = json.loads(citizen_position_str)
         except json.JSONDecodeError:
-            log.error(f"Could not parse citizen position: {citizen_position_str}")
-            return False
+            error_msg = f"Could not parse citizen position: {citizen_position_str}"
+            log.error(error_msg)
+            return {"success": False, "message": error_msg, "activity_fields": None, "reason": "invalid_citizen_position"}
     
     # Determine the target office building (town_hall or builder's workshop)
     if not target_office_building_id:
@@ -66,8 +68,9 @@ def try_create(
             town_hall_formula = "Type='town_hall'"
             town_halls = tables['buildings'].all(formula=town_hall_formula)
             if not town_halls:
-                log.error(f"No town_hall buildings found in the city")
-                return False
+                error_msg = "No town_hall buildings found in the city"
+                log.error(error_msg)
+                return {"success": False, "message": error_msg, "activity_fields": None, "reason": "no_town_hall_found"}
             
             # Find the closest town_hall to the citizen's current position
             closest_town_hall = None
@@ -89,18 +92,21 @@ def try_create(
             if closest_town_hall:
                 target_office_building_id = closest_town_hall['fields'].get('BuildingId')
             else:
-                log.error(f"Could not find a suitable town_hall")
-                return False
+                error_msg = "Could not find a suitable town_hall"
+                log.error(error_msg)
+                return {"success": False, "message": error_msg, "activity_fields": None, "reason": "suitable_town_hall_not_found"}
         except Exception as e:
-            log.error(f"Error finding town_hall: {e}")
-            return False
+            error_msg = f"Error finding town_hall: {e}"
+            log.error(error_msg)
+            return {"success": False, "message": error_msg, "activity_fields": None, "reason": "town_hall_search_error"}
     
     # Get building records for path calculation
     target_office_building_record = get_building_record(tables, target_office_building_id)
     
     if not target_office_building_record:
-        log.error(f"Could not find building record for {target_office_building_id}")
-        return False
+        error_msg = f"Could not find building record for target office: {target_office_building_id}"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "target_office_record_not_found"}
     
     # Create activity IDs
     inspect_land_activity_id = f"inspect_land_{_escape_airtable_value(land_id)}_{citizen}_{ts}"
@@ -115,30 +121,34 @@ def try_create(
     land_records = tables['lands'].all(formula=land_formula, max_records=1)
     
     if not land_records:
-        log.error(f"Land {land_id} not found")
-        return False
+        error_msg = f"Land {land_id} not found"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "land_not_found"}
     
     land_record = land_records[0]
     
     # Check if citizen owns the land
     land_owner = land_record['fields'].get('Owner')
     if land_owner != citizen:
-        log.error(f"Citizen {citizen} does not own land {land_id}")
-        return False
+        error_msg = f"Citizen {citizen} does not own land {land_id}"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "land_not_owned_by_citizen"}
     
     # Get land position (we'll use the point_details for a more precise location)
     land_position = None
     if point_details and isinstance(point_details, dict) and 'lat' in point_details and 'lng' in point_details:
         land_position = point_details
     else:
-        log.error(f"Invalid point_details format")
-        return None # Changed from False
+        error_msg = "Invalid point_details format"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "invalid_point_details"}
     
     # Calculate path to land
     path_to_land = find_path_between_buildings(None, None, transport_api_url, current_position_coords=current_position, target_position_coords=land_position)
     if not path_to_land or not path_to_land.get('path'): # path_to_land itself is the path data or None
-        log.error(f"Could not find path to land {land_id}")
-        return None # Changed from False
+        error_msg = f"Could not find path to land {land_id}"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "path_to_land_failed"}
     
     # Calculate land inspection duration
     land_duration_seconds = path_to_land.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min
@@ -152,8 +162,9 @@ def try_create(
     # Calculate path from land to office
     path_to_office = find_path_between_buildings(None, target_office_building_record, transport_api_url, current_position_coords=land_position)
     if not path_to_office or not path_to_office.get('path'): # path_to_office itself is the path data or None
-        log.error(f"Could not find path from land {land_id} to office {target_office_building_id}")
-        return None # Changed from False
+        error_msg = f"Could not find path from land {land_id} to office {target_office_building_id}"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "path_to_office_failed"}
     
     # Calculate office travel duration
     office_duration_seconds = path_to_office.get('timing', {}).get('durationSeconds', 1800)  # Default 30 min
@@ -279,10 +290,12 @@ def try_create(
         log.info(f"Created complete initiate_building_project activity chain for citizen {citizen}:")
         for idx, activity in enumerate(activities_to_create, 1):
             log.info(f"  {idx}. {activity['Type']} activity {activity['ActivityId']}")
-        return activities_to_create[0] # Return the first activity created
+        # Return success with the fields of the first activity in the chain
+        return {"success": True, "message": "Building project activity chain initiated.", "activity_fields": activities_to_create[0], "reason": "activity_chain_created"}
     except Exception as e:
-        log.error(f"Failed to create initiate_building_project activity chain: {e}")
-        return None # Changed from False
+        error_msg = f"Failed to create initiate_building_project activity chain: {e}"
+        log.error(error_msg)
+        return {"success": False, "message": error_msg, "activity_fields": None, "reason": "internal_creator_error"}
 
 def _calculate_distance(pos1, pos2):
     """Calculate simple Euclidean distance between two positions."""
