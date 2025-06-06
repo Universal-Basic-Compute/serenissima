@@ -26,6 +26,16 @@ from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
 
+# Add project root to sys.path for backend imports
+# This script is in backend/engine, so root is two levels up.
+# Note: IMMIGRATION_SCRIPT_DIR and PROJECT_ROOT_IMMIGRATION are already defined below,
+# but the sys.path modification needs to happen *before* the backend imports.
+# We'll use a common pattern here.
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.abspath(os.path.join(_SCRIPT_DIR, '..', '..'))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 # Import our citizen generator module
 from backend.scripts.generateCitizen import generate_citizen
 
