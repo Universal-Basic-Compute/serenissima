@@ -314,8 +314,8 @@ def generate_intelligence_report(tables: Dict[str, Table], kinos_api_key_val: st
         "message": main_prompt_message,
         "model": "gemini-2.5-pro-preview-06-05",
         "addSystem": json.dumps(add_system_payload),
-        "min_files": 0, # No files needed for this interaction
-        "max_files": 0,
+        "min_files": 2,
+        "max_files": 4,
         "history_length": 5 # Keep some recent history for context if needed
     }
 
