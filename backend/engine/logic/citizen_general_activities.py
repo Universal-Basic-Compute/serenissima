@@ -30,7 +30,8 @@ from backend.engine.utils.activity_helpers import (
     get_citizen_effective_carry_capacity,
     CITIZEN_CARRY_CAPACITY, # Import constant for carry capacity
     get_relationship_trust_score,
-    get_closest_inn,
+    get_closest_inn, # Keep for now if used elsewhere, or remove if fully replaced
+    get_closest_food_provider, # Import the new function
     get_citizen_inventory_details, # New import
     get_citizen_workplace,
     get_citizen_home,
