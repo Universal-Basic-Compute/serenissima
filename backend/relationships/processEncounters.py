@@ -171,8 +171,7 @@ def main(args):
     """Main function to process encounters."""
     log_header("Process Encounters Script", LogColors.HEADER)
     if args.dry_run:
-        log.info(f"{LogColors.WARNING}Running in DRY RUN mode. No actual Kinos calls or Airtable writes will
-occur.{LogColors.ENDC}")
+        log.info(f"{LogColors.WARNING}Running in DRY RUN mode. No actual Kinos calls or Airtable writes will occur.{LogColors.ENDC}")
 
     if not KINOS_API_KEY:
         log.error(f"{LogColors.FAIL}KINOS_API_KEY not found in environment. Exiting.{LogColors.ENDC}")
@@ -253,13 +252,11 @@ occur.{LogColors.ENDC}")
                  time.sleep(DELAY_BETWEEN_PAIRS_SECONDS)
 
 
-    log.info(f"\n{LogColors.OKGREEN}Encounter processing finished. Total pairs processed:
-{processed_pairs_total}.{LogColors.ENDC}")
+    log.info(f"\n{LogColors.OKGREEN}Encounter processing finished. Total pairs processed: {processed_pairs_total}.{LogColors.ENDC}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process encounters between citizens in the same location.")
-    parser.add_argument("--dry-run", action="store_true", help="Simulate the process without making Kinos calls or Airtable
-writes.")
+    parser.add_argument("--dry-run", action="store_true", help="Simulate the process without making Kinos calls or Airtable writes.")
     parser.add_argument("--citizen", type=str, help="Focus processing on encounters involving this citizen (by username).")
     parser.add_argument("--location", type=str, help="Focus processing on a specific location (BuildingId).")
 
