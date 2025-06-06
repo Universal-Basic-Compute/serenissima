@@ -227,7 +227,28 @@ def fetch_daily_communications(tables: Dict[str, Table]) -> List[str]:
         log.error(f"{LogColors.FAIL}Error fetching daily communications: {e}{LogColors.ENDC}")
         return []
 
-def generate_intelligence_report(kinos_api_key_val: str, communications_log: List[str]) -> Optional[str]:
+def _get_latest_daily_update(tables: Dict[str, Table]) -> Optional[str]:
+    """Fetches the content of the latest 'daily_update' message."""
+    if "messages" not in tables:
+        log.error(f"{LogColors.FAIL}Messages table not initialized for fetching daily update.{LogColors.ENDC}")
+        return None
+    try:
+        records = tables["messages"].all(
+            formula="AND({Type}='daily_update', {Sender}='ConsiglioDeiDieci')",
+            sort=[("CreatedAt", "desc")],
+            max_records=1
+        )
+        if records:
+            content = records[0].get("fields", {}).get("Content")
+            log.info(f"{LogColors.OKGREEN}Successfully fetched latest daily update.{LogColors.ENDC}")
+            return content
+        log.info(f"{LogColors.OKBLUE}No daily update found.{LogColors.ENDC}")
+        return None
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error fetching latest daily update: {e}{LogColors.ENDC}")
+        return None
+
+def generate_intelligence_report(tables: Dict[str, Table], kinos_api_key_val: str, communications_log: List[str]) -> Optional[str]: # Added tables parameter
     """Generates an intelligence report using Kinos AI."""
     if not kinos_api_key_val:
         log.error(f"{LogColors.FAIL}Kinos API key not provided.{LogColors.ENDC}")
@@ -241,11 +262,14 @@ def generate_intelligence_report(kinos_api_key_val: str, communications_log: Lis
     
     # The main message to Kinos is a directive.
     # The system prompt and data are in addSystem.
-    main_prompt_message = "Please analyze the provided daily communications log according to the system guidelines and generate an intelligence report. Focus on identifying potential threats and noteworthy patterns as outlined in your operational mandate."
+    main_prompt_message = "Please analyze the provided daily communications log and the latest city dispatch, according to the system guidelines, and generate an intelligence report. Focus on identifying potential threats and noteworthy patterns as outlined in your operational mandate."
+
+    latest_daily_update_content = _get_latest_daily_update(tables)
 
     add_system_payload = {
         "system_guidelines": KINOS_SYSTEM_PROMPT_CONSIGLIO_ANALYSIS,
-        "daily_communications_log": "\n".join(communications_log) # Join into a single string for Kinos
+        "daily_communications_log": "\n".join(communications_log), # Join into a single string for Kinos
+        "latest_city_dispatch": latest_daily_update_content or "No recent city dispatch (Daily Update) available."
     }
 
     payload = {
@@ -349,7 +373,7 @@ def main(args):
         log.info("[DRY RUN] Would call Kinos to generate intelligence report.")
         report = "This is a [DRY RUN] simulated intelligence report. Potential threats identified regarding bread prices."
     else:
-        report = generate_intelligence_report(KINOS_API_KEY, communications)
+        report = generate_intelligence_report(tables, KINOS_API_KEY, communications) # Pass tables
 
     if report:
         log.info("Intelligence Report Summary:")
