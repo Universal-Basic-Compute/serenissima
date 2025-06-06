@@ -44,9 +44,31 @@ def process(
         return False
     
     try:
-        # Parse the path and notes
-        path = json.loads(path_str) if path_str and path_str.strip() else []
-        details = json.loads(notes_str) if notes_str and notes_str.strip() else {} # Changed details_str to notes_str and added strip()
+        # Parse the path
+        path = []
+        if path_str and path_str.strip():
+            try:
+                parsed_path_candidate = json.loads(path_str)
+                if isinstance(parsed_path_candidate, list):
+                    path = parsed_path_candidate
+                else:
+                    log.warning(f"Path string for activity {fields.get('ActivityId', 'N/A')} (Citizen: {citizen}) did not parse to a list: '{path_str[:100]}...'. Using empty path.")
+            except json.JSONDecodeError:
+                log.warning(f"Could not parse Path as JSON for activity {fields.get('ActivityId', 'N/A')} (Citizen: {citizen}). Path: '{path_str[:100]}...'. Using empty path.")
+        
+        # Parse notes (details)
+        details = {}
+        if notes_str and notes_str.strip():
+            try:
+                parsed_details_candidate = json.loads(notes_str)
+                if isinstance(parsed_details_candidate, dict):
+                    details = parsed_details_candidate
+                else:
+                    log.warning(f"Parsed Notes (details) is not a dictionary for activity {fields.get('ActivityId', 'N/A')} (Citizen: {citizen}). Notes: '{notes_str[:100]}...'. Using empty details.")
+                    # details remains {}
+            except json.JSONDecodeError:
+                log.warning(f"Could not parse Notes (details) as JSON for activity {fields.get('ActivityId', 'N/A')} (Citizen: {citizen}). Notes: '{notes_str[:100]}...'. Using empty details.")
+                # details remains {}
         
         # Get the purpose of this movement
         purpose = details.get("activityType", "unknown") # 'details' here is the parsed JSON from 'Notes'
