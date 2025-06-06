@@ -243,9 +243,9 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
               sessionStorage.setItem('cameFromWalletButtonEnterVenice', 'true'); // Flag for /arrival
               router.push('/arrival');
             }}
-            className={`bg-red-800 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg transition-all duration-150 ease-in-out transform hover:scale-105 ${className}`}
+            className={`font-serif font-extrabold text-2xl py-4 px-10 rounded-md shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-500 focus:ring-opacity-60 ${className} bg-gradient-to-br from-rose-700 via-red-800 to-stone-900 text-amber-100 hover:text-white border-2 border-amber-400 hover:border-amber-200 hover:shadow-amber-400/40 active:scale-95`}
           >
-            Enter Venice
+            Enter Venice XV
           </button>
         )
       ) : isConnected ? (
