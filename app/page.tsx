@@ -228,7 +228,7 @@ export default function TwoDPage() {
     
     // 4. Force a hard reload
     console.log("Forcing a hard reload of the page.");
-    window.location.reload(true); // true for hard reload
+    window.location.reload();
   };
 
   // const handleLoadingComplete = () => { // Supprimé car InitialLoadingScreen est retiré
