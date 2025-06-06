@@ -1,4 +1,7 @@
+"use client"; // Make this a Client Component to use usePathname
+
 import { Geist, Geist_Mono } from "next/font/google";
+import { usePathname } from "next/navigation"; // Import usePathname
 import "./globals.css";
 import ClientWalletProvider from "@/components/UI/ClientWalletProvider";
 import Compagno from "@/components/UI/Compagno";
@@ -21,13 +24,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const showCompagno = pathname !== "/arrival";
+
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased">
         <ClientWalletProvider>
           {children}
           {/* BackgroundMusic a été déplacé vers app/page.tsx pour un meilleur contrôle basé sur l'état */}
-          <Compagno />
+          {showCompagno && <Compagno />}
           <ContextMenuPreventer />
           <script dangerouslySetInnerHTML={{
             __html: `
