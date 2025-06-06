@@ -207,11 +207,30 @@ def _get_entity_count_from_response(response_json: Any) -> Optional[int]:
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:
     """Initializes connection to Airtable."""
-    airtable_api_key = os.getenv("AIRTABLE_API_KEY")
-    airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
+    airtable_api_key_env = os.getenv("AIRTABLE_API_KEY")
+    airtable_base_id_env = os.getenv("AIRTABLE_BASE_ID")
 
-    if not airtable_api_key or not airtable_base_id:
-        log.error(f"{LogColors.FAIL}Airtable credentials not found.{LogColors.ENDC}")
+    airtable_api_key = airtable_api_key_env.strip() if isinstance(airtable_api_key_env, str) else None
+    
+    processed_base_id: Optional[str] = None
+    if isinstance(airtable_base_id_env, str):
+        processed_base_id = airtable_base_id_env.strip()
+        if not processed_base_id: # Was empty string or whitespace
+            processed_base_id = None
+    elif isinstance(airtable_base_id_env, tuple):
+        if airtable_base_id_env and isinstance(airtable_base_id_env[0], str):
+            processed_base_id = airtable_base_id_env[0].strip()
+            if not processed_base_id: # First element was empty string
+                 processed_base_id = None
+        else:
+            log.error(f"{LogColors.FAIL}AIRTABLE_BASE_ID environment variable was a tuple but not in the expected format ('id',): {airtable_base_id_env}. Treating as not set.{LogColors.ENDC}")
+            # processed_base_id remains None
+    # If airtable_base_id_env was None or any other type, processed_base_id remains None
+
+    if not airtable_api_key or not processed_base_id:
+        log_api_key_status = 'Set' if airtable_api_key else 'Not Set'
+        log_base_id_status = processed_base_id if processed_base_id else 'Not Set or Invalid Tuple Format'
+        log.error(f"{LogColors.FAIL}Airtable credentials not found or invalid (API Key: {log_api_key_status}, Base ID: {log_base_id_status}).{LogColors.ENDC}")
         return None
     try:
         # Configure a custom retry strategy
@@ -223,13 +242,13 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
         )
         api = Api(airtable_api_key, retry_strategy=retry_strategy)
         tables = {
-            "citizens": api.table(airtable_base_id, "CITIZENS"),
-            "messages": api.table(airtable_base_id, "MESSAGES"), 
-            "notifications": api.table(airtable_base_id, "NOTIFICATIONS"),
-            "buildings": api.table(airtable_base_id, "BUILDINGS"),
-            "lands": api.table(airtable_base_id, "LANDS"),
-            "resources": api.table(airtable_base_id, "RESOURCES"),
-            "contracts": api.table(airtable_base_id, "CONTRACTS"),
+            "citizens": api.table(processed_base_id, "CITIZENS"),
+            "messages": api.table(processed_base_id, "MESSAGES"), 
+            "notifications": api.table(processed_base_id, "NOTIFICATIONS"),
+            "buildings": api.table(processed_base_id, "BUILDINGS"),
+            "lands": api.table(processed_base_id, "LANDS"),
+            "resources": api.table(processed_base_id, "RESOURCES"),
+            "contracts": api.table(processed_base_id, "CONTRACTS"),
         }
         log.info(f"{LogColors.OKGREEN}Airtable connection initialized successfully (citizens, messages, notifications, buildings, lands, resources, contracts).{LogColors.ENDC}")
         return tables
