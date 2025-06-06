@@ -19,6 +19,7 @@ import CitizenRegistry from '@/components/UI/CitizenRegistry'; // Import Citizen
 // import LoanManagementDashboard from '@/components/Loans/LoanManagementDashboard'; // Déplacé vers LoanPanel
 import LoanPanel from '@/components/Loans/LoanPanel'; // Importer le nouveau LoanPanel
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel'; // Import CitizenDetailsPanel
+import TransferComputeMenu from '@/components/UI/TransferComputeMenu'; // Importer TransferComputeMenu
 // import InitialLoadingScreen from '@/components/UI/InitialLoadingScreen'; // Import InitialLoadingScreen - Supprimé
 import DailyUpdatePanel from '@/components/UI/DailyUpdatePanel';
 import BackgroundMusic from '@/components/UI/BackgroundMusic';
@@ -39,6 +40,8 @@ import {
   UnifiedCitizenModelArticle,
   CitizenActivitiesAndNeedsArticle // Import the new article
 } from '@/components/Articles';
+import { transferCompute } from '@/lib/utils/computeUtils'; // Importer transferCompute
+import { useWalletContext } from '@/components/UI/WalletProvider'; // Importer useWalletContext
 // LandDetailsPanel est déjà dans components/PolygonViewer, pas besoin d'importer ici s'il est utilisé par IsometricViewer
 
 // Declare global window type
@@ -163,6 +166,7 @@ export default function TwoDPage() {
   const [showKnowledgePanel, setShowKnowledgePanel] = useState<boolean>(false);
   const [showTechTreePanel, setShowTechTreePanel] = useState<boolean>(false); // État pour TechTree
   const [showCitizenRegistry, setShowCitizenRegistry] = useState<boolean>(false); // State for CitizenRegistry
+  const [showTransferMenu, setShowTransferMenu] = useState<boolean>(false); // State for TransferComputeMenu
   const [transportMode, setTransportMode] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
 
@@ -179,6 +183,7 @@ export default function TwoDPage() {
   const [loginStatusChecked, setLoginStatusChecked] = useState<boolean>(false);
   const [currentUserUsername, setCurrentUserUsername] = useState<string | null>(null); // Pour stocker le nom d'utilisateur
   const [isAmbientAudioInitialized, setIsAmbientAudioInitialized] = useState(false);
+  const { walletAddress, citizenProfile, updateCitizenProfile } = useWalletContext(); // Obtenir les données du contexte du portefeuille
 
   // const handleLoadingComplete = () => { // Supprimé car InitialLoadingScreen est retiré
   //   console.log('InitialLoadingScreen complete, showing Daily Update panel.');
@@ -919,6 +924,23 @@ export default function TwoDPage() {
     };
   }, [appStatus, isAmbientAudioInitialized]);
 
+  // Listen for showTransferMenu event
+  useEffect(() => {
+    const handleShowTransferMenu = () => {
+      console.log('showTransferMenu event received in app/page.tsx');
+      if (citizenProfile && walletAddress) { // Ensure user is connected
+        setShowTransferMenu(true);
+      } else {
+        console.warn('Cannot show transfer menu: user not fully connected.');
+        // Optionally, prompt user to connect wallet or complete profile
+      }
+    };
+    window.addEventListener('showTransferMenu', handleShowTransferMenu);
+    return () => {
+      window.removeEventListener('showTransferMenu', handleShowTransferMenu);
+    };
+  }, [citizenProfile, walletAddress]); // Dependencies ensure this re-runs if connection state changes
+
 
   // Set up event listener for ensureBuildingsVisible
   useEffect(() => {
@@ -1477,6 +1499,32 @@ export default function TwoDPage() {
 
       {/* Weather and Time Display */}
       {canShowMainPanels && <WeatherTimeDisplay />}
+
+      {/* Transfer Compute Menu */}
+      {canShowMainPanels && showTransferMenu && citizenProfile && walletAddress && (
+        <TransferComputeMenu
+          onClose={() => setShowTransferMenu(false)}
+          onTransfer={async (amountToTransfer) => {
+            // walletAddress and citizenProfile are confirmed by the conditional render
+            try {
+              const backendResponse = await transferCompute(walletAddress!, amountToTransfer);
+              if (backendResponse && updateCitizenProfile) {
+                // Assuming backendResponse is the updated profile or contains it.
+                // The API /api/inject-compute-complete returns `data`.
+                // We assume `data` is the updated profile or { citizen: updatedProfile }
+                // WalletProvider's updateCitizenProfile expects the full new profile.
+                await updateCitizenProfile(backendResponse.citizen || backendResponse);
+                console.log('Citizen profile updated after COMPUTE injection.');
+              }
+              // TransferComputeMenu handles its own onClose upon successful transfer.
+            } catch (error) {
+              console.error("Failed to inject COMPUTE from page.tsx:", error);
+              // Re-throw for TransferComputeMenu to display the error to the user
+              throw error;
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
