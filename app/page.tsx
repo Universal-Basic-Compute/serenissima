@@ -20,6 +20,7 @@ import CitizenRegistry from '@/components/UI/CitizenRegistry'; // Import Citizen
 import LoanPanel from '@/components/Loans/LoanPanel'; // Importer le nouveau LoanPanel
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel'; // Import CitizenDetailsPanel
 import TransferComputeMenu from '@/components/UI/TransferComputeMenu'; // Importer TransferComputeMenu
+import ProfileEditor from '@/components/UI/ProfileEditor'; // Importer ProfileEditor
 // import InitialLoadingScreen from '@/components/UI/InitialLoadingScreen'; // Import InitialLoadingScreen - Supprimé
 import DailyUpdatePanel from '@/components/UI/DailyUpdatePanel';
 import BackgroundMusic from '@/components/UI/BackgroundMusic';
@@ -167,6 +168,7 @@ export default function TwoDPage() {
   const [showTechTreePanel, setShowTechTreePanel] = useState<boolean>(false); // État pour TechTree
   const [showCitizenRegistry, setShowCitizenRegistry] = useState<boolean>(false); // State for CitizenRegistry
   const [showTransferMenu, setShowTransferMenu] = useState<boolean>(false); // State for TransferComputeMenu
+  const [showProfileEditor, setShowProfileEditor] = useState<boolean>(false); // State for ProfileEditor
   const [transportMode, setTransportMode] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
 
@@ -941,6 +943,34 @@ export default function TwoDPage() {
     };
   }, [citizenProfile, walletAddress]); // Dependencies ensure this re-runs if connection state changes
 
+  // Effect to handle ProfileEditor visibility
+  useEffect(() => {
+    const handleRequestOpenProfileEditor = () => {
+      console.log('[app/page.tsx] Received requestShowProfileEditor event');
+      setShowProfileEditor(true);
+    };
+    window.addEventListener('requestShowProfileEditor', handleRequestOpenProfileEditor);
+
+    // Automatic opening if profile is incomplete
+    if (walletAddress && citizenProfile && !citizenProfile.username) {
+      const hasBeenPromptedForProfileThisSession = sessionStorage.getItem('profilePrompted');
+      if (!hasBeenPromptedForProfileThisSession) {
+        console.log('[app/page.tsx] New user or incomplete profile, showing ProfileEditor.');
+        setShowProfileEditor(true);
+        sessionStorage.setItem('profilePrompted', 'true');
+      }
+    }
+
+    // Clear the session prompt flag on disconnect
+    if (!walletAddress) {
+      sessionStorage.removeItem('profilePrompted');
+    }
+
+    return () => {
+      window.removeEventListener('requestShowProfileEditor', handleRequestOpenProfileEditor);
+    };
+  }, [walletAddress, citizenProfile]);
+
 
   // Set up event listener for ensureBuildingsVisible
   useEffect(() => {
@@ -1224,6 +1254,24 @@ export default function TwoDPage() {
     <div className="relative w-full h-screen">
       {/* Main 2D Isometric Viewer */}
       <IsometricViewer activeView={activeView} setActiveView={setActiveView} fullWaterGraphData={fullWaterGraphData} />
+
+      {/* Profile Editor Modal - Géré par app/page.tsx */}
+      {canShowMainPanels && showProfileEditor && citizenProfile && (
+        <ProfileEditor
+          onClose={() => {
+            setShowProfileEditor(false);
+            // Le flag sessionStorage 'profilePrompted' reste pour cette session si le profil est toujours incomplet.
+          }}
+          onSuccess={(updatedProfile) => {
+            // ProfileEditor émet 'citizenProfileUpdated', WalletProvider met à jour le contexte.
+            setShowProfileEditor(false);
+            if (updatedProfile.username) {
+              // Si le nom d'utilisateur est maintenant défini, on peut supprimer le flag.
+              sessionStorage.removeItem('profilePrompted');
+            }
+          }}
+        />
+      )}
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center z-30">

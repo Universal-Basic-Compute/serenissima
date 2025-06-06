@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useWalletContext } from './WalletProvider';
 import PlayerProfile from './PlayerProfile';
 import { eventBus } from '@/lib/utils/eventBus'; // Import eventBus
-import ProfileEditor from './ProfileEditor';
+// ProfileEditor n'est plus géré directement ici
 import EconomyPanel from './EconomyPanel';
 import { FaChartLine, FaTelegramPlane } from 'react-icons/fa'; // Added FaTelegramPlane
 
@@ -16,7 +16,7 @@ interface WalletButtonProps {
 export default function WalletButton({ className = '', onSettingsClick }: WalletButtonProps) {
   const { walletAddress, citizenProfile, isConnected, connectWallet } = useWalletContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  // const [showProfileEditor, setShowProfileEditor] = useState(false); // Supprimé
   const [showEconomyPanel, setShowEconomyPanel] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -90,7 +90,8 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
               </button>
               <button
                 onClick={() => {
-                  setShowProfileEditor(true);
+                  // setShowProfileEditor(true); // Supprimé
+                  window.dispatchEvent(new CustomEvent('requestShowProfileEditor'));
                   setDropdownOpen(false);
                 }}
                 className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
@@ -278,15 +279,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
       )}
       
       {/* Render modals */}
-      {showProfileEditor && (
-        <ProfileEditor 
-          onClose={() => setShowProfileEditor(false)}
-          onSuccess={(updatedProfile) => {
-            // You can add additional logic here if needed
-            console.log('Profile updated successfully:', updatedProfile);
-          }}
-        />
-      )}
+      {/* ProfileEditor n'est plus rendu ici */}
       {showEconomyPanel && (
         <EconomyPanel onClose={() => setShowEconomyPanel(false)} />
       )}
