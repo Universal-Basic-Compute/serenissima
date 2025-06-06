@@ -87,6 +87,7 @@ CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE = [
     "GET /api/activities?citizenId={YourUsername}&limit=5 - Get your 5 most recent activities.",
     "GET /api/building-types - Get definitions of all building types (costs, production, etc.). - Important before any POST /buildings request!",
     "GET /api/resource-types - Get definitions of all resource types (import price, category, etc.).- Important before any request involving resources!",
+    "GET /api/activities?citizenId={YourUsername}&ongoing=true - Get your currently active activities.",
     
     # Utility for common GET requests
     "POST /api/try-read - Execute a predefined GET request. Body: {requestType, parameters: {username?, buildingId?, ...}} (Consult compendium_of_simplified_reads for details)",
@@ -1084,6 +1085,7 @@ API_DOCUMENTATION_SUMMARY = {
         "/api/buildings?Type=market_stall&IsConstructed=true", # All constructed market stalls
         "/api/lands?Owner={YourUsername}&District=San Polo", # Your lands in San Polo
         "/api/resources/counts?owner={YourUsername}", # Your resource counts (specific endpoint)
+        "/api/activities?citizenId={YourUsername}&ongoing=true", # Your currently active activities
         # Note: Querying contracts directly is possible, but actions on contracts should be via /api/activities/try-create.
         "/api/contracts?Seller={YourUsername}&Type=public_sell&Status=active", 
         "/api/contracts?ResourceType=wood&Type=public_sell&Status=active", 
