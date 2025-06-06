@@ -1050,40 +1050,110 @@ def reschedule_created_activities_by_priority(
         log.info(f"Citizen {citizen_username}: Identified {len(endeavors)} endeavors to reschedule.")
 
         # Reschedule endeavors sequentially
-        next_available_time_utc = now_utc_to_use
+        global_next_available_time_utc = now_utc_to_use
+    
+        # Fetch citizen's current position once
+        citizen_current_pos_record = get_citizen_record(tables, citizen_username)
+        citizen_initial_pos_str = citizen_current_pos_record['fields'].get('Position') if citizen_current_pos_record else None
+        endeavor_previous_activity_end_location_coords: Optional[Dict[str, float]] = None
+        if citizen_initial_pos_str:
+            try:
+                endeavor_previous_activity_end_location_coords = json.loads(citizen_initial_pos_str)
+            except json.JSONDecodeError:
+                log.warning(f"{LogColors.WARNING}Could not parse initial position for {citizen_username} for rescheduling path logic.{LogColors.ENDC}")
+
+        # Get Transport API URL
+        current_api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000") # Re-fetch or ensure it's passed
+        transport_api_url = os.getenv("TRANSPORT_API_URL", f"{current_api_base_url}/api/transport")
+
         updates_to_make: List[Tuple[str, Dict[str, str]]] = []
 
-        for endeavor in endeavors:
+        for endeavor_idx, endeavor in enumerate(endeavors):
             if not endeavor: continue
+            endeavor.sort(key=lambda x: x['fields']['_StartDateDt']) # Sort activities within endeavor by original start
 
-            # Sort activities within this endeavor by their original StartDate to maintain internal sequence
-            endeavor.sort(key=lambda x: x['fields']['_StartDateDt'])
-            
-            # Determine the anchor time for this endeavor (earliest original start time)
-            min_original_start_date_in_endeavor = endeavor[0]['fields']['_StartDateDt']
-            
-            # Calculate the time shift needed for this endeavor
-            # If the endeavor's original start is already after next_available_time_utc, don't pull it earlier than its plan.
-            # However, the goal is to re-pack based on priority, so we should use next_available_time_utc.
-            effective_start_for_shift_calc = min_original_start_date_in_endeavor
-            
-            time_shift = next_available_time_utc - effective_start_for_shift_calc
-            
-            current_endeavor_max_end_time = next_available_time_utc # Initialize with current available time
+            log.info(f"Citizen {citizen_username}: Rescheduling endeavor {endeavor_idx + 1}/{len(endeavors)} (Priority: {endeavor[0]['fields'].get('Priority', 'N/A')}, {len(endeavor)} activities).")
 
-            for activity in endeavor:
+            # The first activity of this endeavor starts at global_next_available_time_utc
+            endeavor_current_processing_time_utc = global_next_available_time_utc
+
+            for activity_idx, activity in enumerate(endeavor):
                 original_start_dt = activity['fields']['_StartDateDt']
                 original_end_dt = activity['fields']['_EndDateDt']
-                
-                new_start_dt = original_start_dt + time_shift
-                new_end_dt = original_end_dt + time_shift # Preserves original duration
-
-                updates_to_make.append((activity['id'], {'StartDate': new_start_dt.isoformat(), 'EndDate': new_end_dt.isoformat()}))
-                
-                if new_end_dt > current_endeavor_max_end_time:
-                    current_endeavor_max_end_time = new_end_dt
+                original_duration = original_end_dt - original_start_dt
             
-            next_available_time_utc = current_endeavor_max_end_time # Next endeavor starts after this one ends
+                new_start_dt = endeavor_current_processing_time_utc
+                new_path_json = activity['fields'].get('Path') # Default to original path
+                current_duration_seconds = original_duration.total_seconds()
+            
+                activity_type = activity['fields'].get('Type')
+                to_building_id = activity['fields'].get('ToBuilding')
+                # from_building_id = activity['fields'].get('FromBuilding') # Not strictly needed for this re-path logic if we always start from previous end
+
+                # This will be the location where the current activity ends.
+                # Initialize with previous end location; update if this activity moves the citizen.
+                current_activity_actual_end_location_coords = endeavor_previous_activity_end_location_coords
+
+                if to_building_id and endeavor_previous_activity_end_location_coords:
+                    log.debug(f"  Activity {activity['id']} ({activity_type}) has ToBuilding: {to_building_id}. Current location: {endeavor_previous_activity_end_location_coords}")
+                    target_building_record = get_building_record(tables, to_building_id)
+                    if target_building_record:
+                        target_building_coords = _get_building_position_coords(target_building_record)
+                        if target_building_coords:
+                            # Check if already at the target (or very close)
+                            distance_to_target = calculate_haversine_distance_meters(
+                                endeavor_previous_activity_end_location_coords['lat'], endeavor_previous_activity_end_location_coords['lng'],
+                                target_building_coords['lat'], target_building_coords['lng']
+                            )
+                            if distance_to_target > 1.0: # If more than 1m away, consider re-pathing
+                                log.info(f"  Citizen {citizen_username}: Re-pathing for activity {activity['id']} ({activity_type}) from {endeavor_previous_activity_end_location_coords} to {to_building_id} ({target_building_coords}).")
+                                if not dry_run:
+                                    path_data = get_path_between_points(endeavor_previous_activity_end_location_coords, target_building_coords, transport_api_url)
+                                    if path_data and path_data.get('success'):
+                                        new_path_json = json.dumps(path_data.get('path', []))
+                                        new_duration_val = path_data.get('timing', {}).get('durationSeconds')
+                                        if new_duration_val is not None:
+                                            current_duration_seconds = float(new_duration_val)
+                                        current_activity_actual_end_location_coords = target_building_coords
+                                        log.info(f"    New path found. New duration: {current_duration_seconds:.0f}s.")
+                                    else:
+                                        log.warning(f"    Pathfinding failed for activity {activity['id']}. Using original path/duration. Activity might be impossible.")
+                                        # current_activity_actual_end_location_coords remains endeavor_previous_activity_end_location_coords
+                                else: # dry_run
+                                    log.info(f"    [DRY RUN] Would re-path for activity {activity['id']}. Assuming original duration for now.")
+                                    current_activity_actual_end_location_coords = target_building_coords # Assume travel occurs for dry run planning
+                            else: # Already at or very near the target building
+                                log.info(f"  Citizen {citizen_username}: Already at/near target {to_building_id} for activity {activity['id']}. No travel path needed. Duration will be original non-travel part.")
+                                # If it's a travel-like activity but already at destination, duration should be minimal or based on non-travel part.
+                                # For simplicity, if it's a 'goto_...' type and already there, its duration might become very short.
+                                # This needs careful handling based on activity type. For now, use original duration.
+                                # If original duration included travel, this might be too long.
+                                # A better approach: if type is 'goto_X' and already there, set duration to e.g. 1 minute.
+                                if activity_type and activity_type.startswith("goto_"):
+                                    current_duration_seconds = 60 # 1 minute if already at destination for a goto activity
+                                current_activity_actual_end_location_coords = target_building_coords
+                        else:
+                            log.warning(f"  Target building {to_building_id} for activity {activity['id']} has no coordinates. Using original path/duration.")
+                    else:
+                        log.warning(f"  Target building {to_building_id} for activity {activity['id']} not found. Using original path/duration.")
+                elif to_building_id and not endeavor_previous_activity_end_location_coords:
+                    log.warning(f"  Activity {activity['id']} has ToBuilding {to_building_id}, but previous end location is unknown. Cannot re-path. Using original path/duration.")
+
+
+                new_end_dt = new_start_dt + timedelta(seconds=current_duration_seconds)
+            
+                fields_to_update_for_activity = {'StartDate': new_start_dt.isoformat(), 'EndDate': new_end_dt.isoformat()}
+                if new_path_json != activity['fields'].get('Path'): # Only update path if it changed
+                    fields_to_update_for_activity['Path'] = new_path_json
+            
+                updates_to_make.append((activity['id'], fields_to_update_for_activity))
+                log.info(f"  Activity {activity['id']} ({activity_type}) for {citizen_username} rescheduled: Start: {new_start_dt.isoformat()}, End: {new_end_dt.isoformat()}. Path changed: {new_path_json != activity['fields'].get('Path')}")
+            
+                endeavor_current_processing_time_utc = new_end_dt # Next activity in this endeavor starts when this one ends
+                endeavor_previous_activity_end_location_coords = current_activity_actual_end_location_coords # Update for next iteration in this endeavor
+
+            # After processing all activities in an endeavor, update the global start time for the NEXT endeavor
+            global_next_available_time_utc = endeavor_current_processing_time_utc
 
         if updates_to_make:
             log.info(f"Citizen {citizen_username}: Applying {len(updates_to_make)} rescheduling updates.")
