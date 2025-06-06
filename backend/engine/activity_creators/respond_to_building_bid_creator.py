@@ -7,7 +7,7 @@ from datetime import timedelta
 from backend.engine.utils.activity_helpers import (
     LogColors, find_path_between_buildings_or_coords, 
     get_closest_building_of_type, get_contract_record,
-    get_building_record 
+    get_building_record, _get_building_position_coords # Added _get_building_position_coords
 )
 
 log = logging.getLogger(__name__)
@@ -43,22 +43,38 @@ def try_create(
 
     log.info(f"{LogColors.ACTIVITY}Attempting to create 'respond_to_building_bid' activity chain for {citizen_username} for contract {building_bid_contract_id}, response: {response_action}.{LogColors.ENDC}")
 
-    # 1. Determine citizen's current location
-    # (Assuming helper functions are available or imported)
-    # Imports moved to module level
-
+    # 1. Determine citizen's current location for pathfinding and distance calculations
     citizen_position_str = citizen_record['fields'].get('Position')
-    from_location_data = None
+    start_location_for_pathfinding: Optional[Dict[str, Any]] = None # Can be coords or building_record
+    start_coords_for_distance_calc: Optional[Dict[str, float]] = None # Must be coords
+
     if citizen_position_str:
         try:
             pos_data = json.loads(citizen_position_str)
-            if 'lat' in pos_data and 'lng' in pos_data: from_location_data = {"lat": pos_data['lat'], "lng": pos_data['lng']}
-            elif 'building_id' in pos_data: from_location_data = {"building_id": pos_data['building_id']}
+            if 'lat' in pos_data and 'lng' in pos_data:
+                start_coords_for_distance_calc = {"lat": float(pos_data['lat']), "lng": float(pos_data['lng'])}
+                start_location_for_pathfinding = start_coords_for_distance_calc
+            elif 'building_id' in pos_data:
+                building_id_from_pos = pos_data['building_id']
+                building_record_from_pos = get_building_record(tables, building_id_from_pos)
+                if building_record_from_pos:
+                    start_location_for_pathfinding = building_record_from_pos
+                    start_coords_for_distance_calc = _get_building_position_coords(building_record_from_pos)
+                else:
+                    log.warning(f"{LogColors.WARNING}Could not find building record for ID '{building_id_from_pos}' from citizen {citizen_username} position.{LogColors.ENDC}")
         except json.JSONDecodeError:
-            if isinstance(citizen_position_str, str) and citizen_position_str.startswith("bld_"): from_location_data = {"building_id": citizen_position_str}
+            if isinstance(citizen_position_str, str) and citizen_position_str.startswith("bld_"):
+                building_record_from_str = get_building_record(tables, citizen_position_str)
+                if building_record_from_str:
+                    start_location_for_pathfinding = building_record_from_str
+                    start_coords_for_distance_calc = _get_building_position_coords(building_record_from_str)
+                else:
+                    log.warning(f"{LogColors.WARNING}Could not find building record for ID '{citizen_position_str}' from citizen {citizen_username} position string.{LogColors.ENDC}")
+            else:
+                log.warning(f"{LogColors.WARNING}Could not parse citizen {citizen_username} position: {citizen_position_str}.{LogColors.ENDC}")
     
-    if not from_location_data:
-        log.warning(f"{LogColors.WARNING}Citizen {citizen_username} has no valid current location for respond_to_building_bid.{LogColors.ENDC}")
+    if not start_location_for_pathfinding or not start_coords_for_distance_calc:
+        log.warning(f"{LogColors.WARNING}Citizen {citizen_username} has no valid current location for 'respond_to_building_bid'.{LogColors.ENDC}")
         return []
 
     # 2. Verify the contract and that the citizen is the seller
@@ -84,7 +100,8 @@ def try_create(
 
     if not target_office_record:
         for office_type in preferred_office_types:
-            found_office = get_closest_building_of_type(tables, from_location_data, office_type)
+            # Use start_coords_for_distance_calc for reference_position
+            found_office = get_closest_building_of_type(tables, start_coords_for_distance_calc, office_type)
             if found_office:
                 target_office_record = found_office
                 target_office_building_id = target_office_record['fields'].get('BuildingId')
@@ -95,7 +112,13 @@ def try_create(
             return []
 
     # 4. Create goto_location activity
-    path_data = find_path_between_buildings_or_coords(tables, from_location_data, {"building_id": target_office_building_id}, transport_api_url)
+    # Use the newer signature: (start_location, end_location, api_base_url, transport_api_url_override=None)
+    path_data = find_path_between_buildings_or_coords(
+        start_location_for_pathfinding, 
+        target_office_record, 
+        api_base_url, 
+        transport_api_url
+    )
     current_end_time_utc = now_utc_dt
 
     if path_data and path_data.get("path"):
