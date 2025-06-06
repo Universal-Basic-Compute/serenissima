@@ -6,6 +6,7 @@ import datetime
 import time
 import json
 import uuid
+import pytz # For timezone handling
 from typing import Dict, Optional, Any
 
 from backend.engine.utils.activity_helpers import get_building_record, get_closest_building_to_position, get_citizen_inventory_details # Import helpers
