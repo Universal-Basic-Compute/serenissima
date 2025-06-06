@@ -110,35 +110,37 @@ def process_encounter_pair(
     location_id: str, # Represents the shared location (e.g., Position string or BuildingId)
     dry_run: bool = False
 ):
-    """Generates an internal reflection for citizen1 about citizen2 being at the same location."""
-    # Ensure citizen1_username is alphabetically first for consistency if needed,
-    # but for reflection, the order might matter based on who is "observing".
-    # Let's assume the order passed is intentional: citizen1 reflects on citizen2.
+    """Generates an opening conversational line from a randomly chosen speaker to the other."""
     
-    log.info(f"{LogColors.OKCYAN}Processing encounter: {citizen1_username} reflecting on {citizen2_username} at {location_id}.{LogColors.ENDC}")
+    # Randomly decide who speaks first in this encounter
+    pair_participants = [citizen1_username, citizen2_username]
+    random.shuffle(pair_participants)
+    speaker = pair_participants[0]
+    listener = pair_participants[1]
+
+    log.info(f"{LogColors.OKCYAN}Processing encounter: {speaker} will initiate conversation with {listener} at {location_id}.{LogColors.ENDC}")
 
     if dry_run:
-        log.info(f"    [DRY RUN] Would call generate_conversation_turn for {citizen1_username} to reflect on {citizen2_username}.")
+        log.info(f"    [DRY RUN] Would call generate_conversation_turn for {speaker} to initiate with {listener}.")
     else:
         try:
-            # Call generate_conversation_turn with interaction_mode="reflection"
-            # The speaker is citizen1_username, the "listener" (observed) is citizen2_username.
-            new_reflection_message = generate_conversation_turn(
+            # Call generate_conversation_turn with interaction_mode="conversation_opener"
+            new_opening_message = generate_conversation_turn(
                 tables=tables,
                 kinos_api_key=kinos_api_key,
-                speaker_username=citizen1_username,
-                listener_username=citizen2_username, # citizen2 is the one being observed/reflected upon
+                speaker_username=speaker,
+                listener_username=listener,
                 api_base_url=api_base_url,
-                interaction_mode="reflection" # Specify the new mode
+                interaction_mode="conversation_opener" # New mode for opening line
             )
-            if new_reflection_message:
-                log.info(f"    Reflection by {citizen1_username} about {citizen2_username} generated and persisted. ID: {new_reflection_message.get('id')}")
-                log.debug(f"    Content: {new_reflection_message.get('fields', {}).get('Content', '')[:100]}...")
+            if new_opening_message:
+                log.info(f"    Opening line by {speaker} to {listener} generated and persisted. ID: {new_opening_message.get('id')}")
+                log.debug(f"    Content: {new_opening_message.get('fields', {}).get('Content', '')[:100]}...")
             else:
-                log.warning(f"    Failed to generate or persist reflection for {citizen1_username} about {citizen2_username}.")
+                log.warning(f"    Failed to generate or persist opening line from {speaker} to {listener}.")
         
         except Exception as e_turn:
-            log.error(f"    Error during reflection generation for {citizen1_username} about {citizen2_username}: {e_turn}")
+            log.error(f"    Error during conversation opener generation for {speaker} to {listener}: {e_turn}")
 
 def main(args):
     """Main function to process encounters."""

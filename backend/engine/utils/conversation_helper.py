@@ -216,22 +216,24 @@ def generate_conversation_turn(
     tables: Dict[str, Table],
     kinos_api_key: str,
     speaker_username: str,
-    listener_username: str, # For reflection, this is the citizen being observed
+    listener_username: str, # For reflection, this is the citizen being observed; for opener, the one being spoken to
     api_base_url: str,
     kinos_model_override: Optional[str] = None,
     max_history_messages: int = 5,
-    interaction_mode: str = "conversation" # "conversation" or "reflection"
+    interaction_mode: str = "conversation" # "conversation", "reflection", or "conversation_opener"
 ) -> Optional[Dict]:
     """
-    Generates one turn of a conversation or an internal reflection.
+    Generates one turn of a conversation, an internal reflection, or a conversation opener.
     Persists the generated message/reflection and returns its Airtable record.
     """
     if interaction_mode == "reflection":
         log.info(f"Generating internal reflection for {speaker_username} about {listener_username}.")
-    else:
+    elif interaction_mode == "conversation_opener":
+        log.info(f"Generating conversation opener from {speaker_username} to {listener_username}.")
+    else: # conversation
         log.info(f"Generating conversation turn: Speaker: {speaker_username}, Listener: {listener_username}")
 
-    # 1. Get Speaker and Listener (observed citizen) profiles
+    # 1. Get Speaker and Listener (observed/spoken-to citizen) profiles
     speaker_profile_record = get_citizen_record(tables, speaker_username)
     listener_profile_record = get_citizen_record(tables, listener_username)
 
@@ -369,7 +371,18 @@ def generate_conversation_turn(
             f"Keep it concise and focused on potential gameplay impact or character development.[/SYSTEM]\n\n"
         )
         prompt = system_explanation + f"{speaker_profile.get('FirstName', speaker_username)}'s internal thoughts about {listener_profile.get('FirstName', listener_username)}: "
-    else: # conversation mode
+    elif interaction_mode == "conversation_opener":
+        system_explanation = (
+            f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
+            f"{location_context}You see {listener_profile.get('FirstName', listener_username)} (Social Class: {listener_profile.get('SocialClass', 'unknown')}) here. "
+            f"Review your knowledge in `addSystem` (your data package, problems, your relationship with them, their problems, and any recent direct conversation history with them). "
+            f"What would you say to them to initiate a conversation or make an observation? "
+            f"Your response should be direct speech TO {listener_profile.get('FirstName', listener_username)}. "
+            f"Keep it concise, in character, and relevant to your current situation or relationship.[/SYSTEM]\n\n"
+        )
+        # No conversation history for an opener
+        prompt = system_explanation + f"{speaker_profile.get('FirstName', speaker_username)} (you) to {listener_profile.get('FirstName', listener_username)}: "
+    else: # "conversation" mode (replying in an existing conversation)
         system_explanation = (
             f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
             f"You are currently in conversation with {listener_profile.get('FirstName', listener_username)}. {location_context}"
@@ -405,13 +418,17 @@ def generate_conversation_turn(
         return None
 
     # 7. Persist message/reflection
-    message_receiver = listener_username
-    message_type_to_persist = "message_ai_augmented"
+    message_receiver = listener_username # Default for conversation and opener
+    message_type_to_persist = "message_ai_augmented" # Default for conversation and opener
     
     if interaction_mode == "reflection":
         message_receiver = speaker_username # Reflection is "to self"
         message_type_to_persist = "encounter_reflection"
         log.info(f"Persisting reflection from {speaker_username} about {listener_username} (to self).")
+    elif interaction_mode == "conversation_opener":
+        # Receiver is listener_username, type is still message_ai_augmented or a new "opener" type
+        message_type_to_persist = "conversation_opener" # Or keep as message_ai_augmented
+        log.info(f"Persisting conversation opener from {speaker_username} to {listener_username}.")
     
     persisted_message_record = persist_message(
         tables,
@@ -425,7 +442,9 @@ def generate_conversation_turn(
     if persisted_message_record:
         if interaction_mode == "reflection":
             log.info(f"Successfully generated and persisted reflection from {speaker_username} about {listener_username}.")
-        else:
+        elif interaction_mode == "conversation_opener":
+            log.info(f"Successfully generated and persisted conversation opener from {speaker_username} to {listener_username}.")
+        else: # conversation
             log.info(f"Successfully generated and persisted conversation turn from {speaker_username}.")
         return persisted_message_record # Return the full Airtable record
     else:
