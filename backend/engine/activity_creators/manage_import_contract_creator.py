@@ -199,7 +199,7 @@ def try_create(
         "Status": "created",
         "Title": f"Traveling to {'modify' if contract_id else 'register'} import contract",
         "Description": f"Traveling to {office_building_record['fields'].get('Name', target_office_building_id)} to {'modify' if contract_id else 'register'} import contract for {target_amount} {resource_type}",
-        "Notes": f"Travel to office for manage_import_contract. Will be followed by contract registration.",
+        # "Notes": f"Travel to office for manage_import_contract. Will be followed by contract registration.", # This descriptive note is covered by Description. The JSON Notes above is needed by the processor.
         "CreatedAt": chain_created_at, # Use chain creation time
         "StartDate": goto_office_start_date,
         "EndDate": goto_office_end_date,
@@ -224,7 +224,7 @@ def try_create(
         "Status": "created",
         "Title": f"{'Modifying' if contract_id else 'Registering'} import contract for {resource_type}",
         "Description": f"{'Modifying' if contract_id else 'Registering'} import contract for {target_amount} {resource_type} at {price_per_resource} Ducats each",
-        "Notes": f"Final step of manage_import_contract process. Will create/update import contract.",
+        # "Notes": f"Final step of manage_import_contract process. Will create/update import contract.", # This descriptive note is covered by Description. The JSON Notes above is needed by the processor.
         "CreatedAt": chain_created_at, # Use chain creation time
         "StartDate": register_start_date,
         "EndDate": register_end_date,
