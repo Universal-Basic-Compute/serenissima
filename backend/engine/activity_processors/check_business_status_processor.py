@@ -16,6 +16,7 @@ import pytz # For timezone.utc
 PROJECT_ROOT_CBS = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 from backend.engine.utils.activity_helpers import get_building_record, get_citizen_record, VENICE_TIMEZONE, LogColors, _escape_airtable_value, dateutil_parser
+from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_MINOR_POSITIVE, TRUST_SCORE_MINOR_NEGATIVE
 
 log = logging.getLogger(__name__)
 
@@ -128,8 +129,30 @@ def process(
                            f"appears to be idle. You may want to check if they have necessary resources, tasks, or if there's an issue preventing work.")
                 log.info(f"{LogColors.OKBLUE}Occupant {occupant_username} at business {business_name_log} is idle. Triggering manager {manager_username}.{LogColors.ENDC}")
                 _trigger_autonomous_run_for_manager(manager_username, message)
+                # Case 2: Occupant is idle - decrease trust score
+                update_trust_score_for_activity(
+                    tables,
+                    manager_username, # Citizen performing the check
+                    occupant_username, # Worker being checked
+                    TRUST_SCORE_MINOR_NEGATIVE, # Small negative impact
+                    "check_business_status_worker_idle",
+                    success=False, # Interaction perceived negatively by manager
+                    notes_detail=f"Worker {occupant_username} found idle at {business_name_log}.",
+                    activity_record_for_kinos=activity_record['fields']
+                )
             else:
                 log.info(f"{LogColors.OKGREEN}Worker {occupant_username} at business {business_name_log} is currently active. All seems fine.{LogColors.ENDC}")
+                # Case 3: Everything's fine - increase trust score
+                update_trust_score_for_activity(
+                    tables,
+                    manager_username, # Citizen performing the check
+                    occupant_username, # Worker being checked
+                    TRUST_SCORE_MINOR_POSITIVE, # Small positive impact
+                    "check_business_status_worker_active",
+                    success=True, # Interaction perceived positively by manager
+                    notes_detail=f"Worker {occupant_username} found active at {business_name_log}.",
+                    activity_record_for_kinos=activity_record['fields']
+                )
         
         return True
 
