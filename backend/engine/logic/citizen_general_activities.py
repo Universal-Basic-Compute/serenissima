@@ -30,8 +30,8 @@ from backend.engine.utils.activity_helpers import (
     get_citizen_effective_carry_capacity,
     CITIZEN_CARRY_CAPACITY, # Import constant for carry capacity
     get_relationship_trust_score,
-    get_closest_inn, # Keep for now if used elsewhere, or remove if fully replaced
     get_closest_food_provider, # Import the new function
+    get_closest_building_of_type, # Import for finding specific building types like "inn"
     get_citizen_inventory_details, # New import
     get_citizen_workplace,
     get_citizen_home,
@@ -811,7 +811,7 @@ def _handle_night_shelter(
 
     # Forestieri or Homeless Resident logic (Inn)
     log.info(f"{LogColors.OKCYAN}[Repos] Citoyen {citizen_name} ({citizen_social_class} - {'Forestieri' if is_forestieri else 'Résident sans abri'}): Recherche d'une auberge.{LogColors.ENDC}")
-    closest_inn_record = get_closest_inn(tables, citizen_position)
+    closest_inn_record = get_closest_building_of_type(tables, citizen_position, "inn")
     if not closest_inn_record: return None
 
     inn_name_display = _get_bldg_display_name_module(tables, closest_inn_record)
