@@ -94,7 +94,7 @@ export class RenderService {
     } else {
       // Normal state
       ctx.fillStyle = color;
-      ctx.strokeStyle = '#000';
+      ctx.strokeStyle = isActuallyABridge ? '#8B4513' : '#000'; // Brown for bridges, black for others
       ctx.lineWidth = 1;
     }
     
