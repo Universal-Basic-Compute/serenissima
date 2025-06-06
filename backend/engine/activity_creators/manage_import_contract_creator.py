@@ -255,12 +255,6 @@ def _calculate_distance(pos1, pos2): # This seems unused now, consider removing 
     lat_diff = (pos1['lat'] - pos2['lat']) * 111000  # ~111km per degree of latitude
     lng_diff = (pos1['lng'] - pos2['lng']) * 111000 * 0.85  # Approximate at mid-latitudes
     return (lat_diff**2 + lng_diff**2)**0.5  # Euclidean distance in meters
-    if position_str:
-        try:
-            return json.loads(position_str)
-        except json.JSONDecodeError:
-            return None
-    return None
 
 def _calculate_distance(pos1, pos2):
     """Calculate simple Euclidean distance between two positions."""
