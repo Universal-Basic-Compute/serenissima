@@ -53,7 +53,18 @@ export async function POST(request: NextRequest) {
     // Prepare payload for /api/activities/try-create
     const activityParameters: Record<string, any> = {
       landId: pointDetails.polygonId,
-      buildingTypeDefinition: buildingTypeDefinition,
+      buildingTypeDefinition: {
+        id: buildingTypeDefinition.type, // Map 'type' from request to 'id' for Python backend
+        name: buildingTypeDefinition.name,
+        buildTier: buildingTypeDefinition.buildTier,
+        pointType: buildingTypeDefinition.pointType,
+        constructionCosts: buildingTypeDefinition.constructionCosts,
+        category: buildingTypeDefinition.category,
+        subCategory: buildingTypeDefinition.subCategory,
+        size: buildingTypeDefinition.size,
+        constructionMinutes: buildingTypeDefinition.constructionMinutes,
+        // Ensure all fields from the original buildingTypeDefinition expected by Python are copied
+      },
       pointDetails: { // Pass only relevant parts of pointDetails if Python expects a simpler structure
         lat: pointDetails.lat,
         lng: pointDetails.lng,
