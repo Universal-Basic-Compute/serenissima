@@ -109,6 +109,8 @@ def initialize_airtable_tables() -> Optional[Dict[str, Table]]:
         log.error(f"{LogColors.FAIL}Failed to initialize Airtable tables: {e}{LogColors.ENDC}")
         return None
 
+# LogColors is now imported from activity_helpers
+
 def delete_old_records(
     table_object: Table,
     table_name: str,
