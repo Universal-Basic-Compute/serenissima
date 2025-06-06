@@ -87,13 +87,19 @@ def send_telegram_notification(message: str, chat_id_override: Optional[str] = N
     MAX_TELEGRAM_MESSAGE_LENGTH = 4000 
     if len(message) > MAX_TELEGRAM_MESSAGE_LENGTH:
         message = message[:MAX_TELEGRAM_MESSAGE_LENGTH - 200] + "\n\n[...Message truncated...]" 
-        if message.count("```") % 2 != 0: # Ensure code blocks are closed if truncated
+        # Ensure Markdown code blocks are closed if truncated
+        if message.count("```") % 2 != 0: 
             message += "\n```"
+        # Ensure bold/italic markers are balanced if truncated (simple check)
+        if message.count("*") % 2 != 0:
+            message += "*"
+        if message.count("_") % 2 != 0:
+            message += "_"
 
     payload = {
         "chat_id": chat_id_to_use,
-        "text": message,
-        "parse_mode": "HTML" 
+        "text": message, # This will be Markdown
+        "parse_mode": "Markdown" # Changed from HTML to Markdown
     }
     try:
         response = requests.post(url, json=payload, timeout=10)
@@ -142,9 +148,7 @@ def generate_daily_update_summary(thoughts: List[Dict[str, Any]]) -> Optional[st
     if not thoughts:
         log.info(f"{LogColors.OKBLUE}No thoughts provided to Kinos AI. Skipping summary generation.{LogColors.ENDC}")
         default_markdown = "No specific citizen thoughts were logged recently. Venice rests, for now."
-        # Simple HTML version for the default message
-        default_html = f"<p>{default_markdown.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')}</p>"
-        return {"html": default_html, "markdown": default_markdown}
+        return {"telegram_markdown": default_markdown, "airtable_markdown": default_markdown}
 
     try:
         # Prepare thoughts for addSystem. Kinos expects a JSON string.
@@ -264,57 +268,15 @@ def generate_daily_update_summary(thoughts: List[Dict[str, Any]]) -> Optional[st
         log.info(f"{LogColors.OKGREEN}Received daily update summary from Kinos AI.{LogColors.ENDC}")
         # log.debug(f"Kinos AI Raw Response: {latest_ai_response_content}")
         
-        # 1. Replace custom linebreak tags with actual newlines for the Markdown version
-        processed_markdown = latest_ai_response_content.strip()
-        processed_markdown = processed_markdown.replace('[PARAGRAPHBREAK]', '\n\n')
-        processed_markdown = processed_markdown.replace('[LINEBREAK]', '\n')
+        # Replace custom linebreak tags with actual newlines for the Markdown version
+        final_markdown_content = latest_ai_response_content.strip()
+        final_markdown_content = final_markdown_content.replace('[PARAGRAPHBREAK]', '\n\n')
+        final_markdown_content = final_markdown_content.replace('[LINEBREAK]', '\n')
         
-        log.info(f"{LogColors.OKBLUE}Processed Kinos Markdown (with newlines): {processed_markdown[:200]}...{LogColors.ENDC}")
-
-        # 2. Échapper les caractères HTML spéciaux provenant du texte de Kinos (pour la version HTML)
-        # Ceci est fait AVANT d'ajouter nos propres balises HTML.
-        escaped_text = processed_markdown.replace('&', '&amp;')
-        escaped_text = escaped_text.replace('<', '&lt;')
-        escaped_text = escaped_text.replace('>', '&gt;')
-
-        # 3. Convertir le Markdown en HTML compatible avec Telegram en utilisant des regex
-        # L'ordre des remplacements peut être important.
+        log.info(f"{LogColors.OKGREEN}Final Kinos Markdown for Telegram & Airtable: {final_markdown_content[:200]}...{LogColors.ENDC}")
         
-        # Blocs de code (gérés en premier pour protéger leur contenu)
-        processed_html = re.sub(r'```python\r?\n(.*?)\r?\n```', r'<pre><code class="language-python">\1</code></pre>', escaped_text, flags=re.DOTALL)
-        processed_html = re.sub(r'```\r?\n(.*?)\r?\n```', r'<pre>\1</pre>', processed_html, flags=re.DOTALL)
-
-        # Code en ligne : `code` -> <code>code</code>
-        processed_html = re.sub(r'`(.*?)`', r'<code>\1</code>', processed_html)
-        
-        # Gras : **text** -> <b>text</b> (doit être traité avant *text*)
-        processed_html = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', processed_html)
-        
-        # Gras : *text* -> <b>text</b> 
-        # (?<!\*) : non précédé par un astérisque (pour ne pas matcher le deuxième * de **)
-        # \*(?=\S) : un astérisque suivi par un caractère non-espace
-        # (.+?) : le contenu (au moins un caractère, non-gourmand)
-        # (?<=\S)\* : un astérisque précédé par un caractère non-espace
-        # (?!\*) : non suivi par un astérisque (pour ne pas matcher le premier * de **)
-        processed_html = re.sub(r'(?<!\*)\*(?=\S)(.+?)(?<=\S)\*(?!\*)', r'<b>\1</b>', processed_html)
-
-        # Italique : _text_ -> <i>text</i>
-        processed_html = re.sub(r'\_(?=\S)(.+?)(?<=\S)\_', r'<i>\1</i>', processed_html)
-        
-        # Barré : ~text~ -> <s>text</s>
-        processed_html = re.sub(r'\~(?=\S)(.+?)(?<=\S)\~', r'<s>\1</s>', processed_html)
-        
-        # Listes : (traitées après les formatages en ligne)
-        # Convertir "* item" en "• item" (au début d'une ligne)
-        processed_html = re.sub(r'^\* (.*)', r'• \1', processed_html, flags=re.MULTILINE)
-        # Convertir "- item" en "• item" (au début d'une ligne)
-        processed_html = re.sub(r'^\- (.*)', r'• \1', processed_html, flags=re.MULTILINE)
-        
-        # Les caractères \n pour les sauts de ligne sont déjà présents grâce au remplacement des [TAGS]
-        # et ne sont pas modifiés par ces regex. Aucune balise <p> ou <ul>/<li> n'est introduite.
-        
-        log.info(f"{LogColors.OKGREEN}Converted Kinos response to Telegram-compatible HTML (with literal newlines): {processed_html[:200]}...{LogColors.ENDC}")
-        return {"html": processed_html, "markdown": processed_markdown}
+        # HTML conversion is removed. We will send Markdown to Telegram.
+        return {"telegram_markdown": final_markdown_content, "airtable_markdown": final_markdown_content}
 
     except requests.exceptions.RequestException as e:
         log.error(f"{LogColors.FAIL}Kinos AI API request error: {e}{LogColors.ENDC}")
@@ -350,22 +312,22 @@ def process_daily_update(dry_run: bool = False):
 
     daily_summary_data = generate_daily_update_summary(recent_thoughts)
 
-    if daily_summary_data and daily_summary_data.get("html") and daily_summary_data.get("markdown") is not None:
-        html_summary_for_telegram = daily_summary_data["html"]
-        markdown_summary_for_airtable = daily_summary_data["markdown"]
+    if daily_summary_data and daily_summary_data.get("telegram_markdown") is not None and daily_summary_data.get("airtable_markdown") is not None:
+        markdown_for_telegram = daily_summary_data["telegram_markdown"]
+        markdown_for_airtable = daily_summary_data["airtable_markdown"]
         
-        log.info(f"Daily Update HTML Summary for Telegram:\n{html_summary_for_telegram}")
-        log.info(f"Daily Update Markdown Summary for Airtable:\n{markdown_summary_for_airtable}")
+        log.info(f"Daily Update Markdown Summary for Telegram:\n{markdown_for_telegram}")
+        log.info(f"Daily Update Markdown Summary for Airtable:\n{markdown_for_airtable}")
         
         # Save Markdown version to Airtable MESSAGES
-        save_daily_update_to_messages(tables, markdown_summary_for_airtable)
-        # Send HTML version to Telegram
-        send_telegram_notification(html_summary_for_telegram, TELEGRAM_CHAT_ID)
+        save_daily_update_to_messages(tables, markdown_for_airtable)
+        # Send Markdown version to Telegram
+        send_telegram_notification(markdown_for_telegram, TELEGRAM_CHAT_ID)
     else:
         log.warning(f"{LogColors.WARNING}Failed to generate daily update summary from Kinos AI or data is incomplete.{LogColors.ENDC}")
         # Optionally send a fallback message
-        fallback_html_message = "<p>The daily update from Venice could not be generated at this time.</p>"
-        send_telegram_notification(fallback_html_message, TELEGRAM_CHAT_ID)
+        fallback_markdown_message = "The daily update from Venice could not be generated at this time."
+        send_telegram_notification(fallback_markdown_message, TELEGRAM_CHAT_ID)
 
     log.info(f"{LogColors.OKGREEN}Daily Update Process finished.{LogColors.ENDC}")
 

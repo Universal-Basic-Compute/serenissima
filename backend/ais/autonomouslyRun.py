@@ -647,7 +647,7 @@ def make_kinos_call(
                     log.warning(f"{LogColors.WARNING}No suitable general JSON-like substring found for {ai_username}.{LogColors.ENDC}")
         
         if parsed_response:
-            log.debug(f"{LogColors.LIGHTBLUE}Full Kinos parsed JSON response for {ai_username} (method: {parsing_method_used}):\n{json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
+            log.info(f"{LogColors.LIGHTBLUE}Full Kinos parsed JSON response for {ai_username} (method: {parsing_method_used}):\n{json.dumps(parsed_response, indent=2)}{LogColors.ENDC}")
             if parsing_error_info and parsing_method_used != "direct_cleaned" and parsing_method_used != "direct_original": # Add info if a fallback method succeeded
                 parsed_response["parsing_info"] = f"Successfully parsed using {parsing_method_used} method after prior attempts failed. ({parsing_error_info.strip()})"
             return parsed_response
