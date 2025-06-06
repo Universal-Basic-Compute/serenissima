@@ -50,6 +50,9 @@ def process_manage_import_contract_fn(
     
     # Handle register_import_agreement activity
     elif activity_type == "register_import_agreement":
+        if not details: # Check if details is empty after parsing Notes
+            log.error(f"Cannot process {activity_type} for {citizen} (ActivityId: {activity_record.get('id')}) because the 'Notes' field did not yield a valid JSON object with parameters. Notes content was: '{notes_str[:200]}...'")
+            return False
         return _create_or_update_import_contract(tables, activity_record, details)
     
     else:
