@@ -159,20 +159,46 @@ def generate_daily_update_summary(thoughts: List[Dict[str, Any]]) -> Optional[st
             # Removed telegram_markdownv2_formatting_rules from here
         }
         add_system_json = json.dumps(add_system_context)
+
+        # Define multiple prompt templates
+        prompt_templates = [
+            (
+                "From the recent citizen dialogues in 'addSystem', craft a concise daily dispatch for Venice. "
+                "This will be shared on Telegram. Focus on the city's pulse, significant happenings, or noteworthy shifts from day to day. "
+                "Structure:[PARAGRAPHBREAK]"
+                "1. An opening paragraph (one or two sentences) capturing the essence of recent events or key highlights. Use [PARAGRAPHBREAK] for separation.[PARAGRAPHBREAK]"
+                "2. A bulleted list (3-5 points) of specific events, citizen observations, or prevailing sentiments. Keep bullets brief. Use Markdown lists (`* Item` or `- Item`). Precede each bullet with [LINEBREAK] if it's not starting a new paragraph. Emphasize with bold; avoid emojis.[PARAGRAPHBREAK]"
+                "3. A short concluding remark, if fitting.[PARAGRAPHBREAK]"
+                "The entire output must be a single Telegram-ready message. Use Markdown for bold (`*text*` or `**text**`), italics (`_text_`), and strikethrough (`~text~`).[PARAGRAPHBREAK]"
+                "CRITICAL: Use [LINEBREAK] for single line breaks and [PARAGRAPHBREAK] for paragraph breaks (blank lines). Do not use '\\n'.[PARAGRAPHBREAK]"
+                "Provide ONLY the message content, without any surrounding explanations."
+            ),
+            (
+                "Analyze the citizen thoughts provided in 'addSystem'. Produce an engaging daily summary for the Venetian public, suitable for Telegram (keep it brief). "
+                "Highlight the general atmosphere, key occurrences, or interesting changes, particularly those evolving day-to-day. "
+                "Format as follows:[PARAGRAPHBREAK]"
+                " - Lead with a succinct introductory paragraph on major events/points. Separate with [PARAGRAPHBREAK].[PARAGRAPHBREAK]"
+                " - List 3-5 bullet points covering notable events, citizen views, or sentiments. Bullets must be concise. Use Markdown (`* Item` or `- Item`). Ensure [LINEBREAK] before each bullet if not a new paragraph. Use bold text; no emojis.[PARAGRAPHBREAK]"
+                " - Optionally, add a brief closing statement.[PARAGRAPHBREAK]"
+                "The response should be a single message for Telegram. Employ Markdown for formatting (bold: `*text*` or `**text**`; italics: `_text_`; strikethrough: `~text~`).[PARAGRAPHBREAK]"
+                "MANDATORY: For all single line breaks, use [LINEBREAK]. For paragraph breaks, use [PARAGRAPHBREAK]. Avoid literal newlines ('\\n').[PARAGRAPHBREAK]"
+                "Respond with ONLY the Telegram message content."
+            ),
+            (
+                "Review the citizen communications in 'addSystem'. Compose a captivating daily news update for Venice, designed for Telegram (short and sweet). "
+                "Summarize the city's mood, important events, or intriguing developments, especially daily changes. "
+                "Your report structure:[PARAGRAPHBREAK]"
+                "  - Begin with one or two introductory sentences on the main events or key takeaways. Use [PARAGRAPHBREAK] to separate.[PARAGRAPHBREAK]"
+                "  - Follow with 3 to 5 bullet points detailing specific notable incidents, citizen perspectives, or common feelings. Keep them short. Use Markdown list format (`* Item` or `- Item`). Each bullet point must be on a new line (use [LINEBREAK] if needed). Use bold; no emojis.[PARAGRAPHBREAK]"
+                "  - End with a concise closing thought, if applicable.[PARAGRAPHBREAK]"
+                "The entire response must be formatted as one Telegram message. Use Markdown for styling (bold: `*text*` or `**text**`; italics: `_text_`; strikethrough: `~text~`).[PARAGRAPHBREAK]"
+                "ESSENTIAL: Use [LINEBREAK] for single line breaks. Use [PARAGRAPHBREAK] for paragraph breaks. Do not use actual newline characters.[PARAGRAPHBREAK]"
+                "Output ONLY the message content, no additional commentary."
+            )
+        ]
         
-        kinos_prompt = (
-            "Based on the recent thoughts & messages from various citizens of Venice provided in the 'addSystem' context, "
-            "please generate an engaging daily update for the public. It will be displayed in Telegram, so keep it relatively short. "
-            "The update should summarize the general mood, key events, or interesting developments in Venice, especially if they are developments from one day to the next. "
-            "Structure your response as follows:[PARAGRAPHBREAK]"
-            "1. Start with one short introductory paragraphs summarizing the overall events or key important points. Use [PARAGRAPHBREAK] to separate paragraph.[PARAGRAPHBREAK]"
-            "2. Follow with a list of 3 to 5 bullet points highlighting specific notable events, observations, or citizen sentiments. Each bullet point should be concise. Use standard Markdown list syntax (e.g., `* Item 1` or `- Item 1`). Ensure each bullet point starts on a new line by using [LINEBREAK] before it if it's not already the start of a new paragraph.[PARAGRAPHBREAK]. Use bold, no emojis."
-            "3. Conclude with a brief closing sentence, if appropriate.[PARAGRAPHBREAK]"
-            "Format the entire response as a single Telegram message, suitable for public broadcast. "
-            "Use standard Markdown for formatting (e.g., `*bold text*` or `**bold text**`, `_italic text_``, `~strikethrough~`).[PARAGRAPHBREAK]"
-            "IMPORTANT FOR LINE BREAKS: For all single line breaks, you MUST use the exact tag [LINEBREAK]. For paragraph breaks (equivalent to a blank line), you MUST use the exact tag [PARAGRAPHBREAK]. Do NOT use literal newline characters like '\\n' in your output.[PARAGRAPHBREAK]"
-            "Answer with ONLY the Telegram message content, no extra conversational text or explanations."
-        )
+        # Randomly select a prompt template
+        kinos_prompt = random.choice(prompt_templates)
 
         url = f"https://api.kinos-engine.ai/v2/blueprints/{KINOS_BLUEPRINT_ID}/kins/{KINOS_KIN_ID}/channels/{KINOS_CHANNEL_ID}/messages"
         headers = {"Authorization": f"Bearer {KINOS_API_KEY}", "Content-Type": "application/json"}
