@@ -72,6 +72,7 @@ const ArrivalPage: React.FC = () => {
   const [currentUserProfile, setCurrentUserProfile] = useState<any | null>(null);
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [isSendingMessage, setIsSendingMessage] = useState<boolean>(false);
+  const [isAiInitiating, setIsAiInitiating] = useState<boolean>(false); // For AI's first message
   const [inputValue, setInputValue] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -179,10 +180,10 @@ const ArrivalPage: React.FC = () => {
 
 
   // Fonction pour charger les messages du chat
-  const fetchChatMessages = useCallback(async (humanUsername: string, aiUsername: string | undefined) => {
+  const fetchChatMessages = useCallback(async (humanUsername: string, aiUsername: string | undefined): Promise<Message[]> => {
     if (!aiUsername || humanUsername === DEFAULT_HUMAN_USERNAME) {
-      setChatMessages([]); // Pas de messages si l'IA n'est pas définie ou si l'utilisateur est un invité
-      return;
+      setChatMessages([]); 
+      return [];
     }
     const channelName = [humanUsername, aiUsername].sort().join('_');
     try {
@@ -191,15 +192,19 @@ const ArrivalPage: React.FC = () => {
         const data = await response.json();
         if (data.success && data.messages) {
           setChatMessages(data.messages);
+          return data.messages;
         } else {
           setChatMessages([]);
+          return [];
         }
       } else {
         setChatMessages([]);
+        return [];
       }
     } catch (error) {
       console.error("Erreur lors de la récupération des messages du chat:", error);
       setChatMessages([]);
+      return [];
     }
   }, []);
 
@@ -303,25 +308,146 @@ const ArrivalPage: React.FC = () => {
     fetchAllAIs();
   }, [fetchCitizen]); // fetchCitizen est stable grâce à useCallback
 
+  // Fonction pour que l'IA initie la conversation
+  const sendSystemInitiationMessage = useCallback(async (
+    aiProfile: AIProfile, 
+    humanProfile: any | null, 
+    step: ArrivalStep,
+    contextData: typeof contextualDataForChat
+  ) => {
+    if (!aiProfile || !humanProfile || humanProfile.username === DEFAULT_HUMAN_USERNAME) return;
+
+    setIsAiInitiating(true);
+    const aiName = aiProfile.firstName || aiProfile.username;
+    const userName = humanProfile?.firstName || humanProfile?.username || DEFAULT_HUMAN_USERNAME;
+
+    let systemMessageContent = "";
+    // Construire le message système basé sur l'étape
+    switch (step) {
+      case 'galley':
+        systemMessageContent = `[SYSTEM]You are ${aiName}, the captain of this galley, arriving in Venice. You are welcoming ${userName}, a new arrival. Your goal is to build a reliable clientele. Initiate the conversation by remarking on the crossing and trying to gauge their business intentions. For example: "Fine crossing, wouldn't you say? These waters have been good to me for twenty years..." then perhaps ask about their purpose in Venice or comment on their demeanor. Start the conversation now.[/SYSTEM]`;
+        break;
+      case 'customs':
+        systemMessageContent = `[SYSTEM]You are ${aiName}, a customs official in Venice, processing ${userName}'s arrival. Your goal is to build an information network. Start by formally welcoming them and inquiring about their purpose. For example: "Welcome to la Serenissima. Purpose of visit?" then perhaps offer a cautious observation about new merchants. Initiate the conversation now.[/SYSTEM]`;
+        break;
+      case 'home':
+        systemMessageContent = `[SYSTEM]You are ${aiName}, an established citizen, meeting ${userName}, a new arrival settling into lodging. Your goal is to find a promising protégé. Start by observing their arrival or sharing your experience. For example: "You made good time from the port. Most newcomers get lost..." then perhaps assess their patience or emphasize the importance of trust. Initiate the conversation now.[/SYSTEM]`;
+        break;
+      case 'inn':
+        systemMessageContent = `[SYSTEM]You are ${aiName}, at a local inn (perhaps the innkeeper), interacting with ${userName}, a new arrival. Your goal is to be a hub for information. Start by offering a welcoming remark or advice. For example: "First night in Venice? You'll want the corner room..." then perhaps highlight your access to information or share an anecdote. Initiate the conversation now.[/SYSTEM]`;
+        break;
+    }
+
+    const kinosInitiationPrompt = `You are ${aiName}, an AI citizen of Venice.
+The context for your current situation and your initial interaction with ${userName} is provided in the SYSTEM message below.
+Your task is to INITIATE the conversation with ${userName} based on the instructions and scenario described in the SYSTEM message.
+Your first message should be welcoming and engaging, aiming to achieve the goals outlined.
+
+CRITICAL: Use the structured context provided in the 'addSystem' field (your data package) to make your initial message RELEVANT and FOCUSED ON GAMEPLAY.
+
+--- SYSTEM MESSAGE (Your instructions for initiating this scene) ---
+${systemMessageContent}
+--- END OF SYSTEM MESSAGE ---
+
+Remember: Your first message should be human-like, conversational, follow the guidance in the SYSTEM message, be RELEVANT using your data package, and FOCUSED ON GAMEPLAY. NO FLUFF.
+Your first message to ${userName}:`;
+
+    const kinosBody: any = {
+      content: kinosInitiationPrompt,
+      model: getKinosModelForSocialClass(aiProfile.username, aiProfile.socialClass),
+    };
+
+    if (contextData && contextData.senderProfile && contextData.targetProfile && contextData.aiDataPackage) {
+      kinosBody.addSystem = JSON.stringify({
+        sender_citizen_profile: contextData.senderProfile, // Human user
+        ai_persona_profile: contextData.targetProfile,    // AI's basic profile
+        ai_comprehensive_data: contextData.aiDataPackage  // AI's full data package
+      });
+    }
+
+    try {
+      const kinosResponse = await fetch(
+        `${KINOS_API_CHANNEL_BASE_URL}/blueprints/${KINOS_CHANNEL_BLUEPRINT}/kins/${aiProfile.username}/channels/${[humanProfile.username, aiProfile.username].sort().join('_')}/messages`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(kinosBody),
+        }
+      );
+
+      if (kinosResponse.ok) {
+        const kinosData = await kinosResponse.json();
+        if (kinosData.content) {
+          const aiFirstMessage: Message = {
+            messageId: kinosData.message_id || kinosData.id || `kinos-init-msg-${Date.now()}`,
+            sender: aiProfile.username,
+            receiver: humanProfile.username,
+            content: kinosData.content,
+            type: 'message_ai_augmented',
+            createdAt: kinosData.timestamp || new Date().toISOString(),
+            role: 'assistant',
+          };
+          setChatMessages(prev => [...prev, aiFirstMessage]);
+
+          // Persist AI's first message to Airtable
+          await fetch('/api/messages/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sender: aiProfile.username,
+              receiver: humanProfile.username,
+              content: kinosData.content,
+              type: 'message_ai_augmented',
+              channel: [humanProfile.username, aiProfile.username].sort().join('_'),
+            }),
+          });
+        }
+      } else {
+        console.error("Erreur de l'API Kinos lors de l'initiation:", kinosResponse.status, await kinosResponse.text());
+        // Optionnel: afficher un message d'erreur ou un message de fallback de l'IA
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du message système d'initiation:", error);
+    } finally {
+      setIsAiInitiating(false);
+    }
+  }, [getKinosModelForSocialClass]); // Removed contextualDataForChat from deps, it's passed as arg
+
   // Charger les messages et le contexte lorsque l'IA actuelle ou l'utilisateur change
   useEffect(() => {
     const currentAI = getCurrentAI();
     if (currentAI && currentUserUsername !== DEFAULT_HUMAN_USERNAME) {
-      fetchChatMessages(currentUserUsername, currentAI.username);
-      fetchContextualInformation(currentAI, currentUserUsername);
+      setIsAiInitiating(true);
+      setChatMessages([]); // Clear messages from previous AI/step
+
+      fetchChatMessages(currentUserUsername, currentAI.username)
+        .then(existingMessages => {
+          // Pass contextualDataForChat to sendSystemInitiationMessage
+          fetchContextualInformation(currentAI, currentUserUsername)
+            .then(() => { // Context is now ready, access it via state
+              if (existingMessages.length === 0) {
+                sendSystemInitiationMessage(currentAI, currentUserProfile, currentStep, contextualDataForChat)
+                  .finally(() => setIsAiInitiating(false));
+              } else {
+                setIsAiInitiating(false);
+              }
+            }).catch(() => setIsAiInitiating(false));
+        }).catch(() => setIsAiInitiating(false));
     } else if (currentAI) { // AI est là, mais utilisateur est GuestUser
-        // Afficher le message placeholder de l'IA comme seul message
+        setIsAiInitiating(false);
         setChatMessages([{
             messageId: `placeholder-${currentAI.username}`,
             sender: currentAI.username,
             receiver: DEFAULT_HUMAN_USERNAME,
-            content: stepsConfig[currentStep].chatPlaceholder,
+            content: stepsConfig[currentStep].chatPlaceholder, // This is the AI's first line
             type: 'message',
             createdAt: new Date().toISOString(),
         }]);
         setContextualDataForChat(null); // Pas de contexte pour GuestUser
+    } else {
+      setIsAiInitiating(false);
     }
-  }, [currentStep, currentUserUsername, fetchChatMessages, fetchContextualInformation, getCurrentAI]);
+  }, [currentStep, currentUserUsername, getCurrentAI, fetchChatMessages, fetchContextualInformation, currentUserProfile, sendSystemInitiationMessage, contextualDataForChat]); // Added sendSystemInitiationMessage and contextualDataForChat
 
 
   // Scroll vers le bas lorsque de nouveaux messages sont ajoutés
@@ -635,6 +761,17 @@ ${commonPromptInstructions}`;
               </div>
             </div>
           ))}
+          {isAiInitiating && chatMessages.length === 0 && (
+            <div className="flex justify-start">
+              <div className="max-w-[80%] p-3 rounded-lg bg-stone-200 text-stone-800 rounded-bl-none">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
           {isSendingMessage && chatMessages[chatMessages.length-1]?.sender === currentUserUsername && (
              <div className="flex justify-start">
                 <div className="max-w-[80%] p-3 rounded-lg bg-stone-200 text-stone-800 rounded-bl-none">
