@@ -2,7 +2,7 @@ import json
 import uuid
 import logging
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional, List # Added List here
+from typing import Dict, Any, Optional, List, Union # Added Union
 from backend.engine.utils.activity_helpers import (
     _escape_airtable_value, 
     VENICE_TIMEZONE,
@@ -23,7 +23,7 @@ def try_create(
     now_utc_dt_param: datetime, # Added - renamed to avoid conflict with internal now_utc
     transport_api_url: str, # Added
     api_base_url: str # Added
-) -> Optional[List[Dict[str, Any]]]: # Return type changed to Optional[List[Dict]]
+) -> Union[List[Dict[str, Any]], Dict[str, Any]]: # Return type changed to allow error dict
     """
     Create the complete manage_import_contract activity chain at once:
     1. A goto_location activity for travel to the buyer's building (to assess needs)
@@ -44,8 +44,9 @@ def try_create(
     # Validate required parameters
     if not (resource_type and price_per_resource is not None and target_amount is not None and
             target_office_building_id):
-        log.error(f"Missing required details for manage_import_contract: resourceType, pricePerResource, targetAmount, or targetOfficeBuildingId")
-        return None # Changed to None
+        err_msg = "Missing required details for manage_import_contract: resourceType, pricePerResource, targetAmount, or targetOfficeBuildingId"
+        log.error(err_msg)
+        return {"success": False, "message": err_msg, "reason": "missing_contract_details"}
 
     citizen = citizen_record['fields'].get('Username')
     # Use the passed now_venice_dt for timestamp consistency
@@ -55,16 +56,18 @@ def try_create(
     office_building_record = get_building_record(tables, target_office_building_id)
     
     if not office_building_record:
-        log.error(f"Could not find building record for {target_office_building_id}")
-        return None # Changed to None
+        err_msg = f"Could not find office building record for {target_office_building_id}"
+        log.error(err_msg)
+        return {"success": False, "message": err_msg, "reason": "office_building_not_found"}
     
     # Get buyer building record if specified
     buyer_building_record = None
     if buyer_building_id:
         buyer_building_record = get_building_record(tables, buyer_building_id)
         if not buyer_building_record:
-            log.error(f"Could not find building record for buyer building {buyer_building_id}")
-            return None # Changed to None
+            err_msg = f"Could not find building record for buyer building {buyer_building_id}"
+            log.error(err_msg)
+            return {"success": False, "message": err_msg, "reason": "buyer_building_not_found"}
     
     # Get current citizen position to determine first path
     citizen_position_str = citizen_record['fields'].get('Position')
@@ -73,8 +76,9 @@ def try_create(
         try:
             current_position = json.loads(citizen_position_str)
         except json.JSONDecodeError:
-            log.error(f"Could not parse citizen position: {citizen_position_str}")
-            return None # Changed to None
+            err_msg = f"Could not parse citizen position: {citizen_position_str}"
+            log.error(err_msg)
+            return {"success": False, "message": err_msg, "reason": "invalid_citizen_position"}
     
     # Determine if we need to go to buyer building first or if citizen is already there
     citizen_at_buyer_building = False
@@ -98,8 +102,9 @@ def try_create(
     # Pass api_base_url to find_path_between_buildings
     path_to_office = find_path_between_buildings(None, office_building_record, api_base_url, current_position=current_position)
     if not path_to_office or not path_to_office.get('path'):
-        log.error(f"Could not find path to office building {target_office_building_id}")
-        return None # Changed to None
+        err_msg = f"Could not find path to office building {target_office_building_id}"
+        log.error(err_msg)
+        return {"success": False, "message": err_msg, "reason": "path_to_office_failed"}
     
     # Set start times
     assess_start_date = now_utc.isoformat() # This is effectively CreatedAt for the chain
@@ -181,8 +186,9 @@ def try_create(
             log.info(f"  {idx}. {activity['Type']} activity {activity['ActivityId']}")
         return activities_to_create # Return the list of payloads
     except Exception as e:
-        log.error(f"Failed to create manage_import_contract activity chain: {e}")
-        return None # Changed to None
+        err_msg = f"Failed to create manage_import_contract activity chain in Airtable: {e}"
+        log.error(err_msg)
+        return {"success": False, "message": err_msg, "reason": "airtable_chain_creation_error"}
 
 def _get_building_position(building_record):
     """Extract position from building record."""
