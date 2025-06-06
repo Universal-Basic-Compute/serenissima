@@ -1133,7 +1133,8 @@ def autonomously_run_ai_citizen(
     ai_citizen_record: Dict,
     dry_run: bool = False,
     kinos_model_override: Optional[str] = None,
-    user_message: Optional[str] = None # New parameter
+    user_message: Optional[str] = None, # New parameter
+    add_system_prompt_text: Optional[str] = None # New parameter for system prompt addition
 ):
     """Manages the 3-step autonomous run for a single AI citizen."""
     ai_username = ai_citizen_record["fields"].get("Username")
@@ -1170,6 +1171,9 @@ def autonomously_run_ai_citizen(
         "Respond with your directive in JSON format: `{\"endpoint\": \"/api/your/choice\", \"params\": {\"paramName\": \"value\"}}` or `{\"endpoint\": \"/api/your/choice\"}` if no specific inquiry. "
         "Select a channel that offers a comprehensive overview or addresses an immediate concern."
     )
+    if add_system_prompt_text:
+        prompt_step1 += f"\n\nIMPORTANT SYSTEM NOTE: {add_system_prompt_text}"
+
     add_system_step1 = {
         "available_missives_summary": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
         "city_records_structure": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
@@ -1228,6 +1232,9 @@ def autonomously_run_ai_citizen(
         "If no actions are warranted at this time, return `{\"strategy_summary\": \"Observation...\", \"actions\": []}`. "
         "Prioritize using `/api/activities/try-create` for initiating endeavors."
     )
+    if add_system_prompt_text:
+        prompt_step2 += f"\n\nIMPORTANT SYSTEM NOTE: {add_system_prompt_text}"
+
     add_system_step2 = {
         "available_missives_summary": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
         "city_records_structure": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
@@ -1300,6 +1307,9 @@ def autonomously_run_ai_citizen(
         f"{prompt_step3_context_mention_guided}. What wisdom have you gained? What are your key observations or intentions for your next period of independent endeavor? "
         "Respond with a concise summary for your records (max 3-4 sentences)."
     )
+    if add_system_prompt_text:
+        prompt_step3 += f"\n\nIMPORTANT SYSTEM NOTE: {add_system_prompt_text}"
+
     add_system_step3 = {
         "available_missives_summary": CONCISE_API_ENDPOINT_LIST_FOR_GUIDED_MODE,
         "city_records_structure": CONCISE_AIRTABLE_SCHEMA_FIELD_LIST,
@@ -1353,7 +1363,8 @@ def autonomously_run_ai_citizen_unguided(
     ai_citizen_record: Dict,
     dry_run: bool = False,
     kinos_model_override: Optional[str] = None,
-    user_message: Optional[str] = None # New parameter
+    user_message: Optional[str] = None, # New parameter
+    add_system_prompt_text: Optional[str] = None # New parameter for system prompt addition
 ):
     """Manages the unguided autonomous run for a single AI citizen."""
     ai_username = ai_citizen_record["fields"].get("Username")
@@ -1422,6 +1433,8 @@ def autonomously_run_ai_citizen_unguided(
              current_prompt += f"Considering the outcomes of your prior actions and your current intelligence, what is your next decree or inquiry? "
         current_prompt += prompt_action_guidance
 
+        if add_system_prompt_text:
+            current_prompt += f"\n\nIMPORTANT SYSTEM NOTE: {add_system_prompt_text}"
 
         add_system_data = {
             "intelligence_briefing": initial_data_package.get("data") if initial_data_package and initial_data_package.get("success") else initial_data_package,
@@ -1727,7 +1740,8 @@ def process_all_ai_autonomously(
     kinos_model_override: Optional[str] = None,
     unguided_mode: bool = False,
     user_message: Optional[str] = None,
-    social_classes_cli_args: Optional[List[str]] = None
+    social_classes_cli_args: Optional[List[str]] = None,
+    add_system_prompt_text: Optional[str] = None # New parameter
 ):
     """Main function to process autonomous runs for AI citizens."""
     run_mode = "DRY RUN" if dry_run else "LIVE RUN"
@@ -1760,9 +1774,9 @@ def process_all_ai_autonomously(
         ai_citizen_record = ai_citizens_to_process[0]
         start_time_citizen = time.time()
         if unguided_mode:
-            autonomously_run_ai_citizen_unguided(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message)
+            autonomously_run_ai_citizen_unguided(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message, add_system_prompt_text)
         else:
-            autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message)
+            autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message, add_system_prompt_text)
         end_time_citizen = time.time()
         log.info(f"{LogColors.OKBLUE}Time taken for {ai_citizen_record['fields'].get('Username', 'Unknown AI')}: {end_time_citizen - start_time_citizen:.2f} seconds.{LogColors.ENDC}")
         log_header(f"Autonomous AI Process Finished for {specific_citizen_username}.", color_code=Fore.CYAN if colorama_available else '')
@@ -1802,9 +1816,9 @@ def process_all_ai_autonomously(
         for ai_citizen_record in ai_citizens_to_process:
             start_time_citizen = time.time()
             if unguided_mode:
-                autonomously_run_ai_citizen_unguided(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message)
+                autonomously_run_ai_citizen_unguided(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message, add_system_prompt_text)
             else: # Should ideally not be reached in infinite loop mode without unguided, but for safety:
-                autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message)
+                autonomously_run_ai_citizen(tables, kinos_api_key, ai_citizen_record, dry_run, kinos_model_override, user_message, add_system_prompt_text)
             
             end_time_citizen = time.time()
             log.info(f"{LogColors.OKBLUE}Time taken for {ai_citizen_record['fields'].get('Username', 'Unknown AI')}: {end_time_citizen - start_time_citizen:.2f} seconds.{LogColors.ENDC}")
@@ -1877,6 +1891,11 @@ if __name__ == "__main__":
         type=str,
         help="An additional message to include in the context for the AI's first Kinos call."
     )
+    parser.add_argument(
+        "--addSystem",
+        type=str,
+        help="Text to append to the end of the system prompt for Kinos calls."
+    )
     # Arguments for social class filtering
     parser.add_argument("--nobili", action="store_true", help="Include Nobili class AI citizens.")
     parser.add_argument("--cittadini", action="store_true", help="Include Cittadini class AI citizens.")
@@ -1915,5 +1934,6 @@ if __name__ == "__main__":
         kinos_model_override=kinos_model_to_use,
         unguided_mode=run_unguided_mode,
         user_message=args.addMessage, # Pass the new message
-        social_classes_cli_args=social_classes_from_args if social_classes_from_args else None
+        social_classes_cli_args=social_classes_from_args if social_classes_from_args else None,
+        add_system_prompt_text=args.addSystem # Pass the new system prompt text
     )
