@@ -1267,6 +1267,9 @@ def create_activity_record(
     
     # Add CreatedAt timestamp
     payload["CreatedAt"] = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
+    # UpdatedAt is handled by Airtable, remove if present
+    if "UpdatedAt" in payload:
+        del payload["UpdatedAt"]
 
     try:
         # Check if an activity with this ActivityId already exists

@@ -133,7 +133,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
             "Title": f"Travel to {target_office_record['fields'].get('Name', target_office_building_id)}",
             "Description": f"{citizen_username} is traveling to {target_office_record['fields'].get('Name', target_office_building_id)} to make an offer for land {land_id}.",
             "Thought": f"I need to go to the {target_office_record['fields'].get('Type', 'office')} to make my offer for land {land_id}.",
-            "CreatedAt": now_utc_dt.isoformat(), "UpdatedAt": now_utc_dt.isoformat()
+            "CreatedAt": now_utc_dt.isoformat() # Removed UpdatedAt
         }
         activities_created.append(goto_activity)
         log.info(f"{LogColors.OKCYAN}Created goto_location activity {goto_activity_id} for {citizen_username} to {target_office_building_id}. Duration: {travel_duration_minutes} mins.{LogColors.ENDC}")
@@ -162,7 +162,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         "Title": f"Make Offer for Land {land_id}",
         "Description": f"{citizen_username} is finalizing an offer of {offer_price} ducats for land {land_id} at {target_office_record['fields'].get('Name', target_office_building_id)}.",
         "Thought": f"I hope my offer of {offer_price} ducats for land {land_id} is considered.",
-        "CreatedAt": now_utc_dt.isoformat(), "UpdatedAt": now_utc_dt.isoformat()
+        "CreatedAt": now_utc_dt.isoformat() # Removed UpdatedAt
     }
     activities_created.append(finalize_activity)
     log.info(f"{LogColors.OKCYAN}Created finalize_make_offer_for_land activity {finalize_activity_id} for {citizen_username}. Starts at {finalize_start_time_utc.isoformat()}.{LogColors.ENDC}")

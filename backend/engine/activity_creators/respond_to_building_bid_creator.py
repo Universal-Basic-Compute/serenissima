@@ -115,7 +115,7 @@ def try_create(
             "Title": f"Travel to {target_office_record['fields'].get('Name', target_office_building_id)}",
             "Description": f"{citizen_username} is traveling to respond to bid {building_bid_contract_id}.",
             "Thought": f"I must go to the {target_office_record['fields'].get('Type', 'office')} to respond to the offer on my building.",
-            "CreatedAt": now_utc_dt.isoformat(), "UpdatedAt": now_utc_dt.isoformat()
+            "CreatedAt": now_utc_dt.isoformat() # Removed UpdatedAt
         }
         activities_created.append(goto_activity)
         log.info(f"{LogColors.ACTIVITY}Created goto_location activity {goto_activity_id} for {citizen_username}. Duration: {travel_duration_minutes} mins.{LogColors.ENDC}")
@@ -142,7 +142,7 @@ def try_create(
         "Title": f"Respond to Building Bid {building_bid_contract_id}",
         "Description": f"{citizen_username} is finalizing response ({response_action}) to bid {building_bid_contract_id}.",
         "Thought": f"Time to make my decision on this building offer: {response_action}.",
-        "CreatedAt": now_utc_dt.isoformat(), "UpdatedAt": now_utc_dt.isoformat()
+        "CreatedAt": now_utc_dt.isoformat() # Removed UpdatedAt
     }
     activities_created.append(finalize_activity)
     log.info(f"{LogColors.ACTIVITY}Created execute_respond_to_building_bid activity {finalize_activity_id} for {citizen_username}. Starts at {finalize_start_time_utc.isoformat()}.{LogColors.ENDC}")
