@@ -77,12 +77,9 @@ const ArrivalPage: React.FC = () => {
 
   // Contexte pour Kinos, similaire à Compagno
   const [contextualDataForChat, setContextualDataForChat] = useState<{
-    senderProfile: any | null;
-    targetProfile: AIProfile | null;
-    relationship: any | null;
-    targetNotifications: any[] | null;
-    relevancies: any[] | null;
-    problems: any[] | null;
+    senderProfile: any | null; // Profil de l'utilisateur humain
+    targetProfile: AIProfile | null; // Profil de base de l'IA avec qui on chatte
+    aiDataPackage: any | null; // Paquet de données complet pour l'IA cible
   } | null>(null);
   const [isPreparingContext, setIsPreparingContext] = useState<boolean>(false);
 
@@ -152,56 +149,28 @@ const ArrivalPage: React.FC = () => {
     }
     setIsPreparingContext(true);
     try {
-      const senderProfile = currentUserProfile; // Déjà dans l'état
-      const targetProfile = targetAI; // L'IA actuelle
-
-      let relationship = null;
-      if (humanUsername !== targetAI.username) {
-        const relRes = await fetch(`/api/relationships?citizen1=${humanUsername}&citizen2=${targetAI.username}`);
-        const relData = relRes.ok ? await relRes.json() : null;
-        relationship = relData?.success ? relData.relationship : null;
-      } else { // Devrait pas arriver dans ce contexte, mais pour être complet
-        relationship = { strengthScore: 100, type: "Self" };
-      }
-
-      const determinedKinosModel = getKinosModelForSocialClass(targetAI.username, targetAI.socialClass);
-      const isLocalModel = determinedKinosModel === 'local';
-      const notificationLimit = isLocalModel ? 3 : 10;
-      const relevancyLimit = isLocalModel ? 3 : 10;
-      const problemLimit = isLocalModel ? 2 : 5;
-
-      const notifRes = await fetch(`/api/notifications`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ citizen: targetAI.username, limit: notificationLimit }),
-      });
-      const notifData = notifRes.ok ? await notifRes.json() : null;
-      const targetNotifications = notifData?.success ? notifData.notifications : [];
-
-      const relevanciesRes = await fetch(`/api/relevancies?relevantToCitizen=${targetAI.username}&targetCitizen=${humanUsername}&limit=${relevancyLimit}`);
-      const relevanciesData = relevanciesRes.ok ? await relevanciesRes.json() : null;
-      const relevancies = relevanciesData?.success ? relevanciesData.relevancies : [];
-
-      let problems: any[] = [];
-      // Fetch problems for targetAI
-      const problemsTargetRes = await fetch(`/api/problems?citizen=${targetAI.username}&status=active&limit=${problemLimit}`);
-      const problemsTargetData = problemsTargetRes.ok ? await problemsTargetRes.json() : null;
-      if (problemsTargetData?.success && problemsTargetData.problems) {
-        problems.push(...problemsTargetData.problems);
-      }
-      // Fetch problems for human user
-      const problemsSenderRes = await fetch(`/api/problems?citizen=${humanUsername}&status=active&limit=${problemLimit}`);
-      const problemsSenderData = problemsSenderRes.ok ? await problemsSenderRes.json() : null;
-       if (problemsSenderData?.success && problemsSenderData.problems) {
-        problemsSenderData.problems.forEach((p: any) => {
-          if (!problems.find(existing => existing.problemId === p.problemId)) {
-            problems.push(p);
-          }
-        });
+      const senderProfile = currentUserProfile; // Profil de l'utilisateur humain
+      const aiDataPackageResponse = await fetch(`/api/get-data-package?citizenUsername=${targetAI.username}`);
+      
+      let aiDataPackage = null;
+      if (aiDataPackageResponse.ok) {
+        const packageData = await aiDataPackageResponse.json();
+        if (packageData.success) {
+          aiDataPackage = packageData.data;
+        } else {
+          console.error(`Échec de la récupération du data package pour ${targetAI.username}:`, packageData.error);
+        }
+      } else {
+        console.error(`Erreur HTTP lors de la récupération du data package pour ${targetAI.username}: ${aiDataPackageResponse.status}`);
       }
       
-      setContextualDataForChat({ senderProfile, targetProfile, relationship, targetNotifications, relevancies, problems });
+      setContextualDataForChat({ 
+        senderProfile, 
+        targetProfile: targetAI, // Profil de base de l'IA
+        aiDataPackage // Paquet de données complet
+      });
     } catch (error) {
-      console.error("Erreur lors de la récupération des données contextuelles:", error);
+      console.error("Erreur lors de la récupération des données contextuelles pour Kinos:", error);
       setContextualDataForChat(null);
     } finally {
       setIsPreparingContext(false);
@@ -409,33 +378,32 @@ CRITICAL: Use the structured context provided in the 'addSystem' field (detailed
 Reflect your understanding of your relationship, recent events, and potential gameplay interactions with ${currentUserProfile?.firstName || currentUserUsername}.
 
 Guide to 'addSystem' content (use this to make your message relevant and gameplay-focused):
-- 'ai_citizen_profile': Your own detailed profile (status, wealth, etc.).
-- 'sender_citizen_profile': The profile of ${currentUserProfile?.firstName || currentUserUsername}.
-- 'relationship_with_sender': Your existing relationship status with ${currentUserProfile?.firstName || currentUserUsername}.
-- 'recent_notifications_for_ai': Recent news/events you've received that might be relevant to your conversation.
-- 'recent_relevancies_ai_to_sender': Why ${currentUserProfile?.firstName || currentUserUsername} (or things related to them) are specifically relevant to you. This is key for a relevant response!
-- 'recent_problems_involving_ai_or_sender': Recent issues involving you or ${currentUserProfile?.firstName || currentUserUsername} that could be part of your discussion.
+- 'sender_citizen_profile': The profile of the human user you are talking to (${currentUserProfile?.firstName || currentUserUsername}).
+- 'ai_persona_profile': Your basic profile information (who you are: ${currentAI.firstName || currentAI.username}).
+- 'ai_comprehensive_data': Your complete and detailed data package. 
+  - Use 'ai_comprehensive_data.citizen' for your full, up-to-date profile (status, wealth, etc.).
+  - Use other parts of 'ai_comprehensive_data' (like 'ownedLands', 'activeContracts', 'recentProblems', 'strongestRelationships', 'ownedBuildings', 'guildDetails', 'citizenLoans') to understand your current situation, involvements, and relationships. This is key for a relevant and gameplay-focused response!
 
 --- USER'S MESSAGE TO YOU ---
 ${messageContent}
 --- END OF USER'S MESSAGE ---
 
-Remember: Your reply should be human-like, conversational, RELEVANT to ${currentUserProfile?.firstName || currentUserUsername} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
+Remember: Your reply should be human-like, conversational, RELEVANT to ${currentUserProfile?.firstName || currentUserUsername} using the context from 'ai_comprehensive_data', and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
 Your response:`;
       
       const kinosBody: any = {
         content: kinosPromptContent,
         model: getKinosModelForSocialClass(currentAI.username, currentAI.socialClass),
       };
-      if (contextualDataForChat) {
+
+      if (contextualDataForChat && contextualDataForChat.senderProfile && contextualDataForChat.targetProfile && contextualDataForChat.aiDataPackage) {
         kinosBody.addSystem = JSON.stringify({
-            ai_citizen_profile: contextualDataForChat.targetProfile,
             sender_citizen_profile: contextualDataForChat.senderProfile,
-            relationship_with_sender: contextualDataForChat.relationship,
-            recent_notifications_for_ai: contextualDataForChat.targetNotifications,
-            recent_relevancies_ai_to_sender: contextualDataForChat.relevancies,
-            recent_problems_involving_ai_or_sender: contextualDataForChat.problems
+            ai_persona_profile: contextualDataForChat.targetProfile, // Basic profile of the AI
+            ai_comprehensive_data: contextualDataForChat.aiDataPackage // Full data package for the AI
         });
+      } else {
+        console.warn("Données contextuelles incomplètes pour Kinos, envoi du prompt sans addSystem.", contextualDataForChat);
       }
       
       const kinosResponse = await fetch(

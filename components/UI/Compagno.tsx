@@ -88,12 +88,9 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
   // State for contextual data for Kinos addSystem
   const [contextualDataForChat, setContextualDataForChat] = useState<{
-    senderProfile: any | null;
-    targetProfile: any | null;
-    relationship: any | null;
-    targetNotifications: any[] | null;
-    relevancies: any[] | null;
-    problems: any[] | null;
+    senderProfile: any | null; // Profil de l'utilisateur humain
+    targetProfile: any | null; // Profil de base de l'IA avec qui on chatte (peut être l'utilisateur lui-même)
+    aiDataPackage: any | null; // Paquet de données complet pour l'IA cible (ou l'utilisateur lui-même)
   } | null>(null);
   // const [kinosModel, setKinosModel] = useState<'gemini-2.5-pro-preview-05-06' | 'local'>('gemini-2.5-pro-preview-05-06'); // Removed: Model is now dynamic
 
@@ -642,16 +639,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         // This applies to self-chat (selectedCitizen === username) and chat with others.
         if (selectedCitizen && username) {
           let addSystemPayload = null;
-          if (contextualDataForChat) {
-            const systemContext = {
-              ai_citizen_profile: contextualDataForChat.targetProfile, // For self-chat, this is user's profile
-              sender_citizen_profile: contextualDataForChat.senderProfile, // For self-chat, this is user's profile
-              relationship_with_sender: contextualDataForChat.relationship, // For self-chat, this is "Self"
-              recent_notifications_for_ai: contextualDataForChat.targetNotifications,
-              recent_relevancies_ai_to_sender: contextualDataForChat.relevancies,
-              recent_problems_involving_ai_or_sender: contextualDataForChat.problems
-            };
-            addSystemPayload = JSON.stringify(systemContext);
+          if (contextualDataForChat && contextualDataForChat.senderProfile && contextualDataForChat.targetProfile && contextualDataForChat.aiDataPackage) {
+            addSystemPayload = JSON.stringify({
+              sender_citizen_profile: contextualDataForChat.senderProfile,
+              ai_persona_profile: contextualDataForChat.targetProfile,
+              ai_comprehensive_data: contextualDataForChat.aiDataPackage
+            });
+          } else {
+            console.warn("[Compagno] Données contextuelles incomplètes pour Kinos, envoi du prompt sans addSystem.", contextualDataForChat);
           }
 
           try {
@@ -687,22 +682,21 @@ CRITICAL: Use the structured context provided in the 'addSystem' field (detailed
 Reflect your understanding of your relationship, recent events, and potential gameplay interactions with ${senderDisplayName}.
 
 Guide to 'addSystem' content (use this to make your message relevant and gameplay-focused):
-- 'ai_citizen_profile': Your own detailed profile (status, wealth, etc.).
-- 'sender_citizen_profile': The profile of ${senderDisplayName}.
-- 'relationship_with_sender': Your existing relationship status with ${senderDisplayName}.
-- 'recent_notifications_for_ai': Recent news/events you've received that might be relevant to your conversation.
-- 'recent_relevancies_ai_to_sender': Why ${senderDisplayName} (or things related to them) are specifically relevant to you. This is key for a relevant response!
-- 'recent_problems_involving_ai_or_sender': Recent issues involving you or ${senderDisplayName} that could be part of your discussion.
+- 'sender_citizen_profile': The profile of the human user you are talking to (${senderDisplayName}).
+- 'ai_persona_profile': Your basic profile information (who you are: ${aiDisplayName}).
+- 'ai_comprehensive_data': Your complete and detailed data package.
+  - Use 'ai_comprehensive_data.citizen' for your full, up-to-date profile (status, wealth, etc.).
+  - Use other parts of 'ai_comprehensive_data' (like 'ownedLands', 'activeContracts', 'recentProblems', 'strongestRelationships', 'ownedBuildings', 'guildDetails', 'citizenLoans') to understand your current situation, involvements, and relationships. This is key for a relevant and gameplay-focused response!
 
 --- USER'S MESSAGE TO YOU ---
 ${content}
 --- END OF USER'S MESSAGE ---
 
-Remember: Your reply should be human-like, conversational, RELEVANT to ${senderDisplayName} using the context, and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
+Remember: Your reply should be human-like, conversational, RELEVANT to ${senderDisplayName} using the context from 'ai_comprehensive_data', and FOCUSED ON GAMEPLAY. NO FLUFF. Aim for a natural and pertinent response.
 Your response:`;
             }
             
-            const targetUsernameForModel = contextualDataForChat?.targetProfile?.username;
+            const targetUsernameForModel = contextualDataForChat?.targetProfile?.username; // Username de l'IA
             const targetSocialClass = contextualDataForChat?.targetProfile?.socialClass;
             const determinedKinosModel = getKinosModelForSocialClass(targetUsernameForModel, targetSocialClass);
 
@@ -1054,72 +1048,30 @@ Your response:`;
         // Fetch target profile
         const targetProfileRes = await fetch(`/api/citizens/${targetUsername}`);
         const targetProfileData = targetProfileRes.ok ? await targetProfileRes.json() : null;
-        const targetProfile = targetProfileData?.success ? targetProfileData.citizen : null;
+        const targetProfileObject = targetProfileData?.success ? targetProfileData.citizen : null;
 
-        // Fetch relationship
-        let relationship = null;
-        if (currentUsername !== targetUsername) {
-          const relRes = await fetch(`/api/relationships?citizen1=${currentUsername}&citizen2=${targetUsername}`);
-          const relData = relRes.ok ? await relRes.json() : null;
-          relationship = relData?.success ? relData.relationship : null;
-        } else {
-          relationship = { strengthScore: 100, type: "Self" };
-        }
-
-        // Determine context limit based on the target citizen's social class
-        const targetSocialClass = targetProfile?.socialClass;
-        const determinedKinosModel = getKinosModelForSocialClass(targetSocialClass);
-        const isLocalModel = determinedKinosModel === 'local';
-
-        const notificationLimit = isLocalModel ? Math.ceil(10 / 4) : 10; // Default 10, local 3
-        const relevancyLimit = isLocalModel ? Math.ceil(10 / 4) : 10;    // Default 10, local 3
-        const problemLimit = isLocalModel ? Math.ceil(5 / 4) : 5;        // Default 5,  local 2
-
-        // Fetch target notifications
-        const notifRes = await fetch(`/api/notifications`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ citizen: targetUsername, limit: notificationLimit }), 
-        });
-        const notifData = notifRes.ok ? await notifRes.json() : null;
-        const targetNotifications = notifData?.success ? notifData.notifications : [];
-        
-        // Fetch relevancies (target is relevantTo, sender is targetCitizen)
-        const relevanciesRes = await fetch(`/api/relevancies?relevantToCitizen=${targetUsername}&targetCitizen=${currentUsername}&limit=${relevancyLimit}`);
-        const relevanciesData = relevanciesRes.ok ? await relevanciesRes.json() : null;
-        const relevancies = relevanciesData?.success ? relevanciesData.relevancies : [];
-
-        // Fetch problems for target and sender
-        let problems = [];
-        const problemsTargetRes = await fetch(`/api/problems?citizen=${targetUsername}&status=active&limit=${problemLimit}`);
-        const problemsTargetData = problemsTargetRes.ok ? await problemsTargetRes.json() : null;
-        if (problemsTargetData?.success && problemsTargetData.problems) {
-          problems.push(...problemsTargetData.problems);
-        }
-        if (currentUsername !== targetUsername) {
-          const problemsSenderRes = await fetch(`/api/problems?citizen=${currentUsername}&status=active&limit=${problemLimit}`);
-          const problemsSenderData = problemsSenderRes.ok ? await problemsSenderRes.json() : null;
-          if (problemsSenderData?.success && problemsSenderData.problems) {
-            // Avoid duplicates
-            problemsSenderData.problems.forEach(p => {
-              if (!problems.find(existing => existing.problemId === p.problemId)) {
-                problems.push(p);
-              }
-            });
+        // Fetch the full data package for the target AI/citizen
+        const aiDataPackageResponse = await fetch(`/api/get-data-package?citizenUsername=${targetUsername}`);
+        let aiDataPackage = null;
+        if (aiDataPackageResponse.ok) {
+          const packageData = await aiDataPackageResponse.json();
+          if (packageData.success) {
+            aiDataPackage = packageData.data;
+          } else {
+            console.error(`Échec de la récupération du data package pour ${targetUsername} dans Compagno:`, packageData.error);
           }
+        } else {
+          console.error(`Erreur HTTP lors de la récupération du data package pour ${targetUsername} dans Compagno: ${aiDataPackageResponse.status}`);
         }
         
         setContextualDataForChat({
           senderProfile,
-          targetProfile,
-          relationship,
-          targetNotifications,
-          relevancies,
-          problems,
+          targetProfile: targetProfileObject, // Profil de base de l'IA/citoyen cible
+          aiDataPackage, // Paquet de données complet
         });
 
       } catch (error) {
-        console.error("Error fetching contextual data for chat:", error);
+        console.error("Error fetching contextual data for Compagno chat:", error);
         setContextualDataForChat(null);
       } finally {
         setIsPreparingContext(false);
@@ -1887,12 +1839,17 @@ Your response:`;
                           Context Data for AI (Recap)
                         </summary>
                         <div className="p-3 bg-amber-50 rounded-b-md space-y-1">
-                          <p><strong>AI Citizen Profile (Target):</strong> {contextualDataForChat.targetProfile?.firstName || contextualDataForChat.targetProfile?.username || 'N/A'}</p>
                           <p><strong>Sender Citizen Profile:</strong> {contextualDataForChat.senderProfile?.firstName || contextualDataForChat.senderProfile?.username || 'N/A'}</p>
-                          <p><strong>Relationship with Sender:</strong> {contextualDataForChat.relationship?.type || 'N/A'} (Strength: {contextualDataForChat.relationship?.strengthScore ?? 'N/A'})</p>
-                          <p><strong>Recent Notifications for AI:</strong> {contextualDataForChat.targetNotifications?.length ?? 0} items</p>
-                          <p><strong>Recent Relevancies (AI to Sender):</strong> {contextualDataForChat.relevancies?.length ?? 0} items</p>
-                          <p><strong>Recent Problems (AI or Sender):</strong> {contextualDataForChat.problems?.length ?? 0} items</p>
+                          <p><strong>AI Persona Profile (Target):</strong> {contextualDataForChat.targetProfile?.firstName || contextualDataForChat.targetProfile?.username || 'N/A'}</p>
+                          <p><strong>AI Data Package Loaded:</strong> {contextualDataForChat.aiDataPackage ? 'Yes' : 'No'}</p>
+                          {contextualDataForChat.aiDataPackage && (
+                            <>
+                              <p> - Citizen in Package: {contextualDataForChat.aiDataPackage.citizen?.username || 'N/A'}</p>
+                              <p> - Owned Lands: {contextualDataForChat.aiDataPackage.ownedLands?.length ?? 0}</p>
+                              <p> - Owned Buildings: {contextualDataForChat.aiDataPackage.ownedBuildings?.length ?? 0}</p>
+                              <p> - Active Contracts: {contextualDataForChat.aiDataPackage.activeContracts?.length ?? 0}</p>
+                            </>
+                          )}
                           
                           <details className="mt-1 text-xs text-gray-500 border border-amber-100 rounded-sm">
                             <summary className="cursor-pointer p-1 font-medium text-amber-600 hover:bg-amber-100 rounded-t-sm">
