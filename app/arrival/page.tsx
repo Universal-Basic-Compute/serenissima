@@ -501,9 +501,9 @@ Your first message to ${userName}:`;
         fetchedMessagesForStep && fetchedMessagesForStep.length === 0 &&
         contextualDataForChat && !initiationDoneRef.current[keyForInitiation]) {
 
-      // Il est important de mettre isAiInitiating à true ici, car Effet 1 pourrait l'avoir mis à false
-      // si les données sont arrivées rapidement avant que cette condition ne soit vérifiée.
-      if (!isAiInitiating) setIsAiInitiating(true);
+      // Assurer que l'indicateur de chargement est actif avant l'appel asynchrone.
+      // Effet 1 devrait déjà l'avoir mis à true si le chargement des données était en cours.
+      setIsAiInitiating(true); 
       initiationDoneRef.current[keyForInitiation] = true;
 
       sendSystemInitiationMessage(currentAI, currentUserProfile, currentStep, contextualDataForChat)
@@ -516,13 +516,16 @@ Your first message to ${userName}:`;
       if (!initiationDoneRef.current[keyForInitiation]) {
         initiationDoneRef.current[keyForInitiation] = true;
       }
-      if (isAiInitiating) setIsAiInitiating(false); // Assurer que le chargement s'arrête
-    } else if (!currentAI || !currentAI.username || currentUserUsername === DEFAULT_HUMAN_USERNAME || !contextualDataForChat || !fetchedMessagesForStep) {
-      // Conditions non remplies pour l'initiation (ex: utilisateur invité, pas d'IA, pas de contexte, messages pas encore récupérés)
-      // ou l'initiation est déjà faite (vérifié par !initiationDoneRef.current[keyForInitiation] plus haut)
+      // Si isAiInitiating était true (par Effet 1), mais que nous n'initialisons pas ici (car messages existent), le mettre à false.
+      if (isAiInitiating) setIsAiInitiating(false);
+    } else if (!currentAI || !currentAI.username || currentUserUsername === DEFAULT_HUMAN_USERNAME || !contextualDataForChat || (fetchedMessagesForStep === null)) {
+      // Conditions non remplies pour l'initiation (ex: utilisateur invité, pas d'IA, pas de contexte, messages pas encore récupérés (null))
+      // ou l'initiation est déjà faite (vérifié par !initiationDoneRef.current[keyForInitiation] plus haut).
+      // Si fetchedMessagesForStep est un tableau vide, la condition principale aurait dû être vérifiée.
+      // Si isAiInitiating était true, le mettre à false.
       if (isAiInitiating) setIsAiInitiating(false);
     }
-  }, [fetchedMessagesForStep, contextualDataForChat, currentStep, currentUserUsername, getCurrentAI, sendSystemInitiationMessage, currentUserProfile, isAiInitiating]);
+  }, [fetchedMessagesForStep, contextualDataForChat, currentStep, currentUserUsername, getCurrentAI, sendSystemInitiationMessage, currentUserProfile]);
 
 
   // Scroll vers le bas lorsque de nouveaux messages sont ajoutés
