@@ -332,8 +332,9 @@ export async function POST(request: Request) {
     }
 
     if (isConnectionRefused) {
-        console.error('[API /activities/try-create] Detected ECONNREFUSED. Python engine is likely down or unreachable.');
-        return NextResponse.json({ success: false, error: 'Python engine service is unavailable (ECONNREFUSED).' }, { status: 503 });
+        const currentPythonBaseUrlForError = process.env.BACKEND_BASE_URL || 'http://localhost:10000'; // Re-fetch for logging
+        console.error(`[API /activities/try-create] Detected ECONNREFUSED. Python engine is likely down or unreachable at configured URL (derived from BACKEND_BASE_URL: '${currentPythonBaseUrlForError}').`);
+        return NextResponse.json({ success: false, error: `Python engine service is unavailable (ECONNREFUSED). Attempted to reach: ${currentPythonBaseUrlForError}` }, { status: 503 });
     }
     
     return NextResponse.json({ success: false, error: error.message || 'Failed to process try-create activity request' }, { status: 500 });

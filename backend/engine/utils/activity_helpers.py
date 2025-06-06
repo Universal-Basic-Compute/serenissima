@@ -211,7 +211,7 @@ def get_building_types_from_api(api_base_url: Optional[str] = None) -> Dict:
             log.error(f"{LogColors.FAIL}Unexpected API response format for building types: {data}{LogColors.ENDC}")
             return {}
     except requests.exceptions.RequestException as e_req:
-        log.error(f"{LogColors.FAIL}RequestException fetching building types from API: {e_req}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}RequestException fetching building types from API ({url}): {e_req}{LogColors.ENDC}")
         return {}
     except json.JSONDecodeError as e_json:
         log.error(f"{LogColors.FAIL}JSONDecodeError fetching building types from API: {e_json}{LogColors.ENDC}")
@@ -241,7 +241,7 @@ def get_resource_types_from_api(api_base_url: Optional[str] = None) -> Dict:
             log.error(f"{LogColors.FAIL}Unexpected API response format for resource types: {data}{LogColors.ENDC}")
             return {}
     except requests.exceptions.RequestException as e_req:
-        log.error(f"{LogColors.FAIL}RequestException fetching resource types from API: {e_req}{LogColors.ENDC}")
+        log.error(f"{LogColors.FAIL}RequestException fetching resource types from API ({url}): {e_req}{LogColors.ENDC}")
         return {}
     except json.JSONDecodeError as e_json:
         log.error(f"{LogColors.FAIL}JSONDecodeError fetching resource types from API: {e_json}{LogColors.ENDC}")
