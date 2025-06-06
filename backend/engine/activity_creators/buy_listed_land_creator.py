@@ -159,7 +159,7 @@ def try_create(tables: dict, citizen_record: dict, activity_type: str, activity_
         "Title": f"Buy Listed Land {land_id}",
         "Description": f"{citizen_username} is finalizing the purchase of land {land_id} from listing {listing_contract_id} for {price} ducats at {target_office_record['fields'].get('Name', target_office_building_id)}.",
         "Thought": f"This land {land_id} is listed at a good price. Time to buy it.",
-        "CreatedAt": now_utc_dt.isoformat(), "UpdatedAt": now_utc_dt.isoformat()
+        "CreatedAt": now_utc_dt.isoformat() # Removed UpdatedAt
     }
     activities_created.append(execute_activity)
     log.info(f"{LogColors.ACTIVITY}Created execute_buy_listed_land activity {execute_activity_id} for {citizen_username}. Starts at {execute_start_time_utc.isoformat()}.{LogColors.ENDC}")
