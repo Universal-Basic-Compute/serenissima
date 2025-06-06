@@ -166,15 +166,21 @@ const ArrivalPage: React.FC = () => {
         console.error(`Erreur HTTP lors de la récupération du data package pour ${targetAI.username}: ${aiDataPackageResponse.status}`);
       }
       
-      newContextData = { 
-        senderProfile, 
+      newContextData = {
+        senderProfile,
         targetProfile: targetAI, // Profil de base de l'IA
         aiDataPackage // Paquet de données complet
       };
-      setContextualDataForChat(newContextData);
+      // Only update state if new data is different to prevent potential loops if object references change but content doesn't
+      // This is a shallow comparison, for deep comparison a library or custom function would be needed
+      if (JSON.stringify(newContextData) !== JSON.stringify(contextualDataForChat)) {
+        setContextualDataForChat(newContextData);
+      }
     } catch (error) {
       console.error("Erreur lors de la récupération des données contextuelles pour Kinos:", error);
-      setContextualDataForChat(null);
+      if (contextualDataForChat !== null) { // Only set to null if it's not already null
+        setContextualDataForChat(null);
+      }
       newContextData = null;
     } finally {
       setIsPreparingContext(false);
