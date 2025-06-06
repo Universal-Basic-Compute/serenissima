@@ -1924,7 +1924,9 @@ def dispatch_specific_activity_request(
                          activity_payload['Status'] = 'created'
                     if 'CreatedAt' not in activity_payload:
                          activity_payload['CreatedAt'] = now_utc_dt.isoformat()
-                    # UpdatedAt is handled by Airtable
+                    # UpdatedAt is handled by Airtable, remove if present
+                    if 'UpdatedAt' in activity_payload:
+                        del activity_payload['UpdatedAt']
 
                     created_record = tables['activities'].create(activity_payload)
                     created_airtable_records.append(created_record)
