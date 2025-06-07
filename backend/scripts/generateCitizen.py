@@ -398,29 +398,6 @@ def _get_random_venice_position() -> Optional[Dict[str, float]]:
     except Exception as e:
         log.error(f"Error getting random Venice position: {e}")
         return None
-    
-    add_message_file_content = None
-    if args.addMessageFile:
-        try:
-            with open(args.addMessageFile, 'r', encoding='utf-8') as f:
-                add_message_file_content = f.read()
-            log.info(f"Successfully read content from {args.addMessageFile}")
-        except FileNotFoundError:
-            log.error(f"Error: File not found at {args.addMessageFile}")
-            # Decide if you want to exit or continue without this message
-            # For now, it will continue with add_message_file_content as None
-        except Exception as e:
-            log.error(f"Error reading file {args.addMessageFile}: {e}")
-
-    citizens = generate_citizen_batch(social_classes, args.add_prompt, args.addMessage, add_message_file_content)
-    
-    if args.output:
-        with open(args.output, 'w') as f:
-            json.dump(citizens, f, indent=2)
-        log.info(f"Saved {len(citizens)} citizens to {args.output}")
-    else:
-        # If not saving to file, print to console
-        print(json.dumps(citizens, indent=2))
 
     # If not a dry run, save to Airtable and update description/image
     if not args.dry_run and citizens:
