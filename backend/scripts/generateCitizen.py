@@ -76,13 +76,14 @@ def username_exists(tables, username: str) -> bool:
         # If there's an error, assume it might exist to be safe
         return True
 
-def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = None, add_message: Optional[str] = None) -> Optional[Dict[str, Any]]:
+def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = None, add_message: Optional[str] = None, add_message_file_content: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """Generate a new citizen using Kinos Engine API.
     
     Args:
         social_class: Requested social class.
         additional_prompt_text: Optional text to append to the Kinos API prompt (from --add-prompt).
         add_message: Optional text to append to the Kinos API prompt (from --addMessage).
+        add_message_file_content: Optional text from a file to append to the Kinos API prompt (from --addMessageFile).
         
     Returns:
         A dictionary containing the citizen data, or None if generation failed
@@ -109,6 +110,9 @@ def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = 
         
         if add_message:
             prompt += f"\n\n{add_message}"
+        
+        if add_message_file_content:
+            prompt += f"\n\n{add_message_file_content}"
             
         # Call Kinos Engine API
         response = requests.post(
@@ -249,13 +253,14 @@ def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = 
         log.error(f"Error generating citizen: {e}")
         return None
 
-def generate_citizen_batch(social_classes: Dict[str, int], additional_prompt_text: Optional[str] = None, add_message: Optional[str] = None) -> list:
+def generate_citizen_batch(social_classes: Dict[str, int], additional_prompt_text: Optional[str] = None, add_message: Optional[str] = None, add_message_file_content: Optional[str] = None) -> list:
     """Generate a batch of citizens based on specified social class distribution.
     
     Args:
         social_classes: Dictionary mapping social class names to counts.
         additional_prompt_text: Optional text to append to the Kinos API prompt for each citizen (from --add-prompt).
         add_message: Optional text to append to the Kinos API prompt for each citizen (from --addMessage).
+        add_message_file_content: Optional text from a file to append to the Kinos API prompt for each citizen (from --addMessageFile).
         
     Returns:
         List of generated citizen dictionaries
@@ -266,7 +271,7 @@ def generate_citizen_batch(social_classes: Dict[str, int], additional_prompt_tex
         log.info(f"Generating {count} citizens of class {social_class}")
         
         for i in range(count):
-            citizen = generate_citizen(social_class, additional_prompt_text, add_message)
+            citizen = generate_citizen(social_class, additional_prompt_text, add_message, add_message_file_content)
             if citizen:
                 citizens.append(citizen)
                 # Add a small delay to avoid rate limiting
@@ -289,6 +294,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=str, help="Output JSON file path")
     parser.add_argument("--add-prompt", type=str, help="Additional text to append to the generation prompt for Kinos API.")
     parser.add_argument("--addMessage", type=str, help="Another message to append to the Kinos generation prompt.")
+    parser.add_argument("--addMessageFile", type=str, help="Path to a file containing a message to append to the Kinos generation prompt.")
     parser.add_argument("--dry-run", action="store_true", help="Simulate the script execution without making any changes to Airtable.")
     
     args = parser.parse_args()
@@ -308,7 +314,20 @@ if __name__ == "__main__":
         print("No social class specified via arguments, defaulting to generating 1 Facchini.")
         social_classes = {"Facchini": 1}
     
-    citizens = generate_citizen_batch(social_classes, args.add_prompt, args.addMessage)
+    add_message_file_content = None
+    if args.addMessageFile:
+        try:
+            with open(args.addMessageFile, 'r', encoding='utf-8') as f:
+                add_message_file_content = f.read()
+            log.info(f"Successfully read content from {args.addMessageFile}")
+        except FileNotFoundError:
+            log.error(f"Error: File not found at {args.addMessageFile}")
+            # Decide if you want to exit or continue without this message
+            # For now, it will continue with add_message_file_content as None
+        except Exception as e:
+            log.error(f"Error reading file {args.addMessageFile}: {e}")
+
+    citizens = generate_citizen_batch(social_classes, args.add_prompt, args.addMessage, add_message_file_content)
     
     if args.output:
         with open(args.output, 'w') as f:
