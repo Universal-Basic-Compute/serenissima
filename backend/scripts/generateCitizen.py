@@ -432,8 +432,8 @@ def _get_random_venice_position() -> Optional[Dict[str, float]]:
                 # Import the update function here to avoid circular dependencies if any,
                 # and to ensure it's only imported when needed.
                 from updatecitizenDescriptionAndImage import update_citizen_description_and_image
-                # Import the repo linking function
-                from .linkrepos import link_repo_for_citizen
+                # Import the repo linking function - assuming linkrepos.py is in the same directory
+                from linkrepos import link_repo_for_citizen
                 
                 for citizen_data in citizens:
                     log.info(f"Processing citizen {citizen_data.get('username')} for Airtable save.")
@@ -509,3 +509,5 @@ def _get_random_venice_position() -> Optional[Dict[str, float]]:
                 log.error(f"An error occurred during Airtable save, profile update, or repo linking process: {e_main_process}")
     elif args.dry_run:
         log.info("[DRY RUN] Skipping Airtable save, profile update, and repository linking.")
+    elif not citizens:
+        log.warning("The 'citizens' list is empty. Skipping Airtable save, profile update, and repository linking. This usually means Kinos API failed to generate valid citizen data or the response could not be parsed.")
