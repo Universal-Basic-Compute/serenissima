@@ -361,6 +361,11 @@ if __name__ == "__main__":
     # Filter out classes with zero count
     social_classes = {k: v for k, v in social_classes.items() if v > 0}
     
+    if not social_classes:
+        # If no social classes were specified via arguments, default to generating one Facchini
+        print("No social class specified via arguments, defaulting to generating 1 Facchini.")
+        social_classes = {"Facchini": 1}
+    
 
 def _get_random_venice_position() -> Optional[Dict[str, float]]:
     """Fetches polygon data and returns a random buildingPoint's lat/lng."""
