@@ -375,6 +375,8 @@ if __name__ == "__main__":
     parser.add_argument("--cittadini", type=int, default=0, help="Number of cittadini to generate")
     parser.add_argument("--popolani", type=int, default=0, help="Number of popolani to generate")
     parser.add_argument("--facchini", type=int, default=0, help="Number of facchini to generate")
+    parser.add_argument("--forestieri", type=int, default=0, help="Number of forestieri to generate")
+    parser.add_argument("--artisti", type=int, default=0, help="Number of artisti to generate")
     parser.add_argument("--output", type=str, help="Output JSON file path")
     parser.add_argument("--add-prompt", type=str, help="Additional text to append to the generation prompt for Kinos API.")
     parser.add_argument("--addMessage", type=str, help="Another message to append to the Kinos generation prompt.")
@@ -402,7 +404,9 @@ if __name__ == "__main__":
         "Nobili": args.nobili,
         "Cittadini": args.cittadini,
         "Popolani": args.popolani,
-        "Facchini": args.facchini
+        "Facchini": args.facchini,
+        "Forestieri": args.forestieri,
+        "Artisti": args.artisti
     }
     
     # Filter out classes with zero count
