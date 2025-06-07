@@ -66,40 +66,47 @@ const ThoughtBubble: React.FC<ThoughtBubbleProps> = ({
     return null;
   }
 
-  // Get colors based on social class
-  const baseColorString = citizenService.getSocialClassColor(socialClass);
-
-  // Defaults
+  // Initialize color variables with defaults
   let finalTextColor = 'rgb(50, 50, 50)'; // Default dark gray text
   let finalBackgroundColor = 'rgba(240, 240, 240, 0.97)'; // Default very light gray background, high alpha
   let finalBorderColor = 'rgb(200, 200, 200)'; // Default medium gray border
 
-  const rgbaMatch = baseColorString.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-  if (rgbaMatch) {
-    const r_str = rgbaMatch[1];
-    const g_str = rgbaMatch[2];
-    const b_str = rgbaMatch[3];
-    const originalAlpha = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
+  // Check for Artisti social class first
+  if (socialClass && socialClass.toLowerCase() === 'artisti') {
+    finalTextColor = 'rgb(199, 21, 133)'; // MediumVioletRed for text
+    finalBackgroundColor = 'rgba(255, 228, 235, 0.97)'; // Very light pink for background
+    finalBorderColor = 'rgb(255, 182, 193)'; // LightPink for border
+  } else {
+    // Existing logic for other social classes
+    const baseColorString = citizenService.getSocialClassColor(socialClass);
+    const rgbaMatch = baseColorString.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+    if (rgbaMatch) {
+      const r_str = rgbaMatch[1];
+      const g_str = rgbaMatch[2];
+      const b_str = rgbaMatch[3];
+      const originalAlpha = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
 
-    const r_int = parseInt(r_str, 10);
-    const g_int = parseInt(g_str, 10);
-    const b_int = parseInt(b_str, 10);
+      const r_int = parseInt(r_str, 10);
+      const g_int = parseInt(g_str, 10);
+      const b_int = parseInt(b_str, 10);
 
-    // Make the background color a lighter shade of the social class color
-    const lightenFactor = 0.85; // 0 = original color, 1 = white. Increased from 0.75
-    const lighterR = Math.round(r_int + (255 - r_int) * lightenFactor);
-    const lighterG = Math.round(g_int + (255 - g_int) * lightenFactor);
-    const lighterB = Math.round(b_int + (255 - b_int) * lightenFactor);
+      // Make the background color a lighter shade of the social class color
+      const lightenFactor = 0.85; // 0 = original color, 1 = white. Increased from 0.75
+      const lighterR = Math.round(r_int + (255 - r_int) * lightenFactor);
+      const lighterG = Math.round(g_int + (255 - g_int) * lightenFactor);
+      const lighterB = Math.round(b_int + (255 - b_int) * lightenFactor);
 
-    // Darken the text color for better contrast on a light background
-    const darkenFactor = 0.5; // 0 = original color, 1 = black
-    const darkerR = Math.round(r_int * (1 - darkenFactor));
-    const darkerG = Math.round(g_int * (1 - darkenFactor));
-    const darkerB = Math.round(b_int * (1 - darkenFactor));
+      // Darken the text color for better contrast on a light background
+      const darkenFactor = 0.5; // 0 = original color, 1 = black
+      const darkerR = Math.round(r_int * (1 - darkenFactor));
+      const darkerG = Math.round(g_int * (1 - darkenFactor));
+      const darkerB = Math.round(b_int * (1 - darkenFactor));
 
-    finalTextColor = `rgb(${darkerR}, ${darkerG}, ${darkerB})`; // Darkened social class color for text
-    finalBackgroundColor = `rgba(${lighterR}, ${lighterG}, ${lighterB}, 0.97)`; // Lighter social class color, high alpha for background
-    finalBorderColor = `rgba(${r_str}, ${g_str}, ${b_str}, ${originalAlpha})`; // Social class color, original alpha for border
+      finalTextColor = `rgb(${darkerR}, ${darkerG}, ${darkerB})`;
+      finalBackgroundColor = `rgba(${lighterR}, ${lighterG}, ${lighterB}, 0.97)`;
+      finalBorderColor = `rgba(${r_str}, ${g_str}, ${b_str}, ${originalAlpha})`;
+    }
+    // If rgbaMatch is false, the default gray colors (set above) will be used.
   }
   
   // Define tail properties
