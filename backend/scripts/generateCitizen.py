@@ -367,6 +367,7 @@ def generate_citizen_batch(social_classes: Dict[str, int], additional_prompt_tex
     return citizens
 
 if __name__ == "__main__":
+    citizens = []  # Initialize citizens to an empty list
     # This allows the module to be run directly for testing
     import argparse
     
