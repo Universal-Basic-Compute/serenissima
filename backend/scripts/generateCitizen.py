@@ -29,7 +29,19 @@ logging.basicConfig(
 log = logging.getLogger("generate_citizen")
 
 # Load environment variables
-load_dotenv()
+# Add project root to sys.path for consistency if this script is run from elsewhere
+PROJECT_ROOT_GEN_CITIZEN = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if PROJECT_ROOT_GEN_CITIZEN not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT_GEN_CITIZEN)
+
+# Load environment variables from the project root .env file
+dotenv_path_gc = os.path.join(PROJECT_ROOT_GEN_CITIZEN, '.env')
+if os.path.exists(dotenv_path_gc):
+    load_dotenv(dotenv_path_gc)
+    log.info(f"Attempted to load .env file from: {dotenv_path_gc}")
+else:
+    log.warning(f".env file not found at: {dotenv_path_gc}. Attempting default load_dotenv() which searches parent directories or relies on system env vars.")
+    load_dotenv() # Attempt default load_dotenv behavior as a fallback
 
 # Define a list of ~20 colors for citizen profiles
 CITIZEN_COLORS = [
@@ -98,8 +110,12 @@ def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = 
     # Get Kinos API key from environment
     kinos_api_key = os.environ.get('KINOS_API_KEY')
     if not kinos_api_key:
-        log.error("KINOS_API_KEY environment variable is not set")
+        log.error("KINOS_API_KEY environment variable is not set or empty after loading .env")
         return None
+    else:
+        # Log a portion of the key for verification, but not the whole thing for security
+        key_length = len(kinos_api_key)
+        log.info(f"KINOS_API_KEY loaded. Starts with: '{kinos_api_key[:4]}...', Ends with: '...{kinos_api_key[-4:]}', Length: {key_length}")
     
     try:
         # Create a prompt for the Kinos Engine
