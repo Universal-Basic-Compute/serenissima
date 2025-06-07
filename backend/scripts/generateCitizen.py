@@ -134,14 +134,50 @@ def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = 
             return None
         
         # Extract the JSON from Kinos Engine's response
-        content = response.json().get("content", "")
+        # First, ensure the response body itself is valid JSON
+        try:
+            kinos_response_payload = response.json()
+        except json.JSONDecodeError as e_json_body:
+            log.error(f"Kinos API returned 200 OK, but response body is not valid JSON. Error: {e_json_body}")
+            log.error(f"Response text (first 500 chars): {response.text[:500]}")
+            return None
+
+        content = kinos_response_payload.get("content", "")
+        if not content: # If content is empty string or None
+            log.error("Kinos API returned 200 OK, but 'content' field is missing or empty in the JSON response.")
+            log.debug(f"Full Kinos response JSON: {kinos_response_payload}")
+            return None
+            
         log.info(f"Raw Kinos response content:\n{content}")
+
+        # Check for known error patterns within the 'content' string itself
+        # This handles cases where Kinos might return 200 OK but embed an error message in the content field
+        if "Error code: 401" in content and "authentication_error" in content:
+            log.error(f"Kinos 'content' field indicates an authentication error (API key issue?): {content}")
+            log.error("Please check your KINOS_API_KEY environment variable.")
+            return None
+        elif content.startswith("I apologize, but there was an API error:"): # General Kinos apology
+            log.error(f"Kinos 'content' field indicates a general API error: {content}")
+            return None
+        
+        # Add another check: if the content IS a JSON string that represents an error object
+        # This handles cases where 'content' might be "{\"type\": \"error\", ...}"
+        try:
+            potential_error_obj = json.loads(content)
+            if isinstance(potential_error_obj, dict) and potential_error_obj.get("type") == "error":
+                log.error(f"Kinos 'content' field is a JSON object representing an error: {content}")
+                return None
+        except json.JSONDecodeError:
+            # This is expected if 'content' is the actual citizen data JSON string, 
+            # or a non-JSON error message not caught by the specific string checks above.
+            # Proceed to attempt parsing 'content' as citizen data.
+            pass
 
         citizen_data = None
         json_str_to_parse = None # Variable to hold the string we attempt to parse
 
         try:
-            # Attempt 1: Try to parse the entire content as JSON
+            # Attempt 1: Try to parse the entire content as JSON (which is 'content' string from Kinos response)
             log.info("Attempting to parse entire Kinos response as JSON...")
             json_str_to_parse = content
             citizen_data = json.loads(json_str_to_parse)
