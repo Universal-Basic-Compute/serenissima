@@ -393,11 +393,6 @@ def _get_random_venice_position() -> Optional[Dict[str, float]]:
     except Exception as e:
         log.error(f"Error getting random Venice position: {e}")
         return None
-
-    if not social_classes:
-        # If no social classes were specified via arguments, default to generating one Facchini
-        print("No social class specified via arguments, defaulting to generating 1 Facchini.")
-        social_classes = {"Facchini": 1}
     
     add_message_file_content = None
     if args.addMessageFile:
