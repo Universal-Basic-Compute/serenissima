@@ -51,6 +51,38 @@ CITIZEN_COLORS = [
     "#CCCCFF", "#BDB76B", "#8A2BE2", "#D2691E", "#7FFF00"
 ]
 
+def _get_random_venice_position() -> Optional[Dict[str, float]]:
+    """Fetches polygon data and returns a random buildingPoint's lat/lng."""
+    try:
+        api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+        polygons_url = f"{api_base_url}/api/get-polygons?essential=true" # Fetch essential data
+        log.info(f"Fetching polygon data from: {polygons_url}")
+        response = requests.get(polygons_url, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+
+        all_building_points = []
+        if data.get("polygons") and isinstance(data["polygons"], list):
+            for polygon in data["polygons"]:
+                if polygon and isinstance(polygon.get("buildingPoints"), list):
+                    for point in polygon["buildingPoints"]:
+                        if isinstance(point, dict) and "lat" in point and "lng" in point:
+                            all_building_points.append({"lat": float(point["lat"]), "lng": float(point["lng"])})
+        
+        if not all_building_points:
+            log.warning("No building points found in polygon data.")
+            return None
+        
+        selected_point = random.choice(all_building_points)
+        log.info(f"Selected random building point for position: {selected_point}")
+        return selected_point
+    except requests.exceptions.RequestException as e:
+        log.error(f"API request failed for polygon data: {e}")
+        return None
+    except Exception as e:
+        log.error(f"Error getting random Venice position: {e}")
+        return None
+    
 def initialize_airtable():
     """Initialize Airtable connection."""
     api_key = os.environ.get('AIRTABLE_API_KEY')
@@ -365,39 +397,6 @@ if __name__ == "__main__":
         # If no social classes were specified via arguments, default to generating one Facchini
         print("No social class specified via arguments, defaulting to generating 1 Facchini.")
         social_classes = {"Facchini": 1}
-    
-
-def _get_random_venice_position() -> Optional[Dict[str, float]]:
-    """Fetches polygon data and returns a random buildingPoint's lat/lng."""
-    try:
-        api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
-        polygons_url = f"{api_base_url}/api/get-polygons?essential=true" # Fetch essential data
-        log.info(f"Fetching polygon data from: {polygons_url}")
-        response = requests.get(polygons_url, timeout=15)
-        response.raise_for_status()
-        data = response.json()
-
-        all_building_points = []
-        if data.get("polygons") and isinstance(data["polygons"], list):
-            for polygon in data["polygons"]:
-                if polygon and isinstance(polygon.get("buildingPoints"), list):
-                    for point in polygon["buildingPoints"]:
-                        if isinstance(point, dict) and "lat" in point and "lng" in point:
-                            all_building_points.append({"lat": float(point["lat"]), "lng": float(point["lng"])})
-        
-        if not all_building_points:
-            log.warning("No building points found in polygon data.")
-            return None
-        
-        selected_point = random.choice(all_building_points)
-        log.info(f"Selected random building point for position: {selected_point}")
-        return selected_point
-    except requests.exceptions.RequestException as e:
-        log.error(f"API request failed for polygon data: {e}")
-        return None
-    except Exception as e:
-        log.error(f"Error getting random Venice position: {e}")
-        return None
 
     # If not a dry run, save to Airtable and update description/image
     if not args.dry_run and citizens:
