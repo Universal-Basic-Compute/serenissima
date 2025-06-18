@@ -18,7 +18,7 @@ const ResourceDetails = dynamic(() => import('@/components/Knowledge/ResourceDet
 // Dynamically import articles
 const ProjectPresentationArticle = dynamic(() => import('@/components/Articles/ProjectPresentationArticle'), {
   ssr: false,
-  loading: () => <div className="p-8 text-amber-300">Loading Article...</div>
+  loading: () => <div className="p-8 text-amber-300">Loading Project Presentation Article...</div>
 });
 const BeginnersGuideArticle = dynamic(() => import('@/components/Articles/BeginnersGuideArticle'), {
   ssr: false,
@@ -77,10 +77,11 @@ export default function KnowledgePage() {
   };
 
   const handleSelectArticle = (article: string) => {
+    console.log('Selecting article:', article);
     setSelectedArticle(article);
     setView('article');
-    // This would be implemented to show the selected article
-    console.log('Selected article:', article);
+    console.log('View set to:', 'article');
+    console.log('Selected article state:', article);
   };
 
   const handleClose = () => {
@@ -125,8 +126,12 @@ export default function KnowledgePage() {
         </div>
       ) : view === 'article' && selectedArticle ? (
         <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-75 p-4">
+          {console.log('Rendering article view for:', selectedArticle)}
           {selectedArticle === "project-presentation" && (
-            <ProjectPresentationArticle onClose={() => setView('repository')} />
+            <>
+              {console.log('Rendering ProjectPresentationArticle')}
+              <ProjectPresentationArticle onClose={() => setView('repository')} />
+            </>
           )}
           {selectedArticle === "beginners-guide" && (
             <BeginnersGuideArticle onClose={() => setView('repository')} />
