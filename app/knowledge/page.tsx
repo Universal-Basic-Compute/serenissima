@@ -55,16 +55,7 @@ export default function KnowledgePage() {
   }
   
   const handleShowPresentation = () => {
-    console.log("Showing presentation view - function called");
-    
-    // Clear the current view first to force a complete re-render
-    setView('loading');
-    
-    // Then set to presentation after a brief delay
-    setTimeout(() => {
-      console.log("Setting view to presentation after delay");
-      setView('presentation');
-    }, 10);
+    setView('presentation');
   };
 
   const handleShowTechTree = () => {
@@ -96,12 +87,9 @@ export default function KnowledgePage() {
       <div className="hidden">{`Current view: ${view}`}</div>
       
       {view === 'presentation' ? (
-        <>
-          {console.log("Rendering presentation view")}
-          <div className="w-full h-full">
-            <ProjectPresentation onClose={() => setView('repository')} />
-          </div>
-        </>
+        <div className="fixed inset-0 z-50">
+          <ProjectPresentation onClose={() => setView('repository')} />
+        </div>
       ) : view === 'repository' ? (
         <KnowledgeRepository
           onShowTechTree={handleShowTechTree}
