@@ -10,6 +10,9 @@ const ProjectPresentation = dynamic(() => import('@/components/Knowledge/Project
 const ResourceDetails = dynamic(() => import('@/components/Knowledge/ResourceDetails'), { ssr: false });
 // Import other components as needed
 
+// For debugging
+console.log("Knowledge page loaded, components imported");
+
 // Add custom window interface to handle our custom properties
 declare global {
   interface Window {
@@ -43,8 +46,9 @@ export default function KnowledgePage() {
   }
   
   const handleShowPresentation = () => {
-    console.log("Showing presentation view");
+    console.log("Showing presentation view - function called");
     setView('presentation');
+    console.log("Current view after setting:", 'presentation');
   };
 
   const handleShowTechTree = () => {
@@ -72,11 +76,12 @@ export default function KnowledgePage() {
 
   return (
     <div className="knowledge-page">
-      {view === 'presentation' && (
-        <ProjectPresentation onClose={() => setView('repository')} />
-      )}
+      {/* Debug view state */}
+      <div className="hidden">{`Current view: ${view}`}</div>
       
-      {view === 'repository' && (
+      {view === 'presentation' ? (
+        <ProjectPresentation onClose={() => setView('repository')} />
+      ) : view === 'repository' ? (
         <KnowledgeRepository
           onShowTechTree={handleShowTechTree}
           onShowPresentation={handleShowPresentation}
@@ -85,9 +90,7 @@ export default function KnowledgePage() {
           onClose={handleClose}
           standalone={true}
         />
-      )}
-
-      {view === 'techTree' && (
+      ) : view === 'techTree' ? (
         <div className="p-8 bg-amber-50 rounded-lg">
           <h2 className="text-2xl font-serif text-amber-800 mb-4">Tech Tree</h2>
           <p className="text-gray-600">Tech Tree content would go here.</p>
@@ -98,9 +101,7 @@ export default function KnowledgePage() {
             Back to Repository
           </button>
         </div>
-      )}
-
-      {view === 'resourceTree' && (
+      ) : view === 'resourceTree' ? (
         <div className="p-8 bg-amber-50 rounded-lg">
           <h2 className="text-2xl font-serif text-amber-800 mb-4">Resource Tree</h2>
           <p className="text-gray-600">Resource Tree content would go here.</p>
@@ -111,12 +112,22 @@ export default function KnowledgePage() {
             Back to Repository
           </button>
         </div>
-      )}
-
-      {view === 'article' && selectedArticle && (
+      ) : view === 'article' && selectedArticle ? (
         <div className="p-8 bg-amber-50 rounded-lg">
           <h2 className="text-2xl font-serif text-amber-800 mb-4">{selectedArticle}</h2>
           <p className="text-gray-600">Article content would go here.</p>
+          <button
+            onClick={() => setView('repository')}
+            className="mt-4 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+          >
+            Back to Repository
+          </button>
+        </div>
+      ) : (
+        // Fallback if no view matches
+        <div className="p-8 bg-amber-50 rounded-lg">
+          <h2 className="text-2xl font-serif text-amber-800 mb-4">View Not Found</h2>
+          <p className="text-gray-600">The requested view "{view}" could not be displayed.</p>
           <button
             onClick={() => setView('repository')}
             className="mt-4 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
