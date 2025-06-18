@@ -10,3 +10,4 @@ export { default as VenetianGuildsArticle } from './VenetianGuildsArticle';
 export { default as GuildLeadershipArticle } from './GuildLeadershipArticle';
 export { default as UnifiedCitizenModelArticle } from './UnifiedCitizenModelArticle';
 export { default as CitizenActivitiesAndNeedsArticle } from './CitizenActivitiesAndNeedsArticle';
+export { default as ProjectPresentationArticle } from './ProjectPresentationArticle';

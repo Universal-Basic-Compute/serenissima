@@ -64,7 +64,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
                   through our comprehensive project presentation.
                 </p>
                 <button 
-                  onClick={onShowPresentation}
+                  onClick={() => onSelectArticle("project-presentation")}
                   className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
                 >
                   View Presentation
