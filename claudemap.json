@@ -10,6 +10,129 @@
         {"path": "app/types/components.ts", "role": "Defines props interfaces for various UI components, e.g., PolygonViewerProps."}
       ]
     },
+    "api_routes": {
+      "path": "app/api/",
+      "description": "Next.js API routes that handle server-side requests and data processing.",
+      "sub_directories": {
+        "bridges": {
+          "path": "app/api/bridges/",
+          "description": "API routes for managing building bridges and orientations.",
+          "important_files": [
+            {"path": "app/api/bridges/[buildingId]/orient/route.ts", "role": "Handles PATCH requests to update building orientation."}
+          ]
+        },
+        "building_data": {
+          "path": "app/api/building-data/",
+          "description": "API routes for retrieving building data by type.",
+          "important_files": [
+            {"path": "app/api/building-data/[type]/route.ts", "role": "Handles requests to fetch building data by building type."}
+          ]
+        },
+        "building_resources": {
+          "path": "app/api/building-resources/",
+          "description": "API routes for managing building resources.",
+          "important_files": [
+            {"path": "app/api/building-resources/[buildingId]/route.ts", "role": "Handles requests for resources associated with specific buildings."}
+          ]
+        },
+        "citizens": {
+          "path": "app/api/citizens/",
+          "description": "API routes for citizen data and management.",
+          "important_files": [
+            {"path": "app/api/citizens/[username]/route.ts", "role": "Handles requests for specific citizen data by username."},
+            {"path": "app/api/citizens/[username]/transports/route.ts", "role": "Manages transport data for specific citizens."},
+            {"path": "app/api/citizens/top-influence/route.ts", "role": "Retrieves citizens with the highest influence scores."},
+            {"path": "app/api/citizens/wallet/[walletAddress]/route.ts", "role": "Handles requests for citizen data by wallet address."}
+          ]
+        },
+        "contracts": {
+          "path": "app/api/contracts/",
+          "description": "API routes for contract management.",
+          "important_files": [
+            {"path": "app/api/contracts/[contractId]/activities/route.ts", "role": "Manages activities related to specific contracts."},
+            {"path": "app/api/contracts/route.ts", "role": "Handles general contract operations."}
+          ]
+        },
+        "decrees": {
+          "path": "app/api/decrees/",
+          "description": "API routes for decree management.",
+          "important_files": [
+            {"path": "app/api/decrees/route.ts", "role": "Handles operations related to governmental decrees."}
+          ]
+        },
+        "fetch_coat_of_arms": {
+          "path": "app/api/fetch-coat-of-arms/",
+          "description": "API route for retrieving coat of arms images.",
+          "important_files": [
+            {"path": "app/api/fetch-coat-of-arms/route.ts", "role": "Handles requests to fetch coat of arms images for citizens."}
+          ]
+        },
+        "artists": {
+          "path": "app/api/get-artists/",
+          "description": "API route for retrieving artist information.",
+          "important_files": [
+            {"path": "app/api/get-artists/route.ts", "role": "Handles requests to fetch artist data."}
+          ]
+        },
+        "citizens_at_position": {
+          "path": "app/api/get-citizens-at-position/",
+          "description": "API route for finding citizens at specific map positions.",
+          "important_files": [
+            {"path": "app/api/get-citizens-at-position/route.ts", "role": "Handles requests to find citizens at specific coordinates."}
+          ]
+        },
+        "public_builders": {
+          "path": "app/api/get-public-builders/",
+          "description": "API route for retrieving public builder information.",
+          "important_files": [
+            {"path": "app/api/get-public-builders/route.ts", "role": "Handles requests to fetch public builder data."}
+          ]
+        },
+        "thoughts": {
+          "path": "app/api/get-thoughts/",
+          "description": "API route for retrieving citizen thoughts.",
+          "important_files": [
+            {"path": "app/api/get-thoughts/route.ts", "role": "Handles requests to fetch and process citizen thoughts."}
+          ]
+        },
+        "guild_members": {
+          "path": "app/api/guild-members/",
+          "description": "API routes for guild member management.",
+          "important_files": [
+            {"path": "app/api/guild-members/[guildId]/route.ts", "role": "Handles requests for members of specific guilds."}
+          ]
+        },
+        "guilds": {
+          "path": "app/api/guilds/",
+          "description": "API routes for guild management.",
+          "important_files": [
+            {"path": "app/api/guilds/route.ts", "role": "Handles general guild operations."}
+          ]
+        },
+        "kins": {
+          "path": "app/api/kins/",
+          "description": "API routes for KinOS file system access.",
+          "important_files": [
+            {"path": "app/api/kins/[kinId]/content/route.ts", "role": "Handles requests to access KinOS file content for AI citizens."}
+          ]
+        },
+        "transactions": {
+          "path": "app/api/transactions/",
+          "description": "API routes for transaction management.",
+          "important_files": [
+            {"path": "app/api/transaction/land/[landId]/route.ts", "role": "Handles land transaction operations."},
+            {"path": "app/api/transactions/land-offers/[landId]/route.ts", "role": "Manages offers for land parcels."}
+          ]
+        },
+        "water_points": {
+          "path": "app/api/water-points/",
+          "description": "API routes for water point management.",
+          "important_files": [
+            {"path": "app/api/water-points/route.ts", "role": "Handles operations related to water points on the map."}
+          ]
+        }
+      }
+    },
     "frontend_components": {
       "path": "components/",
       "description": "React components for the user interface, organized by functionality.",
@@ -215,6 +338,13 @@
       "path": "lib/",
       "description": "Shared libraries, services, and utility functions used across the application.",
       "sub_directories": {
+        "models": {
+          "path": "lib/models/",
+          "description": "TypeScript model definitions for core game entities.",
+          "important_files": [
+            {"path": "lib/models/BuildingTypes.ts", "role": "Defines building position types and related interfaces."}
+          ]
+        },
         "services": {
           "path": "lib/services/",
           "description": "Core services providing specific functionalities.",
@@ -222,6 +352,7 @@
             {"path": "lib/services/CitizenRenderService.ts", "role": "Service likely related to preparing citizen data for rendering or display."},
             {"path": "lib/services/ContractService.ts", "role": "Manages contract data, including caching and providing lookup methods."},
             {"path": "lib/services/HoverStateService.ts", "role": "Manages hover state information for UI interactions, possibly on the map."},
+            {"path": "lib/services/IncomeDataService.ts", "role": "Manages income data for citizens with min/max tracking."},
             {"path": "lib/services/LoanService.ts", "role": "Manages loan data, statuses, and related operations."},
             {"path": "lib/services/PolygonService.ts", "role": "Manages polygon data for land parcels and related information."},
             {"path": "lib/services/ResourceService.ts", "role": "Manages resource data, categories, player/global inventories, and caching."},
