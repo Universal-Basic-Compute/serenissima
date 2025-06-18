@@ -5,9 +5,6 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { FaTimes } from 'react-icons/fa';
 
-// Import the ProjectPresentationArticle directly to ensure it's available
-import ProjectPresentationArticle from '@/components/Articles/ProjectPresentationArticle';
-
 // Dynamically import components to avoid SSR issues
 const KnowledgeRepository = dynamic(() => import('@/components/Knowledge/KnowledgeRepository'), { 
   ssr: false,
@@ -18,7 +15,11 @@ const ResourceDetails = dynamic(() => import('@/components/Knowledge/ResourceDet
   loading: () => <div className="p-8 text-amber-300">Loading Resource Details...</div>
 });
 
-// Dynamically import other articles
+// Dynamically import ALL articles including ProjectPresentationArticle
+const ProjectPresentationArticle = dynamic(() => import('@/components/Articles/ProjectPresentationArticle'), {
+  ssr: false,
+  loading: () => <div className="p-8 text-amber-300">Loading Presentation...</div>
+});
 const BeginnersGuideArticle = dynamic(() => import('@/components/Articles/BeginnersGuideArticle'), {
   ssr: false,
   loading: () => <div className="p-8 text-amber-300">Loading Article...</div>
@@ -60,8 +61,13 @@ export default function KnowledgePage() {
   if (typeof window !== 'undefined' && window.location.pathname === '/knowledge' && !window.__isClientNavigation) {
     return <div></div>;
   }
-  
-  // This function is no longer needed as we'll use handleSelectArticle instead
+
+  // Add error boundary for debugging
+  if (view === 'article' && !selectedArticle) {
+    console.error('Article view selected but no article specified');
+    setView('repository');
+    return null;
+  }
 
   const handleShowTechTree = () => {
     setView('techTree');
@@ -76,6 +82,7 @@ export default function KnowledgePage() {
   };
 
   const handleSelectArticle = (article: string) => {
+    console.log('Selecting article:', article); // Add debug log
     setSelectedArticle(article);
     setView('article');
   };
@@ -87,7 +94,7 @@ export default function KnowledgePage() {
   return (
     <div className="knowledge-page">
       {/* Debug view state */}
-      <div className="hidden">{`Current view: ${view}`}</div>
+      <div className="hidden">{`Current view: ${view}, Selected article: ${selectedArticle}`}</div>
       
       {view === 'repository' ? (
         <KnowledgeRepository
@@ -122,36 +129,52 @@ export default function KnowledgePage() {
         </div>
       ) : view === 'article' && selectedArticle ? (
         <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-75 p-4">
-          {selectedArticle === "project-presentation" && (
-            <ProjectPresentationArticle onClose={() => setView('repository')} />
-          )}
-          {selectedArticle === "beginners-guide" && (
-            <BeginnersGuideArticle onClose={() => setView('repository')} />
-          )}
-          {selectedArticle === "economic-system" && (
-            <EconomicSystemArticle onClose={() => setView('repository')} />
-          )}
-          {/* Add other article components as needed */}
-          {!["project-presentation", "beginners-guide", "economic-system"].includes(selectedArticle) && (
-            <div className="p-8 bg-amber-50 rounded-lg max-w-4xl mx-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-serif text-amber-800">{selectedArticle}</h2>
+          <div className="min-h-screen flex items-center justify-center">
+            {selectedArticle === "project-presentation" && (
+              <ProjectPresentationArticle onClose={() => {
+                setSelectedArticle(null);
+                setView('repository');
+              }} />
+            )}
+            {selectedArticle === "beginners-guide" && (
+              <BeginnersGuideArticle onClose={() => {
+                setSelectedArticle(null);
+                setView('repository');
+              }} />
+            )}
+            {selectedArticle === "economic-system" && (
+              <EconomicSystemArticle onClose={() => {
+                setSelectedArticle(null);
+                setView('repository');
+              }} />
+            )}
+            {!["project-presentation", "beginners-guide", "economic-system"].includes(selectedArticle) && (
+              <div className="p-8 bg-amber-50 rounded-lg max-w-4xl mx-auto">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-serif text-amber-800">{selectedArticle}</h2>
+                  <button
+                    onClick={() => {
+                      setSelectedArticle(null);
+                      setView('repository');
+                    }}
+                    className="text-amber-600 hover:text-amber-800 p-2"
+                  >
+                    <FaTimes size={24} />
+                  </button>
+                </div>
+                <p className="text-gray-600">This article is coming soon.</p>
                 <button
-                  onClick={() => setView('repository')}
-                  className="text-amber-600 hover:text-amber-800 p-2"
+                  onClick={() => {
+                    setSelectedArticle(null);
+                    setView('repository');
+                  }}
+                  className="mt-4 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
                 >
-                  <FaTimes size={24} />
+                  Back to Repository
                 </button>
               </div>
-              <p className="text-gray-600">This article is coming soon.</p>
-              <button
-                onClick={() => setView('repository')}
-                className="mt-4 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-              >
-                Back to Repository
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       ) : view === 'loading' ? (
         <div className="flex items-center justify-center h-full">
