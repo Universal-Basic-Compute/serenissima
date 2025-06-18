@@ -106,7 +106,8 @@ export async function GET() {
     ];*/
 
     const thoughts = data.messages
-      //.filter((message: any) => thoughtTypes.includes(message.type))
+      // Only include messages where sender equals receiver (actual thoughts)
+      .filter((message: any) => message.sender === message.receiver)
       .map((message: any) => ({
         messageId: message.messageId,
         citizenUsername: message.sender,
