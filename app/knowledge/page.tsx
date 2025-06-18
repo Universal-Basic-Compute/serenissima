@@ -71,6 +71,10 @@ export default function KnowledgePage() {
 
   return (
     <div className="knowledge-page">
+      {view === 'presentation' && (
+        <ProjectPresentation onClose={() => setView('repository')} />
+      )}
+      
       {view === 'repository' && (
         <KnowledgeRepository
           onShowTechTree={handleShowTechTree}
@@ -80,10 +84,6 @@ export default function KnowledgePage() {
           onClose={handleClose}
           standalone={true}
         />
-      )}
-
-      {view === 'presentation' && (
-        <ProjectPresentation onClose={() => setView('repository')} />
       )}
 
       {view === 'techTree' && (
