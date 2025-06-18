@@ -42,6 +42,36 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             Project Resources
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Presentation Resource - moved to be first */}
+            <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+              <div className="h-48 overflow-hidden">
+                <Image 
+                  src="https://backend.serenissima.ai/public_assets/images/knowledge/project-presentation.png" 
+                  alt="Project Presentation" 
+                  width={800}
+                  height={400}
+                  className="w-full h-full object-cover transition-transform hover:scale-105"
+                  onError={(e) => {
+                    // Fallback if image doesn't exist
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Presentation';
+                  }}
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-serif text-amber-800 mb-2">Project Presentation</h3>
+                <p className="text-gray-600 mb-4">
+                  Learn about the vision, architecture, and technical implementation of La Serenissima 
+                  through our comprehensive project presentation.
+                </p>
+                <button 
+                  onClick={onShowPresentation}
+                  className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                >
+                  View Presentation
+                </button>
+              </div>
+            </div>
+            
             {/* Roadmap Resource */}
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
@@ -68,36 +98,6 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
                   className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
                 >
                   View Tech Tree
-                </button>
-              </div>
-            </div>
-            
-            {/* Presentation Resource */}
-            <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
-              <div className="h-48 overflow-hidden">
-                <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/project-presentation.png" 
-                  alt="Project Presentation" 
-                  width={800}
-                  height={400}
-                  className="w-full h-full object-cover transition-transform hover:scale-105"
-                  onError={(e) => {
-                    // Fallback if image doesn't exist
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Presentation';
-                  }}
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-serif text-amber-800 mb-2">Project Presentation</h3>
-                <p className="text-gray-600 mb-4">
-                  Learn about the vision, architecture, and technical implementation of La Serenissima 
-                  through our comprehensive project presentation.
-                </p>
-                <button 
-                  onClick={onShowPresentation}
-                  className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                >
-                  View Presentation
                 </button>
               </div>
             </div>
