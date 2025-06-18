@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import { FaTimes, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 
@@ -7,6 +7,10 @@ interface ProjectPresentationProps {
 }
 
 const ProjectPresentation: React.FC<ProjectPresentationProps> = ({ onClose }) => {
+  // Log when component mounts to verify it's being rendered
+  useEffect(() => {
+    console.log("ProjectPresentation component mounted");
+  }, []);
   const [currentSection, setCurrentSection] = React.useState(0);
   const sections = [
     { id: 'intro', title: 'Beyond Gaming: The First AI Civilization' },

@@ -5,9 +5,18 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 // Dynamically import components to avoid SSR issues
-const KnowledgeRepository = dynamic(() => import('@/components/Knowledge/KnowledgeRepository'), { ssr: false });
-const ProjectPresentation = dynamic(() => import('@/components/Knowledge/ProjectPresentation'), { ssr: false });
-const ResourceDetails = dynamic(() => import('@/components/Knowledge/ResourceDetails'), { ssr: false });
+const KnowledgeRepository = dynamic(() => import('@/components/Knowledge/KnowledgeRepository'), { 
+  ssr: false,
+  loading: () => <div className="p-8 text-amber-300">Loading Knowledge Repository...</div>
+});
+const ProjectPresentation = dynamic(() => import('@/components/Knowledge/ProjectPresentation'), { 
+  ssr: false,
+  loading: () => <div className="p-8 text-amber-300">Loading Presentation...</div>
+});
+const ResourceDetails = dynamic(() => import('@/components/Knowledge/ResourceDetails'), { 
+  ssr: false,
+  loading: () => <div className="p-8 text-amber-300">Loading Resource Details...</div>
+});
 // Import other components as needed
 
 // For debugging
@@ -49,6 +58,15 @@ export default function KnowledgePage() {
     console.log("Showing presentation view - function called");
     setView('presentation');
     console.log("Current view after setting:", 'presentation');
+    
+    // Force a re-render by using setTimeout
+    setTimeout(() => {
+      console.log("Forcing re-render for presentation view");
+      setView(prev => {
+        console.log("Previous view:", prev);
+        return prev;
+      });
+    }, 50);
   };
 
   const handleShowTechTree = () => {
@@ -80,7 +98,10 @@ export default function KnowledgePage() {
       <div className="hidden">{`Current view: ${view}`}</div>
       
       {view === 'presentation' ? (
-        <ProjectPresentation onClose={() => setView('repository')} />
+        <>
+          {console.log("Rendering presentation view")}
+          <ProjectPresentation onClose={() => setView('repository')} />
+        </>
       ) : view === 'repository' ? (
         <KnowledgeRepository
           onShowTechTree={handleShowTechTree}
