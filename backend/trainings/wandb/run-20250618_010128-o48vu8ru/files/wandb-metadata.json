@@ -1,0 +1,56 @@
+{
+    "os": "Windows-10-10.0.22631-SP0",
+    "python": "3.10.6",
+    "heartbeatAt": "2025-06-17T23:01:29.926920",
+    "startedAt": "2025-06-17T23:01:28.993615",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--model",
+        "C:/Users/reyno/.cache/lm-studio/models/lmstudio-community/DeepSeek-R1-0528-Qwen3-8B-GGUF/DeepSeek-R1-0528-Qwen3-8B-Q6_K.gguf",
+        "--quantization",
+        "8bit",
+        "--use_wandb"
+    ],
+    "state": "running",
+    "program": "C:\\Users\\reyno\\serenissima_\\backend\\trainings\\finetuneModel.py",
+    "codePath": "backend\\trainings\\finetuneModel.py",
+    "git": {
+        "remote": "https://github.com/Universal-Basic-Compute/serenissima",
+        "commit": "b88b38778b771d2cb71c93866d6e0b0929c37970"
+    },
+    "email": "reynolds.nicorr@gmail.com",
+    "root": "C:/Users/reyno/serenissima_",
+    "host": "GAMINGPC",
+    "username": "reyno",
+    "executable": "C:\\Users\\reyno\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+    "cpu_count": 8,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 3600.0,
+        "min": 0.0,
+        "max": 3600.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3600.0,
+            "min": 0.0,
+            "max": 3600.0
+        }
+    ],
+    "disk": {
+        "total": 930.6836433410645,
+        "used": 913.171745300293
+    },
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 3090",
+            "memory_total": 25769803776
+        }
+    ],
+    "memory": {
+        "total": 95.90954208374023
+    }
+}

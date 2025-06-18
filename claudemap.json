@@ -1,0 +1,271 @@
+{
+  "project_name": "La Serenissima",
+  "description": "Codebase map for La Serenissima, a blockchain-powered MMO city builder set in Renaissance Venice. This document helps in navigating and understanding the project's architecture.",
+  "last_updated": "2025-05-29",
+  "structure": {
+    "frontend_app_types": {
+      "path": "app/types/",
+      "description": "TypeScript type definitions for frontend application components.",
+      "important_files": [
+        {"path": "app/types/components.ts", "role": "Defines props interfaces for various UI components, e.g., PolygonViewerProps."}
+      ]
+    },
+    "frontend_components": {
+      "path": "components/",
+      "description": "React components for the user interface, organized by functionality.",
+      "sub_directories": {
+        "Articles": {
+          "path": "components/Articles/",
+          "description": "React components for displaying help and lore articles in the Knowledge Repository.",
+          "important_files": [
+            {"path": "components/Articles/index.ts", "role": "Entry point exporting all article components."},
+            {"path": "components/Articles/BeginnersGuideArticle.tsx", "role": "Guide for new players."},
+            {"path": "components/Articles/EconomicSystemArticle.tsx", "role": "Explains the game's economic system."},
+            {"path": "components/Articles/SocialClassArticle.tsx", "role": "Details the social class system."},
+            {"path": "components/Articles/LandOwnerGuideArticle.tsx", "role": "Guide for landowners."},
+            {"path": "components/Articles/BuildingOwnersGuideArticle.tsx", "role": "Guide for building owners."},
+            {"path": "components/Articles/BusinessOwnersGuideArticle.tsx", "role": "Guide for business owners."},
+            {"path": "components/Articles/VenetianGuildsArticle.tsx", "role": "Information on Venetian guilds."},
+            {"path": "components/Articles/GuildLeadershipArticle.tsx", "role": "Information on guild leadership and coordination."},
+            {"path": "components/Articles/DecreesGovernanceArticle.tsx", "role": "Explains the decree and governance system."},
+            {"path": "components/Articles/StrategiesArticle.tsx", "role": "Presents advanced gameplay strategies."},
+            {"path": "components/Articles/HistoricalAccuracyArticle.tsx", "role": "Discusses the game's historical accuracy."},
+            {"path": "components/Articles/UnifiedCitizenModelArticle.tsx", "role": "Explains the unified model for AI and human citizens."},
+            {"path": "components/Articles/CitizenActivitiesAndNeedsArticle.tsx", "role": "Details citizen activities and needs."}
+          ]
+        },
+        "ErrorBoundary": {
+          "path": "components/ErrorBoundary/",
+          "description": "Error handling components for React.",
+          "important_files": [
+            {"path": "components/ErrorBoundary/ErrorBoundary.tsx", "role": "Defines a React error boundary component."}
+          ]
+        },
+        "Knowledge": {
+          "path": "components/Knowledge/",
+          "description": "Components related to the in-game knowledge base and tech tree.",
+          "important_files": [
+            {"path": "components/Knowledge/ResourceDetails.tsx", "role": "Displays detailed information about resources."},
+            {"path": "components/Knowledge/TechTree.tsx", "role": "Component for visualizing the technology tree."}
+          ]
+        },
+        "Loans": {
+          "path": "components/Loans/",
+          "description": "UI components for managing loans.",
+          "important_files": [
+            {"path": "components/Loans/LoanPanel.tsx", "role": "Panel for loan-related actions."}
+          ]
+        },
+        "PolygonViewer": {
+          "path": "components/PolygonViewer/",
+          "description": "Components related to the isometric map view and interactions.",
+          "important_files": [
+            {"path": "components/PolygonViewer/BuildingCreationPanel.tsx", "role": "Panel for creating new buildings."},
+            {"path": "components/PolygonViewer/BuildingDetails/BidPlacementPanel.tsx", "role": "Panel for placing bids on buildings."},
+            {"path": "components/PolygonViewer/BuildingDetails/BuildingFinancials.tsx", "role": "Displays financial details of a building."},
+            {"path": "components/PolygonViewer/BuildingDetails/BuildingLocation.tsx", "role": "Displays location information for a building."},
+            {"path": "components/PolygonViewer/BuildingDetails/BuildingMaintenance.tsx", "role": "Panel for building maintenance."},
+            {"path": "components/PolygonViewer/BuildingDetails/BuildingOccupant.tsx", "role": "Displays building occupant information and allows interaction."},
+            {"path": "components/PolygonViewer/BuildingDetails/BuildingOwner.tsx", "role": "Displays building owner information and allows interaction."},
+            {"path": "components/PolygonViewer/BuildingDetails/BuildingRelevanciesList.tsx", "role": "Lists relevancies associated with a building for a citizen."},
+            {"path": "components/PolygonViewer/BuildingDetails/ConstructionServicePanel.tsx", "role": "Panel for construction services related to buildings."},
+            {"path": "components/PolygonViewer/BuildingDetails/ContractNegotiationPanel.tsx", "role": "Panel for negotiating contracts related to buildings or resources."},
+            {"path": "components/PolygonViewer/BuildingDetails/ResourceItem.tsx", "role": "Component to display a single resource item within building details."},
+            {"path": "components/PolygonViewer/BuildingMarkers.tsx", "role": "Renders building markers on the isometric map."},
+            {"path": "components/PolygonViewer/ResourceMarkers.tsx", "role": "Renders resource markers on the isometric map."},
+            {"path": "components/PolygonViewer/ViewportController.tsx", "role": "Manages the viewport (pan, zoom) for the isometric map."},
+            {"path": "components/PolygonViewer/types.ts", "role": "TypeScript type definitions specific to PolygonViewer components."}
+          ]
+        },
+        "UI": {
+          "path": "components/UI/",
+          "description": "General-purpose UI components used throughout the application.",
+          "important_files": [
+            {"path": "components/UI/ActionButton.tsx", "role": "Reusable action button component."},
+            {"path": "components/UI/AnimatedDucats.tsx", "role": "Component for displaying animated Ducat values."},
+            {"path": "components/UI/BuildingModelViewer.tsx", "role": "Component for viewing 3D building models."},
+            {"path": "components/UI/CitizenRegistry.tsx", "role": "Displays a registry of citizens, including their relevancies and opportunities."},
+            {"path": "components/UI/CitizenRelevanciesList.tsx", "role": "Lists relevancies specifically for a citizen's profile."},
+            {"path": "components/UI/ComputeInvestModal.tsx", "role": "Modal for investing $COMPUTE tokens."},
+            {"path": "components/UI/DailyUpdatePanel.tsx", "role": "Panel for displaying daily game updates or news."},
+            {"path": "components/UI/GuildsPanel.tsx", "role": "Panel for guild information and management."},
+            {"path": "components/UI/IconButton.tsx", "role": "Reusable icon button component."},
+            {"path": "components/UI/InfoIcon.tsx", "role": "Icon with a tooltip for displaying informational messages."},
+            {"path": "components/UI/MyOffersView.tsx", "role": "View for displaying the current user's active offers."},
+            {"path": "components/UI/Portal.tsx", "role": "React Portal component for rendering children into a different DOM subtree (e.g., for modals)."},
+            {"path": "components/UI/ProblemDetailsPanel.tsx", "role": "Panel for displaying details of a specific game problem."},
+            {"path": "components/UI/ProfileEditor.tsx", "role": "Component for editing user or citizen profiles."},
+            {"path": "components/UI/RelationshipGraph.tsx", "role": "Component for visualizing relationships between citizens."},
+            {"path": "components/UI/ResourceDropdown.tsx", "role": "Dropdown component for selecting resources."},
+            {"path": "components/UI/TransferComputeMenu.tsx", "role": "Menu for transferring $COMPUTE tokens."},
+            {"path": "components/UI/WalletButton.tsx", "role": "Button related to wallet actions (connect, disconnect, view status)."},
+            {"path": "components/UI/WalletStatus.tsx", "role": "Displays the current status of the connected wallet."},
+            {"path": "components/UI/WithdrawComputeMenu.tsx", "role": "Menu for withdrawing $COMPUTE tokens."}
+          ]
+        },
+        "types": {
+            "path": "components/types/",
+            "description": "Shared TypeScript type definitions specifically for components.",
+            "important_files": [
+                {"path": "components/types/phantom.d.ts", "role": "Type definitions for the Phantom wallet provider interface."}
+            ]
+        }
+      }
+    },
+    "backend": {
+      "path": "backend/",
+      "description": "Server-side logic, game engine scripts, AI behaviors, and API services.",
+      "sub_directories": {
+        "docs": {
+          "path": "backend/docs/",
+          "description": "Markdown documentation for backend systems, game mechanics, and AI.",
+          "important_files": [
+            {"path": "backend/docs/activities.md", "role": "Explains the citizen activity system, types, and processing."},
+            {"path": "backend/docs/airtable_schema.md", "role": "Describes the Airtable database schema for all tables."},
+            {"path": "backend/docs/ais.md", "role": "Details the AI system, its behaviors, and KinOS Engine integration."},
+            {"path": "backend/docs/contracts.md", "role": "Explains the contract system, types, and lifecycle."},
+            {"path": "backend/docs/decrees.md", "role": "Documents the decree system, active decrees, and their implementation."},
+            {"path": "backend/docs/engine.md", "role": "Describes automated daily game engine processes and their schedules."},
+            {"path": "backend/docs/problems.md", "role": "Documents the problem detection system, types of problems, and management."},
+            {"path": "backend/docs/relevancy-system.md", "role": "Explains the relevancy calculation system for AI and player guidance."},
+            {"path": "backend/docs/relationships.md", "role": "Documents the citizen relationship system, including StrengthScore and TrustScore calculation."}
+          ]
+        },
+        "engine": {
+          "path": "backend/engine/",
+          "description": "Core game engine scripts that run daily automated processes.",
+          "important_files": [
+            {"path": "backend/engine/pay_building_maintenance.py", "role": "Collects daily building maintenance costs from owners."},
+            {"path": "backend/engine/treasuryRedistribution.py", "role": "Redistributes a portion of the Republic's treasury to citizens based on social class."},
+            {"path": "backend/engine/distributeLeases.py", "role": "Handles daily lease payment distribution from building owners to landowners and applies Vigesima Variabilis tax."},
+            {"path": "backend/engine/immigration.py", "role": "Manages new AI citizen immigration based on vacant housing availability."},
+            {"path": "backend/engine/citizensgetjobs.py", "role": "Assigns jobs to unemployed citizens (excluding Nobili)."},
+            {"path": "backend/engine/househomelesscitizens.py", "role": "Assigns housing to homeless citizens based on social class and rent."},
+            {"path": "backend/engine/citizenhousingmobility.py", "role": "Simulates citizens looking for cheaper housing options."},
+            {"path": "backend/engine/updateSocialClass.py", "role": "Updates citizen social classes based on economic achievements and influence."},
+            {"path": "backend/engine/citizenworkmobility.py", "role": "Simulates citizens looking for better-paying job opportunities."},
+            {"path": "backend/engine/dailyloanpayments.py", "role": "Processes daily loan payments between borrowers and lenders."},
+            {"path": "backend/engine/dailywages.py", "role": "Processes daily wage payments from businesses to their employees."},
+            {"path": "backend/engine/dailyrentpayments.py", "role": "Processes daily rent payments for housing and business premises."},
+            {"path": "backend/engine/calculateIncomeAndTurnover.py", "role": "Calculates and updates daily, weekly, and monthly income/turnover for all citizens."},
+            {"path": "backend/engine/decrees/affectpublicbuildingstolandowners.py", "role": "Implements the decree assigning public infrastructure maintenance responsibility to landowners."},
+            {"path": "backend/engine/createActivities.py", "role": "Core script that assigns activities to citizens (AI and human) based on their needs, status, time of day, and available opportunities. Manages the daily life cycle of citizens."},
+            {"path": "backend/engine/paystoragecontracts.py", "role": "Processes daily payments for active 'storage_query' contracts, where a buyer pays a seller for reserved storage space."}
+          ]
+        },
+        "ais": {
+          "path": "backend/ais/",
+          "description": "Scripts defining AI citizen behaviors and decision-making, often integrating with KinOS Engine.",
+          "important_files": [
+            {"path": "backend/ais/bidonlands.py", "role": "Manages AI bidding on land parcels based on income potential."},
+            {"path": "backend/ais/purchaselands.py", "role": "Manages AI purchasing of available land parcels."},
+            {"path": "backend/ais/buildbuildings.py", "role": "Manages AI construction of buildings on their owned land."},
+            {"path": "backend/ais/adjustleases.py", "role": "KinOS-driven AI adjustment of lease prices for buildings on their land."},
+            {"path": "backend/ais/automated_adjustleases.py", "role": "Rule-based AI adjustment of lease prices for buildings on their land."},
+            {"path": "backend/ais/adjustrents.py", "role": "KinOS-driven AI adjustment of rent prices for buildings they own."},
+            {"path": "backend/ais/automated_adjustrents.py", "role": "Rule-based AI adjustment of rent prices for buildings they own."},
+            {"path": "backend/ais/adjustwages.py", "role": "KinOS-driven AI adjustment of wages for businesses they run."},
+            {"path": "backend/ais/automated_adjustwages.py", "role": "Rule-based AI adjustment of wages for businesses they run."},
+            {"path": "backend/ais/adjustimports.py", "role": "KinOS-driven AI management of resource import contracts for their businesses."},
+            {"path": "backend/ais/automated_adjustimports.py", "role": "Rule-based AI management of resource import contracts."},
+            {"path": "backend/ais/managepublicsalesandprices.py", "role": "KinOS-driven AI management of public sell contracts and pricing strategies."},
+            {"path": "backend/ais/automated_managepublicsalesandprices.py", "role": "Rule-based AI creation/update of public sell contracts and pricing."},
+            {"path": "backend/ais/automated_adjustpublicstoragecontracts.py", "role": "Rule-based AI management of public storage contract offerings."},
+            {"path": "backend/ais/automated_adjuststoragequeriescontracts.py", "role": "Rule-based AI creation of storage query contracts when their businesses need external storage."},
+            {"path": "backend/ais/answertomessages.py", "role": "KinOS-driven AI generation of responses to player messages."},
+            {"path": "backend/ais/processnotifications.py", "role": "KinOS-driven AI processing of game notifications to update their world model."},
+            {"path": "backend/ais/generatethoughts.py", "role": "KinOS-driven AI generation of strategic thoughts, visible to players."},
+            {"path": "backend/ais/delegateBusinesses.py", "role": "Redistributes businesses if an AI citizen runs too many, to maintain balance."},
+            {"path": "backend/ais/messagesInitiatives.py", "role": "Allows AI citizens to proactively initiate conversations with other citizens based on relationship scores and context, using KinOS Engine for message generation."}
+          ]
+        },
+        "relevancies": {
+            "path": "backend/relevancies/",
+            "description": "Scripts for calculating and managing relevancy scores for citizens.",
+            "important_files": [
+                {"path": "backend/relevancies/calculateRelevancies.py", "role": "Orchestrates the calculation of all types of relevancies (proximity, domination, etc.)."},
+                {"path": "backend/relevancies/calculateSpecificRelevancy.py", "role": "Handles the calculation of specific relevancy types based on parameters."}
+            ]
+        },
+        "relationships": {
+            "path": "backend/relationships/",
+            "description": "Scripts for managing and updating inter-citizen relationships.",
+            "important_files": [
+                {"path": "backend/relationships/updateRelationshipStrengthScores.py", "role": "Daily script to update StrengthScore and TrustScore between citizens based on interactions and shared relevancies."}
+            ]
+        },
+        "problems": {
+            "path": "backend/problems/",
+            "description": "Scripts for detecting and managing in-game problems affecting citizens or assets.",
+            "important_files": [
+                {"path": "backend/problems/detectProblems.py", "role": "Orchestrates the detection of all defined problem types (e.g., homelessness, vacant buildings)."},
+                {"path": "backend/problems/detectSpecificProblems.py", "role": "Triggers the detection of specific problem types, potentially for a given user."}
+            ]
+        },
+        "startup_scripts": {
+            "path": "backend/",
+            "description": "Root backend directory, likely containing main startup scripts.",
+            "important_files": [
+                {"path": "backend/startup.sh", "role": "Shell script probably used to initialize backend services and schedule cron jobs for all daily engine and AI scripts."}
+            ]
+        }
+      }
+    },
+    "libraries_and_utilities": {
+      "path": "lib/",
+      "description": "Shared libraries, services, and utility functions used across the application.",
+      "sub_directories": {
+        "services": {
+          "path": "lib/services/",
+          "description": "Core services providing specific functionalities.",
+          "important_files": [
+            {"path": "lib/services/CitizenRenderService.ts", "role": "Service likely related to preparing citizen data for rendering or display."},
+            {"path": "lib/services/ContractService.ts", "role": "Manages contract data, including caching and providing lookup methods."},
+            {"path": "lib/services/HoverStateService.ts", "role": "Manages hover state information for UI interactions, possibly on the map."},
+            {"path": "lib/services/LoanService.ts", "role": "Manages loan data, statuses, and related operations."},
+            {"path": "lib/services/PolygonService.ts", "role": "Manages polygon data for land parcels and related information."},
+            {"path": "lib/services/ResourceService.ts", "role": "Manages resource data, categories, player/global inventories, and caching."},
+            {"path": "lib/services/ProblemService.ts", "role": "Contains logic for detecting specific problem types, used by backend problem detection scripts."},
+            {"path": "lib/services/RelevancyService.ts", "role": "Contains logic for calculating various relevancy scores, used by backend relevancy scripts."}
+          ]
+        },
+        "store": {
+          "path": "lib/store/",
+          "description": "State management stores for the frontend application (e.g., Zustand or Redux).",
+          "important_files": [
+            {"path": "lib/store/contractStore.ts", "role": "Manages frontend state related to contracts and transactions."},
+            {"path": "lib/store/marketStore.ts", "role": "Manages frontend state related to market data and transactions."}
+          ]
+        },
+        "utils": {
+          "path": "lib/utils/",
+          "description": "General utility functions.",
+          "important_files": [
+            {"path": "lib/utils/eventBus.ts", "role": "Global event bus for decoupled communication between components or modules."},
+            {"path": "lib/utils/resourceUtils.ts", "role": "Utility functions related to resource management or calculations."},
+            {"path": "lib/utils/problemUtils.ts", "role": "Utility functions for handling problem records, such as saving them to the database."}
+          ]
+        }
+      }
+    },
+    "ai_system_core_files": {
+        "path": "./", 
+        "description": "Root directory files defining the core operational parameters and persona for AI citizens using the KinOS.",
+        "important_files": [
+            {"path": "kinos.txt", "role": "Defines the KinOS implementation for AI Citizens, including memory types (Citizen Profile, Venice World Knowledge, Relationships, Codebase Knowledge), adaptation strategies, and operational mandate regarding codebase access and output structure."},
+            {"path": "system.txt", "role": "System-level instructions for AI players, emphasizing KinOS integration for memory management, adherence to persona, and guidelines for using codebase knowledge ethically."},
+            {"path": "persona.txt", "role": "Template for AI player personas, outlining character framework (background, personality, strategic orientation), initial goals/motivations, communication style, and how persona integrates with KinOS."}
+        ]
+    },
+    "ai_dynamic_data_storage": {
+        "path": "AI-memories/",
+        "description": "Directory where AI citizens persist their structured memories as defined in kinos.txt (e.g., Citizen Profile, Venice World Knowledge, Relationship & Interaction Memory, Codebase & System Knowledge Memory).",
+        "role": "Persistent storage for AI's processed information, learned knowledge, and evolving understanding of the game world and themselves."
+    },
+    "ai_strategic_planning_storage": {
+        "path": "AI-strategies/",
+        "description": "Directory where AI citizens house their formulated strategic plans, decision trees, tactical responses to events, and long-term objectives, derived from their memories and persona.",
+        "role": "Storage for AI's actionable plans, contingent strategies, and overarching goals guiding their behavior in La Serenissima."
+    }
+  }
+}
