@@ -91,7 +91,8 @@ function extractMainThought(content: string): string {
   if (!content) {
     return "";
   }
-  const MIN_LENGTH = 20;
+  // Minimum and maximum length for thought selection
+  const MIN_LENGTH = 30; // Increased from 20 to ensure more substantial thoughts
   const MAX_LENGTH = 400;
   let potentialThoughts: string[] = [];
   const boldRegex = /\*\*(.*?)\*\*/; // Non-greedy match for content within **...**
