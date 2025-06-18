@@ -10,14 +10,113 @@
         {"path": "app/types/components.ts", "role": "Defines props interfaces for various UI components, e.g., PolygonViewerProps."}
       ]
     },
+    "frontend_pages": {
+      "path": "app/",
+      "description": "Next.js page components that define the application's routes and main views.",
+      "important_files": [
+        {"path": "app/page.tsx", "role": "Main landing page component for the application."},
+        {"path": "app/layout.tsx", "role": "Root layout component that wraps all pages."},
+        {"path": "app/globals.css", "role": "Global CSS styles for the entire application."},
+        {"path": "app/not-found.tsx", "role": "404 Not Found page component."}
+      ],
+      "sub_directories": {
+        "arrival": {
+          "path": "app/arrival/",
+          "description": "Components for the new user arrival experience.",
+          "important_files": [
+            {"path": "app/arrival/page.tsx", "role": "Page component for new user onboarding."}
+          ]
+        },
+        "citizens": {
+          "path": "app/citizens/",
+          "description": "Components for citizen profiles and management.",
+          "important_files": [
+            {"path": "app/citizens/page.tsx", "role": "Page component for citizen directory."}
+          ]
+        },
+        "governance": {
+          "path": "app/governance/",
+          "description": "Components for governance and political features.",
+          "important_files": [
+            {"path": "app/governance/page.tsx", "role": "Page component for governance interface."}
+          ]
+        },
+        "guilds": {
+          "path": "app/guilds/",
+          "description": "Components for guild management and information.",
+          "important_files": [
+            {"path": "app/guilds/page.tsx", "role": "Page component for guild directory and management."}
+          ]
+        },
+        "knowledge": {
+          "path": "app/knowledge/",
+          "description": "Components for the knowledge repository and tech tree.",
+          "important_files": [
+            {"path": "app/knowledge/page.tsx", "role": "Page component for knowledge repository."}
+          ]
+        },
+        "loans": {
+          "path": "app/loans/",
+          "description": "Components for loan management and applications.",
+          "important_files": [
+            {"path": "app/loans/page.tsx", "role": "Page component for loan management interface."}
+          ]
+        },
+        "map": {
+          "path": "app/map/",
+          "description": "Components for the main interactive map interface.",
+          "important_files": [
+            {"path": "app/map/page.tsx", "role": "Page component for the main map view."}
+          ]
+        },
+        "activity_reference": {
+          "path": "app/activity-reference/",
+          "description": "Components for activity reference documentation.",
+          "important_files": [
+            {"path": "app/activity-reference/page.tsx", "role": "Page component for activity reference."}
+          ]
+        },
+        "reads_reference": {
+          "path": "app/reads-reference/",
+          "description": "Components for reading material reference.",
+          "important_files": [
+            {"path": "app/reads-reference/page.tsx", "role": "Page component for reading material reference."}
+          ]
+        },
+        "utils": {
+          "path": "app/utils/",
+          "description": "Utility functions specific to the frontend application.",
+          "important_files": [
+            {"path": "app/utils/coatOfArmsUtils.ts", "role": "Utility functions for coat of arms management."}
+          ]
+        }
+      }
+    },
     "api_routes": {
       "path": "app/api/",
       "description": "Next.js API routes that handle server-side requests and data processing.",
       "sub_directories": {
+        "actions": {
+          "path": "app/api/actions/",
+          "description": "API routes for handling user actions.",
+          "important_files": [
+            {"path": "app/api/actions/construct-building/route.ts", "role": "Handles building construction actions."},
+            {"path": "app/api/actions/create-activity/route.ts", "role": "Handles activity creation actions."}
+          ]
+        },
+        "activities": {
+          "path": "app/api/activities/",
+          "description": "API routes for managing citizen activities.",
+          "important_files": [
+            {"path": "app/api/activities/route.ts", "role": "Handles general activity operations."},
+            {"path": "app/api/activities/try-create/route.ts", "role": "Handles activity creation attempts."}
+          ]
+        },
         "bridges": {
           "path": "app/api/bridges/",
           "description": "API routes for managing building bridges and orientations.",
           "important_files": [
+            {"path": "app/api/bridges/route.ts", "role": "Handles general bridge operations."},
             {"path": "app/api/bridges/[buildingId]/orient/route.ts", "role": "Handles PATCH requests to update building orientation."}
           ]
         },
@@ -129,6 +228,49 @@
           "description": "API routes for water point management.",
           "important_files": [
             {"path": "app/api/water-points/route.ts", "role": "Handles operations related to water points on the map."}
+          ]
+        },
+        "weather": {
+          "path": "app/api/weather/",
+          "description": "API routes for weather information.",
+          "important_files": [
+            {"path": "app/api/weather/route.ts", "role": "Handles requests for weather data."}
+          ]
+        },
+        "withdraw_compute": {
+          "path": "app/api/withdraw-compute/",
+          "description": "API routes for withdrawing compute tokens.",
+          "important_files": [
+            {"path": "app/api/withdraw-compute/route.ts", "role": "Handles compute token withdrawal requests."}
+          ]
+        },
+        "calculate_mood": {
+          "path": "app/api/calculate-mood/",
+          "description": "API routes for calculating citizen mood.",
+          "important_files": [
+            {"path": "app/api/calculate-mood/route.ts", "role": "Handles citizen mood calculation."}
+          ]
+        },
+        "get_ledger": {
+          "path": "app/api/get-ledger/",
+          "description": "API routes for retrieving ledger information.",
+          "important_files": [
+            {"path": "app/api/get-ledger/route.ts", "role": "Handles requests for ledger data."}
+          ]
+        },
+        "try_read": {
+          "path": "app/api/try-read/",
+          "description": "API routes for reading attempts.",
+          "important_files": [
+            {"path": "app/api/try-read/route.ts", "role": "Handles reading attempt requests."}
+          ]
+        },
+        "stratagems": {
+          "path": "app/api/stratagems/",
+          "description": "API routes for stratagem management.",
+          "important_files": [
+            {"path": "app/api/stratagems/route.ts", "role": "Handles general stratagem operations."},
+            {"path": "app/api/stratagems/try-create/route.ts", "role": "Handles stratagem creation attempts."}
           ]
         }
       }
