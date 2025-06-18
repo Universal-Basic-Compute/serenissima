@@ -147,10 +147,10 @@ function extractMainThought(content: string): string {
     // ThoughtBubble's prop and ensure its useEffect dependency is stable.
   }, []);
 
-  // Define these constants outside useEffect so they are accessible in the render method
-  const WPM = 120; // Words per minute for reading speed (reduced from 180)
-  const MIN_DISPLAY_TIME = 6000; // Minimum 6 seconds (doubled)
-  const MAX_DISPLAY_TIME = 20000; // Maximum 20 seconds (doubled)
+// Define these constants at module level so they don't get recreated on each render
+const WPM = 120; // Words per minute for reading speed (reduced from 180)
+const MIN_DISPLAY_TIME = 6000; // Minimum 6 seconds (doubled)
+const MAX_DISPLAY_TIME = 20000; // Maximum 20 seconds (doubled)
 
   // Helper function to ensure a citizen object has a valid position
   const ensureCitizenPosition = (citizen: any): any => {
@@ -857,7 +857,7 @@ function extractMainThought(content: string): string {
       if (thoughtCycleTimeoutRef.current) clearTimeout(thoughtCycleTimeoutRef.current);
       if (thoughtDisplayDurationTimeoutRef.current) clearTimeout(thoughtDisplayDurationTimeoutRef.current);
     };
-  }, [allThoughts, citizens, isVisible, activeView, latLngToScreen, canvasWidth, canvasHeight, WPM, MIN_DISPLAY_TIME, MAX_DISPLAY_TIME, isThoughtBubbleHovered]);
+  }, [allThoughts, citizens, isVisible, activeView, latLngToScreen, canvasWidth, canvasHeight, isThoughtBubbleHovered]);
   
   // Update activeThought position if the citizen moves
   useEffect(() => {

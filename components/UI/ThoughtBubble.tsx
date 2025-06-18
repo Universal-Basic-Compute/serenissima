@@ -35,7 +35,12 @@ const ThoughtBubble: React.FC<ThoughtBubbleProps> = ({
 }) => {
   // Determine if this is a thought (sender === receiver) or a chat message
   const isThought = !sender || !receiver || sender === receiver;
-  console.log('ThoughtBubble:', { sender, receiver, isThought });
+  // Only log on first render or when props change
+  React.useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('ThoughtBubble:', { sender, receiver, isThought });
+    }
+  }, [sender, receiver, isThought]);
   const [showOriginal, setShowOriginal] = useState(false);
   const [internalVisible, setInternalVisible] = useState(false);
 
