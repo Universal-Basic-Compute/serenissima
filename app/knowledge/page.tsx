@@ -43,6 +43,7 @@ export default function KnowledgePage() {
   }
   
   const handleShowPresentation = () => {
+    console.log("Showing presentation view");
     setView('presentation');
   };
 
