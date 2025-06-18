@@ -33,7 +33,7 @@ declare global {
 
 export default function KnowledgePage() {
   const router = useRouter();
-  const [view, setView] = useState<'repository' | 'presentation' | 'techTree' | 'resourceTree' | 'article'>('repository');
+  const [view, setView] = useState<'repository' | 'presentation' | 'techTree' | 'resourceTree' | 'article' | 'loading'>('repository');
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
   
   // Handle redirect for direct navigation
@@ -56,17 +56,15 @@ export default function KnowledgePage() {
   
   const handleShowPresentation = () => {
     console.log("Showing presentation view - function called");
-    setView('presentation');
-    console.log("Current view after setting:", 'presentation');
     
-    // Force a re-render by using setTimeout
+    // Clear the current view first to force a complete re-render
+    setView('loading');
+    
+    // Then set to presentation after a brief delay
     setTimeout(() => {
-      console.log("Forcing re-render for presentation view");
-      setView(prev => {
-        console.log("Previous view:", prev);
-        return prev;
-      });
-    }, 50);
+      console.log("Setting view to presentation after delay");
+      setView('presentation');
+    }, 10);
   };
 
   const handleShowTechTree = () => {
@@ -100,7 +98,9 @@ export default function KnowledgePage() {
       {view === 'presentation' ? (
         <>
           {console.log("Rendering presentation view")}
-          <ProjectPresentation onClose={() => setView('repository')} />
+          <div className="w-full h-full">
+            <ProjectPresentation onClose={() => setView('repository')} />
+          </div>
         </>
       ) : view === 'repository' ? (
         <KnowledgeRepository
@@ -143,6 +143,10 @@ export default function KnowledgePage() {
           >
             Back to Repository
           </button>
+        </div>
+      ) : view === 'loading' ? (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-amber-600 text-xl">Loading presentation...</div>
         </div>
       ) : (
         // Fallback if no view matches
