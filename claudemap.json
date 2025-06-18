@@ -385,8 +385,8 @@
           "path": "backend/docs/",
           "description": "Markdown documentation for backend systems, game mechanics, and AI.",
           "important_files": [
-            {"path": "backend/docs/activities.md", "role": "Explains the citizen activity system, types, and processing."},
-            {"path": "backend/docs/airtable_schema.md", "role": "Describes the Airtable database schema for all tables."},
+            {"path": "backend/docs/activities.md", "role": "Explains the citizen activity system, types, and processing.", "importance": "IMPORTANT"},
+            {"path": "backend/docs/airtable_schema.md", "role": "Describes the Airtable database schema for all tables.", "importance": "IMPORTANT"},
             {"path": "backend/docs/ais.md", "role": "Details the AI system, its behaviors, and KinOS Engine integration."},
             {"path": "backend/docs/contracts.md", "role": "Explains the contract system, types, and lifecycle."},
             {"path": "backend/docs/decrees.md", "role": "Documents the decree system, active decrees, and their implementation."},
@@ -394,7 +394,7 @@
             {"path": "backend/docs/problems.md", "role": "Documents the problem detection system, types of problems, and management."},
             {"path": "backend/docs/relevancy-system.md", "role": "Explains the relevancy calculation system for AI and player guidance."},
             {"path": "backend/docs/relationships.md", "role": "Documents the citizen relationship system, including StrengthScore and TrustScore calculation."},
-            {"path": "backend/docs/stratagems.md", "role": "Documents the stratagem system, types of stratagems, and their effects on the game world."}
+            {"path": "backend/docs/stratagems.md", "role": "Documents the stratagem system, types of stratagems, and their effects on the game world.", "importance": "IMPORTANT"}
           ]
         },
         "engine": {
