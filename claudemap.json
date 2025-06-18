@@ -251,12 +251,73 @@
             {"path": "backend/docs/engine.md", "role": "Describes automated daily game engine processes and their schedules."},
             {"path": "backend/docs/problems.md", "role": "Documents the problem detection system, types of problems, and management."},
             {"path": "backend/docs/relevancy-system.md", "role": "Explains the relevancy calculation system for AI and player guidance."},
-            {"path": "backend/docs/relationships.md", "role": "Documents the citizen relationship system, including StrengthScore and TrustScore calculation."}
+            {"path": "backend/docs/relationships.md", "role": "Documents the citizen relationship system, including StrengthScore and TrustScore calculation."},
+            {"path": "backend/docs/stratagems.md", "role": "Documents the stratagem system, types of stratagems, and their effects on the game world."}
           ]
         },
         "engine": {
           "path": "backend/engine/",
           "description": "Core game engine scripts that run daily automated processes.",
+          "sub_directories": {
+            "activity_creators": {
+              "path": "backend/engine/activity_creators/",
+              "description": "Scripts that create various types of activities for citizens.",
+              "important_files": [
+                {"path": "backend/engine/activity_creators/__init__.py", "role": "Initializes the activity creators module and provides common functionality."},
+                {"path": "backend/engine/activity_creators/eat_activity_creator.py", "role": "Creates eating activities for citizens."},
+                {"path": "backend/engine/activity_creators/goto_work_activity_creator.py", "role": "Creates activities for citizens to go to their workplace."},
+                {"path": "backend/engine/activity_creators/production_activity_creator.py", "role": "Creates production activities for businesses."},
+                {"path": "backend/engine/activity_creators/send_message_creator.py", "role": "Creates message sending activities between citizens."}
+              ]
+            },
+            "activity_processors": {
+              "path": "backend/engine/activity_processors/",
+              "description": "Scripts that process and execute various types of activities.",
+              "important_files": [
+                {"path": "backend/engine/activity_processors/__init__.py", "role": "Initializes the activity processors module and provides common functionality."},
+                {"path": "backend/engine/activity_processors/eat_processor.py", "role": "Processes eating activities for citizens."},
+                {"path": "backend/engine/activity_processors/production_processor.py", "role": "Processes production activities for businesses."},
+                {"path": "backend/engine/activity_processors/send_message_processor.py", "role": "Processes message sending between citizens."}
+              ]
+            },
+            "stratagem_creators": {
+              "path": "backend/engine/stratagem_creators/",
+              "description": "Scripts that create various types of stratagems for citizens.",
+              "important_files": [
+                {"path": "backend/engine/stratagem_creators/__init__.py", "role": "Initializes the stratagem creators module and provides common functionality."},
+                {"path": "backend/engine/stratagem_creators/marketplace_gossip_stratagem_creator.py", "role": "Creates marketplace gossip stratagems."},
+                {"path": "backend/engine/stratagem_creators/undercut_stratagem_creator.py", "role": "Creates undercutting price stratagems."}
+              ]
+            },
+            "stratagem_processors": {
+              "path": "backend/engine/stratagem_processors/",
+              "description": "Scripts that process and execute various types of stratagems.",
+              "important_files": [
+                {"path": "backend/engine/stratagem_processors/__init__.py", "role": "Initializes the stratagem processors module and provides common functionality."},
+                {"path": "backend/engine/stratagem_processors/marketplace_gossip_stratagem_processor.py", "role": "Processes marketplace gossip stratagems."},
+                {"path": "backend/engine/stratagem_processors/reputation_assault_stratagem_processor.py", "role": "Processes reputation assault stratagems."}
+              ]
+            },
+            "logic": {
+              "path": "backend/engine/logic/",
+              "description": "Core business logic for different citizen types and activities.",
+              "important_files": [
+                {"path": "backend/engine/logic/citizen_general_activities.py", "role": "Contains logic for general citizen activities."},
+                {"path": "backend/engine/logic/construction_logic.py", "role": "Contains logic for building construction."},
+                {"path": "backend/engine/logic/forestieri_activities.py", "role": "Contains logic for foreign merchant activities."}
+              ]
+            },
+            "utils": {
+              "path": "backend/engine/utils/",
+              "description": "Utility functions used by the engine scripts.",
+              "important_files": [
+                {"path": "backend/engine/utils/activity_helpers.py", "role": "Helper functions for activity creation and processing."},
+                {"path": "backend/engine/utils/conversation_helper.py", "role": "Helper functions for citizen conversations."},
+                {"path": "backend/engine/utils/relationship_helpers.py", "role": "Helper functions for managing citizen relationships."},
+                {"path": "backend/engine/utils/thinking_helper.py", "role": "Helper functions for AI citizen thinking processes."}
+              ]
+            }
+          },
           "important_files": [
             {"path": "backend/engine/pay_building_maintenance.py", "role": "Collects daily building maintenance costs from owners."},
             {"path": "backend/engine/treasuryRedistribution.py", "role": "Redistributes a portion of the Republic's treasury to citizens based on social class."},
@@ -271,9 +332,11 @@
             {"path": "backend/engine/dailywages.py", "role": "Processes daily wage payments from businesses to their employees."},
             {"path": "backend/engine/dailyrentpayments.py", "role": "Processes daily rent payments for housing and business premises."},
             {"path": "backend/engine/calculateIncomeAndTurnover.py", "role": "Calculates and updates daily, weekly, and monthly income/turnover for all citizens."},
-            {"path": "backend/engine/decrees/affectpublicbuildingstolandowners.py", "role": "Implements the decree assigning public infrastructure maintenance responsibility to landowners."},
-            {"path": "backend/engine/createActivities.py", "role": "Core script that assigns activities to citizens (AI and human) based on their needs, status, time of day, and available opportunities. Manages the daily life cycle of citizens."},
-            {"path": "backend/engine/paystoragecontracts.py", "role": "Processes daily payments for active 'storage_query' contracts, where a buyer pays a seller for reserved storage space."}
+            {"path": "backend/engine/processActivities.py", "role": "Processes all pending activities in the system."},
+            {"path": "backend/engine/processStratagems.py", "role": "Processes all pending stratagems in the system."},
+            {"path": "backend/engine/createActivities.py", "role": "Core script that assigns activities to citizens based on their needs and status."},
+            {"path": "backend/engine/paystoragecontracts.py", "role": "Processes daily payments for active storage contracts."},
+            {"path": "backend/engine/dailyUpdate.py", "role": "Main orchestration script for the daily game update process."}
           ]
         },
         "ais": {
@@ -299,7 +362,10 @@
             {"path": "backend/ais/processnotifications.py", "role": "KinOS-driven AI processing of game notifications to update their world model."},
             {"path": "backend/ais/generatethoughts.py", "role": "KinOS-driven AI generation of strategic thoughts, visible to players."},
             {"path": "backend/ais/delegateBusinesses.py", "role": "Redistributes businesses if an AI citizen runs too many, to maintain balance."},
-            {"path": "backend/ais/messagesInitiatives.py", "role": "Allows AI citizens to proactively initiate conversations with other citizens based on relationship scores and context, using KinOS Engine for message generation."}
+            {"path": "backend/ais/messagesInitiatives.py", "role": "Allows AI citizens to proactively initiate conversations with other citizens."},
+            {"path": "backend/ais/autoResolveProblems.py", "role": "AI-driven problem resolution system."},
+            {"path": "backend/ais/autonomouslyRun.py", "role": "Core script for autonomous AI citizen decision-making."},
+            {"path": "backend/ais/thinkingLoop.py", "role": "Background process that manages AI citizen thinking cycles."}
           ]
         },
         "relevancies": {
@@ -307,14 +373,26 @@
             "description": "Scripts for calculating and managing relevancy scores for citizens.",
             "important_files": [
                 {"path": "backend/relevancies/calculateRelevancies.py", "role": "Orchestrates the calculation of all types of relevancies (proximity, domination, etc.)."},
-                {"path": "backend/relevancies/calculateSpecificRelevancy.py", "role": "Handles the calculation of specific relevancy types based on parameters."}
+                {"path": "backend/relevancies/calculateSpecificRelevancy.py", "role": "Handles the calculation of specific relevancy types based on parameters."},
+                {"path": "backend/relevancies/calculateHousingRelevancies.py", "role": "Calculates housing-specific relevancies for citizens."},
+                {"path": "backend/relevancies/calculateJobMarketRelevancies.py", "role": "Calculates job market relevancies for citizens."},
+                {"path": "backend/relevancies/gatherInformation.py", "role": "Gathers information needed for relevancy calculations."}
             ]
         },
         "relationships": {
             "path": "backend/relationships/",
             "description": "Scripts for managing and updating inter-citizen relationships.",
             "important_files": [
-                {"path": "backend/relationships/updateRelationshipStrengthScores.py", "role": "Daily script to update StrengthScore and TrustScore between citizens based on interactions and shared relevancies."}
+                {"path": "backend/relationships/updateRelationshipStrengthScores.py", "role": "Updates relationship strength scores between citizens."},
+                {"path": "backend/relationships/processEncounters.py", "role": "Processes citizen encounters and their effects on relationships."}
+            ]
+        },
+        "resources": {
+            "path": "backend/resources/",
+            "description": "Scripts for managing in-game resources and their lifecycle.",
+            "important_files": [
+                {"path": "backend/resources/processdecay.py", "role": "Processes the decay of perishable resources over time."},
+                {"path": "backend/resources/processHomeConsumption.py", "role": "Processes the consumption of resources in citizen homes."}
             ]
         },
         "problems": {
@@ -325,11 +403,47 @@
                 {"path": "backend/problems/detectSpecificProblems.py", "role": "Triggers the detection of specific problem types, potentially for a given user."}
             ]
         },
+        "scripts": {
+            "path": "backend/scripts/",
+            "description": "Utility scripts for various administrative and maintenance tasks.",
+            "important_files": [
+                {"path": "backend/scripts/buildFast.py", "role": "Script for rapid building construction (likely for testing)."},
+                {"path": "backend/scripts/generateCitizen.py", "role": "Generates new AI citizens with appropriate attributes."},
+                {"path": "backend/scripts/generate_building_images.py", "role": "Generates images for buildings using AI."},
+                {"path": "backend/scripts/updatecitizenDescriptionAndImage.py", "role": "Updates citizen descriptions and images."},
+                {"path": "backend/scripts/artistwork.py", "role": "Manages artist work and art creation in the game."},
+                {"path": "backend/scripts/signoriaDiscussion.py", "role": "Manages discussions in the Signoria (governing council)."},
+                {"path": "backend/scripts/processAllActivitiesNow.py", "role": "Immediately processes all pending activities."}
+            ]
+        },
+        "trainings": {
+            "path": "backend/trainings/",
+            "description": "Scripts and data for training AI models used in the game.",
+            "important_files": [
+                {"path": "backend/trainings/finetuneModel.py", "role": "Fine-tunes AI models for specific game tasks."},
+                {"path": "backend/trainings/prepareDataset.py", "role": "Prepares datasets for AI model training."},
+                {"path": "backend/trainings/install_llama_cpp.py", "role": "Installs the llama.cpp library for AI model inference."},
+                {"path": "backend/trainings/diagnose_model.py", "role": "Diagnoses issues with AI models."}
+            ]
+        },
+        "app": {
+            "path": "backend/app/",
+            "description": "Core application files for the backend server.",
+            "important_files": [
+                {"path": "backend/app/main.py", "role": "Main entry point for the backend application."},
+                {"path": "backend/app/scheduler.py", "role": "Schedules and manages background tasks."},
+                {"path": "backend/app/citizen_utils.py", "role": "Utility functions for citizen management."}
+            ]
+        },
         "startup_scripts": {
             "path": "backend/",
-            "description": "Root backend directory, likely containing main startup scripts.",
+            "description": "Root backend directory containing main startup scripts.",
             "important_files": [
-                {"path": "backend/startup.sh", "role": "Shell script probably used to initialize backend services and schedule cron jobs for all daily engine and AI scripts."}
+                {"path": "backend/startup.sh", "role": "Shell script used to initialize backend services and schedule cron jobs."},
+                {"path": "backend/setup_cron.sh", "role": "Sets up cron jobs for recurring tasks."},
+                {"path": "backend/run.py", "role": "Main Python entry point for running the backend."},
+                {"path": "backend/.env", "role": "Environment configuration file."},
+                {"path": "backend/requirements.txt", "role": "Python dependencies for the backend."}
             ]
         }
       }
