@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { FaTimes } from 'react-icons/fa';
+
+// Import the ProjectPresentationArticle directly to ensure it's available
 import ProjectPresentationArticle from '@/components/Articles/ProjectPresentationArticle';
 
 // Dynamically import components to avoid SSR issues
@@ -17,7 +19,6 @@ const ResourceDetails = dynamic(() => import('@/components/Knowledge/ResourceDet
 });
 
 // Dynamically import other articles
-// ProjectPresentationArticle is now directly imported at the top
 const BeginnersGuideArticle = dynamic(() => import('@/components/Articles/BeginnersGuideArticle'), {
   ssr: false,
   loading: () => <div className="p-8 text-amber-300">Loading Article...</div>
@@ -121,12 +122,8 @@ export default function KnowledgePage() {
         </div>
       ) : view === 'article' && selectedArticle ? (
         <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-75 p-4">
-          {console.log('Rendering article view for:', selectedArticle)}
           {selectedArticle === "project-presentation" && (
-            <div className="w-full h-full">
-              {console.log('Rendering ProjectPresentationArticle')}
-              <ProjectPresentationArticle onClose={() => setView('repository')} />
-            </div>
+            <ProjectPresentationArticle onClose={() => setView('repository')} />
           )}
           {selectedArticle === "beginners-guide" && (
             <BeginnersGuideArticle onClose={() => setView('repository')} />
