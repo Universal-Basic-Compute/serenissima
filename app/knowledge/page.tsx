@@ -75,11 +75,8 @@ export default function KnowledgePage() {
   };
 
   const handleSelectArticle = (article: string) => {
-    console.log('Selecting article:', article);
     setSelectedArticle(article);
     setView('article');
-    console.log('View set to:', 'article');
-    console.log('Selected article state:', article);
   };
 
   const handleClose = () => {
