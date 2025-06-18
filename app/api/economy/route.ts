@@ -8,6 +8,9 @@ const AIRTABLE_CITIZENS_TABLE = 'CITIZENS';
 const AIRTABLE_TRANSACTIONS_TABLE = 'TRANSACTIONS';
 const AIRTABLE_LOANS_TABLE = 'LOANS';
 
+// Citizens to exclude from Gini coefficient calculation
+const EXCLUDED_CITIZENS = ['ConsiglioDeiDieci', 'Italia'];
+
 // Initialize Airtable
 const initAirtable = () => {
   if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
@@ -21,18 +24,62 @@ const initAirtable = () => {
   return Airtable.base(AIRTABLE_BASE_ID);
 };
 
+// Calculate Gini coefficient
+const calculateGiniCoefficient = (citizens: any[]): number => {
+  if (citizens.length <= 1) {
+    return 0; // No inequality with 0 or 1 citizen
+  }
+  
+  // Extract wealth values
+  const wealthValues = citizens.map(record => {
+    return record.get('Ducats') as number || 0;
+  }).sort((a, b) => a - b); // Sort in ascending order
+  
+  const n = wealthValues.length;
+  const mean = wealthValues.reduce((sum, val) => sum + val, 0) / n;
+  
+  if (mean === 0) {
+    return 0; // No inequality if everyone has 0 wealth
+  }
+  
+  let sumAbsoluteDifferences = 0;
+  
+  // Calculate sum of absolute differences
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      sumAbsoluteDifferences += Math.abs(wealthValues[i] - wealthValues[j]);
+    }
+  }
+  
+  // Gini coefficient formula: G = (1/2n²μ) * Σ|xi - xj|
+  const gini = sumAbsoluteDifferences / (2 * n * n * mean);
+  
+  // Round to 3 decimal places
+  return Math.round(gini * 1000) / 1000;
+};
+
 export async function GET(request: Request) {
   try {
     // Initialize Airtable
     const base = initAirtable();
     
-    // 1. Get total Ducats across all citizens
+    // 1. Get total Ducats across all citizens and calculate Gini coefficient
     const citizensRecords = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        fields: ['Ducats']
+        fields: ['Ducats', 'Username']
       })
       .all();
     
+    // Filter out excluded citizens for Gini calculation
+    const filteredCitizens = citizensRecords.filter(record => {
+      const username = record.get('Username') as string;
+      return !EXCLUDED_CITIZENS.includes(username);
+    });
+    
+    // Calculate Gini coefficient
+    const giniCoefficient = calculateGiniCoefficient(filteredCitizens);
+    
+    // Calculate total Ducats (including all citizens)
     const totalDucats = citizensRecords.reduce((sum, record) => {
       const ducats = record.get('Ducats') as number || 0;
       return sum + ducats;
@@ -82,6 +129,7 @@ export async function GET(request: Request) {
         citizenCount: citizensRecords.length,
         transactionCount: transactionsRecords.length,
         loanCount: loansRecords.length,
+        giniCoefficient: giniCoefficient,
         lastUpdated: new Date().toISOString()
       }
     });
@@ -100,6 +148,7 @@ export async function GET(request: Request) {
         citizenCount: 120,
         transactionCount: 450,
         loanCount: 35,
+        giniCoefficient: 0.42, // Sample Gini coefficient
         lastUpdated: new Date().toISOString()
       }
     });

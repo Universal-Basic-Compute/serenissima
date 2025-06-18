@@ -15,6 +15,7 @@ interface EconomyData {
   citizenCount: number;
   transactionCount: number;
   loanCount: number;
+  giniCoefficient: number;
   lastUpdated: string;
 }
 
@@ -201,6 +202,16 @@ const EconomyPanel: React.FC<EconomyPanelProps> = ({ onClose }) => {
                     <span className="text-amber-700">Debt to GDP Ratio</span>
                     <span className="font-medium text-amber-900">
                       {((economyData.totalLoans / Math.max(1, economyData.projectedYearlyGDP)) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center pb-2 border-b border-amber-100">
+                    <span className="text-amber-700 flex items-center">
+                      Gini Coefficient
+                      <span className="ml-1 text-xs text-amber-600 italic">(excl. ConsiglioDeiDieci, Italia)</span>
+                    </span>
+                    <span className="font-medium text-amber-900">
+                      {economyData.giniCoefficient.toFixed(3)}
                     </span>
                   </div>
                 </div>
