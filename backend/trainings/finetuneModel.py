@@ -442,10 +442,10 @@ def main():
                         help="Désactiver complètement la précision mixte FP16")
     parser.add_argument("--bf16", action="store_true", 
                         help="Utiliser l'entraînement en précision mixte bfloat16 (si disponible)")
-    parser.add_argument("--int8", action="store_true", default=True,
+    parser.add_argument("--int8", action="store_true", default=False,
                         help="Utiliser la quantification 8 bits pour réduire l'utilisation mémoire")
-    parser.add_argument("--no-int8", action="store_false", dest="int8",
-                        help="Désactiver la quantification 8 bits")
+    parser.add_argument("--no-int8", action="store_true", default=False,
+                        help="Désactiver explicitement la quantification 8 bits")
     parser.add_argument("--save_steps", type=int, default=100,
                         help="Nombre d'étapes entre chaque sauvegarde du modèle")
     parser.add_argument("--save_total_limit", type=int, default=None,
@@ -509,10 +509,12 @@ def main():
             "low_cpu_mem_usage": True
         }
         
-        # Ajouter l'option de quantification 8 bits si demandée
-        if args.int8:
+        # Ajouter l'option de quantification 8 bits si demandée et non explicitement désactivée
+        if args.int8 and not args.no_int8:
             load_options["load_in_8bit"] = True
             log.info("Utilisation de la quantification 8 bits pour le chargement du modèle")
+        elif args.no_int8:
+            log.info("Quantification 8 bits explicitement désactivée")
         
         # Déterminer le type de précision à utiliser (si 8 bits n'est pas utilisé)
         if not args.int8:

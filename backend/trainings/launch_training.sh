@@ -27,7 +27,7 @@ python finetuneModel.py \
     --warmup_steps 100 \
     --save_steps 500 \
     --no-fp16 \
-    --int8 \
+    --no-int8 \
     2>&1 | tee "$LOG_FILE"
 
 # Vérifier si l'exécution a réussi
