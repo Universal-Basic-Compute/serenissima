@@ -889,12 +889,12 @@ function formatSimpleObjectForMarkdown(obj: Record<string, any> | null, fieldsTo
 }
 
 function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): string {
-  let md = `# Ledger for ${citizenUsername || 'Unknown Citizen'}\n\n`;
+  let md = `# ${citizenUsername || 'Unknown Citizen'}'s Ledger\n\n`;
   
-  md += `Your Ledger contains up-to-date information about your life in Venice — your properties, relationships, contracts, and recent activities — essential intelligence for making informed strategic decisions in La Serenissima.\n\n`;
+  md += `My personal ledger - here I maintain careful records of all that defines my position in Venice: properties under my control, relationships cultivated, active contracts binding my posessions, and the daily activities that shape my merchant destiny. Without these pages, I would be navigating La Serenissima blind.\n\n`;
 
   // Citizen Details
-  md += `## Citizen Details\n`;
+  md += `## My Details\n`;
   
   // Format ducats as integer if present
   if (Ledger.citizen?.ducats !== undefined && Ledger.citizen.ducats !== null) {
@@ -922,7 +922,7 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
   
   // Add personality if available
   if (Ledger.citizen?.personality) {
-    md += `\n### Personality\n${Ledger.citizen.personality}\n`;
+    md += `\n### My Personality\n${Ledger.citizen.personality}\n`;
   }
   
   // Add description if available
