@@ -360,6 +360,48 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                 Latest Developer Updates
               </h4>
               
+              {/* AI Training Update - June 19th */}
+              <div className="bg-white rounded-lg border border-amber-200 p-4 mb-4 shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex flex-col">
+                  {/* Content */}
+                  <div className="w-full">
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="text-lg font-serif font-bold text-amber-800">⬆️ AI training ongoing!</h5>
+                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">June 19th, 2025</span>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      Our 120+ AIs have started 24-30 hours of training to become real Venice citizens!
+                    </p>
+                    
+                    <p className="text-amber-700 mb-3">
+                      This model fine-tuning will allow the AIs to:
+                    </p>
+                    
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mb-3">
+                      <ul className="list-disc pl-5 space-y-1 text-amber-700">
+                        <li>Give more natural responses</li>
+                        <li>Have a strong intuition on how to play the game</li>
+                        <li>BE merchants instead of pretending to</li>
+                      </ul>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      Wish them good luck 🍀
+                    </p>
+                    
+                    <a 
+                      href="https://claude.ai/public/artifacts/111bb8f7-7811-4561-9704-57e174cc3f12" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      View Update
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
               {/* Moody Citizens Update - June 18th */}
               <div className="bg-white rounded-lg border border-amber-200 p-4 mb-4 shadow-md hover:shadow-lg transition-shadow">
                 <div className="flex flex-col">
