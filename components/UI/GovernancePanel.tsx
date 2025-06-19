@@ -400,6 +400,48 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                 </div>
               </div>
               
+              {/* Serenissima Update - June 15th */}
+              <div className="bg-white rounded-lg border border-amber-200 p-4 mb-4 shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex flex-col">
+                  {/* Content */}
+                  <div className="w-full">
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="text-lg font-serif font-bold text-amber-800">Serenissima Update</h5>
+                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">June 15th, 2025</span>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      12 days ago, what we are doing now wouldn't have been possible: deepseek-r1 8B is the first model intelligent enough to simulate our citizens on a consumer graphics card!
+                    </p>
+                    
+                    <p className="text-amber-700 mb-3">
+                      Still, developing with AI is crazy expensive: more than 4000$ per month... One day all of this will be free and people will look at us the same way we look at the people that spend thousands of dollars to pay for internet access in the 90's ^^
+                    </p>
+                    
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mb-3">
+                      <p className="text-amber-800 font-medium mb-2">If you want to support the development, it's very welcome. As a reward, we could even:</p>
+                      <ul className="list-disc pl-5 space-y-1 text-amber-700">
+                        <li>put a work of art in the game in your name</li>
+                        <li>have an Artisti write a piece about you or a topic you want! DM if you are interested.</li>
+                      </ul>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      The development is continuing, let me know if you have any questions! I'm here to answer.
+                    </p>
+                    
+                    <a 
+                      href="https://claude.ai/public/artifacts/ccccb4da-0bbe-4f93-b375-e3d5cf4fce5c" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      View Update
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
               <div className="text-center mt-6">
                 <p className="text-amber-700">
                   Check back regularly for information about new features, improvements, and upcoming changes to the Republic.
