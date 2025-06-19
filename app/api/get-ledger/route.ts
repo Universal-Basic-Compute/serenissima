@@ -1354,6 +1354,10 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       md += `- **Category**: ${report.category || 'Uncategorized'}\n`;
       md += `- **Content**: ${report.content || 'No content available'}\n`;
       
+      if (report.historicalNotes) {
+        md += `- **Historical Context**: ${report.historicalNotes}\n`;
+      }
+      
       if (report.affectedResources && report.affectedResources.length > 0) {
         md += `- **Affected Resources**: ${report.affectedResources.join(', ')}\n`;
       }
@@ -1375,6 +1379,9 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       
       md += '\n';
     });
+  } else if (citizen.socialClass === 'Forestieri') {
+    md += `## Active Reports from Abroad\n`;
+    md += `- No active reports available at this time.\n\n`;
   }
 
   // Available Stratagems
@@ -1756,7 +1763,11 @@ export async function GET(request: Request) {
       fetchLastDailyUpdate(),
       fetchLastActivities(citizenUsername, 5),
       fetchPlannedActivities(citizenUsername),
-      fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/weather`).then(res => res.json()).catch(() => null)
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/weather`).then(res => res.json()).catch(() => null),
+      // Fetch reports for Forestieri citizens
+      citizenRecord.fields.SocialClass === 'Forestieri' 
+        ? fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/reports`).then(res => res.json()).catch(() => null)
+        : Promise.resolve(null)
     ]);
 
     // Assign weather data to Ledger
@@ -1781,6 +1792,9 @@ export async function GET(request: Request) {
       });
       
       Ledger.activeReports = filteredReports;
+      console.log(`[API get-ledger] Assigned ${filteredReports.length} reports for Forestieri citizen ${citizenUsername}`);
+    } else {
+      console.log(`[API get-ledger] No reports assigned: isForeigner=${citizenRecord.fields.SocialClass === 'Forestieri'}, reportsSuccess=${reportsData?.success}`);
     }
     
     // Assign results to Ledger
