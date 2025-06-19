@@ -1214,7 +1214,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
             
             <div className="mb-6 bg-amber-100 p-4 rounded-lg border border-amber-300">
               <p className="text-amber-800 font-serif">
-                Reports arrive daily in Venice from across the known world. Merchants, diplomats, and travelers bring news that may affect trade, politics, and daily life in the Serenissima Republic. Pay close attention to these reports, as they may signal opportunities or threats to your interests.
+                Reports arrive daily in Venice from across the known world, directly inspired by real-world events. Merchants, diplomats, and travelers bring news that may affect trade, politics, and daily life in the Serenissima Republic. Pay close attention to these reports, as they may signal opportunities or threats to your interests.
               </p>
             </div>
             
