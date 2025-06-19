@@ -409,6 +409,8 @@ def main():
                         help="Utiliser l'entraînement en précision mixte")
     parser.add_argument("--bf16", action="store_true", 
                         help="Utiliser l'entraînement en précision mixte bfloat16 (si disponible)")
+    parser.add_argument("--int8", action="store_true", default=True,
+                        help="Utiliser la quantification 8 bits pour réduire l'utilisation mémoire")
     parser.add_argument("--save_steps", type=int, default=100,
                         help="Nombre d'étapes entre chaque sauvegarde du modèle")
     parser.add_argument("--warmup_steps", type=int, default=100,
@@ -458,16 +460,45 @@ def main():
             "low_cpu_mem_usage": True
         }
         
-        # Déterminer le type de précision à utiliser
-        if args.bf16 and torch.cuda.is_bf16_supported():
-            load_options["torch_dtype"] = torch.bfloat16
-            log.info("Utilisation de bfloat16 pour le chargement du modèle")
-        elif args.fp16:
-            load_options["torch_dtype"] = torch.float16
-            log.info("Utilisation de float16 pour le chargement du modèle")
+        # Ajouter l'option de quantification 8 bits si demandée
+        if args.int8:
+            load_options["load_in_8bit"] = True
+            log.info("Utilisation de la quantification 8 bits pour le chargement du modèle")
+        
+        # Déterminer le type de précision à utiliser (si 8 bits n'est pas utilisé)
+        if not args.int8:
+            if args.bf16 and torch.cuda.is_bf16_supported():
+                load_options["torch_dtype"] = torch.bfloat16
+                log.info("Utilisation de bfloat16 pour le chargement du modèle")
+            elif args.fp16:
+                load_options["torch_dtype"] = torch.float16
+                log.info("Utilisation de float16 pour le chargement du modèle")
         
         # Charger le modèle
-        model = AutoModelForCausalLM.from_pretrained(MODEL_ID, **load_options)
+        try:
+            model = AutoModelForCausalLM.from_pretrained(MODEL_ID, **load_options)
+            log.info("Modèle chargé avec succès")
+            if args.int8:
+                log.info("Modèle chargé en 8 bits")
+        except Exception as e:
+            log.warning(f"Erreur lors du chargement du modèle: {e}")
+            
+            # Si l'erreur est liée à la quantification 8 bits, réessayer sans
+            if args.int8 and "8bit" in str(e).lower():
+                log.info("Tentative de chargement sans quantification 8 bits...")
+                load_options.pop("load_in_8bit", None)
+                
+                # Ajouter le type de précision
+                if args.bf16 and torch.cuda.is_bf16_supported():
+                    load_options["torch_dtype"] = torch.bfloat16
+                elif args.fp16:
+                    load_options["torch_dtype"] = torch.float16
+                
+                model = AutoModelForCausalLM.from_pretrained(MODEL_ID, **load_options)
+                log.info("Modèle chargé avec succès sans quantification 8 bits")
+            else:
+                # Si l'erreur n'est pas liée à la quantification, la relancer
+                raise
         
         # Activer le gradient checkpointing pour l'efficacité mémoire
         if hasattr(model, "gradient_checkpointing_enable"):

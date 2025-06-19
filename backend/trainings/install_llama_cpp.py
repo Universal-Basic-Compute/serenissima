@@ -28,7 +28,8 @@ def install_dependencies():
         "accelerate>=0.20.0",
         "wandb",
         "psutil",
-        "gputil"
+        "gputil",
+        "bitsandbytes>=0.41.0"  # Pour la quantification 8 bits
     ]
     
     # Désinstaller bitsandbytes et peft s'ils sont présents

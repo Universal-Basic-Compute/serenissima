@@ -56,11 +56,12 @@ def main():
     # 3. Tester le modèle
     print("\n3️⃣ Test du modèle...")
     try:
-        print(f"Chargement du modèle DeepSeek-R1...")
+        # Essayer d'abord avec la quantification 8 bits
+        print(f"Chargement du modèle DeepSeek-R1 avec quantification 8 bits...")
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_ID,
             trust_remote_code=True,
-            torch_dtype=torch.float16,
+            load_in_8bit=True,
             low_cpu_mem_usage=True,
             device_map="auto"
         )

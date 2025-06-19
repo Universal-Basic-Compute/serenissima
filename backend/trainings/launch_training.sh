@@ -25,7 +25,8 @@ python finetuneModel.py \
     --learning_rate 1e-5 \
     --weight_decay 0.01 \
     --fp16 \
-    --use_wandb 2>&1 | tee "$LOG_FILE"
+    --int8 \
+    2>&1 | tee "$LOG_FILE"
 
 # Vérifier si l'exécution a réussi
 if [ $? -eq 0 ]; then
