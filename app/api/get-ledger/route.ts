@@ -1686,7 +1686,7 @@ export async function GET(request: Request) {
       lastDailyUpdateRecord,
       lastActivitiesRecords,
       plannedActivitiesRecords,
-      weatherData
+      fetchedWeatherData
     ] = await Promise.all([
       fetchStratagemDefinitions(),
       fetchCitizenActiveStratagems(citizenUsername),
@@ -1702,7 +1702,8 @@ export async function GET(request: Request) {
       fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/weather`).then(res => res.json()).catch(() => null)
     ]);
 
-    // Assign weather data to Ledger (no need to reassign to itself)
+    // Assign weather data to Ledger
+    weatherData = fetchedWeatherData;
     Ledger.weather = weatherData?.success ? weatherData : null;
     
     // Assign results to Ledger
