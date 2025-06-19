@@ -417,8 +417,12 @@ def main():
                         help="Utiliser l'entraînement en précision mixte bfloat16 (si disponible)")
     parser.add_argument("--int8", action="store_true", default=True,
                         help="Utiliser la quantification 8 bits pour réduire l'utilisation mémoire")
+    parser.add_argument("--no-int8", action="store_false", dest="int8",
+                        help="Désactiver la quantification 8 bits")
     parser.add_argument("--save_steps", type=int, default=100,
                         help="Nombre d'étapes entre chaque sauvegarde du modèle")
+    parser.add_argument("--save_total_limit", type=int, default=None,
+                        help="Nombre maximum de checkpoints à conserver (supprime les plus anciens)")
     parser.add_argument("--warmup_steps", type=int, default=100,
                         help="Nombre d'étapes de warmup pour le scheduler")
     
@@ -675,6 +679,34 @@ def main():
                         model.save_pretrained(checkpoint_dir)
                         tokenizer.save_pretrained(checkpoint_dir)
                         log.info(f"Checkpoint sauvegardé à l'étape {global_step}")
+                        
+                        # Gérer la limite de checkpoints
+                        if args.save_total_limit:
+                            # Trouver tous les checkpoints
+                            checkpoints = glob.glob(os.path.join(output_dir, "checkpoint-*"))
+                            # Trier par date de création (le plus ancien en premier)
+                            checkpoints = sorted(checkpoints, key=os.path.getctime)
+                            # Supprimer les plus anciens si nécessaire
+                            if len(checkpoints) > args.save_total_limit:
+                                checkpoints_to_delete = checkpoints[:len(checkpoints) - args.save_total_limit]
+                                for checkpoint in checkpoints_to_delete:
+                                    log.info(f"Suppression du checkpoint ancien: {checkpoint}")
+                                    import shutil
+                                    shutil.rmtree(checkpoint)
+                        
+                        # Gérer la limite de checkpoints
+                        if args.save_total_limit:
+                            # Trouver tous les checkpoints
+                            checkpoints = glob.glob(os.path.join(output_dir, "checkpoint-*"))
+                            # Trier par date de création (le plus ancien en premier)
+                            checkpoints = sorted(checkpoints, key=os.path.getctime)
+                            # Supprimer les plus anciens si nécessaire
+                            if len(checkpoints) > args.save_total_limit:
+                                checkpoints_to_delete = checkpoints[:len(checkpoints) - args.save_total_limit]
+                                for checkpoint in checkpoints_to_delete:
+                                    log.info(f"Suppression du checkpoint ancien: {checkpoint}")
+                                    import shutil
+                                    shutil.rmtree(checkpoint)
             else:
                 # Version sans précision mixte
                 outputs = model(**batch)
