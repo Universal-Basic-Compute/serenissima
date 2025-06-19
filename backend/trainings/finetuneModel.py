@@ -464,6 +464,8 @@ def main():
                         help="Modules cibles pour LoRA, séparés par des virgules (ex: q_proj,v_proj)")
     parser.add_argument("--use_lora", action="store_true", default=False,
                         help="Utiliser LoRA pour le fine-tuning")
+    parser.add_argument("--no-gradient-checkpointing", action="store_true", default=False,
+                        help="Désactiver le gradient checkpointing (peut aider si vous rencontrez des erreurs)")
     
     args = parser.parse_args()
     
@@ -506,7 +508,8 @@ def main():
         load_options = {
             "device_map": "auto",
             "trust_remote_code": True,
-            "low_cpu_mem_usage": True
+            "low_cpu_mem_usage": True,
+            "max_memory": {0: "80%", "cpu": "30GB"}  # Limiter l'utilisation de la mémoire GPU et CPU
         }
         
         # Ajouter l'option de quantification 8 bits si demandée et non explicitement désactivée
@@ -566,10 +569,9 @@ def main():
             # S'assurer que le modèle est en mode entraînement
             model.train()
             
-            # Préparer le modèle pour l'entraînement si quantifié
-            if args.int8:
-                log.info("Préparation du modèle quantifié pour l'entraînement avec LoRA...")
-                model = prepare_model_for_kbit_training(model)
+            # Préparer le modèle pour l'entraînement avec LoRA
+            log.info("Préparation du modèle pour l'entraînement avec LoRA...")
+            model = prepare_model_for_kbit_training(model)
             
             # Déterminer les modules cibles
             target_modules = None
@@ -586,11 +588,20 @@ def main():
                 lora_dropout=args.lora_dropout,
                 target_modules=target_modules,
                 bias="none",  # Ne pas entraîner les biais
-                modules_to_save=["lm_head"]  # Sauvegarder la tête de langage
+                modules_to_save=None  # Ne pas sauvegarder de modules supplémentaires pour éviter les problèmes de mémoire
             )
             
-            # Appliquer LoRA au modèle
-            model = get_peft_model(model, peft_config)
+            # Appliquer LoRA au modèle avec gestion d'erreur
+            try:
+                log.info("Application de LoRA au modèle...")
+                model = get_peft_model(model, peft_config)
+            except RuntimeError as e:
+                if "CUDA out of memory" in str(e) or "DefaultCPUAllocator" in str(e):
+                    log.error(f"Erreur de mémoire lors de l'application de LoRA: {e}")
+                    log.error("Essayez de réduire la valeur de lora_r ou le nombre de modules cibles")
+                    return False
+                else:
+                    raise
             
             # Vérifier que les paramètres sont bien configurés pour l'entraînement
             trainable_params = 0
@@ -612,11 +623,13 @@ def main():
             # Forcer le mode d'entraînement
             model.train()
         
-        # Activer le gradient checkpointing pour l'efficacité mémoire
-        if hasattr(model, "gradient_checkpointing_enable"):
+        # Activer le gradient checkpointing pour l'efficacité mémoire (sauf si explicitement désactivé)
+        if hasattr(model, "gradient_checkpointing_enable") and not args.no_gradient_checkpointing:
             model.config.use_cache = False
             model.gradient_checkpointing_enable()
             log.info("Gradient checkpointing activé avec use_cache=False")
+        elif args.no_gradient_checkpointing:
+            log.info("Gradient checkpointing explicitement désactivé")
         
         # Afficher le nombre de paramètres
         total_params = sum(p.numel() for p in model.parameters())
