@@ -1344,6 +1344,42 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
   md += `## Latest Daily Update\n`;
   md += formatSimpleObjectForMarkdown(Ledger.latestDailyUpdate, ['title', 'content', 'createdAt']);
   md += '\n';
+  
+  // Active Reports (for Forestieri only)
+  if (Ledger.activeReports && Ledger.activeReports.length > 0) {
+    md += `## Active Reports from Abroad (${Ledger.activeReports.length})\n`;
+    Ledger.activeReports.forEach((report: any, index: number) => {
+      md += `### Report ${index + 1}: ${report.title || 'Unnamed Report'}\n`;
+      md += `- **Origin**: ${report.originCity || 'Unknown'}\n`;
+      md += `- **Category**: ${report.category || 'Uncategorized'}\n`;
+      md += `- **Content**: ${report.content || 'No content available'}\n`;
+      
+      if (report.historicalNotes) {
+        md += `- **Historical Context**: ${report.historicalNotes}\n`;
+      }
+      
+      if (report.affectedResources && report.affectedResources.length > 0) {
+        md += `- **Affected Resources**: ${report.affectedResources.join(', ')}\n`;
+      }
+      
+      if (report.priceChanges && report.priceChanges.length > 0) {
+        md += `- **Price Changes**: \n`;
+        report.priceChanges.forEach((change: any) => {
+          md += `  - ${change.resource}: ${change.direction === 'increase' ? '↑' : '↓'} ${change.percentage}%\n`;
+        });
+      }
+      
+      if (report.createdAt) {
+        md += `- **Received**: ${formatDate(report.createdAt)}\n`;
+      }
+      
+      if (report.endAt) {
+        md += `- **Relevant Until**: ${formatDate(report.endAt)}\n`;
+      }
+      
+      md += '\n';
+    });
+  }
 
   // Available Stratagems
   md += `## Available Stratagems\n`;
@@ -1656,7 +1692,7 @@ export async function GET(request: Request) {
 
     // Initialize weatherData as null before using it
     let weatherData = null;
-    
+  
     const Ledger = {
       citizen: {
         ...normalizeKeysCamelCaseShallow(citizenRecord.fields), 
@@ -1672,6 +1708,7 @@ export async function GET(request: Request) {
         emotionDistribution: citizenMood.emotion_distribution
       },
       weather: null, // Will be updated after fetching
+      activeReports: [], // Will be populated for Forestieri citizens
       lastActivity: lastActivityRecord ? {...normalizeKeysCamelCaseShallow(lastActivityRecord.fields), airtableId: lastActivityRecord.id} : null,
       lastActivities: [] as any[], // Initialize lastActivities array
       plannedActivities: [] as any[], // Initialize plannedActivities array
@@ -1708,7 +1745,8 @@ export async function GET(request: Request) {
       lastDailyUpdateRecord,
       lastActivitiesRecords,
       plannedActivitiesRecords,
-      fetchedWeatherData
+      fetchedWeatherData,
+      reportsData
     ] = await Promise.all([
       fetchStratagemDefinitions(),
       fetchCitizenActiveStratagems(citizenUsername),
@@ -1727,6 +1765,11 @@ export async function GET(request: Request) {
     // Assign weather data to Ledger
     weatherData = fetchedWeatherData;
     Ledger.weather = weatherData?.success ? weatherData : null;
+    
+    // Assign active reports for Forestieri citizens
+    if (citizenRecord.fields.SocialClass === 'Forestieri' && reportsData?.success) {
+      Ledger.activeReports = reportsData.reports || [];
+    }
     
     // Assign results to Ledger
     Ledger.availableStratagems = availableStratagems;
