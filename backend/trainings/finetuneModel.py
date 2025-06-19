@@ -31,6 +31,23 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
 
+# Pour la barre de progression
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
+    # Implémentation simple d'une barre de progression
+    def simple_progress_bar(iterable, total=None, desc=None):
+        total = total or len(iterable)
+        for i, item in enumerate(iterable):
+            if i % 5 == 0 or i == total - 1:
+                progress = min(100, int(100 * i / total))
+                bar = '█' * (progress // 5) + '░' * (20 - progress // 5)
+                print(f"\r{desc or ''} |{bar}| {progress}% ({i+1}/{total})", end='', flush=True)
+            yield item
+        print()
+
 # Configuration du logging
 logging.basicConfig(
     level=logging.INFO,
@@ -541,7 +558,8 @@ def main():
     model.train()
     
     for epoch in range(args.epochs):
-        log.info(f"Début de l'époque {epoch+1}/{args.epochs}")
+        epoch_start_time = time.time()
+        log.info(f"{'='*20} Début de l'époque {epoch+1}/{args.epochs} {'='*20}")
         
         # Test des réponses du modèle au début de chaque époque
         test_model_responses(model, tokenizer)
@@ -549,9 +567,15 @@ def main():
         epoch_loss = 0
         step_loss = 0
         
-        for step, batch in enumerate(train_dataloader):
+        # Utiliser tqdm si disponible, sinon notre barre de progression simple
+        dataloader_iterator = tqdm(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}") if TQDM_AVAILABLE else simple_progress_bar(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}")
+        
+        for step, batch in enumerate(dataloader_iterator):
             # Déplacer le batch sur le device
             batch = {k: v.to(model.device) for k, v in batch.items()}
+            
+            # Afficher la progression pour chaque batch
+            progress = f"[Époque {epoch+1}/{args.epochs}] Batch {step+1}/{len(train_dataloader)}"
             
             # Forward pass avec précision mixte si activée
             if scaler:
@@ -575,11 +599,14 @@ def main():
                     
                     global_step += 1
                     
-                    # Logging
-                    if global_step % 10 == 0:
-                        resources = monitor_resources()
-                        log.info(f"Étape {global_step} | Perte: {step_loss:.4f} | {resources}")
-                        step_loss = 0
+                    # Logging plus détaillé
+                    resources = monitor_resources()
+                    current_lr = lr_scheduler.get_last_lr()[0]
+                    log.info(f"{progress} | Étape globale: {global_step} | Perte: {loss.item():.4f} | LR: {current_lr:.2e} | {resources}")
+                else:
+                    # Afficher la progression même pendant l'accumulation de gradient
+                    if step % 5 == 0:  # Limiter la fréquence pour ne pas surcharger les logs
+                        log.info(f"{progress} | Accumulation: {(step+1) % args.gradient_accumulation_steps}/{args.gradient_accumulation_steps} | Perte: {loss.item():.4f}")
                     
                     # Sauvegarde périodique
                     if global_step % args.save_steps == 0:
@@ -605,11 +632,14 @@ def main():
                     
                     global_step += 1
                     
-                    # Logging
-                    if global_step % 10 == 0:
-                        resources = monitor_resources()
-                        log.info(f"Étape {global_step} | Perte: {step_loss:.4f} | {resources}")
-                        step_loss = 0
+                    # Logging plus détaillé
+                    resources = monitor_resources()
+                    current_lr = lr_scheduler.get_last_lr()[0]
+                    log.info(f"{progress} | Étape globale: {global_step} | Perte: {loss.item():.4f} | LR: {current_lr:.2e} | {resources}")
+                else:
+                    # Afficher la progression même pendant l'accumulation de gradient
+                    if step % 5 == 0:  # Limiter la fréquence pour ne pas surcharger les logs
+                        log.info(f"{progress} | Accumulation: {(step+1) % args.gradient_accumulation_steps}/{args.gradient_accumulation_steps} | Perte: {loss.item():.4f}")
                     
                     # Sauvegarde périodique
                     if global_step % args.save_steps == 0:
@@ -625,9 +655,14 @@ def main():
             step_loss += loss.item() * args.gradient_accumulation_steps
             epoch_loss += loss.item() * args.gradient_accumulation_steps
         
-        # Fin de l'époque
+        # Fin de l'époque avec statistiques détaillées
         avg_epoch_loss = epoch_loss / len(train_dataloader)
-        log.info(f"Époque {epoch+1} terminée | Perte moyenne: {avg_epoch_loss:.4f}")
+        log.info(f"{'='*20} Résumé de l'époque {epoch+1}/{args.epochs} {'='*20}")
+        log.info(f"Perte moyenne: {avg_epoch_loss:.4f}")
+        log.info(f"Étapes d'entraînement: {global_step}")
+        log.info(f"Taux d'apprentissage actuel: {lr_scheduler.get_last_lr()[0]:.2e}")
+        log.info(f"Temps écoulé pour cette époque: {time.time() - epoch_start_time:.2f} secondes")
+        log.info(f"{'='*65}")
         
         # Évaluation sur le dataset de validation
         if val_dataloader:
