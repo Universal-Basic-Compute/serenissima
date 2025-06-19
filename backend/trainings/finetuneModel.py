@@ -748,16 +748,21 @@ def main():
         log.warning("Le modèle n'était pas en mode d'entraînement. Activation du mode d'entraînement...")
         model.train()
     
-    for epoch in range(args.epochs):
-        epoch_start_time = time.time()
-        log.info(f"{'='*20} Début de l'époque {epoch+1}/{args.epochs} {'='*20}")
-        
-        # Test des réponses du modèle au début de chaque époque (sauf si désactivé)
-        if not args.no_test_generation:
-            test_model_responses(model, tokenizer)
-        
-        epoch_loss = 0
-        step_loss = 0
+    # Activer CUDA_LAUNCH_BLOCKING pour une meilleure détection des erreurs
+    os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+    
+    # Essayer de récupérer les erreurs CUDA
+    try:
+        for epoch in range(args.epochs):
+            epoch_start_time = time.time()
+            log.info(f"{'='*20} Début de l'époque {epoch+1}/{args.epochs} {'='*20}")
+            
+            # Test des réponses du modèle au début de chaque époque (sauf si désactivé)
+            if not args.no_test_generation:
+                test_model_responses(model, tokenizer)
+            
+            epoch_loss = 0
+            step_loss = 0
         
         # Utiliser tqdm si disponible, sinon notre barre de progression simple
         dataloader_iterator = tqdm(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}") if TQDM_AVAILABLE else simple_progress_bar(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}")
