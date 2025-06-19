@@ -1235,12 +1235,12 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
             {!isLoadingReports && reports.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {reports.map((report) => {
-                  // Format dates in a more readable way
+                  // Format dates in a more readable way, subtracting 500 years
                   const createdDate = new Date(report.createdAt);
                   const formattedCreatedDate = `${createdDate.getDate()} ${
                     ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
                      'August', 'September', 'October', 'November', 'December'][createdDate.getMonth()]
-                  } ${createdDate.getFullYear()}`;
+                  } ${createdDate.getFullYear() - 500}`;
                   
                   return (
                     <div key={report.reportId} className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
