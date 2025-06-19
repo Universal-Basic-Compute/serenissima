@@ -1632,6 +1632,9 @@ export async function GET(request: Request) {
     
     // Make sure the Ledger object is initialized with these default values
 
+    // Initialize weatherData as null before using it
+    let weatherData = null;
+    
     const Ledger = {
       citizen: {
         ...normalizeKeysCamelCaseShallow(citizenRecord.fields), 
@@ -1646,7 +1649,7 @@ export async function GET(request: Request) {
         basicEmotions: citizenMood.basic_emotions,
         emotionDistribution: citizenMood.emotion_distribution
       },
-      weather: weatherData && weatherData.success ? weatherData : null,
+      weather: null, // Will be updated after fetching
       lastActivity: lastActivityRecord ? {...normalizeKeysCamelCaseShallow(lastActivityRecord.fields), airtableId: lastActivityRecord.id} : null,
       lastActivities: [] as any[], // Initialize lastActivities array
       plannedActivities: [] as any[], // Initialize plannedActivities array
@@ -1699,6 +1702,10 @@ export async function GET(request: Request) {
       fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/weather`).then(res => res.json()).catch(() => null)
     ]);
 
+    // Update weatherData and assign to Ledger
+    weatherData = weatherData;
+    Ledger.weather = weatherData && weatherData.success ? weatherData : null;
+    
     // Assign results to Ledger
     Ledger.availableStratagems = availableStratagems;
     
