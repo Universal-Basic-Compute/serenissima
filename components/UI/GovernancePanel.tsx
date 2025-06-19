@@ -355,22 +355,71 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
               Developer Updates
             </h3>
             
-            <div className="bg-amber-100 p-6 rounded-lg border border-amber-300 mb-6 text-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-amber-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              
-              <h4 className="text-xl font-serif text-amber-800 mb-4">
-                Developer Updates Coming Soon
+            <div className="bg-amber-100 p-6 rounded-lg border border-amber-300 mb-6">
+              <h4 className="text-xl font-serif text-amber-800 mb-4 text-center">
+                Latest Developer Updates
               </h4>
               
-              <p className="text-amber-700 mb-4">
-                This section will soon contain the latest updates and announcements from the developers of La Serenissima.
-              </p>
+              {/* Moody Citizens Update - June 18th */}
+              <div className="bg-white rounded-lg border border-amber-200 p-4 mb-4 shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex flex-col md:flex-row">
+                  {/* Image on the left */}
+                  <div className="md:w-1/3 mb-4 md:mb-0 md:mr-4">
+                    <a href="https://claude.ai/public/artifacts/8c763cf3-594e-416a-9aec-e51e27e4ea68" target="_blank" rel="noopener noreferrer">
+                      <img 
+                        src="/images/moody-citizens.jpg" 
+                        alt="Moody Citizens Feature" 
+                        className="w-full h-auto rounded-lg border border-amber-200 shadow-sm"
+                        onError={(e) => {
+                          // Fallback to emoji if image doesn't load
+                          (e.target as HTMLImageElement).src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"%3E%3Crect fill="%23f8f0e3" width="300" height="200"/%3E%3Ctext fill="%23b45309" font-family="Arial" font-size="36" x="150" y="100" text-anchor="middle" dominant-baseline="middle"%3E😤%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
+                    </a>
+                  </div>
+                  
+                  {/* Content on the right */}
+                  <div className="md:w-2/3">
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="text-lg font-serif font-bold text-amber-800">😤 Moody Citizens</h5>
+                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">June 18th, 2025</span>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      Citizens now have moods! These depend on the stuff that happens to them, as well as their personality. It will influence everything they do, from how they negotiate to the activities & stratagems that they will perform.
+                    </p>
+                    
+                    <p className="text-amber-700 mb-3">
+                      Yet another dynamic layer, making the simulation even more realistic & dynamic!
+                    </p>
+                    
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mb-3">
+                      <p className="text-amber-800 font-medium mb-2">Expect:</p>
+                      <ul className="list-disc pl-5 space-y-1 text-amber-700">
+                        <li>Dramas at the negotiation tables</li>
+                        <li>Desperate citizens accepting rough contracts</li>
+                        <li>Angry people at the inn plotting against the state</li>
+                        <li>and more!</li>
+                      </ul>
+                    </div>
+                    
+                    <a 
+                      href="https://claude.ai/public/artifacts/8c763cf3-594e-416a-9aec-e51e27e4ea68" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      View Full Presentation
+                    </a>
+                  </div>
+                </div>
+              </div>
               
-              <p className="text-amber-700">
-                Check back regularly for information about new features, improvements, and upcoming changes to the Republic.
-              </p>
+              <div className="text-center mt-6">
+                <p className="text-amber-700">
+                  Check back regularly for information about new features, improvements, and upcoming changes to the Republic.
+                </p>
+              </div>
             </div>
           </div>
         )}
