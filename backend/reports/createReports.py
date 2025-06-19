@@ -160,13 +160,15 @@ NEWS ENTRIES FROM {category.upper()} SOURCES:
 2. Would be most relevant and interesting to Renaissance Venice
 3. Could plausibly affect trade, resources, or politics in Venice
 
-Translate this news into a Renaissance-style report as if it were arriving in Venice via merchant ship, diplomatic courier, or traveler.
+You can think through your selection process and reasoning first, then translate this news into a Renaissance-style report as if it were arriving in Venice via merchant ship, diplomatic courier, or traveler.
 
-Your response must be ONLY a valid JSON object with these fields:
+After your thinking, provide a valid JSON object with these fields:
 - OriginCity: A historically accurate city where this news might originate from
 - Title: A Renaissance-style title for the report
 - Content: The full Renaissance-style report (2-3 paragraphs)
 - HistoricalNotes: Brief notes on how this connects to Renaissance history or parallels
+- originalTitle: The original title of the selected news article
+- originalContent: A shortened version of the original content (max 2000 characters)
 - AffectedResources: Array of 1-3 resources from the provided list that would be affected
 - PriceChanges: Array of objects with {{resource: string, change: number}} where change is between -0.5 and 0.5 representing price multiplier changes
 - AvailabilityChanges: Array of objects with {{resource: string, change: number}} where change is between -0.5 and 0.5 representing availability multiplier changes
@@ -177,6 +179,8 @@ Example format:
   "Title": "Ottoman Fleet Movements Disrupt Spice Routes",
   "Content": "Word arrives from Constantinople that the Ottoman fleet has...",
   "HistoricalNotes": "During the Renaissance, Ottoman naval activity often affected...",
+  "originalTitle": "Turkish Navy Increases Patrols in Eastern Mediterranean",
+  "originalContent": "The shortened original content of the news article...",
   "AffectedResources": ["pepper", "silk", "cotton"],
   "PriceChanges": [
     {{ "resource": "pepper", "change": 0.3 }},
@@ -188,7 +192,7 @@ Example format:
   ]
 }}
 
-Ensure your response is ONLY the JSON object with no additional text before or after.
+I will extract the JSON portion of your response, so you can include your thinking before the JSON object.
 """
 
     try:
@@ -218,28 +222,44 @@ Ensure your response is ONLY the JSON object with no additional text before or a
             
             # Extract JSON from response
             try:
-                # Try to parse the entire response as JSON
-                report_data = json.loads(response_text)
-                log.info("Successfully parsed Claude response as JSON")
-                return report_data
-            except json.JSONDecodeError:
-                # If that fails, try to extract JSON from the response
-                log.warning("Could not parse entire Claude response as JSON. Attempting to extract JSON.")
+                # First, try to extract JSON from the response using regex to find from first { to last }
                 import re
-                json_match = re.search(r'({[\s\S]*})', response_text)
-                if json_match:
+                first_brace_index = response_text.find('{')
+                last_brace_index = response_text.rfind('}')
+                
+                if first_brace_index != -1 and last_brace_index != -1 and first_brace_index < last_brace_index:
+                    json_str = response_text[first_brace_index:last_brace_index+1]
                     try:
-                        report_data = json.loads(json_match.group(1))
+                        report_data = json.loads(json_str)
                         log.info("Successfully extracted and parsed JSON from Claude response")
                         return report_data
                     except json.JSONDecodeError as e:
-                        log.error(f"Failed to parse extracted JSON: {e}")
-                        log.error(f"Extracted text: {json_match.group(1)}")
-                        return None
+                        log.warning(f"Failed to parse extracted JSON from first-to-last brace: {e}")
+                        # Fall back to regex pattern matching
+                        json_match = re.search(r'({[\s\S]*})', response_text)
+                        if json_match:
+                            try:
+                                report_data = json.loads(json_match.group(1))
+                                log.info("Successfully extracted and parsed JSON using regex pattern")
+                                return report_data
+                            except json.JSONDecodeError as e:
+                                log.error(f"Failed to parse extracted JSON from regex: {e}")
+                                log.error(f"Extracted text: {json_match.group(1)}")
+                                return None
+                        else:
+                            log.error("Could not find JSON object in Claude response")
+                            log.error(f"Full response: {response_text}")
+                            return None
                 else:
-                    log.error("Could not find JSON object in Claude response")
-                    log.error(f"Full response: {response_text}")
-                    return None
+                    # If no braces found, try to parse the entire response as JSON (unlikely)
+                    try:
+                        report_data = json.loads(response_text)
+                        log.info("Successfully parsed entire Claude response as JSON")
+                        return report_data
+                    except json.JSONDecodeError:
+                        log.error("Could not find JSON object in Claude response")
+                        log.error(f"Full response: {response_text}")
+                        return None
         else:
             log.error("Unexpected Claude API response format")
             log.error(f"Response: {result}")
@@ -274,6 +294,11 @@ def create_report(tables: Dict[str, Table], report_data: Dict[str, Any], categor
         now = datetime.now(timezone.utc)
         end_at = (now + timedelta(days=7)).isoformat()
         
+        # Truncate originalContent if it's too long
+        original_content = report_data.get('originalContent', '')
+        if len(original_content) > 2000:
+            original_content = original_content[:1997] + "..."
+        
         # Create report record
         report_record = {
             "ReportId": report_id,
@@ -282,6 +307,8 @@ def create_report(tables: Dict[str, Table], report_data: Dict[str, Any], categor
             "Title": report_data.get('Title', 'No Title'),
             "Content": report_data.get('Content', 'No Content'),
             "HistoricalNotes": report_data.get('HistoricalNotes', ''),
+            "OriginalTitle": report_data.get('originalTitle', ''),
+            "OriginalContent": original_content,
             "AffectedResources": affected_resources,
             "PriceChanges": price_changes,
             "AvailabilityChanges": availability_changes,
