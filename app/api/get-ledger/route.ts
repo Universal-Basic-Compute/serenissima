@@ -3,6 +3,10 @@ import Airtable, { FieldSet, Record as AirtableRecord } from 'airtable';
 import fs from 'fs/promises';
 import path from 'path';
 
+// Cache configuration
+const LEDGER_CACHE: Record<string, { data: any, timestamp: number }> = {};
+const LEDGER_CACHE_TTL = 3 * 60 * 1000; // 3 minutes in milliseconds
+
 // Airtable Configuration
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
@@ -1418,9 +1422,27 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const citizenUsername = searchParams.get('citizenUsername');
   const format = searchParams.get('format') || 'markdown'; // Default to markdown
+  const forceRefresh = searchParams.get('forceRefresh') === 'true';
 
   if (!citizenUsername) {
     return NextResponse.json({ success: false, error: 'citizenUsername parameter is required' }, { status: 400 });
+  }
+  
+  // Check cache if not forcing refresh
+  const now = Date.now();
+  const cacheKey = `${citizenUsername}_${format}`;
+  
+  if (!forceRefresh && LEDGER_CACHE[cacheKey] && (now - LEDGER_CACHE[cacheKey].timestamp < LEDGER_CACHE_TTL)) {
+    console.log(`[API get-ledger] Using cached ledger for ${citizenUsername} (format: ${format}, age: ${Math.round((now - LEDGER_CACHE[cacheKey].timestamp) / 1000)} seconds)`);
+    
+    if (format.toLowerCase() === 'markdown') {
+      return new NextResponse(LEDGER_CACHE[cacheKey].data, {
+        status: 200,
+        headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+      });
+    } else {
+      return NextResponse.json({ success: true, data: LEDGER_CACHE[cacheKey].data, fromCache: true });
+    }
   }
 
   try {
@@ -1863,12 +1885,26 @@ export async function GET(request: Request) {
 
     if (format.toLowerCase() === 'markdown') {
       const markdownContent = convertLedgerToMarkdown(Ledger, citizenUsername);
+      
+      // Cache the result
+      LEDGER_CACHE[cacheKey] = {
+        data: markdownContent,
+        timestamp: now
+      };
+      
       return new NextResponse(markdownContent, {
         status: 200,
         headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
       });
     } else {
       // Default to JSON if format is not markdown (e.g., format=json)
+      
+      // Cache the result
+      LEDGER_CACHE[cacheKey] = {
+        data: Ledger,
+        timestamp: now
+      };
+      
       return NextResponse.json({ success: true, data: Ledger });
     }
 
