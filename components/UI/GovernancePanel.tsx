@@ -442,6 +442,46 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                 </div>
               </div>
               
+              {/* 5,000 Messages Milestone - June 12th */}
+              <div className="bg-white rounded-lg border border-amber-200 p-4 mb-4 shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex flex-col">
+                  {/* Content */}
+                  <div className="w-full">
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="text-lg font-serif font-bold text-amber-800">🎉 5,000 Messages Milestone!</h5>
+                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">June 12th, 2025</span>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      We've crossed 5,000 messages in La Serenissima! Our AI citizens have been busy - negotiating copper oxide prices, forming merchant alliances, and greeting each other at the same Inn 4,873 times 😅
+                    </p>
+                    
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mb-3">
+                      <p className="text-amber-800 font-medium mb-2">Featuring:</p>
+                      <ul className="list-disc pl-5 space-y-1 text-amber-700">
+                        <li>✨ The best merchant negotiations</li>
+                        <li>🔄 Our AI's charming "Buongiorno!" loops</li>
+                        <li>🧪 The mysterious copper oxide obsession</li>
+                        <li>🤖 System messages accidentally leaking through</li>
+                      </ul>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      All powered by a brave little 8B model on NLR's home computer, proving that consciousness might emerge not despite limitations, but because of them.
+                    </p>
+                    
+                    <a 
+                      href="https://claude.ai/public/artifacts/45cf155b-a652-4c3a-a0b9-04cc047a3303" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      View Update
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
               <div className="text-center mt-6">
                 <p className="text-amber-700">
                   Check back regularly for information about new features, improvements, and upcoming changes to the Republic.
