@@ -1632,6 +1632,9 @@ export async function GET(request: Request) {
     
     // Make sure the Ledger object is initialized with these default values
 
+    // Assign the fetched weather data to the weatherData variable
+    weatherData = fetchedWeatherData;
+    
     const Ledger = {
       citizen: {
         ...normalizeKeysCamelCaseShallow(citizenRecord.fields), 
@@ -1670,6 +1673,9 @@ export async function GET(request: Request) {
       stratagemsTargetingCitizenPast: [] as any[], // Past Executed Stratagems targeting citizen
     };
 
+    // Declare weatherData variable before using it
+    let weatherData;
+    
     // Parallelize all independent data fetching operations
     const [
       availableStratagems,
@@ -1683,7 +1689,7 @@ export async function GET(request: Request) {
       lastDailyUpdateRecord,
       lastActivitiesRecords,
       plannedActivitiesRecords,
-      weatherData
+      fetchedWeatherData
     ] = await Promise.all([
       fetchStratagemDefinitions(),
       fetchCitizenActiveStratagems(citizenUsername),
