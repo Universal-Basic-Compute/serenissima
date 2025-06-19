@@ -3,6 +3,49 @@ import Airtable, { FieldSet, Record as AirtableRecord } from 'airtable';
 import fs from 'fs/promises';
 import path from 'path';
 
+// Helper functions for descriptive text
+function describeStrength(score: number): string {
+  if (score >= 95) return "Our affairs are completely intertwined";
+  if (score >= 90) return "We are bound by countless threads of commerce";
+  if (score >= 85) return "Major partners in multiple ventures";
+  if (score >= 80) return "Deeply connected through business";
+  if (score >= 75) return "Significant mutual dependencies";
+  if (score >= 70) return "Strong and active partnership";
+  if (score >= 65) return "Regular and important dealings";
+  if (score >= 60) return "Steady business relationship";
+  if (score >= 55) return "Frequent interactions and trades";
+  if (score >= 50) return "Moderate but consistent connection";
+  if (score >= 45) return "Occasional significant business";
+  if (score >= 40) return "Sporadic but meaningful dealings";
+  if (score >= 35) return "Infrequent partnership";
+  if (score >= 30) return "Limited commercial connection";
+  if (score >= 25) return "Rare business encounters";
+  if (score >= 20) return "Minimal shared interests";
+  if (score >= 15) return "Barely connected commercially";
+  if (score >= 10) return "A thin thread of association";
+  if (score >= 5) return "We've done business once or twice";
+  if (score >= 1) return "The slightest commercial acquaintance";
+  return "No meaningful connection";
+}
+
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function describeMoodIntensity(intensity: number, emotion: string): string {
+  if (intensity === 10) return `Completely consumed by ${emotion}`;
+  if (intensity === 9) return `${capitalize(emotion)} dominates my every thought`;
+  if (intensity === 8) return `Profoundly ${emotion}`;
+  if (intensity === 7) return `Quite ${emotion} indeed`;
+  if (intensity === 6) return `Notably ${emotion}`;
+  if (intensity === 5) return `Moderately ${emotion}`;
+  if (intensity === 4) return `Somewhat ${emotion}`;
+  if (intensity === 3) return `Mildly ${emotion}`;
+  if (intensity === 2) return `Slightly ${emotion}`;
+  if (intensity === 1) return `A mere touch of ${emotion}`;
+  return `Emotionally neutral`;
+}
+
 // Cache configuration
 const LEDGER_CACHE: Record<string, { data: any, timestamp: number }> = {};
 const LEDGER_CACHE_TTL = 3 * 60 * 1000; // 3 minutes in milliseconds
@@ -1113,11 +1156,12 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
   if (Ledger.citizen?.mood) {
     md += `## My Disposition\n`;
     const moodIntensity = Ledger.citizen.moodIntensity || 5;
-    md += `I find myself ${Ledger.citizen.mood} (${moodIntensity}/10)`;
+    const moodDescription = describeMoodIntensity(moodIntensity, Ledger.citizen.mood);
+    md += `I find myself ${Ledger.citizen.mood} (${moodIntensity}/10) - ${moodDescription}`;
     
     // Add mood description if available
     if (Ledger.citizen.moodDescription) {
-      md += ` - ${Ledger.citizen.moodDescription}`;
+      md += `. ${Ledger.citizen.moodDescription}`;
     }
     
     // Add primary emotion if available
@@ -1594,11 +1638,12 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       }
       
       if (rel.strengthScore !== undefined) {
-        md += `- **How well we work together**: ${rel.strengthScore}\n`;
+        const strengthDescription = describeStrength(Number(rel.strengthScore));
+        md += `- **How well we work together**: ${rel.strengthScore} - ${strengthDescription}\n`;
       }
       
       if (rel.trustScore !== undefined) {
-        md += `- **Trust between us**: ${rel.trustScore}\n`;
+        md += `- **Trust between us**: ${rel.trustScore}/100\n`;
       }
       
       // Format the last interaction date if available
