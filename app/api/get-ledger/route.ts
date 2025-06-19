@@ -893,15 +893,47 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
   
   md += `My personal ledger - here I maintain careful records of all that defines my position in Venice: properties under my control, relationships cultivated, active contracts binding my posessions, and the daily activities that shape my merchant destiny. Without these pages, I would be navigating La Serenissima blind.\n\n`;
 
-  // Citizen Details
-  md += `## My Details\n`;
+  // Citizen Details - renamed to "My Standing in the Republic"
+  md += `## My Standing in the Republic\n`;
   
   // Format ducats as integer if present
   if (Ledger.citizen?.ducats !== undefined && Ledger.citizen.ducats !== null) {
     Ledger.citizen.ducats = Math.floor(Number(Ledger.citizen.ducats));
   }
   
-  md += formatSimpleObjectForMarkdown(Ledger.citizen, ['username', 'firstName', 'lastName', 'socialClass', 'ducats', 'inVenice', 'homeCity', 'influence', 'specialty']);
+  // More immersive formatting for citizen details
+  if (Ledger.citizen) {
+    md += `- **I am known as**: ${Ledger.citizen.username || 'Unknown'}\n`;
+    
+    const firstName = Ledger.citizen.firstName || '';
+    const lastName = Ledger.citizen.lastName || '';
+    const fullName = [firstName, lastName].filter(Boolean).join(' ');
+    if (fullName) {
+      md += `- **Born**: ${fullName}\n`;
+    }
+    
+    const socialClass = Ledger.citizen.socialClass || 'Unknown';
+    const homeCity = Ledger.citizen.homeCity;
+    md += `- **My station**: ${socialClass}${homeCity ? ` from ${homeCity}` : ''}\n`;
+    
+    if (Ledger.citizen.ducats !== undefined) {
+      md += `- **Ducats in my coffers**: ${Ledger.citizen.ducats}\n`;
+    }
+    
+    if (Ledger.citizen.influence !== undefined) {
+      md += `- **Influence I command**: ${Ledger.citizen.influence}\n`;
+    }
+    
+    if (Ledger.citizen.specialty) {
+      md += `- **My craft**: ${Ledger.citizen.specialty}\n`;
+    }
+    
+    if (Ledger.citizen.inVenice !== undefined) {
+      md += `- **Present in Venice**: ${Ledger.citizen.inVenice ? 'Yes' : 'No'}\n`;
+    }
+  } else {
+    md += formatSimpleObjectForMarkdown(Ledger.citizen, ['username', 'firstName', 'lastName', 'socialClass', 'ducats', 'inVenice', 'homeCity', 'influence', 'specialty']);
+  }
   
   if (Ledger.citizen?.corePersonality) {
     let personalityDisplay = String(Ledger.citizen.corePersonality); // Fallback
@@ -909,31 +941,35 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       try {
         const parsedPersonality = JSON.parse(Ledger.citizen.corePersonality);
         if (Array.isArray(parsedPersonality)) {
-          // Format as a JSON array string, e.g., ["Trait1", "Trait2"]
-          personalityDisplay = JSON.stringify(parsedPersonality);
+          // Format as a list of traits
+          md += `- **What drives me**: ${parsedPersonality.join(', ')}\n`;
+        } else {
+          md += `- **What drives me**: ${personalityDisplay}\n`;
         }
       } catch (e) {
         // If parsing fails, personalityDisplay remains the original string
         console.warn(`[API get-ledger] Could not parse corePersonality as JSON array: ${Ledger.citizen.corePersonality}`, e);
+        md += `- **What drives me**: ${personalityDisplay}\n`;
       }
+    } else {
+      md += `- **What drives me**: ${personalityDisplay}\n`;
     }
-    md += `- **corePersonality**: ${personalityDisplay}\n`;
   }
   
   // Add personality if available
   if (Ledger.citizen?.personality) {
-    md += `\n### My Personality\n${Ledger.citizen.personality}\n`;
+    md += `\n### The Nature of My Character\n${Ledger.citizen.personality}\n`;
   }
   
   // Add description if available
   if (Ledger.citizen?.description) {
-    md += `\n### Description\n${Ledger.citizen.description}\n`;
+    md += `\n### How Others See Me\n${Ledger.citizen.description}\n`;
   }
   
   md += '\n';
 
-  // Current Location
-  md += `## Current Location\n`;
+  // Current Location - renamed to "Where I Find Myself"
+  md += `## Where I Find Myself\n`;
   
   // Handle position display
   if (Ledger.citizen?.position) {
@@ -947,25 +983,29 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
     
     if (buildingAtPosition) {
       // Format the location with building name and other citizens if any
-      locationDescription = `At ${buildingAtPosition}`;
+      if (buildingDetails && buildingDetails.owner === citizenUsername) {
+        locationDescription = `Presently at ${buildingAtPosition}, my own establishment`;
+      } else if (buildingDetails && buildingDetails.owner) {
+        locationDescription = `Presently at ${buildingAtPosition}, owned by ${buildingDetails.owner}`;
+      } else {
+        locationDescription = `Presently at ${buildingAtPosition}`;
+      }
       
       // Add building details if available
       if (buildingDetails) {
-        if (buildingDetails.category) {
+        if (buildingDetails.category && !locationDescription.includes(buildingDetails.category)) {
           locationDescription += ` (${buildingDetails.category})`;
         }
         
-        if (buildingDetails.owner && buildingDetails.owner !== citizenUsername) {
-          locationDescription += `, owned by ${buildingDetails.owner}`;
-        }
-        
-        if (buildingDetails.runBy && buildingDetails.runBy !== citizenUsername && buildingDetails.runBy !== buildingDetails.owner) {
+        if (buildingDetails.runBy && buildingDetails.runBy !== citizenUsername && 
+            buildingDetails.runBy !== buildingDetails.owner && 
+            !locationDescription.includes(`run by ${buildingDetails.runBy}`)) {
           locationDescription += `, run by ${buildingDetails.runBy}`;
         }
       }
       
       if (citizensAtSamePosition.length > 0) {
-        locationDescription += `\n- **With**: ${citizensAtSamePosition.length} other citizen${citizensAtSamePosition.length > 1 ? 's' : ''}`;
+        locationDescription += `\n- **In the company of**: ${citizensAtSamePosition.length} other soul${citizensAtSamePosition.length > 1 ? 's' : ''}`;
         
         // Add the list of citizens with more details if available
         if (citizensAtSamePosition.length <= 5) {
@@ -996,11 +1036,11 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       }
     } else if (Ledger.citizen.position.lat && Ledger.citizen.position.lng) {
       // If coordinates are valid but no building found
-      locationDescription = Ledger.citizen.inVenice ? "In the streets of Venice" : "Navigating the world";
+      locationDescription = Ledger.citizen.inVenice ? "Walking the streets of Venice" : "Journeying beyond the lagoon";
       
       // Add other citizens if any
       if (citizensAtSamePosition.length > 0) {
-        locationDescription += `\n- **With**: ${citizensAtSamePosition.length} other citizen${citizensAtSamePosition.length > 1 ? 's' : ''}`;
+        locationDescription += `\n- **In the company of**: ${citizensAtSamePosition.length} other soul${citizensAtSamePosition.length > 1 ? 's' : ''}`;
         
         // Add the list of citizens with more details if available
         if (citizensAtSamePosition.length <= 5) {
@@ -1029,7 +1069,7 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       }
     } else {
       // If coordinates are invalid
-      locationDescription = "In the streets of Venice";
+      locationDescription = "Somewhere in the streets of Venice";
     }
     
     // Add coordinates for debugging if needed
@@ -1039,7 +1079,7 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
     
     md += `${locationDescription}${positionDebug}\n`;
   } else {
-    md += `Location not available\n`;
+    md += `My whereabouts are uncertain\n`;
   }
   
   // Add current date (subtract 500 years)
@@ -1047,15 +1087,15 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
   const historicalDate = new Date(currentDate);
   historicalDate.setFullYear(currentDate.getFullYear() - 500);
   
-  md += `\n## Current Date & Weather\n`;
+  md += `\n## The Day and Conditions\n`;
   // Use direct formatting for the current date to ensure it's 500 years ago with English month names
-  md += `${historicalDate.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Rome' })}`;
+  md += `Today is ${historicalDate.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Rome' })}`;
   
   // Add weather information if available
   if (Ledger.weather) {
-    md += ` - ${Ledger.weather.description}`;
+    md += `. The skies are ${Ledger.weather.description}`;
     if (Ledger.weather.temperature !== null) {
-      md += `, ${Math.round(Ledger.weather.temperature)}°C`;
+      md += `, with a temperature of ${Math.round(Ledger.weather.temperature)}°C`;
     }
     if (Ledger.weather.condition) {
       const conditionEmoji = {
@@ -1069,11 +1109,11 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
   
   md += '\n\n';
   
-  // Add citizen's current mood if available
+  // Add citizen's current mood if available - renamed to "My Disposition"
   if (Ledger.citizen?.mood) {
-    md += `## Current Mood\n`;
+    md += `## My Disposition\n`;
     const moodIntensity = Ledger.citizen.moodIntensity || 5;
-    md += `${Ledger.citizen.mood} (Intensity: ${moodIntensity}/10)`;
+    md += `I find myself ${Ledger.citizen.mood} (${moodIntensity}/10)`;
     
     // Add mood description if available
     if (Ledger.citizen.moodDescription) {
@@ -1082,72 +1122,186 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
     
     // Add primary emotion if available
     if (Ledger.citizen.primaryEmotion && Ledger.citizen.primaryEmotion !== Ledger.citizen.mood) {
-      md += `\n\nPrimary emotion: ${Ledger.citizen.primaryEmotion}`;
+      md += `\n\nThe weight of ${Ledger.citizen.primaryEmotion} presses upon me`;
     }
     
     // Add basic emotions breakdown if available
     if (Ledger.citizen.basicEmotions && Object.keys(Ledger.citizen.basicEmotions).length > 0) {
-      md += `\n\n### Emotional Breakdown:\n`;
+      md += `\n\n### What stirs within:\n`;
       for (const [emotion, score] of Object.entries(Ledger.citizen.basicEmotions)) {
         const percentage = Ledger.citizen.emotionDistribution?.[emotion] 
           ? ` (${Ledger.citizen.emotionDistribution[emotion].toFixed(1)}%)` 
           : '';
-        md += `- ${emotion}: ${score}${percentage}\n`;
+        md += `- ${emotion} fills me: ${score}${percentage}\n`;
       }
     }
     
     md += '\n';
   }
 
-  // Last Activity
-  md += `## Last Activity\n`;
-  md += formatSimpleObjectForMarkdown(Ledger.lastActivity, ['type', 'title', 'status', 'startDate', 'endDate']);
-  md += '\n';
+  // Last Activity - part of "What Has Occupied My Time"
+  md += `## What Has Occupied My Time\n`;
   
-  // Last 5 Activities
-  md += `## Recent Activities (Last 5)\n`;
-  if (Ledger.lastActivities && Ledger.lastActivities.length > 0) {
-    Ledger.lastActivities.forEach((activity: any, index: number) => {
-      md += `### Activity ${index + 1}: ${activity.title || activity.type}\n`;
-      md += formatSimpleObjectForMarkdown(activity, ['type', 'status', 'startDate', 'endDate', 'description', 'thought']);
-    });
+  if (Ledger.lastActivity) {
+    md += `### Most Recent Endeavor\n`;
+    
+    const activity = Ledger.lastActivity;
+    md += `- **Task**: ${activity.title || activity.type}\n`;
+    
+    if (activity.status) {
+      const statusMap: Record<string, string> = {
+        'created': 'planned',
+        'in_progress': 'underway',
+        'processed': 'completed',
+        'failed': 'unsuccessful',
+        'error': 'encountered difficulties',
+        'interrupted': 'was interrupted'
+      };
+      md += `- **State**: ${statusMap[activity.status] || activity.status}\n`;
+    }
+    
+    if (activity.startDate) {
+      md += `- **Began**: ${formatDate(activity.startDate)}\n`;
+    }
+    
+    if (activity.endDate) {
+      md += `- **Concluded**: ${formatDate(activity.endDate)}\n`;
+    }
+    
+    if (activity.description) {
+      md += `- **Details**: ${activity.description}\n`;
+    }
+    
+    if (activity.thought) {
+      md += `- **My reflections**: ${activity.thought}\n`;
+    }
+    
+    md += '\n';
   } else {
-    md += `- No recent activities found.\n`;
+    md += `- I have no record of recent activities.\n\n`;
+  }
+  
+  // Last 5 Activities - continued from "What Has Occupied My Time"
+  if (Ledger.lastActivities && Ledger.lastActivities.length > 0) {
+    md += `### Prior Endeavors\n`;
+    Ledger.lastActivities.forEach((activity: any, index: number) => {
+      md += `#### ${index + 1}. ${activity.title || activity.type}\n`;
+      
+      if (activity.status) {
+        const statusMap: Record<string, string> = {
+          'created': 'planned',
+          'in_progress': 'underway',
+          'processed': 'completed',
+          'failed': 'unsuccessful',
+          'error': 'encountered difficulties',
+          'interrupted': 'was interrupted'
+        };
+        md += `- **State**: ${statusMap[activity.status] || activity.status}\n`;
+      }
+      
+      if (activity.startDate) {
+        md += `- **Began**: ${formatDate(activity.startDate)}\n`;
+      }
+      
+      if (activity.endDate) {
+        md += `- **Concluded**: ${formatDate(activity.endDate)}\n`;
+      }
+      
+      if (activity.description) {
+        md += `- **Details**: ${activity.description}\n`;
+      }
+      
+      if (activity.thought) {
+        md += `- **My reflections**: ${activity.thought}\n`;
+      }
+    });
   }
   md += '\n';
   
-  // Planned Activities
-  md += `## Planned Activities\n`;
+  // Planned Activities - renamed to "My Intended Actions"
+  md += `## My Intended Actions\n`;
   if (Ledger.plannedActivities && Ledger.plannedActivities.length > 0) {
     Ledger.plannedActivities.forEach((activity: any, index: number) => {
-      md += `### Planned Activity ${index + 1}: ${activity.title || activity.type}\n`;
-      md += formatSimpleObjectForMarkdown(activity, ['type', 'status', 'startDate', 'endDate', 'description', 'thought']);
+      md += `### Plan ${index + 1}: ${activity.title || activity.type}\n`;
+      
+      if (activity.startDate) {
+        md += `- **To begin**: ${formatDate(activity.startDate)}\n`;
+      }
+      
+      if (activity.endDate) {
+        md += `- **Expected completion**: ${formatDate(activity.endDate)}\n`;
+      }
+      
+      if (activity.description) {
+        md += `- **Details**: ${activity.description}\n`;
+      }
+      
+      if (activity.thought) {
+        md += `- **My considerations**: ${activity.thought}\n`;
+      }
     });
   } else {
-    md += `- No planned activities found.\n`;
+    md += `- I have no specific plans at present.\n`;
   }
   md += '\n';
 
-  // Workplace
-  md += `## Workplace\n`;
-  md += formatSimpleObjectForMarkdown(Ledger.workplaceBuilding, ['name', 'type', 'category', 'buildingId']);
+  // Workplace - renamed to "My Place of Trade"
+  md += `## My Place of Trade\n`;
+  if (Ledger.workplaceBuilding) {
+    const workplace = Ledger.workplaceBuilding;
+    md += `I conduct my business at ${workplace.name || workplace.type || 'an unnamed establishment'}`;
+    
+    if (workplace.category) {
+      md += ` (${workplace.category})`;
+    }
+    
+    if (workplace.buildingId) {
+      md += `\n- **Known in records as**: ${workplace.buildingId}`;
+    }
+    
+    md += '\n';
+  } else {
+    md += `I have no formal place of business at present.\n`;
+  }
   md += '\n';
   
-  // Home
-  md += `## Home\n`;
-  md += formatSimpleObjectForMarkdown(Ledger.homeBuilding, ['name', 'type', 'category', 'buildingId']);
+  // Home - renamed to "My Dwelling"
+  md += `## My Dwelling\n`;
+  if (Ledger.homeBuilding) {
+    const home = Ledger.homeBuilding;
+    md += `I reside at ${home.name || home.type || 'an unnamed residence'}`;
+    
+    if (home.category) {
+      md += ` (${home.category})`;
+    }
+    
+    if (home.buildingId) {
+      md += `\n- **Known in records as**: ${home.buildingId}`;
+    }
+    
+    md += '\n';
+  } else {
+    md += `I have no permanent residence at present.\n`;
+  }
   md += '\n';
 
-  // Owned Lands
-  md += `## Owned Lands (${Ledger.ownedLands?.length || 0})\n`;
+  // Owned Lands - renamed to "Lands Under My Control"
+  md += `## Lands Under My Control (${Ledger.ownedLands?.length || 0})\n`;
   if (Ledger.ownedLands && Ledger.ownedLands.length > 0) {
     Ledger.ownedLands.forEach((land: any, index: number) => {
-      md += `### Land ${index + 1}: ${land.historicalName || land.englishName || land.landId}\n`;
-      md += formatSimpleObjectForMarkdown(land, ['landId', 'owner', 'district', 'lastIncome']);
-      md += `- **Building Points**: ${land.unoccupiedBuildingPoints?.length || 0} unoccupied / ${land.totalBuildingPoints || 0} total\n`;
-      // Optionally list unoccupied points if needed
-      md += `- **Canal Points**: ${land.unoccupiedCanalPoints?.length || 0} unoccupied / ${land.totalCanalPoints || 0} total\n`;
-      md += `- **Bridge Points**: ${land.unoccupiedBridgePoints?.length || 0} unoccupied / ${land.totalBridgePoints || 0} total\n`;
+      md += `### Property ${index + 1}: ${land.historicalName || land.englishName || land.landId}\n`;
+      
+      if (land.district) {
+        md += `- **District**: ${land.district}\n`;
+      }
+      
+      if (land.lastIncome !== undefined) {
+        md += `- **Last yielded**: ${land.lastIncome} ducats\n`;
+      }
+      
+      md += `- **Available for construction**: ${land.unoccupiedBuildingPoints?.length || 0} plots of ${land.totalBuildingPoints || 0} total\n`;
+      md += `- **Canal access points**: ${land.unoccupiedCanalPoints?.length || 0} of ${land.totalCanalPoints || 0} total\n`;
+      md += `- **Bridge possibilities**: ${land.unoccupiedBridgePoints?.length || 0} of ${land.totalBridgePoints || 0} total\n`;
       
       if (land.buildings && land.buildings.length > 0) {
         // Filter buildings to only show those owned by the user
@@ -1156,210 +1310,471 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
         );
         
         if (ownedBuildings.length > 0) {
-          md += `#### Buildings on this land owned by you (${ownedBuildings.length}):\n`;
+          md += `#### Structures I've raised here (${ownedBuildings.length}):\n`;
           ownedBuildings.forEach((building: any, bIndex: number) => {
-            md += `##### Building ${bIndex + 1}: ${building.name || building.buildingId}\n`;
-            md += formatSimpleObjectForMarkdown(building, ['type', 'category', 'runBy', 'occupant', 'isConstructed']);
+            md += `##### ${bIndex + 1}. ${building.name || building.type || building.buildingId}\n`;
+            
+            if (building.category) {
+              md += `- **Purpose**: ${building.category}\n`;
+            }
+            
+            if (building.runBy && building.runBy !== citizenUsername) {
+              md += `- **Managed by**: ${building.runBy}\n`;
+            }
+            
+            if (building.occupant && building.occupant !== citizenUsername) {
+              md += `- **Occupied by**: ${building.occupant}\n`;
+            }
+            
+            if (building.isConstructed !== undefined) {
+              md += `- **Construction**: ${building.isConstructed ? 'Complete' : 'In progress'}\n`;
+            }
           });
         } else {
-          md += `#### Buildings on this land: None owned by you\n`;
+          md += `#### Structures on this land: None bearing my name\n`;
         }
       }
       md += '\n';
     });
   } else {
-    md += `- No lands owned.\n\n`;
+    md += `- I hold no lands in my name.\n\n`;
   }
 
-  // Owned Buildings (not on owned lands - this logic might need adjustment based on how Ledger is structured)
-  // Assuming ownedBuildings are those not already listed under ownedLands
-  md += `## Other Owned Buildings (${Ledger.ownedBuildings?.length || 0})\n`;
+  // Owned Buildings - renamed to "Other Properties in My Name"
+  md += `## Other Properties in My Name (${Ledger.ownedBuildings?.length || 0})\n`;
   if (Ledger.ownedBuildings && Ledger.ownedBuildings.length > 0) {
     Ledger.ownedBuildings.forEach((building: any, index: number) => {
-      md += `### Building ${index + 1}: ${building.name || building.buildingId}\n`;
-      md += formatSimpleObjectForMarkdown(building, ['type', 'category', 'owner', 'runBy', 'occupant', 'isConstructed', 'landId']);
+      md += `### Property ${index + 1}: ${building.name || building.type || building.buildingId}\n`;
+      
+      if (building.category) {
+        md += `- **Purpose**: ${building.category}\n`;
+      }
+      
+      if (building.runBy && building.runBy !== citizenUsername) {
+        md += `- **Managed by**: ${building.runBy}\n`;
+      }
+      
+      if (building.occupant && building.occupant !== citizenUsername) {
+        md += `- **Occupied by**: ${building.occupant}\n`;
+      }
+      
+      if (building.isConstructed !== undefined) {
+        md += `- **Construction**: ${building.isConstructed ? 'Complete' : 'In progress'}\n`;
+      }
+      
+      if (building.landId) {
+        md += `- **Located on**: ${building.landId}\n`;
+      }
       
       if (building.resourceDetails) {
-        md += `#### Resource Details for ${building.name || building.buildingId}:\n`;
+        md += `#### Resources and Commerce at ${building.name || building.type || building.buildingId}:\n`;
         const rd = building.resourceDetails;
         if (rd.storage) {
-          md += `- **Storage**: Used ${rd.storage.used || 0} / Capacity ${rd.storage.capacity || 0}\n`;
+          md += `- **Storage**: ${rd.storage.used || 0} units of ${rd.storage.capacity || 0} capacity filled\n`;
         }
         if (rd.resources?.stored && rd.resources.stored.length > 0) {
-          md += `- **Stored Resources (${rd.resources.stored.length})**:\n`;
+          md += `- **Goods in storage (${rd.resources.stored.length})**:\n`;
           rd.resources.stored.forEach((res: any) => {
-            md += `  - ${res.name || res.type} (Count: ${res.count}, Owner: ${res.owner})\n`;
+            md += `  - ${res.count} ${res.name || res.type}${res.owner !== citizenUsername ? ` (belongs to ${res.owner})` : ''}\n`;
           });
         }
         if (rd.resources?.publiclySold && rd.resources.publiclySold.length > 0) {
-          md += `- **Publicly Sold (${rd.resources.publiclySold.length})**:\n`;
+          md += `- **Goods for sale (${rd.resources.publiclySold.length})**:\n`;
           rd.resources.publiclySold.forEach((contract: any) => {
-            md += `  - ${contract.resourceName || contract.resourceType} (Price: ${contract.pricePerResource}, Amount: ${contract.targetAmount || contract.amount})\n`;
+            md += `  - ${contract.targetAmount || contract.amount} ${contract.resourceName || contract.resourceType} at ${contract.pricePerResource} ducats each\n`;
           });
         }
          if (rd.resources?.transformationRecipes && rd.resources.transformationRecipes.length > 0) {
-            md += `- **Production Recipes (${rd.resources.transformationRecipes.length})**:\n`;
+            md += `- **Production capabilities (${rd.resources.transformationRecipes.length})**:\n`;
             rd.resources.transformationRecipes.forEach((recipe: any) => {
                 const inputs = recipe.inputs.map((i: any) => `${i.count || i.amount || 0} ${i.name || i.type}`).join(', ');
                 const outputs = recipe.outputs.map((o: any) => `${o.count || o.amount || 0} ${o.name || o.type}`).join(', ');
-                md += `  - Recipe: ${recipe.recipeName || 'Production Recipe'}\n`;
-                md += `    - Inputs: ${inputs}\n`;
-                md += `    - Outputs: ${outputs}\n`;
-                md += `    - Duration: ${recipe.durationMinutes || recipe.craftMinutes || 0} minutes\n`;
+                md += `  - Process: ${recipe.recipeName || 'Production Recipe'}\n`;
+                md += `    - Requires: ${inputs}\n`;
+                md += `    - Produces: ${outputs}\n`;
+                md += `    - Takes: ${recipe.durationMinutes || recipe.craftMinutes || 0} minutes\n`;
             });
         }
         md += '\n';
       }
     });
   } else {
-    md += `- No other buildings owned.\n\n`;
+    md += `- I own no other buildings beyond those on my lands.\n\n`;
   }
 
-  // Managed Buildings
-  md += `## Managed Buildings (${Ledger.managedBuildings?.length || 0})\n`;
+  // Managed Buildings - renamed to "Properties Under My Management"
+  md += `## Properties Under My Management (${Ledger.managedBuildings?.length || 0})\n`;
   if (Ledger.managedBuildings && Ledger.managedBuildings.length > 0) {
     Ledger.managedBuildings.forEach((building: any, index: number) => {
-      md += `### Building ${index + 1}: ${building.name || building.buildingId}\n`;
-      md += formatSimpleObjectForMarkdown(building, ['type', 'category', 'owner', 'occupant', 'isConstructed']);
+      md += `### Property ${index + 1}: ${building.name || building.type || building.buildingId}\n`;
+      
+      if (building.category) {
+        md += `- **Purpose**: ${building.category}\n`;
+      }
+      
+      if (building.owner && building.owner !== citizenUsername) {
+        md += `- **Owned by**: ${building.owner}\n`;
+      }
+      
+      if (building.occupant && building.occupant !== citizenUsername) {
+        md += `- **Occupied by**: ${building.occupant}\n`;
+      }
+      
+      if (building.isConstructed !== undefined) {
+        md += `- **Construction**: ${building.isConstructed ? 'Complete' : 'In progress'}\n`;
+      }
     });
   } else {
-    md += `- No buildings managed.\n\n`;
+    md += `- I manage no properties for others.\n\n`;
   }
   
-  // Active Contracts
-  md += `## Active Contracts (${Ledger.activeContracts?.length || 0})\n`;
+  // Active Contracts - renamed to "My Outstanding Obligations"
+  md += `## My Outstanding Obligations (${Ledger.activeContracts?.length || 0})\n`;
   if (Ledger.activeContracts && Ledger.activeContracts.length > 0) {
     Ledger.activeContracts.forEach((contract: any, index: number) => {
-      md += `### Contract ${index + 1}: ${contract.title || contract.contractId}\n`;
-      md += formatSimpleObjectForMarkdown(contract, ['type', 'buyer', 'seller', 'resourceType', 'pricePerResource', 'targetAmount', 'status', 'createdAt', 'endAt']);
+      md += `### Obligation ${index + 1}: ${contract.title || contract.contractId}\n`;
+      
+      if (contract.type) {
+        const typeMap: Record<string, string> = {
+          'import': 'Import goods',
+          'public_sell': 'Sell to the public',
+          'recurrent': 'Regular trade',
+          'construction_project': 'Construction work',
+          'logistics_service_request': 'Transport services',
+          'building_bid': 'Bid on property',
+          'land_listing': 'Land for sale',
+          'land_offer': 'Offer on land',
+          'land_sell': 'Land transaction'
+        };
+        md += `- **Nature**: ${typeMap[contract.type] || contract.type}\n`;
+      }
+      
+      if (contract.buyer) {
+        if (contract.buyer === citizenUsername) {
+          md += `- **I am to receive from**: ${contract.seller}\n`;
+        } else {
+          md += `- **I am to provide to**: ${contract.buyer}\n`;
+        }
+      }
+      
+      if (contract.seller && !md.includes(contract.seller)) {
+        if (contract.seller === citizenUsername) {
+          md += `- **I am to provide to**: ${contract.buyer}\n`;
+        } else {
+          md += `- **I am to receive from**: ${contract.seller}\n`;
+        }
+      }
+      
+      if (contract.resourceType) {
+        md += `- **Concerning**: ${contract.resourceType}\n`;
+      }
+      
+      if (contract.pricePerResource !== undefined) {
+        md += `- **At the price of**: ${contract.pricePerResource} ducats per unit\n`;
+      }
+      
+      if (contract.targetAmount !== undefined) {
+        md += `- **Quantity agreed**: ${contract.targetAmount} units\n`;
+      }
+      
+      if (contract.status) {
+        md += `- **Current state**: ${contract.status}\n`;
+      }
+      
+      if (contract.createdAt) {
+        md += `- **Agreed upon**: ${formatDate(contract.createdAt)}\n`;
+      }
+      
+      if (contract.endAt) {
+        md += `- **To be fulfilled by**: ${formatDate(contract.endAt)}\n`;
+      }
     });
     if (Ledger.activeContracts.length === 20) {
-      md += `- ... (and more)\n`;
+      md += `- ... (and more obligations not listed here)\n`;
     }
     md += '\n';
   } else {
-    md += `- No active contracts.\n\n`;
+    md += `- I have no active contracts or obligations at present.\n\n`;
   }
 
-  // Guild Details
-  md += `## Guild Details\n`;
-  md += formatSimpleObjectForMarkdown(Ledger.guildDetails, ['guildName', 'guildId', 'guildTier', 'shortDescription']);
+  // Guild Details - renamed to "My Guild Affiliations"
+  md += `## My Guild Affiliations\n`;
+  if (Ledger.guildDetails) {
+    const guild = Ledger.guildDetails;
+    md += `I am a member of the ${guild.guildName || 'unnamed guild'}`;
+    
+    if (guild.guildTier) {
+      md += ` (Tier ${guild.guildTier})`;
+    }
+    
+    md += '\n';
+    
+    if (guild.shortDescription) {
+      md += `- **Guild purpose**: ${guild.shortDescription}\n`;
+    }
+    
+    if (guild.guildId) {
+      md += `- **Guild registry number**: ${guild.guildId}\n`;
+    }
+  } else {
+    md += `I hold no guild memberships at present.\n`;
+  }
   md += '\n';
 
-  // Create a separate tab for Loans
-  md += `## Loans\n\n`;
+  // Create a separate tab for Loans - renamed to "My Financial Arrangements"
+  md += `## My Financial Arrangements\n\n`;
   
   // Citizen Loans
   md += `### Active Loans (${Ledger.citizenLoans?.length || 0})\n`;
   if (Ledger.citizenLoans && Ledger.citizenLoans.length > 0) {
     Ledger.citizenLoans.forEach((loan: any, index: number) => {
-      md += `#### Loan ${index + 1}: ${loan.name || loan.loanId}\n`;
-      md += formatSimpleObjectForMarkdown(loan, ['lender', 'borrower', 'type', 'status', 'principalAmount', 'interestRate', 'termDays', 'remainingBalance', 'createdAt']);
+      md += `#### Arrangement ${index + 1}: ${loan.name || loan.loanId}\n`;
+      
+      if (loan.lender === citizenUsername) {
+        md += `- **I have lent to**: ${loan.borrower}\n`;
+      } else if (loan.borrower === citizenUsername) {
+        md += `- **I have borrowed from**: ${loan.lender}\n`;
+      } else {
+        md += `- **Between**: ${loan.lender} and ${loan.borrower}\n`;
+      }
+      
+      if (loan.type) {
+        md += `- **Nature**: ${loan.type}\n`;
+      }
+      
+      if (loan.status) {
+        md += `- **Status**: ${loan.status}\n`;
+      }
+      
+      if (loan.principalAmount !== undefined) {
+        md += `- **Principal sum**: ${loan.principalAmount} ducats\n`;
+      }
+      
+      if (loan.interestRate !== undefined) {
+        const percentage = (Number(loan.interestRate) * 100).toFixed(1);
+        md += `- **Interest rate**: ${percentage}%\n`;
+      }
+      
+      if (loan.termDays !== undefined) {
+        md += `- **Term**: ${loan.termDays} days\n`;
+      }
+      
+      if (loan.remainingBalance !== undefined) {
+        md += `- **Outstanding balance**: ${loan.remainingBalance} ducats\n`;
+      }
+      
+      if (loan.createdAt) {
+        md += `- **Established**: ${formatDate(loan.createdAt)}\n`;
+      }
     });
   } else {
-    md += `- No active loans.\n\n`;
+    md += `- I have no active loans or debts.\n\n`;
   }
   
-  // Strongest Relationships
-  md += `## Strongest Relationships (Top 20) (${Ledger.strongestRelationships?.length || 0})\n`;
+  // Strongest Relationships - renamed to "Those I Know (And Who Know Me)"
+  md += `## Those I Know (And Who Know Me) (${Ledger.strongestRelationships?.length || 0})\n`;
   if (Ledger.strongestRelationships && Ledger.strongestRelationships.length > 0) {
     Ledger.strongestRelationships.forEach((rel: any, index: number) => {
       const otherCitizen = rel.citizen1 === citizenUsername ? rel.citizen2 : rel.citizen1;
-      md += `### Relationship ${index + 1} with ${otherCitizen}\n`;
+      md += `### ${index + 1}. ${otherCitizen}\n`;
       
       // Add title with proper formatting if available
       if (rel.title) {
-        md += `- **Relationship Type**: ${rel.title}\n`;
+        md += `- **Our bond**: ${rel.title}\n`;
       }
       
       // Add description with proper formatting if available
       if (rel.description) {
-        md += `- **Description**: ${rel.description}\n`;
+        md += `- **Nature of our association**: ${rel.description}\n`;
       }
       
       // Add other relationship details
-      md += `- **Status**: ${rel.status || 'Unknown'}\n`;
-      md += `- **Strength Score**: ${rel.strengthScore || '0'}\n`;
-      md += `- **Trust Score**: ${rel.trustScore || '0'}\n`;
+      if (rel.status) {
+        md += `- **Current standing**: ${rel.status}\n`;
+      }
+      
+      if (rel.strengthScore !== undefined) {
+        md += `- **How well we work together**: ${rel.strengthScore}\n`;
+      }
+      
+      if (rel.trustScore !== undefined) {
+        md += `- **Trust between us**: ${rel.trustScore}\n`;
+      }
       
       // Format the last interaction date if available
       if (rel.lastInteraction) {
-        md += `- **Last Interaction**: ${formatDate(rel.lastInteraction)}\n`;
+        md += `- **Last crossed paths**: ${formatDate(rel.lastInteraction)}\n`;
       }
     });
     if (Ledger.strongestRelationships.length === 20) {
-      md += `- ... (and more)\n`;
+      md += `- ... (and more acquaintances not listed here)\n`;
     }
     md += '\n';
   } else {
-    md += `- No significant relationships.\n\n`;
+    md += `- I have formed no significant relationships yet.\n\n`;
   }
 
-  // Recent Problems
-  md += `## Recent Problems (${Ledger.recentProblems?.length || 0})\n`;
+  // Recent Problems - renamed to "Matters Requiring Attention"
+  md += `## Matters Requiring Attention (${Ledger.recentProblems?.length || 0})\n`;
   if (Ledger.recentProblems && Ledger.recentProblems.length > 0) {
     Ledger.recentProblems.forEach((problem: any, index: number) => {
-      md += `### Problem ${index + 1}: ${problem.title || problem.problemId}\n`;
-      md += formatSimpleObjectForMarkdown(problem, ['type', 'assetType', 'asset', 'status', 'severity', 'description', 'createdAt']);
+      md += `### Concern ${index + 1}: ${problem.title || problem.problemId}\n`;
+      
+      if (problem.type) {
+        md += `- **Nature**: ${problem.type.replace(/_/g, ' ')}\n`;
+      }
+      
+      if (problem.assetType && problem.asset) {
+        md += `- **Regarding**: ${problem.asset} (${problem.assetType})\n`;
+      }
+      
+      if (problem.status) {
+        md += `- **Status**: ${problem.status}\n`;
+      }
+      
+      if (problem.severity) {
+        md += `- **Urgency**: ${problem.severity}\n`;
+      }
+      
+      if (problem.description) {
+        md += `- **Details**: ${problem.description}\n`;
+      }
+      
+      if (problem.createdAt) {
+        md += `- **First noted**: ${formatDate(problem.createdAt)}\n`;
+      }
     });
     if (Ledger.recentProblems.length === 20) {
-      md += `- ... (and more)\n`;
+      md += `- ... (and more concerns not listed here)\n`;
     }
     md += '\n';
   } else {
-    md += `- No recent problems.\n\n`;
+    md += `- No pressing matters require my attention at present.\n\n`;
   }
 
-  // Recent Messages
-  md += `## Recent Messages (Last 20) (${Ledger.recentMessages?.length || 0})\n`;
+  // Recent Messages - renamed to "My Correspondence"
+  md += `## My Correspondence (${Ledger.recentMessages?.length || 0})\n`;
   if (Ledger.recentMessages && Ledger.recentMessages.length > 0) {
     Ledger.recentMessages.forEach((message: any, index: number) => {
-      md += `### Message ${index + 1}\n`;
-      md += formatSimpleObjectForMarkdown(message, ['sender', 'receiver', 'type', 'content', 'channel', 'createdAt']);
+      md += `### Letter ${index + 1}\n`;
+      
+      if (message.sender === citizenUsername) {
+        md += `- **From**: Myself\n`;
+      } else {
+        md += `- **From**: ${message.sender}\n`;
+      }
+      
+      if (message.receiver === citizenUsername) {
+        md += `- **To**: Myself\n`;
+      } else {
+        md += `- **To**: ${message.receiver}\n`;
+      }
+      
+      if (message.type) {
+        md += `- **Nature**: ${message.type.replace(/_/g, ' ')}\n`;
+      }
+      
+      if (message.createdAt) {
+        md += `- **Written**: ${formatDate(message.createdAt)}\n`;
+      }
+      
+      if (message.content) {
+        md += `- **Contents**: "${message.content}"\n`;
+      }
+      
+      if (message.channel) {
+        md += `- **Channel**: ${message.channel}\n`;
+      }
     });
     if (Ledger.recentMessages.length === 20) {
-      md += `- ... (and more)\n`;
+      md += `- ... (and more correspondence not listed here)\n`;
     }
     md += '\n';
   } else {
-    md += `- No recent messages.\n\n`;
+    md += `- I have exchanged no messages of late.\n\n`;
   }
   
-  // Thoughts (Messages where sender = receiver)
+  // Thoughts (Messages where sender = receiver) - keep as is but enhance
   md += `## Personal Thoughts (${Ledger.thoughts?.length || 0})\n`;
   if (Ledger.thoughts && Ledger.thoughts.length > 0) {
     Ledger.thoughts.forEach((thought: any, index: number) => {
-      md += `### Thought ${index + 1}\n`;
-      md += formatSimpleObjectForMarkdown(thought, ['content', 'type', 'createdAt']);
+      md += `### Reflection ${index + 1}\n`;
+      
+      if (thought.type) {
+        const typeMap: Record<string, string> = {
+          'kinos_daily_reflection': 'Evening contemplation',
+          'kinos_theater_reflection': 'Thoughts after the theater',
+          'kinos_public_bath_reflection': 'Musings at the baths',
+          'kinos_practical_reflection': 'Practical considerations',
+          'kinos_guided_reflection': 'Guided meditation',
+          'kinos_unguided_reflection': 'Free contemplation',
+          'encounter_reflection': 'On meeting someone',
+          'kinos_thought_continuation': 'Further thoughts'
+        };
+        md += `- **Nature**: ${typeMap[thought.type] || thought.type.replace(/_/g, ' ')}\n`;
+      }
+      
+      if (thought.createdAt) {
+        md += `- **Recorded**: ${formatDate(thought.createdAt)}\n`;
+      }
+      
+      if (thought.content) {
+        md += `- **In my own words**: "${thought.content}"\n`;
+      }
     });
     if (Ledger.thoughts.length === 20) {
-      md += `- ... (and more)\n`;
+      md += `- ... (and more thoughts not recorded here)\n`;
     }
     md += '\n';
   } else {
-    md += `- No personal thoughts recorded.\n\n`;
+    md += `- I have recorded no personal reflections of late.\n\n`;
   }
   
-  // Latest Daily Update
-  md += `## Latest Daily Update\n`;
-  md += formatSimpleObjectForMarkdown(Ledger.latestDailyUpdate, ['title', 'content', 'createdAt']);
+  // Latest Daily Update - renamed to "Word from the Rialto"
+  md += `## Word from the Rialto\n`;
+  if (Ledger.latestDailyUpdate) {
+    const update = Ledger.latestDailyUpdate;
+    
+    if (update.title) {
+      md += `### ${update.title}\n`;
+    } else {
+      md += `### Latest proclamations and whispers\n`;
+    }
+    
+    if (update.content) {
+      md += `${update.content}\n`;
+    } else {
+      md += `No specific news has reached my ears.\n`;
+    }
+    
+    if (update.createdAt) {
+      md += `\n*Heard on ${formatDate(update.createdAt)}*\n`;
+    }
+  } else {
+    md += `No news of significance has reached me recently.\n`;
+  }
   md += '\n';
   
-  // Active Reports (for Forestieri only)
+  // Active Reports (for Forestieri only) - renamed to "News from Distant Ports"
   if (Ledger.activeReports && Ledger.activeReports.length > 0) {
-    md += `## Active Reports from Abroad (${Ledger.activeReports.length})\n`;
+    md += `## News from Distant Ports (${Ledger.activeReports.length})\n`;
     Ledger.activeReports.forEach((report: any, index: number) => {
-      md += `### Report ${index + 1}: ${report.title || 'Unnamed Report'}\n`;
-      md += `- **Origin**: ${report.originCity || 'Unknown'}\n`;
-      md += `- **Category**: ${report.category || 'Uncategorized'}\n`;
-      md += `- **Content**: ${report.content || 'No content available'}\n`;
+      md += `### From ${report.originCity || 'unknown lands'}: ${report.title || 'Unnamed Report'}\n`;
+      
+      if (report.content) {
+        md += `${report.content}\n\n`;
+      }
+      
+      if (report.category) {
+        md += `- **Nature of report**: ${report.category}\n`;
+      }
       
       if (report.affectedResources && report.affectedResources.length > 0) {
-        md += `- **Affected Resources**: ${report.affectedResources.join(', ')}\n`;
+        md += `- **This concerns**: ${report.affectedResources.join(', ')}\n`;
       }
       
       if (report.priceChanges && report.priceChanges.length > 0) {
-        md += `- **Price Changes**: \n`;
+        md += `- **Market implications**: \n`;
         report.priceChanges.forEach((change: any) => {
           const direction = change.change > 0 ? '↑' : '↓';
           const percentage = Math.abs(change.change * 100).toFixed(1);
@@ -1368,87 +1783,204 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       }
       
       if (report.createdAt) {
-        md += `- **Received**: ${formatDate(report.createdAt)}\n`;
+        md += `- **Reached Venice**: ${formatDate(report.createdAt)}\n`;
       }
       
       if (report.endAt) {
-        md += `- **Relevant Until**: ${formatDate(report.endAt)}\n`;
+        md += `- **Reliable until**: ${formatDate(report.endAt)}\n`;
       }
       
       md += '\n';
     });
-  } else if (citizen.socialClass === 'Forestieri') {
-    md += `## Active Reports from Abroad\n`;
-    md += `- No active reports available at this time.\n\n`;
+  } else if (Ledger.citizen?.socialClass === 'Forestieri') {
+    md += `## News from Distant Ports\n`;
+    md += `- No reports from abroad have reached me at present.\n\n`;
   }
 
-  // Available Stratagems
-  md += `## Available Stratagems\n`;
+  // Available Stratagems - renamed to "Tactics I Might Employ"
+  md += `## Tactics I Might Employ\n`;
   if (Ledger.availableStratagems && Object.keys(Ledger.availableStratagems).length > 0) {
     for (const [category, natures] of Object.entries(Ledger.availableStratagems as Record<string, Record<string, ShortStratagemDefinition[]>>)) {
-      md += `### Category: ${category}\n`;
+      md += `### In ${category.charAt(0).toUpperCase() + category.slice(1)}\n`;
+      
       for (const [nature, stratagems] of Object.entries(natures)) {
-        md += `#### Nature: ${nature} (${stratagems.length} stratagems)\n`;
+        const natureDisplay = nature.charAt(0).toUpperCase() + nature.slice(1);
+        md += `#### ${natureDisplay} approaches (${stratagems.length})\n`;
+        
         stratagems.forEach(strat => {
           md += `##### ${strat.name}\n`;
-          md += `- **Type**: ${strat.type}\n`;
+          md += `- **Method**: ${strat.type.replace(/_/g, ' ')}\n`;
           md += `- **Purpose**: ${strat.purpose}\n`;
-          md += `- **Status**: ${strat.status}\n\n`;
+          
+          const statusMap: Record<string, string> = {
+            'Implemented': 'Available now',
+            'Coming Soon': 'Not yet possible',
+            'Partially Implemented': 'Limited availability'
+          };
+          md += `- **Availability**: ${statusMap[strat.status] || strat.status}\n\n`;
         });
       }
     }
   } else {
-    md += `- No stratagem definitions available.\n\n`;
+    md += `- I have yet to learn of strategic maneuvers I might employ.\n\n`;
   }
 
-  // Active Stratagems Executed By Citizen
-  md += `## Active Stratagems Executed By Citizen (${Ledger.stratagemsExecutedByCitizen?.length || 0})\n`;
+  // Active Stratagems Executed By Citizen - renamed to "My Current Schemes"
+  md += `## My Current Schemes (${Ledger.stratagemsExecutedByCitizen?.length || 0})\n`;
   if (Ledger.stratagemsExecutedByCitizen && Ledger.stratagemsExecutedByCitizen.length > 0) {
     Ledger.stratagemsExecutedByCitizen.forEach((strat: any, index: number) => {
-      md += `### Stratagem ${index + 1}: ${strat.name || strat.stratagemId}\n`;
-      md += formatSimpleObjectForMarkdown(strat, ['type', 'variant', 'targetCitizen', 'targetBuilding', 'targetResourceType', 'status', 'executedAt', 'expiresAt']);
+      md += `### Scheme ${index + 1}: ${strat.name || strat.type?.replace(/_/g, ' ') || strat.stratagemId}\n`;
+      
+      if (strat.variant) {
+        md += `- **Approach**: ${strat.variant}\n`;
+      }
+      
+      if (strat.targetCitizen) {
+        md += `- **Directed at**: ${strat.targetCitizen}\n`;
+      }
+      
+      if (strat.targetBuilding) {
+        md += `- **Focused on property**: ${strat.targetBuilding}\n`;
+      }
+      
+      if (strat.targetResourceType) {
+        md += `- **Concerning**: ${strat.targetResourceType}\n`;
+      }
+      
+      if (strat.status) {
+        md += `- **Current state**: ${strat.status}\n`;
+      }
+      
+      if (strat.executedAt) {
+        md += `- **Set in motion**: ${formatDate(strat.executedAt)}\n`;
+      }
+      
+      if (strat.expiresAt) {
+        md += `- **Concludes**: ${formatDate(strat.expiresAt)}\n`;
+      }
     });
   } else {
-    md += `- No active stratagems executed by this citizen.\n\n`;
+    md += `- I have no schemes currently in motion.\n\n`;
   }
 
-  // Active Stratagems Targeting Citizen
-  md += `## Active Stratagems Targeting Citizen (${Ledger.stratagemsTargetingCitizen?.length || 0})\n`;
+  // Active Stratagems Targeting Citizen - renamed to "Plots Against Me"
+  md += `## Plots Against Me (${Ledger.stratagemsTargetingCitizen?.length || 0})\n`;
   if (Ledger.stratagemsTargetingCitizen && Ledger.stratagemsTargetingCitizen.length > 0) {
     Ledger.stratagemsTargetingCitizen.forEach((strat: any, index: number) => {
-      md += `### Stratagem ${index + 1}: ${strat.name || strat.stratagemId} (Executed by: ${strat.executedBy})\n`;
-      md += formatSimpleObjectForMarkdown(strat, ['type', 'variant', 'targetBuilding', 'targetResourceType', 'status', 'executedAt', 'expiresAt']);
+      md += `### Plot ${index + 1}: ${strat.name || strat.type?.replace(/_/g, ' ') || strat.stratagemId}\n`;
+      
+      if (strat.executedBy) {
+        md += `- **Orchestrated by**: ${strat.executedBy}\n`;
+      }
+      
+      if (strat.variant) {
+        md += `- **Nature**: ${strat.variant}\n`;
+      }
+      
+      if (strat.targetBuilding) {
+        md += `- **Targeting my property**: ${strat.targetBuilding}\n`;
+      }
+      
+      if (strat.targetResourceType) {
+        md += `- **Concerning my**: ${strat.targetResourceType}\n`;
+      }
+      
+      if (strat.status) {
+        md += `- **Current state**: ${strat.status}\n`;
+      }
+      
+      if (strat.executedAt) {
+        md += `- **Begun on**: ${formatDate(strat.executedAt)}\n`;
+      }
+      
+      if (strat.expiresAt) {
+        md += `- **Concludes**: ${formatDate(strat.expiresAt)}\n`;
+      }
     });
   } else {
-    md += `- No active stratagems targeting this citizen.\n\n`;
+    md += `- None that I know of... but in Venice, who can be certain?\n\n`;
   }
 
-  // Past Executed Stratagems Executed By Citizen
-  md += `## Past Stratagems Executed By Citizen (Last 20) (${Ledger.stratagemsExecutedByCitizenPast?.length || 0})\n`;
+  // Past Executed Stratagems Executed By Citizen - renamed to "My Past Machinations"
+  md += `## My Past Machinations (${Ledger.stratagemsExecutedByCitizenPast?.length || 0})\n`;
   if (Ledger.stratagemsExecutedByCitizenPast && Ledger.stratagemsExecutedByCitizenPast.length > 0) {
     Ledger.stratagemsExecutedByCitizenPast.forEach((strat: any, index: number) => {
-      md += `### Stratagem ${index + 1}: ${strat.name || strat.stratagemId}\n`;
-      md += formatSimpleObjectForMarkdown(strat, ['type', 'variant', 'targetCitizen', 'targetBuilding', 'targetResourceType', 'status', 'executedAt', 'expiresAt']);
+      md += `### Scheme ${index + 1}: ${strat.name || strat.type?.replace(/_/g, ' ') || strat.stratagemId}\n`;
+      
+      if (strat.variant) {
+        md += `- **Approach**: ${strat.variant}\n`;
+      }
+      
+      if (strat.targetCitizen) {
+        md += `- **Was directed at**: ${strat.targetCitizen}\n`;
+      }
+      
+      if (strat.targetBuilding) {
+        md += `- **Focused on property**: ${strat.targetBuilding}\n`;
+      }
+      
+      if (strat.targetResourceType) {
+        md += `- **Concerned**: ${strat.targetResourceType}\n`;
+      }
+      
+      if (strat.status) {
+        md += `- **Final state**: ${strat.status}\n`;
+      }
+      
+      if (strat.executedAt) {
+        md += `- **Set in motion**: ${formatDate(strat.executedAt)}\n`;
+      }
+      
+      if (strat.expiresAt) {
+        md += `- **Concluded**: ${formatDate(strat.expiresAt)}\n`;
+      }
     });
     if (Ledger.stratagemsExecutedByCitizenPast.length === 20) {
-      md += `- ... (and more)\n`;
+      md += `- ... (and more past schemes not recorded here)\n`;
     }
   } else {
-    md += `- No past stratagems recorded as executed by this citizen.\n\n`;
+    md += `- I have no record of past schemes.\n\n`;
   }
 
-  // Past Executed Stratagems Targeting Citizen
-  md += `## Past Stratagems Targeting Citizen (Last 20) (${Ledger.stratagemsTargetingCitizenPast?.length || 0})\n`;
+  // Past Executed Stratagems Targeting Citizen - renamed to "Past Plots Against Me"
+  md += `## Past Plots Against Me (${Ledger.stratagemsTargetingCitizenPast?.length || 0})\n`;
   if (Ledger.stratagemsTargetingCitizenPast && Ledger.stratagemsTargetingCitizenPast.length > 0) {
     Ledger.stratagemsTargetingCitizenPast.forEach((strat: any, index: number) => {
-      md += `### Stratagem ${index + 1}: ${strat.name || strat.stratagemId} (Executed by: ${strat.executedBy})\n`;
-      md += formatSimpleObjectForMarkdown(strat, ['type', 'variant', 'targetBuilding', 'targetResourceType', 'status', 'executedAt', 'expiresAt']);
+      md += `### Plot ${index + 1}: ${strat.name || strat.type?.replace(/_/g, ' ') || strat.stratagemId}\n`;
+      
+      if (strat.executedBy) {
+        md += `- **Was orchestrated by**: ${strat.executedBy}\n`;
+      }
+      
+      if (strat.variant) {
+        md += `- **Nature**: ${strat.variant}\n`;
+      }
+      
+      if (strat.targetBuilding) {
+        md += `- **Targeted my property**: ${strat.targetBuilding}\n`;
+      }
+      
+      if (strat.targetResourceType) {
+        md += `- **Concerned my**: ${strat.targetResourceType}\n`;
+      }
+      
+      if (strat.status) {
+        md += `- **Final state**: ${strat.status}\n`;
+      }
+      
+      if (strat.executedAt) {
+        md += `- **Begun on**: ${formatDate(strat.executedAt)}\n`;
+      }
+      
+      if (strat.expiresAt) {
+        md += `- **Concluded**: ${formatDate(strat.expiresAt)}\n`;
+      }
     });
     if (Ledger.stratagemsTargetingCitizenPast.length === 20) {
-      md += `- ... (and more)\n`;
+      md += `- ... (and more past plots not recorded here)\n`;
     }
   } else {
-    md += `- No past stratagems recorded as targeting this citizen.\n\n`;
+    md += `- I have no record of past plots against me.\n\n`;
   }
 
   return md;
