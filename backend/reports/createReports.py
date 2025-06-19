@@ -320,9 +320,10 @@ def create_report(tables: Dict[str, Table], report_data: Dict[str, Any], categor
         price_changes = json.dumps(report_data.get('PriceChanges', []))
         availability_changes = json.dumps(report_data.get('AvailabilityChanges', []))
         
-        # Set end date (reports are valid for 4 days)
+        # Set end date (reports are valid for 5-9 days)
         now = datetime.now(timezone.utc)
-        end_at = (now + timedelta(days=4)).isoformat()
+        days_valid = random.randint(5, 9)
+        end_at = (now + timedelta(days=days_valid)).isoformat()
         
         # Truncate OriginalContent if it's too long
         original_content = report_data.get('OriginalContent', '')
@@ -357,6 +358,7 @@ def create_report(tables: Dict[str, Table], report_data: Dict[str, Any], categor
 def process_category(tables: Dict[str, Table], category: str, resource_names: List[str], dry_run: bool = False) -> bool:
     """
     Process a category of news and create a report.
+    Only creates a report with a 1/7 chance for each category.
     
     Args:
         tables: Dictionary of Airtable tables
@@ -368,6 +370,11 @@ def process_category(tables: Dict[str, Table], category: str, resource_names: Li
         True if successful, False otherwise
     """
     log.info(f"{LogColors.HEADER}Processing {category} news...{LogColors.ENDC}")
+    
+    # Only create a report with a 1/7 chance
+    if random.randint(1, 7) != 1:
+        log.info(f"{LogColors.OKBLUE}Skipping report creation for {category} (random chance).{LogColors.ENDC}")
+        return True
     
     # Fetch RSS feed for category
     news_entries = fetch_rss_feed(category)
