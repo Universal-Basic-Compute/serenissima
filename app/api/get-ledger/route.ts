@@ -1702,9 +1702,8 @@ export async function GET(request: Request) {
       fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/weather`).then(res => res.json()).catch(() => null)
     ]);
 
-    // Update weatherData and assign to Ledger
-    weatherData = weatherData;
-    Ledger.weather = weatherData && weatherData.success ? weatherData : null;
+    // Assign weather data to Ledger (no need to reassign to itself)
+    Ledger.weather = weatherData?.success ? weatherData : null;
     
     // Assign results to Ledger
     Ledger.availableStratagems = availableStratagems;
