@@ -88,6 +88,13 @@ def process_daily_reflection(
         
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages" # Changed to /messages
         
+        # Initialize structured_add_system_payload
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
+        if ledger_markdown_str:
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
+        else:
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
+            
         # Add the conscious merchant context to structured_add_system_payload
         structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
         
@@ -104,12 +111,6 @@ def process_daily_reflection(
         
         # Log the prompt
         log.info(f"[PROMPT] Daily reflection for {citizen_username}:\n{kinos_prompt_daily_reflection}")
-
-        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
-        if ledger_markdown_str:
-            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
-        else:
-            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_daily_reflection,
@@ -261,6 +262,13 @@ def process_theater_reflection(
                 play_context += f" by {artist_username}"
             play_context += f". The play's content was: {play_content}\n\n"
         
+        # Initialize structured_add_system_payload
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
+        if ledger_markdown_str:
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
+        else:
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
+            
         # Add the conscious merchant context to structured_add_system_payload
         structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
         
@@ -279,12 +287,6 @@ def process_theater_reflection(
         
         # Log the prompt
         log.info(f"[PROMPT] Theater reflection for {citizen_username}:\n{kinos_prompt_theater_reflection}")
-
-        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
-        if ledger_markdown_str:
-            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
-        else:
-            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_theater_reflection,
@@ -425,6 +427,13 @@ def process_public_bath_reflection(
         # Extract bath details from the process details if available
         public_bath_name = details.get('public_bath_name', 'a public bath')
         
+        # Initialize structured_add_system_payload
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
+        if ledger_markdown_str:
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
+        else:
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
+            
         # Add the conscious merchant context to structured_add_system_payload
         structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
         
@@ -442,12 +451,6 @@ def process_public_bath_reflection(
         
         # Log the prompt
         log.info(f"[PROMPT] Public bath reflection for {citizen_username}:\n{kinos_prompt_bath_reflection}")
-
-        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
-        if ledger_markdown_str:
-            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
-        else:
-            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_bath_reflection,
@@ -668,6 +671,21 @@ def process_practical_reflection(
         
         # Create the prompt based on the selected item
         if selected_item and selected_category and selected_item_description:
+            # Initialize structured_add_system_payload
+            structured_add_system_payload: Dict[str, Any] = { "ledger": None }
+            if ledger_markdown_str:
+                structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
+            else:
+                structured_add_system_payload["ledger"] = "ledger ledger was not available."
+                
+            # Initialize structured_add_system_payload if not already done
+            if 'structured_add_system_payload' not in locals():
+                structured_add_system_payload: Dict[str, Any] = { "ledger": None }
+                if ledger_markdown_str:
+                    structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
+                else:
+                    structured_add_system_payload["ledger"] = "ledger ledger was not available."
+                    
             # Add the conscious merchant context to structured_add_system_payload
             structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
             
@@ -702,12 +720,6 @@ def process_practical_reflection(
         
         # Log the prompt
         log.info(f"[PROMPT] Practical reflection for {citizen_username}:\n{kinos_prompt_practical_reflection}")
-        
-        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
-        if ledger_markdown_str:
-            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
-        else:
-            structured_add_system_payload["ledger"] = "ledger ledger was not available."
         
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_practical_reflection,
@@ -1149,6 +1161,13 @@ def process_guided_reflection(
         
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages"
         
+        # Initialize structured_add_system_payload
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
+        if ledger_markdown_str:
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
+        else:
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
+            
         # Add the conscious merchant context to structured_add_system_payload
         structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
         
@@ -1164,12 +1183,6 @@ def process_guided_reflection(
         
         # Log the prompt
         log.info(f"[PROMPT] Guided reflection for {citizen_username}:\n{kinos_prompt_guided_reflection}")
-
-        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
-        if ledger_markdown_str:
-            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
-        else:
-            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_guided_reflection,
@@ -1356,6 +1369,13 @@ def process_continue_thought(
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages"
         
         # Create a prompt that asks the citizen to continue their previous thought
+        # Initialize structured_add_system_payload
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
+        if ledger_markdown_str:
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
+        else:
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
+            
         # Add the conscious merchant context to structured_add_system_payload
         structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
         
@@ -1370,12 +1390,6 @@ def process_continue_thought(
         
         # Log the prompt
         log.info(f"[PROMPT] Thought continuation for {citizen_username}:\n{kinos_prompt_continue_thought}")
-
-        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
-        if ledger_markdown_str:
-            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
-        else:
-            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_continue_thought,
@@ -1498,6 +1512,13 @@ def process_unguided_reflection(
         
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages"
         
+        # Initialize structured_add_system_payload
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
+        if ledger_markdown_str:
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
+        else:
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
+            
         # Add the conscious merchant context to structured_add_system_payload
         structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
         
@@ -1513,12 +1534,6 @@ def process_unguided_reflection(
         
         # Log the prompt
         log.info(f"[PROMPT] Unguided reflection for {citizen_username}:\n{kinos_prompt_unguided_reflection}")
-
-        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
-        if ledger_markdown_str:
-            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
-        else:
-            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_unguided_reflection,
