@@ -118,6 +118,9 @@ def process_daily_reflection(
             "addSystem": json.dumps(structured_add_system_payload) # structured_add_system_payload is a dict, ledger is a string
         }
 
+        # Afficher le contenu exact de addSystem pour débogage
+        log.info(f"  [DEBUG] addSystem content for {citizen_username}: {json.dumps(structured_add_system_payload, indent=2)[:500]}...")
+        
         log.info(f"  Making KinOS /messages call for daily reflection by {citizen_username} to {kinos_messages_url}")
         
         try:
