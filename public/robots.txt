@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Allow all crawlers to access all content
+Sitemap: https://serenissima.ai/sitemap.xml
+
+# Disallow crawling of private or development areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dev/

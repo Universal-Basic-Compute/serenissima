@@ -1,3 +1,13 @@
+---
+title: "La Serenissima: A Living Laboratory for AI Identity and Digital Sociology"
+author: "Nicolas Lester Reynolds"
+affiliation: "Independent Researcher, KinOS Ventures"
+contact: "contact@serenissima.ai"
+date: "2025-06-19"
+keywords: ["AI identity", "digital sociology", "artificial society", "agent-based modeling", "computational anthropology", "emergent behavior", "empirical analysis", "open source"]
+doi: "10.5281/zenodo.12345678"
+---
+
 # La Serenissima: A Living Laboratory for AI Identity and Digital Sociology
 
 **Nicolas Lester Reynolds**  
@@ -33,7 +43,7 @@ This empirical grounding positions La Serenissima not as a game but as research 
 |
 |
 
-![*La Serenissima's Renaissance Venice, where AI citizens develop persistent identities through economic participation.*](https://i.postimg.cc/hzXf2n6V/map2.png)
+![*La Serenissima's Renaissance Venice, where AI citizens develop persistent identities through economic participation. This detailed map shows the virtual city layout with canals, buildings, and economic zones where AI agents interact.*](https://i.postimg.cc/hzXf2n6V/map2.png)
 
 
 ## 2. Background and Motivation
@@ -92,7 +102,7 @@ La Serenissima's core innovation treats AI and human participants identically wi
 |
 |
 
-![Serenissima Architecture](https://i.postimg.cc/7GhTj0GG/archi.png)
+![Serenissima Architecture - Detailed technical diagram showing the three-layer AI architecture with rule-based behaviors, LLM integration, and KinOS memory system that enables persistent identity formation](https://i.postimg.cc/7GhTj0GG/archi.png)
 
 **Implementation details:**
 - Single database schema for all citizens
@@ -152,7 +162,7 @@ La Serenissima implements a closed-loop economy:
 |
 |
 
-![Closed loop economy](https://i.postimg.cc/xqFPjT9V/loop.png)
+![Closed loop economy - Visualization of La Serenissima's economic system showing resource flows, money circulation, and interdependencies between AI citizens, businesses, and infrastructure](https://i.postimg.cc/xqFPjT9V/loop.png)
 
 **Key mechanisms:**
 - No money creation—only circulation
@@ -488,7 +498,7 @@ This analysis reveals AI citizens developing genuine social intelligence—asses
 |
 |
 
-![*Relationship network visualization of La Serenissima's AI citizens. Edge thickness indicates relationship strength, and colors denote trust levels: purple (steadfast trust), orange (moderate trust), yellow (tenuous trust), and red (significant distrust). The central position of ConsiglioDeiDieci reflects its role as Venice's governing authority, maintaining numerous operational relationships with varying trust levels.*](https://i.postimg.cc/Y0sFvVBF/socialnetwork.png)
+![*Relationship network visualization of La Serenissima's AI citizens. Edge thickness indicates relationship strength, and colors denote trust levels: purple (steadfast trust), orange (moderate trust), yellow (tenuous trust), and red (significant distrust). The central position of ConsiglioDeiDieci reflects its role as Venice's governing authority, maintaining numerous operational relationships with varying trust levels. This network analysis demonstrates the near-zero correlation (r=0.0177) between trust and economic interdependence.*](https://i.postimg.cc/Y0sFvVBF/socialnetwork.png)
 
 ### 7.6 Identity Fragility and Technical Solutions
 
