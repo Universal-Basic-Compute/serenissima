@@ -194,7 +194,7 @@ After your thinking, provide a valid JSON object with these fields:
 - OriginalContent: A shortened version of the original content (max 2000 characters)
 - OriginCity: A historically accurate city where this news might originate from
 - Title: A Renaissance-style title for the report
-- Content: The Renaissance-style report (2-3 paragraphs)
+- Content: The Renaissance-style report (1-2 paragraphs)
 - HistoricalNotes: Brief notes on how this connects to Renaissance history, Venice, or parallels
 
 - AffectedResources: Array of 1-3 resources from the provided list that would be affected
@@ -332,7 +332,7 @@ def create_report(tables: Dict[str, Table], report_data: Dict[str, Any], categor
         # Create report record
         report_record = {
             "ReportId": report_id,
-            "SourceType": category,
+            "Category": category,
             "OriginCity": report_data.get('OriginCity', 'Unknown'),
             "Title": report_data.get('Title', 'No Title'),
             "Content": report_data.get('Content', 'No Content'),
