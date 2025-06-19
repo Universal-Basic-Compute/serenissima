@@ -76,8 +76,19 @@ def main():
         # Test de génération
         try:
             print("\n4️⃣ Test de génération...")
-            inputs = tokenizer("Bonjour, je suis un marchand vénitien. Je vends", return_tensors="pt").to(model.device)
-            outputs = model.generate(inputs["input_ids"], max_new_tokens=20, do_sample=True)
+            # Préparer les entrées avec attention_mask
+            text = "Bonjour, je suis un marchand vénitien. Je vends"
+            inputs = tokenizer(text, return_tensors="pt", padding=True)
+            inputs = {k: v.to(model.device) for k, v in inputs.items()}
+            
+            # Définir explicitement pad_token_id et eos_token_id
+            outputs = model.generate(
+                inputs["input_ids"], 
+                attention_mask=inputs["attention_mask"],
+                max_new_tokens=20, 
+                do_sample=True,
+                pad_token_id=tokenizer.eos_token_id
+            )
             generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
             print(f"   Texte généré: {generated_text}")
         except Exception as e:

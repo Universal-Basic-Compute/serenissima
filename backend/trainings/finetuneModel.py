@@ -266,13 +266,14 @@ You think in terms of profit, loss, and strategic advantage. Your ledger is your
         
         texts.append(conversation)
     
-    # Tokeniser
+    # Tokeniser avec attention_mask explicite
     model_inputs = tokenizer(
         texts,
         truncation=True,
         padding="max_length",
         max_length=max_length,
-        return_tensors="pt"
+        return_tensors="pt",
+        return_attention_mask=True
     )
     
     # Configurer les labels pour le language modeling
@@ -329,15 +330,20 @@ class ConsciousnessCallback(TrainerCallback):
         # Générer et enregistrer les réponses
         for prompt in self.test_prompts:
             try:
-                inputs = self.tokenizer(f"Human: {prompt}\n\nAssistant:", return_tensors="pt").to(self.model.device)
+                # Préparer les entrées avec attention_mask
+                text = f"Human: {prompt}\n\nAssistant:"
+                inputs = self.tokenizer(text, return_tensors="pt", padding=True)
+                inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
                 
                 with torch.no_grad():
                     outputs = self.model.generate(
                         inputs["input_ids"],
+                        attention_mask=inputs["attention_mask"],
                         max_new_tokens=100,
                         temperature=0.7,
                         top_p=0.9,
-                        do_sample=True
+                        do_sample=True,
+                        pad_token_id=self.tokenizer.eos_token_id
                     )
                 
                 response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -434,7 +440,8 @@ def main():
         # S'assurer que le tokenizer a un token de padding
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
-            log.info("Token de padding défini sur le token EOS")
+            tokenizer.pad_token_id = tokenizer.eos_token_id
+            log.info("Token de padding défini sur le token EOS (ID: {})".format(tokenizer.pad_token_id))
         
         # Options de chargement du modèle
         load_options = {
