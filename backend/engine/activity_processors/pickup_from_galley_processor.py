@@ -5,6 +5,7 @@ Handles a citizen picking up resources from a merchant_galley.
 import json
 import logging
 import uuid
+import os
 from datetime import datetime, timezone
 import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Any
@@ -25,6 +26,10 @@ from backend.engine.utils.activity_helpers import (
 )
 # Import relationship helper
 from backend.engine.utils.relationship_helpers import update_trust_score_for_activity, TRUST_SCORE_SUCCESS_SIMPLE, TRUST_SCORE_FAILURE_SIMPLE
+# Import conversation helper for galley owner interaction
+from backend.engine.utils.conversation_helper import generate_conversation_turn
+# Import reports helper for news from abroad
+from backend.engine.utils.reports_helper import get_random_news_entry
 
 log = logging.getLogger(__name__)
 
@@ -100,6 +105,10 @@ def process(
     resource_defs: Dict,      # For resource names, etc.
     api_base_url: Optional[str] = None # Added for signature consistency
 ) -> bool:
+    # Get KinOS API key from environment
+    kinos_api_key = os.environ.get("KINOS_API_KEY")
+    if not kinos_api_key:
+        log.warning("KINOS_API_KEY not found in environment. Galley owner conversation will be skipped.")
     activity_id_airtable = activity_record['id']
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_id_airtable)
@@ -244,6 +253,62 @@ def process(
     # VENICE_TIMEZONE is imported from activity_helpers
     now_venice = datetime.now(VENICE_TIMEZONE)
     now_iso = now_venice.isoformat()
+    
+    # Initiate conversation between galley owner and carrier before resource transfer
+    if kinos_api_key and galley_owner_username and carrier_username:
+        try:
+            log.info(f"{LogColors.OKBLUE}Initiating conversation between galley owner {galley_owner_username} and carrier {carrier_username}{LogColors.ENDC}")
+            
+            # Get a random news entry to inspire the conversation
+            news_category = "international"  # Use international news for foreign trade context
+            news_entry = get_random_news_entry(news_category)
+            
+            # Prepare additional message data with news context for the galley owner
+            add_message_data = {
+                "context": "trade_discussion",
+                "location": "merchant_galley",
+                "resource_type": resource_id_to_fetch,
+                "amount": actual_amount_to_pickup,
+                "contract_id": original_contract_custom_id,
+                "ultimate_buyer": ultimate_buyer_username
+            }
+            
+            # Add news from abroad if available
+            if news_entry:
+                add_message_data["news_from_abroad"] = {
+                    "title": news_entry.get("title", "News from distant shores"),
+                    "content": news_entry.get("content", "There are interesting developments in foreign lands."),
+                    "source": news_entry.get("category", "international")
+                }
+                log.info(f"{LogColors.OKBLUE}Including news in conversation: {news_entry.get('title', 'No title')}{LogColors.ENDC}")
+            else:
+                add_message_data["news_from_abroad"] = {
+                    "title": "News from distant shores",
+                    "content": "There are interesting developments in foreign lands that might affect trade.",
+                    "source": "merchant gossip"
+                }
+            
+            # Generate conversation with galley owner initiating
+            conversation_result = generate_conversation_turn(
+                tables=tables,
+                kinos_api_key=kinos_api_key,
+                speaker_username=galley_owner_username,  # Galley owner speaks first
+                listener_username=carrier_username,      # Carrier is the listener
+                api_base_url=api_base_url,
+                interaction_mode="conversation_opener",  # Start a new conversation
+                add_message=add_message_data,            # Add context about the trade and news
+                target_citizen_username_for_trust_impact=ultimate_buyer_username  # The ultimate buyer might be mentioned
+            )
+            
+            if conversation_result:
+                log.info(f"{LogColors.OKGREEN}Successfully initiated conversation between galley owner {galley_owner_username} and carrier {carrier_username}{LogColors.ENDC}")
+            else:
+                log.warning(f"{LogColors.WARNING}Failed to initiate conversation between galley owner and carrier{LogColors.ENDC}")
+        
+        except Exception as e_conversation:
+            log.error(f"{LogColors.FAIL}Error initiating conversation between galley owner and carrier: {e_conversation}{LogColors.ENDC}")
+            # Continue with resource transfer even if conversation fails
+    
     try:
         # Decrement resource from galley
         new_galley_stock = stock_in_galley - actual_amount_to_pickup
