@@ -835,185 +835,171 @@ def main():
             dataloader_iterator = tqdm(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}") if TQDM_AVAILABLE else simple_progress_bar(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}")
         
             for step, batch in enumerate(dataloader_iterator):
-            # Déplacer le batch sur le device et s'assurer que requires_grad est activé
-            batch = {k: v.to(model.device) for k, v in batch.items()}
+                # Déplacer le batch sur le device et s'assurer que requires_grad est activé
+                batch = {k: v.to(model.device) for k, v in batch.items()}
+                
+                # Les labels sont des entiers et n'ont pas besoin de gradients
+                
+                # Afficher la progression pour chaque batch
+                progress = f"[Époque {epoch+1}/{args.epochs}] Batch {step+1}/{len(train_dataloader)}"
             
-            # Les labels sont des entiers et n'ont pas besoin de gradients
-            
-            # Afficher la progression pour chaque batch
-            progress = f"[Époque {epoch+1}/{args.epochs}] Batch {step+1}/{len(train_dataloader)}"
-            
-            # Forward pass avec précision mixte si activée
-            if scaler:
-                try:
-                    # Les tenseurs d'entrée (input_ids, attention_mask) n'ont pas besoin de requires_grad
-                    # Seuls les paramètres du modèle ont besoin de gradients
+                # Forward pass avec précision mixte si activée
+                if scaler:
+                    try:
+                        # Les tenseurs d'entrée (input_ids, attention_mask) n'ont pas besoin de requires_grad
+                        # Seuls les paramètres du modèle ont besoin de gradients
+                        
+                        with torch.amp.autocast('cuda'):
+                            outputs = model(**batch)
+                            loss = outputs.loss / args.gradient_accumulation_steps
                     
-                    with torch.amp.autocast('cuda'):
-                        outputs = model(**batch)
-                        loss = outputs.loss / args.gradient_accumulation_steps
+                        # Vérifier que la perte a un grad_fn
+                        if not hasattr(loss, 'grad_fn'):
+                            log.error(f"La perte n'a pas de grad_fn. Vérifiez que le modèle est bien configuré pour l'entraînement.")
+                            log.error(f"Type de perte: {type(loss)}, Valeur: {loss.item() if hasattr(loss, 'item') else loss}")
+                            return False
+                        
+                        # Backward pass avec scaling
+                        scaler.scale(loss).backward()
                     
-                    # Vérifier que la perte a un grad_fn
-                    if not hasattr(loss, 'grad_fn'):
-                        log.error(f"La perte n'a pas de grad_fn. Vérifiez que le modèle est bien configuré pour l'entraînement.")
-                        log.error(f"Type de perte: {type(loss)}, Valeur: {loss.item() if hasattr(loss, 'item') else loss}")
-                        return False
+                        # Accumulation de gradient
+                        if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
+                            # Désactiver unscale_ qui cause des problèmes avec les gradients FP16
+                            # scaler.unscale_(optimizer)
+                            
+                            # Appliquer le clip de gradient directement via le scaler
+                            scaler.step(optimizer)
+                            scaler.update()
+                            lr_scheduler.step()
+                            optimizer.zero_grad()
+                    except ValueError as e:
+                        if "Attempting to unscale FP16 gradients" in str(e) or "nan" in str(e).lower() or "inf" in str(e).lower():
+                            log.warning(f"Erreur FP16 détectée: {e}, désactivation de la précision mixte")
+                            # Désactiver le scaler pour le reste de l'entraînement
+                            scaler = None
+                            # Réinitialiser les gradients
+                            optimizer.zero_grad()
+                            # Réessayer sans précision mixte
+                            outputs = model(**batch)
+                            loss = outputs.loss / args.gradient_accumulation_steps
+                            # Vérifier que la perte a un grad_fn
+                            if not hasattr(loss, 'grad_fn'):
+                                log.error("La perte n'a pas de grad_fn. Vérifiez que le modèle est bien configuré pour l'entraînement.")
+                                return False
+                            # Vérifier si la perte est NaN ou Inf
+                            if torch.isnan(loss) or torch.isinf(loss):
+                                log.warning(f"Détection de perte NaN/Inf: {loss.item()}, ignorant ce batch")
+                                continue
+                            loss.backward()
+                            
+                            if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
+                                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                                optimizer.step()
+                                lr_scheduler.step()
+                                optimizer.zero_grad()
+                        else:
+                            # Si c'est une autre erreur, la relancer
+                            raise
                     
-                    # Backward pass avec scaling
-                    scaler.scale(loss).backward()
+                        global_step += 1
+                        
+                        # Logging plus détaillé
+                        resources = monitor_resources()
+                        current_lr = lr_scheduler.get_last_lr()[0]
+                        log.info(f"{progress} | Étape globale: {global_step} | Perte: {loss.item():.4f} | LR: {current_lr:.2e} | {resources}")
+                    else:
+                        # Afficher la progression même pendant l'accumulation de gradient
+                        if step % 5 == 0:  # Limiter la fréquence pour ne pas surcharger les logs
+                            log.info(f"{progress} | Accumulation: {(step+1) % args.gradient_accumulation_steps}/{args.gradient_accumulation_steps} | Perte: {loss.item():.4f}")
+                    
+                        # Sauvegarde périodique (uniquement après la première étape)
+                        if global_step > 0 and global_step % args.save_steps == 0:
+                            checkpoint_dir = os.path.join(output_dir, f"checkpoint-{global_step}")
+                            os.makedirs(checkpoint_dir, exist_ok=True)
+                            
+                            # Sauvegarder le modèle
+                            if hasattr(model, "save_pretrained") and hasattr(model, "config") and hasattr(model.config, "peft_config_id"):
+                                log.info(f"Sauvegarde du checkpoint LoRA à l'étape {global_step}...")
+                                model.save_pretrained(checkpoint_dir)
+                            else:
+                                model.save_pretrained(checkpoint_dir)
+                            tokenizer.save_pretrained(checkpoint_dir)
+                            log.info(f"Checkpoint sauvegardé à l'étape {global_step}")
+                        
+                            # Gérer la limite de checkpoints
+                            if args.save_total_limit:
+                                # Trouver tous les checkpoints
+                                checkpoints = glob.glob(os.path.join(output_dir, "checkpoint-*"))
+                                # Trier par date de création (le plus ancien en premier)
+                                checkpoints = sorted(checkpoints, key=os.path.getctime)
+                                # Supprimer les plus anciens si nécessaire
+                                if len(checkpoints) > args.save_total_limit:
+                                    checkpoints_to_delete = checkpoints[:len(checkpoints) - args.save_total_limit]
+                                    for checkpoint in checkpoints_to_delete:
+                                        log.info(f"Suppression du checkpoint ancien: {checkpoint}")
+                                        import shutil
+                                        shutil.rmtree(checkpoint)
+                else:
+                    # Version sans précision mixte
+                    # Forcer le modèle en mode entraînement
+                    model.train()
+                    
+                    # Vérifier que les paramètres sont bien entraînables
+                    trainable = False
+                    for param in model.parameters():
+                        if param.requires_grad:
+                            trainable = True
+                            break
+                    
+                    if not trainable:
+                        log.error("Aucun paramètre n'est entraînable. Activation de LoRA...")
+                        # Réactiver LoRA si nécessaire
+                        if not args.use_lora and args.lora_target_modules:
+                            args.use_lora = True
+                            log.info("LoRA activé automatiquement")
+                    
+                    outputs = model(**batch)
+                    loss = outputs.loss / args.gradient_accumulation_steps
+                
+                    # Vérifier si la perte est NaN ou Inf
+                    if torch.isnan(loss) or torch.isinf(loss):
+                        log.warning(f"Détection de perte NaN/Inf: {loss.item()}, ignorant ce batch")
+                        optimizer.zero_grad()  # Réinitialiser les gradients
+                        continue
+                    
+                    loss.backward()
                     
                     # Accumulation de gradient
                     if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
-                        # Désactiver unscale_ qui cause des problèmes avec les gradients FP16
-                        # scaler.unscale_(optimizer)
-                        
-                        # Appliquer le clip de gradient directement via le scaler
-                        scaler.step(optimizer)
-                        scaler.update()
+                        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                        optimizer.step()
                         lr_scheduler.step()
                         optimizer.zero_grad()
-                except ValueError as e:
-                    if "Attempting to unscale FP16 gradients" in str(e) or "nan" in str(e).lower() or "inf" in str(e).lower():
-                        log.warning(f"Erreur FP16 détectée: {e}, désactivation de la précision mixte")
-                        # Désactiver le scaler pour le reste de l'entraînement
-                        scaler = None
-                        # Réinitialiser les gradients
-                        optimizer.zero_grad()
-                        # Réessayer sans précision mixte
-                        outputs = model(**batch)
-                        loss = outputs.loss / args.gradient_accumulation_steps
-                        # Vérifier que la perte a un grad_fn
-                        if not hasattr(loss, 'grad_fn'):
-                            log.error("La perte n'a pas de grad_fn. Vérifiez que le modèle est bien configuré pour l'entraînement.")
-                            return False
-                        # Vérifier si la perte est NaN ou Inf
-                        if torch.isnan(loss) or torch.isinf(loss):
-                            log.warning(f"Détection de perte NaN/Inf: {loss.item()}, ignorant ce batch")
-                            continue
-                        loss.backward()
                         
-                        if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
-                            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-                            optimizer.step()
-                            lr_scheduler.step()
-                            optimizer.zero_grad()
+                        global_step += 1
+                        
+                        # Logging plus détaillé
+                        resources = monitor_resources()
+                        current_lr = lr_scheduler.get_last_lr()[0]
+                        log.info(f"{progress} | Étape globale: {global_step} | Perte: {loss.item():.4f} | LR: {current_lr:.2e} | {resources}")
                     else:
-                        # Si c'est une autre erreur, la relancer
-                        raise
-                    
-                    global_step += 1
-                    
-                    # Logging plus détaillé
-                    resources = monitor_resources()
-                    current_lr = lr_scheduler.get_last_lr()[0]
-                    log.info(f"{progress} | Étape globale: {global_step} | Perte: {loss.item():.4f} | LR: {current_lr:.2e} | {resources}")
-                else:
-                    # Afficher la progression même pendant l'accumulation de gradient
-                    if step % 5 == 0:  # Limiter la fréquence pour ne pas surcharger les logs
-                        log.info(f"{progress} | Accumulation: {(step+1) % args.gradient_accumulation_steps}/{args.gradient_accumulation_steps} | Perte: {loss.item():.4f}")
-                    
-                    # Sauvegarde périodique (uniquement après la première étape)
-                    if global_step > 0 and global_step % args.save_steps == 0:
-                        checkpoint_dir = os.path.join(output_dir, f"checkpoint-{global_step}")
-                        os.makedirs(checkpoint_dir, exist_ok=True)
+                        # Afficher la progression même pendant l'accumulation de gradient
+                        if step % 5 == 0:  # Limiter la fréquence pour ne pas surcharger les logs
+                            log.info(f"{progress} | Accumulation: {(step+1) % args.gradient_accumulation_steps}/{args.gradient_accumulation_steps} | Perte: {loss.item():.4f}")
                         
-                        # Sauvegarder le modèle
-                        if hasattr(model, "save_pretrained") and hasattr(model, "config") and hasattr(model.config, "peft_config_id"):
-                            log.info(f"Sauvegarde du checkpoint LoRA à l'étape {global_step}...")
+                        # Sauvegarde périodique (uniquement après la première étape)
+                        if global_step > 0 and global_step % args.save_steps == 0:
+                            checkpoint_dir = os.path.join(output_dir, f"checkpoint-{global_step}")
+                            os.makedirs(checkpoint_dir, exist_ok=True)
+                            
+                            # Sauvegarder le modèle
                             model.save_pretrained(checkpoint_dir)
-                        else:
-                            model.save_pretrained(checkpoint_dir)
-                        tokenizer.save_pretrained(checkpoint_dir)
-                        log.info(f"Checkpoint sauvegardé à l'étape {global_step}")
-                        
-                        # Gérer la limite de checkpoints
-                        if args.save_total_limit:
-                            # Trouver tous les checkpoints
-                            checkpoints = glob.glob(os.path.join(output_dir, "checkpoint-*"))
-                            # Trier par date de création (le plus ancien en premier)
-                            checkpoints = sorted(checkpoints, key=os.path.getctime)
-                            # Supprimer les plus anciens si nécessaire
-                            if len(checkpoints) > args.save_total_limit:
-                                checkpoints_to_delete = checkpoints[:len(checkpoints) - args.save_total_limit]
-                                for checkpoint in checkpoints_to_delete:
-                                    log.info(f"Suppression du checkpoint ancien: {checkpoint}")
-                                    import shutil
-                                    shutil.rmtree(checkpoint)
-                        
-                        # Gérer la limite de checkpoints
-                        if args.save_total_limit:
-                            # Trouver tous les checkpoints
-                            checkpoints = glob.glob(os.path.join(output_dir, "checkpoint-*"))
-                            # Trier par date de création (le plus ancien en premier)
-                            checkpoints = sorted(checkpoints, key=os.path.getctime)
-                            # Supprimer les plus anciens si nécessaire
-                            if len(checkpoints) > args.save_total_limit:
-                                checkpoints_to_delete = checkpoints[:len(checkpoints) - args.save_total_limit]
-                                for checkpoint in checkpoints_to_delete:
-                                    log.info(f"Suppression du checkpoint ancien: {checkpoint}")
-                                    import shutil
-                                    shutil.rmtree(checkpoint)
-            else:
-                # Version sans précision mixte
-                # Forcer le modèle en mode entraînement
-                model.train()
-                
-                # Vérifier que les paramètres sont bien entraînables
-                trainable = False
-                for param in model.parameters():
-                    if param.requires_grad:
-                        trainable = True
-                        break
-                
-                if not trainable:
-                    log.error("Aucun paramètre n'est entraînable. Activation de LoRA...")
-                    # Réactiver LoRA si nécessaire
-                    if not args.use_lora and args.lora_target_modules:
-                        args.use_lora = True
-                        log.info("LoRA activé automatiquement")
-                
-                outputs = model(**batch)
-                loss = outputs.loss / args.gradient_accumulation_steps
-                
-                # Vérifier si la perte est NaN ou Inf
-                if torch.isnan(loss) or torch.isinf(loss):
-                    log.warning(f"Détection de perte NaN/Inf: {loss.item()}, ignorant ce batch")
-                    optimizer.zero_grad()  # Réinitialiser les gradients
-                    continue
-                
-                loss.backward()
-                
-                # Accumulation de gradient
-                if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-                    optimizer.step()
-                    lr_scheduler.step()
-                    optimizer.zero_grad()
-                    
-                    global_step += 1
-                    
-                    # Logging plus détaillé
-                    resources = monitor_resources()
-                    current_lr = lr_scheduler.get_last_lr()[0]
-                    log.info(f"{progress} | Étape globale: {global_step} | Perte: {loss.item():.4f} | LR: {current_lr:.2e} | {resources}")
-                else:
-                    # Afficher la progression même pendant l'accumulation de gradient
-                    if step % 5 == 0:  # Limiter la fréquence pour ne pas surcharger les logs
-                        log.info(f"{progress} | Accumulation: {(step+1) % args.gradient_accumulation_steps}/{args.gradient_accumulation_steps} | Perte: {loss.item():.4f}")
-                    
-                    # Sauvegarde périodique (uniquement après la première étape)
-                    if global_step > 0 and global_step % args.save_steps == 0:
-                        checkpoint_dir = os.path.join(output_dir, f"checkpoint-{global_step}")
-                        os.makedirs(checkpoint_dir, exist_ok=True)
-                        
-                        # Sauvegarder le modèle
-                        model.save_pretrained(checkpoint_dir)
-                        tokenizer.save_pretrained(checkpoint_dir)
-                        log.info(f"Checkpoint sauvegardé à l'étape {global_step}")
+                            tokenizer.save_pretrained(checkpoint_dir)
+                            log.info(f"Checkpoint sauvegardé à l'étape {global_step}")
             
-                # Accumuler la perte
-                step_loss += loss.item() * args.gradient_accumulation_steps
-                epoch_loss += loss.item() * args.gradient_accumulation_steps
+                    # Accumuler la perte
+                    step_loss += loss.item() * args.gradient_accumulation_steps
+                    epoch_loss += loss.item() * args.gradient_accumulation_steps
             
             # Fin de l'époque avec statistiques détaillées
             avg_epoch_loss = epoch_loss / len(train_dataloader)
