@@ -66,14 +66,28 @@ def main():
             chat_text = tokenizer.apply_chat_template(test_messages, tokenize=False, add_generation_prompt=True)
             log.info(f"Texte formaté pour génération: {chat_text}")
             
-            inputs = tokenizer(chat_text, return_tensors="pt").to(model.device)
+            inputs = tokenizer(
+                chat_text, 
+                return_tensors="pt", 
+                padding=True,
+                truncation=True,
+                max_length=512
+            )
+            
+            # Créer un masque d'attention explicite
+            if 'attention_mask' not in inputs:
+                inputs['attention_mask'] = torch.ones_like(inputs['input_ids'])
+                
+            inputs = {k: v.to(model.device) for k, v in inputs.items()}
             
             with torch.no_grad():
                 outputs = model.generate(
                     inputs["input_ids"],
+                    attention_mask=inputs["attention_mask"],
                     max_new_tokens=100,
                     do_sample=False,
-                    pad_token_id=tokenizer.eos_token_id
+                    pad_token_id=tokenizer.eos_token_id,
+                    eos_token_id=tokenizer.eos_token_id
                 )
             
             response = tokenizer.decode(outputs[0], skip_special_tokens=True)

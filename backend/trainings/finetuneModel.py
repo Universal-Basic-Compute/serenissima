@@ -425,18 +425,31 @@ def test_model_responses(model, tokenizer, test_prompts=None):
                 add_generation_prompt=True
             )
             
-            # Tokeniser le texte
-            inputs = tokenizer(chat_text, return_tensors="pt")
+            # Tokeniser le texte avec padding explicite
+            inputs = tokenizer(
+                chat_text, 
+                return_tensors="pt", 
+                padding=True,
+                truncation=True,
+                max_length=512
+            )
+            
+            # Créer un masque d'attention explicite si non présent
+            if 'attention_mask' not in inputs:
+                inputs['attention_mask'] = torch.ones_like(inputs['input_ids'])
+                
             inputs = {k: v.to(model.device) for k, v in inputs.items()}
             
             with torch.no_grad():
                 # Utiliser des paramètres de génération plus simples
                 outputs = model.generate(
                     inputs["input_ids"],
+                    attention_mask=inputs["attention_mask"],
                     max_new_tokens=50,
                     num_beams=1,
                     do_sample=False,
-                    pad_token_id=tokenizer.eos_token_id
+                    pad_token_id=tokenizer.eos_token_id,
+                    eos_token_id=tokenizer.eos_token_id
                 )
             
             # Décoder la réponse complète
@@ -448,6 +461,13 @@ def test_model_responses(model, tokenizer, test_prompts=None):
                 response = full_response.split("<｜Assistant｜>", 1)[1]
                 if "<｜end▁of▁sentence｜>" in response:
                     response = response.split("<｜end▁of▁sentence｜>", 1)[0]
+            
+            # Nettoyer la réponse des caractères spéciaux et répétitifs
+            response = response.strip()
+            # Supprimer les répétitions de points d'exclamation
+            if '!!' in response:
+                import re
+                response = re.sub(r'!{2,}', '!', response)
             
             log.info(f"Prompt: {prompt}\nRéponse: {response.strip()}\n")
         
