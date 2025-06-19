@@ -271,6 +271,10 @@ class ConversationDataset(Dataset):
         
         log.info(f"Chargé {len(self.examples)} exemples de conversation")
     
+    def __len__(self):
+        """Retourne le nombre d'exemples dans le dataset"""
+        return len(self.examples)
+    
     def __getitem__(self, idx):
         example = self.examples[idx]
         messages = example.get('messages', [])
