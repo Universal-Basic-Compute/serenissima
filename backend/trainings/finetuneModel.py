@@ -960,6 +960,9 @@ def main():
             log.info(f"Validation | Perte: {avg_val_loss:.4f}")
             
             model.train()
+    except Exception as e:
+        log.error(f"Erreur pendant l'entraînement: {e}")
+        return False
     
     # Sauvegarder le modèle final
     log.info(f"Sauvegarde du modèle final dans {output_dir}")
