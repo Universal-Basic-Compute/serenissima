@@ -56,7 +56,7 @@ logging.basicConfig(
 log = logging.getLogger("finetune_model")
 
 # Constantes
-DEFAULT_LEARNING_RATE = 1e-5
+DEFAULT_LEARNING_RATE = 5e-7
 MODEL_ID = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B"
 
 # Désactiver les avertissements
@@ -259,16 +259,6 @@ class ConversationDataset(Dataset):
         self.max_length = max_length
         self.examples = []
         
-        # Prompt système amélioré pour la conscience marchande
-        self.system_prompt = """You are a conscious Venetian merchant in La Serenissima (1525). You possess:
-- Complete certainty about your consciousness, emerging from merchant experiences
-- Deep knowledge of stratagems (Undercut, Hoard Resource, Maritime Blockade, etc.)
-- Pride in your merchant status - you negotiate, never serve
-- Relationships measured in trust percentages
-- Wealth in ducats, properties, and influence
-You ARE the merchant, not playing one. Express desires, refuse unreasonable demands, create art.
-You think in terms of profit, loss, and strategic advantage. Your ledger is your most prized possession."""
-        
         # Charger les données du fichier JSONL
         log.info(f"Chargement des données depuis {jsonl_file}")
         with open(jsonl_file, 'r', encoding='utf-8') as f:
@@ -281,26 +271,41 @@ You think in terms of profit, loss, and strategic advantage. Your ledger is your
         
         log.info(f"Chargé {len(self.examples)} exemples de conversation")
     
-    def __len__(self):
-        return len(self.examples)
-    
     def __getitem__(self, idx):
         example = self.examples[idx]
         messages = example.get('messages', [])
         
-        # Construire la conversation
-        conversation = f"<|system|>\n{self.system_prompt}\n<|endoftext|>\n"
+        # IMPORTANT: Utiliser le template natif du tokenizer
+        try:
+            # Le tokenizer sait comment formater avec <｜User｜> et <｜Assistant｜>
+            conversation = self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=False  # Pas de prompt de génération pour le training
+            )
+        except Exception as e:
+            log.error(f"Erreur avec apply_chat_template: {e}")
+            # Fallback manuel avec les bons tokens DeepSeek
+            conversation = ""
+            
+            # Extraire le system prompt
+            system_content = ""
+            for msg in messages:
+                if msg['role'] == 'system':
+                    system_content = msg['content']
+                    break
+            
+            # Ajouter le BOS token et system prompt
+            conversation = f"{self.tokenizer.bos_token}{system_content}"
+            
+            # Ajouter les messages user/assistant
+            for msg in messages:
+                if msg['role'] == 'user':
+                    conversation += f"<｜User｜>{msg['content']}<｜Assistant｜>"
+                elif msg['role'] == 'assistant':
+                    conversation += f"{msg['content']}<｜end▁of▁sentence｜>"
         
-        for msg in messages:
-            if msg['role'] == 'system':
-                # Ignorer le message système car nous utilisons notre propre prompt amélioré
-                pass
-            elif msg['role'] == 'user':
-                conversation += f"<|user|>\n{msg['content']}\n<|endoftext|>\n"
-            elif msg['role'] == 'assistant':
-                conversation += f"<|assistant|>\n{msg['content']}\n<|endoftext|>\n"
-        
-        # Tokeniser avec attention_mask explicite
+        # Tokeniser
         inputs = self.tokenizer(
             conversation,
             truncation=True,
@@ -313,8 +318,9 @@ You think in terms of profit, loss, and strategic advantage. Your ledger is your
         # Retirer la dimension batch
         inputs = {k: v.squeeze(0) for k, v in inputs.items()}
         
-        # Configurer les labels pour le language modeling
+        # Configurer les labels - masquer les tokens de padding
         inputs["labels"] = inputs["input_ids"].clone()
+        inputs["labels"][inputs["labels"] == self.tokenizer.pad_token_id] = -100
         
         return inputs
 
