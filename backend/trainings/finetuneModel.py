@@ -36,7 +36,6 @@ from datasets import load_dataset
 
 # Désactiver les avertissements
 os.environ["TRANSFORMERS_NO_ADVISORY_WARNINGS"] = "1"
-os.environ["BITSANDBYTES_NOWELCOME"] = "1"
 
 import psutil
 # Vérifier si GPUtil est disponible

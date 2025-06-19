@@ -26,7 +26,6 @@ def install_dependencies():
         "transformers>=4.30.0",
         "datasets>=2.12.0",
         "accelerate>=0.20.0",
-        "bitsandbytes>=0.39.0",
         "wandb",
         "psutil",
         "gputil"
