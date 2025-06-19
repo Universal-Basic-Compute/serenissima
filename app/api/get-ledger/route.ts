@@ -1709,6 +1709,7 @@ export async function GET(request: Request) {
       },
       weather: null, // Will be updated after fetching
       activeReports: [], // Will be populated for Forestieri citizens
+      activeReports: [], // Will be populated for Forestieri citizens
       lastActivity: lastActivityRecord ? {...normalizeKeysCamelCaseShallow(lastActivityRecord.fields), airtableId: lastActivityRecord.id} : null,
       lastActivities: [] as any[], // Initialize lastActivities array
       plannedActivities: [] as any[], // Initialize plannedActivities array
