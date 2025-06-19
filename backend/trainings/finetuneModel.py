@@ -405,7 +405,7 @@ def main():
                         help="Taux d'apprentissage pour l'entraînement")
     parser.add_argument("--weight_decay", type=float, default=0.01,
                         help="Weight decay pour la régularisation")
-    parser.add_argument("--fp16", action="store_true", default=True,
+    parser.add_argument("--fp16", action="store_true", default=False,
                         help="Utiliser l'entraînement en précision mixte")
     parser.add_argument("--bf16", action="store_true", 
                         help="Utiliser l'entraînement en précision mixte bfloat16 (si disponible)")
@@ -576,11 +576,13 @@ def main():
         num_training_steps=max_train_steps
     )
     
-    # Configurer la précision mixte si demandé
+    # Configurer la précision mixte si demandé et si compatible avec le modèle
     scaler = None
-    if args.fp16:
+    if args.fp16 and not args.int8:  # Ne pas utiliser fp16 avec int8
         scaler = torch.cuda.amp.GradScaler()
         log.info("Utilisation de la précision mixte (FP16) pour l'entraînement")
+    elif args.fp16 and args.int8:
+        log.warning("La précision mixte (FP16) n'est pas compatible avec la quantification 8 bits. FP16 désactivé.")
     
     # Boucle d'entraînement personnalisée
     log.info("Démarrage de l'entraînement...")
@@ -610,23 +612,42 @@ def main():
             
             # Forward pass avec précision mixte si activée
             if scaler:
-                with torch.cuda.amp.autocast():
-                    outputs = model(**batch)
-                    loss = outputs.loss / args.gradient_accumulation_steps
-                
-                # Backward pass avec scaling
-                scaler.scale(loss).backward()
-                
-                # Accumulation de gradient
-                if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
-                    scaler.unscale_(optimizer)
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                try:
+                    with torch.cuda.amp.autocast():
+                        outputs = model(**batch)
+                        loss = outputs.loss / args.gradient_accumulation_steps
                     
-                    # Optimizer step
-                    scaler.step(optimizer)
-                    scaler.update()
-                    lr_scheduler.step()
-                    optimizer.zero_grad()
+                    # Backward pass avec scaling
+                    scaler.scale(loss).backward()
+                    
+                    # Accumulation de gradient
+                    if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
+                        # Désactiver unscale_ qui cause des problèmes avec les gradients FP16
+                        # scaler.unscale_(optimizer)
+                        
+                        # Appliquer le clip de gradient directement via le scaler
+                        scaler.step(optimizer)
+                        scaler.update()
+                        lr_scheduler.step()
+                        optimizer.zero_grad()
+                except ValueError as e:
+                    if "Attempting to unscale FP16 gradients" in str(e):
+                        log.warning("Erreur FP16 détectée, désactivation de la précision mixte")
+                        # Désactiver le scaler pour le reste de l'entraînement
+                        scaler = None
+                        # Réessayer sans précision mixte
+                        outputs = model(**batch)
+                        loss = outputs.loss / args.gradient_accumulation_steps
+                        loss.backward()
+                        
+                        if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
+                            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                            optimizer.step()
+                            lr_scheduler.step()
+                            optimizer.zero_grad()
+                    else:
+                        # Si c'est une autre erreur, la relancer
+                        raise
                     
                     global_step += 1
                     
