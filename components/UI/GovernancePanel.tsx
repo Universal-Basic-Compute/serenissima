@@ -367,7 +367,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                   <div className="md:w-1/3 mb-4 md:mb-0 md:mr-4">
                     <a href="https://claude.ai/public/artifacts/8c763cf3-594e-416a-9aec-e51e27e4ea68" target="_blank" rel="noopener noreferrer">
                       <img 
-                        src="/images/moody-citizens.jpg" 
+                        src="https://claude.ai/api/public/artifacts/8c763cf3-594e-416a-9aec-e51e27e4ea68/content" 
                         alt="Moody Citizens Feature" 
                         className="w-full h-auto rounded-lg border border-amber-200 shadow-sm"
                         onError={(e) => {
