@@ -1354,10 +1354,6 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       md += `- **Category**: ${report.category || 'Uncategorized'}\n`;
       md += `- **Content**: ${report.content || 'No content available'}\n`;
       
-      if (report.historicalNotes) {
-        md += `- **Historical Context**: ${report.historicalNotes}\n`;
-      }
-      
       if (report.affectedResources && report.affectedResources.length > 0) {
         md += `- **Affected Resources**: ${report.affectedResources.join(', ')}\n`;
       }
