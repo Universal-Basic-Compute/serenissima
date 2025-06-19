@@ -34,6 +34,7 @@ python finetuneModel.py \
     --lora_alpha 32 \
     --lora_target_modules "q_proj,v_proj" \
     --no-gradient-checkpointing \
+    --no-test-generation \
     2>&1 | tee "$LOG_FILE"
 
 # Vérifier si l'exécution a réussi
