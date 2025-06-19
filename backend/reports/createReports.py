@@ -137,12 +137,12 @@ def call_claude_api(news_entries: List[Dict[str, Any]], recent_reports: List[Dic
         })
     
     # Prepare system prompt with news entries, recent reports, and resource names
-    system_prompt = f"""You are a Renaissance-era Venetian scribe who translates news from around the world into reports for the Venetian Republic.
+    system_prompt = f"""You are a Renaissance-era Venetian scribe who translates news from around the world into reports for the Venetian Republic in 1525.
 
-AVAILABLE RESOURCES IN VENICE:
+AVAILABLE RESOURCES IN VENICE (ONLY use resources from the list):
 {', '.join(resource_names)}
 
-RECENT REPORTS ALREADY RECEIVED IN VENICE (DO NOT DUPLICATE THESE):
+RECENT REPORTS ALREADY RECEIVED IN VENICE (DO NOT DUPLICATE THESE unless evolution):
 {json.dumps(recent_reports_context, indent=2)}
 
 NEWS ENTRIES FROM {category.upper()} SOURCES:
@@ -163,36 +163,35 @@ NEWS ENTRIES FROM {category.upper()} SOURCES:
 You can think through your selection process and reasoning first, then translate this news into a Renaissance-style report as if it were arriving in Venice via merchant ship, diplomatic courier, or traveler.
 
 After your thinking, provide a valid JSON object with these fields:
+- OriginalTitle: The original title of the selected news article
+- OriginalContent: A shortened version of the original content (max 2000 characters)
 - OriginCity: A historically accurate city where this news might originate from
 - Title: A Renaissance-style title for the report
-- Content: The full Renaissance-style report (2-3 paragraphs)
-- HistoricalNotes: Brief notes on how this connects to Renaissance history or parallels
-- originalTitle: The original title of the selected news article
-- originalContent: A shortened version of the original content (max 2000 characters)
+- Content: The Renaissance-style report (2-3 paragraphs)
+- HistoricalNotes: Brief notes on how this connects to Renaissance history, Venice, or parallels
+
 - AffectedResources: Array of 1-3 resources from the provided list that would be affected
 - PriceChanges: Array of objects with {{resource: string, change: number}} where change is between -0.5 and 0.5 representing price multiplier changes
 - AvailabilityChanges: Array of objects with {{resource: string, change: number}} where change is between -0.5 and 0.5 representing availability multiplier changes
 
 Example format:
 {{
+  "OriginalTitle": "Turkish Navy Increases Patrols in Eastern Mediterranean",
+  "OriginalContent": "The shortened original content of the news article...",
   "OriginCity": "Constantinople",
   "Title": "Ottoman Fleet Movements Disrupt Spice Routes",
   "Content": "Word arrives from Constantinople that the Ottoman fleet has...",
   "HistoricalNotes": "During the Renaissance, Ottoman naval activity often affected...",
-  "originalTitle": "Turkish Navy Increases Patrols in Eastern Mediterranean",
-  "originalContent": "The shortened original content of the news article...",
-  "AffectedResources": ["pepper", "silk", "cotton"],
+  "AffectedResources": ["silk_fabric", "prepared_silk"],
   "PriceChanges": [
-    {{ "resource": "pepper", "change": 0.3 }},
-    {{ "resource": "silk", "change": 0.2 }}
+    {{ "resource": "silk_fabric", "change": 0.2 }},
+    {{ "resource": "prepared_silk", "change": 0.3 }}
   ],
   "AvailabilityChanges": [
-    {{ "resource": "pepper", "change": -0.2 }},
-    {{ "resource": "silk", "change": -0.15 }}
+    {{ "resource": "silk_fabric", "change": -0.15 }},
+    {{ "resource": "prepared_silk", "change": -0.2 }}
   ]
 }}
-
-I will extract the JSON portion of your response, so you can include your thinking before the JSON object.
 """
 
     try:
@@ -211,7 +210,7 @@ I will extract the JSON portion of your response, so you can include your thinki
                     {"role": "user", "content": user_prompt}
                 ]
             },
-            timeout=60
+            timeout=90
         )
         
         response.raise_for_status()
@@ -294,12 +293,12 @@ def create_report(tables: Dict[str, Table], report_data: Dict[str, Any], categor
         price_changes = json.dumps(report_data.get('PriceChanges', []))
         availability_changes = json.dumps(report_data.get('AvailabilityChanges', []))
         
-        # Set end date (reports are valid for 7 days)
+        # Set end date (reports are valid for 4 days)
         now = datetime.now(timezone.utc)
-        end_at = (now + timedelta(days=7)).isoformat()
+        end_at = (now + timedelta(days=4)).isoformat()
         
-        # Truncate originalContent if it's too long
-        original_content = report_data.get('originalContent', '')
+        # Truncate OriginalContent if it's too long
+        original_content = report_data.get('OriginalContent', '')
         if len(original_content) > 2000:
             original_content = original_content[:1997] + "..."
         
@@ -311,12 +310,11 @@ def create_report(tables: Dict[str, Table], report_data: Dict[str, Any], categor
             "Title": report_data.get('Title', 'No Title'),
             "Content": report_data.get('Content', 'No Content'),
             "HistoricalNotes": report_data.get('HistoricalNotes', ''),
-            "OriginalTitle": report_data.get('originalTitle', ''),
+            "OriginalTitle": report_data.get('OriginalTitle', ''),
             "OriginalContent": original_content,
             "AffectedResources": affected_resources,
             "PriceChanges": price_changes,
             "AvailabilityChanges": availability_changes,
-            "CreatedAt": now.isoformat(),
             "EndAt": end_at,
             "Notes": f"Generated from {category} news feed"
         }
@@ -366,7 +364,7 @@ def process_category(tables: Dict[str, Table], category: str, resource_names: Li
         log.info(f"{LogColors.OKBLUE}[DRY RUN] Would create report:{LogColors.ENDC}")
         log.info(f"Title: {report_data.get('Title')}")
         log.info(f"Origin: {report_data.get('OriginCity')}")
-        log.info(f"Content: {report_data.get('Content')[:100]}...")
+        log.info(f"Content: {report_data.get('Content')[:1000]}...")
         log.info(f"Affected Resources: {report_data.get('AffectedResources')}")
         log.info(f"Price Changes: {report_data.get('PriceChanges')}")
         log.info(f"Availability Changes: {report_data.get('AvailabilityChanges')}")
