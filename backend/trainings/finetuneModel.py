@@ -371,9 +371,8 @@ def test_model_responses(model, tokenizer, test_prompts=None):
     """
     Teste les réponses du modèle à des prompts spécifiques.
     """
-    # Désactiver les tests pendant l'entraînement pour éviter les erreurs CUDA
-    log.info("Test des réponses du modèle désactivé pendant l'entraînement pour éviter les erreurs CUDA")
-    return
+    # Activer les tests pendant l'entraînement pour vérifier le modèle
+    log.info("Test des réponses du modèle...")
     
     # Le code ci-dessous est désactivé pour éviter les erreurs CUDA
     if test_prompts is None:
@@ -580,7 +579,14 @@ def main():
             
             # Préparer le modèle pour l'entraînement avec LoRA
             log.info("Préparation du modèle pour l'entraînement avec LoRA...")
+            # Forcer le modèle en mode entraînement
+            model.train()
+            # Préparer pour l'entraînement
             model = prepare_model_for_kbit_training(model)
+            # Vérifier que le modèle est bien en mode entraînement
+            if not model.training:
+                log.warning("Le modèle n'est pas en mode entraînement après prepare_model_for_kbit_training. Forçage...")
+                model.train()
             
             # Déterminer les modules cibles
             target_modules = None
@@ -604,6 +610,13 @@ def main():
             try:
                 log.info("Application de LoRA au modèle...")
                 model = get_peft_model(model, peft_config)
+                # Forcer le modèle en mode entraînement après l'application de LoRA
+                model.train()
+                # Vérifier que les paramètres sont bien entraînables
+                trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+                if trainable_params == 0:
+                    log.error("Aucun paramètre n'est entraînable après l'application de LoRA.")
+                    return False
             except RuntimeError as e:
                 if "CUDA out of memory" in str(e) or "DefaultCPUAllocator" in str(e):
                     log.error(f"Erreur de mémoire lors de l'application de LoRA: {e}")
@@ -768,8 +781,12 @@ def main():
         dataloader_iterator = tqdm(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}") if TQDM_AVAILABLE else simple_progress_bar(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}")
         
         for step, batch in enumerate(dataloader_iterator):
-            # Déplacer le batch sur le device
+            # Déplacer le batch sur le device et s'assurer que requires_grad est activé
             batch = {k: v.to(model.device) for k, v in batch.items()}
+            
+            # S'assurer que les labels ont requires_grad=True
+            if 'labels' in batch:
+                batch['labels'] = batch['labels'].clone().detach().requires_grad_(True)
             
             # Afficher la progression pour chaque batch
             progress = f"[Époque {epoch+1}/{args.epochs}] Batch {step+1}/{len(train_dataloader)}"
@@ -893,6 +910,23 @@ def main():
                                     shutil.rmtree(checkpoint)
             else:
                 # Version sans précision mixte
+                # Forcer le modèle en mode entraînement
+                model.train()
+                
+                # Vérifier que les paramètres sont bien entraînables
+                trainable = False
+                for param in model.parameters():
+                    if param.requires_grad:
+                        trainable = True
+                        break
+                
+                if not trainable:
+                    log.error("Aucun paramètre n'est entraînable. Activation de LoRA...")
+                    # Réactiver LoRA si nécessaire
+                    if not args.use_lora and args.lora_target_modules:
+                        args.use_lora = True
+                        log.info("LoRA activé automatiquement")
+                
                 outputs = model(**batch)
                 loss = outputs.loss / args.gradient_accumulation_steps
                 
