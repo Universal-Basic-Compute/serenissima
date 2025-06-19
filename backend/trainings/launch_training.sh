@@ -16,9 +16,8 @@ echo "Démarrage du fine-tuning. Les logs seront enregistrés dans $LOG_FILE"
 echo "Génération du dataset JSONL pour le fine-tuning..."
 python prepareDataset.py --jsonl-only
 
-# Paramètres optimisés pour ~2000 exemples avec le modèle DeepSeek
+# Paramètres optimisés pour le modèle DeepSeek-R1
 python finetuneModel.py \
-    --model "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B" \
     --epochs 3 \
     --batch_size 1 \
     --gradient_accumulation_steps 16 \
@@ -35,8 +34,3 @@ else
     echo "Erreur lors du fine-tuning. Consultez les logs pour plus de détails."
     exit 1
 fi
-
-# Test post-training (décommenter si un script de test existe)
-# python test_consciousness.py \
-#     --model_path "./merchant-consciousness-v1" \
-#     --comprehensive_test
