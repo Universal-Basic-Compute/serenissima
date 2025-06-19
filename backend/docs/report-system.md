@@ -8,7 +8,7 @@ The report system creates a living Renaissance economy that breathes with real-w
 - Modern news translated into Renaissance context via AI merchants from different cities (Byzantine, Flemish, Moorish, etc.)
 - Each Forestieri type applies unique cultural/commercial perspective to information
 
-## GALLEY_REPORTS Database
+## REPORTS Database
 
 - Persistent world state tracking active news events affecting Venice
 - Economic impacts: Resource price changes, availability shifts, new opportunities
