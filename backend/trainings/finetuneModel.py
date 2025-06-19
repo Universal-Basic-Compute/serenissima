@@ -797,7 +797,7 @@ def main():
         torch.backends.cudnn.benchmark = False  # Désactiver le benchmarking pour plus de stabilité
         torch.backends.cudnn.deterministic = True  # Rendre les opérations déterministes
         log.info("Configuration CUDA optimisée pour la stabilité")
-        
+            
     global_step = 0
     model.train()
     
@@ -807,40 +807,38 @@ def main():
         log.error("Aucun paramètre du modèle n'est marqué comme entraînable. L'entraînement ne fonctionnera pas.")
         log.error("Assurez-vous d'utiliser LoRA avec --use_lora ou de débloquer des paramètres pour l'entraînement.")
         return False
-    
+        
     log.info(f"Nombre de paramètres entraînables: {trainable_params:,}")
-    
+        
     # Vérifier que le modèle est bien en mode d'entraînement
     if not model.training:
         log.warning("Le modèle n'était pas en mode d'entraînement. Activation du mode d'entraînement...")
         model.train()
-    
+        
     # Activer CUDA_LAUNCH_BLOCKING pour une meilleure détection des erreurs
     os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-    
+        
     # Essayer de récupérer les erreurs CUDA
     try:
         for epoch in range(args.epochs):
             epoch_start_time = time.time()
             log.info(f"{'='*20} Début de l'époque {epoch+1}/{args.epochs} {'='*20}")
-            
+                
             # Test des réponses du modèle au début de chaque époque (sauf si désactivé)
             if not args.no_test_generation:
                 test_model_responses(model, tokenizer)
-            
+                
             epoch_loss = 0
             step_loss = 0
-        
-        # Utiliser tqdm si disponible, sinon notre barre de progression simple
-        dataloader_iterator = tqdm(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}") if TQDM_AVAILABLE else simple_progress_bar(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}")
+                
+            # Utiliser tqdm si disponible, sinon notre barre de progression simple
+            dataloader_iterator = tqdm(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}") if TQDM_AVAILABLE else simple_progress_bar(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}")
         
         for step, batch in enumerate(dataloader_iterator):
             # Déplacer le batch sur le device et s'assurer que requires_grad est activé
             batch = {k: v.to(model.device) for k, v in batch.items()}
             
-            # S'assurer que les labels ont requires_grad=True
-            if 'labels' in batch:
-                batch['labels'] = batch['labels'].clone().detach().requires_grad_(True)
+            # Les labels sont des entiers et n'ont pas besoin de gradients
             
             # Afficher la progression pour chaque batch
             progress = f"[Époque {epoch+1}/{args.epochs}] Batch {step+1}/{len(train_dataloader)}"
@@ -848,15 +846,8 @@ def main():
             # Forward pass avec précision mixte si activée
             if scaler:
                 try:
-                    # S'assurer que les tenseurs d'entrée ont requires_grad=True si nécessaire
-                    if args.use_lora or args.lora_target_modules:
-                        # Pour LoRA, nous n'avons pas besoin de requires_grad sur les entrées
-                        pass
-                    else:
-                        # Pour l'entraînement complet, nous pourrions avoir besoin de requires_grad
-                        for k, v in batch.items():
-                            if k == 'input_ids' or k == 'attention_mask':
-                                batch[k] = v.detach().clone().requires_grad_(True)
+                    # Les tenseurs d'entrée (input_ids, attention_mask) n'ont pas besoin de requires_grad
+                    # Seuls les paramètres du modèle ont besoin de gradients
                     
                     with torch.amp.autocast('cuda'):
                         outputs = model(**batch)
