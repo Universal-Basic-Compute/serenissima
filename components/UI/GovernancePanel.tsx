@@ -27,6 +27,20 @@ interface SignoriaPlayer {
   isCurrentUser?: boolean;
 }
 
+interface Report {
+  reportId: string;
+  category: string;
+  originCity: string;
+  title: string;
+  content: string;
+  historicalNotes: string;
+  affectedResources: string[];
+  priceChanges: Array<{resource: string, change: number}>;
+  availabilityChanges: Array<{resource: string, change: number}>;
+  createdAt: string;
+  endAt: string;
+}
+
 interface Decree {
   DecreeId: string;
   Type: string;
@@ -130,7 +144,7 @@ const mockDecrees: Decree[] = [
 ];
 
 const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone = false }) => {
-  const [governanceTab, setGovernanceTab] = useState<'council' | 'laws' | 'signoria' | 'senate'>('laws');
+  const [governanceTab, setGovernanceTab] = useState<'council' | 'laws' | 'signoria' | 'senate' | 'news'>('laws');
   const [decrees, setDecrees] = useState<Decree[]>(mockDecrees);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -140,7 +154,38 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
   const [senatePlayers, setSenatePlayers] = useState<SenatePlayer[]>([]);
   const [isLoadingSenate, setIsLoadingSenate] = useState<boolean>(false);
   const [senateError, setSenateError] = useState<string | null>(null);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [isLoadingReports, setIsLoadingReports] = useState<boolean>(false);
+  const [reportsError, setReportsError] = useState<string | null>(null);
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+
+  // Function to fetch reports from API
+  const fetchReports = async () => {
+    setIsLoadingReports(true);
+    setReportsError(null);
+    
+    try {
+      const response = await fetch('/api/reports');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch reports: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.reports)) {
+        setReports(data.reports);
+      } else {
+        throw new Error('Invalid response format from API');
+      }
+    } catch (err) {
+      console.error('Error fetching reports:', err);
+      setReportsError(err instanceof Error ? err.message : 'Failed to fetch reports');
+      setReports([]);
+    } finally {
+      setIsLoadingReports(false);
+    }
+  };
 
   // Function to fetch decrees from Airtable
   const fetchDecrees = async () => {
@@ -274,6 +319,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
   // Fetch decrees when the component mounts or when the tab changes to 'laws'
   // Fetch signoria players when the tab changes to 'signoria'
   // Fetch senate players when the tab changes to 'senate'
+  // Fetch reports when the tab changes to 'news'
   useEffect(() => {
     if (governanceTab === 'laws') {
       fetchDecrees();
@@ -281,6 +327,8 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
       fetchSignoriaPlayers();
     } else if (governanceTab === 'senate') {
       fetchSenatePlayers();
+    } else if (governanceTab === 'news') {
+      fetchReports();
     }
   }, [governanceTab]);
 
@@ -344,6 +392,16 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
               onClick={() => setGovernanceTab('senate')}
             >
               The Senate
+            </button>
+            <button
+              className={`pb-4 px-1 border-b-2 font-medium text-sm ${
+                governanceTab === 'news' 
+                  ? 'border-amber-600 text-amber-800' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setGovernanceTab('news')}
+            >
+              News & Reports
             </button>
           </nav>
         </div>
@@ -1145,6 +1203,136 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                 </p>
               </div>
             </div>
+          </div>
+        )}
+        
+        {governanceTab === 'news' && (
+          <div className="py-4">
+            <h3 className="text-xl font-serif text-amber-800 mb-4 text-center">
+              News & Reports from Abroad
+            </h3>
+            
+            <div className="mb-6 bg-amber-100 p-4 rounded-lg border border-amber-300">
+              <p className="text-amber-800 font-serif">
+                Reports arrive daily in Venice from across the known world. Merchants, diplomats, and travelers bring news that may affect trade, politics, and daily life in the Serenissima Republic. Pay close attention to these reports, as they may signal opportunities or threats to your interests.
+              </p>
+            </div>
+            
+            {isLoadingReports && (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-600"></div>
+                <p className="mt-2 text-amber-800">Gathering reports from across the seas...</p>
+              </div>
+            )}
+            
+            {reportsError && (
+              <div className="bg-red-50 border border-red-300 text-red-800 p-4 rounded-lg mb-6">
+                <p className="font-medium">Failed to retrieve reports</p>
+                <p className="text-sm mt-1">{reportsError}</p>
+              </div>
+            )}
+            
+            {!isLoadingReports && reports.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {reports.map((report) => {
+                  // Format dates in a more readable way
+                  const createdDate = new Date(report.createdAt);
+                  const formattedCreatedDate = `${createdDate.getDate()} ${
+                    ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
+                     'August', 'September', 'October', 'November', 'December'][createdDate.getMonth()]
+                  } ${createdDate.getFullYear()}`;
+                  
+                  return (
+                    <div key={report.reportId} className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                      <div className="relative bg-amber-50 border-2 border-amber-300 rounded-lg overflow-hidden shadow-md">
+                        {/* Parchment texture overlay */}
+                        <div className="absolute inset-0 opacity-10 pointer-events-none" 
+                             style={{
+                               backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E\")",
+                               backgroundRepeat: "repeat"
+                             }}>
+                        </div>
+                        
+                        {/* Decorative header */}
+                        <div className="bg-gradient-to-r from-amber-200 to-amber-100 px-4 py-3 border-b border-amber-300">
+                          <div className="flex justify-between items-center">
+                            <div className="font-serif text-amber-800 text-lg font-bold">{report.title}</div>
+                            <div className="text-xs text-amber-700 font-medium capitalize">{report.category}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Main content */}
+                        <div className="p-4">
+                          {/* Origin city and date */}
+                          <div className="flex justify-between items-start mb-4">
+                            <span className="px-3 py-1 inline-flex text-xs leading-5 font-serif font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                              From {report.originCity}
+                            </span>
+                            <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
+                              {formattedCreatedDate}
+                            </span>
+                          </div>
+                          
+                          {/* Report content */}
+                          <div className="mb-4 text-sm text-amber-800 font-serif leading-relaxed whitespace-pre-line">
+                            {report.content}
+                          </div>
+                          
+                          {/* Historical notes */}
+                          {report.historicalNotes && (
+                            <div className="mb-4 text-xs italic text-amber-600 font-serif">
+                              {report.historicalNotes}
+                            </div>
+                          )}
+                          
+                          {/* Affected resources */}
+                          {report.affectedResources && report.affectedResources.length > 0 && (
+                            <div className="mt-3 text-xs">
+                              <div className="font-medium text-amber-800 mb-1">Affected Resources:</div>
+                              <div className="flex flex-wrap gap-1">
+                                {report.affectedResources.map((resource) => (
+                                  <span key={resource} className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full">
+                                    {resource.replace(/_/g, ' ')}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Price changes */}
+                          {report.priceChanges && report.priceChanges.length > 0 && (
+                            <div className="mt-3 text-xs">
+                              <div className="font-medium text-amber-800 mb-1">Market Effects:</div>
+                              <div className="space-y-1">
+                                {report.priceChanges.map((change) => (
+                                  <div key={`price-${change.resource}`} className="flex items-center">
+                                    <span className="mr-2">{change.resource.replace(/_/g, ' ')}:</span>
+                                    <span className={`${change.change > 0 ? 'text-red-600' : 'text-green-600'} font-medium`}>
+                                      {change.change > 0 ? `+${(change.change * 100).toFixed(0)}%` : `${(change.change * 100).toFixed(0)}%`} price
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Decorative footer */}
+                        <div className="bg-gradient-to-r from-amber-100 to-amber-200 px-4 py-2 border-t border-amber-300 text-xs text-amber-700 text-right font-serif">
+                          Report of La Serenissima
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            
+            {!isLoadingReports && reports.length === 0 && !reportsError && (
+              <div className="text-center py-8 text-amber-700 italic">
+                No reports have arrived from abroad today.
+              </div>
+            )}
           </div>
         )}
       </div>
