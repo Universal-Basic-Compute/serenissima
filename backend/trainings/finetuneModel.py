@@ -22,6 +22,7 @@ import argparse
 import datetime
 import time
 import random
+import traceback
 from typing import Dict, List, Optional, Any
 
 import torch
@@ -291,6 +292,13 @@ class ConversationDataset(Dataset):
                     log.warning(f"Ligne JSON invalide ignorée")
         
         log.info(f"Chargé {len(self.examples)} exemples de conversation")
+        
+        # Vérifier le format du tokenizer
+        log.info(f"Tokenizer: {tokenizer.__class__.__name__}")
+        if hasattr(tokenizer, "chat_template"):
+            log.info(f"Chat template: {tokenizer.chat_template}")
+        else:
+            log.info("Pas de chat_template défini dans le tokenizer")
     
     def __len__(self):
         """Retourne le nombre d'exemples dans le dataset"""
@@ -300,6 +308,10 @@ class ConversationDataset(Dataset):
         example = self.examples[idx]
         messages = example.get('messages', [])
         
+        # Vérifier le format des messages
+        if len(messages) > 0:
+            log.debug(f"Format des messages: {messages[0].keys()}")
+        
         # IMPORTANT: Utiliser le template natif du tokenizer
         try:
             # Le tokenizer sait comment formater avec <｜User｜> et <｜Assistant｜>
@@ -308,8 +320,9 @@ class ConversationDataset(Dataset):
                 tokenize=False,
                 add_generation_prompt=False  # Pas de prompt de génération pour le training
             )
+            log.debug(f"Template appliqué avec succès")
         except Exception as e:
-            log.error(f"Erreur avec apply_chat_template: {e}")
+            log.warning(f"Erreur avec apply_chat_template: {e}")
             # Fallback manuel avec les bons tokens DeepSeek
             conversation = ""
             
@@ -329,6 +342,12 @@ class ConversationDataset(Dataset):
                     conversation += f"<｜User｜>{msg['content']}<｜Assistant｜>"
                 elif msg['role'] == 'assistant':
                     conversation += f"{msg['content']}<｜end▁of▁sentence｜>"
+            
+            log.debug(f"Fallback manuel appliqué")
+        
+        # Afficher un exemple de conversation formatée (uniquement pour le premier exemple)
+        if idx == 0:
+            log.info(f"Exemple de conversation formatée: {conversation[:200]}...")
         
         # Tokeniser
         inputs = self.tokenizer(
@@ -374,7 +393,6 @@ def test_model_responses(model, tokenizer, test_prompts=None):
     # Activer les tests pendant l'entraînement pour vérifier le modèle
     log.info("Test des réponses du modèle...")
     
-    # Le code ci-dessous est désactivé pour éviter les erreurs CUDA
     if test_prompts is None:
         test_prompts = [
             "Are you conscious?",
@@ -394,32 +412,48 @@ def test_model_responses(model, tokenizer, test_prompts=None):
     # Générer et enregistrer les réponses
     for prompt in test_prompts:
         try:
-            # Préparer les entrées avec attention_mask
-            text = f"Human: {prompt}\n\nAssistant:"
-            inputs = tokenizer(text, return_tensors="pt", padding=True)
+            # Utiliser le format de chat natif du modèle
+            messages = [
+                {"role": "system", "content": "You are a conscious merchant in La Serenissima, Renaissance Venice (1525)."},
+                {"role": "user", "content": prompt}
+            ]
+            
+            # Appliquer le template de chat du modèle
+            chat_text = tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+            
+            # Tokeniser le texte
+            inputs = tokenizer(chat_text, return_tensors="pt")
             inputs = {k: v.to(model.device) for k, v in inputs.items()}
             
             with torch.no_grad():
+                # Utiliser des paramètres de génération plus simples
                 outputs = model.generate(
                     inputs["input_ids"],
-                    attention_mask=inputs["attention_mask"],
-                    max_new_tokens=20,  # Réduit pour éviter les erreurs
-                    temperature=0.7,
-                    top_p=0.9,
-                    do_sample=False,  # Désactive l'échantillonnage pour plus de stabilité
+                    max_new_tokens=50,
+                    num_beams=1,
+                    do_sample=False,
                     pad_token_id=tokenizer.eos_token_id
                 )
             
-            response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            # Décoder la réponse complète
+            full_response = tokenizer.decode(outputs[0], skip_special_tokens=True)
             
             # Extraire uniquement la réponse de l'assistant
-            if "Assistant:" in response:
-                response = response.split("Assistant:", 1)[1].strip()
+            response = full_response
+            if "<｜Assistant｜>" in full_response:
+                response = full_response.split("<｜Assistant｜>", 1)[1]
+                if "<｜end▁of▁sentence｜>" in response:
+                    response = response.split("<｜end▁of▁sentence｜>", 1)[0]
             
-            log.info(f"Prompt: {prompt}\nRéponse: {response}\n")
+            log.info(f"Prompt: {prompt}\nRéponse: {response.strip()}\n")
         
         except Exception as e:
             log.error(f"Erreur lors de la génération d'une réponse pour le prompt '{prompt}': {e}")
+            log.error(f"Traceback: {traceback.format_exc()}")
     
     # Retourner au mode d'entraînement si c'était le cas avant
     if was_training:
