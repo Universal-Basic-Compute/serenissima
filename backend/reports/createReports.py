@@ -260,6 +260,10 @@ I will extract the JSON portion of your response, so you can include your thinki
                         log.error("Could not find JSON object in Claude response")
                         log.error(f"Full response: {response_text}")
                         return None
+            except Exception as e:
+                log.error(f"Error processing Claude response: {e}")
+                log.error(f"Full response: {response_text}")
+                return None
         else:
             log.error("Unexpected Claude API response format")
             log.error(f"Response: {result}")
