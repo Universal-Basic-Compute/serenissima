@@ -1043,10 +1043,27 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
   const historicalDate = new Date(currentDate);
   historicalDate.setFullYear(currentDate.getFullYear() - 500);
   
-  md += `\n## Current Date\n`;
+  md += `\n## Current Date & Weather\n`;
   // Use direct formatting for the current date to ensure it's 500 years ago with English month names
-  md += `${historicalDate.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Rome' })}\n`;
-  md += '\n';
+  md += `${historicalDate.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Rome' })}`;
+  
+  // Add weather information if available
+  if (Ledger.weather) {
+    md += ` - ${Ledger.weather.description}`;
+    if (Ledger.weather.temperature !== null) {
+      md += `, ${Math.round(Ledger.weather.temperature)}°C`;
+    }
+    if (Ledger.weather.condition) {
+      const conditionEmoji = {
+        'clear': '☀️',
+        'rainy': '🌧️',
+        'windy': '💨'
+      }[Ledger.weather.condition] || '';
+      md += ` ${conditionEmoji}`;
+    }
+  }
+  
+  md += '\n\n';
   
   // Add citizen's current mood if available
   if (Ledger.citizen?.mood) {
@@ -1629,6 +1646,7 @@ export async function GET(request: Request) {
         basicEmotions: citizenMood.basic_emotions,
         emotionDistribution: citizenMood.emotion_distribution
       },
+      weather: weatherData && weatherData.success ? weatherData : null,
       lastActivity: lastActivityRecord ? {...normalizeKeysCamelCaseShallow(lastActivityRecord.fields), airtableId: lastActivityRecord.id} : null,
       lastActivities: [] as any[], // Initialize lastActivities array
       plannedActivities: [] as any[], // Initialize plannedActivities array
@@ -1664,7 +1682,8 @@ export async function GET(request: Request) {
       recentMessagesRecords,
       lastDailyUpdateRecord,
       lastActivitiesRecords,
-      plannedActivitiesRecords
+      plannedActivitiesRecords,
+      weatherData
     ] = await Promise.all([
       fetchStratagemDefinitions(),
       fetchCitizenActiveStratagems(citizenUsername),
@@ -1676,7 +1695,8 @@ export async function GET(request: Request) {
       fetchCitizenMessages(citizenUsername),
       fetchLastDailyUpdate(),
       fetchLastActivities(citizenUsername, 5),
-      fetchPlannedActivities(citizenUsername)
+      fetchPlannedActivities(citizenUsername),
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/weather`).then(res => res.json()).catch(() => null)
     ]);
 
     // Assign results to Ledger
