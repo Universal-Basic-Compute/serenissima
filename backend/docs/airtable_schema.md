@@ -367,6 +367,28 @@ Liens et relations entre citoyens (bi-directionnel).
 -   `CreatedAt` (Date/Heure): Date de début de la relation ou de création de l'enregistrement.
 -   `UpdatedAt` (Date/Heure): Date de dernière modification.
 
+## Table: REPORTS
+
+Permet aux nouvelles du monde réel d'entrer dans La Serenissima sous une forme traduite à la Renaissance et d'impacter le jeu.
+
+-   `ReportId` (Texte): Identifiant unique du rapport.
+-   `SourceType` (Texte): Type de source (ex: `news_article`, `financial_report`, `market_update`).
+-   `SourceUrl` (Texte): URL de la source originale.
+-   `OriginCity` (Texte): Ville d'origine du rapport (ex: `Constantinople`, `Alexandria`, `Bruges`).
+-   `Citizen` (Texte): `Username` du citoyen qui a apporté la nouvelle (généralement un `Forestieri`).
+-   `OriginalTitle` (Texte): Titre original de la nouvelle.
+-   `OriginalContent` (Texte multiligne): Contenu original de la nouvelle.
+-   `Title` (Texte): Titre traduit dans le style Renaissance.
+-   `Content` (Texte multiligne): Contenu traduit dans le style Renaissance.
+-   `CreatedAt` (Date/Heure): Date de création du rapport.
+-   `EndAt` (Date/Heure): Date de fin d'effet du rapport.
+-   `AffectedResources` (Texte multiligne): Chaîne JSON des ressources affectées par cette nouvelle.
+-   `PriceChanges` (Texte multiligne): Chaîne JSON des changements de prix induits.
+-   `AvailabilityChanges` (Texte multiligne): Chaîne JSON des changements de disponibilité induits.
+-   `CitizenMessage` (Texte multiligne): Message à afficher aux citoyens concernés.
+-   `HistoricalNotes` (Texte multiligne): Notes sur le contexte historique ou les parallèles.
+-   `Notes` (Texte multiligne): Notes administratives ou commentaires.
+
 ## Table: STRATAGEMS
 
 Permet aux joueurs de déployer des stratégies de haut niveau qui affecteront le moteur de jeu.
