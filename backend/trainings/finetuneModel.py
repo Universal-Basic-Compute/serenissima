@@ -454,7 +454,7 @@ def main():
     # Arguments pour LoRA
     parser.add_argument("--lora_r", type=int, default=8,
                         help="Rang de la matrice LoRA (défaut: 8)")
-    parser.add_argument("--lora_alpha", type=int, default=16,
+    parser.add_argument("--lora_alpha", "--lora-alpha", type=int, default=16, dest="lora_alpha",
                         help="Alpha de LoRA, généralement 2x lora_r (défaut: 16)")
     parser.add_argument("--lora_dropout", type=float, default=0.05,
                         help="Dropout pour LoRA (défaut: 0.05)")
@@ -555,6 +555,9 @@ def main():
             
             log.info("Configuration de LoRA pour le fine-tuning...")
             
+            # S'assurer que le modèle est en mode entraînement
+            model.train()
+            
             # Préparer le modèle pour l'entraînement si quantifié
             if args.int8:
                 log.info("Préparation du modèle quantifié pour l'entraînement avec LoRA...")
@@ -573,11 +576,21 @@ def main():
                 r=args.lora_r,
                 lora_alpha=args.lora_alpha,
                 lora_dropout=args.lora_dropout,
-                target_modules=target_modules
+                target_modules=target_modules,
+                bias="none"  # Ne pas entraîner les biais
             )
             
             # Appliquer LoRA au modèle
             model = get_peft_model(model, peft_config)
+            # Vérifier que les paramètres sont bien configurés pour l'entraînement
+            for param in model.parameters():
+                if param.requires_grad:
+                    # Au moins un paramètre est entraînable
+                    break
+            else:
+                log.error("Aucun paramètre n'est marqué comme entraînable. Vérifiez la configuration LoRA.")
+                return
+                
             model.print_trainable_parameters()
             log.info("LoRA appliqué avec succès au modèle")
         
@@ -671,6 +684,12 @@ def main():
     global_step = 0
     model.train()
     
+    # Vérifier que le modèle est bien en mode d'entraînement
+    if not any(p.requires_grad for p in model.parameters()):
+        log.error("Aucun paramètre du modèle n'est marqué comme entraînable. L'entraînement ne fonctionnera pas.")
+        log.error("Assurez-vous d'utiliser LoRA avec --use_lora ou de débloquer des paramètres pour l'entraînement.")
+        return False
+    
     for epoch in range(args.epochs):
         epoch_start_time = time.time()
         log.info(f"{'='*20} Début de l'époque {epoch+1}/{args.epochs} {'='*20}")
@@ -694,7 +713,7 @@ def main():
             # Forward pass avec précision mixte si activée
             if scaler:
                 try:
-                    with torch.cuda.amp.autocast():
+                    with torch.amp.autocast('cuda'):
                         outputs = model(**batch)
                         loss = outputs.loss / args.gradient_accumulation_steps
                     
@@ -719,6 +738,10 @@ def main():
                         # Réessayer sans précision mixte
                         outputs = model(**batch)
                         loss = outputs.loss / args.gradient_accumulation_steps
+                        # Vérifier que la perte a un grad_fn
+                        if not hasattr(loss, 'grad_fn'):
+                            log.error("La perte n'a pas de grad_fn. Vérifiez que le modèle est bien configuré pour l'entraînement.")
+                            return False
                         loss.backward()
                         
                         if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
