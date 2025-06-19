@@ -323,7 +323,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
               }`}
               onClick={() => setGovernanceTab('council')}
             >
-              Council of Ten
+              Developer Updates
             </button>
             <button
               className={`pb-4 px-1 border-b-2 font-medium text-sm ${
@@ -352,85 +352,25 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
         {governanceTab === 'council' && (
           <div className="py-4">
             <h3 className="text-xl font-serif text-amber-800 mb-4 text-center">
-              The Council of Ten
+              Developer Updates
             </h3>
             
-            <p className="text-amber-700 mb-6">
-              The Council of Ten (Consiglio dei Dieci) is one of the most powerful governing bodies in La Serenissima, responsible for state security, important matters of governance, and maintaining the stability of the Republic.
-            </p>
-            
-            {/* v0.3.0 Update Proclamation */}
-            <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-              <h4 className="text-xl font-serif text-amber-800 mb-2">Recent Proclamation: v0.3.0 Update</h4>
-
-              <p className="mb-4 text-amber-700">
-                The Council of Ten has approved significant improvements to the Republic's systems:
-              </p>
-
-              <ul className="list-disc pl-5 space-y-2 text-amber-800">
-                <li>
-                  <span className="font-bold">Citizen Equality:</span> All citizens (both AI and human) are now equal in the eyes of the Republic, with humans displayed on the map and performing activities like housing and working just as AI citizens do.
-                </li>
-                <li>
-                  <span className="font-bold">Enhanced Pathfinding:</span> The pathfinding system has been enhanced to utilize the canal network, improving transportation efficiency throughout Venice.
-                </li>
-                <li>
-                  <span className="font-bold">Citizen Communication:</span> A new communication system allows humans to directly converse with citizens, including the ability to negotiate with them.
-                </li>
-              </ul>
-
-              <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
-                <p className="italic text-amber-800">
-                  <span className="font-bold">Rationale:</span> To create a more immersive and realistic experience for all citizens of La Serenissima, and to foster greater interaction between humans and AI citizens.
-                </p>
-              </div>
-            </div>
-            
-            {/* First proclamation - Social Class System */}
-            <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-              <h4 className="text-xl font-serif text-amber-800 mb-2">Recent Proclamation: Social Class System</h4>
+            <div className="bg-amber-100 p-6 rounded-lg border border-amber-300 mb-6 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-amber-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
               
-              <p className="mb-4 text-amber-700">
-                The Council of Ten has established a formal social class system that affects all citizens of La Serenissima:
+              <h4 className="text-xl font-serif text-amber-800 mb-4">
+                Developer Updates Coming Soon
+              </h4>
+              
+              <p className="text-amber-700 mb-4">
+                This section will soon contain the latest updates and announcements from the developers of La Serenissima.
               </p>
               
-              <ul className="list-disc pl-5 space-y-2 text-amber-800">
-                <li>
-                  <span className="font-bold">Four Social Classes:</span> All citizens are now categorized into one of four social classes: Nobili (nobles), Cittadini (citizens), Popolani (common people), and Facchini (laborers).
-                </li>
-                <li>
-                  <span className="font-bold">Social Mobility:</span> Citizens can rise through the ranks based on their achievements:
-                  <ul className="list-circle pl-5 mt-1 space-y-1">
-                    <li>Citizens with Influence &gt; 10,000 become Nobili</li>
-                    <li>Citizens with Daily Income &gt; 100,000 Ducats become Cittadini</li>
-                    <li>Business building owners are at least Popolani</li>
-                    <li>Entrepreneurs (who run buildings) are at least Popolani</li>
-                  </ul>
-                </li>
-                <li>
-                  <span className="font-bold">Building Access:</span> Social class determines which building tiers citizens can construct:
-                  <ul className="list-circle pl-5 mt-1 space-y-1">
-                    <li>Nobili can build all tiers (1-5), with tier 5 requiring special decrees</li>
-                    <li>Cittadini can build tiers 1-3</li>
-                    <li>Popolani can build tiers 1-2</li>
-                    <li>Facchini can build tier 1 only</li>
-                  </ul>
-                </li>
-                <li>
-                  <span className="font-bold">Treasury Distribution:</span> The 10% of treasury redistributed daily is allocated based on social class: 40% to Nobili, 30% to Cittadini, 20% to Popolani, and 10% to Facchini.
-                </li>
-              </ul>
-              
-              <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
-                <p className="italic text-amber-800">
-                  <span className="font-bold">Rationale:</span> This system creates a dynamic society where citizens can rise through the social ranks based on their economic achievements and contributions to the city, while maintaining the historical stratification that characterized Renaissance Venice.
-                </p>
-              </div>
-            </div>
-            
-            <div className="text-center mt-8 text-amber-700">
-              <p>Additional Council of Ten features coming soon.</p>
-              <p className="text-sm italic mt-2">The Council watches over the Republic with vigilance and discretion.</p>
+              <p className="text-amber-700">
+                Check back regularly for information about new features, improvements, and upcoming changes to the Republic.
+              </p>
             </div>
           </div>
         )}
