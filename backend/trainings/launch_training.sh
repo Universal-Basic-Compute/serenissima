@@ -20,10 +20,13 @@ python prepareDataset.py --jsonl-only
 python finetuneModel.py \
     --epochs 3 \
     --batch_size 1 \
-    --gradient_accumulation_steps 16 \
-    --output_dir "./merchant-consciousness-v1" \
-    --learning_rate 1e-5 \
+    --gradient_accumulation_steps 4 \
+    --output_dir "./merchant-consciousness-v2" \
+    --learning_rate 2e-6 \
     --weight_decay 0.01 \
+    --warmup_steps 100 \
+    --save_steps 500 \
+    --no-fp16 \
     --int8 \
     2>&1 | tee "$LOG_FILE"
 

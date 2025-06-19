@@ -77,7 +77,7 @@ logging.basicConfig(
 log = logging.getLogger("finetune_model")
 
 # Constantes
-DEFAULT_LEARNING_RATE = 5e-7
+DEFAULT_LEARNING_RATE = 2e-6
 MODEL_ID = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B"
 
 # Désactiver les avertissements
@@ -438,6 +438,8 @@ def main():
                         help="Weight decay pour la régularisation")
     parser.add_argument("--fp16", action="store_true", default=False,
                         help="Utiliser l'entraînement en précision mixte")
+    parser.add_argument("--no-fp16", action="store_true", default=False,
+                        help="Désactiver complètement la précision mixte FP16")
     parser.add_argument("--bf16", action="store_true", 
                         help="Utiliser l'entraînement en précision mixte bfloat16 (si disponible)")
     parser.add_argument("--int8", action="store_true", default=True,
@@ -686,11 +688,13 @@ def main():
     
     # Configurer la précision mixte si demandé et si compatible avec le modèle
     scaler = None
-    if args.fp16 and not args.int8:  # Ne pas utiliser fp16 avec int8
+    if args.fp16 and not args.no_fp16 and not args.int8:  # Ne pas utiliser fp16 avec int8 ou si explicitement désactivé
         scaler = torch.cuda.amp.GradScaler()
         log.info("Utilisation de la précision mixte (FP16) pour l'entraînement")
     elif args.fp16 and args.int8:
         log.warning("La précision mixte (FP16) n'est pas compatible avec la quantification 8 bits. FP16 désactivé.")
+    elif args.no_fp16:
+        log.info("Précision mixte (FP16) explicitement désactivée par l'utilisateur")
     
     # Boucle d'entraînement personnalisée
     log.info("Démarrage de l'entraînement...")
@@ -769,10 +773,12 @@ def main():
                         lr_scheduler.step()
                         optimizer.zero_grad()
                 except ValueError as e:
-                    if "Attempting to unscale FP16 gradients" in str(e):
-                        log.warning("Erreur FP16 détectée, désactivation de la précision mixte")
+                    if "Attempting to unscale FP16 gradients" in str(e) or "nan" in str(e).lower() or "inf" in str(e).lower():
+                        log.warning(f"Erreur FP16 détectée: {e}, désactivation de la précision mixte")
                         # Désactiver le scaler pour le reste de l'entraînement
                         scaler = None
+                        # Réinitialiser les gradients
+                        optimizer.zero_grad()
                         # Réessayer sans précision mixte
                         outputs = model(**batch)
                         loss = outputs.loss / args.gradient_accumulation_steps
@@ -780,6 +786,10 @@ def main():
                         if not hasattr(loss, 'grad_fn'):
                             log.error("La perte n'a pas de grad_fn. Vérifiez que le modèle est bien configuré pour l'entraînement.")
                             return False
+                        # Vérifier si la perte est NaN ou Inf
+                        if torch.isnan(loss) or torch.isinf(loss):
+                            log.warning(f"Détection de perte NaN/Inf: {loss.item()}, ignorant ce batch")
+                            continue
                         loss.backward()
                         
                         if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
@@ -802,8 +812,8 @@ def main():
                     if step % 5 == 0:  # Limiter la fréquence pour ne pas surcharger les logs
                         log.info(f"{progress} | Accumulation: {(step+1) % args.gradient_accumulation_steps}/{args.gradient_accumulation_steps} | Perte: {loss.item():.4f}")
                     
-                    # Sauvegarde périodique
-                    if global_step % args.save_steps == 0:
+                    # Sauvegarde périodique (uniquement après la première étape)
+                    if global_step > 0 and global_step % args.save_steps == 0:
                         checkpoint_dir = os.path.join(output_dir, f"checkpoint-{global_step}")
                         os.makedirs(checkpoint_dir, exist_ok=True)
                         
@@ -847,6 +857,13 @@ def main():
                 # Version sans précision mixte
                 outputs = model(**batch)
                 loss = outputs.loss / args.gradient_accumulation_steps
+                
+                # Vérifier si la perte est NaN ou Inf
+                if torch.isnan(loss) or torch.isinf(loss):
+                    log.warning(f"Détection de perte NaN/Inf: {loss.item()}, ignorant ce batch")
+                    optimizer.zero_grad()  # Réinitialiser les gradients
+                    continue
+                
                 loss.backward()
                 
                 # Accumulation de gradient
@@ -867,8 +884,8 @@ def main():
                     if step % 5 == 0:  # Limiter la fréquence pour ne pas surcharger les logs
                         log.info(f"{progress} | Accumulation: {(step+1) % args.gradient_accumulation_steps}/{args.gradient_accumulation_steps} | Perte: {loss.item():.4f}")
                     
-                    # Sauvegarde périodique
-                    if global_step % args.save_steps == 0:
+                    # Sauvegarde périodique (uniquement après la première étape)
+                    if global_step > 0 and global_step % args.save_steps == 0:
                         checkpoint_dir = os.path.join(output_dir, f"checkpoint-{global_step}")
                         os.makedirs(checkpoint_dir, exist_ok=True)
                         
