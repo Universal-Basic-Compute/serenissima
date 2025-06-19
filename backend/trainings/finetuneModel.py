@@ -834,7 +834,7 @@ def main():
             # Utiliser tqdm si disponible, sinon notre barre de progression simple
             dataloader_iterator = tqdm(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}") if TQDM_AVAILABLE else simple_progress_bar(train_dataloader, desc=f"Époque {epoch+1}/{args.epochs}")
         
-        for step, batch in enumerate(dataloader_iterator):
+            for step, batch in enumerate(dataloader_iterator):
             # Déplacer le batch sur le device et s'assurer que requires_grad est activé
             batch = {k: v.to(model.device) for k, v in batch.items()}
             
@@ -1011,34 +1011,34 @@ def main():
                         tokenizer.save_pretrained(checkpoint_dir)
                         log.info(f"Checkpoint sauvegardé à l'étape {global_step}")
             
-            # Accumuler la perte
-            step_loss += loss.item() * args.gradient_accumulation_steps
-            epoch_loss += loss.item() * args.gradient_accumulation_steps
-        
-        # Fin de l'époque avec statistiques détaillées
-        avg_epoch_loss = epoch_loss / len(train_dataloader)
-        log.info(f"{'='*20} Résumé de l'époque {epoch+1}/{args.epochs} {'='*20}")
-        log.info(f"Perte moyenne: {avg_epoch_loss:.4f}")
-        log.info(f"Étapes d'entraînement: {global_step}")
-        log.info(f"Taux d'apprentissage actuel: {lr_scheduler.get_last_lr()[0]:.2e}")
-        log.info(f"Temps écoulé pour cette époque: {time.time() - epoch_start_time:.2f} secondes")
-        log.info(f"{'='*65}")
-        
-        # Évaluation sur le dataset de validation
-        if val_dataloader:
-            model.eval()
-            val_loss = 0
+                # Accumuler la perte
+                step_loss += loss.item() * args.gradient_accumulation_steps
+                epoch_loss += loss.item() * args.gradient_accumulation_steps
             
-            with torch.no_grad():
-                for val_batch in val_dataloader:
-                    val_batch = {k: v.to(model.device) for k, v in val_batch.items()}
-                    val_outputs = model(**val_batch)
-                    val_loss += val_outputs.loss.item()
+            # Fin de l'époque avec statistiques détaillées
+            avg_epoch_loss = epoch_loss / len(train_dataloader)
+            log.info(f"{'='*20} Résumé de l'époque {epoch+1}/{args.epochs} {'='*20}")
+            log.info(f"Perte moyenne: {avg_epoch_loss:.4f}")
+            log.info(f"Étapes d'entraînement: {global_step}")
+            log.info(f"Taux d'apprentissage actuel: {lr_scheduler.get_last_lr()[0]:.2e}")
+            log.info(f"Temps écoulé pour cette époque: {time.time() - epoch_start_time:.2f} secondes")
+            log.info(f"{'='*65}")
             
-            avg_val_loss = val_loss / len(val_dataloader)
-            log.info(f"Validation | Perte: {avg_val_loss:.4f}")
-            
-            model.train()
+            # Évaluation sur le dataset de validation
+            if val_dataloader:
+                model.eval()
+                val_loss = 0
+                
+                with torch.no_grad():
+                    for val_batch in val_dataloader:
+                        val_batch = {k: v.to(model.device) for k, v in val_batch.items()}
+                        val_outputs = model(**val_batch)
+                        val_loss += val_outputs.loss.item()
+                
+                avg_val_loss = val_loss / len(val_dataloader)
+                log.info(f"Validation | Perte: {avg_val_loss:.4f}")
+                
+                model.train()
     except Exception as e:
         log.error(f"Erreur pendant l'entraînement: {e}")
         return False
