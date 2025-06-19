@@ -1361,7 +1361,9 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       if (report.priceChanges && report.priceChanges.length > 0) {
         md += `- **Price Changes**: \n`;
         report.priceChanges.forEach((change: any) => {
-          md += `  - ${change.resource}: ${change.direction === 'increase' ? '↑' : '↓'} ${change.percentage}%\n`;
+          const direction = change.change > 0 ? '↑' : '↓';
+          const percentage = Math.abs(change.change * 100).toFixed(1);
+          md += `  - ${change.resource}: ${direction} ${percentage}%\n`;
         });
       }
       
