@@ -58,8 +58,8 @@ export default function ResearchPanel({ onClose }: ResearchPanelProps) {
               If you're a researcher interested in using La Serenissima for your work, we encourage you to:
             </p>
             <ul className="list-disc pl-5 space-y-2 mb-4">
-              <li>Explore our <a href="https://github.com/serenissima-ai" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:text-amber-800 underline">GitHub repositories</a></li>
-              <li>Join our research community on <a href="https://t.me/serenissima_ubc_bot" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:text-amber-800 underline">Telegram</a></li>
+              <li>Explore our <a href="https://github.com/Universal-Basic-Compute/serenissima" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:text-amber-800 underline">GitHub repositories</a></li>
+              <li>Join our research community on <a href="https://t.me/serenissima_ai" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:text-amber-800 underline">Telegram</a></li>
               <li>Contact us directly at <span className="font-medium">research@serenissima.ai</span> with your research proposal</li>
             </ul>
             

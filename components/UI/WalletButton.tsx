@@ -137,7 +137,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
                     </span>
                   </button>
                   <a
-                    href="https://t.me/serenissima_ubc_bot" 
+                    href="https://t.me/serenissima_ai" 
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setDropdownOpen(false)}
