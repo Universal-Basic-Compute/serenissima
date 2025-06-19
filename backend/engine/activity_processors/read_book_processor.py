@@ -148,7 +148,7 @@ def process_read_book_fn(
             if artwork_content_for_kinos:
                 log.info(f"  Successfully fetched content for artwork '{book_title}' from KinOS path {book_kinos_path}.")
             else:
-                log.warning(f"  Failed to fetch content for artwork '{book_title}' from KinOS path {book_kinos_path}. Proceeding without book content in addSystem.")
+                log.warning(f"  Failed to fetch content for artwork '{book_title}' from KinOS path {book_kinos_path}. Proceeding without book content in add System.")
         else:
             log.info(f"  Book '{book_title}' does not have a specific KinOS path in activity notes. Reflection will be more general.")
 
@@ -158,17 +158,17 @@ def process_read_book_fn(
         # Updated KinOS prompt to reflect new addSystem structure
         kinos_prompt = (
             f"You are {citizen_username}, a citizen of Renaissance Venice. You have just spent some time reading a book titled '{book_title}'. "
-            f"The book's content (if available) and your personal data are provided in the `addSystem` field under `book_context` and `citizen_context` respectively.\n\n"
+            f"The book's content (if available) and your personal data are provided in your Ledger under `book_context` and `ledger` respectively.\n\n"
             f"Reflect on what you have read. Consider the following:\n"
-            f"- What were the main ideas or themes of the book (see `addSystem.book_context.content`)?\n"
+            f"- What were the main ideas or themes of the book (see content)?\n"
             f"- Did anything in the book particularly resonate with you, challenge your views, or inspire you?\n"
-            f"- How might the insights or knowledge gained from this book influence your thoughts, decisions, or actions in the near future regarding your life, work, relationships, or ambitions in Venice (refer to `addSystem.citizen_context`)?\n\n"
-            f"Your reflection should be personal and introspective. Use your current situation, goals, and personality (detailed in `addSystem.citizen_context`) to contextualize your thoughts on the book."
+            f"- How might the insights or knowledge gained from this book influence your thoughts, decisions, or actions in the near future regarding your life, work, relationships, or ambitions in Venice (refer to your Ledger)?\n\n"
+            f"Your reflection should be personal and introspective. Use your current situation, goals, and personality (detailed in your Ledger) to contextualize your thoughts on the book."
         )
         
         # Initialize the structured addSystem payload
         structured_add_system_payload: Dict[str, Any] = {
-            "citizen_context": None,
+            "ledger": None,
             "book_context": {
                 "title": book_title,
                 "content": "Content not available or this is a generic book." # Default content
@@ -176,12 +176,12 @@ def process_read_book_fn(
         }
         if ledger_json_str:
             try:
-                structured_add_system_payload["citizen_context"] = json.loads(ledger_json_str)
+                structured_add_system_payload["ledger"] = json.loads(ledger_json_str)
             except json.JSONDecodeError:
-                log.error("  Failed to parse ledger_json_str for citizen_context. Citizen context will be incomplete.")
-                structured_add_system_payload["citizen_context"] = {"error_parsing_ledger": True, "status": "unavailable"}
+                log.error("  Failed to parse ledger_json_str for ledger. ledger will be incomplete.")
+                structured_add_system_payload["ledger"] = {"error_parsing_ledger": True, "status": "unavailable"}
         else:
-            structured_add_system_payload["citizen_context"] = {"status": "unavailable_no_ledger_fetched"}
+            structured_add_system_payload["ledger"] = {"status": "unavailable_no_ledger_fetched"}
 
         if artwork_content_for_kinos:
             structured_add_system_payload["book_context"]["content"] = artwork_content_for_kinos

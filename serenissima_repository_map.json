@@ -1,6 +1,6 @@
 {
   "project_name": "La Serenissima",
-  "description": "Codebase map for La Serenissima, an Economic AI-driven simulation game set in Renaissance Venice. This document helps in navigating and understanding the project's architecture. It is in particular useful to search the game's code & documentation on the synchronized Drive.",
+  "description": "Codebase map for La Serenissima, a blockchain-powered MMO city builder set in Renaissance Venice. This document helps in navigating and understanding the project's architecture.",
   "last_updated": "2025-05-29",
   "structure": {
     "frontend_app_types": {

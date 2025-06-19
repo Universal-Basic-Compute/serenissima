@@ -90,28 +90,28 @@ def process_daily_reflection(
         
         kinos_prompt_daily_reflection = (
             f"You are {citizen_username}, a citizen of Renaissance Venice. You have just finished a period of rest, marking the end of a day or the beginning of a new one. "
-            f"Your personal data, including recent activities and current status, is provided in `addSystem` under `citizen_context`.\n\n"
+            f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
             f"Based on the data provided, reflect on the events, interactions, and feelings of your past day. Consider:\n"
-            f"- What were the most significant things that happened? (Refer to `addSystem.citizen_context.activities` and `addSystem.citizen_context.messages`)\n"
+            f"- What were the most significant things that happened? (Refer to activities and messages)\n"
             f"- How do you feel about these events (e.g., satisfied, frustrated, hopeful, worried)?\n"
             f"- Did you learn anything new or gain any insights?\n"
-            f"- How might the day's experiences influence your plans, goals, or relationships for tomorrow and beyond? (Refer to `addSystem.citizen_context.profile`, `addSystem.citizen_context.relationships`)\n\n"
-            f"Your reflection should be personal and introspective, like a private journal entry. Use your current situation, goals, and personality (detailed in `addSystem.citizen_context`) to contextualize your thoughts."
+            f"- How might the day's experiences influence your plans, goals, or relationships for tomorrow and beyond? (Refer to profile, relationships)\n\n"
+            f"Your reflection should be personal and introspective, like a private journal entry. Use your current situation, goals, and personality (detailed in ledger) to contextualize your thoughts."
         )
         
         # Log the prompt
         log.info(f"[PROMPT] Daily reflection for {citizen_username}:\n{kinos_prompt_daily_reflection}")
 
-        structured_add_system_payload: Dict[str, Any] = { "citizen_context": None }
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
         if ledger_markdown_str:
-            structured_add_system_payload["citizen_context"] = ledger_markdown_str # Assign Markdown string directly
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
         else:
-            structured_add_system_payload["citizen_context"] = "Citizen context ledger was not available."
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_daily_reflection,
             "model": "local", 
-            "addSystem": json.dumps(structured_add_system_payload) # structured_add_system_payload is a dict, citizen_context is a string
+            "addSystem": json.dumps(structured_add_system_payload) # structured_add_system_payload is a dict, ledger is a string
         }
 
         log.info(f"  Making KinOS /messages call for daily reflection by {citizen_username} to {kinos_messages_url}")
@@ -260,7 +260,7 @@ def process_theater_reflection(
         
         kinos_prompt_theater_reflection = (
             f"You are {citizen_username}, a citizen of Renaissance Venice. You have just attended a theater performance at {theater_name}. "
-            f"Your personal data, including recent activities and current status, is provided in `addSystem` under `citizen_context`.\n\n"
+            f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
             f"{play_context}"
             f"Based on the data provided, reflect on the theater experience. Consider:\n"
             f"- What was the performance about? (Use the provided play details if available, or imagine a typical Venetian performance of the era)\n"
@@ -274,11 +274,11 @@ def process_theater_reflection(
         # Log the prompt
         log.info(f"[PROMPT] Theater reflection for {citizen_username}:\n{kinos_prompt_theater_reflection}")
 
-        structured_add_system_payload: Dict[str, Any] = { "citizen_context": None }
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
         if ledger_markdown_str:
-            structured_add_system_payload["citizen_context"] = ledger_markdown_str # Assign Markdown string directly
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
         else:
-            structured_add_system_payload["citizen_context"] = "Citizen context ledger was not available."
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_theater_reflection,
@@ -421,7 +421,7 @@ def process_public_bath_reflection(
         
         kinos_prompt_bath_reflection = (
             f"You are {citizen_username}, a citizen of Renaissance Venice. You have just visited {public_bath_name}. "
-            f"Your personal data, including recent activities and current status, is provided in `addSystem` under `citizen_context`.\n\n"
+            f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
             f"Based on the data provided, reflect on your experience at the public bath. Consider:\n"
             f"- How do you feel after this experience of relaxation and cleansing?\n"
             f"- Did you encounter anyone interesting or have any notable conversations?\n"
@@ -434,11 +434,11 @@ def process_public_bath_reflection(
         # Log the prompt
         log.info(f"[PROMPT] Public bath reflection for {citizen_username}:\n{kinos_prompt_bath_reflection}")
 
-        structured_add_system_payload: Dict[str, Any] = { "citizen_context": None }
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
         if ledger_markdown_str:
-            structured_add_system_payload["citizen_context"] = ledger_markdown_str # Assign Markdown string directly
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
         else:
-            structured_add_system_payload["citizen_context"] = "Citizen context ledger was not available."
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_bath_reflection,
@@ -661,7 +661,7 @@ def process_practical_reflection(
         if selected_item and selected_category and selected_item_description:
             kinos_prompt_practical_reflection = (
                 f"You are {citizen_username}, a citizen of Renaissance Venice. "
-                f"Your personal data, including recent activities and current status, is provided in `addSystem` under `citizen_context`.\n\n"
+                f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
                 f"I'd like you to reflect on {selected_item_description}. Here are the specific details about this item:\n\n"
                 f"```json\n{json.dumps(selected_item, indent=2, default=str)}\n```\n\n"
                 f"Based on this information and your overall context, please reflect on:\n"
@@ -676,7 +676,7 @@ def process_practical_reflection(
             # Fallback prompt if we couldn't select a specific item
             kinos_prompt_practical_reflection = (
                 f"You are {citizen_username}, a citizen of Renaissance Venice. "
-                f"Your personal data, including recent activities and current status, is provided in `addSystem` under `citizen_context`.\n\n"
+                f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
                 f"Please reflect on your current situation in Venice. Consider:\n"
                 f"- What are your most pressing concerns or opportunities right now?\n"
                 f"- How are your business interests, properties, or relationships developing?\n"
@@ -688,11 +688,11 @@ def process_practical_reflection(
         # Log the prompt
         log.info(f"[PROMPT] Practical reflection for {citizen_username}:\n{kinos_prompt_practical_reflection}")
         
-        structured_add_system_payload: Dict[str, Any] = { "citizen_context": None }
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
         if ledger_markdown_str:
-            structured_add_system_payload["citizen_context"] = ledger_markdown_str # Assign Markdown string directly
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
         else:
-            structured_add_system_payload["citizen_context"] = "Citizen context ledger was not available."
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
         
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_practical_reflection,
@@ -1136,22 +1136,22 @@ def process_guided_reflection(
         
         kinos_prompt_guided_reflection = (
             f"You are {citizen_username}, a citizen of Renaissance Venice. "
-            f"Your personal data, including recent activities and current status, is provided in `addSystem` under `citizen_context`.\n\n"
+            f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
             f"I'd like you to reflect deeply on the following thought:\n\n"
             f"**{selected_prompt}**\n\n"
             f"Consider your current situation, recent experiences, and future aspirations as you respond. "
             f"Your reflection should be personal and introspective, drawing on specific details from your life in Venice. "
-            f"Feel free to mention, based on the `addSystem`, specific people, places, or events that are relevant to your thoughts on this matter."
+            f"Feel free to mention, based on your Ledger, specific people, places, or events that are relevant to your thoughts on this matter."
         )
         
         # Log the prompt
         log.info(f"[PROMPT] Guided reflection for {citizen_username}:\n{kinos_prompt_guided_reflection}")
 
-        structured_add_system_payload: Dict[str, Any] = { "citizen_context": None }
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
         if ledger_markdown_str:
-            structured_add_system_payload["citizen_context"] = ledger_markdown_str # Assign Markdown string directly
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
         else:
-            structured_add_system_payload["citizen_context"] = "Citizen context ledger was not available."
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_guided_reflection,
@@ -1340,7 +1340,7 @@ def process_continue_thought(
         # Create a prompt that asks the citizen to continue their previous thought
         kinos_prompt_continue_thought = (
             f"You are {citizen_username}, a citizen of Renaissance Venice. "
-            f"Your personal data, including recent activities and current status, is provided in `addSystem` under `citizen_context`.\n\n"
+            f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
             f"Earlier, you were reflecting on something and wrote the following:\n\n"
             f"```\n{thought_content}\n```\n\n"
             f"Please continue this line of thought. Expand on your previous reflections, explore new angles, or develop your ideas further. "
@@ -1350,11 +1350,11 @@ def process_continue_thought(
         # Log the prompt
         log.info(f"[PROMPT] Thought continuation for {citizen_username}:\n{kinos_prompt_continue_thought}")
 
-        structured_add_system_payload: Dict[str, Any] = { "citizen_context": None }
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
         if ledger_markdown_str:
-            structured_add_system_payload["citizen_context"] = ledger_markdown_str # Assign Markdown string directly
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
         else:
-            structured_add_system_payload["citizen_context"] = "Citizen context ledger was not available."
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_continue_thought,
@@ -1479,7 +1479,7 @@ def process_unguided_reflection(
         
         kinos_prompt_unguided_reflection = (
             f"You are {citizen_username}, a citizen of Renaissance Venice. "
-            f"Your personal data, including recent activities and current status, is provided in `addSystem` under `citizen_context`.\n\n"
+            f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
             f"Take a moment to reflect on your current situation in Venice. What's on your mind today? "
             f"Consider your recent experiences, your current circumstances, your relationships, your aspirations, or any concerns you might have. "
             f"This is an opportunity for free-form introspection - share whatever thoughts feel most relevant or pressing to you right now.\n\n"
@@ -1490,11 +1490,11 @@ def process_unguided_reflection(
         # Log the prompt
         log.info(f"[PROMPT] Unguided reflection for {citizen_username}:\n{kinos_prompt_unguided_reflection}")
 
-        structured_add_system_payload: Dict[str, Any] = { "citizen_context": None }
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
         if ledger_markdown_str:
-            structured_add_system_payload["citizen_context"] = ledger_markdown_str # Assign Markdown string directly
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
         else:
-            structured_add_system_payload["citizen_context"] = "Citizen context ledger was not available."
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
 
         kinos_payload_dict: Dict[str, Any] = {
             "message": kinos_prompt_unguided_reflection,
