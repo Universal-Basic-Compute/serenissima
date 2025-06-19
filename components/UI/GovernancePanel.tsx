@@ -362,24 +362,9 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
               
               {/* Moody Citizens Update - June 18th */}
               <div className="bg-white rounded-lg border border-amber-200 p-4 mb-4 shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex flex-col md:flex-row">
-                  {/* Image on the left */}
-                  <div className="md:w-1/3 mb-4 md:mb-0 md:mr-4">
-                    <a href="https://claude.ai/public/artifacts/8c763cf3-594e-416a-9aec-e51e27e4ea68" target="_blank" rel="noopener noreferrer">
-                      <img 
-                        src="https://claude.ai/api/public/artifacts/8c763cf3-594e-416a-9aec-e51e27e4ea68/content" 
-                        alt="Moody Citizens Feature" 
-                        className="w-full h-auto rounded-lg border border-amber-200 shadow-sm"
-                        onError={(e) => {
-                          // Fallback to emoji if image doesn't load
-                          (e.target as HTMLImageElement).src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"%3E%3Crect fill="%23f8f0e3" width="300" height="200"/%3E%3Ctext fill="%23b45309" font-family="Arial" font-size="36" x="150" y="100" text-anchor="middle" dominant-baseline="middle"%3E😤%3C/text%3E%3C/svg%3E';
-                        }}
-                      />
-                    </a>
-                  </div>
-                  
-                  {/* Content on the right */}
-                  <div className="md:w-2/3">
+                <div className="flex flex-col">
+                  {/* Content */}
+                  <div className="w-full">
                     <div className="flex justify-between items-start mb-2">
                       <h5 className="text-lg font-serif font-bold text-amber-800">😤 Moody Citizens</h5>
                       <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">June 18th, 2025</span>
@@ -409,7 +394,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                       rel="noopener noreferrer"
                       className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                     >
-                      View Full Presentation
+                      View Update
                     </a>
                   </div>
                 </div>
