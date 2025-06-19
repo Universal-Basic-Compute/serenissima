@@ -509,7 +509,7 @@ def main():
             "device_map": "auto",
             "trust_remote_code": True,
             "low_cpu_mem_usage": True,
-            "max_memory": {0: "80%", "cpu": "30GB"}  # Limiter l'utilisation de la mémoire GPU et CPU
+            "max_memory": {0: "16GB", "cpu": "30GB"}  # Limiter l'utilisation de la mémoire GPU et CPU
         }
         
         # Ajouter l'option de quantification 8 bits si demandée et non explicitement désactivée
