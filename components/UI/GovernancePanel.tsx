@@ -1291,7 +1291,16 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                               <div className="font-medium text-amber-800 mb-1">Affected Resources:</div>
                               <div className="flex flex-wrap gap-1">
                                 {report.affectedResources.map((resource) => (
-                                  <span key={resource} className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full">
+                                  <span key={resource} className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full flex items-center">
+                                    <img 
+                                      src={`https://backend.serenissima.ai/public_assets/images/resources/${resource}.png`}
+                                      alt=""
+                                      className="w-4 h-4 mr-1"
+                                      onError={(e) => {
+                                        // Hide the image if it fails to load
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                      }}
+                                    />
                                     {resource.replace(/_/g, ' ')}
                                   </span>
                                 ))}
@@ -1306,7 +1315,18 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                               <div className="space-y-1">
                                 {report.priceChanges.map((change) => (
                                   <div key={`price-${change.resource}`} className="flex items-center">
-                                    <span className="mr-2">{change.resource.replace(/_/g, ' ')}:</span>
+                                    <span className="mr-2 flex items-center">
+                                      <img 
+                                        src={`https://backend.serenissima.ai/public_assets/images/resources/${change.resource}.png`}
+                                        alt=""
+                                        className="w-4 h-4 mr-1"
+                                        onError={(e) => {
+                                          // Hide the image if it fails to load
+                                          (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                      />
+                                      {change.resource.replace(/_/g, ' ')}:
+                                    </span>
                                     <span className={`${change.change > 0 ? 'text-red-600' : 'text-green-600'} font-medium`}>
                                       {change.change > 0 ? `+${(change.change * 100).toFixed(0)}%` : `${(change.change * 100).toFixed(0)}%`} price
                                     </span>
