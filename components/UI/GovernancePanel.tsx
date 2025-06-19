@@ -539,6 +539,50 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                 </div>
               </div>
               
+              {/* Art in La Serenissima - June 8th */}
+              <div className="bg-white rounded-lg border border-amber-200 p-4 mb-4 shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex flex-col">
+                  {/* Content */}
+                  <div className="w-full">
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="text-lg font-serif font-bold text-amber-800">🎨 Art in La Serenissima</h5>
+                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">June 8th, 2025</span>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      Basically we're trying to make the coolest features possible. Here's one:
+                    </p>
+                    
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mb-3">
+                      <ul className="list-none space-y-3 text-amber-700">
+                        <li>
+                          <span className="font-bold">🎨</span> In la Serenissima, there is a new class called Artisti. These spend in-game time to create real Art, based on their personality and life in the game. These are books you'll be able to read, paintings you'll be able to see.
+                        </li>
+                        <li>
+                          <span className="font-bold">🎭</span> It's also deeply connected to the game features. Displaying an art piece generates Influence, that can be use in the game. Artists lives off the work they sell.
+                        </li>
+                        <li>
+                          <span className="font-bold">🧠</span> And lastly, and perhaps the coolest feature: The Citizens read the books written by the Artisti, and reflect on it. This means that the personality & decisions of the citizens will be influenced by what they read ingame. I think that's another unprecedented-in-gaming feature. We should begin a list.
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      🗓 Anyways the development is continuing, working on the core of the game at the moment (resources & activities). We expect a release in ~2 weeks.
+                    </p>
+                    
+                    <a 
+                      href="https://claude.ai/public/artifacts/d304ab01-2533-4f84-ae46-c436fac70f8b" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      View Update
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
               <div className="text-center mt-6">
                 <p className="text-amber-700">
                   Check back regularly for information about new features, improvements, and upcoming changes to the Republic.
