@@ -32,10 +32,15 @@ from transformers import (
     DataCollatorForLanguageModeling,
     TrainerCallback
 )
+# Désactiver l'import automatique de peft
+import os
+os.environ["TRANSFORMERS_NO_ADVISORY_WARNINGS"] = "1"
+os.environ["TRANSFORMERS_OFFLINE"] = "1"  # Empêcher les imports automatiques en ligne
 from datasets import load_dataset
 
-# Désactiver les avertissements
+# Désactiver les avertissements et les imports automatiques
 os.environ["TRANSFORMERS_NO_ADVISORY_WARNINGS"] = "1"
+os.environ["TRANSFORMERS_OFFLINE"] = "1"  # Empêcher les imports automatiques en ligne
 
 import psutil
 # Vérifier si GPUtil est disponible
@@ -509,7 +514,14 @@ def main():
     # Configurer le trainer
     log.info("Configuration du trainer...")
     try:
-        trainer = Trainer(
+        # Créer une classe Trainer personnalisée pour éviter l'import de peft
+        class CustomTrainer(Trainer):
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
+                # Désactiver explicitement la détection de peft
+                self._peft_has_been_imported = False
+        
+        trainer = CustomTrainer(
             model=model,
             args=training_args,
             train_dataset=tokenized_train_dataset,

@@ -31,6 +31,15 @@ def install_dependencies():
         "gputil"
     ]
     
+    # Désinstaller bitsandbytes et peft s'ils sont présents
+    try:
+        log.info("Désinstallation de bitsandbytes et peft s'ils sont présents...")
+        subprocess.call([sys.executable, "-m", "pip", "uninstall", "-y", "bitsandbytes"])
+        subprocess.call([sys.executable, "-m", "pip", "uninstall", "-y", "peft"])
+        log.info("Désinstallation terminée.")
+    except Exception as e:
+        log.warning(f"Erreur lors de la désinstallation: {e}")
+    
     try:
         for package in packages:
             log.info(f"Installation de {package}...")
