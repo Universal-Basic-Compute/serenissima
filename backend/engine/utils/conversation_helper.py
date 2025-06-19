@@ -334,9 +334,9 @@ def make_kinos_channel_call(
     payload: Dict[str, Any] = {"content": cleaned_prompt} # Changed "message" to "content" as per Compagno.tsx
     if add_system_data:
         try:
-            payload["addSystem"] = json.dumps(add_system_data)
+            payload["ledger"] = json.dumps(add_system_data)
         except TypeError as te:
-            log.error(f"Error serializing addSystem data for KinOS channel call: {te}. Sending without addSystem.")
+            log.error(f"Error serializing ledger data for KinOS channel call: {te}. Sending without ledger.")
     
     if kinos_model_override:
         payload["model"] = kinos_model_override
@@ -351,14 +351,14 @@ def make_kinos_channel_call(
             log.info(f"Sending request to KinOS channel {channel_name} for speaker {speaker_username} (Attempt {attempt + 1}/{max_retries})...")
             log.info(f"{LogColors.LIGHTBLUE}KinOS Channel Prompt for {speaker_username} to {channel_name}:\n{cleaned_prompt}{LogColors.ENDC}")
             if add_system_data:
-                log.debug(f"KinOS Channel addSystem keys: {list(add_system_data.keys())}")
+                log.debug(f"KinOS Channel ledger keys: {list(add_system_data.keys())}")
                 
             print(f"\n\n===== KINOS API CALL DETAILS =====")
             print(f"Speaker: {speaker_username}, Channel: {channel_name}")
             print(f"URL: {kinos_url}")
             print(f"Model Override: {kinos_model_override}")
             print(f"Payload Content: {cleaned_prompt}")
-            print(f"Payload addSystem Keys: {list(add_system_data.keys()) if add_system_data else 'None'}")
+            print(f"Payload ledger Keys: {list(add_system_data.keys()) if add_system_data else 'None'}")
             print(f"Tables object provided: {tables is not None}")
             print(f"================================\n\n")
 
@@ -476,9 +476,9 @@ def _call_kinos_analysis_api(
     
     if add_system_data:
         try:
-            payload["addSystem"] = json.dumps(add_system_data)
+            payload["ledger"] = json.dumps(add_system_data)
         except TypeError as te:
-            log.error(f"Error serializing addSystem data for KinOS analysis call: {te}. Sending without addSystem.")
+            log.error(f"Error serializing ledger data for KinOS analysis call: {te}. Sending without ledger.")
     
     if model_override:
         payload["model"] = model_override
@@ -495,7 +495,7 @@ def _call_kinos_analysis_api(
             log.info(f"Sending request to KinOS analysis for kin {kin_username} (Attempt {attempt + 1}/{max_retries})...")
             log.info(f"{LogColors.LIGHTBLUE}KinOS Analysis Prompt for {kin_username}:\n{message_prompt}{LogColors.ENDC}")
             if add_system_data:
-                log.debug(f"KinOS Analysis addSystem keys: {list(add_system_data.keys())}")
+                log.debug(f"KinOS Analysis ledger keys: {list(add_system_data.keys())}")
 
             response = requests.post(analysis_url, headers=headers, json=payload, timeout=DEFAULT_TIMEOUT_SECONDS)
             response.raise_for_status()  # Raises HTTPError for 4xx/5xx responses
@@ -561,7 +561,7 @@ def generate_conversation_turn(
     message: Optional[str] = None, # Optional message to send directly for "conversation_opener"
     target_citizen_username_for_trust_impact: Optional[str] = None, # For 3-way trust impact
     process_reply: bool = True, # Whether to generate a reply from the listener
-    add_message: Optional[Dict[str, Any]] = None # Additional message data to include in addSystem
+    add_message: Optional[Dict[str, Any]] = None # Additional message data to include in ledger
 ) -> Optional[Dict]:
     """
     Generates one turn of a conversation, an internal reflection, or a conversation opener.
@@ -725,7 +725,7 @@ def generate_conversation_turn(
     # 2. Determine KinOS channel name
     channel_name = "_".join(sorted([speaker_username, listener_username]))
 
-    # 3. Fetch context data for addSystem
+    # 3. Fetch context data for ledger
     speaker_ledger = get_citizen_ledger(speaker_username, api_base_url) or {}
     
     # Get the speaker's mood based on their ledger data
@@ -767,7 +767,7 @@ def generate_conversation_turn(
     # Add additional message data if provided
     if add_message:
         add_system_payload["additional_message_data"] = add_message
-        log.info(f"Including additional message data in addSystem payload: {list(add_message.keys())}")
+        log.info(f"Including additional message data in ledger payload: {list(add_message.keys())}")
 
     # 4. Construct KinOS prompt
     # location_description_for_prompt is now set above.
@@ -788,7 +788,7 @@ def generate_conversation_turn(
             f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
             f"{location_context}You have noticed {listener_profile.get('FirstName', listener_username)} (Social Class: {listener_profile.get('SocialClass', 'unknown')}) is also here. "
             f"{mood_guidance} "
-            f"Review your knowledge in `addSystem` (your ledger including `availableStratagems` and active stratagems, problems, your relationship with them, their problems, and any recent direct conversation history). "
+            f"Review your knowledge in your Ledger (including `availableStratagems` and active stratagems, problems, your relationship with them, their problems, and any recent direct conversation history). "
             f"What are your internal thoughts or observations about their presence and this encounter? Consider any opportunities, risks, or social implications. Could a **Stratagem** be relevant here (either one you are running, one targeting you, or one you might propose)? "
             f"Your response should be your internal monologue or reflection in plain text in English, not direct speech to them. "
             f"Keep it focused on potential gameplay impact or character development.[/SYSTEM]\n\n"
@@ -809,8 +809,8 @@ def generate_conversation_turn(
             f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
             f"{location_context}You see {listener_profile.get('FirstName', listener_username)} (Social Class: {listener_profile.get('SocialClass', 'unknown')}) here. "
             f"{mood_guidance} "
-            f"Review your knowledge in `addSystem` (your ledger including `availableStratagems` and active stratagems, problems, your relationship with them, their problems, and any recent direct conversation history). "
-            f"What would you say to them to initiate or continue a conversation? Your opening could be related to a shared interest, a problem, an opportunity, or perhaps a **Stratagem** you wish to discuss or propose. "
+            f"Review your knowledge in your Ledger (including `availableStratagems` and active stratagems, problems, your relationship with them, their problems, and any recent direct conversation history). "
+            f"What would you say to them to continue the conversation? Your opening could be related to a shared interest, a problem, an opportunity, latest reports or gossips, or perhaps a **Stratagem** you wish to discuss or propose. "
             f"Your response should be direct speech TO {listener_profile.get('FirstName', listener_username)}, in plain text in English. "
             f"Keep it concise, in character, and relevant to your current situation or relationship.[/SYSTEM]\n\n"
         )
@@ -831,7 +831,7 @@ def generate_conversation_turn(
             f"[SYSTEM]You are {speaker_profile.get('FirstName', speaker_username)}, a {speaker_profile.get('SocialClass', 'citizen')} of Venice. "
             f"You are currently in conversation with {listener_profile.get('FirstName', listener_username)}. {location_context}"
             f"{mood_guidance} "
-            f"Review your knowledge in `addSystem` (your ledger including `availableStratagems` and active stratagems, problems, relationship, listener's problems, and recent conversation histories, plus this `system_guidance`). "
+            f"Review your knowledge in your Ledger (including `availableStratagems` and active stratagems, problems, relationship, listener's problems, and recent conversation histories, plus this `system_guidance`). "
             f"Continue the conversation naturally in plain text in English, keeping your persona and objectives in mind. If strategic elements arise, remember that **Stratagems** are a key way to interact with the world. Your response should be direct speech.[/SYSTEM]\n\n"
         )
         add_system_payload["system_guidance"] = system_explanation
