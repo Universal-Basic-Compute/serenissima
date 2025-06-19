@@ -1765,7 +1765,22 @@ export async function GET(request: Request) {
     
     // Assign active reports for Forestieri citizens
     if (citizenRecord.fields.SocialClass === 'Forestieri' && reportsData?.success) {
-      Ledger.activeReports = reportsData.reports || [];
+      // Filter reports - Forestieri only have 50% chance to access each report
+      // Use a deterministic seed based on ReportId and Username
+      const filteredReports = (reportsData.reports || []).filter(report => {
+        // Create a deterministic seed from ReportId and Username
+        const seed = `${report.reportId}-${citizenUsername}`;
+        // Simple hash function to get a number from the seed string
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) {
+          hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+          hash |= 0; // Convert to 32bit integer
+        }
+        // Use the hash to determine if this Forestieri has access to this report (50% chance)
+        return Math.abs(hash) % 2 === 0;
+      });
+      
+      Ledger.activeReports = filteredReports;
     }
     
     // Assign results to Ledger
