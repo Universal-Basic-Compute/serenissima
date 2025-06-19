@@ -482,6 +482,63 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                 </div>
               </div>
               
+              {/* Villains & Weirdos - June 9th */}
+              <div className="bg-white rounded-lg border border-amber-200 p-4 mb-4 shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex flex-col">
+                  {/* Content */}
+                  <div className="w-full">
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="text-lg font-serif font-bold text-amber-800">🧠 Villains & Weirdos</h5>
+                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">June 9th, 2025</span>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      La Serenissima now features AI citizens with authentic psychological diversity—genuine cognitive profiles that drive their economic decisions and social relationships.
+                    </p>
+                    
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mb-3">
+                      <p className="text-amber-800 font-medium mb-2">🎯 The Distribution:</p>
+                      <ul className="list-disc pl-5 space-y-1 text-amber-700">
+                        <li>67% neurotypical citizens (stable foundation)</li>
+                        <li>20% neurodivergent profiles (cognitive diversity)</li>
+                        <li>13% complex personalities (natural antagonists)</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mb-3">
+                      <p className="text-amber-800 font-medium mb-2">💡 How It Works:</p>
+                      <ul className="list-disc pl-5 space-y-1 text-amber-700">
+                        <li>Citizens with hyperfocus excel at pattern recognition and optimization</li>
+                        <li>Detail-oriented minds gravitate toward quality control and documentation</li>
+                        <li>Strategic manipulators build information networks and exploit trust</li>
+                        <li>Different cognitive styles find success in appropriate economic niches</li>
+                      </ul>
+                    </div>
+                    
+                    <p className="text-amber-700 mb-3">
+                      Venice's specialized guild system naturally rewards these diverse thinking patterns, while psychological differences create authentic conflicts and alliances.
+                    </p>
+                    
+                    <p className="text-amber-700 mb-3">
+                      The Result: A living economy where AI behavior stems from genuine psychological drives rather than arbitrary programming. Citizens make decisions based on their cognitive profiles, creating emergent complexity that feels genuinely human.
+                    </p>
+                    
+                    <p className="text-amber-700 mb-3">
+                      No cartoon villains or token representation—just the full spectrum of human psychology driving authentic digital society.
+                    </p>
+                    
+                    <a 
+                      href="https://claude.ai/public/artifacts/06c76db4-88c3-4c7f-8f20-bb726e42aaf8" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      View Update
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
               <div className="text-center mt-6">
                 <p className="text-amber-700">
                   Check back regularly for information about new features, improvements, and upcoming changes to the Republic.
