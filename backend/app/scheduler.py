@@ -209,8 +209,7 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                      ("engine/createmarketgalley.py --construction", "Create Market Galley (Construction)", 10)], # 20:10 VT
                 21: [("ais/buildbuildings.py --model local", "AI building construction", 0), # 21:00 VT
                      ("ais/automated_adjustleases.py --strategy standard", "Automated AI Lease Price Adjustment (Standard)", 30), # 21:30 VT
-                     ("ais/thinkingLoop.py", "AI Thinking Loop & Process Queue", 45), # 21:45 VT
-                     ("reports/createReports.py", "Create Renaissance Reports", 50)], # 21:50 VT
+                     ("ais/thinkingLoop.py", "AI Thinking Loop & Process Queue", 45)], # 21:45 VT
                 22: [("ais/automated_adjustrents.py --strategy standard", "Automated AI Rent Adjustment (Standard)", 5)], # 22:05 VT
                 23: [("ais/automated_adjustpublicstoragecontracts.py", "Automated Public Storage Offers", 0)], # 23:00 VT
                 0: [("ais/automated_adjustwages.py --strategy standard", "Automated AI Wage Adjustment (Standard)", 0), # 00:00 VT (Midnight)
@@ -222,7 +221,8 @@ def run_scheduled_tasks(forced_hour: Optional[int] = None): # Added forced_hour 
                     ("engine/createmarketgalley.py", "Create Market Galley (Normal)", 5), # 2:05 VT
                     ("relevancies/calculateRelevancies.py", "Calculate Citizen Relevancies", 10)], # 2:10 VT
                 3: [("engine/cleanTables.py", "Clean Old Table Records", 0), # 3:00 VT
-                    ("engine/processStratagems.py", "Process Active Stratagems (Morning)", 5)], # 3:05 VT
+                    ("engine/processStratagems.py", "Process Active Stratagems (Morning)", 5), # 3:05 VT
+                    ("reports/createReports.py", "Create Renaissance Reports", 50)], # 3:50 VT
                 4: [("ais/answertomessages.py --model local", "AI message responses", 0), # 4:00 VT
                     ("ais/automated_managepublicsalesandprices.py --strategy standard", "Automated AI Public Sales & Pricing (Standard)", 5), # 4:05 VT
                     ("engine/processPassiveBuildings.py", "Process Passive Buildings (Wells/Cisterns)", 10)], # 4:10 VT
