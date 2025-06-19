@@ -1293,7 +1293,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                                 {report.affectedResources.map((resource) => (
                                   <span key={resource} className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full flex items-center">
                                     <img 
-                                      src={`https://backend.serenissima.ai/public_assets/images/resources/${resource}.png`}
+                                      src={`https://backend.serenissima.ai/public_assets/images/resources/${resource.toLowerCase().replace(/ /g, '_')}.png`}
                                       alt=""
                                       className="w-4 h-4 mr-1"
                                       onError={(e) => {
@@ -1317,7 +1317,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                                   <div key={`price-${change.resource}`} className="flex items-center">
                                     <span className="mr-2 flex items-center">
                                       <img 
-                                        src={`https://backend.serenissima.ai/public_assets/images/resources/${change.resource}.png`}
+                                        src={`https://backend.serenissima.ai/public_assets/images/resources/${change.resource.toLowerCase().replace(/ /g, '_')}.png`}
                                         alt=""
                                         className="w-4 h-4 mr-1"
                                         onError={(e) => {
