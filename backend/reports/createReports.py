@@ -100,8 +100,35 @@ def get_recent_reports(tables: Dict[str, Table], max_reports: int = MAX_REPORTS_
             sort=[{"field": "CreatedAt", "direction": "desc"}],
             max_records=max_reports
         )
-        log.info(f"Fetched {len(reports)} recent reports from Airtable")
-        return reports
+        
+        # Ensure all fields are properly formatted for JSON serialization
+        sanitized_reports = []
+        for report in reports:
+            # Create a sanitized copy of each report
+            sanitized_report = {
+                'id': report.get('id', ''),
+                'fields': {}
+            }
+            
+            # Copy fields, ensuring all values are of serializable types
+            for key, value in report.get('fields', {}).items():
+                # Convert any non-serializable values to strings
+                if isinstance(value, (str, int, float, bool, type(None))):
+                    sanitized_report['fields'][key] = value
+                elif isinstance(value, (list, dict)):
+                    # Try to ensure nested structures are serializable
+                    try:
+                        json.dumps(value)  # Test if serializable
+                        sanitized_report['fields'][key] = value
+                    except (TypeError, OverflowError):
+                        sanitized_report['fields'][key] = str(value)
+                else:
+                    sanitized_report['fields'][key] = str(value)
+            
+            sanitized_reports.append(sanitized_report)
+        
+        log.info(f"Fetched and sanitized {len(sanitized_reports)} recent reports from Airtable")
+        return sanitized_reports
     except Exception as e:
         log.error(f"Error fetching recent reports: {e}")
         return []
