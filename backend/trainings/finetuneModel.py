@@ -31,6 +31,19 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
 
+# Import pour LoRA
+try:
+    from peft import (
+        LoraConfig,
+        get_peft_model,
+        prepare_model_for_kbit_training,
+        TaskType
+    )
+    PEFT_AVAILABLE = True
+except ImportError:
+    PEFT_AVAILABLE = False
+    log.warning("La bibliothèque PEFT n'est pas installée. LoRA ne sera pas disponible.")
+
 # Pour la barre de progression
 try:
     from tqdm import tqdm
@@ -430,6 +443,18 @@ def main():
     parser.add_argument("--warmup_steps", type=int, default=100,
                         help="Nombre d'étapes de warmup pour le scheduler")
     
+    # Arguments pour LoRA
+    parser.add_argument("--lora_r", type=int, default=8,
+                        help="Rang de la matrice LoRA (défaut: 8)")
+    parser.add_argument("--lora_alpha", type=int, default=16,
+                        help="Alpha de LoRA, généralement 2x lora_r (défaut: 16)")
+    parser.add_argument("--lora_dropout", type=float, default=0.05,
+                        help="Dropout pour LoRA (défaut: 0.05)")
+    parser.add_argument("--lora_target_modules", type=str, default=None,
+                        help="Modules cibles pour LoRA, séparés par des virgules (ex: q_proj,v_proj)")
+    parser.add_argument("--use_lora", action="store_true", default=False,
+                        help="Utiliser LoRA pour le fine-tuning")
+    
     args = parser.parse_args()
     
     # Trouver le fichier dataset
@@ -513,6 +538,40 @@ def main():
             else:
                 # Si l'erreur n'est pas liée à la quantification, la relancer
                 raise
+                
+        # Appliquer LoRA si demandé
+        if args.use_lora or args.lora_target_modules:
+            if not PEFT_AVAILABLE:
+                log.error("LoRA demandé mais la bibliothèque PEFT n'est pas installée. Exécutez 'pip install peft'.")
+                return
+            
+            log.info("Configuration de LoRA pour le fine-tuning...")
+            
+            # Préparer le modèle pour l'entraînement si quantifié
+            if args.int8:
+                log.info("Préparation du modèle quantifié pour l'entraînement avec LoRA...")
+                model = prepare_model_for_kbit_training(model)
+            
+            # Déterminer les modules cibles
+            target_modules = None
+            if args.lora_target_modules:
+                target_modules = args.lora_target_modules.split(',')
+                log.info(f"Modules cibles pour LoRA: {target_modules}")
+            
+            # Configurer LoRA
+            peft_config = LoraConfig(
+                task_type=TaskType.CAUSAL_LM,
+                inference_mode=False,
+                r=args.lora_r,
+                lora_alpha=args.lora_alpha,
+                lora_dropout=args.lora_dropout,
+                target_modules=target_modules
+            )
+            
+            # Appliquer LoRA au modèle
+            model = get_peft_model(model, peft_config)
+            model.print_trainable_parameters()
+            log.info("LoRA appliqué avec succès au modèle")
         
         # Activer le gradient checkpointing pour l'efficacité mémoire
         if hasattr(model, "gradient_checkpointing_enable"):
@@ -680,7 +739,11 @@ def main():
                         os.makedirs(checkpoint_dir, exist_ok=True)
                         
                         # Sauvegarder le modèle
-                        model.save_pretrained(checkpoint_dir)
+                        if hasattr(model, "save_pretrained") and hasattr(model, "config") and hasattr(model.config, "peft_config_id"):
+                            log.info(f"Sauvegarde du checkpoint LoRA à l'étape {global_step}...")
+                            model.save_pretrained(checkpoint_dir)
+                        else:
+                            model.save_pretrained(checkpoint_dir)
                         tokenizer.save_pretrained(checkpoint_dir)
                         log.info(f"Checkpoint sauvegardé à l'étape {global_step}")
                         
@@ -777,8 +840,18 @@ def main():
     # Sauvegarder le modèle final
     log.info(f"Sauvegarde du modèle final dans {output_dir}")
     try:
-        model.save_pretrained(output_dir)
-        tokenizer.save_pretrained(output_dir)
+        # Vérifier si c'est un modèle LoRA
+        if hasattr(model, "save_pretrained") and hasattr(model, "config") and hasattr(model.config, "peft_config_id"):
+            log.info("Sauvegarde du modèle LoRA...")
+            model.save_pretrained(output_dir)
+            # Sauvegarder également le tokenizer
+            tokenizer.save_pretrained(output_dir)
+            log.info("Modèle LoRA et tokenizer sauvegardés avec succès")
+        else:
+            # Sauvegarde standard
+            model.save_pretrained(output_dir)
+            tokenizer.save_pretrained(output_dir)
+            log.info("Modèle et tokenizer sauvegardés avec succès")
     except Exception as e:
         log.error(f"Erreur lors de la sauvegarde du modèle: {e}")
         return

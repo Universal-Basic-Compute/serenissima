@@ -29,7 +29,8 @@ def install_dependencies():
         "wandb",
         "psutil",
         "gputil",
-        "bitsandbytes>=0.41.0"  # Pour la quantification 8 bits
+        "bitsandbytes>=0.41.0",  # Pour la quantification 8 bits
+        "peft>=0.4.0"            # Pour LoRA
     ]
     
     # Désinstaller bitsandbytes et peft s'ils sont présents
