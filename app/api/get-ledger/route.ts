@@ -1527,19 +1527,23 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
         md += `- **Nature**: ${typeMap[contract.type] || contract.type}\n`;
       }
       
-      if (contract.buyer) {
+      if (contract.type === 'import') {
+        // For import contracts, the seller is providing to the buyer
+        if (contract.seller === citizenUsername) {
+          md += `- **I am to deliver to**: ${contract.buyer}\n`;
+        } else if (contract.buyer === citizenUsername) {
+          md += `- **To be delivered by**: ${contract.seller}\n`;
+        } else {
+          md += `- **Delivery**: ${contract.seller} to ${contract.buyer}\n`;
+        }
+      } else {
+        // For other contract types
         if (contract.buyer === citizenUsername) {
           md += `- **I am to receive from**: ${contract.seller}\n`;
-        } else {
-          md += `- **I am to provide to**: ${contract.buyer}\n`;
-        }
-      }
-      
-      if (contract.seller && !md.includes(contract.seller)) {
-        if (contract.seller === citizenUsername) {
+        } else if (contract.seller === citizenUsername) {
           md += `- **I am to provide to**: ${contract.buyer}\n`;
         } else {
-          md += `- **I am to receive from**: ${contract.seller}\n`;
+          md += `- **Between**: ${contract.seller} and ${contract.buyer}\n`;
         }
       }
       
