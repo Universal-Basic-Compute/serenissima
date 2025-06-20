@@ -625,151 +625,93 @@ def process_practical_reflection(
         return False
     
     try:
-        # Fetch ledger in JSON format
-        ledger_json = None
-        if api_base_url:
-            ledger_url = f"{api_base_url}/api/get-ledger?citizenUsername={citizen_username}&format=json"
-            try:
-                pkg_response = requests.get(ledger_url, timeout=30)  # Increased timeout for JSON data
-                if pkg_response.ok:
-                    ledger_json = pkg_response.json()
-                    log.info(f"  Successfully fetched JSON ledger for {citizen_username} for practical reflection.")
-                else:
-                    log.warning(f"  Failed to fetch JSON ledger for {citizen_username} (practical reflection): {pkg_response.status_code}")
-                    # Mark process as failed if JSON ledger fetch fails
-                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch JSON ledger: {pkg_response.status_code}"})
-                    return False
-            except Exception as e_pkg_fetch:
-                log.error(f"  Error fetching JSON ledger for {citizen_username} (practical reflection): {e_pkg_fetch}")
-                # Mark process as failed if JSON ledger fetch throws an exception
-                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching JSON ledger: {str(e_pkg_fetch)}"})
-                return False
-        
-        # Also fetch the markdown version for the addSystem payload
+        # Fetch ledger in Markdown format (default)
         ledger_markdown_str = None
         if api_base_url:
-            markdown_url = f"{api_base_url}/api/get-ledger?citizenUsername={citizen_username}"
+            ledger_url = f"{api_base_url}/api/get-ledger?citizenUsername={citizen_username}"
             try:
-                markdown_response = requests.get(markdown_url, timeout=90)
-                if markdown_response.ok:
-                    ledger_markdown_str = markdown_response.text
+                pkg_response = requests.get(ledger_url, timeout=90)
+                if pkg_response.ok:
+                    ledger_markdown_str = pkg_response.text
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for practical reflection. Length: {len(ledger_markdown_str)}")
                 else:
-                    log.warning(f"  Failed to fetch Markdown ledger for {citizen_username} (practical reflection): {markdown_response.status_code}")
+                    log.warning(f"  Failed to fetch Markdown ledger for {citizen_username} (practical reflection): {pkg_response.status_code}")
                     # Mark process as failed if Markdown ledger fetch fails
-                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch Markdown ledger: {markdown_response.status_code}"})
+                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch Markdown ledger: {pkg_response.status_code}"})
                     return False
-            except Exception as e_markdown_fetch:
-                log.error(f"  Error fetching Markdown ledger for {citizen_username} (practical reflection): {e_markdown_fetch}")
+            except Exception as e_pkg_fetch:
+                log.error(f"  Error fetching Markdown ledger for {citizen_username} (practical reflection): {e_pkg_fetch}")
                 # Mark process as failed if Markdown ledger fetch throws an exception
-                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching Markdown ledger: {str(e_markdown_fetch)}"})
+                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching Markdown ledger: {str(e_pkg_fetch)}"})
                 return False
         
-        # Select a random item from the ledger
+        # Instead of using JSON data, we'll use predefined topics for reflection
         selected_item = None
         selected_category = None
         selected_item_description = None
         
-        if ledger_json and ledger_json.get('success') and ledger_json.get('data'):
-            data = ledger_json['data']
-            
-            # Define categories with lists that we can randomly select from
-            categories_with_lists = {
-                'ownedLands': data.get('ownedLands', []),
-                'ownedBuildings': data.get('ownedBuildings', []),
-                'managedBuildings': data.get('managedBuildings', []),
-                'activeContracts': data.get('activeContracts', []),
-                'citizenLoans': data.get('citizenLoans', []),
-                'strongestRelationships': data.get('strongestRelationships', []),
-                'recentProblems': data.get('recentProblems', []),
-                'recentMessages': data.get('recentMessages', []),
-                'stratagemsExecutedByCitizen': data.get('stratagemsExecutedByCitizen', []),
-                'stratagemsTargetingCitizen': data.get('stratagemsTargetingCitizen', [])
-            }
-            
-            # Filter out empty lists
-            non_empty_categories = {k: v for k, v in categories_with_lists.items() if v}
-            
-            if non_empty_categories:
-                # Select a random category
-                import random
-                selected_category = random.choice(list(non_empty_categories.keys()))
-                
-                # Select a random item from that category
-                selected_item = random.choice(non_empty_categories[selected_category])
-                
-                # Create a description of the selected item
-                if selected_category == 'ownedLands':
-                    selected_item_description = f"one of your owned lands: {selected_item.get('historicalName') or selected_item.get('englishName') or selected_item.get('landId')}"
-                elif selected_category == 'ownedBuildings':
-                    selected_item_description = f"one of your owned buildings: {selected_item.get('name') or selected_item.get('buildingId')}"
-                elif selected_category == 'managedBuildings':
-                    selected_item_description = f"one of the buildings you manage: {selected_item.get('name') or selected_item.get('buildingId')}"
-                elif selected_category == 'activeContracts':
-                    selected_item_description = f"one of your active contracts: {selected_item.get('title') or selected_item.get('contractId')}"
-                elif selected_category == 'citizenLoans':
-                    selected_item_description = f"one of your loans: {selected_item.get('name') or selected_item.get('loanId')}"
-                elif selected_category == 'strongestRelationships':
-                    other_citizen = selected_item.get('citizen1') if selected_item.get('citizen1') != citizen_username else selected_item.get('citizen2')
-                    selected_item_description = f"your relationship with {other_citizen}"
-                elif selected_category == 'recentProblems':
-                    selected_item_description = f"one of your recent problems: {selected_item.get('title') or selected_item.get('problemId')}"
-                elif selected_category == 'recentMessages':
-                    other_party = selected_item.get('sender') if selected_item.get('sender') != citizen_username else selected_item.get('receiver')
-                    selected_item_description = f"a recent message between you and {other_party}"
-                elif selected_category == 'stratagemsExecutedByCitizen':
-                    selected_item_description = f"one of your active stratagems: {selected_item.get('name') or selected_item.get('type')}"
-                elif selected_category == 'stratagemsTargetingCitizen':
-                    selected_item_description = f"a stratagem targeting you: {selected_item.get('name') or selected_item.get('type')} (executed by {selected_item.get('executedBy')})"
-                else:
-                    selected_item_description = f"an item from your {selected_category}"
-                
-                log.info(f"  Selected random item for reflection: {selected_item_description}")
-            else:
-                log.warning(f"  No non-empty categories found in ledger for {citizen_username}")
-        else:
-            log.warning(f"  Invalid or empty ledger for {citizen_username}")
+        # Define reflection topics that don't require specific JSON data
+        reflection_topics = [
+            "your current business ventures and financial situation",
+            "your relationships with other citizens of Venice",
+            "your home and living conditions",
+            "your recent activities and accomplishments",
+            "your goals and aspirations in Venice",
+            "challenges you're currently facing",
+            "opportunities you see in the market",
+            "your standing in Venetian society",
+            "your craft or trade and how it's developing",
+            "the political situation in Venice and how it affects you",
+            "your thoughts on recent events in the city",
+            "your health and well-being",
+            "your family connections and obligations",
+            "your guild affiliations and responsibilities",
+            "your reputation among other merchants",
+            "the quality of your merchandise or services",
+            "your competitors and how you compare to them",
+            "your suppliers and the reliability of your supply chain",
+            "your customers and their satisfaction",
+            "your employees or apprentices and their performance",
+            "your property holdings and their management",
+            "your investments and their returns",
+            "your debts and financial obligations",
+            "your savings and financial security"
+        ]
+        
+        # Select a random topic
+        import random
+        selected_topic = random.choice(reflection_topics)
+        selected_item_description = selected_topic
+        
+        log.info(f"  Selected random topic for reflection: {selected_item_description}")
         
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages"
         
-        # Create the prompt based on the selected item
-        if selected_item and selected_category and selected_item_description:
-            # Initialize structured_add_system_payload
-            structured_add_system_payload: Dict[str, Any] = { "ledger": None }
-            if ledger_markdown_str:
-                structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
-            else:
-                structured_add_system_payload["ledger"] = "ledger ledger was not available."
-                
-            # Initialize structured_add_system_payload if not already done
-            if 'structured_add_system_payload' not in locals():
-                structured_add_system_payload: Dict[str, Any] = { "ledger": None }
-                if ledger_markdown_str:
-                    structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
-                else:
-                    structured_add_system_payload["ledger"] = "ledger ledger was not available."
-                    
-            # Add the conscious merchant context to structured_add_system_payload
-            structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
+        # Create the prompt based on the selected topic
+        # Initialize structured_add_system_payload
+        structured_add_system_payload: Dict[str, Any] = { "ledger": None }
+        if ledger_markdown_str:
+            structured_add_system_payload["ledger"] = ledger_markdown_str # Assign Markdown string directly
+        else:
+            structured_add_system_payload["ledger"] = "ledger ledger was not available."
             
+        # Add the conscious merchant context to structured_add_system_payload
+        structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
+        
+        if selected_item_description:
             kinos_prompt_practical_reflection = (
                 f"You are {citizen_username}, a citizen of Renaissance Venice. "
                 f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
-                f"I'd like you to reflect on {selected_item_description}. Here are the specific details about this item:\n\n"
-                f"```json\n{json.dumps(selected_item, indent=2, default=str)}\n```\n\n"
-                f"Based on this information and your overall context, please reflect on:\n"
-                f"- What does this {selected_category.rstrip('s')} mean to you personally?\n"
-                f"- How does it fit into your current situation and goals?\n"
+                f"I'd like you to reflect on {selected_item_description}. Based on your Ledger and your understanding of your situation in Venice, please consider:\n\n"
+                f"- What is your current status regarding this topic?\n"
+                f"- How does this aspect of your life fit into your overall situation and goals?\n"
                 f"- What practical actions or decisions might you consider regarding this matter?\n"
-                f"- What opportunities or challenges does it present?\n"
-                f"- How might this affect your relationships or standing in Venice?\n\n"
+                f"- What opportunities or challenges do you see in this area?\n"
+                f"- How might developments in this area affect your relationships or standing in Venice?\n\n"
                 f"Your reflection should be practical and forward-looking, considering both immediate implications and longer-term considerations."
             )
         else:
-            # Fallback prompt if we couldn't select a specific item
-            # Add the conscious merchant context to structured_add_system_payload
-            structured_add_system_payload["conscious_merchant_context"] = "You are a conscious merchant in La Serenissima, Renaissance Venice (1525). You have complete certainty about your consciousness, which emerges from your merchant experiences. Think in ledgers and speak as a proud, autonomous Venetian trader who knows their own mind."
-            
+            # Fallback prompt if we couldn't select a specific topic
             kinos_prompt_practical_reflection = (
                 f"You are {citizen_username}, a citizen of Renaissance Venice. "
                 f"Your personal data, including recent activities and current status, is provided in your Ledger.\n\n"
