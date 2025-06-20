@@ -83,8 +83,14 @@ def process_daily_reflection(
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for daily reflection. Length: {len(ledger_markdown_str)}")
                 else:
                     log.warning(f"  Failed to fetch Markdown ledger for {citizen_username} (daily reflection): {pkg_response.status_code}")
+                    # Mark process as failed if ledger fetch fails
+                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch ledger: {pkg_response.status_code}"})
+                    return False
             except Exception as e_pkg_fetch:
                 log.error(f"  Error fetching Markdown ledger for {citizen_username} (daily reflection): {e_pkg_fetch}")
+                # Mark process as failed if ledger fetch throws an exception
+                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching ledger: {str(e_pkg_fetch)}"})
+                return False
         
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages" # Changed to /messages
         
@@ -256,8 +262,14 @@ def process_theater_reflection(
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for theater reflection. Length: {len(ledger_markdown_str)}")
                 else:
                     log.warning(f"  Failed to fetch Markdown ledger for {citizen_username} (theater reflection): {pkg_response.status_code}")
+                    # Mark process as failed if ledger fetch fails
+                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch ledger: {pkg_response.status_code}"})
+                    return False
             except Exception as e_pkg_fetch:
                 log.error(f"  Error fetching Markdown ledger for {citizen_username} (theater reflection): {e_pkg_fetch}")
+                # Mark process as failed if ledger fetch throws an exception
+                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching ledger: {str(e_pkg_fetch)}"})
+                return False
         
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages"
         
@@ -442,8 +454,14 @@ def process_public_bath_reflection(
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for public bath reflection. Length: {len(ledger_markdown_str)}")
                 else:
                     log.warning(f"  Failed to fetch Markdown ledger for {citizen_username} (public bath reflection): {pkg_response.status_code}")
+                    # Mark process as failed if ledger fetch fails
+                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch ledger: {pkg_response.status_code}"})
+                    return False
             except Exception as e_pkg_fetch:
                 log.error(f"  Error fetching Markdown ledger for {citizen_username} (public bath reflection): {e_pkg_fetch}")
+                # Mark process as failed if ledger fetch throws an exception
+                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching ledger: {str(e_pkg_fetch)}"})
+                return False
         
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages"
         
@@ -618,8 +636,14 @@ def process_practical_reflection(
                     log.info(f"  Successfully fetched JSON ledger for {citizen_username} for practical reflection.")
                 else:
                     log.warning(f"  Failed to fetch JSON ledger for {citizen_username} (practical reflection): {pkg_response.status_code}")
+                    # Mark process as failed if JSON ledger fetch fails
+                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch JSON ledger: {pkg_response.status_code}"})
+                    return False
             except Exception as e_pkg_fetch:
                 log.error(f"  Error fetching JSON ledger for {citizen_username} (practical reflection): {e_pkg_fetch}")
+                # Mark process as failed if JSON ledger fetch throws an exception
+                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching JSON ledger: {str(e_pkg_fetch)}"})
+                return False
         
         # Also fetch the markdown version for the addSystem payload
         ledger_markdown_str = None
@@ -632,8 +656,14 @@ def process_practical_reflection(
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for practical reflection. Length: {len(ledger_markdown_str)}")
                 else:
                     log.warning(f"  Failed to fetch Markdown ledger for {citizen_username} (practical reflection): {markdown_response.status_code}")
+                    # Mark process as failed if Markdown ledger fetch fails
+                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch Markdown ledger: {markdown_response.status_code}"})
+                    return False
             except Exception as e_markdown_fetch:
                 log.error(f"  Error fetching Markdown ledger for {citizen_username} (practical reflection): {e_markdown_fetch}")
+                # Mark process as failed if Markdown ledger fetch throws an exception
+                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching Markdown ledger: {str(e_markdown_fetch)}"})
+                return False
         
         # Select a random item from the ledger
         selected_item = None
@@ -907,8 +937,14 @@ def process_guided_reflection(
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for guided reflection. Length: {len(ledger_markdown_str)}")
                 else:
                     log.warning(f"  Failed to fetch Markdown ledger for {citizen_username} (guided reflection): {pkg_response.status_code}")
+                    # Mark process as failed if ledger fetch fails
+                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch ledger: {pkg_response.status_code}"})
+                    return False
             except Exception as e_pkg_fetch:
                 log.error(f"  Error fetching Markdown ledger for {citizen_username} (guided reflection): {e_pkg_fetch}")
+                # Mark process as failed if ledger fetch throws an exception
+                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching ledger: {str(e_pkg_fetch)}"})
+                return False
         
         # Get citizen record to determine social class and other details
         citizen_record = None
@@ -1416,8 +1452,14 @@ def process_continue_thought(
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for thought continuation. Length: {len(ledger_markdown_str)}")
                 else:
                     log.warning(f"  Failed to fetch Markdown ledger for {citizen_username} (thought continuation): {pkg_response.status_code}")
+                    # Mark process as failed if ledger fetch fails
+                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch ledger: {pkg_response.status_code}"})
+                    return False
             except Exception as e_pkg_fetch:
                 log.error(f"  Error fetching Markdown ledger for {citizen_username} (thought continuation): {e_pkg_fetch}")
+                # Mark process as failed if ledger fetch throws an exception
+                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching ledger: {str(e_pkg_fetch)}"})
+                return False
         
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages"
         
@@ -1570,8 +1612,14 @@ def process_unguided_reflection(
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for unguided reflection. Length: {len(ledger_markdown_str)}")
                 else:
                     log.warning(f"  Failed to fetch Markdown ledger for {citizen_username} (unguided reflection): {pkg_response.status_code}")
+                    # Mark process as failed if ledger fetch fails
+                    update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Failed to fetch ledger: {pkg_response.status_code}"})
+                    return False
             except Exception as e_pkg_fetch:
                 log.error(f"  Error fetching Markdown ledger for {citizen_username} (unguided reflection): {e_pkg_fetch}")
+                # Mark process as failed if ledger fetch throws an exception
+                update_process_status(tables, process_id, PROCESS_STATUS_FAILED, {"error": f"Error fetching ledger: {str(e_pkg_fetch)}"})
+                return False
         
         kinos_messages_url = f"{KINOS_API_URL}/v2/blueprints/{KINOS_BLUEPRINT}/kins/{citizen_username}/messages"
         
