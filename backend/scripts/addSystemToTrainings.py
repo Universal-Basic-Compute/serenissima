@@ -14,13 +14,12 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-# Configure logging
+# Configure logging - console only
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(os.path.join(PROJECT_ROOT, 'logs', 'add_system_to_trainings.log'))
+        logging.StreamHandler()
     ]
 )
 log = logging.getLogger(__name__)
