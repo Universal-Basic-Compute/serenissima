@@ -28,6 +28,30 @@ function describeStrength(score: number): string {
   return "No meaningful connection";
 }
 
+function describeTrust(score: number): string {
+  if (score >= 95) return "I would entrust them with my fortune and my life";
+  if (score >= 90) return "My trust in them is nearly absolute";
+  if (score >= 85) return "A most reliable and proven ally";
+  if (score >= 80) return "I trust them in all but the most sensitive matters";
+  if (score >= 75) return "A dependable partner in commerce and life";
+  if (score >= 70) return "Trustworthy in most dealings";
+  if (score >= 65) return "Generally reliable, with occasional doubts";
+  if (score >= 60) return "I trust them with standard business";
+  if (score >= 55) return "More trustworthy than not";
+  if (score >= 50) return "Equal measures of trust and caution";
+  if (score >= 45) return "I proceed with notable caution";
+  if (score >= 40) return "Trust is limited to small matters";
+  if (score >= 35) return "I verify everything twice";
+  if (score >= 30) return "They've earned my lasting suspicion";
+  if (score >= 25) return "A proven deceiver and false friend";
+  if (score >= 20) return "Their treachery still stings";
+  if (score >= 15) return "I spit when I hear their name";
+  if (score >= 10) return "They disgust me utterly";
+  if (score >= 5) return "My enemy in all but open warfare";
+  if (score >= 1) return "I dream of their destruction";
+  return "If Hell has merchants, they'll rule there";
+}
+
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -1643,7 +1667,8 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       }
       
       if (rel.trustScore !== undefined) {
-        md += `- **Trust between us**: ${rel.trustScore}/100\n`;
+        const trustDescription = describeTrust(Number(rel.trustScore));
+        md += `- **Trust between us**: ${rel.trustScore}/100 - ${trustDescription}\n`;
       }
       
       // Format the last interaction date if available
