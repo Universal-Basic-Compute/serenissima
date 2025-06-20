@@ -51,6 +51,8 @@ def process(
         "activity_details": activity_details
     }
     
+    # Commenting out reflection call
+    """
     # Check if 'processes' table exists before creating process
     from backend.engine.utils.process_helper import is_processes_table_available
     
@@ -102,6 +104,8 @@ def process(
                 log.warning(f"{LogColors.WARNING}Failed to create daily reflection process for {citizen_username}.{LogColors.ENDC}")
         except Exception as e:
             log.error(f"{LogColors.FAIL}Error creating daily reflection process for {citizen_username}: {e}{LogColors.ENDC}")
+    """
+    log.info(f"{LogColors.OKGREEN}Daily reflection disabled for {citizen_username}.{LogColors.ENDC}")
 
     # The 'rest' activity itself is considered successful by its completion.
     # KinOS reflection is an add-on that will be processed asynchronously.
