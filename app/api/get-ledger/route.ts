@@ -1681,8 +1681,9 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
       }
       
       if (rel.trustScore !== undefined) {
-        const trustDescription = describeTrust(Number(rel.trustScore));
-        md += `- **Trust between us**: ${rel.trustScore}/100 - ${trustDescription}\n`;
+        const trustScore = Math.round(Number(rel.trustScore));
+        const trustDescription = describeTrust(trustScore);
+        md += `- **Trust between us**: ${trustScore}/100 - ${trustDescription}\n`;
       }
       
       // Format the last interaction date if available
