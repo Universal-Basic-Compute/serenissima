@@ -1329,7 +1329,12 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
     
     md += '\n';
   } else {
-    md += `I have no formal place of work at present.\n`;
+    // Custom message for Forestieri
+    if (Ledger.citizen?.socialClass === 'Forestieri') {
+      md += `I conduct my business from my galley.\n`;
+    } else {
+      md += `I have no formal place of work at present.\n`;
+    }
   }
   md += '\n';
   
@@ -1349,7 +1354,12 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
     
     md += '\n';
   } else {
-    md += `I have no permanent residence at present.\n`;
+    // Custom message for Forestieri
+    if (Ledger.citizen?.socialClass === 'Forestieri') {
+      md += `I lodge at the Inn while in Venice.\n`;
+    } else {
+      md += `I have no permanent residence at present.\n`;
+    }
   }
   md += '\n';
 
