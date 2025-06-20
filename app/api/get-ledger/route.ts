@@ -1190,12 +1190,12 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
     
     // Add primary emotion if available
     if (Ledger.citizen.primaryEmotion && Ledger.citizen.primaryEmotion !== Ledger.citizen.mood) {
-      md += `\n\nThe weight of ${Ledger.citizen.primaryEmotion} presses upon me`;
+      md += `\n\nThe weight of ${Ledger.citizen.primaryEmotion}ness presses upon me`;
     }
     
     // Add basic emotions breakdown if available
     if (Ledger.citizen.basicEmotions && Object.keys(Ledger.citizen.basicEmotions).length > 0) {
-      md += `\n\n### What stirs within:\n`;
+      md += `\n\n`;
       for (const [emotion, score] of Object.entries(Ledger.citizen.basicEmotions)) {
         const percentage = Ledger.citizen.emotionDistribution?.[emotion] 
           ? ` (${Ledger.citizen.emotionDistribution[emotion].toFixed(1)}%)` 
