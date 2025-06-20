@@ -77,7 +77,7 @@ def process_daily_reflection(
         if api_base_url:
             ledger_url = f"{api_base_url}/api/get-ledger?citizenUsername={citizen_username}" # Defaults to Markdown
             try:
-                pkg_response = requests.get(ledger_url, timeout=200)
+                pkg_response = requests.get(ledger_url, timeout=90)
                 if pkg_response.ok:
                     ledger_markdown_str = pkg_response.text # Get Markdown content
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for daily reflection. Length: {len(ledger_markdown_str)}")
@@ -436,7 +436,7 @@ def process_public_bath_reflection(
         if api_base_url:
             ledger_url = f"{api_base_url}/api/get-ledger?citizenUsername={citizen_username}" # Defaults to Markdown
             try:
-                pkg_response = requests.get(ledger_url, timeout=15)
+                pkg_response = requests.get(ledger_url, timeout=90)
                 if pkg_response.ok:
                     ledger_markdown_str = pkg_response.text # Get Markdown content
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for public bath reflection. Length: {len(ledger_markdown_str)}")
@@ -626,7 +626,7 @@ def process_practical_reflection(
         if api_base_url:
             markdown_url = f"{api_base_url}/api/get-ledger?citizenUsername={citizen_username}"
             try:
-                markdown_response = requests.get(markdown_url, timeout=15)
+                markdown_response = requests.get(markdown_url, timeout=90)
                 if markdown_response.ok:
                     ledger_markdown_str = markdown_response.text
                     log.info(f"  Successfully fetched Markdown ledger for {citizen_username} for practical reflection. Length: {len(ledger_markdown_str)}")
