@@ -1317,7 +1317,7 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
   md += `## My Place of Trade\n`;
   if (Ledger.workplaceBuilding) {
     const workplace = Ledger.workplaceBuilding;
-    md += `I conduct my business at ${workplace.name || workplace.type || 'an unnamed establishment'}`;
+    md += `I work at ${workplace.name || workplace.type || 'an unnamed establishment'}`;
     
     if (workplace.category) {
       md += ` (${workplace.category})`;
@@ -1329,7 +1329,7 @@ function convertLedgerToMarkdown(Ledger: any, citizenUsername: string | null): s
     
     md += '\n';
   } else {
-    md += `I have no formal place of business at present.\n`;
+    md += `I have no formal place of work at present.\n`;
   }
   md += '\n';
   
