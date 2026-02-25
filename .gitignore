@@ -47,3 +47,6 @@ next-env.d.ts
 # Training output files
 backend/trainings/output/*.jsonl
 backend/trainings/output/
+
+# Session files (binary state)
+*.session

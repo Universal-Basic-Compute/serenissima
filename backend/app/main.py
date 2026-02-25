@@ -429,6 +429,12 @@ except Exception as e:
     print(f"Warning: Failed to initialize citizen autonomy system: {e}")
     # Non-critical, allow app to continue
 
+# --- Health Check (used by Render.com) ---
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint for Render deployment monitoring."""
+    return {"status": "ok", "service": "serenissima-backend"}
+
 # --- Global Exception Handler ---
 from fastapi import Request
 from fastapi.responses import JSONResponse
