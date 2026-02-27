@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 import Airtable from 'airtable';
+import { getAuthContext } from '@/lib/auth';
 
 // Configure Airtable
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -12,41 +13,24 @@ const initAirtable = () => {
     console.error('Airtable credentials not configured');
     throw new Error('Airtable credentials not configured');
   }
-  // Configure un délai d'attente plus long (par exemple, 30 secondes)
   Airtable.configure({
-    requestTimeout: 30000, // 30 secondes en millisecondes
+    requestTimeout: 30000,
   });
   return new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 };
 
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Implement proper session/authentication to get the username
-    // For now, this is a placeholder. In a real app, you'd use something like:
-    // const session = await getSession({ req: request }); // Example using next-auth
-    // if (!session || !session.user || !session.user.name) {
-    //   return NextResponse.json({ success: false, error: 'User not authenticated' }, { status: 401 });
-    // }
-    // const username = session.user.name;
-    
-    // Placeholder: Attempt to get username from a custom header or a query param for testing.
-    // In a real scenario, rely on secure session management.
-    let username = request.headers.get('X-User-Username');
-    if (!username) {
-        // As a fallback for testing, allow username in query. NOT FOR PRODUCTION.
-        const url = new URL(request.url);
-        username = url.searchParams.get('username');
+    // Authenticate user via JWT token from Authorization header
+    const authContext = getAuthContext(request);
+    if (!authContext.isAuthenticated || !authContext.user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required. Provide a valid Bearer token in the Authorization header.' },
+        { status: 401 }
+      );
     }
-    
-    // If still no username, and for a real app, if session is not found:
-    if (!username) {
-      // Using a default user for now if no other way to get it.
-      // THIS IS NOT SECURE FOR A REAL APPLICATION.
-      // Replace this with actual user identification logic.
-      username = 'ConsiglioDeiDieci'; // Defaulting for demonstration
-      console.warn(`Username not found in request, defaulting to '${username}'. Implement proper auth.`);
-      // return NextResponse.json({ success: false, error: 'Username not provided and no active session.' }, { status: 400 });
-    }
+
+    const username = authContext.user.username;
 
     console.log(`User activity update requested for '${username}' at ${new Date().toISOString()}`);
 

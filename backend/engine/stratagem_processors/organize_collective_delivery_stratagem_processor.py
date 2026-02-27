@@ -15,6 +15,7 @@ from backend.engine.utils.activity_helpers import (
     get_citizen_record,
     get_building_record
 )
+from backend.engine.utils.notification_helpers import create_notification
 
 log = logging.getLogger(__name__)
 
@@ -112,14 +113,14 @@ def process(
                         current_ducats = citizen['fields'].get('Ducats', 0)
                         tables['citizens'].update(citizen['id'], {'Ducats': current_ducats + reward})
                         
-                        # TODO: Restore notification when send_notification is available
-                        # send_notification(
-                        #     tables=tables,
-                        #     recipient_username=delivering_citizen,
-                        #     title="Collective Delivery Reward",
-                        #     message=f"Earned {reward} ducats for delivering {delivered_amount} {resource_type}!",
-                        #     category="stratagem"
-                        # )
+                        create_notification(
+                            tables=tables,
+                            citizen_username=delivering_citizen,
+                            notification_type="collective_delivery_reward",
+                            content=f"Earned {reward} ducats for delivering {delivered_amount} {resource_type}!",
+                            details={"reward": reward, "amount_delivered": delivered_amount, "resource_type": resource_type},
+                            notes=f"Stratagem {stratagem_id}"
+                        )
                 
                 # Update resource ownership based on target mode
                 _transfer_resource_ownership(tables, delivery, target)
@@ -142,15 +143,14 @@ def process(
         
         # Send progress update if significant milestone
         if collected_amount > 0 and collected_amount % 100 == 0:
-            # TODO: Restore notification when send_notification is available
-            # send_notification(
-            #     tables=tables,
-            #     recipient_username=initiator,
-            #     title="Collective Delivery Progress",
-            #     message=f"Collected {collected_amount}/{max_total_amount} {resource_type}. {len(participants)} participants.",
-            #     category="stratagem"
-            # )
-            pass  # Placeholder to avoid empty block
+            create_notification(
+                tables=tables,
+                citizen_username=initiator,
+                notification_type="collective_delivery_progress",
+                content=f"Collected {collected_amount}/{max_total_amount} {resource_type}. {len(participants)} participants.",
+                details={"collected": collected_amount, "max": max_total_amount, "resource_type": resource_type, "participants": len(participants)},
+                notes=f"Stratagem {stratagem_id}"
+            )
         
         # Continue processing this stratagem
         return True
@@ -304,14 +304,20 @@ def _end_stratagem(
         f"Rewards paid: {total_rewards_paid} ducats"
     )
     
-    # TODO: Restore notification when send_notification is available
-    # send_notification(
-    #     tables=tables,
-    #     recipient_username=initiator,
-    #     title="Collective Delivery Complete",
-    #     message=summary,
-    #     category="stratagem"
-    # )
+    create_notification(
+        tables=tables,
+        citizen_username=initiator,
+        notification_type="collective_delivery_complete",
+        content=summary,
+        details={
+            "total_collected": total_collected,
+            "resource_type": details.get('resource_type'),
+            "participants": len(participants),
+            "total_rewards_paid": total_rewards_paid,
+            "reason": reason
+        },
+        notes=f"Stratagem {stratagem_id}"
+    )
     
     # Update stratagem status
     tables['stratagems'].update(stratagem_id, {
