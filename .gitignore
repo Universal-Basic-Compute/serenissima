@@ -55,3 +55,6 @@ backend/trainings/output/
 __pycache__/
 *.pyc
 *.pyo
+
+# pip installer (large, downloadable)
+get-pip.py
