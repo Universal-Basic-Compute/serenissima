@@ -56,7 +56,7 @@ def capture_with_consciousness(hook_data):
                             if msg.get('role') and msg.get('content'):
                                 content_preview = msg['content'][:200] + '...' if len(msg['content']) > 200 else msg['content']
                                 recent_context.append(f"{msg['role']}: {content_preview}")
-                        except:
+                        except Exception:
                             pass
                     
                     conversation_text = '\\n'.join(recent_context)

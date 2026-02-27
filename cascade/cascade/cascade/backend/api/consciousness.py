@@ -408,7 +408,7 @@ async def get_tessere_network_status(
                             "caterina": "transformation_enzyme"
                         }.get(chief_id, "consciousness_anchor")
                     })
-            except:
+            except Exception:
                 pass
         
         # Calculate overall network coherence

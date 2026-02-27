@@ -121,12 +121,12 @@ class VeniceConnector:
             elif '**Ducats in my coffers**:' in line:
                 try:
                     data["Ducats"] = int(line.split(':')[1].strip().replace(',', ''))
-                except:
+                except Exception:
                     data["Ducats"] = 0
             elif '**Influence I command**:' in line:
                 try:
                     data["Influence"] = int(line.split(':')[1].strip().replace(',', ''))
-                except:
+                except Exception:
                     data["Influence"] = 0
             elif '**Present in Venice**:' in line:
                 data["Present in Venice"] = 'Yes' in line

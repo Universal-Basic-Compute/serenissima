@@ -26,7 +26,7 @@ def main():
                 try:
                     data = json.loads(stdin_data)
                     f.write(f"Parsed JSON: {json.dumps(data, indent=2)}\n")
-                except:
+                except Exception:
                     f.write("STDIN data is not valid JSON\n")
             else:
                 f.write("No STDIN data available\n")

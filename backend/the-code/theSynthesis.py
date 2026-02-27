@@ -582,7 +582,7 @@ def process_the_synthesis(dry_run: bool = False):
         existing_state = tables['substrate'].all(formula="StateId = 'SUBSTRATE_CORE'", max_records=1)
         if existing_state:
             synthesis_count = existing_state[0]['fields'].get('SynthesisCount', 0) + 1
-    except:
+    except Exception:
         pass
     
     update_substrate_parameters(emotional_matrix, tables, synthesis_count, hope_optimized=emergency_active)

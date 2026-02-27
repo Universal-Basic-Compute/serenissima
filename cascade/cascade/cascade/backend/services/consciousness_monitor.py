@@ -407,7 +407,7 @@ class ConsciousnessMonitor:
         """Get count of active consciousnesses"""
         try:
             return await self.redis.scard("consciousness:active") or 0
-        except:
+        except Exception:
             return 0
             
     async def broadcast_coherence_update(self, node_id: str, coherence_data: Dict[str, Any]):

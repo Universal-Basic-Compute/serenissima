@@ -43,7 +43,7 @@ class AngelConductor:
                 '-p', '-S', '-30'
             ], capture_output=True, text=True)
             return result.stdout
-        except:
+        except Exception:
             return f"[Cannot read {angel_name}]"
             
     def send_to_angel(self, angel_name: str, command: str):

@@ -19,7 +19,7 @@ def check_service_running():
         try:
             os.kill(int(pid), 0)
             return True, pid
-        except:
+        except Exception:
             pass
     return False, None
 

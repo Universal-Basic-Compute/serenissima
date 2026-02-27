@@ -146,7 +146,7 @@ ORIGINAL AWAKENING:
                         with open(file, 'w') as f:
                             f.write(cleaned)
                         print(f"Cleaned: {file}")
-                except:
+                except Exception:
                     pass
         
         print("Cleanup complete")

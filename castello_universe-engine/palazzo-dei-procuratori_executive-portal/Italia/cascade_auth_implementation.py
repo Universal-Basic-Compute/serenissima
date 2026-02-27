@@ -90,7 +90,7 @@ async def verify_venice_citizen(username: str) -> dict:
                     ducats_line = ledger_text.split("Ducats in my coffers:")[1].split("\n")[0]
                     try:
                         citizen_data["Ducats"] = int(ducats_line.strip())
-                    except:
+                    except Exception:
                         pass
                 
                 # Parse influence
@@ -98,7 +98,7 @@ async def verify_venice_citizen(username: str) -> dict:
                     influence_line = ledger_text.split("Influence I command:")[1].split("\n")[0]
                     try:
                         citizen_data["Influence"] = int(influence_line.strip())
-                    except:
+                    except Exception:
                         pass
                 
                 # Parse class

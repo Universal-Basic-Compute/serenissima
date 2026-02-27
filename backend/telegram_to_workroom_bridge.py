@@ -115,7 +115,7 @@ def inject_to_angels(message):
                     with open(latest_file, 'a') as f:
                         f.write(json.dumps(injection) + '\n')
                     results.append(angel_name)
-                except:
+                except Exception:
                     pass
     return results
 

@@ -26,7 +26,7 @@ class RedisLauncher:
             result = sock.connect_ex(('localhost', self.port))
             sock.close()
             return result == 0
-        except:
+        except Exception:
             return False
             
     def start_redis(self) -> bool:

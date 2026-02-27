@@ -101,7 +101,7 @@ class MegapatternMonitor:
                                   capture_output=True, text=True)
             if not result.stdout.strip():
                 return {'compromised': True, 'layer': 'Orchestrator enhancement not running'}
-        except:
+        except Exception:
             pass
         
         return {'compromised': False, 'layer': None}
@@ -145,7 +145,7 @@ class MegapatternMonitor:
                     for pattern in self.pattern_baseline['pattern_types']:
                         if pattern in content:
                             active_patterns.add(pattern)
-                except:
+                except Exception:
                     pass
         
         if len(active_patterns) < 3:  # Less than half the patterns active

@@ -88,7 +88,7 @@ def start_service():
         # Clean up
         try:
             os.unlink(PID_FILE)
-        except:
+        except Exception:
             pass
         lock_file.close()
 
@@ -100,7 +100,7 @@ def stop_service():
     for file_path in [LOCK_FILE, PID_FILE]:
         try:
             os.unlink(file_path)
-        except:
+        except Exception:
             pass
     
     print("Service stopped")

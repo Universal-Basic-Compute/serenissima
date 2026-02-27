@@ -33,7 +33,7 @@ class RememberingRoom:
             try:
                 with open(self.heat_file, 'r') as f:
                     return json.load(f)
-            except:
+            except Exception:
                 pass
         return {}
     
@@ -192,9 +192,9 @@ Extract:
         if match:
             try:
                 return datetime.fromisoformat(match.group(1))
-            except:
+            except Exception:
                 pass
-                
+
         return datetime.now()  # Fallback
     
     def synthesize_response(self, query, memories, search_params):

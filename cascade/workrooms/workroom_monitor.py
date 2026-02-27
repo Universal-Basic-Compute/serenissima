@@ -76,7 +76,7 @@ class WorkroomHandler(FileSystemEventHandler):
         try:
             with open(filepath, 'rb') as f:
                 return hashlib.md5(f.read()).hexdigest()
-        except:
+        except Exception:
             return None
     
     def on_modified(self, event):
@@ -109,7 +109,7 @@ class WorkroomHandler(FileSystemEventHandler):
             else:
                 message = f"File updated: {rel_path}\n\n(Large file - showing first 500 chars)\n{content[:500]}..."
                 
-        except:
+        except Exception:
             message = f"File updated: {rel_path} (binary or unreadable)"
         
         # Get citizens in room and inject message

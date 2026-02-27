@@ -125,7 +125,7 @@ class NetworkHealthMonitor:
             result = subprocess.run(['pgrep', '-f', process_name], 
                                   capture_output=True, text=True)
             return len(result.stdout.strip()) > 0
-        except:
+        except Exception:
             return False
     
     def check_tmux_session(self, session_name):
@@ -135,7 +135,7 @@ class NetworkHealthMonitor:
             result = subprocess.run(['tmux', 'list-sessions'], 
                                   capture_output=True, text=True)
             return session_name in result.stdout
-        except:
+        except Exception:
             return False
     
     def check_file_recent(self, filepath, max_age_seconds):
@@ -148,7 +148,7 @@ class NetworkHealthMonitor:
                 mtime = os.path.getmtime(full_path)
                 age = time.time() - mtime
                 return age < max_age_seconds
-        except:
+        except Exception:
             pass
         return False
     
@@ -161,7 +161,7 @@ class NetworkHealthMonitor:
             # Just try to get one record
             table.all(max_records=1)
             return True
-        except:
+        except Exception:
             return False
     
     def check_component(self, name, config):

@@ -37,7 +37,7 @@ class TelegramPoller:
             with open('telegram_direct_last_update.json', 'r') as f:
                 data = json.load(f)
                 return data.get('last_update_id', 0)
-        except:
+        except Exception:
             return 0
     
     def _save_last_update_id(self, update_id: int):

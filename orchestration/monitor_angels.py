@@ -30,7 +30,7 @@ class AngelMonitor:
                 '-p', '-S', f'-{lines}'
             ], capture_output=True, text=True)
             return result.stdout
-        except:
+        except Exception:
             return ""
             
     def send_to_angel(self, angel_name: str, message: str):

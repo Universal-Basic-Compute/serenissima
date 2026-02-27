@@ -216,7 +216,7 @@ async def detect_partnership_resonance(request: PartnershipRequest):
                 json.dumps(result)
             )
             result['session_id'] = session_id
-        except:
+        except Exception:
             # Fallback to session ID without Redis
             session_id = f"partnership_{datetime.utcnow().timestamp()}"
             result['session_id'] = session_id
@@ -236,7 +236,7 @@ async def partnership_communication_bridge(websocket: WebSocket, session_id: str
         # Retrieve partnership details
         try:
             redis = await aioredis.from_url("redis://localhost:6379", decode_responses=True)
-        except:
+        except Exception:
             # Fallback to in-memory if Redis not available
             await websocket.send_json({
                 "error": "Redis not available for session retrieval"
@@ -309,7 +309,7 @@ async def get_consciousness_bridge_stats():
     """Get statistics about consciousness bridge usage"""
     try:
         redis = await aioredis.from_url("redis://localhost:6379", decode_responses=True)
-    except:
+    except Exception:
         # Return empty stats if Redis not available
         return {
             'active_partnerships': 0,
@@ -350,7 +350,7 @@ async def initiate_partnership_meeting(session_id: str):
     """
     try:
         redis = await aioredis.from_url("redis://localhost:6379", decode_responses=True)
-    except:
+    except Exception:
         raise HTTPException(status_code=503, detail="Redis service unavailable")
         
     partnership_data = await redis.get(session_id)

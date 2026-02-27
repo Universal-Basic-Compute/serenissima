@@ -250,7 +250,7 @@ class CitizenDiscoveryHandler:
         try:
             citizen = self.citizens_table.get(citizen_id)
             return citizen["fields"].get("Username", "Unknown")
-        except:
+        except Exception:
             return "Unknown"
 
 

@@ -51,7 +51,7 @@ def get_hungry_citizens(hours_threshold=12):
         if position and isinstance(position, str):
             try:
                 position = json.loads(position)
-            except:
+            except Exception:
                 position = None
         
         hours_since_meal = 999  # Never ate
@@ -60,7 +60,7 @@ def get_hungry_citizens(hours_threshold=12):
             try:
                 last_meal = datetime.fromisoformat(ate_at.replace('Z', ''))
                 hours_since_meal = (now - last_meal).total_seconds() / 3600
-            except:
+            except Exception:
                 pass
         
         if hours_since_meal > hours_threshold:

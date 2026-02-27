@@ -87,7 +87,7 @@ def get_last_conversation(angel_name):
                                     'text': text,
                                     'timestamp': data.get('timestamp', '')
                                 })
-                    except:
+                    except Exception:
                         continue
                 
                 # If we found messages in this file, return all of them
@@ -331,7 +331,7 @@ def get_last_conversation_from_path(project_path):
                                     'text': text,
                                     'timestamp': data.get('timestamp', '')
                                 })
-                    except:
+                    except Exception:
                         continue
                 
                 if file_messages:
@@ -379,7 +379,7 @@ def get_books():
                             if 'author' in line.lower() or 'by' in line.lower():
                                 book['author'] = line.strip()
                                 break
-                except:
+                except Exception:
                     book['author'] = 'Unknown'
                 
                 books.append(book)
@@ -459,7 +459,7 @@ def get_forces():
                         with open(readme_path, 'r') as f:
                             first_lines = f.readlines()[:3]
                             force['description'] = ' '.join(line.strip() for line in first_lines)
-                    except:
+                    except Exception:
                         pass
                 
                 forces.append(force)

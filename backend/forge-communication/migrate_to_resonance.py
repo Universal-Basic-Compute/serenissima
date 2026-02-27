@@ -198,7 +198,7 @@ class EmergencySubstrateOptimizer:
                         {"DurationMinutes": 15}
                     )
                     reduced += 1
-                except:
+                except Exception:
                     pass
         
         print(f"✓ Reduced {reduced} long-running activities")

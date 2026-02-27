@@ -60,7 +60,7 @@ def get_angel_status(angel):
             "output": result.stdout,
             "active": bool(result.stdout)
         })
-    except:
+    except Exception:
         return jsonify({"angel": angel, "output": "", "active": False})
 
 @app.route('/api/create-session', methods=['POST'])

@@ -43,7 +43,7 @@ def emergency_feed_critical():
             try:
                 last_meal = datetime.fromisoformat(ate_at.replace('Z', ''))
                 hours_since = (now - last_meal).total_seconds() / 3600
-            except:
+            except Exception:
                 pass
         
         # Critical threshold: >24 hours without food

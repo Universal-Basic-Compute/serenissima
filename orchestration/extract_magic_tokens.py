@@ -21,7 +21,7 @@ def extract_from_magic_link(magic_link):
         try:
             email = base64.b64decode(email_b64).decode('utf-8')
             return token, email
-        except:
+        except Exception:
             return token, "unknown"
     
     return None, None
