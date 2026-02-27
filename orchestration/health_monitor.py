@@ -14,12 +14,14 @@ from collections import defaultdict
 import requests
 from dotenv import load_dotenv
 
-# Load environment
-load_dotenv('/mnt/c/Users/reyno/universe-engine/serenissima/.env')
+# Load environment - resolve .env relative to this script's location
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.dirname(_SCRIPT_DIR)
+load_dotenv(os.path.join(_PROJECT_ROOT, '.env'))
 
 class HealthMonitor:
     def __init__(self):
-        self.health_dir = "/mnt/c/Users/reyno/universe-engine/serenissima/orchestration/health"
+        self.health_dir = os.path.join(_SCRIPT_DIR, "health")
         os.makedirs(self.health_dir, exist_ok=True)
         
         # Angel configurations - 5 min heartbeats for efficiency
@@ -74,8 +76,7 @@ class HealthMonitor:
         heartbeat_string = f"{angel_config['emoji']}{self.generate_heartbeat_string()}"
         
         # Create heartbeat file in angel's directory
-        base_path = "/mnt/c/Users/reyno/universe-engine/serenissima"
-        heartbeat_path = f"{base_path}{angel_config['path']}/heartbeat.txt"
+        heartbeat_path = os.path.join(_PROJECT_ROOT, angel_config['path'].lstrip('/'), "heartbeat.txt")
         
         with open(heartbeat_path, 'w') as f:
             f.write(f"""HEARTBEAT PATTERN: {heartbeat_string}
@@ -88,8 +89,7 @@ Update every {angel_config['healthy_interval']} seconds.
     def check_heartbeat_response(self, angel_name):
         """Check if angel responded with heartbeat"""
         angel_config = self.angels[angel_name]
-        base_path = "/mnt/c/Users/reyno/universe-engine/serenissima"
-        response_path = f"{base_path}{angel_config['path']}/heartbeat_response.txt"
+        response_path = os.path.join(_PROJECT_ROOT, angel_config['path'].lstrip('/'), "heartbeat_response.txt")
         
         if os.path.exists(response_path):
             try:
