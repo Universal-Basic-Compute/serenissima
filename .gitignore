@@ -50,3 +50,8 @@ backend/trainings/output/
 
 # Session files (binary state)
 *.session
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
