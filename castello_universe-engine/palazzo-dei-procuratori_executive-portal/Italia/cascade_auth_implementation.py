@@ -22,7 +22,15 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 # JWT settings
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "cascade-venice-secret-2025")
+_env = os.getenv("ENVIRONMENT", os.getenv("PYTHON_ENV", "development"))
+_jwt_secret_env = os.getenv("JWT_SECRET_KEY")
+if not _jwt_secret_env:
+    if _env == "production":
+        raise RuntimeError("JWT_SECRET_KEY environment variable is required in production")
+    else:
+        import warnings
+        warnings.warn("JWT_SECRET_KEY not set — using insecure dev-only fallback. Do NOT use in production.")
+SECRET_KEY = _jwt_secret_env or "dev-only-insecure-secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

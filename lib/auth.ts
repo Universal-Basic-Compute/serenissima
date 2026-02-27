@@ -15,12 +15,12 @@ export interface AuthContext {
 }
 
 // JWT Configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'cascade-debug-secret-2025';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('JWT_SECRET environment variable is required in production'); })() : 'dev-only-insecure-secret');
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
 // Security validation
-if (!process.env.JWT_SECRET) {
-  console.warn('⚠️  JWT_SECRET not set in environment variables. Using default secret.');
+if (!process.env.JWT_SECRET && process.env.NODE_ENV !== 'production') {
+  console.warn('⚠️  JWT_SECRET not set — using insecure dev-only fallback. Do NOT use in production.');
 }
 
 /**
