@@ -8,6 +8,17 @@ import AnimatedDucats from '../UI/AnimatedDucats'; // Added for displaying price
 
 type ActiveLeftTabType = 'info' | 'buildings' | 'realEstate';
 
+// Format a snake_case or kebab-case building type into a human-readable label
+function formatBuildingType(type: string | null | undefined): string {
+  if (!type) return 'Building';
+  return type
+    .replace(/[_-]/g, ' ')
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 interface LandInfoColumnProps {
   selectedPolygon: Polygon | null;
   selectedPolygonId: string | null;
@@ -21,6 +32,17 @@ interface LandInfoColumnProps {
   handleGenericActivity: (activityType: string, parameters: Record<string, any>) => Promise<void>;
   normalizeIdentifier: (id: string | null | undefined) => string | null;
   isLoadingMarketData: boolean;
+}
+
+interface BuildingInfo {
+  id: string;
+  type: string;
+  name: string;
+  owner: string | null;
+  occupant: string | null;
+  category: string | null;
+  runBy: string | null;
+  isConstructed: boolean;
 }
 
 const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
@@ -39,6 +61,54 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
 }) => {
   const [isImageHovered, setIsImageHovered] = useState(false);
   const hoverIntentRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Buildings state for the Buildings tab
+  const [buildings, setBuildings] = useState<BuildingInfo[]>([]);
+  const [isLoadingBuildings, setIsLoadingBuildings] = useState(false);
+  const [buildingsError, setBuildingsError] = useState<string | null>(null);
+
+  // Fetch buildings when the Buildings tab is active and a land parcel is selected
+  useEffect(() => {
+    if (activeLeftTab !== 'buildings' || !selectedPolygonId) {
+      return;
+    }
+
+    const fetchBuildings = async () => {
+      setIsLoadingBuildings(true);
+      setBuildingsError(null);
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const response = await fetch(`${API_BASE_URL}/api/buildings?landId=${encodeURIComponent(selectedPolygonId)}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch buildings: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.buildings && Array.isArray(data.buildings)) {
+          const mapped: BuildingInfo[] = data.buildings.map((b: any) => ({
+            id: b.id || b.buildingId || '',
+            type: b.type || 'unknown',
+            name: b.name || formatBuildingType(b.type),
+            owner: b.owner || null,
+            occupant: b.occupant || null,
+            category: b.category || null,
+            runBy: b.runBy || null,
+            isConstructed: b.isConstructed === true,
+          }));
+          setBuildings(mapped);
+        } else {
+          setBuildings([]);
+        }
+      } catch (err) {
+        console.error('Error fetching buildings for land:', err);
+        setBuildingsError(err instanceof Error ? err.message : 'Failed to load buildings');
+        setBuildings([]);
+      } finally {
+        setIsLoadingBuildings(false);
+      }
+    };
+
+    fetchBuildings();
+  }, [activeLeftTab, selectedPolygonId]);
 
   if (!selectedPolygon) return null;
 
@@ -227,8 +297,73 @@ const LandInfoColumn: React.FC<LandInfoColumnProps> = ({
         {activeLeftTab === 'buildings' && (
           <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-200">
             <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Buildings on this Land</h3>
-            <p className="text-xs text-gray-500 italic">Building list coming soon.</p>
-            {/* TODO: Implement building list display here */}
+            {isLoadingBuildings && (
+              <p className="text-xs text-amber-700">Loading buildings...</p>
+            )}
+            {buildingsError && (
+              <p className="text-xs text-red-600">Error: {buildingsError}</p>
+            )}
+            {!isLoadingBuildings && !buildingsError && buildings.length === 0 && (
+              <p className="text-xs text-gray-500 italic">No buildings on this land parcel.</p>
+            )}
+            {!isLoadingBuildings && !buildingsError && buildings.length > 0 && (
+              <div className="space-y-2">
+                {buildings.map((building) => (
+                  <div
+                    key={building.id}
+                    className="p-2 rounded-lg bg-amber-50 border border-amber-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-amber-800 truncate">
+                        {building.name}
+                      </span>
+                      {building.isConstructed ? (
+                        <span className="text-[10px] font-medium text-green-700 bg-green-100 px-1.5 py-0.5 rounded">
+                          Built
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-medium text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded">
+                          Under Construction
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-1 text-xs text-gray-600 space-y-0.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Type:</span>
+                        <span className="font-medium text-amber-700">{formatBuildingType(building.type)}</span>
+                      </div>
+                      {building.category && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">Category:</span>
+                          <span className="font-medium text-amber-700">{formatBuildingType(building.category)}</span>
+                        </div>
+                      )}
+                      {building.owner && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">Owner:</span>
+                          <span className="font-medium text-amber-700 truncate ml-2">{building.owner}</span>
+                        </div>
+                      )}
+                      {building.runBy && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">Run by:</span>
+                          <span className="font-medium text-amber-700 truncate ml-2">{building.runBy}</span>
+                        </div>
+                      )}
+                      {building.occupant && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">Occupant:</span>
+                          <span className="font-medium text-amber-700 truncate ml-2">{building.occupant}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <div className="text-[10px] text-gray-400 text-right pt-1">
+                  {buildings.length} building{buildings.length !== 1 ? 's' : ''} total
+                </div>
+              </div>
+            )}
           </div>
         )}
         {activeLeftTab === 'realEstate' && (
