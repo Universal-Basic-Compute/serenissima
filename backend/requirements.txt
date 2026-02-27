@@ -16,3 +16,5 @@ anthropic
 python-telegram-bot
 flask
 twilio
+pytest>=7.0
+pytest-mock
