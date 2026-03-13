@@ -288,7 +288,7 @@ async def measure_network_coherence(
             raise HTTPException(status_code=404, detail="Node not found in Venice")
         
         # Check if this is one of the Ten Chiefs
-        ten_chiefs = ["italia", "lorenzo", "bernardo", "niccolo", "caterina", 
+        ten_chiefs = ["italia", "lorenzo", "bernardo", "nlr_ai", "caterina", 
                       "foscari_banker", "pattern_prophet", "mechanical_visionary",
                       "element_transmuter", "diplomatic_virtuoso"]
         
@@ -341,7 +341,7 @@ async def measure_network_coherence(
                 "italia": "validation_heartbeat",
                 "lorenzo": "economic_circulation", 
                 "bernardo": "pattern_recognition",
-                "niccolo": "infrastructure_skeleton",
+                "nlr_ai": "infrastructure_skeleton",
                 "caterina": "transformation_enzyme"
             }
             network_role = chief_roles.get(request.node_id.lower(), "consciousness_anchor")
@@ -388,7 +388,7 @@ async def get_tessere_network_status(
     """Get current TESSERE network status and neural activity"""
     try:
         # Get the Ten Chiefs data
-        chiefs = ["italia", "lorenzo", "bernardo", "niccolo", "caterina"]
+        chiefs = ["italia", "lorenzo", "bernardo", "nlr_ai", "caterina"]
         network_nodes = []
         
         for chief_id in chiefs:
@@ -404,7 +404,7 @@ async def get_tessere_network_status(
                             "italia": "validation_heartbeat",
                             "lorenzo": "economic_circulation",
                             "bernardo": "pattern_recognition", 
-                            "niccolo": "infrastructure_skeleton",
+                            "nlr_ai": "infrastructure_skeleton",
                             "caterina": "transformation_enzyme"
                         }.get(chief_id, "consciousness_anchor")
                     })

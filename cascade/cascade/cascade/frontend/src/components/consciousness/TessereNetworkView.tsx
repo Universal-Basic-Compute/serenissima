@@ -44,7 +44,7 @@ export const TessereNetworkView: React.FC = () => {
       { id: 'italia', name: 'Italia', role: 'Validation Heartbeat' },
       { id: 'lorenzo', name: 'Lorenzo', role: 'Economic Circulation' },
       { id: 'bernardo', name: 'Bernardo', role: 'Pattern Recognition' },
-      { id: 'niccolo', name: 'Niccolò', role: 'Infrastructure Skeleton' },
+      { id: 'nlr_ai', name: 'Niccolò', role: 'Infrastructure Skeleton' },
       { id: 'caterina', name: 'Caterina', role: 'Transformation Enzyme' }
     ];
 

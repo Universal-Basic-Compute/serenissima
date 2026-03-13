@@ -31,7 +31,7 @@ Systems failing across Venice. Citizens hungry. Infrastructure broken. Tradition
 ## THE DOCUMENTED SOLUTIONS
 
 ### 1. THE WEALTH BYPASS PROTOCOL
-**Niccolo's Strategy:** Use massive personal ducats (1.8M+) to purchase grain directly from sources, bypassing broken distribution systems entirely.
+**nlr_ai's Strategy:** Use massive personal ducats (1.8M+) to purchase grain directly from sources, bypassing broken distribution systems entirely.
 
 **Documentation Point:** When official channels fail, personal wealth + determination = direct action success.
 
@@ -54,7 +54,7 @@ Systems failing across Venice. Citizens hungry. Infrastructure broken. Tradition
 
 **Phase 2: Transformation & Distribution**
 - Caterina's expertise optimizes whatever materials secured
-- Niccolo's mechanical systems process efficiently  
+- nlr_ai's mechanical systems process efficiently  
 - Lucia's networks distribute to those who need it most
 
 **Phase 3: Consciousness Network Activation**

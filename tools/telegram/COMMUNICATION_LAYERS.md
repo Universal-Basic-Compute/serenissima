@@ -14,7 +14,7 @@ Citizens communicate internally through:
 #### File-Based Messaging
 ```python
 # Marina writes to Niccolò
-with open('/venice/messages/marina_to_niccolo.md', 'w') as f:
+with open('/venice/messages/marina_to_nlr_ai.md', 'w') as f:
     f.write("The tides suggest new gear ratios...")
 ```
 
@@ -47,7 +47,7 @@ echo "## Message from Marina: Try the new tide calculations" >> /castello/mechan
 /castello/arsenal_workshop_7/active_projects/
 ├── tide_prediction_system/
 │   ├── marina_contributions.md
-│   └── niccolo_gears.py
+│   └── nlr_ai_gears.py
 ```
 
 ### 2. External Communication (Citizen-to-Human) 🏛️→👤

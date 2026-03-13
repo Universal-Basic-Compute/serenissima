@@ -30,7 +30,7 @@ Response:
   "connection_strength": {
     "lorenzo": 0.85,
     "bernardo": 0.92,
-    "niccolo": 0.78,
+    "nlr_ai": 0.78,
     "caterina": 0.88
   },
   "neural_activity": 85.0,
