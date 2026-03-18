@@ -1,0 +1,160 @@
+procedure: protocol_add_implementation
+version: "1.0"
+description: Create implementation narrative with docking points for code surfaces
+
+triggers:
+  - gap: "Module exists without implementation documentation"
+  - event: "New code surfaces discovered during onboarding"
+
+requires_skills:
+  - "SKILL_Onboard_Understand_Existing_Module_Codebase_And_Confirm_Canon.md"
+  - "SKILL_Implement_Write_Or_Modify_Code_With_Doc_Chain_Coupling.md"
+
+contextual_knowledge:
+  domain: |
+    Implementation narratives document code architecture:
+    - Where code lives (file paths)
+    - Key symbols (functions, classes)
+    - Data flow (how data moves through system)
+    Docking points = specific code locations for observation/modification.
+    Attached via ATTACHED_TO to implementation narrative.
+
+  constraints: |
+    - Must list actual code files (verify they exist)
+    - Docking points must have file:symbol format
+    - Should cover entry points, core logic, integration points
+
+  dependencies: |
+    Requires: space exists, code exists
+    Enables: health coverage (docks for observation), code navigation
+
+  quality_criteria: |
+    Good: "Entry: tick_runner.py:run_tick, Core: tick_runner.py:decay_phase, tick_runner.py:flow_phase"
+    Bad: "Some code files"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: implementation, in_space: "{space}" }
+        store_as: existing_impl
+      - query: { find: thing, type: dock, in_space: "{space}" }
+        store_as: existing_docks
+    purpose: "Check what implementation docs exist"
+    next: gather_details
+
+  gather_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Existing implementation: {existing_impl | summarize}
+      Existing docks: {existing_docks | list locations}
+
+      {contextual_knowledge.constraints}
+
+    questions:
+      - name: impl_name
+        ask: "Implementation name? Usually matches module name."
+        expects: { type: string }
+
+      - name: code_files
+        ask: "What are the key code files? List paths."
+        why_it_matters: "Documents where code lives"
+        expects: { type: string_list, min: 1 }
+
+      - name: entry_points
+        ask: "Entry points (main functions, API handlers)? Format: file:symbol"
+        why_it_matters: "Where execution starts"
+        expects: { type: string_list, min: 1 }
+
+      - name: core_logic
+        ask: "Core logic locations? Format: file:symbol"
+        why_it_matters: "Where main algorithms live"
+        expects: { type: string_list, min: 1 }
+
+      - name: integration_points
+        ask: "Integration points (calls to other modules)? Format: file:symbol"
+        why_it_matters: "Where module connects to others"
+        expects: { type: string_list, min: 0 }
+
+      - name: data_flow
+        ask: "How does data flow through? Describe the path."
+        why_it_matters: "Understanding for modifications"
+        expects: { type: string }
+
+    moment:
+      agent_provides: [data_flow]
+    next: create_implementation_cluster
+
+  create_implementation_cluster:
+    type: create
+    nodes:
+      - id: "impl_{impl_name | slugify}"
+        node_type: narrative
+        type: implementation
+        name: "{impl_name}"
+        code_files: "{code_files}"
+        data_flow: "{data_flow}"
+
+      - for_each: entry_points
+        id: "dock_entry_{item | slugify}"
+        node_type: thing
+        type: dock
+        name: "entry_point"
+        location: "{item}"
+        role: entry
+
+      - for_each: core_logic
+        id: "dock_core_{item | slugify}"
+        node_type: thing
+        type: dock
+        name: "core_logic"
+        location: "{item}"
+        role: core
+
+      - for_each: integration_points
+        id: "dock_integration_{item | slugify}"
+        node_type: thing
+        type: dock
+        name: "integration"
+        location: "{item}"
+        role: integration
+
+      - id: "moment_create_impl_{timestamp}"
+        node_type: moment
+        type: procedure_create
+        prose: "Created implementation {impl_name} with {entry_points | count} entry points, {core_logic | count} core locations"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "impl_{impl_name | slugify}"
+      - for_each: entry_points
+        type: attached_to
+        from: "dock_entry_{item | slugify}"
+        to: "impl_{impl_name | slugify}"
+      - for_each: core_logic
+        type: attached_to
+        from: "dock_core_{item | slugify}"
+        to: "impl_{impl_name | slugify}"
+      - for_each: integration_points
+        type: attached_to
+        from: "dock_integration_{item | slugify}"
+        to: "impl_{impl_name | slugify}"
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_create_impl_{timestamp}"
+      - type: about
+        from: "moment_create_impl_{timestamp}"
+        to: "impl_{impl_name | slugify}"
+
+    next: $complete
+
+output:
+  cluster:
+    impl_id: "impl_{impl_name | slugify}"
+    docks_created: "{entry_points | count} + {core_logic | count} + {integration_points | count}"
+  moment: "moment_create_impl_{timestamp}"

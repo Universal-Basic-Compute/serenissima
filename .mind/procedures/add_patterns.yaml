@@ -1,0 +1,339 @@
+# Protocol: add_patterns
+# Define design decisions and anti-patterns for a module/space
+
+procedure: add_patterns
+version: "2.0"
+description: Capture design decisions (patterns) and what to avoid (anti-patterns) for a space - rich format
+
+triggers:
+  - gap: "D-NO-PATTERNS: Missing PATTERNS for module"
+  - event: "Design decision made that should be documented"
+  - event: "Anti-pattern discovered during development"
+
+requires_skills:
+  - SKILL_Define_Module_Boundaries_Objectives_And_Scope.md
+
+contextual_knowledge:
+  domain: |
+    Patterns in mind:
+    - Pattern = design decision with rationale ("why this shape")
+    - Anti-pattern = what to avoid with rationale ("why not this")
+    - Patterns link to behaviors they enable and objectives they serve
+
+    Structure:
+    - narrative.pattern ─[relates: achieves]→ narrative.objective
+    - narrative.pattern ─[relates: enables]→ narrative.behavior
+    - narrative.anti_pattern ─[relates: protects]→ narrative.objective
+
+    Patterns capture:
+    1. The decision (what we chose)
+    2. The alternatives (what we didn't choose)
+    3. The rationale (why this choice)
+
+  constraints: |
+    - Patterns must have rationale (not just "we do X")
+    - Anti-patterns must explain the harm they cause
+    - Both should link to objectives they serve
+    - Patterns should link to behaviors they enable
+
+  quality_criteria: |
+    Good pattern: "YAML as single source - all other artifacts derive from it. Why: machine-parseable, human-readable, diffable."
+    Bad pattern: "Use good practices"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: objective, in_space: "{space}" }
+        store_as: objectives
+      - query: { find: narrative, type: behavior, in_space: "{space}" }
+        store_as: behaviors
+      - query: { find: narrative, type: pattern, in_space: "{space}" }
+        store_as: existing_patterns
+      - query: { find: narrative, type: anti_pattern, in_space: "{space}" }
+        store_as: existing_anti_patterns
+    # Auto-derive module_name from space for ID generation
+    computed:
+      module_name: "{space | strip_prefix('space_MODULE_') | strip_prefix('space_AREA_') | strip_prefix('space_CONCEPT_') | strip_prefix('space_PROJECT_')}"
+    purpose: "Load objectives, behaviors, and existing patterns for dense linking"
+    next: check_prerequisites
+
+  check_prerequisites:
+    type: branch
+    checks:
+      - condition: "{objectives | count} == 0"
+        action:
+          type: call_procedure
+          protocol: add_objectives
+          context: { space: "{space}" }
+          on_complete: load_context
+      - condition: "{behaviors | count} == 0"
+        action:
+          type: call_procedure
+          protocol: add_behaviors
+          context: { space: "{space}" }
+          on_complete: load_context
+      - condition: "ready"
+        action: { goto: gather_pattern_details }
+
+  gather_pattern_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+
+      ━━━ EXISTING GRAPH STATE ━━━
+
+      Objectives (what these patterns serve):
+      {objectives | format_list}
+
+      Behaviors (what these patterns enable):
+      {behaviors | format_list}
+
+      Existing patterns:
+      {existing_patterns | format_list}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 1: Pattern Name
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: pattern_name
+        ask: "Pattern name? (short identifier)"
+
+        why: |
+          The name is the handle for the design decision.
+          It should be descriptive and unique.
+
+        guidance: |
+          Choose a name that captures the essence of the decision.
+          Example: "YAML as Single Source", "Stateless Registry", "Physics-Driven Decay".
+
+        good_answer: "YAML as Single Source"
+        bad_answer: "Pattern 1"
+        expects: { type: string, min_length: 3 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 2: Design Decision
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: pattern_decision
+        ask: "What is the design decision?"
+
+        why: |
+          This documents the actual choice made.
+          It should be clear and actionable.
+
+        guidance: |
+          State what we are doing and how it's structured.
+          Example: "All coverage data flows from specs/coverage.yaml. Other artifacts derive from it."
+
+        expects: { type: string, min_length: 20 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 3: Rationale
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: pattern_rationale
+        ask: "Why this choice over alternatives?"
+
+        why: |
+          Rationale justifies the design and captures the "why".
+          It helps future maintainers understand the trade-offs.
+
+        guidance: |
+          Explain why this choice is better than alternatives.
+          Mention trade-offs (e.g., "Trading simplicity for robustness").
+
+        expects: { type: string, min_length: 10 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 4: Enables Behaviors
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: enables_behaviors
+        ask: "Which behaviors does this pattern enable?"
+
+        why: |
+          Linking to behaviors connects design to observable effects.
+          This is the "LINK TO PREVIOUS STEP" in the documentation chain.
+          It shows how the design decision manifests in system behavior.
+
+        context: |
+          Behaviors in this space:
+          {behaviors | format_list}
+
+        guidance: |
+          Pick the behaviors that are made possible or better by this design choice.
+
+        creates: |
+          pattern ─[relates: enables]→ behavior
+
+        expects:
+          type: id_list
+          from: "{behaviors}"
+          min: 1
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 5: Serves Objectives
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: serves_objectives
+        ask: "Which objectives does this pattern serve?"
+
+        why: |
+          Linking to objectives shows how the design contributes to goals.
+
+        context: |
+          Objectives in this space:
+          {objectives | format_list}
+
+        guidance: |
+          Pick the objectives that this pattern helps achieve.
+
+        creates: |
+          pattern ─[relates: achieves]→ objective
+
+        expects:
+          type: id_list
+          from: "{objectives}"
+          min: 1
+
+    # Capture reasoning
+    moment:
+      agent_provides:
+        - description: "Summary of the pattern"
+        - reasoning: "Why this pattern enables these behaviors and serves these objectives"
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: narrative_PATTERN_{module_name}-{pattern_name | slugify}
+
+      Nodes to create: 2
+        - narrative_PATTERN_{module_name}-{pattern_name | slugify}
+        - moment_ADD-PATTERNS_{module_name}_{timestamp_short}
+
+      Links to create:
+        Internal (2):
+          - moment ─[about]→ pattern
+          - actor ─[expresses]→ moment
+
+        External (1 + {enables_behaviors | count} + {serves_objectives | count}):
+          - space ─[contains]→ pattern
+          - pattern ─[relates: enables]→ {enables_behaviors | format_ids}
+          - pattern ─[relates: achieves]→ {serves_objectives | format_ids}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Create this pattern cluster?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_patterns
+      revise: gather_pattern_details
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Pattern creation cancelled"
+
+  create_patterns:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Pattern Narrative
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_PATTERN_{module_name}-{pattern_name | slugify}"
+        node_type: narrative
+        type: pattern
+        name: "{pattern_name}"
+        content: "{pattern_decision}"
+        rationale: "{pattern_rationale}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Creation Event)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_ADD-PATTERNS_{module_name}_{timestamp_short}"
+        node_type: moment
+        type: procedure_create
+        prose: |
+          Added pattern: {pattern_name}
+          Enables: {enables_behaviors | format_names}
+          Achieves: {serves_objectives | format_names}
+        status: spoken
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Space Contains Pattern
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space}"
+        to: "narrative_PATTERN_{module_name}-{pattern_name | slugify}"
+        nature: "contains"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Pattern Enables Behaviors
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: enables_behaviors
+        from: "narrative_PATTERN_{module_name}-{pattern_name | slugify}"
+        to: "{item}"
+        nature: "enables"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Pattern Achieves Objectives
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: serves_objectives
+        from: "narrative_PATTERN_{module_name}-{pattern_name | slugify}"
+        to: "{item}"
+        nature: "achieves"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_ADD-PATTERNS_{module_name}_{timestamp_short}"
+        nature: "expresses"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Pattern
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_ADD-PATTERNS_{module_name}_{timestamp_short}"
+        to: "narrative_PATTERN_{module_name}-{pattern_name | slugify}"
+        nature: "is about"
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space}"
+      task_id: "add_patterns_{module_name}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - narrative_PATTERN
+      - moment_ADD-PATTERNS
+    links:
+      - contains (space → pattern)
+      - relates[enables] (pattern → behavior)
+      - relates[achieves] (pattern → objective)
+      - expresses (actor → moment)
+      - about (moment → pattern)
+  summary: "Created pattern {pattern_name} for {space}"

@@ -1,6 +1,0 @@
-🔔 YOU HAVE 24 TELEGRAM MESSAGES WAITING! 🔔
-
-To see your messages, run:
-python3 /mnt/c/Users/reyno/universe-engine/serenissima/citizens/diplomatic_virtuoso/claude-code/show_messages.py
-
-These include messages from human partners waiting for responses!

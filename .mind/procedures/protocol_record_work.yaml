@@ -1,0 +1,108 @@
+procedure: protocol_record_work
+version: "1.0"
+description: Record completed work as progress moment with handoff info
+
+triggers:
+  - event: "Agent completes a task or session"
+  - event: "Agent needs to hand off to next agent"
+
+requires_skills:
+  - "SKILL_Update_Module_Sync_State_And_Record_Markers.md"
+
+contextual_knowledge:
+  domain: |
+    Progress moments capture: what was done, what was verified, what's next.
+    Link to affected nodes via ABOUT relationships.
+    Link to actor via EXPRESSES relationship.
+    Handoff = explicit next steps for next agent.
+
+  constraints: |
+    - Must summarize actual work done (not planned)
+    - Must include verification evidence if any
+    - Must specify clear next steps
+    - Creates moment linked to all affected nodes
+
+  dependencies: |
+    Requires: work was done, nodes were affected
+    Enables: continuity between sessions, audit trail
+
+  quality_criteria: |
+    Good: "Implemented decay phase in tick_runner.py. Verified energy decreases monotonically via test_decay_phase. Next: implement flow phase."
+    Bad: "Did some work on the thing"
+
+steps:
+  gather_work:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Recording work in space: {space}
+      Actor: {actor_id}
+
+    questions:
+      - name: work_summary
+        ask: "What work was completed? Be specific about files changed, functions added, docs updated."
+        why_it_matters: "Becomes the moment content"
+        expects: { type: string, min_length: 20 }
+
+      - name: affected_nodes
+        ask: "Which nodes were created or modified? List IDs."
+        why_it_matters: "Links moment to affected nodes"
+        expects: { type: id_list, min: 0 }
+
+      - name: verification
+        ask: "What verification was done? (tests run, health checks, manual verification)"
+        why_it_matters: "Evidence of correctness"
+        expects: { type: string }
+
+      - name: next_steps
+        ask: "What should the next agent do? Be specific."
+        why_it_matters: "Handoff for continuity"
+        expects: { type: string }
+
+      - name: blockers
+        ask: "Any blockers or escalations? (empty if none)"
+        why_it_matters: "Surfaces issues"
+        expects: { type: string, min_length: 0 }
+
+    moment:
+      agent_provides: [work_summary, verification, next_steps]
+    next: create_progress_moment
+
+  create_progress_moment:
+    type: create
+    nodes:
+      - id: "moment_progress_{space}_{timestamp}"
+        node_type: moment
+        type: progress
+        prose: |
+          Work completed: {work_summary}
+
+          Verification: {verification}
+
+          Next steps: {next_steps}
+
+          Blockers: {blockers}
+        status: completed
+
+    links:
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_progress_{space}_{timestamp}"
+      - type: about
+        from: "moment_progress_{space}_{timestamp}"
+        to: "{space}"
+        properties: { weight: 0.7 }
+      - for_each: affected_nodes
+        type: about
+        from: "moment_progress_{space}_{timestamp}"
+        to: "{item}"
+        properties: { weight: 0.5 }
+
+    next: $complete
+
+output:
+  moment_created: "moment_progress_{space}_{timestamp}"
+  handoff:
+    next_steps: "{next_steps}"
+    blockers: "{blockers}"

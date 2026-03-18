@@ -1,0 +1,112 @@
+name: fix_drift
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for fixing template drift in documentation.
+
+inputs:
+  target: doc_path
+  missing_sections: string[]
+
+outputs:
+  doc_fixed: path
+  sections_added: int
+  validated: boolean
+
+steps:
+  - id: determine_type
+    name: Determine Doc Type
+    action: parse
+    params:
+      input: "{target}"
+      pattern: "([A-Z]+)(?:_.*)?\.md$"
+    outputs:
+      doc_type: string
+
+  - id: load_template
+    name: Load Template
+    action: read
+    params:
+      path: "templates/docs/{doc_type}_TEMPLATE.md"
+    outputs:
+      template_content: string
+
+  - id: extract_template_sections
+    name: Extract Template Sections
+    action: parse_sections
+    params:
+      content: "{template_content}"
+      header_pattern: "^## "
+    outputs:
+      required_sections: string[]
+      section_order: string[]
+
+  - id: read_current_doc
+    name: Read Current Doc
+    action: read
+    params:
+      path: "{target}"
+    outputs:
+      current_content: string
+
+  - id: extract_current_sections
+    name: Extract Current Sections
+    action: parse_sections
+    params:
+      content: "{current_content}"
+      header_pattern: "^## "
+    outputs:
+      current_sections: string[]
+      section_content: dict
+
+  - id: add_missing_sections
+    name: Add Missing Sections
+    action: transform
+    params:
+      operation: add_sections
+      doc_path: "{target}"
+      sections_to_add: "{missing_sections}"
+      placeholder: "<!-- @mind:todo Fill this section -->"
+    outputs:
+      sections_added: int
+
+  - id: reorder_sections
+    name: Reorder Sections
+    action: transform
+    params:
+      operation: reorder_sections
+      doc_path: "{target}"
+      target_order: "{section_order}"
+    outputs:
+      reordered: boolean
+
+  - id: validate_structure
+    name: Validate Structure
+    action: validate
+    params:
+      checks:
+        - all_required_sections_present
+        - content_preserved
+        - structure_matches_template
+    outputs:
+      validated: boolean
+      errors: string[]
+
+  - id: update_sync
+    name: Update SYNC
+    condition: "validated == true"
+    action: append
+    params:
+      path: "docs/{module}/SYNC.md"
+      content: |
+        - Fixed template drift in {target}
+        - Added sections: {missing_sections}
+
+  - id: complete
+    name: Mark Complete
+    condition: "validated == true"
+    action: complete
+    outputs:
+      doc_fixed: path
+      sections_added: int

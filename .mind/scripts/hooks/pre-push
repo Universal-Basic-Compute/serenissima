@@ -1,0 +1,23 @@
+#!/bin/bash
+# Mind Protocol — pre-push hook
+# Installed by `mind init`. Syncs .env to Render + announces to L4.
+
+set -e
+
+MIND_DIR=".mind"
+SCRIPTS="$MIND_DIR/scripts"
+
+# 1. Sync .env → Render (if render.yaml exists)
+if [ -f "render.yaml" ] && [ -f ".env" ]; then
+    python3 "$SCRIPTS/render_env_sync.py" 2>/dev/null || echo "[mind] render env sync skipped"
+fi
+
+# 2. Announce org to L4 registry (RSA keypair + TOFU)
+if [ -f "$SCRIPTS/l4_org_announce.py" ]; then
+    python3 "$SCRIPTS/l4_org_announce.py" 2>/dev/null || echo "[mind] L4 org announce skipped"
+fi
+
+# 3. Register all citizens to L4
+if [ -f "$SCRIPTS/l4_register_citizens.py" ]; then
+    python3 "$SCRIPTS/l4_register_citizens.py" 2>/dev/null || echo "[mind] L4 citizen registration skipped"
+fi

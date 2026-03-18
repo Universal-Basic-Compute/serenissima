@@ -1,0 +1,470 @@
+# Protocol: resolve_blocker
+# Resolve an open escalation with decision and rationale
+
+procedure: resolve_blocker
+version: "2.0"
+description: Resolve an escalation by recording the decision and linking resolution moment - rich format
+
+triggers:
+  - event: "Escalation has been decided"
+  - event: "Human provided decision on blocker"
+  - gap: "Open escalation ready for resolution"
+
+requires_skills:
+  - SKILL_Debug_Investigate_And_Fix_Issues_With_Evidence_First.md
+
+contextual_knowledge:
+  domain: |
+    Resolution in mind:
+    - Resolves an escalation by updating status and recording decision
+    - Creates resolution moment linked to original escalation
+    - Captures: what was decided, why, who decided
+
+    Resolution links:
+    - moment_resolution → relates[resolves] → escalation
+    - escalation.status updated to "resolved"
+
+    Follow-up:
+    - Resolution may spawn TODOs for implementation
+    - Links to decision narrative if complex enough
+  constraints: |
+    - Must reference existing escalation
+    - Must capture actual decision (not just "resolved")
+    - Must attribute who decided
+    - Should note any follow-up actions
+  quality_criteria: |
+    Good resolution: "Decided: Use JWT with refresh tokens. Rationale: API-first architecture, stateless backend. Decided by: Nicolas. Follow-up: Implement auth module with JWT approach."
+    Bad resolution: "Fixed"
+
+steps:
+  select_escalation:
+    type: ask
+    auto_fetch:
+      - query:
+          find: narrative
+          type: escalation
+          where:
+            status: open
+        store_as: open_escalations
+    context: |
+      Select an open escalation to resolve.
+
+      Open escalations:
+      {open_escalations | format_list}
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Escalation ID
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: escalation_id
+        ask: "Which escalation to resolve?"
+        why: "Identifies the specific blocker being addressed."
+        guidance: "Select from the list of open escalations."
+        expects:
+          type: id
+          node_type: narrative
+    next: load_escalation
+
+  load_escalation:
+    type: query
+    auto_fetch:
+      - query:
+          get: "{escalation_id}"
+        store_as: escalation
+    purpose: "Load full escalation details"
+    next: show_escalation
+
+  show_escalation:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      ESCALATION TO RESOLVE
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Title: {escalation.name}
+      Priority: {escalation.priority}
+
+      BLOCKER:
+      {escalation.content}
+
+      OPTIONS:
+      {escalation.options | format_options}
+
+      ORIGINAL RECOMMENDATION:
+      {escalation.recommendation}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    questions:
+      - name: proceed
+        ask: "Proceed with resolution?"
+        expects:
+          type: enum
+          options: [yes, cancel]
+    next: route_proceed
+
+  route_proceed:
+    type: branch
+    on: "{proceed}"
+    cases:
+      yes: capture_resolution
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Resolution cancelled"
+
+  capture_resolution:
+    type: ask
+    context: |
+      Original options:
+      {escalation.options | format_options}
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Decision
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: decision
+        ask: "What was decided? (which option or other)"
+        why: "Records the definitive path forward chosen by the resolver."
+        guidance: "State the chosen alternative or the unique resolution."
+        expects:
+          type: string
+          min_length: 5
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Decision Rationale
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: decision_rationale
+        ask: "Why this decision?"
+        why: "Provides justification and context for the choice."
+        guidance: "Explain why this option was chosen over others."
+        expects:
+          type: string
+          min_length: 10
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Decided By
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: decided_by
+        ask: "Who made this decision? (human, team, etc.)"
+        why: "Attribution for accountability and future reference."
+        expects:
+          type: string
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Follow-up Actions
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: follow_up_actions
+        ask: "What follow-up actions are needed? (or empty)"
+        why: "Identifies work required to implement the decision."
+        guidance: "Be specific and actionable. Example: 'Update auth middleware'."
+        expects:
+          type: string
+          required: false
+
+    # Capture reasoning for the resolution
+    moment:
+      agent_provides:
+        - description: "Summary of resolution"
+        - reasoning: "Why this resolution is complete and how it addresses the blocker"
+
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before creating the resolution, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this resolve_blocker protocol?"
+        expects:
+          type: string
+          required: false
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: moment_resolution_{timestamp}
+
+      Nodes to create: 1 + {follow_up_actions | if_present: 1}
+        - moment_resolution_*
+        - {follow_up_actions | if_present: "todo_followup_*"}
+
+      Links to create: 2 + {follow_up_actions | if_present: 2}
+        - moment ─[relates: resolves]→ {escalation_id}
+        - actor ─[expresses]→ moment
+        - {follow_up_actions | if_present: "todo ─[relates: spawned_from]→ moment"}
+        - {follow_up_actions | if_present: "todo ─[about]→ space"}
+
+      UPDATES:
+        - {escalation_id}.status ➔ resolved
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Record this resolution?"
+        expects:
+          type: enum
+          options: [resolve, revise, cancel]
+
+    next: route_confirm
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Resolution Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_resolution_{timestamp}"
+        node_type: moment
+        type: escalation_resolved
+        text: |
+          Resolved: {escalation.name}
+
+          Decision: {decision}
+          Rationale: {decision_rationale}
+          Decided by: {decided_by}
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_resolution_{timestamp}"
+        #   WHAT: Unique ID with timestamp for ordering
+        #   WHY: Moments are ordered chronologically
+        #   FORMAT: moment_<action>_<timestamp>
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event record
+        #   WHY: Creates history that can be queried
+        #   CONTRAST: narratives persist, moments are events
+        #
+        # type: escalation_resolved
+        #   WHAT: Categorizes this moment type
+        #   WHY: Enables queries like "show all resolutions"
+        #   OTHER_TYPES: escalation_raised, decision_recorded
+        #
+        # text: "Resolved..."
+        #   WHAT: Human-readable description with decision details
+        #   WHY: Displayed in activity feeds and history
+        #   FORMAT: Past tense, includes key decision + rationale
+        #
+        # status: completed
+        #   WHAT: Moment state
+        #   WHY: "completed" = action finished successfully
+        #   OPTIONS: completed, pending, cancelled
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Follow-up TODO (Optional)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "todo_followup_{timestamp}"
+        node_type: narrative
+        type: todo
+        content: "{follow_up_actions}"
+        status: open
+        from_escalation: "{escalation_id}"
+        condition: "{follow_up_actions} is not empty"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "todo_followup_{timestamp}"
+        #   WHAT: Unique identifier for this follow-up task
+        #   WHY: Used to query and track implementation work
+        #   FORMAT: todo_followup_<timestamp>
+        #
+        # node_type: narrative
+        #   WHAT: Persistent story/record (vs moment = event)
+        #   WHY: TODOs exist over time, track state changes
+        #   ALTERNATIVES: moment (point-in-time), space (container)
+        #
+        # type: todo
+        #   WHAT: Categorization within narratives
+        #   WHY: Enables queries like "show all open TODOs"
+        #   OTHER_TYPES: escalation, decision, investigation
+        #
+        # content: "{follow_up_actions}"
+        #   WHAT: Description of work to be done
+        #   WHY: Provides actionable task for implementation
+        #   QUALITY: Should be specific, not vague
+        #
+        # status: open
+        #   WHAT: TODO state
+        #   WHY: Tracks lifecycle: open → in_progress → completed
+        #   OPTIONS: open, in_progress, completed, cancelled
+        #
+        # from_escalation: "{escalation_id}"
+        #   WHAT: Links back to originating escalation
+        #   WHY: Provides context for why this TODO exists
+        #   USAGE: Can query "what TODOs came from escalation X?"
+        #
+        # weight: 0.7
+        #   WHAT: Importance score (0.0-1.0)
+        #   WHY: Follow-up TODOs are medium priority (0.7)
+        #   RANGE: 0.9 for escalations, 0.7 for todos, lower for notes
+        #
+        # condition: "{follow_up_actions} is not empty"
+        #   WHAT: Only create this node if follow-up specified
+        #   WHY: Not all resolutions require follow-up work
+        #   ALTERNATIVE: Could create empty TODO marked as "none"
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Resolution Resolves Escalation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_resolution_{timestamp}"
+        to: "{escalation_id}"
+        nature: "resolves"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: resolves
+        #   WHAT: Resolution relationship
+        #   WHY: "resolves" is a specific semantic relationship
+        #   QUERY: "What resolved escalation X?" follows resolves inversely
+        #   DIRECTION: from=resolution_moment, to=escalation
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Resolution
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_resolution_{timestamp}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who/what created this resolution
+        #   QUERY: "What did agent X resolve?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Resolution About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_resolution_{timestamp}"
+        to: "{escalation.about | first}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what space this resolution affects
+        #   QUERY: "What resolutions happened in space X?" follows about
+        #   DIRECTION: from=moment, to=space
+        #
+        # to: "{escalation.about | first}"
+        #   WHAT: Inherits space from original escalation
+        #   WHY: Resolution should affect same space as escalation
+        #   ASSUMPTION: Escalation has at least one "about" link to space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Follow-up TODO About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "todo_followup_{timestamp}"
+        to: "{escalation.about | first}"
+        nature: "is about"
+        condition: "{follow_up_actions} is not empty"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what space this TODO affects
+        #   QUERY: "What TODOs are for space X?" follows about
+        #   DIRECTION: from=todo, to=space
+        #
+        # condition: "{follow_up_actions} is not empty"
+        #   WHAT: Only create link if TODO exists
+        #   WHY: Matches condition on the TODO node itself
+        #   CONSISTENCY: Link and node created together
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Follow-up Spawned From Resolution
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "todo_followup_{timestamp}"
+        to: "moment_resolution_{timestamp}"
+        nature: "spawned from"
+        condition: "{follow_up_actions} is not empty"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: spawned from
+        #   WHAT: Origin relationship
+        #   WHY: "spawned from" shows TODO originated from this resolution
+        #   QUERY: "What did resolution X spawn?" follows spawned from inversely
+        #   DIRECTION: from=todo, to=resolution_moment
+        #   USAGE: Can trace decision -> resolution -> implementation
+
+    updates:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # UPDATE: Escalation Status
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - node: "{escalation_id}"
+        set:
+          status: resolved
+          resolved_at: "{timestamp}"
+          resolution: "{decision}"
+          resolution_rationale: "{decision_rationale}"
+          resolved_by: "{decided_by}"
+        # ━━━ UPDATE EXPLANATION ━━━
+        #
+        # status: resolved
+        #   WHAT: Updates escalation state from "open" to "resolved"
+        #   WHY: Marks escalation as no longer blocking
+        #   QUERY: Can filter escalations by status="open" vs "resolved"
+        #
+        # resolved_at: "{timestamp}"
+        #   WHAT: Records when resolution occurred
+        #   WHY: Enables tracking time-to-resolution metrics
+        #   FORMAT: ISO timestamp
+        #
+        # resolution: "{decision}"
+        #   WHAT: Captures what was decided
+        #   WHY: Preserves decision on escalation node itself
+        #   USAGE: Can query escalation directly for decision
+        #
+        # resolution_rationale: "{decision_rationale}"
+        #   WHAT: Captures why this decision was made
+        #   WHY: Provides context for future reference
+        #   QUALITY: Should explain reasoning, not just restate decision
+        #
+        # resolved_by: "{decided_by}"
+        #   WHAT: Records who made the decision
+        #   WHY: Attribution for accountability and context
+        #   EXAMPLE: "Nicolas", "Architecture Team"
+
+    moment:
+      agent_provides: [description]
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{escalation.about | first}"
+      task_id: "resolve_blocker_{escalation_id}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - moment_resolution
+      - todo (optional follow-up)
+    links:
+      - relates[resolves] (moment → escalation)
+      - expresses (actor → moment)
+      - about (moment → space)
+    updates:
+      - escalation.status → resolved
+  summary: "Resolved: {escalation.name} → {decision}"
+  returns:
+    moment_id: "moment_resolution_{timestamp}"
+    escalation_id: "{escalation_id}"
+    follow_up_id: "todo_followup_{timestamp}"

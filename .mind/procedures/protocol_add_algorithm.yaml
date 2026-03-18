@@ -1,0 +1,129 @@
+procedure: protocol_add_algorithm
+version: "1.0"
+description: Document procedures and pseudocode for a module
+
+triggers:
+  - gap: "Module has behaviors but no documented algorithms"
+  - event: "Complex logic added that needs explanation"
+
+requires_skills:
+  - "SKILL_Define_Module_Boundaries_Objectives_And_Scope.md"
+
+contextual_knowledge:
+  domain: |
+    Algorithms = procedures (HOW the module works, pseudocode).
+    Algorithms implement behaviors.
+    Format: numbered steps, pseudocode, flow diagrams.
+    Should be language-agnostic where possible.
+
+  constraints: |
+    - Algorithms must be traceable to behaviors
+    - Avoid implementation details specific to language/framework
+    - Focus on core logic, not boilerplate
+
+  dependencies: |
+    Requires: behaviors exist (algorithms implement behaviors)
+    Enables: implementation, code review, optimization
+
+  quality_criteria: |
+    Good: "1. Collect all edges where weight > threshold. 2. For each edge: new_weight = weight * (1 - decay_rate). 3. If new_weight < min_threshold: remove edge."
+    Bad: "Uses a for loop to decay weights"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: behaviors, in_space: "{space}" }
+        store_as: behaviors
+      - query: { find: narrative, type: algorithm, in_space: "{space}" }
+        store_as: existing_algorithms
+    next: check_behaviors
+
+  check_behaviors:
+    type: branch
+    checks:
+      - condition: "{behaviors | count} == 0"
+        action:
+          type: call_procedure
+          protocol: protocol_add_behaviors
+          context:
+            space: "{space}"
+            actor_id: "{actor_id}"
+          on_complete: gather_algorithm
+      - condition: "ready"
+        action: { goto: gather_algorithm }
+
+  gather_algorithm:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Behaviors to implement: {behaviors | list}
+      Existing algorithms: {existing_algorithms | count}
+
+    questions:
+      - name: algorithm_name
+        ask: "Algorithm name (what procedure is this)?"
+        expects: { type: string }
+
+      - name: implements_behavior
+        ask: "Which behavior does this algorithm implement?"
+        expects:
+          type: reference
+          from: behaviors
+
+      - name: pseudocode
+        ask: "Pseudocode (numbered steps)?"
+        expects: { type: string }
+
+      - name: complexity
+        ask: "Time/space complexity if relevant?"
+        expects: { type: string, min_length: 0 }
+
+      - name: edge_cases
+        ask: "Edge cases to handle?"
+        expects: { type: string_list, min: 0 }
+
+    next: create_algorithm
+
+  create_algorithm:
+    type: create
+    nodes:
+      - id: "doc_algorithm_{space}"
+        node_type: narrative
+        type: algorithm
+        name: "ALGORITHM for {space}"
+        algorithms:
+          - name: "{algorithm_name}"
+            implements: "{implements_behavior}"
+            pseudocode: "{pseudocode}"
+            complexity: "{complexity}"
+            edge_cases: "{edge_cases}"
+
+      - id: "moment_add_algorithm_{timestamp}"
+        node_type: moment
+        type: documentation
+        prose: "Documented algorithm: {algorithm_name}"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "doc_algorithm_{space}"
+      - type: implements
+        from: "doc_algorithm_{space}"
+        to: "{implements_behavior}"
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_add_algorithm_{timestamp}"
+      - type: about
+        from: "moment_add_algorithm_{timestamp}"
+        to: "doc_algorithm_{space}"
+
+    next: $complete
+
+output:
+  algorithm_doc: "doc_algorithm_{space}"
+  implements_behavior: "{implements_behavior}"
+  moment: "moment_add_algorithm_{timestamp}"

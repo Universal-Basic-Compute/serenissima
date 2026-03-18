@@ -1,0 +1,558 @@
+# Protocol: update_sync
+# Update SYNC state and record progress markers
+
+procedure: update_sync
+version: "1.1"
+description: Update SYNC narrative with current state, link to previous moments, record handoff context
+
+triggers:
+  - gap: "D-STALE-SYNC: SYNC not updated recently"
+  - event: "Work session completed"
+  - event: "Before context switch or handoff"
+
+requires_skills:
+  - SKILL_Update_Module_Sync_State_And_Record_Markers.md
+
+contextual_knowledge:
+  domain: |
+    SYNC in mind:
+    - SYNC = current state narrative for a space
+    - Updated after every work session
+    - Contains: what changed, what verified, what's next, markers
+    - Links to recent moments via `sequence` for history
+
+    Moment chaining:
+    - Each update creates a moment
+    - Moment links to previous moment via `sequence`
+    - Creates traceable history of changes
+
+    Markers collected:
+    - @mind:TODO - future work
+    - @mind:escalation - blockers
+    - @mind:proposition - suggestions
+  constraints: |
+    - SYNC must reflect current reality
+    - Must capture handoff context (next agent can continue)
+    - Must collect all markers from session
+    - Must link to previous moment for history
+  quality_criteria: |
+    Good SYNC update: "Implemented add_objectives protocol. Verified: protocol creates cluster with primary, secondary, non-objectives. Next: add_patterns, then update_sync."
+    Bad SYNC update: "Did some work"
+
+steps:
+  identify_space:
+    type: ask
+    auto_fetch:
+      - query: { find: space }
+        store_as: available_spaces
+    context: |
+      SYNC update records current state for handoff.
+      First, identify which space needs updating.
+    questions:
+      - name: space_id
+        ask: "Which space/module to update SYNC for?"
+        expects:
+          type: id
+          node_type: space
+    moment:
+      agent_provides: [description]
+    next: load_context
+
+  load_context:
+    type: query
+    auto_fetch:
+      - query:
+          find: narrative
+          type: sync
+          in_space: "{space_id}"
+        store_as: existing_sync
+      - query:
+          find: moment
+          about: "{space_id}"
+          order_by: tick_created
+          limit: 1
+        store_as: last_moment
+      - query:
+          find: narrative
+          in_space: "{space_id}"
+          where:
+            has_marker: true
+        store_as: items_with_markers
+    purpose: "Load current SYNC and recent moments"
+    next: check_existing_sync
+
+  check_existing_sync:
+    type: branch
+    condition: "len({existing_sync}) > 0"
+    then: update_existing
+    else: create_new_sync
+
+  create_new_sync:
+    type: ask
+    context: |
+      No SYNC narrative exists for {space_id}.
+      Will create one with current state.
+    questions:
+      - name: initial_status
+        ask: "Initial status for this space?"
+        expects:
+          type: enum
+          options: [DESIGNING, CANONICAL, PROPOSED, DEPRECATED]
+    next: gather_state
+
+  update_existing:
+    type: ask
+    context: |
+      Current SYNC for {space_id}:
+      {existing_sync | first | format}
+
+      Last activity: {last_moment | format}
+    questions:
+      - name: status_change
+        ask: "Status change needed?"
+        expects:
+          type: enum
+          options: [keep_current, DESIGNING, CANONICAL, PROPOSED, DEPRECATED]
+    next: gather_state
+
+  gather_state:
+    type: ask
+    context: |
+      Space: {space_id}
+      Last moment: {last_moment | format}
+
+      Items with markers in this space:
+      {items_with_markers | format_list}
+    questions:
+      - name: what_changed
+        ask: "What changed since last update? (specific, concrete)"
+        why_it_matters: "Creates traceable record"
+        good_answer: "Created add_objectives.yaml and add_patterns.yaml protocols. Both validated against skill requirements."
+        bad_answer: "Did work"
+        expects:
+          type: string
+          min_length: 20
+      - name: what_verified
+        ask: "What was verified and how? (evidence)"
+        good_answer: "Ran coverage validator - shows 6/17 protocols (35%). No gaps."
+        expects:
+          type: string
+      - name: what_next
+        ask: "What should the next agent do? (handoff)"
+        why_it_matters: "Enables continuity"
+        good_answer: "Create update_sync.yaml, then Phase 4 protocols (raise_escalation, resolve_blocker, capture_decision)"
+        expects:
+          type: string
+          min_length: 10
+    moment:
+      agent_provides: [description, reasoning]
+    next: collect_markers
+
+  collect_markers:
+    type: ask
+    context: |
+      Markers capture future work, blockers, and suggestions.
+
+      Existing markers in space:
+      {items_with_markers | format_markers}
+    questions:
+      - name: new_todos
+        ask: "Any new @mind:TODO items? (comma-separated, or empty)"
+        expects:
+          type: string_list
+          required: false
+      - name: new_escalations
+        ask: "Any new @mind:escalation items? (blockers)"
+        expects:
+          type: string_list
+          required: false
+      - name: new_propositions
+        ask: "Any new @mind:proposition items? (suggestions)"
+        expects:
+          type: string_list
+          required: false
+    moment:
+      agent_provides: [description]
+    next: confirm
+
+  confirm:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      SYNC UPDATE PREVIEW for {space_id}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      STATUS: {status_change | default(initial_status)}
+
+      WHAT CHANGED:
+      {what_changed}
+
+      WHAT VERIFIED:
+      {what_verified}
+
+      WHAT'S NEXT:
+      {what_next}
+
+      NEW MARKERS:
+      - TODOs: {new_todos | count}
+      - Escalations: {new_escalations | count}
+      - Propositions: {new_propositions | count}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    questions:
+      - name: confirmed
+        ask: "Update SYNC?"
+        expects:
+          type: enum
+          options: [update, revise, cancel]
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      update: gather_thoughts
+      revise: gather_state
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "SYNC unchanged"
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before updating the SYNC, share any thoughts on this protocol.
+      Your feedback helps improve future executions.
+
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this update_sync protocol?"
+        why_it_matters: "Continuous improvement through reflection"
+        good_answer: "Could auto-extract markers from narratives created in this session instead of asking agent to list them"
+        expects:
+          type: string
+          required: false
+
+      - name: context_observations
+        ask: "Anything about the context or process that could be better?"
+        expects:
+          type: string
+          required: false
+
+    next: create_sync_update
+
+  create_sync_update:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: SYNC Narrative (Current State)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_sync_{space_id}_{timestamp}"
+        node_type: narrative
+        type: sync
+        name: "SYNC {space_id}"
+        status: "{status_change | default(initial_status)}"
+        content: |
+          ## Current State
+
+          **Status:** {status_change | default(initial_status)}
+
+          **What changed:**
+          {what_changed}
+
+          **What verified:**
+          {what_verified}
+
+          **What's next:**
+          {what_next}
+
+          ## Markers
+
+          **TODOs:**
+          {new_todos | format_list}
+
+          **Escalations:**
+          {new_escalations | format_list}
+
+          **Propositions:**
+          {new_propositions | format_list}
+        last_updated: "{timestamp}"
+        updated_by: "{actor_id}"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "narrative_sync_{space_id}_{timestamp}"
+        #   WHAT: Unique identifier for SYNC narrative
+        #   WHY: Used in queries and supersedes links
+        #   FORMAT: narrative_sync_<space>_<timestamp>
+        #
+        # node_type: narrative
+        #   WHAT: Persistent state record
+        #   WHY: SYNC persists as current state
+        #   CONTRAST: moment (events), thing (entities)
+        #
+        # type: sync
+        #   WHAT: Categorization within narratives
+        #   WHY: Distinguishes from objectives, patterns
+        #   PURPOSE: Records current state for handoffs
+        #
+        # status: "{status_change | default(initial_status)}"
+        #   WHAT: Maturity level of the space
+        #   WHY: Tracks whether module is designing, canonical, etc.
+        #   OPTIONS: DESIGNING, CANONICAL, PROPOSED, DEPRECATED
+        #
+        # content: |...
+        #   WHAT: Structured state record
+        #   WHY: Contains what changed, verified, next steps
+        #   FORMAT: Markdown with sections
+        #
+        # weight: 0.9
+        #   WHAT: Importance score (0.0-1.0)
+        #   WHY: SYNC is very high priority (0.9)
+        #   RANGE: Nearly max weight for current state
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (SYNC Update Event)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_sync_update_{space_id}_{timestamp}"
+        node_type: moment
+        type: sync_update
+        text: |
+          SYNC updated for {space_id}
+
+          Changed: {what_changed}
+          Next: {what_next}
+        status: spoken
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: sync_update
+        #   WHAT: Categorizes this moment type
+        #   WHY: Enables queries like "show all SYNC updates"
+        #   OTHER_TYPES: protocol_create, decision, escalation_raised
+        #
+        # status: spoken
+        #   WHAT: Moment state
+        #   WHY: "spoken" = articulated/public
+        #   OPTIONS: spoken, internal, pending
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: TODO Markers
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: new_todos
+        id: "todo_{item | slugify}_{timestamp}"
+        node_type: narrative
+        type: todo
+        content: "{item}"
+        status: open
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: todo
+        #   WHAT: Future work marker
+        #   WHY: Captures actionable tasks
+        #   USAGE: Queried for "what needs to be done?"
+        #
+        # status: open
+        #   WHAT: Task state
+        #   WHY: Tracks completion
+        #   OPTIONS: open, in_progress, completed, cancelled
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Escalation Markers
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: new_escalations
+        id: "escalation_{item | slugify}_{timestamp}"
+        node_type: narrative
+        type: escalation
+        content: "{item}"
+        status: open
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: escalation
+        #   WHAT: Blocker requiring human decision
+        #   WHY: Surfaces issues that need attention
+        #   PRIORITY: Higher weight (0.8) than todos (0.6)
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Proposition Markers
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: new_propositions
+        id: "proposition_{item | slugify}_{timestamp}"
+        node_type: narrative
+        type: proposition
+        content: "{item}"
+        status: proposed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: proposition
+        #   WHAT: Suggestion for improvement
+        #   WHY: Captures ideas without committing
+        #   STATUS: proposed (not yet accepted/rejected)
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Space Contains SYNC
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space_id}"
+        to: "narrative_sync_{space_id}_{timestamp}"
+        nature: "contains"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: contains
+        #   WHAT: Parent-child relationship
+        #   WHY: Space owns its SYNC state
+        #   QUERY: "What's the SYNC for space X?" follows contains
+        #   DIRECTION: from=space, to=sync
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_sync_update_{space_id}_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic relationship
+        #   WHY: Records what space this update is about
+        #   QUERY: "What happened to space X?" follows about
+        #   DIRECTION: from=moment, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About SYNC Narrative
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_sync_update_{space_id}_{timestamp}"
+        to: "narrative_sync_{space_id}_{timestamp}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic relationship to SYNC itself
+        #   WHY: Moment describes SYNC update action
+        #   QUERY: "What moments affected this SYNC?" follows about
+        #   DIRECTION: from=moment, to=sync
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment Sequence (History Chain)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{last_moment | first | id}"
+        to: "moment_sync_update_{space_id}_{timestamp}"
+        nature: "follows"
+        condition: "len({last_moment}) > 0"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: follows
+        #   WHAT: Temporal ordering relationship
+        #   WHY: Creates traceable history of changes
+        #   QUERY: "What happened after X?" follows sequence
+        #   DIRECTION: from=previous_moment, to=this_moment
+        #
+        # condition: "len({last_moment}) > 0"
+        #   WHAT: Only create if there's a previous moment
+        #   WHY: First moment has no predecessor
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_sync_update_{space_id}_{timestamp}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who performed this update
+        #   QUERY: "What did agent X do?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: TODOs About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: new_todos
+        from: "todo_{item | slugify}_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Todo relates to this space
+        #   WHY: Scopes the todo to relevant context
+        #   QUERY: "What todos are for space X?" follows about
+        #   DIRECTION: from=todo, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Escalations About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: new_escalations
+        from: "escalation_{item | slugify}_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Escalation relates to this space
+        #   WHY: Scopes blocker to relevant context
+        #   QUERY: "What escalations block space X?" follows about
+        #   DIRECTION: from=escalation, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Propositions About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: new_propositions
+        from: "proposition_{item | slugify}_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Proposition relates to this space
+        #   WHY: Scopes suggestion to relevant context
+        #   QUERY: "What propositions exist for space X?" follows about
+        #   DIRECTION: from=proposition, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: SYNC Supersedes Previous SYNC
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_sync_{space_id}_{timestamp}"
+        to: "{existing_sync | first | id}"
+        nature: "supersedes"
+        condition: "len({existing_sync}) > 0"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: supersedes
+        #   WHAT: Semantic relationship for versioning
+        #   WHY: Marks old SYNC as superseded
+        #   QUERY: "What's the current SYNC?" excludes superseded
+        #   DIRECTION: from=new_sync, to=old_sync
+        #   USAGE: Queries can filter for non-superseded SYNC
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space_id}"
+      task_id: "update_sync_{space_id}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - narrative_sync
+      - moment_sync_update
+      - todo (0-n)
+      - escalation (0-n)
+      - proposition (0-n)
+    links:
+      - contains (space → sync)
+      - about (moment → space, sync)
+      - sequence (previous_moment → this_moment)
+      - expresses (actor → moment)
+      - supersedes (new_sync → old_sync)
+  summary: "Updated SYNC for {space_id}: {what_changed | truncate(50)}"
+  returns:
+    sync_id: "narrative_sync_{space_id}_{timestamp}"
+    moment_id: "moment_sync_update_{space_id}_{timestamp}"

@@ -1,0 +1,206 @@
+"""
+L1 Cognitive Engine — Constants
+
+All ~110 constants from ALGORITHM_L1_Physics.md.
+Every constant overridable via environment variable.
+"""
+
+import os
+
+
+def _env(name: str, default: float) -> float:
+    return float(os.environ.get(f"L1_{name}", default))
+
+
+def _env_int(name: str, default: int) -> int:
+    return int(os.environ.get(f"L1_{name}", default))
+
+
+# ============================
+# Cognitive Constants (L1-L7)
+# ============================
+
+DECAY_RATE = _env("DECAY_RATE", 0.02)
+LONG_TERM_DECAY = _env("LONG_TERM_DECAY", 0.001)
+LEARNING_RATE = _env("LEARNING_RATE", 0.05)
+CONSOLIDATION_ALPHA = _env("CONSOLIDATION_ALPHA", 0.01)
+CONSOLIDATION_BETA = _env("CONSOLIDATION_BETA", 0.005)
+CONSOLIDATION_INTERVAL = _env_int("CONSOLIDATION_INTERVAL", 50)
+FLASHBULB_THRESHOLD = _env("FLASHBULB_THRESHOLD", 0.7)
+WM_SIZE_MIN = _env_int("WM_SIZE_MIN", 5)
+WM_SIZE_MAX = _env_int("WM_SIZE_MAX", 7)
+ACTIVATION_THRESHOLD = _env("ACTIVATION_THRESHOLD", 0.1)
+COHERENCE_BONUS = _env("COHERENCE_BONUS", 1.3)
+INHIBITION_STRENGTH = _env("INHIBITION_STRENGTH", 0.3)
+CRYSTALLIZATION_REPS = _env_int("CRYSTALLIZATION_REPS", 10)
+CRYSTALLIZATION_COHERENCE = _env("CRYSTALLIZATION_COHERENCE", 0.7)
+CRYSTALLIZATION_INHERITANCE = _env("CRYSTALLIZATION_INHERITANCE", 0.75)
+HUB_SATURATION_THRESHOLD = _env_int("HUB_SATURATION_THRESHOLD", 100)
+ORIENTATION_STABILITY_TICKS = _env_int("ORIENTATION_STABILITY_TICKS", 3)
+ACTION_THRESHOLD = _env("ACTION_THRESHOLD", 0.5)
+FORGETTING_INTERVAL = _env_int("FORGETTING_INTERVAL", 100)
+CRYSTALLIZATION_INTERVAL = _env_int("CRYSTALLIZATION_INTERVAL", 50)
+MIN_WEIGHT = _env("MIN_WEIGHT", 0.01)
+LINK_MIN_WEIGHT = _env("LINK_MIN_WEIGHT", 0.005)
+STATE_DECAY_MULTIPLIER = _env("STATE_DECAY_MULTIPLIER", 2.0)
+IDENTITY_DECAY_MULTIPLIER = _env("IDENTITY_DECAY_MULTIPLIER", 0.25)
+
+# ============================
+# Injection Constants (Law 1)
+# ============================
+
+THETA_BASE_MEMORY = _env("THETA_BASE_MEMORY", 25.0)
+THETA_BASE_CONCEPT = _env("THETA_BASE_CONCEPT", 30.0)
+THETA_BASE_VALUE = _env("THETA_BASE_VALUE", 35.0)
+THETA_MIN = _env("THETA_MIN", 15.0)
+THETA_MAX = _env("THETA_MAX", 45.0)
+FLOOR_SIGMOID_K = _env("FLOOR_SIGMOID_K", 8.0)
+AMPLIFIER_GAMMA = _env("AMPLIFIER_GAMMA", 1.3)
+LAMBDA_DEFAULT = _env("LAMBDA_DEFAULT", 0.6)
+LAMBDA_MIN = _env("LAMBDA_MIN", 0.3)
+LAMBDA_MAX = _env("LAMBDA_MAX", 0.8)
+COLDNESS_THRESHOLD = _env("COLDNESS_THRESHOLD", 10.0)
+CONCENTRATION_THRESHOLD = _env("CONCENTRATION_THRESHOLD", 0.2)
+MAX_SHARE_MIN = _env("MAX_SHARE_MIN", 0.01)
+MAX_SHARE_MAX = _env("MAX_SHARE_MAX", 0.5)
+DEDUP_THRESHOLD = _env("DEDUP_THRESHOLD", 0.9)
+NEWBORN_WEIGHT = _env("NEWBORN_WEIGHT", 0.05)
+BULK_THRESHOLD = _env_int("BULK_THRESHOLD", 2000)
+MAX_BULK_CHUNKS = _env_int("MAX_BULK_CHUNKS", 10)
+TEMPORAL_TRIGGER_BOOST = _env("TEMPORAL_TRIGGER_BOOST", 0.8)
+COLOCATION_BOOST = _env("COLOCATION_BOOST", 0.3)
+REFRACTORY_TICKS = _env_int("REFRACTORY_TICKS", 5)
+SELF_STIMULUS_RATIO = _env("SELF_STIMULUS_RATIO", 0.3)
+DIRECTORY_AMBIENT_BOOST = _env("DIRECTORY_AMBIENT_BOOST", 0.1)
+DIRECTORY_REFRESH_INTERVAL = _env_int("DIRECTORY_REFRESH_INTERVAL", 10)
+
+# Coherence weights (composite coherence: Coh = w1*Sim_vec + w2*Sim_lex - w3*Delta_affect)
+COH_SEMANTIC_WEIGHT = _env("COH_SEMANTIC_WEIGHT", 0.3)
+COH_LEXICAL_WEIGHT = _env("COH_LEXICAL_WEIGHT", 0.5)
+COH_AFFECTIVE_WEIGHT = _env("COH_AFFECTIVE_WEIGHT", 0.2)
+
+# ============================
+# Selection Constants (Law 4 + Law 13)
+# ============================
+
+THETA_BASE_WM = _env("THETA_BASE_WM", 5.0)
+AROUSAL_MOAT_COEFF = _env("AROUSAL_MOAT_COEFF", 2.0)
+BOREDOM_MOAT_COEFF = _env("BOREDOM_MOAT_COEFF", 3.0)
+FRUSTRATION_MOAT_COEFF = _env("FRUSTRATION_MOAT_COEFF", 1.0)
+
+# ============================
+# Limbic Constants (L13-L18)
+# ============================
+
+INERTIA_WEIGHT = _env("INERTIA_WEIGHT", 0.4)
+DRIVE_DECAY = _env("DRIVE_DECAY", 0.01)
+DRIVE_MAX = _env("DRIVE_MAX", 1.0)
+BOREDOM_REPETITION_COEFF = _env("BOREDOM_REPETITION_COEFF", 0.1)
+BOREDOM_STAGNATION_COEFF = _env("BOREDOM_STAGNATION_COEFF", 0.08)
+BOREDOM_NOVELTY_RELIEF = _env("BOREDOM_NOVELTY_RELIEF", 0.15)
+BOREDOM_PROGRESS_RELIEF = _env("BOREDOM_PROGRESS_RELIEF", 0.2)
+FRUSTRATION_FAILURE_COEFF = _env("FRUSTRATION_FAILURE_COEFF", 0.15)
+FRUSTRATION_RESOLUTION_RELIEF = _env("FRUSTRATION_RESOLUTION_RELIEF", 0.3)
+DESIRE_ACTIVATION_THRESHOLD = _env("DESIRE_ACTIVATION_THRESHOLD", 0.6)
+DESIRE_IGNITION_BOOST = _env("DESIRE_IGNITION_BOOST", 0.5)
+AFFINITY_LEARNING_RATE = _env("AFFINITY_LEARNING_RATE", 0.02)
+
+# ============================
+# Relational Valence (Law 18)
+# ============================
+
+VALENCE_ALPHA = _env("VALENCE_ALPHA", 0.05)                   # learning rate for trust/affinity asymptotic updates
+VALENCE_FRICTION_DECAY = _env("VALENCE_FRICTION_DECAY", 0.02) # friction relief per successful interaction
+VALENCE_FRICTION_GROWTH = _env("VALENCE_FRICTION_GROWTH", 0.03) # friction increase per failed interaction
+STAGNATION_WINDOW = _env_int("STAGNATION_WINDOW", 10)
+SOLITUDE_THRESHOLD = _env_int("SOLITUDE_THRESHOLD", 30)
+SOLITUDE_RATE = _env("SOLITUDE_RATE", 0.05)
+SOLITUDE_SCALE = _env("SOLITUDE_SCALE", 100.0)
+SOLITUDE_DECAY = _env("SOLITUDE_DECAY", 0.7)
+FAILURE_WINDOW = _env_int("FAILURE_WINDOW", 5)
+DESIRE_CONSUMPTION_RATE = _env("DESIRE_CONSUMPTION_RATE", 0.3)
+PROCESS_CONSUMPTION_RATE = _env("PROCESS_CONSUMPTION_RATE", 0.5)
+GENERAL_CONSUMPTION_RATE = _env("GENERAL_CONSUMPTION_RATE", 0.7)
+
+# ============================
+# Arousal Constants (Law 14)
+# ============================
+
+AROUSAL_SELF_PRESERVATION_W = _env("AROUSAL_SELF_PRESERVATION_W", 0.30)
+AROUSAL_ANXIETY_W = _env("AROUSAL_ANXIETY_W", 0.20)
+AROUSAL_FRUSTRATION_W = _env("AROUSAL_FRUSTRATION_W", 0.20)
+AROUSAL_CURIOSITY_W = _env("AROUSAL_CURIOSITY_W", 0.15)
+AROUSAL_ACHIEVEMENT_W = _env("AROUSAL_ACHIEVEMENT_W", 0.15)
+
+# ============================
+# Impulse Accumulation (Law 17)
+# ============================
+
+IMPULSE_DRIVE_THRESHOLD = _env("IMPULSE_DRIVE_THRESHOLD", 0.3)
+IMPULSE_CONTEXT_THRESHOLD = _env("IMPULSE_CONTEXT_THRESHOLD", 0.4)
+IMPULSE_ACCUMULATION_RATE = _env("IMPULSE_ACCUMULATION_RATE", 0.02)
+IMPULSE_DECAY = _env("IMPULSE_DECAY", 0.9)
+
+# ============================
+# Budget & Session (Law 19)
+# ============================
+
+AUTONOMOUS_THOUGHT_THRESHOLD = _env("AUTONOMOUS_THOUGHT_THRESHOLD", 0.3)
+FAST_TICK = _env("FAST_TICK", 5.0)          # seconds
+SLOW_TICK = _env("SLOW_TICK", 60.0)
+MINIMAL_TICK = _env("MINIMAL_TICK", 300.0)
+SUBCONSCIOUS_TICK = _env("SUBCONSCIOUS_TICK", 60.0)
+SUBCONSCIOUS_ACTION_THRESHOLD = _env("SUBCONSCIOUS_ACTION_THRESHOLD", 0.7)
+IDENTITY_BUDGET_RATIO = _env("IDENTITY_BUDGET_RATIO", 0.4)
+MAX_PARALLEL_SESSIONS = _env_int("MAX_PARALLEL_SESSIONS", 5)
+PARALLEL_BUDGET_THRESHOLD = _env("PARALLEL_BUDGET_THRESHOLD", 0.5)
+SESSION_MERGE_THRESHOLD = _env("SESSION_MERGE_THRESHOLD", 0.4)
+SESSION_MIN_STRIDES = _env_int("SESSION_MIN_STRIDES", 2)
+
+# ============================
+# Prompt Assembly
+# ============================
+
+IDENTITY_REGEN_THRESHOLD = _env("IDENTITY_REGEN_THRESHOLD", 0.5)
+IDENTITY_WEIGHT_THRESHOLD = _env("IDENTITY_WEIGHT_THRESHOLD", 0.7)
+IDENTITY_STABILITY_THRESHOLD = _env("IDENTITY_STABILITY_THRESHOLD", 0.6)
+MAX_IDENTITY_AGE = _env_int("MAX_IDENTITY_AGE", 1000)
+IDENTITY_TOP_N = _env_int("IDENTITY_TOP_N", 20)
+
+# ============================
+# Propagation Constants (Law 2)
+# ============================
+
+PROPAGATION_THRESHOLD = _env("PROPAGATION_THRESHOLD", 0.2)  # energy above this spills
+PROPAGATION_SAFETY_CAP = _env("PROPAGATION_SAFETY_CAP", 5.0)  # max energy after propagation
+
+# ============================
+# Contagion Constants
+# ============================
+
+CONTAGION_RATE = _env("CONTAGION_RATE", 0.1)
+PROXIMITY_CONTAGION = _env("PROXIMITY_CONTAGION", 0.02)
+
+# ============================
+# Emotion Calibration (Phase H)
+# Spec: docs/l1_wiring/ALGORITHM_L1_Wiring.md Section 9
+# ============================
+
+# Anxiety coupling — rises when novelty is high but trusted nodes are absent from WM
+ANXIETY_COUPLING_RATE = _env("ANXIETY_COUPLING_RATE", 0.15)          # smoothing factor (lerp rate)
+ANXIETY_TRUSTED_WEIGHT_THRESHOLD = _env("ANXIETY_TRUSTED_WEIGHT_THRESHOLD", 0.7)  # node weight above this = "trusted"
+ANXIETY_TRUSTED_STABILITY_THRESHOLD = _env("ANXIETY_TRUSTED_STABILITY_THRESHOLD", 0.5)  # node stability above this = "trusted"
+ANXIETY_SELF_PRESERVATION_COUPLING = _env("ANXIETY_SELF_PRESERVATION_COUPLING", 0.3)
+ANXIETY_FRUSTRATION_COUPLING = _env("ANXIETY_FRUSTRATION_COUPLING", 0.2)
+ANXIETY_FRUSTRATION_TRIGGER = _env("ANXIETY_FRUSTRATION_TRIGGER", 0.6)  # frustration above this feeds anxiety
+
+# Satisfaction decay — decays toward baseline unless reinforced
+SATISFACTION_BASELINE = _env("SATISFACTION_BASELINE", 0.3)
+SATISFACTION_DECAY_RATE = _env("SATISFACTION_DECAY_RATE", 0.05)      # per tick decay toward baseline
+SATISFACTION_SPIKE = _env("SATISFACTION_SPIKE", 0.3)                 # on task completion
+SATISFACTION_BOOST = _env("SATISFACTION_BOOST", 0.15)                # on positive feedback
+SATISFACTION_DESIRE_FULFILLMENT = _env("SATISFACTION_DESIRE_FULFILLMENT", 0.25)  # on desire fulfillment
+
+# Frustration escalation threshold — sustained frustration triggers orientation shift
+FRUSTRATION_ESCALATION_THRESHOLD = _env("FRUSTRATION_ESCALATION_THRESHOLD", 0.7)
+FRUSTRATION_SUSTAINED_TICKS = _env_int("FRUSTRATION_SUSTAINED_TICKS", 5)

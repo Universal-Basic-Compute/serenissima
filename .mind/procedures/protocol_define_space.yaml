@@ -1,0 +1,114 @@
+procedure: protocol_define_space
+version: "1.0"
+description: Create a space/container node for a module
+
+triggers:
+  - gap: "Module needs container in graph"
+  - event: "New module being created"
+
+requires_skills: []
+
+contextual_knowledge:
+  domain: |
+    Spaces are containers for module content.
+    Space types: module, area, concept, project.
+    Spaces contain: narratives, things, moments.
+    Spaces link to parent spaces via CONTAINS.
+
+  constraints: |
+    - Space ID must be unique
+    - Should specify type and parent
+    - Creates container for all module content
+
+  dependencies: |
+    Requires: nothing (can be first node)
+    Enables: all other protocols (they need a space to work in)
+
+  quality_criteria: |
+    Good: "space_physics_tick with type=module, parent=space_physics"
+    Bad: "some_space"
+
+steps:
+  check_exists:
+    type: query
+    auto_fetch:
+      - query: { find: space, where: { id: "{space_id}" } }
+        store_as: existing
+    next: branch_exists
+
+  branch_exists:
+    type: branch
+    checks:
+      - condition: "{existing | count} > 0"
+        action:
+          type: complete
+          message: "Space {space_id} already exists"
+      - condition: "ready"
+        action: { goto: gather_details }
+
+  gather_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Creating new space.
+
+    questions:
+      - name: space_id
+        ask: "Space ID? Pattern: space_<area>_<module>"
+        expects:
+          type: string
+          pattern: "^space_[a-z_]+$"
+
+      - name: space_name
+        ask: "Human-readable name?"
+        expects: { type: string }
+
+      - name: space_type
+        ask: "Space type?"
+        expects:
+          type: enum
+          options: [module, area, concept, project]
+
+      - name: parent_space
+        ask: "Parent space ID? (empty if root)"
+        expects: { type: string, min_length: 0 }
+
+      - name: description
+        ask: "Brief description of what this space contains?"
+        expects: { type: string }
+
+    next: create_space
+
+  create_space:
+    type: create
+    nodes:
+      - id: "{space_id}"
+        node_type: space
+        name: "{space_name}"
+        type: "{space_type}"
+        description: "{description}"
+
+      - id: "moment_create_space_{timestamp}"
+        node_type: moment
+        type: procedure_create
+        prose: "Created space {space_name} ({space_type})"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{parent_space}"
+        to: "{space_id}"
+        condition: "{parent_space} != ''"
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_create_space_{timestamp}"
+      - type: about
+        from: "moment_create_space_{timestamp}"
+        to: "{space_id}"
+
+    next: $complete
+
+output:
+  space_created: "{space_id}"
+  moment: "moment_create_space_{timestamp}"

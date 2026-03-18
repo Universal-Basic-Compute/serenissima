@@ -1,0 +1,267 @@
+# Protocol: add_behaviors
+# Document observable behaviors for a module
+
+procedure: add_behaviors
+version: "2.0"
+description: Document observable behaviors for a module - rich format, individual nodes
+
+triggers:
+  - gap: "Module has objectives but no documented behaviors"
+  - event: "New functionality added that should be documented"
+
+requires_skills:
+  - SKILL_Define_Module_Boundaries_Objectives_And_Scope.md
+
+contextual_knowledge:
+  domain: |
+    Behaviors = observable effects (WHAT the module does, not HOW).
+    Behaviors link to objectives they satisfy.
+    Format: Given/When/Then or "On X, Y happens".
+    Behaviors are testable claims about system behavior.
+
+  constraints: |
+    - Behaviors must be observable from outside
+    - Each behavior links to an objective
+    - Avoid implementation details
+
+  dependencies: |
+    Requires: objectives exist (behaviors serve objectives)
+    Enables: validation design, test writing
+
+  quality_criteria: |
+    Good: "On decay tick, all connection weights above 0.1 reduce by 5%. Serves: performance_objective."
+    Bad: "Uses exponential decay algorithm"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: objective, in_space: "{space}" }
+        store_as: objectives
+      - query: { find: narrative, type: behavior, in_space: "{space}" }
+        store_as: existing_behaviors
+    # Auto-derive module_name from space for ID generation
+    computed:
+      module_name: "{space | strip_prefix('space_MODULE_') | strip_prefix('space_AREA_') | strip_prefix('space_CONCEPT_') | strip_prefix('space_PROJECT_')}"
+    purpose: "Load objectives and existing behaviors for dense linking"
+    next: check_objectives
+
+  check_objectives:
+    type: branch
+    checks:
+      - condition: "{objectives | count} == 0"
+        action:
+          type: call_procedure
+          protocol: add_objectives
+          context:
+            space: "{space}"
+            actor_id: "{actor_id}"
+          on_complete: gather_behaviors_count
+      - condition: "ready"
+        action: { goto: gather_behaviors_count }
+
+  gather_behaviors_count:
+    type: ask
+    questions:
+      - name: behavior_count
+        ask: "How many behaviors to document? (1-5)"
+        why: "Determines the number of loop iterations to capture individual behaviors."
+        expects:
+          type: number
+          min: 1
+          max: 5
+    next: behavior_loop
+
+  behavior_loop:
+    type: loop
+    count: "{behavior_count}"
+    step:
+      type: ask
+      context: |
+        {contextual_knowledge.domain}
+
+        Space: {space}
+        Objectives: {objectives | format_list}
+      questions:
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # QUESTION: Behavior Name
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - name: behavior_name
+          ask: "Behavior name? (short identifier)"
+          why: "The name is used to identify the behavior in the graph and UI."
+          guidance: "Choose a concise, descriptive name. Example: 'Weight Decay', 'Cycle Detection'."
+          good_answer: "Weight Decay"
+          expects: { type: string, min_length: 3 }
+
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # QUESTION: Behavior Description
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - name: behavior_description
+          ask: "Describe the behavior (Given/When/Then or 'On X, Y happens')?"
+          why: "Describes the observable effect. This is the core content of the behavior node."
+          guidance: "Focus on WHAT happens, not HOW. Use Given/When/Then for clarity."
+          good_answer: "On decay tick, all connection weights above 0.1 reduce by 5%."
+          expects: { type: string, min_length: 10 }
+
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # QUESTION: Serves Objective
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - name: serves_objective
+          ask: "Which objective does this behavior serve?"
+          why: "Linking back to objectives shows how behavior contributes to goals."
+          guidance: "Pick the objective that this behavior helps satisfy."
+          creates: "behavior ─[serves]→ objective"
+          expects:
+            type: reference
+            from: objectives
+
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # QUESTION: Observable At
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - name: observable_at
+          ask: "Where is this observable? (API endpoint, UI, log, metric)"
+          why: "Helps verify the behavior in the real system."
+          guidance: "Be specific about where a human or agent can see this behavior."
+          expects: { type: string }
+    collect_as: behaviors
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before creating the behaviors, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this add_behaviors protocol?"
+        expects:
+          type: string
+          required: false
+
+    # Capture reasoning for each behavior
+    moment:
+      agent_provides:
+        - description: "Summary of documented behaviors"
+        - reasoning: "Why these behaviors were chosen and how they link to objectives"
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW for {space}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: {behaviors | count} behavior nodes
+
+      Nodes to create: {behaviors | count} + 1
+      Links to create: {behaviors | count} * 3 + 2
+
+      STRUCTURE:
+        space ─[contains]→ behavior
+        behavior ─[serves]→ objective
+        moment ─[about]→ behavior
+        actor ─[expresses]→ moment
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Create these behavior nodes?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_behaviors
+      revise: gather_behaviors_count
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Behavior creation cancelled"
+
+  create_behaviors:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Individual Behavior Nodes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: behaviors
+        id: "narrative_BEHAVIOR_{module_name}-{item.behavior_name | slugify}"
+        node_type: narrative
+        type: behavior
+        name: "{item.behavior_name}"
+        content: "{item.behavior_description}"
+        observable_at: "{item.observable_at}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Documentation Event)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_ADD-BEHAVIORS_{module_name}_{timestamp_short}"
+        node_type: moment
+        type: documentation
+        prose: "Documented {behaviors | count} behaviors for {space}"
+        status: spoken
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Space Contains Behaviors
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: behaviors
+        from: "{space}"
+        to: "narrative_BEHAVIOR_{module_name}-{item.behavior_name | slugify}"
+        nature: "contains"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Behaviors Serve Objective
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: behaviors
+        from: "narrative_BEHAVIOR_{module_name}-{item.behavior_name | slugify}"
+        to: "{item.serves_objective}"
+        nature: "serves"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_ADD-BEHAVIORS_{module_name}_{timestamp_short}"
+        nature: "expresses"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Behaviors
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: behaviors
+        from: "moment_ADD-BEHAVIORS_{module_name}_{timestamp_short}"
+        to: "narrative_BEHAVIOR_{module_name}-{item.behavior_name | slugify}"
+        nature: "is about"
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space}"
+      task_id: "add_behaviors_{module_name}"
+    next: $complete
+
+output:
+  behavior_ids: "{behaviors | map(id)}"
+  moment: "moment_ADD-BEHAVIORS_{module_name}_{timestamp_short}"

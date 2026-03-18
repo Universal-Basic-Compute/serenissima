@@ -1,0 +1,108 @@
+procedure: protocol_add_todo
+version: "1.0"
+description: Create actionable TODO node
+
+triggers:
+  - event: "Actionable task discovered during work"
+  - event: "Work item needs tracking"
+
+requires_skills:
+  - "SKILL_Update_Module_Sync_State_And_Record_Markers.md"
+
+contextual_knowledge:
+  domain: |
+    TODOs = atomic actionable items (@mind:TODO marker).
+    TODOs attach to spaces or narratives.
+    TODOs have: description, priority, status (open, in_progress, done, blocked).
+    TODOs link "about" their subject and "assigned_to" actors.
+
+  constraints: |
+    - TODOs must be actionable (verb + object)
+    - TODOs need clear subject (what node is this about?)
+    - Priority determines triage order
+
+  dependencies: |
+    Requires: space or narrative to attach to
+    Enables: work tracking, handoff clarity
+
+  quality_criteria: |
+    Good: "@mind:TODO Add decay tests for edge case. Priority: high. About: validation_decay."
+    Bad: "Fix stuff"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, in_space: "{space}", limit: 10 }
+        store_as: narratives
+      - query: { find: todo, in_space: "{space}", status: open }
+        store_as: existing_todos
+    next: gather_todo
+
+  gather_todo:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Existing narratives: {narratives | list by type}
+      Open TODOs: {existing_todos | count}
+
+    questions:
+      - name: description
+        ask: "TODO description (verb + object, actionable)?"
+        expects: { type: string }
+
+      - name: about_node
+        ask: "What is this TODO about? (space, narrative, or code location)"
+        expects:
+          type: reference_or_string
+
+      - name: priority
+        ask: "Priority?"
+        expects:
+          type: enum
+          options: [critical, high, medium, low]
+
+      - name: context_notes
+        ask: "Any context for the next agent? (optional)"
+        expects: { type: string, min_length: 0 }
+
+    next: create_todo
+
+  create_todo:
+    type: create
+    nodes:
+      - id: "todo_{timestamp}"
+        node_type: todo
+        description: "{description}"
+        priority: "{priority}"
+        status: open
+        context: "{context_notes}"
+
+      - id: "moment_add_todo_{timestamp}"
+        node_type: moment
+        type: todo_creation
+        prose: "Created TODO: {description}"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "todo_{timestamp}"
+      - type: about
+        from: "todo_{timestamp}"
+        to: "{about_node}"
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_add_todo_{timestamp}"
+      - type: about
+        from: "moment_add_todo_{timestamp}"
+        to: "todo_{timestamp}"
+
+    next: $complete
+
+output:
+  todo_created: "todo_{timestamp}"
+  priority: "{priority}"
+  moment: "moment_add_todo_{timestamp}"

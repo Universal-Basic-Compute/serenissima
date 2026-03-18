@@ -1,0 +1,136 @@
+procedure: protocol_explore_space
+version: "1.0"
+description: Explore a space/module to understand current state before work
+
+triggers:
+  - event: "Agent starts work on a module"
+  - event: "Agent needs to understand existing state"
+  - gap: "MATCH (s:Space {id: '{space}'}) WHERE NOT EXISTS((s)<-[:ABOUT]-(:Moment {type: 'exploration'})) RETURN s"
+
+requires_skills:
+  - "SKILL_Onboard_Understand_Existing_Module_Codebase_And_Confirm_Canon.md"
+
+# ============================================
+# CONTEXTUAL KNOWLEDGE
+# ============================================
+contextual_knowledge:
+  domain: |
+    Exploration = understanding current state before making changes.
+    Spaces contain: narratives (behaviors, validations, patterns), things (files, docks), moments (work history).
+    Recent work = moments about this space, ordered by timestamp.
+    Existing structures = what nodes/links already exist.
+
+  constraints: |
+    - Must query existing state before asking questions
+    - Must summarize what exists, not just list
+    - Creates exploration moment linked to space
+    - Exploration is read-only (no mutations except the moment)
+
+  dependencies: |
+    Requires: space exists in graph
+    Enables: all other protocols (they start with explore_space)
+
+  quality_criteria: |
+    Good: "Found 3 validations (V-ENERGY-BOUNDED, V-DECAY-MONOTONIC, V-FLOW-CONSERVED), 2 health indicators, last work 2 days ago on decay algorithm"
+    Bad: "There are some things in the space"
+
+# ============================================
+# STEPS
+# ============================================
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, in_space: "{space}", limit: 20 }
+        store_as: existing_narratives
+      - query: { find: thing, in_space: "{space}", limit: 20 }
+        store_as: existing_things
+      - query: { find: moment, about_space: "{space}", limit: 10, order_by: timestamp_desc }
+        store_as: recent_moments
+      - query: { find: link, in_space: "{space}" }
+        store_as: internal_links
+    purpose: "Load all existing content in space"
+    next: summarize_state
+
+  summarize_state:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+
+      Existing narratives ({existing_narratives | count}):
+      {existing_narratives | group_by type | summarize}
+
+      Existing things ({existing_things | count}):
+      {existing_things | group_by type | summarize}
+
+      Recent work:
+      {recent_moments | format_timeline}
+
+      Internal structure:
+      {internal_links | summarize_graph}
+
+    questions:
+      - name: exploration_summary
+        ask: "Based on the loaded context, what is the current state of this space? What exists? What patterns do you see? What might be missing?"
+        why_it_matters: "This summary becomes the exploration moment content"
+        expects:
+          type: string
+          min_length: 50
+
+      - name: focus_areas
+        ask: "What areas need attention? What's well-covered vs sparse?"
+        why_it_matters: "Guides next work"
+        expects:
+          type: string
+
+      - name: questions_raised
+        ask: "What questions does this exploration raise? What would you want to clarify?"
+        why_it_matters: "Surfaces gaps and uncertainties"
+        expects:
+          type: string
+
+    moment:
+      agent_provides: [exploration_summary, focus_areas, questions_raised]
+    next: create_exploration_moment
+
+  create_exploration_moment:
+    type: create
+    nodes:
+      - id: "moment_explore_{space}_{timestamp}"
+        node_type: moment
+        type: exploration
+        prose: |
+          Explored {space}.
+
+          Current state: {exploration_summary}
+
+          Focus areas: {focus_areas}
+
+          Questions: {questions_raised}
+        status: completed
+
+    links:
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_explore_{space}_{timestamp}"
+      - type: about
+        from: "moment_explore_{space}_{timestamp}"
+        to: "{space}"
+        properties:
+
+    moment:
+      agent_provides: [description]
+    next: $complete
+
+output:
+  exploration:
+    summary: "{exploration_summary}"
+    focus_areas: "{focus_areas}"
+    questions: "{questions_raised}"
+    existing_count:
+      narratives: "{existing_narratives | count}"
+      things: "{existing_things | count}"
+      moments: "{recent_moments | count}"
+  moment_created: "moment_explore_{space}_{timestamp}"

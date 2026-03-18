@@ -1,0 +1,356 @@
+# Protocol: add_implementation
+# Create implementation narrative with docking points for code surfaces
+
+procedure: add_implementation
+version: "2.0"
+description: Create implementation narrative with docking points for code surfaces - rich format
+
+triggers:
+  - gap: "Module exists without implementation documentation"
+  - event: "New code surfaces discovered during onboarding"
+
+requires_skills:
+  - SKILL_Onboard_Understand_Existing_Module_Codebase_And_Confirm_Canon.md
+  - SKILL_Implement_Write_Or_Modify_Code_With_Doc_Chain_Coupling.md
+
+contextual_knowledge:
+  domain: |
+    Implementation narratives document code architecture:
+    - Where code lives (file paths)
+    - Key symbols (functions, classes)
+    - Data flow (how data moves through system)
+    Docking points = specific code locations for observation/modification.
+    Attached via ATTACHED_TO to implementation narrative.
+
+  constraints: |
+    - Must list actual code files (verify they exist)
+    - Docking points must have file:symbol format
+    - Should cover entry points, core logic, integration points
+
+  dependencies: |
+    Requires: space exists, code exists, algorithms exist
+    Enables: health coverage (docks for observation), code navigation
+
+  quality_criteria: |
+    Good: "Entry: tick_runner.py:run_tick, Core: tick_runner.py:decay_phase, tick_runner.py:flow_phase"
+    Bad: "Some code files"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: algorithm, in_space: "{space}" }
+        store_as: algorithms
+      - query: { find: narrative, type: pattern, in_space: "{space}" }
+        store_as: patterns
+      - query: { find: narrative, type: implementation, in_space: "{space}" }
+        store_as: existing_impl
+      - query: { find: thing, type: dock, in_space: "{space}" }
+        store_as: existing_docks
+    purpose: "Load algorithms, patterns, and existing implementation docs"
+    next: check_prerequisites
+
+  check_prerequisites:
+    type: branch
+    checks:
+      - condition: "{algorithms | count} == 0"
+        action:
+          type: call_procedure
+          protocol: add_algorithm
+          context: { space: "{space}" }
+          on_complete: load_context
+      - condition: "ready"
+        action: { goto: gather_implementation_details }
+
+  gather_implementation_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+
+      ━━━ EXISTING GRAPH STATE ━━━
+
+      Algorithms (what this implementation realizes):
+      {algorithms | format_list}
+
+      Patterns (design decisions followed):
+      {patterns | format_list}
+
+      Existing implementation: {existing_impl | summarize}
+      Existing docks: {existing_docks | list locations}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 1: Implementation Name
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: impl_name
+        ask: "Implementation name? Usually matches module name."
+        expects: { type: string }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 2: Realizes Algorithm
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: realizes_algorithm
+        ask: "Which algorithm does this implementation realize?"
+
+        why: |
+          Linking to algorithms connects code architecture to logical design.
+          This is the "LINK TO PREVIOUS STEP" in the doc chain.
+
+        context: |
+          Algorithms in this space:
+          {algorithms | format_list}
+
+        guidance: |
+          Pick the algorithm whose steps are implemented in this code.
+
+        creates: |
+          implementation ─[relates: realizes]→ algorithm
+
+        expects:
+          type: reference
+          from: algorithms
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 3: Follows Patterns
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: follows_patterns
+        ask: "Which design patterns does this implementation follow?"
+
+        why: |
+          Linking to patterns connects code structure to design decisions.
+
+        context: |
+          Patterns in this space:
+          {patterns | format_list}
+
+        guidance: |
+          Pick the design patterns that govern this implementation's structure.
+
+        creates: |
+          implementation ─[relates: follows]→ pattern
+
+        expects:
+          type: id_list
+          from: "{patterns}"
+          min: 0
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 4: Code Files
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: code_files
+        ask: "What are the key code files? List paths."
+        why_it_matters: "Documents where code lives"
+        expects: { type: string_list, min: 1 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 5: Entry Points
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: entry_points
+        ask: "Entry points (main functions, API handlers)? Format: file:symbol"
+        why_it_matters: "Where execution starts"
+        expects: { type: string_list, min: 1 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 6: Core Logic
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: core_logic
+        ask: "Core logic locations? Format: file:symbol"
+        why_it_matters: "Where main algorithms live"
+        expects: { type: string_list, min: 1 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 7: Integration Points
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: integration_points
+        ask: "Integration points (calls to other modules)? Format: file:symbol"
+        why_it_matters: "Where module connects to others"
+        expects: { type: string_list, min: 0 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 8: Data Flow
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: data_flow
+        ask: "How does data flow through? Describe the path."
+        why_it_matters: "Understanding for modifications"
+        expects: { type: string }
+
+    # Capture reasoning
+    moment:
+      agent_provides:
+        - description: "Summary of the implementation"
+        - reasoning: "Why this implementation realizes this algorithm and follows these patterns"
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: narrative_IMPLEMENTATION_{impl_name | slugify}
+
+      Nodes to create: {1 + (entry_points | count) + (core_logic | count) + (integration_points | count) + 1}
+        - narrative_IMPLEMENTATION_{impl_name | slugify}
+        - thing_DOCK_* ({entry_points | count} + {core_logic | count} + {integration_points | count})
+        - moment_CREATE_implementation_{impl_name | slugify}_{timestamp_short}
+
+      Links to create:
+        Internal:
+          - dock ─[attached_to]→ implementation
+          - moment ─[about]→ implementation
+          - actor ─[expresses]→ moment
+
+        External:
+          - space ─[contains]→ implementation
+          - implementation ─[relates: realizes]→ {realizes_algorithm}
+          - implementation ─[relates: follows]→ {follows_patterns | format_ids}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Create this implementation cluster?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_implementation
+      revise: gather_implementation_details
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Implementation creation cancelled"
+
+  create_implementation:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Implementation Narrative
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_IMPLEMENTATION_{impl_name | slugify}"
+        node_type: narrative
+        type: implementation
+        name: "{impl_name}"
+        code_files: "{code_files}"
+        data_flow: "{data_flow}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODES: Docks (Things)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: entry_points
+        id: "thing_DOCK_entry_{item | slugify}"
+        node_type: thing
+        type: dock
+        name: "entry_point"
+        location: "{item}"
+        role: entry
+
+      - for_each: core_logic
+        id: "thing_DOCK_core_{item | slugify}"
+        node_type: thing
+        type: dock
+        name: "core_logic"
+        location: "{item}"
+        role: core
+
+      - for_each: integration_points
+        id: "thing_DOCK_integration_{item | slugify}"
+        node_type: thing
+        type: dock
+        name: "integration"
+        location: "{item}"
+        role: integration
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Creation Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_CREATE_implementation_{impl_name | slugify}_{timestamp_short}"
+        node_type: moment
+        type: procedure_create
+        prose: |
+          Created implementation {impl_name}
+          Realizes: {realizes_algorithm}
+          Follows: {follows_patterns | format_names}
+          Code: {code_files | list}
+        status: completed
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # STRUCTURAL: Space Contains Implementation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space}"
+        to: "narrative_IMPLEMENTATION_{impl_name | slugify}"
+        nature: "contains"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # SEMANTIC: Implementation Realizes Algorithm
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_IMPLEMENTATION_{impl_name | slugify}"
+        to: "{realizes_algorithm}"
+        nature: "realizes"
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # SEMANTIC: Implementation Follows Patterns
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: follows_patterns
+        from: "narrative_IMPLEMENTATION_{impl_name | slugify}"
+        to: "{item}"
+        nature: "follows"
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # ATTACHMENT: Docks Attached To Implementation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: entry_points
+        from: "thing_DOCK_entry_{item | slugify}"
+        to: "narrative_IMPLEMENTATION_{impl_name | slugify}"
+        nature: "attached to"
+
+      - for_each: core_logic
+        from: "thing_DOCK_core_{item | slugify}"
+        to: "narrative_IMPLEMENTATION_{impl_name | slugify}"
+        nature: "attached to"
+
+      - for_each: integration_points
+        from: "thing_DOCK_integration_{item | slugify}"
+        to: "narrative_IMPLEMENTATION_{impl_name | slugify}"
+        nature: "attached to"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PROVENANCE: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_CREATE_implementation_{impl_name | slugify}_{timestamp_short}"
+        nature: "expresses"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PROVENANCE: Moment About Implementation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_CREATE_implementation_{impl_name | slugify}_{timestamp_short}"
+        to: "narrative_IMPLEMENTATION_{impl_name | slugify}"
+        nature: "is about"
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space}"
+      task_id: "add_implementation_{impl_name}"
+    next: $complete
+
+output:
+  impl_id: "narrative_IMPLEMENTATION_{impl_name | slugify}"
+  moment: "moment_CREATE_implementation_{impl_name | slugify}_{timestamp_short}"

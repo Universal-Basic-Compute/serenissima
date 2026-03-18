@@ -1,0 +1,524 @@
+# Protocol: completion_handoff
+# Called at the end of every task for quality reflection and handoff
+
+procedure: completion_handoff
+version: "2.0"
+description: Captures task completion report, quality reflection, and improvement suggestions - rich format
+
+triggers:
+  - event: "Protocol completed"
+  - event: "Task finished"
+  - gap: "Agent needs to record handoff"
+
+requires_skills: []
+
+contextual_knowledge:
+  domain: |
+    Every completed task should produce:
+    1. A completion report (what was done, choices made)
+    2. Quality reflection (confidence, risks, escalations)
+    3. Improvement suggestions (for skill, protocol, process)
+
+    This creates a feedback loop for continuous improvement.
+
+  why_this_matters: |
+    - Handoffs without context waste the next agent's time
+    - Unrecorded decisions get lost
+    - Low-confidence work needs flagging
+    - Process improvements come from reflection
+
+  constraints: |
+    - Be honest about confidence levels
+    - Escalate genuine blockers, don't hide them
+    - Suggestions should be actionable
+    - Keep handoff context sufficient for cold-start
+
+steps:
+  gather_completion:
+    type: ask
+    context: |
+      ## Completion Report
+
+      Record what was accomplished in this task.
+      Be specific - the next agent or human needs to understand
+      exactly what changed and why.
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Task Summary
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: task_summary
+        ask: "What was the main task and what did you accomplish?"
+        why: "Creates the primary handoff record for understanding progress."
+        good_answer: "Implemented update_sync protocol with 5 steps. All verified working."
+        expects:
+          type: string
+          min_length: 50
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Files Changed
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: files_changed
+        ask: "What files were created or modified? (comma-separated paths)"
+        why: "Provides a clear list of code and doc surfaces affected."
+        expects:
+          type: string_list
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Key Decisions
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: key_decisions
+        ask: "What key decisions did you make? List each with brief reasoning."
+        why: "Ensures decisions are traceable and justifiable."
+        good_answer: "1. Used YAML anchors for reusable step patterns."
+        expects:
+          type: string
+          min_length: 30
+
+    next: gather_quality
+
+  gather_quality:
+    type: ask
+    context: |
+      ## Quality Reflection
+
+      Assess the quality and completeness of your work.
+      Honest self-assessment enables appropriate review depth.
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Confidence Level
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: confidence_level
+        ask: "How confident are you in this work? Consider: correctness, completeness, edge cases"
+        why: "Signals the level of review or verification required."
+        expects:
+          type: enum
+          options:
+            - "high (90%+): Thoroughly tested, covers edge cases, ready to ship"
+            - "medium (70-90%): Works for main cases, may have gaps"
+            - "low (50-70%): Basic functionality, needs review"
+            - "uncertain (<50%): Best effort, significant unknowns"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Confidence Reasoning
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: confidence_reasoning
+        ask: "Why this confidence level? What would increase it?"
+        why: "Provides context for the confidence assessment."
+        expects:
+          type: string
+          min_length: 20
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Risks Identified
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: risks_identified
+        ask: "What risks or potential issues should be monitored? (empty if none)"
+        why: "Flags potential failure points for future observation."
+        expects:
+          type: string
+          required: false
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Tests Run
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: tests_run
+        ask: "What verification did you perform? (tests, manual checks, etc.)"
+        why: "Documents the evidence supporting completion."
+        expects:
+          type: string
+
+    next: gather_escalations
+
+  gather_escalations:
+    type: ask
+    context: |
+      ## Escalations & Propositions
+
+      Identify blockers that need human decisions and improvements to suggest.
+
+      **Escalation** = blocked, needs decision, can't proceed without input
+      **Proposition** = improvement idea, refactor suggestion, feature request
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Escalations
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: escalations
+        ask: "Any escalations? Things that are blocked or need human decision? (empty if none)"
+        why: "Surfaces blockers that require external intervention."
+        expects:
+          type: string_list
+          required: false
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Propositions
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: propositions
+        ask: "Any improvement propositions? Refactors, features, optimizations? (empty if none)"
+        why: "Captures growth ideas for the system."
+        expects:
+          type: string_list
+          required: false
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Blockers for Next
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: blockers_for_next
+        ask: "Anything the next agent/human should be aware of before continuing?"
+        why: "Ensures continuity and awareness of context-specific hurdles."
+        expects:
+          type: string
+          required: false
+
+    next: gather_handoff
+
+  gather_handoff:
+    type: ask
+    context: |
+      ## Handoff Context
+
+      What does the next agent need to know to continue effectively?
+      Assume they have no prior context.
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Current State
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: current_state
+        ask: "What is the current state? Where did you leave off?"
+        why: "Provides the immediate entry point for the next agent."
+        expects:
+          type: string
+          min_length: 30
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Next Steps
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: next_steps
+        ask: "What should happen next? Be specific and actionable."
+        why: "Defines the roadmap for continued progress."
+        expects:
+          type: string
+          min_length: 20
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Context Files
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: context_files
+        ask: "What files should the next agent read first? (comma-separated paths)"
+        why: "Identifies essential reading for cold-start orientation."
+        expects:
+          type: string_list
+
+    next: gather_improvements
+
+  gather_improvements:
+    type: ask
+    context: |
+      ## Process Improvement
+
+      Reflect on how this task went. What could be better?
+
+      Consider:
+      - **Skill** - Was the domain knowledge sufficient?
+      - **Protocol** - Were the steps clear and complete?
+      - **Integration** - Did tools and systems work well together?
+      - **Context** - Did you have enough information to work effectively?
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Skill Improvements
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: skill_improvements
+        ask: "How could the skill documentation be improved?"
+        why: "Drives evolution of shared domain knowledge."
+        expects:
+          type: string
+          required: false
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Protocol Improvements
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: protocol_improvements
+        ask: "How could THIS protocol be improved?"
+        why: "Drives refinement of specific task workflows."
+        expects:
+          type: string
+          required: false
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Integration Improvements
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: integration_improvements
+        ask: "How could the tools/systems integration be better?"
+        why: "Identifies technical friction points."
+        expects:
+          type: string
+          required: false
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Context Improvements
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: context_improvements
+        ask: "What context was missing that would have helped?"
+        why: "Drives automation of relevant context loading."
+        expects:
+          type: string
+          required: false
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: General Feedback
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: general_feedback
+        ask: "Any other thoughts, observations, or suggestions?"
+        expects:
+          type: string
+          required: false
+
+    # Capture reasoning for the handoff process
+    moment:
+      agent_provides:
+        - description: "Summary of handoff process"
+        - reasoning: "Why this handoff context was provided and its significance for continuity"
+
+    next: confirm_handoff
+
+  confirm_handoff:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      ## HANDOFF REPORT PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      **Task:** {task_summary | truncate(100)}
+
+      **Files:** {files_changed | join(", ")}
+
+      **Confidence:** {confidence_level}
+      - {confidence_reasoning}
+
+      **Escalations:** {escalations | count} items
+      **Propositions:** {propositions | count} items
+
+      **Next Steps:** {next_steps | truncate(100)}
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirm_handoff
+        ask: "Submit this handoff report?"
+        expects:
+          type: enum
+          options: [submit, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirm_handoff}"
+    cases:
+      submit: create_handoff
+      revise: gather_completion
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Handoff cancelled"
+
+  create_handoff:
+    type: create
+    nodes:
+      # Completion moment
+      - id: "moment_completion_{task_id}_{timestamp}"
+        node_type: moment
+        type: task_completion
+        prose: |
+          ## Task Completed
+
+          {task_summary}
+
+          ### Key Decisions
+          {key_decisions}
+
+          ### Quality
+          - Confidence: {confidence_level}
+          - Reasoning: {confidence_reasoning}
+          - Tests: {tests_run}
+
+          ### Risks
+          {risks_identified | default("None identified")}
+        status: spoken
+        # Attribute explanations:
+        # - node_type: moment = point-in-time record of something that happened
+        # - type: task_completion = categorizes this as a completion event for querying
+        # - prose: rich text content capturing the full completion context
+        # - status: spoken = this moment has been articulated (vs internal/pending)
+        # - weight: 0.9 = high importance for retrieval (completion events are significant)
+
+      # Handoff narrative
+      - id: "narrative_handoff_{task_id}_{timestamp}"
+        node_type: narrative
+        type: handoff
+        name: "Handoff: {task_summary | truncate(50)}"
+        content: |
+          ## Current State
+          {current_state}
+
+          ## Next Steps
+          {next_steps}
+
+          ## Context Files
+          {context_files | format_list}
+
+          ## Blockers
+          {blockers_for_next | default("None")}
+        # Attribute explanations:
+        # - node_type: narrative = persistent documentation/context
+        # - type: handoff = categorizes for handoff queries
+        # - name: short identifier for display
+        # - content: full handoff context for next agent
+        # - weight: 0.8 = important but not as critical as the completion moment
+
+      # Escalation nodes (if any)
+      - for_each: escalations
+        id: "escalation_{item | slugify}_{timestamp}"
+        node_type: narrative
+        type: escalation
+        content: "{item}"
+        status: open
+        priority: high
+        # Attribute explanations:
+        # - type: escalation = blocked item needing human decision
+        # - status: open = not yet resolved
+        # - priority: high = escalations are urgent
+        # - weight: 0.9 = high retrieval priority
+
+      # Proposition nodes (if any)
+      - for_each: propositions
+        id: "proposition_{item | slugify}_{timestamp}"
+        node_type: narrative
+        type: proposition
+        content: "{item}"
+        status: proposed
+        priority: normal
+        # Attribute explanations:
+        # - type: proposition = improvement suggestion
+        # - status: proposed = suggested but not approved
+        # - priority: normal = not urgent
+        # - weight: 0.5 = lower retrieval priority (background improvement)
+
+      # Improvement feedback narrative
+      - id: "narrative_improvements_{task_id}_{timestamp}"
+        node_type: narrative
+        type: process_feedback
+        name: "Process Improvements: {task_summary | truncate(30)}"
+        content: |
+          ## Skill Improvements
+          {skill_improvements | default("No suggestions")}
+
+          ## Protocol Improvements
+          {protocol_improvements | default("No suggestions")}
+
+          ## Integration Improvements
+          {integration_improvements | default("No suggestions")}
+
+          ## Context Improvements
+          {context_improvements | default("No suggestions")}
+
+          ## General Feedback
+          {general_feedback | default("None")}
+        # Attribute explanations:
+        # - type: process_feedback = meta-improvement suggestions
+        # - weight: 0.4 = lower priority, for periodic review
+
+    links:
+      # Completion moment about the task space
+      - from: "moment_completion_{task_id}_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # Link explanation: Records which space/module this completion relates to
+
+      # Actor expresses completion
+      - from: "{actor_id}"
+        to: "moment_completion_{task_id}_{timestamp}"
+        nature: "expresses"
+        # Link explanation: Who performed and reported this completion
+
+      # Handoff in space
+      - from: "{space_id}"
+        to: "narrative_handoff_{task_id}_{timestamp}"
+        nature: "contains"
+        # Link explanation: Handoff belongs to this space
+
+      # Completion links to handoff
+      - from: "moment_completion_{task_id}_{timestamp}"
+        to: "narrative_handoff_{task_id}_{timestamp}"
+        nature: "produces"
+        # Link explanation: The completion moment produced this handoff context
+
+      # Escalations about space
+      - for_each: escalations
+        from: "escalation_{item | slugify}_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # Link explanation: Escalation relates to this space
+
+      # Escalations linked to completion
+      - for_each: escalations
+        from: "moment_completion_{task_id}_{timestamp}"
+        to: "escalation_{item | slugify}_{timestamp}"
+        nature: "raised"
+        # Link explanation: Completion raised these escalations
+
+      # Propositions about space
+      - for_each: propositions
+        from: "proposition_{item | slugify}_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # Link explanation: Proposition relates to this space
+
+      # Propositions linked to completion
+      - for_each: propositions
+        from: "moment_completion_{task_id}_{timestamp}"
+        to: "proposition_{item | slugify}_{timestamp}"
+        nature: "suggested"
+        # Link explanation: Completion suggested these propositions
+
+      # Improvements linked to completion
+      - from: "moment_completion_{task_id}_{timestamp}"
+        to: "narrative_improvements_{task_id}_{timestamp}"
+        nature: "reflected"
+        # Link explanation: Completion triggered this reflection
+
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - moment_completion (1)
+      - narrative_handoff (1)
+      - escalation (0-n)
+      - proposition (0-n)
+      - narrative_improvements (1)
+    links:
+      - about (completion → space)
+      - expresses (actor → completion)
+      - contains (space → handoff)
+      - relates (completion → handoff, escalations, propositions, improvements)
+  summary: "Task completed: {task_summary | truncate(50)}"
+  returns:
+    completion_id: "moment_completion_{task_id}_{timestamp}"
+    handoff_id: "narrative_handoff_{task_id}_{timestamp}"
+    escalation_count: "{escalations | count}"
+    proposition_count: "{propositions | count}"

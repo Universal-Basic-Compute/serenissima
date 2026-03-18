@@ -1,0 +1,200 @@
+name: investigate_runtime
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for investigating runtime issues:
+  - LOG_ERROR: Find root cause of errors
+  - HOOK_UNDOC: Document undocumented hooks
+
+inputs:
+  target: string           # Log path or hook path
+  problem_type: string     # LOG_ERROR or HOOK_UNDOC
+  error_message: string    # For LOG_ERROR
+  stack_trace: string      # For LOG_ERROR
+  hook_name: string        # For HOOK_UNDOC
+
+outputs:
+  diagnosis: object        # For LOG_ERROR
+  behaviors_doc: path      # For HOOK_UNDOC
+  validated: boolean
+
+steps:
+  # =============================================================================
+  # COMMON: Gather context
+  # =============================================================================
+
+  - id: gather_context
+    name: Gather Context
+    action: read
+    params:
+      paths:
+        - "{target}"
+        - condition: "problem_type == 'LOG_ERROR'"
+          value: ".mind/logs/*.log"
+    outputs:
+      context: string
+
+  # =============================================================================
+  # LOG_ERROR PATH
+  # =============================================================================
+
+  - id: read_surrounding_logs
+    name: Read Surrounding Log Entries
+    condition: "problem_type == 'LOG_ERROR'"
+    action: read
+    params:
+      path: "{target}"
+      window: "5m"
+      center_on: "{timestamp}"
+    outputs:
+      log_context: string
+
+  - id: identify_error_location
+    name: Identify Error Location
+    condition: "problem_type == 'LOG_ERROR'"
+    action: parse
+    params:
+      input: "{stack_trace}"
+      extract: ["file", "line", "function"]
+    outputs:
+      error_location: object
+
+  - id: read_error_code
+    name: Read Code at Error Location
+    condition: "problem_type == 'LOG_ERROR'"
+    action: read
+    params:
+      path: "{error_location.file}"
+      lines: ["{error_location.line - 10}", "{error_location.line + 10}"]
+    outputs:
+      error_code: string
+
+  - id: form_hypotheses
+    name: Form Hypotheses
+    condition: "problem_type == 'LOG_ERROR'"
+    action: analyze
+    params:
+      context: "{log_context}"
+      code: "{error_code}"
+      prompt: |
+        Based on this error and context, list possible root causes.
+        For each hypothesis:
+        - Description
+        - Supporting evidence
+        - Counter-evidence
+        - Confidence (low/medium/high)
+    outputs:
+      hypotheses: list
+
+  - id: verify_hypothesis
+    name: Verify Top Hypothesis
+    condition: "problem_type == 'LOG_ERROR'"
+    action: verify
+    params:
+      hypothesis: "{hypotheses[0]}"
+      context: "{context}"
+    outputs:
+      verification: object
+
+  - id: create_diagnosis
+    name: Create Diagnosis
+    condition: "problem_type == 'LOG_ERROR'"
+    action: create_diagnosis
+    params:
+      root_cause: "{verification.conclusion}"
+      evidence: "{verification.evidence}"
+      confidence: "{verification.confidence}"
+      recommended_action: "{verification.recommendation}"
+    outputs:
+      diagnosis: object
+
+  # =============================================================================
+  # HOOK_UNDOC PATH
+  # =============================================================================
+
+  - id: read_hook_code
+    name: Read Hook Code
+    condition: "problem_type == 'HOOK_UNDOC'"
+    action: read
+    params:
+      path: "{target}"
+    outputs:
+      hook_code: string
+
+  - id: analyze_hook
+    name: Analyze Hook Behavior
+    condition: "problem_type == 'HOOK_UNDOC'"
+    action: analyze
+    params:
+      code: "{hook_code}"
+      prompt: |
+        Analyze this hook script and extract:
+        - Trigger: What causes this hook to run?
+        - Purpose: What does it do?
+        - Side effects: What does it modify?
+        - Dependencies: What does it require?
+        - Failure mode: What happens if it fails?
+    outputs:
+      hook_analysis: object
+
+  - id: find_behaviors_doc
+    name: Find or Create BEHAVIORS.md
+    condition: "problem_type == 'HOOK_UNDOC'"
+    action: find_or_create
+    params:
+      pattern: "docs/**/BEHAVIORS*.md"
+      default: "docs/hooks/BEHAVIORS.md"
+    outputs:
+      behaviors_path: path
+
+  - id: write_hook_doc
+    name: Write Hook Documentation
+    condition: "problem_type == 'HOOK_UNDOC'"
+    action: append
+    params:
+      path: "{behaviors_path}"
+      content: |
+        ## Hook: {hook_name}
+
+        **Trigger:** {hook_analysis.trigger}
+
+        **Purpose:** {hook_analysis.purpose}
+
+        **Side Effects:**
+        {format_list(hook_analysis.side_effects)}
+
+        **Dependencies:**
+        {format_list(hook_analysis.dependencies)}
+
+        **Failure Mode:** {hook_analysis.failure_mode}
+
+        **Location:** `{target}`
+    outputs:
+      behaviors_doc: path
+
+  # =============================================================================
+  # COMMON: Validate and complete
+  # =============================================================================
+
+  - id: validate
+    name: Validate Output
+    action: validate
+    params:
+      checks:
+        - condition: "problem_type == 'LOG_ERROR'"
+          check: diagnosis_has_evidence
+        - condition: "problem_type == 'LOG_ERROR'"
+          check: root_cause_identified
+        - condition: "problem_type == 'HOOK_UNDOC'"
+          check: hook_doc_complete
+    outputs:
+      validated: boolean
+      errors: string[]
+
+  - id: complete
+    name: Mark Complete
+    condition: "validated == true"
+    action: complete
+    outputs:
+      result: object

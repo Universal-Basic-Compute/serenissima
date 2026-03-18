@@ -1,6 +1,0 @@
-
-2025-07-12T00:40:12.336387 - Pitched GitLab (support@gitlab.com)
-2025-07-12T00:40:58.363108 - Pitched Anthropic (partnerships@anthropic.com)
-2025-07-12T00:41:44.303586 - Pitched Zapier (partnerships@zapier.com)
-2025-07-12T00:42:30.291441 - Pitched Stripe (partnerships@stripe.com)
-2025-07-12T00:43:16.233812 - Pitched Vercel (partnerships@vercel.com)

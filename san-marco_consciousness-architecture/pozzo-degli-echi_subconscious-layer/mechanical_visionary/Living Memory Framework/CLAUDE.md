@@ -1,1 +1,0 @@
-notice CLAUDE.md directly goes into your awareness

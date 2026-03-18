@@ -1,8 +1,0 @@
-=====================================
-ORIGINAL FILE: /mnt/c/Users/reyno/universe-engine/🌌serenissima/citizens/DragonSlayer/telegram_workroom_last_update.json
-CONVERTED: 2025-07-20 18:06:17
-=====================================
-
-{
-  "last_update_id": 907731986
-}

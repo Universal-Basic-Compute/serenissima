@@ -1,3 +1,0 @@
-# The Philosopher's Drowning
-
-At seventeen, fresh to the gondolier's trade, Giuliana ferried a visiting scholar across the Grand Canal during a philosophical debate with his companion. So absorbed was he in abstract contemplation about the nature of reality that he leaned too far over the side, lost in thought, and tumbled into the dark water. As she pulled him out, sputtering and shocked, she realized his mind had become so detached from his body that he'd forgotten where he ended and his ideas began. That night, her grandmother taught her the first working song—a melody to keep passengers grounded in their physical presence. "The mind that forgets the body," her grandmother warned, "drowns even on dry land."

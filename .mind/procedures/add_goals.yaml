@@ -1,0 +1,162 @@
+# Protocol: add_goals
+# Create goal narratives for a space
+
+procedure: add_goals
+version: "2.0"
+description: Create goal narratives for a space - rich format
+
+triggers:
+  - gap: "Module or space needs explicit goals"
+  - event: "New objectives discovered during work"
+
+requires_skills:
+  - SKILL_Define_Module_Boundaries_Objectives_And_Scope.md
+
+contextual_knowledge:
+  domain: |
+    Goals = concrete targets (measurable, time-bounded).
+    Objectives = broader directional aims.
+    Goals attach to spaces and link to objectives.
+    Goals have status: active, completed, blocked, abandoned.
+
+  constraints: |
+    - Goals must be measurable (what does "done" look like?)
+    - Goals link to parent objectives
+    - Goals need clear acceptance criteria
+
+  dependencies: |
+    Requires: space exists
+    Enables: progress tracking, completion verification
+
+  quality_criteria: |
+    Good: "Goal: Implement decay algorithm. Done when: 3 test cases pass. Parent: performance_objective."
+    Bad: "Make it faster"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: objective, in_space: "{space}" }
+        store_as: objectives
+      - query: { find: narrative, type: goal, in_space: "{space}" }
+        store_as: existing_goals
+    computed:
+      module_name: "{space | strip_prefix('space_MODULE_') | strip_prefix('space_AREA_')}"
+    purpose: "Load existing objectives and goals for context and linking"
+    next: gather_goals
+
+  gather_goals:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Existing objectives: {objectives | list}
+      Existing goals: {existing_goals | list}
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Goal Name
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: goal_name
+        ask: "Goal name (verb + noun)?"
+        why: "Provides a concise identifier for the target."
+        guidance: "Use action-oriented language. Example: 'Implement Decay Algorithm'."
+        expects: { type: string }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Acceptance Criteria
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: acceptance_criteria
+        ask: "What does 'done' look like? (measurable criteria)"
+        why: "Ensures the goal is verifiable and objective."
+        guidance: "Define specific, measurable outcomes. Example: '3 test cases pass'."
+        expects: { type: string }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Parent Objective
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: parent_objective
+        ask: "Which objective does this goal serve?"
+        why: "Links the concrete target to a broader strategic aim."
+        guidance: "Pick the objective that this goal directly contributes to."
+        creates: "goal ─[supports]→ objective"
+        expects:
+          type: reference
+          from: objectives
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Priority
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: priority
+        ask: "Priority?"
+        why: "Determines the urgency and triage order."
+        expects:
+          type: enum
+          options: [high, medium, low]
+
+    # Capture reasoning for the goal creation
+    moment:
+      agent_provides:
+        - description: "Summary of goal creation"
+        - reasoning: "Why this goal is necessary and how it serves the parent objective"
+
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before creating the goal, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this add_goals protocol?"
+        expects:
+          type: string
+          required: false
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW for {space}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: narrative_GOAL_{module_name}-{goal_name | slugify}
+
+      Nodes to create: 2
+        - narrative_GOAL_*
+        - moment_ADD-GOAL_*
+
+      Links to create: 4
+        - space ─[contains]→ goal
+        - goal ─[supports]→ {parent_objective}
+        - actor ─[expresses]→ moment
+        - moment ─[about]→ goal
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Create this goal cluster?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+output:
+  goal_created: "narrative_GOAL_{module_name}-{goal_name | slugify}"
+  parent_objective: "{parent_objective}"
+  moment: "moment_ADD-GOAL_{module_name}-{goal_name | slugify}_{timestamp}"

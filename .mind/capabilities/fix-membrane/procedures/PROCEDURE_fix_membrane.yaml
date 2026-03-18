@@ -1,0 +1,174 @@
+name: fix_membrane
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for diagnosing and fixing broken procedure YAML files.
+  Handles all 4 membrane problems: no protocols, parse errors, invalid steps,
+  and missing fields.
+
+inputs:
+  target: path
+  problem_type: string
+  error_details: object
+
+outputs:
+  fixed: boolean
+  changes: string[]
+  validated: boolean
+
+steps:
+  - id: identify_problem
+    name: Identify Problem Type
+    action: match
+    params:
+      value: "{problem_type}"
+      cases:
+        MEMBRANE_NO_PROTOCOLS: install_templates
+        MEMBRANE_PARSE_ERROR: fix_syntax
+        MEMBRANE_INVALID_STEP: fix_step
+        MEMBRANE_MISSING_FIELDS: add_fields
+    outputs:
+      next_step: string
+
+  # Branch: No Protocols
+  - id: install_templates
+    name: Install Procedure Templates
+    condition: "next_step == 'install_templates'"
+    action: copy_templates
+    params:
+      source: "templates/procedures/*.yaml"
+      dest: ".mind/procedures/"
+    outputs:
+      files_copied: path[]
+
+  - id: validate_installed
+    name: Validate Installed Procedures
+    condition: "next_step == 'install_templates'"
+    action: validate_yaml
+    params:
+      paths: "{files_copied}"
+    outputs:
+      all_valid: boolean
+
+  # Branch: Parse Error
+  - id: read_raw_file
+    name: Read Raw File Content
+    condition: "next_step == 'fix_syntax'"
+    action: read_raw
+    params:
+      path: "{target}"
+    outputs:
+      content: string
+      lines: string[]
+
+  - id: locate_error
+    name: Locate Error Position
+    condition: "next_step == 'fix_syntax'"
+    action: extract
+    params:
+      from: "{error_details}"
+      fields: [line, column, message]
+    outputs:
+      error_line: int
+      error_col: int
+      error_msg: string
+
+  - id: apply_syntax_fix
+    name: Apply Syntax Fix
+    condition: "next_step == 'fix_syntax'"
+    action: fix_yaml_syntax
+    params:
+      content: "{content}"
+      line: "{error_line}"
+      error: "{error_msg}"
+    outputs:
+      fixed_content: string
+      fix_applied: string
+
+  - id: write_fixed
+    name: Write Fixed File
+    condition: "next_step == 'fix_syntax'"
+    action: write
+    params:
+      path: "{target}"
+      content: "{fixed_content}"
+
+  - id: revalidate_syntax
+    name: Re-validate Syntax
+    condition: "next_step == 'fix_syntax'"
+    action: validate_yaml
+    params:
+      paths: ["{target}"]
+    outputs:
+      syntax_valid: boolean
+
+  # Branch: Invalid Step
+  - id: parse_procedure
+    name: Parse Procedure
+    condition: "next_step == 'fix_step' or next_step == 'add_fields'"
+    action: parse_yaml
+    params:
+      path: "{target}"
+    outputs:
+      procedure: object
+
+  - id: locate_step
+    name: Locate Invalid Step
+    condition: "next_step == 'fix_step'"
+    action: extract
+    params:
+      from: "{error_details}"
+      fields: [step_index, issue]
+    outputs:
+      step_index: int
+      issue: string
+
+  - id: fix_step
+    name: Fix Step Structure
+    condition: "next_step == 'fix_step'"
+    action: fix_step_structure
+    params:
+      procedure: "{procedure}"
+      step_index: "{step_index}"
+      issue: "{issue}"
+    outputs:
+      fixed_procedure: object
+
+  # Branch: Missing Fields
+  - id: add_fields
+    name: Add Missing Fields
+    condition: "next_step == 'add_fields'"
+    action: add_procedure_fields
+    params:
+      procedure: "{procedure}"
+      missing: "{error_details.missing_fields}"
+      filename: "{target}"
+    outputs:
+      fixed_procedure: object
+
+  # Common: Write and Validate
+  - id: write_procedure
+    name: Write Fixed Procedure
+    condition: "next_step == 'fix_step' or next_step == 'add_fields'"
+    action: write_yaml
+    params:
+      path: "{target}"
+      content: "{fixed_procedure}"
+
+  - id: final_validate
+    name: Final Validation
+    action: validate_procedure
+    params:
+      path: "{target}"
+    outputs:
+      validated: boolean
+      errors: string[]
+
+  - id: complete
+    name: Mark Complete
+    condition: "validated == true"
+    action: complete
+    outputs:
+      fixed: boolean
+      changes: string[]

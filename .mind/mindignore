@@ -1,0 +1,78 @@
+# Context Protocol Ignore File
+# Paths listed here are excluded from doctor health checks
+# Syntax is similar to .gitignore
+
+# Dependencies
+node_modules/
+vendor/
+.venv/
+venv/
+env/
+.env/
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+target/
+bin/
+obj/
+
+# Data and assets (often large, not code)
+data/
+assets/
+static/
+public/uploads/
+uploads/
+
+# Generated files
+*.min.js
+*.min.css
+*.bundle.js
+*.chunk.js
+*.map
+coverage/
+.coverage
+htmlcov/
+
+# IDE and tools
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Package locks (not code)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+Pipfile.lock
+poetry.lock
+
+# Test snapshots and fixtures
+__snapshots__/
+*.snap
+
+# Protocol installation
+.ngram/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.cache/
+.parcel-cache/
+
+# Documentation build output
+site/
+_site/
+docs/_build/

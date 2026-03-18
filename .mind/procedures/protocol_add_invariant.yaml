@@ -1,0 +1,146 @@
+procedure: protocol_add_invariant
+version: "1.0"
+description: Create a validation invariant with full context and links
+
+triggers:
+  - gap: "Behavior exists without validation coverage"
+  - event: "New constraint discovered during implementation"
+
+requires_skills:
+  - "SKILL_Define_And_Verify_Health_Signals_Mapped_To_Validation_Invariants.md"
+
+contextual_knowledge:
+  domain: |
+    Validations = invariants that must always hold.
+    Priority: HIGH (system breaks), MED (degraded), LOW (inconvenience).
+    Link to behaviors via RELATES with direction=ensures.
+    Name pattern: V-<AREA>-<INVARIANT> (e.g., V-ENERGY-BOUNDED).
+    Failure mode = what breaks if violated.
+
+  constraints: |
+    - Must have failure_mode (what breaks)
+    - Should link to at least one behavior
+    - Name must follow V-<AREA>-<INVARIANT> pattern
+    - Priority required
+
+  dependencies: |
+    Requires: space exists, behaviors exist (optional but recommended)
+    Enables: health coverage, test generation
+
+  quality_criteria: |
+    Good: "Energy values must remain in [0,1] range after every tick phase"
+    Bad: "Energy should be valid"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: behavior, in_space: "{space}" }
+        store_as: behaviors
+      - query: { find: narrative, type: validation, in_space: "{space}" }
+        store_as: existing_validations
+    purpose: "Load behaviors to link and existing validations to avoid duplication"
+    next: check_exists
+
+  check_exists:
+    type: branch
+    checks:
+      - condition: "{existing_validations | contains name: '{validation_name}'}"
+        action:
+          type: complete
+          message: "Validation {validation_name} already exists"
+      - condition: "ready"
+        action: { goto: gather_details }
+
+  gather_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Existing validations: {existing_validations | list names}
+      Available behaviors to link: {behaviors | list names with ids}
+
+    questions:
+      - name: validation_id
+        ask: "Validation ID? Must follow pattern V-<AREA>-<INVARIANT>"
+        why_it_matters: "Consistent naming enables search and grouping"
+        good_answer: "V-ENERGY-BOUNDED"
+        bad_answer: "energy_check"
+        expects:
+          type: string
+          pattern: "^V-[A-Z]+-[A-Z-]+$"
+
+      - name: invariant_statement
+        ask: "What must always hold? State the invariant precisely."
+        why_it_matters: "This is the core constraint being validated"
+        good_answer: "Energy values must remain in [0,1] range after every tick phase"
+        bad_answer: "Energy should be valid"
+        expects: { type: string, min_length: 20 }
+
+      - name: priority
+        ask: "Priority? HIGH=system breaks, MED=degraded, LOW=inconvenience"
+        why_it_matters: "Determines health check urgency"
+        expects:
+          type: enum
+          options: [HIGH, MED, LOW]
+
+      - name: failure_mode
+        ask: "What breaks if this fails? Be specific."
+        why_it_matters: "Explains why this validation matters"
+        expects: { type: string, min_length: 10 }
+
+      - name: linked_behaviors
+        ask: "Which behaviors does this ensure? Select from available."
+        why_it_matters: "Links validation to what it protects"
+        expects:
+          type: id_list
+          from: "{behaviors}"
+          min: 0
+
+    moment:
+      agent_provides: [invariant_statement, failure_mode]
+    next: create_validation
+
+  create_validation:
+    type: create
+    nodes:
+      - id: "validation_{validation_id | slugify}"
+        node_type: narrative
+        type: validation
+        name: "{validation_id}"
+        content: "{invariant_statement}"
+        priority: "{priority}"
+        failure_mode: "{failure_mode}"
+
+      - id: "moment_create_validation_{timestamp}"
+        node_type: moment
+        type: procedure_create
+        prose: "Created validation {validation_id}: {invariant_statement}"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "validation_{validation_id | slugify}"
+      - for_each: linked_behaviors
+        type: relates
+        from: "validation_{validation_id | slugify}"
+        to: "{item}"
+        properties:
+          direction: ensures      - type: expresses
+        from: "{actor_id}"
+        to: "moment_create_validation_{timestamp}"
+      - type: about
+        from: "moment_create_validation_{timestamp}"
+        to: "validation_{validation_id | slugify}"
+
+    next: $complete
+
+output:
+  created:
+    validation_id: "validation_{validation_id | slugify}"
+    name: "{validation_id}"
+    priority: "{priority}"
+    linked_to: "{linked_behaviors | count} behaviors"
+  moment: "moment_create_validation_{timestamp}"

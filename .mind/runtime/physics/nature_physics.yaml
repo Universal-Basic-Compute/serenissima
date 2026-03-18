@@ -1,0 +1,999 @@
+# Nature Physics — Semantic to Physics Mapping
+#
+# STATUS: CANONICAL
+# MODULE: physics/nature
+#
+# Universal vocabulary for nodes AND links.
+# Same nature string → same physics floats, regardless of entity type.
+#
+# Format: [pre_modifier] + verb + [, post_modifier]
+# Examples:
+#   "urgently, with difficulty"
+#   "cautiously concerns"
+#   "unreliably imports"
+#   "speculatively resolves"
+#
+# Physics axes:
+#   hierarchy: -1 (parent) to +1 (child)
+#   polarity: [source_agency, target_agency] each 0-1
+#   permanence: 0 (ephemeral) to 1 (permanent)
+#   energy: 0-10 (activation level)
+#   trust: -1 (negative/risky) to +1 (positive/reliable)
+#   surprise: -1 (expected) to +1 (unexpected)
+#   weight: 0-10 (importance)
+
+---
+
+defaults:
+  hierarchy: 0.0
+  polarity: [0.5, 0.5]
+  permanence: 0.5
+  energy: null
+  trust: 0.0
+  surprise: 0.0
+  weight: null
+
+# =============================================================================
+# CORE VERBS (10) — Essential relationships
+# =============================================================================
+
+core_verbs:
+  serves:
+    # instance → template (task_run serves task)
+    hierarchy: 0.8
+    polarity: [0.2, 0.8]
+    permanence: 0.95
+    type_a: narrative
+    type_b: narrative
+
+  concerns:
+    # action → target (task_run concerns node)
+    hierarchy: 0.0
+    polarity: [0.7, 0.3]
+    permanence: 0.8
+    type_a: narrative
+    type_b: [thing, narrative]
+
+  claims:
+    # owner → owned (actor claims task_run)
+    hierarchy: -0.3
+    polarity: [0.9, 0.1]
+    permanence: 0.5
+    energy: 6.0
+    type_a: actor
+    type_b: narrative
+
+  resolves:
+    # fixer → problem (task_run resolves issue)
+    hierarchy: 0.0
+    polarity: [0.95, 0.05]
+    permanence: 0.9
+    trust: 0.7
+    type_a: narrative
+    type_b: narrative
+
+  blocks:
+    # blocker → blocked (issue blocks task)
+    hierarchy: 0.0
+    polarity: [0.9, 0.1]
+    permanence: 0.6
+    trust: -0.5
+    type_a: narrative
+    type_b: narrative
+
+  includes:
+    # container → contained (module includes file)
+    hierarchy: -0.6
+    polarity: [0.8, 0.2]
+    permanence: 0.9
+    type_a: [space, narrative]
+    type_b: [thing, narrative]
+
+  uses:
+    # user → tool (task uses skill)
+    hierarchy: 0.0
+    polarity: [0.85, 0.15]
+    permanence: 0.6
+    energy: 5.0
+    type_a: [actor, narrative]
+    type_b: [thing, narrative]
+
+  executes:
+    # runner → runnable (task executes procedure)
+    hierarchy: 0.0
+    polarity: [0.95, 0.05]
+    permanence: 0.7
+    energy: 8.0
+    type_a: narrative
+    type_b: narrative
+
+  imports:
+    # dependent → dependency (module imports library)
+    hierarchy: 0.5
+    polarity: [0.2, 0.8]
+    permanence: 0.95
+    trust: 0.4
+    type_a: thing
+    type_b: thing
+
+  describes:
+    # doc → subject (doc describes module)
+    hierarchy: 0.4
+    polarity: [0.3, 0.7]
+    permanence: 0.85
+    type_a: thing
+    type_b: [thing, narrative, actor]
+
+# =============================================================================
+# EVIDENTIAL VERBS — Knowledge graph relationships
+# =============================================================================
+
+evidential_verbs:
+  proves:
+    permanence: 0.9
+    trust: 0.8
+    weight: 5.0
+    type_a: [thing, moment]
+    type_b: narrative
+
+  refutes:
+    permanence: 0.9
+    trust: -0.8
+    weight: 5.0
+    type_a: [thing, moment]
+    type_b: narrative
+
+  suggests:
+    permanence: 0.5
+    trust: 0.3
+    weight: 2.0
+    type_a: [thing, moment]
+    type_b: narrative
+
+  contradicts:
+    permanence: 0.8
+    trust: -0.6
+    weight: 4.0
+    type_a: narrative
+    type_b: narrative
+
+  supports:
+    permanence: 0.7
+    trust: 0.5
+    weight: 3.0
+    type_a: [thing, moment, narrative]
+    type_b: narrative
+
+  confirms:
+    permanence: 0.9
+    trust: 0.7
+    weight: 4.0
+    type_a: moment
+    type_b: narrative
+
+  questions:
+    permanence: 0.6
+    trust: -0.3
+    weight: 2.0
+    type_a: [thing, moment]
+    type_b: narrative
+
+# =============================================================================
+# STRUCTURAL VERBS — Hierarchy and containment
+# =============================================================================
+
+structural_verbs:
+  encompasses:
+    hierarchy: -0.85
+    polarity: [1.0, 1.0]
+    permanence: 0.9
+
+  contains:
+    hierarchy: -0.6
+    polarity: [1.0, 1.0]
+    permanence: 0.85
+
+  elaborates:
+    hierarchy: 0.6
+    polarity: [1.0, 1.0]
+    permanence: 0.8
+
+  exemplifies:
+    hierarchy: 0.85
+    polarity: [1.0, 1.0]
+    permanence: 0.8
+
+# =============================================================================
+# ACTOR VERBS — Actor relationships
+# =============================================================================
+
+actor_verbs:
+  expresses:
+    polarity: [0.85, 0.15]
+    permanence: 0.6
+    type_a: actor
+    type_b: moment
+
+  initiates:
+    polarity: [0.9, 0.1]
+    energy: 7.0
+    permanence: 0.7
+    type_a: actor
+    type_b: moment
+
+  believes in:
+    polarity: [0.85, 0.15]
+    trust: 0.6
+    permanence: 0.7
+    type_a: actor
+    type_b: narrative
+
+  doubts:
+    polarity: [0.85, 0.15]
+    trust: -0.5
+    permanence: 0.5
+    type_a: actor
+    type_b: narrative
+
+  created:
+    hierarchy: -0.4
+    polarity: [0.9, 0.1]
+    permanence: 0.95
+    type_a: actor
+    type_b: [thing, narrative]
+
+# =============================================================================
+# TEMPORAL VERBS — Moment relationships
+# =============================================================================
+
+temporal_verbs:
+  precedes:
+    polarity: [0.9, 0.0]
+    permanence: 1.0
+    type_a: moment
+    type_b: moment
+
+  follows:
+    polarity: [0.0, 0.9]
+    permanence: 1.0
+    type_a: moment
+    type_b: moment
+
+  triggers:
+    polarity: [0.95, 0.05]
+    hierarchy: 0.3
+    permanence: 0.9
+    energy: 7.0
+    type_a: moment
+    type_b: moment
+
+  leads to:
+    polarity: [0.85, 0.0]
+    hierarchy: 0.2
+    permanence: 0.7
+    type_a: moment
+    type_b: moment
+
+  interrupts:
+    polarity: [0.9, 0.1]
+    permanence: 0.85
+    surprise: 0.7
+    type_a: moment
+    type_b: moment
+
+  enables:
+    polarity: [0.85, 0.15]
+    hierarchy: 0.4
+    permanence: 0.6
+    trust: 0.3
+    type_a: moment
+    type_b: moment
+
+  prevents:
+    polarity: [0.9, 0.1]
+    permanence: 0.7
+    trust: -0.3
+    type_a: moment
+    type_b: moment
+
+# =============================================================================
+# SPATIAL VERBS — Space relationships
+# =============================================================================
+
+spatial_verbs:
+  shelters:
+    hierarchy: -0.75
+    permanence: 0.8
+    trust: 0.4
+    type_a: space
+    type_b: [actor, thing]
+
+  occupies:
+    polarity: [0.85, 0.15]
+    permanence: 0.7
+    type_a: actor
+    type_b: space
+
+  inhabits:
+    polarity: [0.85, 0.15]
+    permanence: 0.9
+    type_a: actor
+    type_b: space
+
+# =============================================================================
+# PRE-MODIFIERS — Priority
+# =============================================================================
+
+pre_modifiers:
+  # Priority (affects energy + weight)
+  urgently:
+    energy: 9.0
+    weight: 5.0
+  critically:
+    energy: 10.0
+    weight: 8.0
+  importantly:
+    energy: 7.0
+    weight: 4.0
+  optionally:
+    energy: 2.0
+    weight: 0.5
+  eventually:
+    energy: 1.0
+    weight: 1.0
+
+  # Difficulty (affects energy/trust)
+  simply:
+    energy: 3.0
+  laboriously:
+    energy: 6.0
+    permanence: 0.7
+  trickily:
+    trust: -0.3
+    weight: 3.0
+
+  # Risk/Caution (affects trust)
+  cautiously:
+    trust: -0.2
+    energy: 4.0
+  riskily:
+    trust: -0.5
+  dangerously:
+    trust: -0.8
+    weight: 5.0
+  safely:
+    trust: 0.6
+
+  # Reliability (affects trust)
+  reliably:
+    trust: 0.8
+  unreliably:
+    trust: -0.6
+  flakily:
+    trust: -0.7
+    surprise: 0.4
+  consistently:
+    trust: 0.7
+    permanence: 0.8
+  sporadically:
+    trust: -0.4
+    surprise: 0.3
+  problematically:
+    trust: -0.5
+    weight: 3.0
+
+  # Confidence (affects permanence)
+  certainly:
+    permanence: 1.0
+  definitely:
+    permanence: 0.95
+  probably:
+    permanence: 0.6
+  possibly:
+    permanence: 0.3
+  uncertainly:
+    permanence: 0.2
+  speculatively:
+    permanence: 0.1
+  disputedly:
+    permanence: 0.3
+    trust: -0.3
+
+  # Manner (affects energy/permanence)
+  carefully:
+    energy: 4.0
+    permanence: 0.7
+  thoroughly:
+    energy: 7.0
+    permanence: 0.9
+  hastily:
+    energy: 8.0
+    permanence: 0.3
+  partially:
+    permanence: 0.4
+  superficially:
+    permanence: 0.3
+  deeply:
+    energy: 6.0
+    permanence: 0.8
+
+  # Evidential adverbs (for knowledge links)
+  provingly:
+    trust: 0.8
+    permanence: 0.9
+    weight: 5.0
+  refutingly:
+    trust: -0.8
+    permanence: 0.9
+    weight: 5.0
+  supportingly:
+    trust: 0.5
+    weight: 3.0
+  contradictingly:
+    trust: -0.6
+    weight: 4.0
+  suggestingly:
+    trust: 0.3
+    permanence: 0.5
+    weight: 2.0
+
+# =============================================================================
+# POST-MODIFIERS — After comma
+# =============================================================================
+
+post_modifiers:
+  # Difficulty
+  with difficulty:
+    energy: 6.0
+    weight: 3.0
+  with complexity:
+    weight: 4.0
+    permanence: 0.7
+  with fragility:
+    trust: -0.4
+
+  # Reliability
+  with confidence:
+    trust: 0.6
+  with doubt:
+    trust: -0.4
+
+  # Temporal
+  temporarily:
+    permanence: 0.3
+  permanently:
+    permanence: 0.95
+  conditionally:
+    permanence: 0.4
+    surprise: 0.2
+  freshly:
+    permanence: 0.5
+    surprise: 0.3
+  stalely:
+    permanence: 0.7
+    trust: -0.3
+  historically:
+    permanence: 0.9
+
+  # Emotion/Tone
+  frustratingly:
+    trust: -0.5
+  satisfyingly:
+    trust: 0.6
+  boringly:
+    trust: -0.1
+    energy: 2.0
+  excitingly:
+    trust: 0.5
+    energy: 7.0
+  painfully:
+    trust: -0.6
+
+  # Manner
+  with urgency:
+    energy: 8.0
+    weight: 4.0
+
+# =============================================================================
+# WEIGHT ANNOTATIONS — Importance markers
+# =============================================================================
+
+weight_annotations:
+  "(fundamental)":
+    weight: 6.0
+  "(important)":
+    weight: 4.0
+  "(minor)":
+    weight: 0.5
+  "(critical)":
+    weight: 8.0
+    energy: 7.0
+
+# =============================================================================
+# INTENSIFIERS — Attenuated/Intensified forms
+# =============================================================================
+
+intensifiers:
+  # Core verbs
+  serves: [loosely serves, fully serves]
+  claims: [considers, fully commits to]
+  resolves: [addresses, completely resolves]
+  blocks: [hinders, completely blocks]
+  includes: [touches, fully contains]
+  uses: [considers, exploits]
+  executes: [attempts, drives]
+
+  # Evidential verbs
+  proves: [suggests, demonstrates beyond doubt]
+  refutes: [questions, completely invalidates]
+  supports: [hints at, strongly reinforces]
+  contradicts: [nuances, radically contradicts]
+
+  # Temporal verbs
+  triggers: [enables, directly causes]
+  leads to: [might lead to, inevitably leads to]
+
+# =============================================================================
+# SYNONYMS — Alternative terms mapping to canonical forms
+# =============================================================================
+
+synonyms:
+  # Core verbs
+  serves:
+    - implements
+    - instantiates
+    - fulfills
+    - realizes
+  concerns:
+    - targets
+    - affects
+    - involves
+    - relates to
+    - is about
+    - touches
+  claims:
+    - owns
+    - possesses
+    - takes
+    - controls
+  resolves:
+    - fixes
+    - solves
+    - addresses
+    - repairs
+    - remedies
+    - handles
+  blocks:
+    - obstructs
+    - hinders
+    - impedes
+    - halts
+  includes:
+    - comprises
+    - incorporates
+  uses:
+    - utilizes
+    - employs
+    - leverages
+    - applies
+    - consumes
+  executes:
+    - runs
+    - performs
+    - invokes
+    - calls
+  imports:
+    - depends on
+    - requires
+    - needs
+    - relies on
+  describes:
+    - documents
+    - explains
+    - details
+    - specifies
+    - defines
+
+  # Evidential verbs
+  proves:
+    - demonstrates
+    - establishes
+    - shows conclusively
+  refutes:
+    - disproves
+    - invalidates
+    - denies
+  suggests:
+    - implies
+    - indicates
+    - hints
+    - points to
+  contradicts:
+    - conflicts with
+    - opposes
+    - clashes with
+    - counters
+  supports:
+    - backs
+    - reinforces
+    - corroborates
+    - strengthens
+  confirms:
+    - verifies
+    - validates
+    - affirms
+    - certifies
+    - attests
+  questions:
+    - challenges
+    - queries
+    - disputes
+    - scrutinizes
+
+  # Structural verbs
+  encompasses:
+    - spans
+    - includes all
+    - wraps
+  contains:
+    - holds
+    - has
+    - stores
+  elaborates:
+    - expands
+    - develops
+    - extends
+    - fleshes out
+  exemplifies:
+    - illustrates
+    - represents
+    - typifies
+
+  # Actor verbs
+  expresses:
+    - states
+    - declares
+    - communicates
+    - voices
+  initiates:
+    - starts
+    - begins
+    - launches
+    - kicks off
+  believes in:
+    - trusts
+    - accepts
+    - endorses
+  doubts:
+    - distrusts
+    - suspects
+    - mistrusts
+  created:
+    - made
+    - built
+    - authored
+    - produced
+    - generated
+
+  # Temporal verbs
+  precedes:
+    - comes before
+    - happens before
+    - leads
+  follows:
+    - comes after
+    - happens after
+    - succeeds
+  triggers:
+    - sparks
+    - activates
+    - sets off
+  leads to:
+    - results in
+    - causes
+    - produces
+  interrupts:
+    - breaks
+    - disrupts
+    - suspends
+    - stops
+  enables:
+    - allows
+    - permits
+    - facilitates
+    - makes possible
+  prevents:
+    - inhibits
+    - avoids
+    - precludes
+
+  # Spatial verbs
+  shelters:
+    - houses
+    - hosts
+    - protects
+    - harbors
+  occupies:
+    - fills
+    - takes up
+    - is in
+  inhabits:
+    - lives in
+    - dwells in
+    - resides in
+
+  # Priority modifiers
+  urgently:
+    - immediately
+    - asap
+    - now
+  critically:
+    - crucially
+    - vitally
+    - essentially
+  importantly:
+    - significantly
+    - notably
+    - meaningfully
+  optionally:
+    - if possible
+    - when convenient
+  eventually:
+    - someday
+    - later
+    - when possible
+    - low priority
+
+  # Difficulty modifiers
+  simply:
+    - easily
+    - trivially
+    - straightforwardly
+  laboriously:
+    - painstakingly
+    - arduously
+    - toilsomely
+  trickily:
+    - subtly
+    - deceptively
+    - sneakily
+
+  # Risk modifiers
+  cautiously:
+    - carefully
+    - warily
+    - guardedly
+  riskily:
+    - hazardously
+    - precariously
+  dangerously:
+    - perilously
+    - unsafely
+  safely:
+    - securely
+    - harmlessly
+
+  # Reliability modifiers
+  reliably:
+    - dependably
+    - consistently
+    - stably
+  unreliably:
+    - inconsistently
+    - unpredictably
+  flakily:
+    - erratically
+    - randomly
+    - intermittently
+  consistently:
+    - steadily
+    - uniformly
+    - regularly
+  sporadically:
+    - occasionally
+    - sometimes
+    - on and off
+  problematically:
+    - troublesomely
+    - poorly
+
+  # Confidence modifiers
+  certainly:
+    - surely
+    - undoubtedly
+    - absolutely
+  definitely:
+    - clearly
+    - obviously
+    - plainly
+  probably:
+    - likely
+    - presumably
+  possibly:
+    - maybe
+    - perhaps
+    - potentially
+    - conceivably
+  uncertainly:
+    - doubtfully
+    - questionably
+  speculatively:
+    - hypothetically
+    - theoretically
+    - tentatively
+  disputedly:
+    - controversially
+    - contestedly
+
+  # Manner modifiers
+  carefully:
+    - attentively
+    - meticulously
+    - precisely
+  thoroughly:
+    - completely
+    - fully
+    - exhaustively
+  hastily:
+    - quickly
+    - rapidly
+    - rushed
+  partially:
+    - incompletely
+    - partly
+    - half
+  superficially:
+    - shallowly
+    - cursorily
+    - briefly
+  deeply:
+    - profoundly
+    - thoroughly
+    - comprehensively
+
+  # Post-modifiers
+  with difficulty:
+    - with effort
+    - with struggle
+    - barely
+  with complexity:
+    - intricately
+    - elaborately
+  with fragility:
+    - delicately
+    - brittlely
+  with confidence:
+    - confidently
+    - assuredly
+  with doubt:
+    - hesitantly
+    - skeptically
+  temporarily:
+    - for now
+    - short-term
+    - interim
+  permanently:
+    - forever
+    - long-term
+    - persistently
+  conditionally:
+    - depending on
+    - if
+    - when
+  freshly:
+    - newly
+    - recently
+    - just
+  stalely:
+    - outdatedly
+    - obsoletely
+  historically:
+    - previously
+    - in the past
+    - formerly
+  frustratingly:
+    - annoyingly
+    - irritatingly
+  satisfyingly:
+    - pleasingly
+    - gratifyingly
+  boringly:
+    - dully
+    - monotonously
+  excitingly:
+    - thrillingly
+    - stimulatingly
+  painfully:
+    - agonizingly
+    - torturously
+  with urgency:
+    - pressingly
+
+# =============================================================================
+# TRANSLATIONS
+# =============================================================================
+
+translations:
+  en:
+    # Core verbs
+    serves: serves
+    concerns: concerns
+    claims: claims
+    resolves: resolves
+    blocks: blocks
+    includes: includes
+    uses: uses
+    executes: executes
+    imports: imports
+    describes: describes
+    # Evidential
+    proves: proves
+    refutes: refutes
+    suggests: suggests
+    contradicts: contradicts
+    supports: supports
+    # Priority
+    urgently: urgently
+    critically: critically
+    importantly: importantly
+    optionally: optionally
+    eventually: eventually
+    # Confidence
+    definitely: definitely
+    probably: probably
+    possibly: possibly
+    certainly: certainly
+    speculatively: speculatively
+    # Reliability
+    reliably: reliably
+    unreliably: unreliably
+    # Manner
+    carefully: carefully
+    thoroughly: thoroughly
+    # Post-modifiers
+    with difficulty: with difficulty
+    with confidence: with confidence
+    temporarily: temporarily
+    permanently: permanently
+
+  fr:
+    # Core verbs
+    serves: sert
+    concerns: concerne
+    claims: revendique
+    resolves: résout
+    blocks: bloque
+    includes: inclut
+    uses: utilise
+    executes: exécute
+    imports: importe
+    describes: décrit
+    # Evidential
+    proves: prouve
+    refutes: réfute
+    suggests: suggère
+    contradicts: contredit
+    supports: soutient
+    # Priority
+    urgently: urgemment
+    critically: critiquement
+    importantly: importamment
+    optionally: optionnellement
+    eventually: éventuellement
+    # Confidence
+    definitely: définitivement
+    probably: probablement
+    possibly: possiblement
+    certainly: certainement
+    speculatively: spéculativement
+    # Reliability
+    reliably: fiablement
+    unreliably: non fiablement
+    # Manner
+    carefully: soigneusement
+    thoroughly: minutieusement
+    # Post-modifiers
+    with difficulty: avec difficulté
+    with confidence: avec confiance
+    temporarily: temporairement
+    permanently: définitivement

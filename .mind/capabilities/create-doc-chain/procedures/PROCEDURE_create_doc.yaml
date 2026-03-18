@@ -1,0 +1,129 @@
+name: create_doc_chain
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for creating a complete doc chain for a module.
+
+inputs:
+  target: module_id
+  missing: doc_type[]
+
+outputs:
+  docs_created: path[]
+  validated: boolean
+
+steps:
+  - id: read_context
+    name: Read Module Context
+    action: read
+    params:
+      paths:
+        - "src/{target}/**/*"
+        - "lib/{target}/**/*"
+        - "{target}/**/*"
+    outputs:
+      code_context: string
+
+  - id: check_existing
+    name: Check Existing Docs
+    action: glob
+    params:
+      pattern: "docs/{target}/*.md"
+    outputs:
+      existing_docs: path[]
+
+  - id: create_objectives
+    name: Create OBJECTIVES
+    condition: "'OBJECTIVES' in missing"
+    action: create_from_template
+    params:
+      template: templates/docs/OBJECTIVES_TEMPLATE.md
+      output: "docs/{target}/OBJECTIVES.md"
+      context:
+        module: "{target}"
+        code: "{code_context}"
+
+  - id: create_patterns
+    name: Create PATTERNS
+    condition: "'PATTERNS' in missing"
+    action: create_from_template
+    params:
+      template: templates/docs/PATTERNS_TEMPLATE.md
+      output: "docs/{target}/PATTERNS.md"
+
+  - id: create_vocabulary
+    name: Create VOCABULARY
+    condition: "'VOCABULARY' in missing"
+    action: create_from_template
+    params:
+      template: templates/docs/VOCABULARY_TEMPLATE.md
+      output: "docs/{target}/VOCABULARY.md"
+
+  - id: create_behaviors
+    name: Create BEHAVIORS
+    condition: "'BEHAVIORS' in missing"
+    action: create_from_template
+    params:
+      template: templates/docs/BEHAVIORS_TEMPLATE.md
+      output: "docs/{target}/BEHAVIORS.md"
+
+  - id: create_algorithm
+    name: Create ALGORITHM
+    condition: "'ALGORITHM' in missing"
+    action: create_from_template
+    params:
+      template: templates/docs/ALGORITHM_TEMPLATE.md
+      output: "docs/{target}/ALGORITHM.md"
+
+  - id: create_validation
+    name: Create VALIDATION
+    condition: "'VALIDATION' in missing"
+    action: create_from_template
+    params:
+      template: templates/docs/VALIDATION_TEMPLATE.md
+      output: "docs/{target}/VALIDATION.md"
+
+  - id: create_implementation
+    name: Create IMPLEMENTATION
+    condition: "'IMPLEMENTATION' in missing"
+    action: create_from_template
+    params:
+      template: templates/docs/IMPLEMENTATION_TEMPLATE.md
+      output: "docs/{target}/IMPLEMENTATION.md"
+
+  - id: create_health
+    name: Create HEALTH
+    condition: "'HEALTH' in missing"
+    action: create_from_template
+    params:
+      template: templates/docs/HEALTH_TEMPLATE.md
+      output: "docs/{target}/HEALTH.md"
+
+  - id: create_sync
+    name: Create SYNC
+    condition: "'SYNC' in missing"
+    action: create_from_template
+    params:
+      template: templates/docs/SYNC_TEMPLATE.md
+      output: "docs/{target}/SYNC.md"
+
+  - id: validate_chain
+    name: Validate Doc Chain
+    action: validate
+    params:
+      checks:
+        - all_files_present
+        - no_placeholders
+        - chain_links_valid
+        - structure_matches_template
+    outputs:
+      validated: boolean
+      errors: string[]
+
+  - id: complete
+    name: Mark Complete
+    condition: "validated == true"
+    action: complete
+    outputs:
+      docs_created: path[]

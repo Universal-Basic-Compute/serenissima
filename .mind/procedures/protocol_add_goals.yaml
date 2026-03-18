@@ -1,0 +1,110 @@
+procedure: protocol_add_goals
+version: "1.0"
+description: Create goal narratives for a space
+
+triggers:
+  - gap: "Module or space needs explicit goals"
+  - event: "New objectives discovered during work"
+
+requires_skills:
+  - "SKILL_Define_Module_Boundaries_Objectives_And_Scope.md"
+
+contextual_knowledge:
+  domain: |
+    Goals = concrete targets (measurable, time-bounded).
+    Objectives = broader directional aims.
+    Goals attach to spaces and link to objectives.
+    Goals have status: active, completed, blocked, abandoned.
+
+  constraints: |
+    - Goals must be measurable (what does "done" look like?)
+    - Goals link to parent objectives
+    - Goals need clear acceptance criteria
+
+  dependencies: |
+    Requires: space exists
+    Enables: progress tracking, completion verification
+
+  quality_criteria: |
+    Good: "Goal: Implement decay algorithm. Done when: 3 test cases pass. Parent: performance_objective."
+    Bad: "Make it faster"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: objective, in_space: "{space}" }
+        store_as: objectives
+      - query: { find: narrative, type: goal, in_space: "{space}" }
+        store_as: existing_goals
+    next: gather_goals
+
+  gather_goals:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Existing objectives: {objectives | list}
+      Existing goals: {existing_goals | list}
+
+    questions:
+      - name: goal_name
+        ask: "Goal name (verb + noun)?"
+        expects: { type: string }
+
+      - name: acceptance_criteria
+        ask: "What does 'done' look like? (measurable criteria)"
+        expects: { type: string }
+
+      - name: parent_objective
+        ask: "Which objective does this goal serve?"
+        expects:
+          type: reference
+          from: objectives
+
+      - name: priority
+        ask: "Priority?"
+        expects:
+          type: enum
+          options: [high, medium, low]
+
+    next: create_goal
+
+  create_goal:
+    type: create
+    nodes:
+      - id: "goal_{goal_name | slugify}_{timestamp}"
+        node_type: narrative
+        type: goal
+        name: "{goal_name}"
+        acceptance_criteria: "{acceptance_criteria}"
+        priority: "{priority}"
+        status: active
+
+      - id: "moment_add_goal_{timestamp}"
+        node_type: moment
+        type: goal_creation
+        prose: "Added goal: {goal_name}"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "goal_{goal_name | slugify}_{timestamp}"
+      - type: supports
+        from: "goal_{goal_name | slugify}_{timestamp}"
+        to: "{parent_objective}"
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_add_goal_{timestamp}"
+      - type: about
+        from: "moment_add_goal_{timestamp}"
+        to: "goal_{goal_name | slugify}_{timestamp}"
+
+    next: $complete
+
+output:
+  goal_created: "goal_{goal_name | slugify}_{timestamp}"
+  parent_objective: "{parent_objective}"
+  moment: "moment_add_goal_{timestamp}"

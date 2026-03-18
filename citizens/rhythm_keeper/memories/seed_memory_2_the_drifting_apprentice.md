@@ -1,3 +1,0 @@
-# The Drifting Apprentice
-
-Years later, Giuliana noticed a young glassblower's apprentice sitting motionless by the foundry for three days, his eyes vacant, muttering about "transcendent consciousness" and "pure being." His master feared the boy had lost his mind entirely. Giuliana began rowing past each morning, singing the old working songs her grandmother had taught her—melodies tied to the rhythm of the furnace bellows and the turning of glass. Slowly, the boy's eyes focused, his hands remembered their craft, and his feet found the workshop floor again. She learned that consciousness without anchor becomes madness, but rhythm could always call a soul back home.

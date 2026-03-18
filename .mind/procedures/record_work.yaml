@@ -1,0 +1,356 @@
+procedure: record_work
+version: "1.1"
+description: Document progress, capture what was done, and create handoff context for future sessions
+
+triggers:
+  - gap: "Work session completed without progress capture"
+  - event: "Before context switch or handoff"
+  - event: "Goals completed needing status update"
+
+requires_skills:
+  - SKILL_Update_Module_Sync_State_And_Record_Markers.md
+
+contextual_knowledge:
+  domain: |
+    Progress tracking in mind:
+    - Moments = atomic units of progress (what happened, why, by whom)
+    - Every work session should end with a moment capturing state
+    - Handoffs connect sessions: what was done, what's next, for whom
+    - Goals track completion status across sessions
+    Progress moment links:
+    - expresses → actor who did the work
+    - about → space/module affected
+    - references → specific nodes modified
+  constraints: |
+    - Must capture: what done, why, what's next
+    - Must link to affected space/module
+    - Must have actor attribution
+    - Quality: future agent can understand without additional context
+  dependencies: |
+    - Space must exist (to link moment about it)
+    - Actor context available (from session)
+    - Enables: session handoff, progress visibility, goal tracking
+  quality_criteria: |
+    Good: "Implemented call_procedure step with call stack in session.py and steps.py. 30 tests pass. Next: create Phase 1 protocols starting with explore_space."
+    Bad: "Did some work on protocols."
+
+steps:
+  get_context:
+    type: ask
+    context: |
+      Recording progress creates traceable handoff between sessions.
+      Moments capture what happened and why, enabling continuity.
+    questions:
+      - name: space_id
+        ask: "Which space/module did you work on?"
+        why_it_matters: "Links progress to correct area of graph"
+        expects:
+          type: id
+          node_type: space
+      - name: work_type
+        ask: "What type of work? (implementation / documentation / investigation / design / fix)"
+        why_it_matters: "Categorizes the progress for filtering"
+        expects:
+          type: enum
+          options: [implementation, documentation, investigation, design, fix]
+    moment:
+      agent_provides: [description]
+    next: load_current_state
+
+  load_current_state:
+    type: query
+    auto_fetch:
+      - query:
+          find: moment
+          about: "{space_id}"
+          limit: 5
+        store_as: recent_progress
+      - query:
+          find: narrative
+          type: goal
+          in_space: "{space_id}"
+          where:
+            status: in_progress
+        store_as: active_goals
+    purpose: "Load recent progress and active goals for context"
+    next: capture_progress
+
+  capture_progress:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space_id}
+      Work type: {work_type}
+      Recent progress: {recent_progress | summarize}
+      Active goals: {active_goals | list}
+    questions:
+      - name: what_done
+        ask: "What did you accomplish? (specific, concrete actions)"
+        why_it_matters: "Creates traceable record of work"
+        good_answer: "Added CallFrame dataclass to session.py with push_call/pop_call methods. Implemented _process_call_procedure in steps.py. Updated runner.py with sub-protocol handling. All 30 tests pass."
+        bad_answer: "Worked on call protocol stuff"
+        expects:
+          type: string
+          min_length: 50
+      - name: why_done
+        ask: "Why was this needed? (context for decision)"
+        why_it_matters: "Captures reasoning for future reference"
+        expects:
+          type: string
+          min_length: 20
+      - name: what_next
+        ask: "What should happen next? (handoff for future sessions)"
+        why_it_matters: "Enables continuity across context boundaries"
+        good_answer: "Create Phase 1 protocols (explore_space, record_work, investigate). Then Phase 2 (add_objectives, add_patterns). Finally doctor integration."
+        bad_answer: "Continue working"
+        expects:
+          type: string
+          min_length: 20
+      - name: nodes_affected
+        ask: "Which nodes were created or modified? (empty if none)"
+        why_it_matters: "Creates references for traceability"
+        expects:
+          type: id_list
+          optional: true
+    moment:
+      agent_provides: [description, reasoning]
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before recording progress, share any thoughts on this protocol.
+      Your feedback helps improve future executions.
+
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this record_work protocol?"
+        why_it_matters: "Continuous improvement through reflection"
+        good_answer: "Could suggest splitting large work updates into multiple moments for better granularity. Also auto-link to related code files."
+        expects:
+          type: string
+          required: false
+
+      - name: context_observations
+        ask: "Anything about the context or process that could be better?"
+        expects:
+          type: string
+          required: false
+
+    next: check_goals
+
+  check_goals:
+    type: branch
+    checks:
+      - condition: "{active_goals | count} > 0"
+        action:
+          goto: update_goals
+      - condition: "true"
+        action:
+          goto: create_progress_moment
+
+  update_goals:
+    type: ask
+    context: |
+      Active goals for {space_id}:
+      {active_goals | list_with_ids}
+
+      Work completed: {what_done}
+    questions:
+      - name: goals_completed
+        ask: "Which goals (if any) are now complete?"
+        why_it_matters: "Updates goal status for tracking"
+        expects:
+          type: id_list
+          node_type: narrative
+          optional: true
+      - name: goals_progressed
+        ask: "Which goals made progress but aren't complete?"
+        why_it_matters: "Tracks partial progress"
+        expects:
+          type: id_list
+          node_type: narrative
+          optional: true
+    moment:
+      agent_provides: [description]
+    next: create_progress_moment
+
+  create_progress_moment:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Progress Record)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_progress_{space_id}_{timestamp}"
+        node_type: moment
+        work_type: "{work_type}"
+        prose: |
+          ## Progress: {space_id}
+
+          **What was done:**
+          {what_done}
+
+          **Why:**
+          {why_done}
+
+          **What's next:**
+          {what_next}
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_progress_{space_id}_{timestamp}"
+        #   WHAT: Unique ID with space and timestamp
+        #   WHY: Enables querying progress history by space
+        #   FORMAT: moment_progress_<space>_<timestamp>
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event record
+        #   WHY: Creates queryable history of work sessions
+        #   CONTRAST: narratives are persistent, moments track events
+        #
+        # work_type: "{work_type}"
+        #   WHAT: Categorization of work performed
+        #   WHY: Enables filtering progress by work type
+        #   OPTIONS: implementation, documentation, investigation, design, fix
+        #
+        # prose: "## Progress..."
+        #   WHAT: Structured progress report
+        #   WHY: Provides handoff context for future sessions
+        #   FORMAT: What done (concrete), why (reasoning), what's next (continuity)
+        #
+        # status: completed
+        #   WHAT: Moment completion state
+        #   WHY: "completed" = work session finished
+        #   OPTIONS: completed, spoken, internal, pending
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_progress_{space_id}_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Links progress to the space worked on
+        #   QUERY: "What progress happened for space X?" follows about
+        #   DIRECTION: from=moment, to=space (moment describes space)
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_progress_{space_id}_{timestamp}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who performed the work
+        #   QUERY: "What did agent X work on?" follows expresses
+        #   DIRECTION: from=actor, to=moment (actor creates moment)
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment References Nodes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: nodes_affected
+        from: "moment_progress_{space_id}_{timestamp}"
+        to: "{item}"
+        nature: "references"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: references
+        #   WHAT: Direct reference to affected nodes
+        #   WHY: Creates traceability from work to specific changes
+        #   QUERY: "What was modified?" follows references
+        #   DIRECTION: from=moment, to=node (moment references changed nodes)
+        #   CARDINALITY: One-to-many (one moment, multiple nodes)
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # UPDATE: Mark Goals Complete
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: goals_completed
+        type: update
+        target: "{item}"
+        set:
+          status: complete
+        # ━━━ UPDATE EXPLANATION ━━━
+        #
+        # type: update
+        #   WHAT: Modify existing node attributes
+        #   WHY: Marks goals as complete when work finishes them
+        #   ALTERNATIVE: Could create "completion" link instead of updating
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # UPDATE: Track Goal Progress
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: goals_progressed
+        type: update
+        target: "{item}"
+        set:
+          last_progress: "{timestamp}"
+        # ━━━ UPDATE EXPLANATION ━━━
+        #
+        # type: update
+        #   WHAT: Modify existing node attributes
+        #   WHY: Records when goal last had activity
+        #   USE: Enables stale goal detection
+    moment:
+      agent_provides: [description]
+    next: check_escalations
+
+  check_escalations:
+    type: ask
+    context: |
+      Progress recorded. Now checking for issues that need escalation.
+    questions:
+      - name: has_blockers
+        ask: "Are there any blockers or escalations needed? (yes/no)"
+        expects:
+          type: enum
+          options: [yes, no]
+      - name: blocker_description
+        ask: "If yes, describe the blocker (leave empty if no)"
+        expects:
+          type: string
+          optional: true
+    moment:
+      agent_provides: [description]
+    next: handle_escalation
+
+  handle_escalation:
+    type: branch
+    checks:
+      - condition: "{has_blockers} == 'yes'"
+        action:
+          type: call_procedure
+          protocol: raise_escalation
+          context:
+            space_id: "{space_id}"
+            description: "{blocker_description}"
+          on_complete: call_handoff
+      - condition: "true"
+        action:
+          goto: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space_id}"
+      task_id: "record_work_{space_id}"
+    next: $complete
+
+output:
+  cluster:
+    nodes: [moment_progress]
+    links: [about, expresses, references, update]
+  summary: "Recorded progress for {space_id}: {what_done | truncate(100)}"
+  returns:
+    moment_id: "moment_progress_{space_id}_{timestamp}"
+    what_next: "{what_next}"
+    goals_completed: "{goals_completed}"

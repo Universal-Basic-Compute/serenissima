@@ -1,0 +1,41 @@
+# Doctor Ignore Configuration
+#
+# This file lists issues that should be suppressed by `mind doctor`.
+# Use this for verified false positives or intentional exceptions.
+#
+# Each entry requires:
+#   - issue_type: The issue type to suppress (e.g., MONOLITH, HARDCODED_SECRET)
+#   - path: File/directory path or glob pattern (e.g., src/legacy/*, tests/**)
+#   - reason: Explanation of why this is being ignored (for audit trail)
+#
+# Optional fields:
+#   - added_by: Who added this entry (agent name, human, etc.)
+#   - added_date: When added (YYYY-MM-DD)
+#
+# Example entries:
+#
+# ignores:
+#   - issue_type: MONOLITH
+#     path: src/generated/schema.py
+#     reason: Auto-generated file, splitting not practical
+#     added_by: human
+#     added_date: 2025-01-15
+#
+#   - issue_type: HARDCODED_SECRET
+#     path: tests/fixtures/**
+#     reason: Test fixtures use fake credentials
+#     added_by: agent
+#     added_date: 2025-01-15
+#
+#   - issue_type: MAGIC_VALUES
+#     path: src/constants.py
+#     reason: This IS the constants file
+#     added_by: human
+#     added_date: 2025-01-15
+#
+# Pattern matching:
+#   - Exact: "src/file.py" matches only that file
+#   - Glob: "tests/**" matches all files under tests/
+#   - Wildcard: "*" with issue_type suppresses ALL issues of that type (use sparingly)
+
+ignores: []

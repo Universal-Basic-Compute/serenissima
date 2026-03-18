@@ -1,0 +1,308 @@
+procedure: explore_space
+version: "2.0"
+description: Understand what exists in a space before taking action - foundation for all other protocols - rich format
+
+triggers:
+  - gap: "Starting any work on a module/space"
+  - event: "Doctor detects need to understand current state"
+
+requires_skills:
+  - SKILL_Onboard_Understand_Existing_Module_Codebase_And_Confirm_Canon.md
+
+contextual_knowledge:
+  domain: |
+    Spaces = containers for module knowledge (narratives, moments, things).
+    Exploration precedes action - understand before modifying.
+    Graph structure: space → contains → narratives/things
+    Narratives have types: objective, pattern, behavior, validation, health
+    Things represent code artifacts with docking points.
+  constraints: |
+    - Never modify without exploring first
+    - Capture exploration in moment node (traceable)
+    - Note gaps, inconsistencies, open questions
+  dependencies: |
+    - Space must exist (or be identifiable)
+    - Enables: all other protocols (add_objectives, add_patterns, etc.)
+  quality_criteria: |
+    Good exploration: "Found 3 objectives, 2 patterns, no behaviors defined. Gap: validation coverage missing for core invariants."
+    Bad exploration: "Looked at the module."
+
+steps:
+  identify_space:
+    type: ask
+    context: |
+      Exploration starts by identifying where to look.
+      Spaces correspond to modules defined in modules.yaml.
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Space ID
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: space_id
+        ask: "Which space/module to explore?"
+        why: "Scopes the exploration to the relevant context."
+        guidance: "Select the container you need to understand."
+        expects:
+          type: id
+          node_type: space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Exploration Goal
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: exploration_goal
+        ask: "What are you trying to understand? (general orientation / specific question / gap analysis)"
+        why: "Guides what information to look for."
+        expects:
+          type: enum
+          options: [orientation, specific_question, gap_analysis]
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Specific Question
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: specific_question
+        ask: "If specific question, what is it? (leave empty for orientation/gap)"
+        why: "Focuses the investigation when a particular need arises."
+        expects:
+          type: string
+          optional: true
+    moment:
+      agent_provides: [description]
+    next: load_space_contents
+
+  load_space_contents:
+    type: query
+    auto_fetch:
+      - query:
+          find: narrative
+          in_space: "{space_id}"
+        store_as: narratives
+      - query:
+          find: thing
+          in_space: "{space_id}"
+        store_as: things
+      - query:
+          find: moment
+          about: "{space_id}"
+          limit: 10
+        store_as: recent_moments
+    purpose: "Load all contents of the space for analysis"
+    next: analyze_contents
+
+  analyze_contents:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space_id}
+      Narratives found: {narratives | count}
+        - Objectives: {narratives | filter(type=objective) | count}
+        - Patterns: {narratives | filter(type=pattern) | count}
+        - Behaviors: {narratives | filter(type=behavior) | count}
+        - Validations: {narratives | filter(type=validation) | count}
+        - Health: {narratives | filter(type=health) | count}
+      Things found: {things | count}
+      Recent activity: {recent_moments | summarize}
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Gaps Found
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: gaps_found
+        ask: "What's missing or incomplete? (doc chain gaps, orphaned items, unclear boundaries)"
+        why: "Identifies work required to reach canonical state."
+        good_answer: "Missing: behaviors (none defined), health coverage (0 of 3 validations covered)."
+        expects:
+          type: string
+          min_length: 20
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Questions Raised
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: questions_raised
+        ask: "What questions or uncertainties emerged?"
+        why: "Surfaces issues for escalation or further investigation."
+        expects:
+          type: string
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Summary
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: summary
+        ask: "One-paragraph summary of current state"
+        why: "Creates a high-level traceable exploration record."
+        expects:
+          type: string
+          min_length: 50
+    moment:
+      agent_provides: [description, reasoning]
+    # Capture reasoning for the exploration
+    moment:
+      agent_provides:
+        - description: "Summary of exploration"
+        - reasoning: "Why this space was explored and the primary findings"
+
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before recording the exploration, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this explore_space protocol?"
+        expects:
+          type: string
+          required: false
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: moment_exploration_{space_id}_{timestamp}
+
+      Nodes to create: 1
+      Links to create: 2
+        - actor ─[expresses]→ moment
+        - moment ─[about]→ {space_id}
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Record this exploration?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_exploration_moment
+      revise: identify_space
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Exploration not recorded"
+
+  create_exploration_moment:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Exploration Record)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_exploration_{space_id}_{timestamp}"
+        node_type: moment
+        prose: |
+          Explored {space_id}.
+
+          Summary: {summary}
+
+          Gaps identified: {gaps_found}
+
+          Questions raised: {questions_raised}
+        exploration_goal: "{exploration_goal}"
+        specific_question: "{specific_question}"
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_exploration_{space_id}_{timestamp}"
+        #   WHAT: Unique ID with space and timestamp
+        #   WHY: Enables querying exploration history by space
+        #   FORMAT: moment_exploration_<space>_<timestamp>
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event record
+        #   WHY: Creates queryable history of explorations
+        #   CONTRAST: narratives are persistent knowledge, moments are events
+        #
+        # prose: "Explored {space_id}..."
+        #   WHAT: Human-readable exploration summary
+        #   WHY: Displayed in activity feeds and history views
+        #   FORMAT: Includes summary, gaps, and questions for context
+        #
+        # exploration_goal: "{exploration_goal}"
+        #   WHAT: Type of exploration performed
+        #   WHY: Enables filtering by exploration intent
+        #   OPTIONS: orientation, specific_question, gap_analysis
+        #
+        # specific_question: "{specific_question}"
+        #   WHAT: Specific question being answered (if any)
+        #   WHY: Tracks focused explorations vs general orientation
+        #   FORMAT: Optional, empty for general explorations
+        #
+        # status: completed
+        #   WHAT: Moment completion state
+        #   WHY: "completed" = exploration finished, "spoken" = articulated/public
+        #   OPTIONS: completed, spoken, internal, pending
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_exploration_{space_id}_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Links exploration to the space explored
+        #   QUERY: "What explorations happened for space X?" follows about
+        #   DIRECTION: from=moment, to=space (moment describes space)
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_exploration_{space_id}_{timestamp}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who performed the exploration
+        #   QUERY: "What did agent X explore?" follows expresses
+        #   DIRECTION: from=actor, to=moment (actor creates moment)
+    moment:
+      agent_provides: [description]
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space_id}"
+      task_id: "explore_space_{space_id}"
+    next: $complete
+
+output:
+  cluster:
+    nodes: [moment_exploration]
+    links: [about, expresses]
+  summary: "Explored {space_id}: {summary}"
+  returns:
+    gaps: "{gaps_found}"
+    questions: "{questions_raised}"
+    narrative_counts:
+      objectives: "{narratives | filter(type=objective) | count}"
+      patterns: "{narratives | filter(type=pattern) | count}"
+      behaviors: "{narratives | filter(type=behavior) | count}"
+      validations: "{narratives | filter(type=validation) | count}"
+      health: "{narratives | filter(type=health) | count}"

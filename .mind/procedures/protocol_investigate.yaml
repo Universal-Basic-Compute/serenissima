@@ -1,0 +1,157 @@
+procedure: protocol_investigate
+version: "1.0"
+description: Investigate an issue with evidence-first approach
+
+triggers:
+  - event: "Bug report or error observed"
+  - event: "Unexpected behavior detected"
+
+requires_skills:
+  - "SKILL_Debug_Investigate_And_Fix_Issues_With_Evidence_First.md"
+
+contextual_knowledge:
+  domain: |
+    Investigation = gathering evidence before forming hypotheses.
+    Evidence types: logs, health stream, stack traces, graph queries, test failures.
+    Hypothesis requires evidence citation: "X might be wrong because Y (see: file:line)".
+    Investigation moment captures: symptom, hypotheses, evidence, conclusions.
+
+  constraints: |
+    - Must cite evidence for each hypothesis
+    - Must not jump to conclusions without evidence
+    - Investigation is read-only (no fixes yet)
+    - Creates investigation moment with full trace
+
+  dependencies: |
+    Requires: symptom observed
+    Enables: targeted fix, regression prevention
+
+  quality_criteria: |
+    Good: "Hypothesis: decay runs before flow. Evidence: tick_runner.py:45 shows decay_phase() called first."
+    Bad: "I think there's a bug somewhere"
+
+steps:
+  gather_symptom:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Investigation in space: {space}
+
+    questions:
+      - name: symptom
+        ask: "What exact error/behavior was observed? Quote logs or errors."
+        why_it_matters: "Starting point for investigation"
+        expects: { type: string, min_length: 20 }
+
+      - name: reproduction
+        ask: "How to reproduce? Steps or conditions."
+        why_it_matters: "Enables verification"
+        expects: { type: string }
+
+      - name: context
+        ask: "When did it start? What changed recently?"
+        why_it_matters: "Narrows scope"
+        expects: { type: string }
+
+      - name: suspected_area
+        ask: "Which module/file is likely involved?"
+        why_it_matters: "Focuses search"
+        expects: { type: string }
+
+    next: load_related
+
+  load_related:
+    type: query
+    auto_fetch:
+      - query: { find: moment, about_space: "{space}", type: progress, limit: 5 }
+        store_as: recent_work
+      - query: { find: narrative, type: validation, in_space: "{space}" }
+        store_as: validations
+      - query: { find: narrative, type: health, in_space: "{space}" }
+        store_as: health_indicators
+    purpose: "Load context for forming hypotheses"
+    next: form_hypotheses
+
+  form_hypotheses:
+    type: ask
+    context: |
+      Symptom: {symptom}
+      Reproduction: {reproduction}
+      Context: {context}
+      Suspected area: {suspected_area}
+
+      Recent work in this space:
+      {recent_work | format_timeline}
+
+      Validations (might be violated):
+      {validations | list with content}
+
+      Health indicators (might have fired):
+      {health_indicators | list with mechanism}
+
+      {contextual_knowledge.constraints}
+
+    questions:
+      - name: hypotheses
+        ask: "What might be wrong? List hypotheses with evidence citations."
+        why_it_matters: "Evidence-based reasoning"
+        good_answer: "1. Decay phase order wrong (evidence: tick_runner.py:45)\n2. Energy not bounded (evidence: test output shows 1.2)"
+        bad_answer: "Something is broken"
+        expects: { type: string, min_length: 50 }
+
+      - name: evidence_gathered
+        ask: "What evidence have you gathered? List sources."
+        why_it_matters: "Traces investigation path"
+        expects: { type: string }
+
+      - name: most_likely
+        ask: "Which hypothesis is most likely and why?"
+        why_it_matters: "Prioritizes fix attempt"
+        expects: { type: string }
+
+      - name: next_evidence_needed
+        ask: "What additional evidence would confirm/refute?"
+        why_it_matters: "Guides continued investigation"
+        expects: { type: string }
+
+    moment:
+      agent_provides: [hypotheses, most_likely]
+    next: create_investigation_moment
+
+  create_investigation_moment:
+    type: create
+    nodes:
+      - id: "moment_investigate_{space}_{timestamp}"
+        node_type: moment
+        type: investigation
+        prose: |
+          Investigation: {symptom}
+
+          Hypotheses:
+          {hypotheses}
+
+          Evidence gathered: {evidence_gathered}
+
+          Most likely: {most_likely}
+
+          Next evidence needed: {next_evidence_needed}
+        status: completed
+
+    links:
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_investigate_{space}_{timestamp}"
+      - type: about
+        from: "moment_investigate_{space}_{timestamp}"
+        to: "{space}"
+
+    next: $complete
+
+output:
+  investigation:
+    symptom: "{symptom}"
+    hypotheses: "{hypotheses}"
+    most_likely: "{most_likely}"
+    next_evidence: "{next_evidence_needed}"
+  moment: "moment_investigate_{space}_{timestamp}"

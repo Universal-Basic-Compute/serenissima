@@ -1,0 +1,302 @@
+name: solve_markers
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for resolving markers of any type.
+  Handles: ESCALATION, SUGGESTION, LEGACY_MARKER, UNRESOLVED_QUESTION
+
+inputs:
+  target: file_path:line
+  marker_type: enum[ESCALATION, SUGGESTION, LEGACY_MARKER, UNRESOLVED_QUESTION]
+  context: string
+  age: number
+
+outputs:
+  resolved: boolean
+  action_taken: string
+  marker_removed: boolean
+
+steps:
+  - id: read_context
+    name: Read Marker Context
+    action: read
+    params:
+      path: "{target.file_path}"
+      line: "{target.line}"
+      context_lines: 20
+    outputs:
+      full_context: string
+      marker_text: string
+
+  - id: check_still_exists
+    name: Verify Marker Still Exists
+    action: grep
+    params:
+      pattern: "{marker_text}"
+      file: "{target.file_path}"
+    outputs:
+      exists: boolean
+    on_false:
+      - action: complete
+        params:
+          resolved: true
+          action_taken: "already_resolved"
+          marker_removed: true
+
+  - id: route_by_type
+    name: Route to Type-Specific Handler
+    action: branch
+    condition: marker_type
+    branches:
+      ESCALATION: handle_escalation
+      SUGGESTION: handle_proposition
+      LEGACY_MARKER: handle_legacy
+      UNRESOLVED_QUESTION: handle_question
+
+  # ===== ESCALATION BRANCH =====
+  - id: handle_escalation
+    name: Handle Escalation
+    steps:
+      - id: analyze_escalation
+        name: Analyze Options
+        action: analyze
+        params:
+          prompt: |
+            Escalation: {marker_text}
+            Context: {full_context}
+
+            Identify:
+            1. What decision is needed
+            2. What options exist
+            3. Tradeoffs of each option
+            4. Your recommendation with rationale
+            5. Confidence level (0-1)
+        outputs:
+          analysis: object
+          confidence: float
+          recommendation: string
+
+      - id: can_decide
+        name: Check If Can Decide
+        action: condition
+        condition: "analysis.confidence > 0.8"
+        on_true:
+          - id: make_decision
+            name: Make Decision
+            action: document
+            params:
+              decision: "{analysis.recommendation}"
+              rationale: "{analysis.rationale}"
+          - id: remove_escalation_marker
+            name: Remove Marker
+            action: edit
+            params:
+              file: "{target.file_path}"
+              remove_line: "{target.line}"
+        on_false:
+          - id: escalate_to_human
+            name: Escalate to Human
+            action: escalate
+            params:
+              context: "{analysis}"
+              options: "{analysis.options}"
+              recommendation: "{analysis.recommendation}"
+
+  # ===== SUGGESTION BRANCH =====
+  - id: handle_proposition
+    name: Handle Proposition
+    steps:
+      - id: evaluate_proposition
+        name: Evaluate Proposition
+        action: analyze
+        params:
+          prompt: |
+            Proposition: {marker_text}
+            Context: {full_context}
+
+            Evaluate:
+            1. Feasibility (easy/medium/hard)
+            2. Value (low/medium/high)
+            3. Effort (hours/days/weeks)
+            4. Risk (low/medium/high)
+            5. Recommend: accept, reject, or defer
+        outputs:
+          evaluation: object
+          disposition: enum[accept, reject, defer]
+
+      - id: disposition_branch
+        name: Handle Disposition
+        action: branch
+        condition: evaluation.disposition
+        branches:
+          accept:
+            - id: create_impl_task
+              name: Create Implementation Task
+              action: create_task
+              params:
+                type: "implement_improvement"
+                description: "{marker_text}"
+                file: "{target.file_path}"
+                effort: "{evaluation.effort}"
+            - id: doc_accepted
+              name: Document Acceptance
+              action: document
+              params:
+                disposition: "ACCEPTED"
+                rationale: "{evaluation.rationale}"
+                task_id: "{create_impl_task.task_id}"
+          reject:
+            - id: doc_rejected
+              name: Document Rejection
+              action: document
+              params:
+                disposition: "REJECTED"
+                rationale: "{evaluation.rationale}"
+          defer:
+            - id: doc_deferred
+              name: Document Deferral
+              action: document
+              params:
+                disposition: "DEFERRED"
+                rationale: "{evaluation.rationale}"
+
+      - id: remove_proposition_marker
+        name: Remove Marker
+        action: edit
+        params:
+          file: "{target.file_path}"
+          remove_line: "{target.line}"
+
+  # ===== LEGACY MARKER BRANCH =====
+  - id: handle_legacy
+    name: Handle Legacy Marker
+    steps:
+      - id: assess_relevance
+        name: Assess Relevance
+        action: analyze
+        params:
+          prompt: |
+            Legacy marker: {marker_text}
+            Context: {full_context}
+
+            Determine:
+            1. Is this issue still relevant?
+            2. Has it been fixed elsewhere?
+            3. If relevant, can it be fixed in < 30 min?
+            4. If not quick-fix, what task description captures it?
+        outputs:
+          is_relevant: boolean
+          is_quick_fix: boolean
+          fix_description: string
+          task_description: string
+
+      - id: relevance_branch
+        name: Handle Based on Relevance
+        action: branch
+        condition: assess_relevance.is_relevant
+        branches:
+          false:
+            - id: delete_obsolete
+              name: Delete Obsolete Marker
+              action: edit
+              params:
+                file: "{target.file_path}"
+                remove_line: "{target.line}"
+          true:
+            - id: fix_or_convert
+              name: Fix or Convert
+              action: branch
+              condition: assess_relevance.is_quick_fix
+              branches:
+                true:
+                  - id: apply_fix
+                    name: Apply Quick Fix
+                    action: edit
+                    params:
+                      file: "{target.file_path}"
+                      changes: "{assess_relevance.fix_description}"
+                  - id: remove_after_fix
+                    name: Remove Marker
+                    action: edit
+                    params:
+                      file: "{target.file_path}"
+                      remove_line: "{target.line}"
+                false:
+                  - id: create_debt_task
+                    name: Create Technical Debt Task
+                    action: create_task
+                    params:
+                      type: "fix_technical_debt"
+                      description: "{assess_relevance.task_description}"
+                      file: "{target.file_path}"
+                      line: "{target.line}"
+                  - id: remove_after_convert
+                    name: Remove Marker
+                    action: edit
+                    params:
+                      file: "{target.file_path}"
+                      remove_line: "{target.line}"
+
+  # ===== QUESTION BRANCH =====
+  - id: handle_question
+    name: Handle Question
+    steps:
+      - id: research_answer
+        name: Research Answer
+        action: research
+        params:
+          question: "{marker_text}"
+          context: "{full_context}"
+          search_paths:
+            - "docs/**/*.md"
+            - "src/**/*"
+            - "lib/**/*"
+        outputs:
+          answer: string
+          confidence: float
+          sources: string[]
+
+      - id: confidence_branch
+        name: Handle Based on Confidence
+        action: branch
+        condition: "research_answer.confidence > 0.7"
+        branches:
+          true:
+            - id: document_answer
+              name: Document Answer
+              action: edit
+              params:
+                file: "{target.file_path}"
+                insert_after: "{target.line}"
+                content: "# Answer: {research_answer.answer}"
+            - id: remove_question_marker
+              name: Remove Marker
+              action: edit
+              params:
+                file: "{target.file_path}"
+                remove_line: "{target.line}"
+          false:
+            - id: escalate_question
+              name: Escalate to Human
+              action: escalate
+              params:
+                question: "{marker_text}"
+                research: "{research_answer}"
+                possible_answers: "{research_answer.answer}"
+
+  # ===== COMPLETION =====
+  - id: update_sync
+    name: Update SYNC
+    action: update_sync
+    params:
+      module: "solve-markers"
+      note: "Resolved {marker_type} at {target}"
+
+  - id: complete
+    name: Mark Complete
+    action: complete
+    outputs:
+      resolved: true
+      action_taken: "{action_taken}"
+      marker_removed: true

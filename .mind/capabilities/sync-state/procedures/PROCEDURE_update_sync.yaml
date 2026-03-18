@@ -1,0 +1,207 @@
+# Procedure: update_sync
+# Update stale SYNC file with current module state
+
+name: update_sync
+version: "1.0"
+description: Update SYNC file with current state, recent changes, and handoff notes
+
+triggers:
+  - problem: "STALE_SYNC: SYNC not updated in 14+ days"
+  - event: "Work session completed on module"
+  - manual: "Agent requested to update SYNC"
+
+requires_skills:
+  - SKILL_update_sync
+
+contextual_knowledge:
+  domain: |
+    SYNC files track current module state:
+    - STATUS: DESIGNING | CANONICAL | PROPOSED | DEPRECATED | BLOCKED
+    - LAST_UPDATED: When last refreshed
+    - RECENT_CHANGES: What happened lately
+    - HANDOFF: Context for next agent
+
+    Staleness threshold: 14 days
+    Update requires: reading changes, summarizing, writing meaningful content
+
+  constraints: |
+    - SYNC must reflect actual current state
+    - Recent changes must be specific and traceable
+    - Handoff must enable continuity
+    - Cannot be just a date bump
+
+steps:
+  identify_target:
+    type: ask
+    context: |
+      Update a stale SYNC file with current module state.
+      First, confirm which SYNC file needs updating.
+    questions:
+      - name: sync_path
+        ask: "Which SYNC file to update? (path)"
+        expects:
+          type: path
+          pattern: "**/*SYNC*.md"
+    next: load_current
+
+  load_current:
+    type: read
+    action: read_file
+    params:
+      path: "{sync_path}"
+    store_as: current_sync
+    next: check_git_log
+
+  check_git_log:
+    type: query
+    action: git_log
+    params:
+      path: "{sync_path | dirname}"
+      since: "30 days ago"
+    store_as: recent_commits
+    next: analyze_changes
+
+  analyze_changes:
+    type: ask
+    context: |
+      Current SYNC content:
+      {current_sync}
+
+      Recent commits in module:
+      {recent_commits | format_commits}
+    questions:
+      - name: changes_summary
+        ask: "Summarize what changed since last SYNC update (be specific)"
+        expects:
+          type: string
+          min_length: 50
+        good_answer: "Implemented auth flow with JWT tokens. Added login/logout endpoints. Fixed session persistence bug."
+        bad_answer: "Did some work"
+
+      - name: new_status
+        ask: "What should the STATUS be?"
+        expects:
+          type: enum
+          options: [DESIGNING, CANONICAL, PROPOSED, DEPRECATED, keep_current]
+
+      - name: handoff_context
+        ask: "What should the next agent know? (handoff context)"
+        expects:
+          type: string
+          min_length: 30
+    next: prepare_update
+
+  prepare_update:
+    type: compute
+    action: render_template
+    params:
+      template: |
+        # {module_name} - Sync
+
+        ```
+        STATUS: {new_status | resolve_status}
+        LAST_UPDATED: {today}
+        UPDATED_BY: {actor_id}
+        ```
+
+        ---
+
+        ## CURRENT STATE
+
+        {changes_summary}
+
+        ---
+
+        ## RECENT CHANGES
+
+        ### {today}: SYNC refresh
+
+        - **What:** {changes_summary}
+        - **Files:** {recent_commits | extract_files}
+        - **By:** {actor_id}
+
+        {existing_changes}
+
+        ---
+
+        ## HANDOFF
+
+        {handoff_context}
+
+        ---
+
+        ## KNOWN ISSUES
+
+        {existing_issues}
+    store_as: new_sync_content
+    next: confirm
+
+  confirm:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      SYNC UPDATE PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      {new_sync_content | preview}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    questions:
+      - name: confirmed
+        ask: "Write this updated SYNC?"
+        expects:
+          type: enum
+          options: [write, revise, cancel]
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      write: write_sync
+      revise: analyze_changes
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "SYNC update cancelled"
+
+  write_sync:
+    type: write
+    action: write_file
+    params:
+      path: "{sync_path}"
+      content: "{new_sync_content}"
+    next: verify
+
+  verify:
+    type: validate
+    checks:
+      - name: has_status
+        check: "content contains 'STATUS:'"
+      - name: has_date
+        check: "LAST_UPDATED is today"
+      - name: has_handoff
+        check: "## HANDOFF section exists and non-empty"
+      - name: no_placeholders
+        check: "no {placeholder} markers"
+    on_fail: error_report
+    next: complete
+
+  error_report:
+    type: complete
+    status: failed
+    message: "SYNC update failed validation: {validation_errors}"
+
+  complete:
+    type: complete
+    status: completed
+    message: "Updated SYNC at {sync_path}"
+
+output:
+  summary: "Updated SYNC for {module_name}: status={new_status}, changes documented"
+  returns:
+    sync_path: "{sync_path}"
+    status: "{new_status}"
+    updated: true

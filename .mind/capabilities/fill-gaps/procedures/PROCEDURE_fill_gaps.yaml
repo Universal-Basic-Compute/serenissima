@@ -1,0 +1,202 @@
+name: fill_gaps
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for resolving documentation quality issues:
+  filling gaps, consolidating duplicates, and splitting large docs.
+
+inputs:
+  target: doc_path
+  problem_type: enum[DOC_GAPS, DOC_DUPLICATION, LARGE_DOC_MODULE]
+  context: object  # problem-specific context
+
+outputs:
+  resolved: boolean
+  changes: object[]
+
+steps:
+  # ==========================================================================
+  # COMMON: Read task context
+  # ==========================================================================
+  - id: read_task
+    name: Read Task Context
+    action: read_task_inputs
+    outputs:
+      problem_type: string
+      target: path
+      context: object
+
+  # ==========================================================================
+  # GAP FILLING FLOW
+  # ==========================================================================
+  - id: read_gap_context
+    name: Read Gap Context
+    condition: "problem_type == 'DOC_GAPS'"
+    action: read
+    params:
+      path: "{target}"
+    outputs:
+      doc_content: string
+      gap_marker: string
+
+  - id: research_gap
+    name: Research Gap Content
+    condition: "problem_type == 'DOC_GAPS'"
+    action: research
+    params:
+      query: "{context.gap_text}"
+      sources:
+        - codebase
+        - related_docs
+        - commit_history
+    outputs:
+      research_results: object
+
+  - id: fill_gap_content
+    name: Fill Gap With Content
+    condition: "problem_type == 'DOC_GAPS'"
+    action: generate_content
+    params:
+      gap_context: "{context.gap_text}"
+      research: "{research_results}"
+      min_length: 50
+    outputs:
+      new_content: string
+
+  - id: replace_gap_marker
+    name: Replace Gap Marker
+    condition: "problem_type == 'DOC_GAPS'"
+    action: edit
+    params:
+      path: "{target}"
+      old: "@mind:gap {context.gap_text}"
+      new: "{new_content}"
+
+  # ==========================================================================
+  # DEDUPLICATION FLOW
+  # ==========================================================================
+  - id: read_both_docs
+    name: Read Both Documents
+    condition: "problem_type == 'DOC_DUPLICATION'"
+    action: read
+    params:
+      paths:
+        - "{target}"
+        - "{context.duplicate}"
+    outputs:
+      primary_content: string
+      secondary_content: string
+
+  - id: determine_canonical
+    name: Determine Canonical Source
+    condition: "problem_type == 'DOC_DUPLICATION'"
+    action: compare
+    params:
+      primary: "{target}"
+      secondary: "{context.duplicate}"
+      criteria:
+        - completeness
+        - age
+        - location
+    outputs:
+      canonical: path
+      secondary: path
+
+  - id: find_overlaps
+    name: Find Overlapping Sections
+    condition: "problem_type == 'DOC_DUPLICATION'"
+    action: diff
+    params:
+      canonical: "{canonical}"
+      secondary: "{secondary}"
+    outputs:
+      overlaps: object[]
+
+  - id: replace_with_references
+    name: Replace Duplicates With References
+    condition: "problem_type == 'DOC_DUPLICATION'"
+    action: edit
+    params:
+      path: "{secondary}"
+      replacements:
+        - for_each: "{overlaps}"
+          old: "{item.duplicate_text}"
+          new: "See [{canonical}]({canonical}) for details."
+
+  # ==========================================================================
+  # SIZE SPLITTING FLOW
+  # ==========================================================================
+  - id: check_doc_type
+    name: Check Document Type
+    condition: "problem_type == 'LARGE_DOC_MODULE'"
+    action: analyze
+    params:
+      path: "{target}"
+    outputs:
+      doc_type: string
+      is_sync: boolean
+
+  - id: archive_sync_entries
+    name: Archive Old SYNC Entries
+    condition: "problem_type == 'LARGE_DOC_MODULE' and is_sync"
+    action: split_sync
+    params:
+      sync_path: "{target}"
+      archive_path: "{target.parent}/SYNC_archive.md"
+      cutoff_days: 30
+    outputs:
+      archived_count: int
+      archive_path: path
+
+  - id: split_by_sections
+    name: Split By Sections
+    condition: "problem_type == 'LARGE_DOC_MODULE' and not is_sync"
+    action: split_doc
+    params:
+      path: "{target}"
+      max_lines: 180
+    outputs:
+      split_files: path[]
+
+  - id: add_cross_refs
+    name: Add Cross References
+    condition: "problem_type == 'LARGE_DOC_MODULE'"
+    action: add_references
+    params:
+      original: "{target}"
+      related: "{split_files or [archive_path]}"
+
+  # ==========================================================================
+  # COMMON: Validate and complete
+  # ==========================================================================
+  - id: validate_fix
+    name: Validate Fix
+    action: validate
+    params:
+      checks:
+        - gap_marker_removed: "problem_type != 'DOC_GAPS' or '@mind:gap' not in read(target)"
+        - refs_valid: "all links resolve"
+        - size_ok: "problem_type != 'LARGE_DOC_MODULE' or line_count(target) < 200"
+        - content_quality: "problem_type != 'DOC_GAPS' or len(new_content) > 50"
+    outputs:
+      validated: boolean
+      errors: string[]
+
+  - id: update_sync
+    name: Update SYNC
+    action: append
+    params:
+      path: "find_sync({target})"
+      content: |
+        ### {today}
+        - Resolved {problem_type} in {target}
+        - {resolution_summary}
+
+  - id: complete
+    name: Mark Complete
+    condition: "validated == true"
+    action: complete
+    outputs:
+      resolved: boolean
+      changes: object[]

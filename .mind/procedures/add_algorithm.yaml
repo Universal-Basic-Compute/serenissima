@@ -1,0 +1,314 @@
+# Protocol: add_algorithm
+# Document procedures and pseudocode for a module
+
+procedure: add_algorithm
+version: "2.0"
+description: Document procedures and pseudocode for a module - rich format
+
+triggers:
+  - gap: "Module has behaviors but no documented algorithms"
+  - event: "Complex logic added that needs explanation"
+
+requires_skills:
+  - SKILL_Define_Module_Boundaries_Objectives_And_Scope.md
+
+contextual_knowledge:
+  domain: |
+    Algorithms = procedures (HOW the module works, pseudocode).
+    Algorithms implement behaviors and follow design patterns.
+    Format: numbered steps, pseudocode, flow diagrams.
+    Should be language-agnostic where possible.
+
+  constraints: |
+    - Algorithms must be traceable to behaviors and patterns
+    - Avoid implementation details specific to language/framework
+    - Focus on core logic, not boilerplate
+
+  dependencies: |
+    Requires: behaviors exist (algorithms implement behaviors)
+    Enables: implementation, code review, optimization
+
+  quality_criteria: |
+    Good: "1. Collect all edges where weight > threshold. 2. For each edge: new_weight = weight * (1 - decay_rate). 3. If new_weight < min_threshold: remove edge."
+    Bad: "Uses a for loop to decay weights"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: behavior, in_space: "{space}" }
+        store_as: behaviors
+      - query: { find: narrative, type: pattern, in_space: "{space}" }
+        store_as: patterns
+      - query: { find: narrative, type: algorithm, in_space: "{space}" }
+        store_as: existing_algorithms
+    # Auto-derive module_name from space for ID generation
+    computed:
+      module_name: "{space | strip_prefix('space_MODULE_') | strip_prefix('space_AREA_')}"
+    purpose: "Load behaviors, patterns, and existing algorithms for dense linking"
+    next: check_prerequisites
+
+  check_prerequisites:
+    type: branch
+    checks:
+      - condition: "{behaviors | count} == 0"
+        action:
+          type: call_procedure
+          protocol: add_behaviors
+          context: { space: "{space}" }
+          on_complete: load_context
+      - condition: "{patterns | count} == 0"
+        action:
+          type: call_procedure
+          protocol: add_patterns
+          context: { space: "{space}" }
+          on_complete: load_context
+      - condition: "ready"
+        action: { goto: gather_algorithm_details }
+
+  gather_algorithm_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+
+      ━━━ EXISTING GRAPH STATE ━━━
+
+      Behaviors (what this algorithm enables):
+      {behaviors | format_list}
+
+      Patterns (what this algorithm implements):
+      {patterns | format_list}
+
+      Existing algorithms:
+      {existing_algorithms | format_list}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 1: Algorithm Name
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: algorithm_name
+        ask: "Algorithm name (what procedure is this)?"
+
+        why: |
+          The name identifies the logic. It should be concise and descriptive.
+
+        guidance: |
+          Example: "Weighted Decay", "Cycle Detection", "Least-Recently-Used Eviction".
+
+        good_answer: "Weighted Decay"
+        bad_answer: "Algorithm A"
+        expects: { type: string, min_length: 3 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 2: Enables Behavior
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: enables_behavior
+        ask: "Which behavior does this algorithm enable?"
+
+        why: |
+          Linking back to behaviors connects logic to observable system effects.
+          This is the "LINK TO PREVIOUS STEP" in the doc chain.
+
+        context: |
+          Behaviors in this space:
+          {behaviors | format_list}
+
+        guidance: |
+          Pick the behavior that is directly implemented by this algorithm.
+
+        creates: |
+          algorithm ─[relates: enables]→ behavior
+
+        expects:
+          type: reference
+          from: behaviors
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 3: Implements Pattern
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: implements_pattern
+        ask: "Which design pattern does this algorithm implement?"
+
+        why: |
+          Linking back to patterns connects logic to design decisions.
+
+        context: |
+          Patterns in this space:
+          {patterns | format_list}
+
+        guidance: |
+          Pick the design decision that this algorithm follows.
+
+        creates: |
+          algorithm ─[relates: implements]→ pattern
+
+        expects:
+          type: reference
+          from: patterns
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 4: Pseudocode
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: pseudocode
+        ask: "Pseudocode (numbered steps)?"
+
+        why: |
+          Pseudocode explains the logic in a language-agnostic way.
+          It's the primary content of the algorithm narrative.
+
+        guidance: |
+          Use numbered steps. Keep it clear and high-level.
+          Avoid language-specific syntax.
+
+        expects: { type: string, min_length: 20 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 5: Complexity
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: complexity
+        ask: "Time/space complexity if relevant?"
+        expects: { type: string, min_length: 0 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 6: Edge Cases
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: edge_cases
+        ask: "Edge cases to handle?"
+        expects: { type: string_list, min: 0 }
+
+    # Capture reasoning
+    moment:
+      agent_provides:
+        - description: "Summary of the algorithm"
+        - reasoning: "Why this algorithm implements this pattern and enables this behavior"
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: narrative_ALGORITHM_{module_name}-{algorithm_name | slugify}
+
+      Nodes to create: 2
+        - narrative_ALGORITHM_{module_name}-{algorithm_name | slugify}
+        - moment_ADD-ALGORITHM_{module_name}-{algorithm_name | slugify}_{timestamp_short}
+
+      Links to create:
+        Internal (2):
+          - moment ─[about]→ algorithm
+          - actor ─[expresses]→ moment
+
+        External (3):
+          - space ─[contains]→ algorithm
+          - algorithm ─[relates: enables]→ {enables_behavior}
+          - algorithm ─[relates: implements]→ {implements_pattern}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Create this algorithm cluster?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_algorithm
+      revise: gather_algorithm_details
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Algorithm creation cancelled"
+
+  create_algorithm:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Algorithm Documentation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_ALGORITHM_{module_name}-{algorithm_name | slugify}"
+        node_type: narrative
+        type: algorithm
+        name: "{algorithm_name}"
+        steps: "{pseudocode}"
+        complexity: "{complexity}"
+        edge_cases: "{edge_cases}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Documentation Event)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_ADD-ALGORITHM_{module_name}-{algorithm_name | slugify}_{timestamp_short}"
+        node_type: moment
+        type: documentation
+        prose: |
+          Documented algorithm: {algorithm_name}
+          Enables: {enables_behavior}
+          Implements: {implements_pattern}
+        status: spoken
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Space Contains Algorithm
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space}"
+        to: "narrative_ALGORITHM_{module_name}-{algorithm_name | slugify}"
+        nature: "contains"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Algorithm Enables Behavior
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_ALGORITHM_{module_name}-{algorithm_name | slugify}"
+        to: "{enables_behavior}"
+        nature: "enables"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Algorithm Implements Pattern
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_ALGORITHM_{module_name}-{algorithm_name | slugify}"
+        to: "{implements_pattern}"
+        nature: "implements"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_ADD-ALGORITHM_{module_name}-{algorithm_name | slugify}_{timestamp_short}"
+        nature: "expresses"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Algorithm
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_ADD-ALGORITHM_{module_name}-{algorithm_name | slugify}_{timestamp_short}"
+        to: "narrative_ALGORITHM_{module_name}-{algorithm_name | slugify}"
+        nature: "is about"
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space}"
+      task_id: "add_algorithm_{module_name}"
+    next: $complete
+
+output:
+  algorithm_doc: "narrative_ALGORITHM_{module_name}-{algorithm_name | slugify}"
+  implements_pattern: "{implements_pattern}"
+  enables_behavior: "{enables_behavior}"
+  moment: "moment_ADD-ALGORITHM_{module_name}-{algorithm_name | slugify}_{timestamp_short}"

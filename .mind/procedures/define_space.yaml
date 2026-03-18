@@ -1,0 +1,341 @@
+# Protocol: define_space
+# Create a space/container node for a module
+
+procedure: define_space
+version: "2.0"
+description: Create a space/container node for a module - rich format
+
+triggers:
+  - gap: "Module needs container in graph"
+  - event: "New module being created"
+
+requires_skills: []
+
+contextual_knowledge:
+  domain: |
+    Spaces are containers for module content.
+    Space types: module, area, concept, project.
+    Spaces contain: narratives, things, moments.
+    Spaces link to parent spaces via CONTAINS.
+
+  constraints: |
+    - Space ID must be unique
+    - Should specify type and parent
+    - Creates container for all module content
+
+  dependencies: |
+    Requires: nothing (can be first node)
+    Enables: all other protocols (they need a space to work in)
+
+  quality_criteria: |
+    Good: "space_physics_tick with type=module, parent=space_physics"
+    Bad: "some_space"
+
+steps:
+  check_exists:
+    type: query
+    auto_fetch:
+      - query: { find: space, where: { id: "{space_id}" } }
+        store_as: existing
+    next: branch_exists
+
+  branch_exists:
+    type: branch
+    checks:
+      - condition: "{existing | count} > 0"
+        action:
+          type: complete
+          message: "Space {space_id} already exists"
+      - condition: "ready"
+        action: { goto: gather_details }
+
+  gather_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Creating new space.
+
+      ID Convention: {node-type}_{SUBTYPE}_{instance}
+      Example: space_MODULE_engine-physics
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Module Name
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: module_name
+        ask: "Module name? (noun, lowercase, dashes for multi-word)"
+        why: "Used to generate the unique and canonical space ID."
+        guidance: "Choose a concise, descriptive noun. Example: 'physics-tick-runner'."
+        good_answer: "physics-tick-runner"
+        bad_answer: "my_space"
+        expects:
+          type: string
+          pattern: "^[a-z][a-z0-9-]*$"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Space Name
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: space_name
+        ask: "Human-readable name?"
+        why: "Used for display in UI, docs, and search results."
+        good_answer: "Physics Tick Runner"
+        expects: { type: string }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Space Type
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: space_type
+        ask: "Space type?"
+        why: "Determines the organizational role of the space."
+        guidance: |
+          - module: Code + docs for a single component
+          - area: Grouping of related modules
+          - concept: Cross-cutting idea that spans modules
+          - project: Top-level container
+        expects:
+          type: enum
+          options: [module, area, concept, project]
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Parent Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: parent_space
+        ask: "Parent space ID? (empty if root)"
+        why: "Establishes the containment hierarchy for navigation."
+        guidance: "Pick the parent container this space belongs to."
+        creates: "parent ─[contains]→ child"
+        good_answer: "space_AREA_physics"
+        expects: { type: string, min_length: 0 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Description
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: description
+        ask: "Brief description of what this space contains?"
+        why: "Helps agents and humans understand the scope of this container."
+        good_answer: "Manages the tick-based execution loop for physics simulation."
+        expects: { type: string }
+
+    # Auto-generate space_id from inputs
+    computed:
+      space_id: "space_{space_type | upper}_{module_name}"
+
+    # Capture reasoning for the space definition
+    moment:
+      agent_provides:
+        - description: "Summary of space definition"
+        - reasoning: "Why this space structure and hierarchy was chosen"
+
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before creating the space, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this define_space protocol?"
+        expects:
+          type: string
+          required: false
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: {space_id}
+
+      Nodes to create: 2
+        - space_{space_type | upper}_*
+        - moment_CREATE_*
+
+      Links to create: 2 + {parent_space | if_present: 1}
+        - {parent_space | if_present: "{parent_space} ─[contains]→ {space_id}"}
+        - actor ─[expresses]→ moment
+        - moment ─[about]→ {space_id}
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Create this space cluster?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Space (Container)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "{space_id}"
+        node_type: space
+        name: "{space_name}"
+        type: "{space_type}"
+        description: "{description}"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "{space_id}"
+        #   WHAT: Unique identifier like "space_physics_tick"
+        #   WHY: Used in all graph queries to find this space
+        #   FORMAT: space_<area>_<module> for consistency
+        #
+        # node_type: space
+        #   WHAT: Declares this as a container node
+        #   WHY: Spaces can contain narratives, things, moments
+        #   ALTERNATIVES: narrative, thing, moment, todo
+        #
+        # name: "{space_name}"
+        #   WHAT: Human-readable display name
+        #   WHY: Shown in UI, docs, and search results
+        #   EXAMPLE: "Physics Tick Runner"
+        #
+        # type: "{space_type}"
+        #   WHAT: Categorization within spaces
+        #   WHY: Affects how space is treated in queries/views
+        #   OPTIONS:
+        #     - module: Single component with code + docs
+        #     - area: Grouping of modules
+        #     - concept: Cross-cutting idea
+        #     - project: Top-level container
+        #
+        # description: "{description}"
+        #   WHAT: Brief explanation of space contents
+        #   WHY: Helps agents decide whether to load this context
+        #   LENGTH: 1-3 sentences, specific not vague
+        #
+        # weight: 1.0
+        #   WHAT: Importance score (0.0-1.0)
+        #   WHY: Spaces are always max weight (1.0) - they're containers
+        #   RANGE: 1.0 for spaces, 0.1-0.9 for contents
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Creation Event)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_CREATE_{module_name}_{timestamp_short}"
+        # ID Convention: moment_{SUBTYPE}_{context}_{disambiguator}
+        # Example: moment_CREATE_physics-tick-runner_a7
+        node_type: moment
+        type: procedure_create
+        prose: "Created space {space_name} ({space_type})"
+        status: spoken
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_CREATE_{module_name}_{timestamp_short}"
+        #   WHAT: Unique ID with subtype and short hash
+        #   WHY: Moments are ordered by creation time, SUBTYPE for scanning
+        #   FORMAT: moment_{SUBTYPE}_{context}_{hash}
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event record
+        #   WHY: Creates history that can be queried
+        #   CONTRAST: narratives are persistent, moments are events
+        #
+        # type: procedure_create
+        #   WHAT: Categorizes this moment type
+        #   WHY: Enables queries like "show all creation events"
+        #   OTHER_TYPES: sync_update, decision, escalation_raised
+        #
+        # prose: "Created space..."
+        #   WHAT: Human-readable description
+        #   WHY: Displayed in activity feeds and history
+        #   FORMAT: Past tense, specific about what happened
+        #
+        # status: spoken
+        #   WHAT: Moment state
+        #   WHY: "spoken" = articulated/public, "internal" = private thought
+        #   OPTIONS: spoken, internal, pending
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Parent Contains Child
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{parent_space}"
+        to: "{space_id}"
+        nature: "contains"
+        condition: "{parent_space} != ''"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: contains
+        #   WHAT: Parent-child relationship
+        #   WHY: Establishes hierarchy - "area contains modules"
+        #   QUERY: "What spaces are in area X?" follows contains
+        #   DIRECTION: from=parent, to=child
+        #
+        # condition: "{parent_space} != ''"
+        #   WHAT: Only create link if parent specified
+        #   WHY: Root spaces have no parent
+        #   ALTERNATIVE: Could link to implicit "root" space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_CREATE_{module_name}_{timestamp_short}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who/what created this moment
+        #   QUERY: "What did agent X do?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_CREATE_{module_name}_{timestamp_short}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what the moment relates to
+        #   QUERY: "What happened to space X?" follows about
+        #   DIRECTION: from=moment/narrative, to=subject
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space_id}"
+      task_id: "define_space_{space_id}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - space (1)
+      - moment_create (1)
+    links:
+      - contains (parent → child, conditional)
+      - expresses (actor → moment)
+      - about (moment → space)
+  summary: "Created space {space_id} ({space_type})"
+  returns:
+    space_created: "{space_id}"
+    moment: "moment_CREATE_{module_name}_{timestamp_short}"
+
+# ID Convention Reference:
+# See docs/schema/PATTERNS_Schema.md section 3 for full ID format specification.
+# Format: {node-type}_{SUBTYPE}_{instance-context}_{disambiguator}

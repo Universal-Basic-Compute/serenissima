@@ -1,0 +1,218 @@
+# Protocol: ingest_docs
+# Ingest documentation files into graph and archive originals
+
+procedure: ingest_docs
+version: "2.0"
+description: Ingest doc files into graph as narratives, then archive originals - rich format
+
+triggers:
+  - issue: "DOCS_NOT_INGESTED"
+  - event: "New documentation needs graph ingestion"
+
+requires_skills:
+  - SKILL_Ingest_Docs_To_Graph_And_Archive.md
+
+contextual_knowledge:
+  domain: |
+    Documentation files must be ingested into the graph to enable:
+    - Agent queries across documentation
+    - Link traversal between concepts
+    - Context loading for tasks
+
+    Chain order determines ingestion priority:
+    OBJECTIVES(0) > BEHAVIORS(1) > PATTERNS(2) > ALGORITHM(3) >
+    VALIDATION(4) > IMPLEMENTATION(5) > HEALTH(6) > SYNC(7)
+
+  constraints: |
+    - Process docs in chain order within each module
+    - Verify ingestion before archiving
+    - Maintain module grouping for coherent graph structure
+    - Archive to data/archive/docs/{module}/
+
+  dependencies: |
+    Requires: Graph connection, module space exists
+    Enables: Graph queries, agent context loading
+
+  quality_criteria: |
+    Good: All OBJECTIVES ingested before BEHAVIORS, all module docs together
+    Bad: Random ingestion order, orphaned docs without module context
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: issue, type: DOCS_NOT_INGESTED, module: "{module}" }
+        store_as: pending_docs
+      - query: { find: space, id: "space_MODULE_{module}" }
+        store_as: module_space
+    computed:
+      module_name: "{module | clean_module_name}"
+    next: check_module_space
+
+  check_module_space:
+    type: branch
+    checks:
+      - condition: "{module_space | is_empty}"
+        action:
+          type: call_procedure
+          protocol: define_space
+          context:
+            space_type: MODULE
+            name: "{module}"
+          on_complete: sort_by_chain
+      - condition: "ready"
+        action: { goto: sort_by_chain }
+
+  sort_by_chain:
+    type: transform
+    input: pending_docs
+    sort_by: chain_priority
+    group_by: chain_type
+    store_as: sorted_docs
+    next: ingest_loop
+
+  ingest_loop:
+    type: foreach
+    items: sorted_docs
+    as: doc
+    steps:
+      - read_doc:
+          type: read_file
+          path: "{doc.path}"
+          store_as: doc_content
+
+      - create_narrative:
+          type: create
+          nodes:
+            - id: "narrative_DOC_{module_name}-{doc.chain_type}_{doc.path | hash6}"
+              node_type: narrative
+              type: documentation
+              chain_type: "{doc.chain_type}"
+              module: "{module_name}"
+              path: "{doc.path}"
+              title: "{doc_content | extract_title}"
+              content: "{doc_content}"
+              created_at_s: "{timestamp}"
+              updated_at_s: "{timestamp}"
+
+          links:
+            # Space contains doc
+            - from: "space_MODULE_{module_name}"
+              to: "narrative_DOC_{module_name}-{doc.chain_type}_{doc.path | hash6}"
+              nature: "contains"
+
+      - verify_ingestion:
+          type: query
+          cypher: |
+            MATCH (n:Narrative {id: $id})
+            RETURN n.id, n.content IS NOT NULL
+          params:
+            id: "narrative_DOC_{module_name}-{doc.chain_type}_{doc.path | hash6}"
+          expect: "row_count > 0"
+          on_fail: { error: "Ingestion verification failed for {doc.path}" }
+
+      - archive_original:
+          type: move_file
+          from: "{doc.path}"
+          to: "data/archive/docs/{module_name}/{doc.path | basename}"
+
+    next: capture_reasoning
+
+  capture_reasoning:
+    # Capture reasoning for the ingestion process
+    moment:
+      agent_provides:
+        - description: "Summary of doc ingestion"
+        - reasoning: "Why these documents were ingested and how they strengthen the module's doc chain"
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW for {module_name}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: moment_INGEST-DOCS_{module_name}_{timestamp_short}
+
+      Nodes to create: 1 + {sorted_docs | count}
+        - moment_INGEST-DOCS_*
+        - narrative_DOC_* (one per ingested file)
+
+      Links to create: 1 + {sorted_docs | count}
+        - actor ─[expresses]→ moment
+        - space ─[contains]→ narrative_DOC (one per file)
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Ingest these documents and archive originals?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_moment
+      revise: load_context
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Ingestion cancelled"
+
+  create_moment:
+    type: create
+    nodes:
+      - id: "moment_INGEST-DOCS_{module_name}_{timestamp_short}"
+        node_type: moment
+        type: doc_ingestion
+        prose: "Ingested {sorted_docs | count} docs for {module_name}"
+        status: completed
+        docs_ingested: "{sorted_docs | count}"
+        module: "{module_name}"
+
+    links:
+      - from: "{actor_id}"
+        to: "moment_INGEST-DOCS_{module_name}_{timestamp_short}"
+        nature: "expresses"
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "space_MODULE_{module_name}"
+      task_id: "ingest_docs_{module_name}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - narrative_DOC (per doc)
+      - moment_INGEST-DOCS
+    links:
+      - contains (space → doc)
+      - expresses (actor → moment)
+  summary: "Ingested {sorted_docs | count} docs for {module_name}, archived to data/archive/docs/"
+  returns:
+    docs_ingested: "{sorted_docs | count}"
+    module: "{module_name}"
+    archive_path: "data/archive/docs/{module_name}/"
+    moment: "moment_INGEST-DOCS_{module_name}_{timestamp_short}"

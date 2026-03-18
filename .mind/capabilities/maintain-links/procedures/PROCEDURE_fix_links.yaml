@@ -1,0 +1,205 @@
+name: fix_links
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for fixing broken IMPL: links and resolving orphan docs.
+
+inputs:
+  target: doc_path
+  problem_type: BROKEN_IMPL_LINK | ORPHAN_DOCS
+  broken_markers: string[]  # For BROKEN_IMPL_LINK
+  reason: string            # For ORPHAN_DOCS
+
+outputs:
+  fixed: boolean
+  updates: object[]
+  resolution: enum
+
+steps:
+  # Common: Read the target doc
+  - id: read_doc
+    name: Read Target Document
+    action: read
+    params:
+      path: "{target}"
+    outputs:
+      doc_content: string
+
+  # Common: Parse existing markers
+  - id: parse_markers
+    name: Parse IMPL Markers
+    action: extract_patterns
+    params:
+      content: "{doc_content}"
+      patterns:
+        - 'IMPL:\s*([^\s\n`]+)'
+        - 'implements:\s*([^\s\n`]+)'
+    outputs:
+      impl_markers: string[]
+
+  # Branch: BROKEN_IMPL_LINK
+  - id: fix_broken_links
+    name: Fix Broken IMPL Links
+    condition: "problem_type == 'BROKEN_IMPL_LINK'"
+    action: loop
+    loop: "{broken_markers}"
+    steps:
+      - id: extract_filename
+        name: Extract Filename
+        action: path_parse
+        params:
+          path: "{item}"
+        outputs:
+          filename: string
+          directory: string
+
+      - id: search_codebase
+        name: Search for File
+        action: glob
+        params:
+          pattern: "**/{filename}"
+        outputs:
+          candidates: path[]
+
+      - id: resolve_path
+        name: Resolve New Path
+        action: conditional
+        branches:
+          single_match:
+            condition: "len(candidates) == 1"
+            action: set
+            params:
+              new_path: "{candidates[0]}"
+              confidence: 1.0
+
+          multiple_matches:
+            condition: "len(candidates) > 1"
+            action: score_paths
+            params:
+              original: "{item}"
+              candidates: "{candidates}"
+            outputs:
+              new_path: string
+              confidence: float
+
+          no_match:
+            condition: "len(candidates) == 0"
+            action: set
+            params:
+              new_path: null
+              action_type: remove
+
+      - id: update_marker
+        name: Update or Remove Marker
+        action: conditional
+        branches:
+          update:
+            condition: "new_path != null and confidence > 0.8"
+            action: replace_in_file
+            params:
+              file: "{target}"
+              old: "IMPL: {item}"
+              new: "IMPL: {new_path}"
+
+          escalate:
+            condition: "new_path != null and confidence <= 0.8"
+            action: create_escalation
+            params:
+              reason: "Multiple candidates for {item}: {candidates}"
+
+          remove:
+            condition: "new_path == null"
+            action: replace_in_file
+            params:
+              file: "{target}"
+              old: "IMPL: {item}"
+              new: ""
+            outputs:
+              removed_marker: string
+
+  # Branch: ORPHAN_DOCS
+  - id: resolve_orphan
+    name: Resolve Orphan Doc
+    condition: "problem_type == 'ORPHAN_DOCS'"
+    steps:
+      - id: extract_module
+        name: Extract Module Name
+        action: path_parse
+        params:
+          path: "{target}"
+        outputs:
+          module_name: string
+
+      - id: search_for_code
+        name: Search for Related Code
+        action: search_multiple
+        params:
+          patterns:
+            - "src/{module_name}/**/*"
+            - "lib/{module_name}/**/*"
+            - "{module_name}/**/*"
+        outputs:
+          code_matches: path[]
+
+      - id: decide_resolution
+        name: Decide Resolution
+        action: conditional
+        branches:
+          link:
+            condition: "len(code_matches) > 0"
+            action: create_links
+            params:
+              doc: "{target}"
+              code: "{code_matches[0]}"
+            outputs:
+              resolution: "linked"
+
+          delete_stub:
+            condition: "is_stub(doc_content)"
+            action: delete_file
+            params:
+              path: "{target}"
+            outputs:
+              resolution: "deleted"
+
+          archive:
+            condition: "has_value(doc_content) and len(code_matches) == 0"
+            action: move_file
+            params:
+              from: "{target}"
+              to: "docs/archive/{date}_{basename}"
+            outputs:
+              resolution: "archived"
+
+          escalate:
+            condition: "uncertain(doc_content)"
+            action: create_escalation
+            params:
+              doc: "{target}"
+              reason: "Cannot determine if code should exist"
+            outputs:
+              resolution: "escalated"
+
+  # Validate results
+  - id: validate
+    name: Validate Fix
+    action: validate
+    params:
+      checks:
+        - all_impl_links_valid
+        - no_new_broken_links
+        - doc_content_preserved
+    outputs:
+      validated: boolean
+      errors: string[]
+
+  # Complete
+  - id: complete
+    name: Mark Complete
+    condition: "validated == true"
+    action: complete
+    outputs:
+      fixed: boolean
+      updates: object[]
+      resolution: enum

@@ -1,0 +1,142 @@
+name: investigate_error
+version: "1.0"
+description: Investigate and triage a new error from logs
+
+inputs:
+  fingerprint:
+    type: string
+    required: true
+  message:
+    type: string
+    required: true
+  log_path:
+    type: string
+    required: true
+  stack_trace:
+    type: string
+    required: false
+
+outputs:
+  root_cause:
+    type: string
+  severity:
+    type: enum
+    values: [low, medium, high, critical]
+  affected_files:
+    type: list
+  fix_approach:
+    type: string
+  action:
+    type: enum
+    values: [fix_now, create_task, monitor, close]
+
+steps:
+  - id: understand_error
+    prompt: |
+      Read the error details:
+
+      **Fingerprint:** {fingerprint}
+      **Message:** {message}
+      **Log path:** {log_path}
+      **Stack trace:** {stack_trace}
+
+      What type of error is this? What component does it affect?
+    expects:
+      error_type: string
+      affected_component: string
+
+  - id: find_source
+    prompt: |
+      Based on the error type "{error_type}" in component "{affected_component}":
+
+      1. Find the source file where this error originates
+      2. Read the relevant code
+      3. Check recent commits to understand if this is a regression
+
+      What did you find?
+    expects:
+      source_file: path
+      is_regression: boolean
+      recent_changes: string
+
+  - id: reproduce
+    prompt: |
+      Try to reproduce the error:
+
+      1. What conditions trigger this error?
+      2. Can you reproduce it locally?
+      3. What are the exact steps?
+
+      If you cannot reproduce, note that and we'll proceed with analysis.
+    expects:
+      reproducible: boolean
+      trigger_conditions: string
+      steps_to_reproduce: string
+
+  - id: identify_cause
+    prompt: |
+      Based on your investigation:
+
+      **Source file:** {source_file}
+      **Regression:** {is_regression}
+      **Reproducible:** {reproducible}
+      **Trigger:** {trigger_conditions}
+
+      What is the root cause of this error?
+    expects:
+      root_cause: string
+      confidence: enum[high, medium, low]
+
+  - id: assess_severity
+    prompt: |
+      Given the root cause: "{root_cause}"
+
+      Assess the severity:
+      - **critical**: Data loss, security issue, or complete feature failure
+      - **high**: Major feature broken, many users affected
+      - **medium**: Feature degraded, some users affected
+      - **low**: Minor issue, rare occurrence, easy workaround
+
+      What severity is this error?
+    expects:
+      severity: enum[critical, high, medium, low]
+      impact_description: string
+
+  - id: plan_action
+    prompt: |
+      Given severity "{severity}" and root cause "{root_cause}":
+
+      What should we do?
+      - **fix_now**: Critical/high severity, fix immediately
+      - **create_task**: Medium severity, schedule for later
+      - **monitor**: Low severity, watch for recurrence
+      - **close**: Not our bug, external issue, or already fixed
+
+      What's the recommended action and fix approach?
+    expects:
+      action: enum[fix_now, create_task, monitor, close]
+      fix_approach: string
+      affected_files: list
+
+  - id: document
+    prompt: |
+      Summarize the investigation:
+
+      **Error:** {message}
+      **Root cause:** {root_cause}
+      **Severity:** {severity}
+      **Action:** {action}
+      **Fix approach:** {fix_approach}
+
+      Create a summary for the task record.
+    expects:
+      summary: string
+
+completion:
+  message: "Investigation complete. Action: {action}"
+  outputs:
+    root_cause: "{root_cause}"
+    severity: "{severity}"
+    affected_files: "{affected_files}"
+    fix_approach: "{fix_approach}"
+    action: "{action}"

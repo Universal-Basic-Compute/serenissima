@@ -1,0 +1,335 @@
+# Nature Vocabulary
+#
+# Unified vocabulary for links AND nodes. Use adverb forms that work for both:
+#   - Link: "urgently concerns", "cautiously blocks"
+#   - Node: nature: "urgently" (means "this is urgent")
+#
+# Format: [modifier] + [verb]
+#
+# Examples:
+#   "serves"
+#   "urgently serves"
+#   "cautiously, with difficulty"
+#   "unreliably imports"
+#   "speculatively resolves, temporarily"
+
+# =============================================================================
+# VERBS (for links)
+# =============================================================================
+
+structural:
+  - verb: serves
+    when: Linking an instance to its template (task_run → task, actor → actor_template)
+    result: System recognizes instance-template relationship, queries for instances return this node
+
+  - verb: includes
+    when: Creating hierarchy or containment (space → subspace, category → item)
+    result: Child appears in parent's contents, hierarchy queries traverse this link
+
+  - verb: imports
+    when: Recording code/module dependencies (module → library, file → package)
+    result: Dependency graph includes this edge, impact analysis finds dependents
+
+  - verb: describes
+    when: Linking documentation to what it documents (README → module, PATTERNS → system)
+    result: Subject shows related docs, doc queries find this documentation
+
+action:
+  - verb: concerns
+    when: Connecting an action to what it operates on (task_run → target node)
+    result: Task is associated with target, target shows related actions
+
+  - verb: claims
+    when: Recording ownership (actor → task_run, user → resource)
+    result: Resource marked as owned, others see it as unavailable
+
+  - verb: resolves
+    when: Task successfully addresses a problem (task_run → problem, fix → bug)
+    result: Problem marked as addressed, detection stops flagging it
+
+  - verb: blocks
+    when: Recording what prevents progress (blocker → blocked, dependency → dependent)
+    result: Blocked item shows as waiting, unblock queries find blockers
+
+capability:
+  - verb: uses
+    when: Recording tool/skill usage (task → skill, process → utility)
+    result: Capability linked to consumer, usage tracking possible
+
+  - verb: executes
+    when: Recording what runs what (task → procedure, runner → script)
+    result: Execution path defined, procedure loaded when task runs
+
+  - verb: requires
+    when: Recording prerequisites (task → prerequisite, step → prior_step)
+    result: Must be satisfied before proceeding, ordering enforced
+
+  - verb: enables
+    when: Recording what makes something possible (capability → action, permission → operation)
+    result: Action possible only when enabler present
+
+evidence:
+  - verb: proves
+    when: Strong evidence confirming a claim (test_result → hypothesis, data → theory)
+    result: Claim strengthened, confidence increased significantly
+
+  - verb: refutes
+    when: Strong evidence against a claim (counterexample → hypothesis)
+    result: Claim weakened, may trigger reconsideration
+
+  - verb: supports
+    when: Moderate evidence for a claim (observation → theory)
+    result: Claim somewhat strengthened, adds to body of evidence
+
+  - verb: contradicts
+    when: Evidence conflicts with claim (finding → assumption)
+    result: Inconsistency flagged, needs resolution
+
+  - verb: suggests
+    when: Weak indication of possibility (hint → hypothesis)
+    result: Possibility noted, warrants investigation
+
+# =============================================================================
+# MODIFIERS (for links and nodes)
+# =============================================================================
+
+priority:
+  - modifier: urgently
+    when: Needs immediate attention, time-sensitive, blocking others
+    result: Surfaces in priority queries, triggers alerts, assigned first
+
+  - modifier: critically
+    when: System depends on this, failure has wide impact
+    result: Highest priority, blocks other work until resolved
+
+  - modifier: importantly
+    when: High value but not time-sensitive
+    result: Prioritized in queues, gets attention before optional work
+
+  - modifier: optionally
+    when: Nice to have, can be skipped without harm
+    result: Deprioritized, done only if time permits
+
+  - modifier: eventually
+    when: No rush, background work, someday/maybe
+    result: Lowest priority, picked up during slack time
+
+difficulty:
+  - modifier: with difficulty
+    when: Requires significant skill or effort, not for beginners
+    result: Routed to senior/experienced agents, given more time
+
+  - modifier: laboriously
+    when: Time-intensive regardless of skill, tedious work
+    result: Time estimates increased, may be split into chunks
+
+  - modifier: simply
+    when: Straightforward, good for onboarding or quick wins
+    result: Can be assigned to any agent, fast turnaround expected
+
+  - modifier: with complexity
+    when: Many moving parts, needs decomposition
+    result: Flagged for planning phase, broken into subtasks
+
+  - modifier: trickily
+    when: Easy to get wrong, subtle gotchas, needs careful attention
+    result: Extra review required, common mistakes highlighted
+
+risk:
+  - modifier: cautiously
+    when: Could cause problems if done wrong, needs verification
+    result: Requires verification before proceeding, slower pace
+
+  - modifier: riskily
+    when: Known to cause issues sometimes, needs safety measures
+    result: Rollback plan required, extra testing mandated
+
+  - modifier: dangerously
+    when: Can break system, data loss possible, high stakes
+    result: Requires approval before action, maximum caution
+
+  - modifier: safely
+    when: Low risk, well-understood, reversible
+    result: Can proceed freely, minimal oversight needed
+
+  - modifier: with fragility
+    when: Breaks easily, sensitive to changes, handle gently
+    result: Avoid side effects, minimize touching, isolate changes
+
+reliability:
+  - modifier: reliably
+    when: Consistently works, trusted, proven track record
+    result: No extra verification needed, can depend on this
+
+  - modifier: unreliably
+    when: Sometimes fails, inconsistent behavior
+    result: Retry logic needed, don't depend on single attempt
+
+  - modifier: flakily
+    when: Known to fail randomly, non-deterministic
+    result: Multiple retries, investigate root cause
+
+  - modifier: consistently
+    when: Behaves the same way every time, predictable
+    result: Can build automation around this, stable foundation
+
+  - modifier: sporadically
+    when: Works sometimes, fails sometimes, pattern unclear
+    result: Needs investigation, gather more data
+
+  - modifier: problematically
+    when: Known issues exist, history of problems
+    result: Check history first, expect trouble, have workarounds ready
+
+confidence:
+  - modifier: certainly
+    when: Verified fact, confirmed by evidence, no doubt
+    result: Can depend on this, use as foundation for decisions
+
+  - modifier: definitely
+    when: High confidence based on experience, very likely true
+    result: Act on it, but allow for small chance of error
+
+  - modifier: probably
+    when: Likely true but not verified, reasonable assumption
+    result: Proceed but verify if critical path depends on it
+
+  - modifier: possibly
+    when: Might be true, hypothesis stage, needs investigation
+    result: Don't act on it yet, gather more information
+
+  - modifier: uncertainly
+    when: Unknown, insufficient information, can't assess
+    result: Gather more info before proceeding, flag as uncertain
+
+  - modifier: speculatively
+    when: Guess, intuition, no evidence yet
+    result: Don't build on this, treat as hypothesis to test
+
+  - modifier: disputedly
+    when: Conflicting opinions, no consensus, contested
+    result: Needs resolution before proceeding, surface disagreement
+
+temporal:
+  - modifier: temporarily
+    when: Will change soon, interim state, not permanent
+    result: Don't over-invest, expect to revisit
+
+  - modifier: permanently
+    when: Stable, not expected to change, long-term
+    result: Safe to build on, can make dependent decisions
+
+  - modifier: conditionally
+    when: True only under certain conditions, context-dependent
+    result: Check conditions before relying on this
+
+  - modifier: freshly
+    when: Just updated, current, recent
+    result: Information is current, no need to refresh
+
+  - modifier: stalely
+    when: Old information, may be outdated, needs refresh
+    result: Verify before using, may have changed
+
+  - modifier: historically
+    when: Past state, for reference, not current
+    result: Don't act on this, use only for context
+
+  - modifier: imminently
+    when: About to happen, coming soon, prepare now
+    result: Take preparatory action, deadline approaching
+
+manner:
+  - modifier: carefully
+    when: Precision matters, mistakes costly, take your time
+    result: Slower pace, double-check work, review before completing
+
+  - modifier: thoroughly
+    when: Complete coverage needed, no shortcuts acceptable
+    result: Full investigation, all cases covered, comprehensive
+
+  - modifier: hastily
+    when: Speed prioritized over completeness, good enough is ok
+    result: Quick pass, may need follow-up, accept imperfection
+
+  - modifier: partially
+    when: Incomplete work, more to do, interim state
+    result: Not done yet, continuation needed
+
+  - modifier: superficially
+    when: Surface-level only, not deep, quick scan
+    result: May miss details, sufficient for overview only
+
+  - modifier: deeply
+    when: Full investigation needed, understand root cause
+    result: Thorough analysis, time-intensive, comprehensive understanding
+
+emotion:
+  - modifier: frustratingly
+    when: Known pain point, causes suffering, annoying to work with
+    result: Empathize with assignee, consider fixing root cause
+
+  - modifier: satisfyingly
+    when: Rewarding to work on, feels good to complete
+    result: Good for morale, can use as motivator
+
+  - modifier: boringly
+    when: Tedious, low engagement, mind-numbing
+    result: Rotate assignees, don't give to same person repeatedly
+
+  - modifier: excitingly
+    when: Interesting, engaging, people want to work on it
+    result: High interest, may need to manage demand
+
+  - modifier: painfully
+    when: Causes suffering, unpleasant, everyone avoids
+    result: Minimize exposure, compensate, consider elimination
+
+  - modifier: surprisingly
+    when: Unexpected behavior, not what was anticipated
+    result: Worth noting, investigate why, update expectations
+
+  - modifier: disappointingly
+    when: Below expectations, let down, worse than hoped
+    result: Adjust expectations, consider alternatives
+
+# =============================================================================
+# EXAMPLES
+# =============================================================================
+
+examples:
+  - nature: "serves"
+    context: task_run → task
+    meaning: This task_run is an instance of that task template
+
+  - nature: "urgently concerns"
+    context: hot_fix → production_bug
+    meaning: High-priority task targeting a critical issue
+
+  - nature: "cautiously, with difficulty"
+    context: (node modifier)
+    meaning: This requires careful handling and experienced skills
+
+  - nature: "unreliably imports"
+    context: module → flaky_api
+    meaning: This dependency fails sometimes, add retry logic
+
+  - nature: "speculatively resolves, temporarily"
+    context: workaround → bug
+    meaning: Uncertain fix that may need revisiting
+
+  - nature: "critically blocks"
+    context: missing_config → deployment
+    meaning: Deployment cannot proceed until config is provided
+
+  - nature: "frustratingly, with complexity"
+    context: (node modifier)
+    meaning: Known pain point that's also hard to work with
+
+  - nature: "freshly proves"
+    context: test_run → hypothesis
+    meaning: Recent test confirms the hypothesis
+
+  - nature: "dangerously claims"
+    context: admin → system_resource
+    meaning: Ownership that could break things if misused

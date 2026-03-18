@@ -1,0 +1,121 @@
+procedure: protocol_add_patterns
+version: "1.0"
+description: Add design pattern narratives to a space
+
+triggers:
+  - gap: "Space lacks design documentation"
+  - event: "Design decision made during implementation"
+
+requires_skills:
+  - "SKILL_Define_Module_Boundaries_Objectives_And_Scope.md"
+
+contextual_knowledge:
+  domain: |
+    Patterns document design decisions:
+    - Why this shape (not alternatives)
+    - What's in scope vs out
+    - Key abstractions and their rationale
+    Links to objectives via RELATES with direction=implements.
+
+  constraints: |
+    - Must explain WHY, not just WHAT
+    - Should reference alternatives considered
+    - Should link to objectives it serves
+
+  dependencies: |
+    Requires: space exists, objectives exist (recommended)
+    Enables: consistent implementation, onboarding
+
+  quality_criteria: |
+    Good: "Using weighted graph because: energy propagation needs continuous values, not discrete states. Considered: FSM (rejected: no gradual decay), event sourcing (rejected: overkill for single-node)"
+    Bad: "We use a graph"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: objective, in_space: "{space}" }
+        store_as: objectives
+      - query: { find: narrative, type: pattern, in_space: "{space}" }
+        store_as: existing_patterns
+    next: gather_patterns
+
+  gather_patterns:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Objectives: {objectives | list}
+      Existing patterns: {existing_patterns | list}
+
+    questions:
+      - name: pattern_name
+        ask: "Pattern name? What decision is being documented?"
+        expects: { type: string }
+
+      - name: decision
+        ask: "What is the design decision?"
+        why_it_matters: "The core choice"
+        expects: { type: string }
+
+      - name: rationale
+        ask: "Why this approach? What problem does it solve?"
+        why_it_matters: "Future maintainers need to understand"
+        expects: { type: string, min_length: 30 }
+
+      - name: alternatives
+        ask: "What alternatives were considered and why rejected?"
+        why_it_matters: "Prevents revisiting same decisions"
+        expects: { type: string }
+
+      - name: serves_objectives
+        ask: "Which objectives does this pattern serve?"
+        expects:
+          type: id_list
+          from: "{objectives}"
+          min: 0
+
+    moment:
+      agent_provides: [rationale, alternatives]
+    next: create_pattern
+
+  create_pattern:
+    type: create
+    nodes:
+      - id: "pattern_{pattern_name | slugify}"
+        node_type: narrative
+        type: pattern
+        name: "{pattern_name}"
+        decision: "{decision}"
+        rationale: "{rationale}"
+        alternatives: "{alternatives}"
+
+      - id: "moment_create_pattern_{timestamp}"
+        node_type: moment
+        type: procedure_create
+        prose: "Documented pattern: {pattern_name}"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "pattern_{pattern_name | slugify}"
+      - for_each: serves_objectives
+        type: relates
+        from: "pattern_{pattern_name | slugify}"
+        to: "{item}"
+        properties:
+          direction: implements
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_create_pattern_{timestamp}"
+      - type: about
+        from: "moment_create_pattern_{timestamp}"
+        to: "pattern_{pattern_name | slugify}"
+
+    next: $complete
+
+output:
+  created: "pattern_{pattern_name | slugify}"
+  moment: "moment_create_pattern_{timestamp}"

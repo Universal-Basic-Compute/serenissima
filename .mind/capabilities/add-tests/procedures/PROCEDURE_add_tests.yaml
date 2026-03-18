@@ -1,0 +1,113 @@
+name: add_tests
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for creating tests for a module.
+  Reads invariants from VALIDATION.md and creates tests with VALIDATES markers.
+
+inputs:
+  target: module_id
+  invariants: invariant_id[]  # Optional: specific invariants to test
+
+outputs:
+  test_file: path
+  test_count: int
+  validated: boolean
+
+steps:
+  - id: read_context
+    name: Read Module Context
+    action: read
+    params:
+      paths:
+        - "src/{target}/**/*"
+        - "lib/{target}/**/*"
+        - "{target}/**/*"
+    outputs:
+      code_context: string
+
+  - id: read_validation
+    name: Read VALIDATION.md
+    action: read
+    params:
+      path: "docs/{target}/VALIDATION.md"
+    outputs:
+      validation_content: string
+      invariants: invariant[]
+
+  - id: check_existing_tests
+    name: Check Existing Tests
+    action: glob
+    params:
+      pattern: "tests/{target}/**/*.py"
+    outputs:
+      existing_tests: path[]
+
+  - id: create_test_file
+    name: Create Test File
+    condition: "len(existing_tests) == 0"
+    action: create_from_template
+    params:
+      template: templates/test_template.py
+      output: "tests/test_{target}.py"
+      context:
+        module: "{target}"
+
+  - id: write_tests
+    name: Write Tests for Invariants
+    loop: "{invariants}"
+    action: agent_write
+    params:
+      invariant_id: "{item.id}"
+      invariant_def: "{item.definition}"
+      test_file: "tests/test_{target}.py"
+    outputs:
+      test_function: string
+
+  - id: add_validates_markers
+    name: Add VALIDATES Markers
+    loop: "{invariants}"
+    action: add_marker
+    params:
+      file: "tests/test_{target}.py"
+      marker: "VALIDATES: {item.id}"
+      target_function: "{test_function}"
+
+  - id: run_tests
+    name: Run Tests
+    action: run_pytest
+    params:
+      path: "tests/test_{target}.py"
+      args: ["--tb=short", "-v"]
+    outputs:
+      passed: boolean
+      failures: string[]
+
+  - id: handle_failures
+    name: Handle Test Failures
+    condition: "not passed"
+    action: escalate
+    params:
+      reason: "Tests failed"
+      details: "{failures}"
+
+  - id: validate_coverage
+    name: Validate Invariant Coverage
+    action: validate
+    params:
+      checks:
+        - all_invariants_have_validates
+        - all_validates_reference_valid_ids
+        - tests_pass
+    outputs:
+      validated: boolean
+      errors: string[]
+
+  - id: complete
+    name: Mark Complete
+    condition: "validated == true"
+    action: complete
+    outputs:
+      test_file: path
+      test_count: int

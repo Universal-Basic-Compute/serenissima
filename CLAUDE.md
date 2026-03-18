@@ -231,3 +231,25 @@ Open Problems:
 ---
 Time Remaining: [data needed: exact hours]
 Next Critical Milestone: [data needed: specific goal]
+
+# serenissima
+
+@.mind/PRINCIPLES.md
+
+---
+
+@.mind/FRAMEWORK.md
+
+---
+
+@.mind/STYLE.md
+
+---
+
+## Before Any Task
+
+Check: `.mind/state/SYNC_Project_State.md`
+
+## After Any Change
+
+Update: `.mind/state/SYNC_Project_State.md`

@@ -1,0 +1,10 @@
+database:
+  backend: falkordb
+  falkordb:
+    host: localhost
+    port: 6379
+    graph_name: serenissima
+embedding:
+  provider: local
+  model: all-mpnet-base-v2
+  dimension: 768

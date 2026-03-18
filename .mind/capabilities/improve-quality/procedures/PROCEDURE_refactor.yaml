@@ -1,0 +1,157 @@
+name: quality_refactor
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for refactoring code to address quality issues.
+  Handles MONOLITH, LONG_PROMPT, LONG_SQL, and general refactoring.
+
+inputs:
+  target: file_path
+  problem_type: problem_id
+  details: object
+
+outputs:
+  files_modified: path[]
+  files_created: path[]
+  tests_pass: boolean
+  problem_resolved: boolean
+
+steps:
+  - id: verify_tests
+    name: Verify Tests Pass
+    action: run_tests
+    params:
+      scope: related
+      target: "{target}"
+    outputs:
+      tests_baseline: boolean
+    on_failure:
+      action: abort
+      reason: "Tests must pass before refactoring"
+
+  - id: analyze
+    name: Analyze Target
+    action: analyze_file
+    params:
+      file: "{target}"
+      problem_type: "{problem_type}"
+    outputs:
+      analysis: object
+
+  - id: plan
+    name: Create Refactor Plan
+    action: create_plan
+    params:
+      analysis: "{analysis}"
+      problem_type: "{problem_type}"
+    outputs:
+      plan: object
+      steps: list
+
+  - id: backup
+    name: Backup Original
+    action: backup
+    params:
+      file: "{target}"
+    outputs:
+      backup_path: path
+
+  - id: execute_steps
+    name: Execute Refactor Steps
+    loop: "{plan.steps}"
+    action: execute_refactor_step
+    params:
+      step: "{item}"
+      target: "{target}"
+    on_step_complete:
+      action: run_tests
+      params:
+        scope: related
+    on_step_failure:
+      action: restore_and_abort
+      params:
+        backup: "{backup_path}"
+
+  - id: validate_result
+    name: Validate Result
+    action: validate_refactor
+    params:
+      problem_type: "{problem_type}"
+      target: "{target}"
+      original_analysis: "{analysis}"
+    outputs:
+      problem_resolved: boolean
+      remaining_issues: list
+
+  - id: run_final_tests
+    name: Run Final Tests
+    action: run_tests
+    params:
+      scope: full
+    outputs:
+      tests_pass: boolean
+    on_failure:
+      action: restore_and_abort
+      params:
+        backup: "{backup_path}"
+
+  - id: cleanup
+    name: Cleanup
+    condition: "tests_pass == true and problem_resolved == true"
+    action: cleanup
+    params:
+      backup: "{backup_path}"
+      remove_backup: true
+
+  - id: complete
+    name: Mark Complete
+    condition: "tests_pass == true and problem_resolved == true"
+    action: complete
+    outputs:
+      files_modified: path[]
+      files_created: path[]
+
+# Problem-specific step templates
+step_templates:
+  MONOLITH:
+    - analyze_responsibilities
+    - identify_split_points
+    - extract_to_new_file
+    - update_imports
+    - verify_no_circular
+
+  LONG_PROMPT:
+    - analyze_prompt_sections
+    - identify_redundancy
+    - compress_language
+    - extract_to_files
+    - verify_effectiveness
+
+  LONG_SQL:
+    - analyze_query_structure
+    - identify_subqueries
+    - create_ctes_or_views
+    - simplify_joins
+    - verify_results_match
+
+  MAGIC_VALUES:
+    - find_all_magic_values
+    - generate_constant_names
+    - create_constants
+    - replace_occurrences
+    - verify_no_magic
+
+  HARDCODED_SECRET:
+    - identify_secret_type
+    - create_env_var
+    - replace_with_env_read
+    - update_env_example
+    - verify_gitignore
+
+  NAMING_CONVENTION:
+    - identify_violations
+    - determine_correct_names
+    - rename_definitions
+    - update_references
+    - verify_imports

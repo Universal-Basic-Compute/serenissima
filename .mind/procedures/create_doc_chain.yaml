@@ -1,0 +1,500 @@
+# Protocol: create_doc_chain
+# Create full documentation chain for a module from templates
+
+procedure: create_doc_chain
+version: "2.0"
+description: Create full documentation chain for a module from templates - rich format
+
+triggers:
+  - gap: "Module exists without documentation"
+  - event: "New module being scaffolded"
+
+requires_skills:
+  - SKILL_Create_Module_Documentation_Chain_From_Templates_And_Seed_Todos.md
+
+contextual_knowledge:
+  domain: |
+    Doc chain: [CONCEPT →] OBJECTIVES → PATTERNS → BEHAVIORS → ALGORITHM → VALIDATION → IMPLEMENTATION → HEALTH → SYNC.
+    CONCEPT is optional — only when the module introduces a cross-cutting idea spanning multiple modules.
+    Each doc type has specific purpose and template.
+    Creates narratives in graph linked to space.
+    Seeds @mind:TODO for each doc to be filled.
+
+  constraints: |
+    - Must create all doc types (complete chain, CONCEPT optional)
+    - Each doc gets at least one TODO
+    - Creates graph narratives, not just files
+
+  dependencies: |
+    Requires: space exists
+    Enables: structured documentation, canon establishment
+
+  quality_criteria: |
+    Good: "Created 8-9 doc narratives with TODOs seeded"
+    Bad: "Made some docs"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, in_space: "{space}" }
+        store_as: existing_docs
+    next: check_exists
+
+  check_exists:
+    type: branch
+    checks:
+      - condition: "{existing_docs | has_all_doc_types}"
+        action:
+          type: complete
+          message: "Doc chain already exists for {space}"
+      - condition: "ready"
+        action: { goto: gather_details }
+
+  gather_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Existing docs: {existing_docs | list by type}
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Module Name
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: module_name
+        ask: "Module name for doc titles?"
+        why: "Used as a prefix for all document names in the chain."
+        guidance: "Choose a concise, descriptive name. Example: 'Physics Engine', 'Tick Runner'."
+        expects: { type: string }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Concept Needed
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: needs_concept
+        ask: "Does this module introduce a cross-cutting concept?"
+        why: "CONCEPT docs are for ideas that span multiple modules."
+        guidance: "Only say yes if this introduces a fundamental idea used elsewhere. Most modules don't need CONCEPT."
+        expects: { type: boolean, default: false }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Concept Notes (conditional)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: concept_notes
+        ask: "Describe the cross-cutting concept."
+        why: "Seeds the CONCEPT document with the core idea definition."
+        guidance: "What is this concept? Why does it matter across the system?"
+        expects: { type: string, min_length: 0 }
+        condition: "{needs_concept}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Objectives
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: initial_objectives
+        ask: "What are the ranked objectives for this module?"
+        why: "Seeds the OBJECTIVES document with what we optimize for."
+        guidance: "List goals in priority order. What matters most? What tradeoffs exist?"
+        expects: { type: string, min_length: 0 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Patterns Notes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: initial_patterns_notes
+        ask: "Any initial design notes for PATTERNS?"
+        why: "Seeds the PATTERNS document with existing design ideas."
+        guidance: "Explain the 'why' behind the module's shape."
+        expects: { type: string, min_length: 0 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Known Behaviors
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: known_behaviors
+        ask: "Any known behaviors to document?"
+        why: "Seeds the BEHAVIORS document with observable effects."
+        guidance: "What should the module do from an outside perspective?"
+        expects: { type: string, min_length: 0 }
+
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before creating the doc chain, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this create_doc_chain protocol?"
+        expects:
+          type: string
+          required: false
+
+    # Capture reasoning for the doc chain creation
+    moment:
+      agent_provides:
+        - description: "Summary of doc chain creation"
+        - reasoning: "Why this module needs this specific documentation structure"
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW for {space}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Nodes to create: {9 + 1 if needs_concept else 9}
+        - narrative_CONCEPT_{space} (if needs_concept)
+        - narrative_OBJECTIVES_{space}
+        - narrative_PATTERNS_{space}
+        - narrative_BEHAVIORS_{space}
+        - narrative_ALGORITHM_{space}
+        - narrative_VALIDATION_{space}
+        - narrative_IMPLEMENTATION_{space}
+        - narrative_HEALTH_{space}
+        - narrative_SYNC_{space}
+        - moment_create_doc_chain_{timestamp}
+
+      Links to create: {10 + 1 if needs_concept else 10}
+        - space ─[contains]→ each doc (8-9)
+        - actor ─[expresses]→ moment
+        - moment ─[about]→ space
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Create this doc chain cluster?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  create_doc_chain:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: CONCEPT Doc (optional)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "doc_concept_{space}"
+        node_type: narrative
+        type: concept
+        name: "CONCEPT_{module_name}"
+        content: "{concept_notes}"
+        todo: "@mind:TODO Define cross-cutting concept and where it applies"
+        condition: "{needs_concept}"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: concept
+        #   WHAT: Doc chain type - cross-cutting idea
+        #   WHY: Defines an idea that spans multiple modules
+        #   LOADED: When understanding how idea applies across system
+        #   OPTIONAL: Most modules don't need this
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: OBJECTIVES Doc
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "doc_objectives_{space}"
+        node_type: narrative
+        type: objectives
+        name: "OBJECTIVES_{module_name}"
+        content: "{initial_objectives}"
+        todo: "@mind:TODO Rank objectives and define tradeoffs"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: objectives
+        #   WHAT: Doc chain type - ranked goals
+        #   WHY: Defines WHAT we optimize for, priority order, tradeoffs
+        #   LOADED: Before making design decisions or tradeoffs
+        #   FIRST: Read this before PATTERNS to understand priorities
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: PATTERNS Doc
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "doc_patterns_{space}"
+        node_type: narrative
+        type: patterns
+        name: "PATTERNS_{module_name}"
+        content: "{initial_patterns_notes}"
+        todo: "@mind:TODO Fill design decisions and rationale"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "doc_patterns_{space}"
+        #   WHAT: Unique identifier linking doc to space
+        #   WHY: Enables querying "get PATTERNS doc for space X"
+        #   FORMAT: doc_{type}_{space_id}
+        #
+        # node_type: narrative
+        #   WHAT: Persistent documentation node
+        #   WHY: Narratives are long-lived (vs moments = events)
+        #   CONTRAST: moments track events, narratives track knowledge
+        #
+        # type: patterns
+        #   WHAT: Doc chain type - design philosophy
+        #   WHY: Explains WHY module exists, WHAT's in/out of scope
+        #   LOADED: Before modifying module architecture
+        #
+        # name: "PATTERNS_{module_name}"
+        #   WHAT: Display name matching file naming convention
+        #   WHY: Consistency with filesystem docs
+        #   EXAMPLE: "PATTERNS_Physics_Tick_Runner"
+        #
+        # content: "{initial_patterns_notes}"
+        #   WHAT: Initial design notes or empty string
+        #   WHY: Seed with existing knowledge if available
+        #   UPDATES: Via separate update protocols
+        #
+        # todo: "@mind:TODO ..."
+        #   WHAT: Actionable marker for next agent
+        #   WHY: Makes explicit what needs filling
+        #   FORMAT: @mind:TODO {action}
+        #
+        # weight: 0.7
+        #   WHAT: Importance score for graph queries
+        #   WHY: PATTERNS is high priority (0.7) - defines shape
+        #   RANGE: 0.6-0.7 for core docs, 0.5 for todos
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: BEHAVIORS Doc
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "doc_behaviors_{space}"
+        node_type: narrative
+        type: behaviors
+        name: "BEHAVIORS_{module_name}"
+        content: "{known_behaviors}"
+        todo: "@mind:TODO Document observable effects"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: behaviors
+        #   WHAT: Doc chain type - observable effects
+        #   WHY: Describes WHAT module does externally
+        #   LOADED: When behavior unclear or testing
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: ALGORITHM Doc
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "doc_algorithm_{space}"
+        node_type: narrative
+        type: algorithm
+        name: "ALGORITHM_{module_name}"
+        content: ""
+        todo: "@mind:TODO Document procedures and pseudocode"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: algorithm
+        #   WHAT: Doc chain type - procedures and logic
+        #   WHY: Explains HOW module works (pseudocode)
+        #   LOADED: When implementing or debugging logic
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: VALIDATION Doc
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "doc_validation_{space}"
+        node_type: narrative
+        type: validation_doc
+        name: "VALIDATION_{module_name}"
+        content: ""
+        todo: "@mind:TODO Define invariants"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: validation_doc
+        #   WHAT: Doc chain type - invariants
+        #   WHY: Defines WHAT must always be true
+        #   LOADED: Before implementing to establish constraints
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: IMPLEMENTATION Doc
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "doc_implementation_{space}"
+        node_type: narrative
+        type: implementation_doc
+        name: "IMPLEMENTATION_{module_name}"
+        content: ""
+        todo: "@mind:TODO Map code surfaces and docking points"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: implementation_doc
+        #   WHAT: Doc chain type - code architecture
+        #   WHY: Maps WHERE code lives, data flows
+        #   LOADED: When building or navigating codebase
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: HEALTH Doc
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "doc_health_{space}"
+        node_type: narrative
+        type: health_doc
+        name: "HEALTH_{module_name}"
+        content: ""
+        todo: "@mind:TODO Define health indicators"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: health_doc
+        #   WHAT: Doc chain type - health checks
+        #   WHY: Defines WHAT gets verified in practice
+        #   LOADED: When defining health signals
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: SYNC Doc
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "doc_sync_{space}"
+        node_type: narrative
+        type: sync
+        name: "SYNC_{module_name}"
+        status: "DESIGNING"
+        content: "Doc chain created, all docs need filling."
+        todo: "@mind:TODO Update as work progresses"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # type: sync
+        #   WHAT: Doc chain type - current state
+        #   WHY: Tracks WHERE we are, handoffs, recent changes
+        #   LOADED: Always (first doc to read)
+        #
+        # status: "DESIGNING"
+        #   WHAT: Maturity state of module
+        #   WHY: Signals this is work-in-progress
+        #   OPTIONS: CANONICAL, DESIGNING, PROPOSED, DEPRECATED
+        #
+        # weight: 0.6
+        #   WHAT: Slightly lower than other docs
+        #   WHY: SYNC is current state, others are canonical knowledge
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Creation Event)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_create_doc_chain_{timestamp}"
+        node_type: moment
+        type: procedure_create
+        prose: "Created doc chain for {module_name} with {8 + 1 if needs_concept else 8} documents"
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_create_doc_chain_{timestamp}"
+        #   WHAT: Unique ID with timestamp for ordering
+        #   WHY: Moments are ordered chronologically
+        #   FORMAT: moment_{action}_{timestamp}
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event record
+        #   WHY: Creates history that can be queried
+        #   CONTRAST: narratives persist, moments record events
+        #
+        # type: procedure_create
+        #   WHAT: Categorizes this moment type
+        #   WHY: Enables queries like "show all creation events"
+        #   OTHER_TYPES: sync_update, decision, escalation_raised
+        #
+        # prose: "Created doc chain..."
+        #   WHAT: Human-readable description
+        #   WHY: Displayed in activity feeds and history
+        #   FORMAT: Past tense, specific about what happened
+        #
+        # status: completed
+        #   WHAT: Moment completion state
+        #   WHY: Tracks whether action finished successfully
+        #   OPTIONS: completed, pending, failed
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Space Contains Docs
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space}"
+        to: "doc_concept_{space}"
+        nature: "contains"
+        condition: "{needs_concept}"
+      - from: "{space}"
+        to: "doc_objectives_{space}"
+        nature: "contains"
+      - from: "{space}"
+        to: "doc_patterns_{space}"
+        nature: "contains"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: contains
+        #   WHAT: Hierarchical ownership relationship
+        #   WHY: Establishes "space owns this doc"
+        #   QUERY: "What docs are in space X?" follows contains
+        #   DIRECTION: from=container, to=contained
+        #   NOTE: Each doc gets its own contains link to space
+      - from: "{space}"
+        to: "doc_behaviors_{space}"
+        nature: "contains"
+      - from: "{space}"
+        to: "doc_algorithm_{space}"
+        nature: "contains"
+      - from: "{space}"
+        to: "doc_validation_{space}"
+        nature: "contains"
+      - from: "{space}"
+        to: "doc_implementation_{space}"
+        nature: "contains"
+      - from: "{space}"
+        to: "doc_health_{space}"
+        nature: "contains"
+      - from: "{space}"
+        to: "doc_sync_{space}"
+        nature: "contains"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_create_doc_chain_{timestamp}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who/what created this moment
+        #   QUERY: "What did agent X do?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_create_doc_chain_{timestamp}"
+        to: "{space}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what the moment relates to
+        #   QUERY: "What happened to space X?" follows about
+        #   DIRECTION: from=moment/narrative, to=subject
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space}"
+      task_id: "create_doc_chain_{space}"
+    next: $complete
+
+output:
+  docs_created:
+    - "doc_concept_{space}"        # (if needs_concept)
+    - "doc_objectives_{space}"
+    - "doc_patterns_{space}"
+    - "doc_behaviors_{space}"
+    - "doc_algorithm_{space}"
+    - "doc_validation_{space}"
+    - "doc_implementation_{space}"
+    - "doc_health_{space}"
+    - "doc_sync_{space}"
+  todos_seeded: "{8 + 1 if needs_concept else 8}"
+  moment: "moment_create_doc_chain_{timestamp}"

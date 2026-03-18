@@ -1,0 +1,302 @@
+name: implement_code
+version: 1.0
+status: active
+
+purpose: |
+  Step-by-step procedure for implementing code, completing partial implementations,
+  creating algorithm documentation, and synchronizing docs with code.
+
+inputs:
+  problem_type: string  # STUB_IMPL, INCOMPLETE_IMPL, UNDOC_IMPL, STALE_IMPL
+  target: path          # File or module path
+  details: object       # Problem-specific details (functions, markers, etc.)
+
+outputs:
+  completed: boolean
+  artifacts: path[]
+
+steps:
+  # ============================================================
+  # Common Steps
+  # ============================================================
+
+  - id: identify_problem
+    name: Identify Problem Type
+    action: switch
+    params:
+      on: "{problem_type}"
+      cases:
+        STUB_IMPL: goto_implement_stub
+        INCOMPLETE_IMPL: goto_complete_impl
+        UNDOC_IMPL: goto_document_impl
+        STALE_IMPL: goto_update_docs
+
+  # ============================================================
+  # STUB_IMPL Flow
+  # ============================================================
+
+  - id: goto_implement_stub
+    name: Start Stub Implementation
+    action: noop
+
+  - id: read_stub_spec
+    name: Read Specification
+    condition: "problem_type == 'STUB_IMPL'"
+    action: read
+    params:
+      paths:
+        - "docs/{module}/ALGORITHM.md"
+        - "{target}"
+    outputs:
+      spec: string
+      code_context: string
+
+  - id: implement_stub
+    name: Implement Stub Functions
+    condition: "problem_type == 'STUB_IMPL'"
+    action: agent_implement
+    params:
+      target: "{target}"
+      functions: "{details.functions}"
+      spec: "{spec}"
+    outputs:
+      implemented: function_name[]
+
+  - id: test_stub
+    name: Run Tests
+    condition: "problem_type == 'STUB_IMPL'"
+    action: run_tests
+    params:
+      target: "{target}"
+    outputs:
+      tests_passed: boolean
+      failures: string[]
+
+  - id: validate_stub
+    name: Validate No Stubs Remain
+    condition: "problem_type == 'STUB_IMPL'"
+    action: validate
+    params:
+      checks:
+        - no_stub_patterns
+        - tests_pass
+    outputs:
+      validated: boolean
+
+  # ============================================================
+  # INCOMPLETE_IMPL Flow
+  # ============================================================
+
+  - id: goto_complete_impl
+    name: Start Incomplete Completion
+    action: noop
+
+  - id: read_todo_context
+    name: Read TODO Context
+    condition: "problem_type == 'INCOMPLETE_IMPL'"
+    action: read_lines
+    params:
+      file: "{target}"
+      around: "{details.markers[0].line}"
+      context: 20
+    outputs:
+      todo_context: string
+
+  - id: complete_code
+    name: Complete Partial Code
+    condition: "problem_type == 'INCOMPLETE_IMPL'"
+    action: agent_complete
+    params:
+      target: "{target}"
+      markers: "{details.markers}"
+      context: "{todo_context}"
+    outputs:
+      completed_markers: int
+
+  - id: test_complete
+    name: Run Tests
+    condition: "problem_type == 'INCOMPLETE_IMPL'"
+    action: run_tests
+    params:
+      target: "{target}"
+    outputs:
+      tests_passed: boolean
+
+  - id: validate_complete
+    name: Validate No TODOs Remain
+    condition: "problem_type == 'INCOMPLETE_IMPL'"
+    action: validate
+    params:
+      checks:
+        - no_todo_markers_at_lines
+        - tests_pass
+    outputs:
+      validated: boolean
+
+  # ============================================================
+  # UNDOC_IMPL Flow
+  # ============================================================
+
+  - id: goto_document_impl
+    name: Start Documentation
+    action: noop
+
+  - id: read_implementation
+    name: Read Implementation Code
+    condition: "problem_type == 'UNDOC_IMPL'"
+    action: read
+    params:
+      paths:
+        - "docs/{target}/IMPLEMENTATION.md"
+    outputs:
+      impl_doc: string
+
+  - id: extract_code_paths
+    name: Extract Code Paths
+    condition: "problem_type == 'UNDOC_IMPL'"
+    action: parse_impl_links
+    params:
+      doc: "{impl_doc}"
+    outputs:
+      code_paths: path[]
+
+  - id: read_code_files
+    name: Read Code Files
+    condition: "problem_type == 'UNDOC_IMPL'"
+    action: read
+    params:
+      paths: "{code_paths}"
+    outputs:
+      code_content: string
+
+  - id: analyze_algorithms
+    name: Analyze Algorithms
+    condition: "problem_type == 'UNDOC_IMPL'"
+    action: agent_analyze
+    params:
+      code: "{code_content}"
+    outputs:
+      algorithms: algorithm[]
+      flows: flow[]
+
+  - id: create_algorithm_doc
+    name: Create ALGORITHM.md
+    condition: "problem_type == 'UNDOC_IMPL'"
+    action: create_from_template
+    params:
+      template: templates/docs/ALGORITHM_TEMPLATE.md
+      output: "docs/{target}/ALGORITHM.md"
+      context:
+        module: "{target}"
+        algorithms: "{algorithms}"
+        flows: "{flows}"
+
+  - id: validate_algorithm
+    name: Validate ALGORITHM.md
+    condition: "problem_type == 'UNDOC_IMPL'"
+    action: validate
+    params:
+      checks:
+        - file_exists
+        - no_placeholders
+        - min_length_500
+        - chain_links_valid
+    outputs:
+      validated: boolean
+
+  # ============================================================
+  # STALE_IMPL Flow
+  # ============================================================
+
+  - id: goto_update_docs
+    name: Start Doc Update
+    action: noop
+
+  - id: get_code_diff
+    name: Get Code Diff
+    condition: "problem_type == 'STALE_IMPL'"
+    action: git_diff
+    params:
+      file: "{details.code_file}"
+      since: "{details.doc_last_updated}"
+    outputs:
+      diff: string
+
+  - id: analyze_changes
+    name: Analyze Changes
+    condition: "problem_type == 'STALE_IMPL'"
+    action: agent_analyze_changes
+    params:
+      diff: "{diff}"
+    outputs:
+      changes: change[]
+
+  - id: read_current_doc
+    name: Read Current Doc
+    condition: "problem_type == 'STALE_IMPL'"
+    action: read
+    params:
+      paths:
+        - "{details.doc_file}"
+    outputs:
+      doc_content: string
+
+  - id: update_doc
+    name: Update Documentation
+    condition: "problem_type == 'STALE_IMPL'"
+    action: agent_update_doc
+    params:
+      doc: "{doc_content}"
+      changes: "{changes}"
+    outputs:
+      updated_doc: string
+
+  - id: write_updated_doc
+    name: Write Updated Doc
+    condition: "problem_type == 'STALE_IMPL'"
+    action: write
+    params:
+      path: "{details.doc_file}"
+      content: "{updated_doc}"
+
+  - id: update_last_updated
+    name: Update LAST_UPDATED
+    condition: "problem_type == 'STALE_IMPL'"
+    action: update_field
+    params:
+      file: "{details.doc_file}"
+      field: "LAST_UPDATED"
+      value: "{today}"
+
+  - id: validate_sync
+    name: Validate Sync
+    condition: "problem_type == 'STALE_IMPL'"
+    action: validate
+    params:
+      checks:
+        - last_updated_recent
+        - no_contradictions
+    outputs:
+      validated: boolean
+
+  # ============================================================
+  # Common Completion
+  # ============================================================
+
+  - id: update_sync
+    name: Update SYNC
+    action: append_to_sync
+    params:
+      file: "docs/{module}/SYNC.md"
+      entry: |
+        ### {today}
+        - Fixed {problem_type} in {target}
+        - Task: {task_id}
+
+  - id: complete
+    name: Mark Complete
+    condition: "validated == true"
+    action: complete
+    outputs:
+      completed: true
+      artifacts: "{created_files}"

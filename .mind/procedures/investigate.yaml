@@ -1,0 +1,697 @@
+procedure: investigate
+version: "2.0"
+description: Deep dive into an issue, gather evidence, and determine next steps - rich format
+
+triggers:
+  - gap: "Stuck module with no activity"
+  - gap: "Unresolved escalation in graph"
+  - event: "Doctor detects issue needing investigation"
+  - event: "Decision blocking progress"
+
+requires_skills:
+  - SKILL_Debug_Investigate_And_Fix_Issues_With_Evidence_First.md
+
+contextual_knowledge:
+  domain: |
+    Investigation in mind:
+    - Evidence-first: gather facts before proposing solutions
+    - Investigation moment = traceable record of what was examined
+    - Outcomes: resolve (fix it), escalate (need help), capture_decision (choose path)
+    - Escalations link to affected nodes via `about` relationship
+    Structure:
+    - Investigation → explores issue
+    - Escalation → flags blocker needing external input
+    - Decision → records choice with rationale and alternatives
+  constraints: |
+    - Must gather evidence before concluding
+    - Never propose solution without understanding problem
+    - If blocked, escalate with clear context and options
+    - Decisions must capture alternatives considered
+  dependencies: |
+    - Issue must be identifiable (node, space, or description)
+    - Enables: escalation resolution, decision capture, blocker removal
+  quality_criteria: |
+    Good investigation: "Examined call_procedure implementation. Found: step returns $call_procedure but runner doesn't handle it. Evidence: runner.py:45 has no case for this. Options: (A) add handler to runner, (B) change step return format."
+    Bad investigation: "Looked at the code, seems broken."
+
+steps:
+  identify_issue:
+    type: ask
+    context: |
+      Investigation starts by clearly identifying what needs to be understood.
+      Be specific about the issue scope and symptoms.
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Issue Type
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: issue_type
+        ask: "What type of issue? (bug / stuck_module / escalation / decision_needed / unclear_behavior)"
+        why: "Guides the investigative approach and categorization."
+        expects:
+          type: enum
+          options: [bug, stuck_module, escalation, decision_needed, unclear_behavior]
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Issue Description
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: issue_description
+        ask: "Describe the issue in detail"
+        why: "Defines the specific scope and symptoms of the investigation."
+        guidance: "Include specific behaviors or error messages. Example: 'call_procedure step executes but runner doesn't transition'."
+        good_answer: "call_procedure step executes but runner doesn't transition to sub-protocol. Session context shows call_stack populated but current_step unchanged."
+        expects:
+          type: string
+          min_length: 30
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Affected Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: affected_space
+        ask: "Which space/module is affected?"
+        why: "Links the investigation to the correct organisational container."
+        guidance: "Select the primary space where the issue manifests."
+        expects:
+          type: id
+          node_type: space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Affected Nodes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: affected_nodes
+        ask: "Which specific nodes are involved? (empty if general issue)"
+        why: "Provides fine-grained context for the investigation."
+        guidance: "List IDs of relevant narratives, things, or moments."
+        expects:
+          type: id_list
+          optional: true
+    next: load_context
+
+  load_context:
+    type: query
+    auto_fetch:
+      - query:
+          find: escalation
+          about: "{affected_space}"
+          where:
+            status: open
+        store_as: open_escalations
+      - query:
+          find: moment
+          about: "{affected_space}"
+          limit: 10
+        store_as: recent_activity
+      - query:
+          find: narrative
+          type: decision
+          in_space: "{affected_space}"
+          limit: 5
+        store_as: related_decisions
+    purpose: "Load existing escalations, recent activity, and related decisions"
+    next: gather_evidence
+
+  gather_evidence:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Issue: {issue_type} - {issue_description}
+      Affected space: {affected_space}
+      Open escalations: {open_escalations | list}
+      Recent activity: {recent_activity | summarize}
+      Related decisions: {related_decisions | list}
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Evidence Gathered
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: evidence_gathered
+        ask: "What evidence did you find? (facts, observations, logs, code locations)"
+        why: "Establishes the factual foundation for conclusions."
+        guidance: "Be specific and cite sources. Example: 'runner.py:45 has no case for $call_procedure'."
+        good_answer: "1. runner.py:45 - _process_current_step has no case for '$call_procedure' return. 2. session.py:78 - call_stack correctly populated."
+        expects:
+          type: string
+          min_length: 50
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Root Cause
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: root_cause
+        ask: "What appears to be the root cause? (hypothesis based on evidence)"
+        why: "Guides the approach to resolution or escalation."
+        expects:
+          type: string
+          min_length: 20
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Options
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: options
+        ask: "What are the possible paths forward? (list 2-4 options)"
+        why: "Documents the alternatives considered during the investigation."
+        guidance: "Explain the tradeoffs for each path."
+        good_answer: "A) Add $call_procedure handler to runner. B) Change step to directly start sub-protocol."
+        expects:
+          type: string
+          min_length: 30
+    next: determine_outcome
+
+  determine_outcome:
+    type: ask
+    context: |
+      Evidence: {evidence_gathered}
+      Root cause: {root_cause}
+      Options: {options}
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Outcome Type
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: outcome_type
+        ask: "What's the outcome? (can_resolve / needs_escalation / needs_decision)"
+        why: "Determines the next phase of work and appropriate protocol."
+        expects:
+          type: enum
+          options: [can_resolve, needs_escalation, needs_decision]
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Recommendation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: recommendation
+        ask: "If resolvable, what's your recommended fix? If escalation/decision, what input is needed?"
+        why: "Provides a clear, actionable next step based on findings."
+        expects:
+          type: string
+          min_length: 20
+
+    # Capture reasoning for the investigation process
+    moment:
+      agent_provides:
+        - description: "Summary of investigation"
+        - reasoning: "Why this outcome was determined and how the evidence supports it"
+
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before recording the investigation outcome, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this investigate protocol?"
+        expects:
+          type: string
+          required: false
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW for {affected_space}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: moment_investigate_{affected_space}_{timestamp}
+
+      Nodes to create: 1 + {outcome_type == 'needs_escalation' ? 1 : (outcome_type == 'needs_decision' ? 1 : 0)}
+        - moment_investigate_*
+        - {outcome_type == 'needs_escalation' ? 'escalation_*' : (outcome_type == 'needs_decision' ? 'decision_*' : 'None')}
+
+      Links to create: 2 + {affected_nodes | count} + {outcome_type != 'can_resolve' ? 1 : 0}
+        - actor ─[expresses]→ moment
+        - moment ─[about]→ {affected_space}
+        - moment ─[references]→ {affected_nodes | format_ids}
+        - {outcome_type == 'needs_escalation' ? 'moment ─[triggers]→ escalation' : (outcome_type == 'needs_decision' ? 'moment ─[proposes]→ decision' : 'None')}
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Record this investigation outcome?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_outcome
+
+  create_escalation:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Escalation (Blocker)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "escalation_{affected_space}_{timestamp}"
+        node_type: escalation
+        status: open
+        issue_type: "{issue_type}"
+        description: "{issue_description}"
+        evidence: "{evidence_gathered}"
+        root_cause: "{root_cause}"
+        options: "{options}"
+        input_needed: "{recommendation}"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "escalation_{affected_space}_{timestamp}"
+        #   WHAT: Unique ID for this escalation
+        #   WHY: Enables tracking and resolution of blockers
+        #   FORMAT: escalation_<space>_<timestamp>
+        #
+        # node_type: escalation
+        #   WHAT: Specialized node for blocking issues
+        #   WHY: Flags items needing external input or decisions
+        #   CONTRAST: moments record events, escalations block progress
+        #
+        # status: open
+        #   WHAT: Current state of escalation
+        #   WHY: Tracks whether blocker is resolved
+        #   OPTIONS: open, in_review, resolved, dismissed
+        #
+        # issue_type: "{issue_type}"
+        #   WHAT: Category of the blocking issue
+        #   WHY: Helps route escalations to appropriate handlers
+        #   OPTIONS: bug, stuck_module, escalation, decision_needed, unclear_behavior
+        #
+        # evidence: "{evidence_gathered}"
+        #   WHAT: Facts and observations supporting the escalation
+        #   WHY: Provides context for resolution without re-investigation
+        #   FORMAT: Specific locations, logs, test results
+        #
+        # root_cause: "{root_cause}"
+        #   WHAT: Hypothesis about underlying issue
+        #   WHY: Guides resolution approach
+        #   CONFIDENCE: May be uncertain, marked as hypothesis
+        #
+        # options: "{options}"
+        #   WHAT: Possible resolution paths
+        #   WHY: Shows alternatives considered, enables informed decision
+        #   FORMAT: Enumerated list (A, B, C)
+        #
+        # input_needed: "{recommendation}"
+        #   WHAT: Specific decision or information required
+        #   WHY: Makes escalation actionable
+        #   FORMAT: Clear question or request
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Investigation Record)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_investigate_{affected_space}_{timestamp}"
+        node_type: moment
+        prose: |
+          ## Investigation: {affected_space}
+
+          **Issue:** {issue_type} - {issue_description}
+
+          **Evidence:**
+          {evidence_gathered}
+
+          **Root cause hypothesis:**
+          {root_cause}
+
+          **Outcome:** Escalated - needs external input
+
+          **Input needed:**
+          {recommendation}
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_investigate_{affected_space}_{timestamp}"
+        #   WHAT: Unique ID for this investigation
+        #   WHY: Creates traceable record of investigation process
+        #   FORMAT: moment_investigate_<space>_<timestamp>
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event record
+        #   WHY: Captures investigation findings at specific time
+        #   USE: History and audit trail
+        #
+        # prose: "## Investigation..."
+        #   WHAT: Structured investigation report
+        #   WHY: Documents what was found and why escalated
+        #   FORMAT: Issue, Evidence, Root cause, Outcome
+        #
+        # status: completed
+        #   WHAT: Moment completion state
+        #   WHY: "completed" = investigation finished
+        #   OPTIONS: completed, spoken, internal, pending
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Escalation About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "escalation_{affected_space}_{timestamp}"
+        to: "{affected_space}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Links escalation to affected space
+        #   QUERY: "What escalations exist for space X?" follows about
+        #   DIRECTION: from=escalation, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Escalation About Nodes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: affected_nodes
+        from: "escalation_{affected_space}_{timestamp}"
+        to: "{item}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Links escalation to specific affected nodes
+        #   WHY: Provides fine-grained context for blockers
+        #   CARDINALITY: One-to-many (one escalation, multiple nodes)
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_investigate_{affected_space}_{timestamp}"
+        to: "{affected_space}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Links investigation to space
+        #   WHY: Makes investigation discoverable from space context
+        #   QUERY: "What investigations happened?" follows about
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_investigate_{affected_space}_{timestamp}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who performed investigation
+        #   QUERY: "What did agent X investigate?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment Triggers Escalation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_investigate_{affected_space}_{timestamp}"
+        to: "escalation_{affected_space}_{timestamp}"
+        nature: "triggers"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: triggers
+        #   WHAT: Causal relationship
+        #   WHY: Shows investigation led to escalation
+        #   QUERY: "What caused this escalation?" follows triggers backward
+        #   DIRECTION: from=moment, to=escalation (moment creates escalation)
+    moment:
+      agent_provides: [description]
+    next: call_handoff
+
+  create_decision:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Decision Narrative
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "decision_{affected_space}_{timestamp}"
+        node_type: narrative
+        type: decision
+        status: pending
+        question: "{issue_description}"
+        context: "{evidence_gathered}"
+        options: "{options}"
+        recommendation: "{recommendation}"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "decision_{affected_space}_{timestamp}"
+        #   WHAT: Unique ID for this decision point
+        #   WHY: Enables tracking and referencing decisions
+        #   FORMAT: decision_<space>_<timestamp>
+        #
+        # node_type: narrative
+        #   WHAT: Persistent knowledge node
+        #   WHY: Decisions are part of design history
+        #   CONTRAST: moments are events, narratives are lasting knowledge
+        #
+        # type: decision
+        #   WHAT: Subtype of narrative
+        #   WHY: Distinguishes from objectives, patterns, etc.
+        #   SIBLINGS: objective, pattern, behavior, validation
+        #
+        # status: pending
+        #   WHAT: Decision state
+        #   WHY: Tracks whether choice has been made
+        #   OPTIONS: pending, made, deferred, obsolete
+        #
+        # question: "{issue_description}"
+        #   WHAT: What needs to be decided
+        #   WHY: Frames the decision clearly
+        #   FORMAT: Question or choice statement
+        #
+        # context: "{evidence_gathered}"
+        #   WHAT: Evidence informing the decision
+        #   WHY: Provides basis for informed choice
+        #   SOURCE: Investigation findings
+        #
+        # options: "{options}"
+        #   WHAT: Alternative paths available
+        #   WHY: Shows what was considered
+        #   FORMAT: Enumerated list with tradeoffs
+        #
+        # recommendation: "{recommendation}"
+        #   WHAT: Suggested path forward
+        #   WHY: Agent's analysis of best option
+        #   AUTHORITY: Recommendation, not decision (human decides)
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Investigation Record)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_investigate_{affected_space}_{timestamp}"
+        node_type: moment
+        prose: |
+          ## Investigation: {affected_space}
+
+          **Issue:** {issue_type} - {issue_description}
+
+          **Evidence:**
+          {evidence_gathered}
+
+          **Root cause hypothesis:**
+          {root_cause}
+
+          **Outcome:** Decision needed
+
+          **Decision question:**
+          {issue_description}
+
+          **Options:**
+          {options}
+
+          **Recommendation:**
+          {recommendation}
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_investigate_{affected_space}_{timestamp}"
+        #   WHAT: Unique ID for this investigation
+        #   WHY: Creates traceable record of investigation
+        #   FORMAT: moment_investigate_<space>_<timestamp>
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event
+        #   WHY: Captures when decision point was identified
+        #   USE: History and audit trail
+        #
+        # prose: "## Investigation..."
+        #   WHAT: Investigation findings leading to decision
+        #   WHY: Documents why decision is needed
+        #   FORMAT: Issue, Evidence, Outcome, Decision details
+        #
+        # status: completed
+        #   WHAT: Moment completion state
+        #   WHY: "completed" = investigation finished, decision framed
+        #   OPTIONS: completed, spoken, internal, pending
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Space Contains Decision
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{affected_space}"
+        to: "decision_{affected_space}_{timestamp}"
+        nature: "contains"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: contains
+        #   WHAT: Containment relationship
+        #   WHY: Decision belongs to space's knowledge
+        #   QUERY: "What decisions exist for space X?" follows contains
+        #   DIRECTION: from=space, to=decision (space owns decision)
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_investigate_{affected_space}_{timestamp}"
+        to: "{affected_space}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Links investigation to space
+        #   QUERY: "What investigations happened for space X?" follows about
+        #   DIRECTION: from=moment, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_investigate_{affected_space}_{timestamp}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who performed investigation
+        #   QUERY: "What did agent X investigate?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment Proposes Decision
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_investigate_{affected_space}_{timestamp}"
+        to: "decision_{affected_space}_{timestamp}"
+        nature: "proposes"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: proposes
+        #   WHAT: Proposal relationship
+        #   WHY: Shows investigation led to decision framing
+        #   QUERY: "What investigation proposed this decision?" follows proposes backward
+        #   DIRECTION: from=moment, to=decision (moment creates decision)
+    moment:
+      agent_provides: [description]
+    next: call_handoff
+
+  create_investigation_moment:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Investigation with Resolution)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_investigate_{affected_space}_{timestamp}"
+        node_type: moment
+        prose: |
+          ## Investigation: {affected_space}
+
+          **Issue:** {issue_type} - {issue_description}
+
+          **Evidence:**
+          {evidence_gathered}
+
+          **Root cause hypothesis:**
+          {root_cause}
+
+          **Outcome:** Can resolve
+
+          **Recommended fix:**
+          {recommendation}
+
+          **Options considered:**
+          {options}
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_investigate_{affected_space}_{timestamp}"
+        #   WHAT: Unique ID for this investigation
+        #   WHY: Creates traceable record
+        #   FORMAT: moment_investigate_<space>_<timestamp>
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event
+        #   WHY: Captures investigation that led to resolution
+        #   USE: History and learning
+        #
+        # prose: "## Investigation..."
+        #   WHAT: Complete investigation report with resolution
+        #   WHY: Documents problem-solving process
+        #   FORMAT: Issue, Evidence, Root cause, Resolution, Options
+        #   VALUE: Future reference for similar issues
+        #
+        # status: completed
+        #   WHAT: Moment completion state
+        #   WHY: "completed" = investigation finished, path forward clear
+        #   OPTIONS: completed, spoken, internal, pending
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_investigate_{affected_space}_{timestamp}"
+        to: "{affected_space}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Links investigation to space
+        #   QUERY: "What investigations happened for space X?" follows about
+        #   DIRECTION: from=moment, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_investigate_{affected_space}_{timestamp}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who investigated
+        #   QUERY: "What did agent X investigate?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment References Affected Nodes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: affected_nodes
+        from: "moment_investigate_{affected_space}_{timestamp}"
+        to: "{item}"
+        nature: "references"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: references
+        #   WHAT: Direct reference to affected nodes
+        #   WHY: Links investigation to specific problem nodes
+        #   QUERY: "What nodes were investigated?" follows references
+        #   DIRECTION: from=moment, to=node
+        #   CARDINALITY: One-to-many (one investigation, multiple nodes)
+    moment:
+      agent_provides: [description]
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{affected_space}"
+      task_id: "investigate_{affected_space}"
+    next: $complete
+
+output:
+  cluster:
+    nodes: [moment_investigate, escalation (conditional), decision (conditional)]
+    links: [about, expresses, references, triggers, proposes]
+  summary: "Investigated {issue_type} in {affected_space}: {outcome_type}"
+  returns:
+    outcome_type: "{outcome_type}"
+    recommendation: "{recommendation}"
+    root_cause: "{root_cause}"
+    escalation_id: "escalation_{affected_space}_{timestamp}"
+    decision_id: "decision_{affected_space}_{timestamp}"

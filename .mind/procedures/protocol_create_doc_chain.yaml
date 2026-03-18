@@ -1,0 +1,173 @@
+procedure: protocol_create_doc_chain
+version: "1.0"
+description: Create full documentation chain for a module from templates
+
+triggers:
+  - gap: "Module exists without documentation"
+  - event: "New module being scaffolded"
+
+requires_skills:
+  - "SKILL_Create_Module_Documentation_Chain_From_Templates_And_Seed_Todos.md"
+
+contextual_knowledge:
+  domain: |
+    Doc chain: PATTERNS → BEHAVIORS → ALGORITHM → VALIDATION → IMPLEMENTATION → HEALTH → SYNC.
+    Each doc type has specific purpose and template.
+    Creates narratives in graph linked to space.
+    Seeds @mind:TODO for each doc to be filled.
+
+  constraints: |
+    - Must create all doc types (complete chain)
+    - Each doc gets at least one TODO
+    - Creates graph narratives, not just files
+
+  dependencies: |
+    Requires: space exists
+    Enables: structured documentation, canon establishment
+
+  quality_criteria: |
+    Good: "Created 7 doc narratives with 7 TODOs seeded"
+    Bad: "Made some docs"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, in_space: "{space}" }
+        store_as: existing_docs
+    next: check_exists
+
+  check_exists:
+    type: branch
+    checks:
+      - condition: "{existing_docs | has_all_doc_types}"
+        action:
+          type: complete
+          message: "Doc chain already exists for {space}"
+      - condition: "ready"
+        action: { goto: gather_details }
+
+  gather_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Existing docs: {existing_docs | list by type}
+
+    questions:
+      - name: module_name
+        ask: "Module name for doc titles?"
+        expects: { type: string }
+
+      - name: initial_patterns_notes
+        ask: "Any initial design notes for PATTERNS?"
+        expects: { type: string, min_length: 0 }
+
+      - name: known_behaviors
+        ask: "Any known behaviors to document?"
+        expects: { type: string, min_length: 0 }
+
+    next: create_doc_chain
+
+  create_doc_chain:
+    type: create
+    nodes:
+      - id: "doc_patterns_{space}"
+        node_type: narrative
+        type: patterns
+        name: "PATTERNS_{module_name}"
+        content: "{initial_patterns_notes}"
+        todo: "@mind:TODO Fill design decisions and rationale"
+
+      - id: "doc_behaviors_{space}"
+        node_type: narrative
+        type: behaviors
+        name: "BEHAVIORS_{module_name}"
+        content: "{known_behaviors}"
+        todo: "@mind:TODO Document observable effects"
+
+      - id: "doc_algorithm_{space}"
+        node_type: narrative
+        type: algorithm
+        name: "ALGORITHM_{module_name}"
+        content: ""
+        todo: "@mind:TODO Document procedures and pseudocode"
+
+      - id: "doc_validation_{space}"
+        node_type: narrative
+        type: validation_doc
+        name: "VALIDATION_{module_name}"
+        content: ""
+        todo: "@mind:TODO Define invariants"
+
+      - id: "doc_implementation_{space}"
+        node_type: narrative
+        type: implementation_doc
+        name: "IMPLEMENTATION_{module_name}"
+        content: ""
+        todo: "@mind:TODO Map code surfaces and docking points"
+
+      - id: "doc_health_{space}"
+        node_type: narrative
+        type: health_doc
+        name: "HEALTH_{module_name}"
+        content: ""
+        todo: "@mind:TODO Define health indicators"
+
+      - id: "doc_sync_{space}"
+        node_type: narrative
+        type: sync
+        name: "SYNC_{module_name}"
+        status: "DESIGNING"
+        content: "Doc chain created, all docs need filling."
+        todo: "@mind:TODO Update as work progresses"
+
+      - id: "moment_create_doc_chain_{timestamp}"
+        node_type: moment
+        type: procedure_create
+        prose: "Created doc chain for {module_name} with 7 documents"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "doc_patterns_{space}"
+      - type: contains
+        from: "{space}"
+        to: "doc_behaviors_{space}"
+      - type: contains
+        from: "{space}"
+        to: "doc_algorithm_{space}"
+      - type: contains
+        from: "{space}"
+        to: "doc_validation_{space}"
+      - type: contains
+        from: "{space}"
+        to: "doc_implementation_{space}"
+      - type: contains
+        from: "{space}"
+        to: "doc_health_{space}"
+      - type: contains
+        from: "{space}"
+        to: "doc_sync_{space}"
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_create_doc_chain_{timestamp}"
+      - type: about
+        from: "moment_create_doc_chain_{timestamp}"
+        to: "{space}"
+
+    next: $complete
+
+output:
+  docs_created:
+    - "doc_patterns_{space}"
+    - "doc_behaviors_{space}"
+    - "doc_algorithm_{space}"
+    - "doc_validation_{space}"
+    - "doc_implementation_{space}"
+    - "doc_health_{space}"
+    - "doc_sync_{space}"
+  todos_seeded: 7
+  moment: "moment_create_doc_chain_{timestamp}"

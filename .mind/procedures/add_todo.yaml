@@ -1,0 +1,348 @@
+# Protocol: add_todo
+# Create actionable TODO node
+
+procedure: add_todo
+version: "2.0"
+description: Create actionable TODO node - rich format
+
+triggers:
+  - event: "Actionable task discovered during work"
+  - event: "Work item needs tracking"
+
+requires_skills:
+  - SKILL_Update_Module_Sync_State_And_Record_Markers.md
+
+contextual_knowledge:
+  domain: |
+    TODOs = atomic actionable items (@mind:TODO marker).
+    TODOs attach to spaces or narratives.
+    TODOs have: description, priority, status (open, in_progress, done, blocked).
+    TODOs link "about" their subject and "assigned_to" actors.
+
+  constraints: |
+    - TODOs must be actionable (verb + object)
+    - TODOs need clear subject (what node is this about?)
+    - Priority determines triage order
+
+  dependencies: |
+    Requires: space or narrative to attach to
+    Enables: work tracking, handoff clarity
+
+  quality_criteria: |
+    Good: "@mind:TODO Add decay tests for edge case. Priority: high. About: validation_decay."
+    Bad: "Fix stuff"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, in_space: "{space}", limit: 10 }
+        store_as: narratives
+      - query: { find: todo, in_space: "{space}", status: open }
+        store_as: existing_todos
+    # Auto-derive module_name from space for ID generation
+    computed:
+      module_name: "{space | strip_prefix('space_MODULE_') | strip_prefix('space_AREA_') | strip_prefix('space_CONCEPT_') | strip_prefix('space_PROJECT_')}"
+    next: gather_todo
+
+  gather_todo:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Existing narratives: {narratives | list by type}
+      Open TODOs: {existing_todos | count}
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Description
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: description
+        ask: "TODO description (verb + object, actionable)?"
+        why: "Defines the specific task to be performed."
+        guidance: "Be clear and actionable. Example: 'Add decay tests for edge case'."
+        expects: { type: string }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: About Node
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: about_node
+        ask: "What is this TODO about? (space, narrative, or code location)"
+        why: "Links the TODO to its subject for context and discovery."
+        guidance: "Pick the node that this task directly affects or improves."
+        creates: "todo ─[about]→ subject"
+        expects:
+          type: reference_or_string
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Priority
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: priority
+        ask: "Priority?"
+        why: "Determines the importance and urgency of the task."
+        expects:
+          type: enum
+          options: [critical, high, medium, low]
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Context Notes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: context_notes
+        ask: "Any context for the next agent? (optional)"
+        why: "Provides additional details or instructions for completion."
+        expects: { type: string, min_length: 0 }
+
+    # Capture reasoning for the TODO creation
+    moment:
+      agent_provides:
+        - description: "Summary of TODO creation"
+        - reasoning: "Why this TODO was created and its priority level"
+
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before creating the TODO, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this add_todo protocol?"
+        expects:
+          type: string
+          required: false
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW for {space}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: narrative_TODO_{module_name}-{description | slugify | truncate(30)}_{timestamp_short}
+
+      Nodes to create: 2
+        - narrative_TODO_*
+        - moment_ADD-TODO_*
+
+      Links to create: 4
+        - space ─[contains]→ todo
+        - todo ─[about]→ {about_node}
+        - actor ─[expresses]→ moment
+        - moment ─[about]→ todo
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Create this TODO cluster?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_todo
+      revise: gather_todo
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "TODO creation cancelled"
+
+  create_todo:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: TODO
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_TODO_{module_name}-{description | slugify | truncate(30)}_{timestamp_short}"
+        node_type: narrative
+        type: todo
+        content: "{description}"
+        priority: "{priority}"
+        status: open
+        context: "{context_notes}"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "narrative_TODO_{module_name}-{description}_{timestamp_short}"
+        #   WHAT: Unique identifier with SUBTYPE and module
+        #   WHY: TODOs are narratives about work to be done
+        #   FORMAT: narrative_TODO_<module>-<slug>_<hash>
+        #   Example: narrative_TODO_engine-physics-add-decay-tests_a7
+        #
+        # node_type: narrative
+        #   WHAT: TODOs are narratives with type=todo
+        #   WHY: Follows schema - 5 node types only
+        #   NOTE: type field differentiates from other narratives
+        #
+        # type: todo
+        #   WHAT: Subtype marking this as actionable work
+        #   WHY: Enables queries like "find all todos"
+        #
+        # content: "{description}"
+        #   WHAT: Actionable task (verb + object)
+        #   WHY: Makes clear what needs to be done
+        #   EXAMPLE: "Add decay tests for edge case", "Update SYNC with status"
+        #
+        # priority: "{priority}"
+        #   WHAT: Triage ordering
+        #   WHY: Helps agents decide what to work on next
+        #   OPTIONS: critical, high, medium, low
+        #   NOTE: TODOs have "critical" option, goals don't
+        #
+        # status: open
+        #   WHAT: TODO lifecycle state
+        #   WHY: Tracks progress from creation to completion
+        #   OPTIONS: open, in_progress, done, blocked
+        #
+        # context: "{context_notes}"
+        #   WHAT: Additional notes for next agent
+        #   WHY: Provides context that helps complete the TODO
+        #   EXAMPLE: "Blocked on PR #123", "Needs review from X"
+        #
+        # weight: 0.5
+        #   WHAT: Importance score for graph queries
+        #   WHY: TODOs are lower priority (0.5) than goals/docs
+        #   RANGE: 0.5 for todos, 0.7 for goals/docs
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (TODO Creation Event)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_ADD-TODO_{module_name}_{timestamp_short}"
+        node_type: moment
+        type: todo_creation
+        prose: "Created TODO: {description}"
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_ADD-TODO_{module_name}_{timestamp_short}"
+        #   WHAT: Unique ID with SUBTYPE in ALLCAPS
+        #   WHY: Moments are ordered chronologically
+        #   FORMAT: moment_ADD-TODO_<module>_<hash>
+        #   Example: moment_ADD-TODO_engine-physics_a7
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event record
+        #   WHY: Creates history that can be queried
+        #   CONTRAST: narratives persist, moments record events
+        #
+        # type: todo_creation
+        #   WHAT: Categorizes this moment type
+        #   WHY: Enables queries like "show all TODO creations"
+        #   OTHER_TYPES: protocol_create, sync_update, goal_creation
+        #
+        # prose: "Created TODO: {description}"
+        #   WHAT: Human-readable description
+        #   WHY: Displayed in activity feeds and history
+        #   FORMAT: Past tense, specific about what happened
+        #
+        # status: completed
+        #   WHAT: Moment completion state
+        #   WHY: Tracks whether action finished successfully
+        #   OPTIONS: completed, pending, failed
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Space Contains TODO
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space}"
+        to: "narrative_TODO_{module_name}-{description | slugify | truncate(30)}_{timestamp_short}"
+        nature: "contains"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: contains
+        #   WHAT: Hierarchical ownership relationship
+        #   WHY: Establishes "space owns this TODO"
+        #   QUERY: "What TODOs are in space X?" follows contains
+        #   DIRECTION: from=container, to=contained
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: TODO About Node
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_TODO_{module_name}-{description | slugify | truncate(30)}_{timestamp_short}"
+        to: "{about_node}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what the TODO relates to
+        #   QUERY: "What TODOs are about X?" follows about
+        #   DIRECTION: from=todo, to=subject (space/narrative/code)
+        #   NOTE: Subject can be space, narrative, or code location
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_ADD-TODO_{module_name}_{timestamp_short}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who/what created this moment
+        #   QUERY: "What did agent X do?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About TODO
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_ADD-TODO_{module_name}_{timestamp_short}"
+        to: "narrative_TODO_{module_name}-{description | slugify | truncate(30)}_{timestamp_short}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what the moment relates to
+        #   QUERY: "What happened to TODO X?" follows about
+        #   DIRECTION: from=moment, to=subject
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space}"
+      task_id: "add_todo_{module_name}_{timestamp_short}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - narrative_TODO
+      - moment_ADD-TODO
+    links:
+      - contains (space → todo)
+      - about (todo → subject)
+      - expresses (actor → moment)
+      - about (moment → todo)
+  summary: "Created TODO: {description}"
+  returns:
+    todo_created: "narrative_TODO_{module_name}-{description | slugify | truncate(30)}_{timestamp_short}"
+    priority: "{priority}"
+    moment: "moment_ADD-TODO_{module_name}_{timestamp_short}"
+
+# ID Convention Reference:
+# See docs/schema/PATTERNS_Schema.md section 3 for full ID format specification.
+# Format: {node-type}_{SUBTYPE}_{instance-context}_{disambiguator}

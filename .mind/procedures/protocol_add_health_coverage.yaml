@@ -1,0 +1,179 @@
+procedure: protocol_add_health_coverage
+version: "1.0"
+description: Create health indicator with docks linked to validation
+
+triggers:
+  - gap: "Validation exists without health coverage"
+  - event: "Runtime verification needed for invariant"
+
+requires_skills:
+  - "SKILL_Define_And_Verify_Health_Signals_Mapped_To_Validation_Invariants.md"
+
+contextual_knowledge:
+  domain: |
+    Health indicators verify runtime behavior tests can't catch:
+    drift, ratio degradation, production-only states.
+    Link to validations via RELATES with direction=verifies.
+    Docks = observation points attached via ATTACHED_TO.
+    - Input dock: where value is observed
+    - Output dock: where result is checked
+    Thresholds: warning vs error levels.
+
+  constraints: |
+    - Must verify at least one validation
+    - Must have input dock AND output dock
+    - Mechanism must be specific enough to implement
+    - Thresholds must distinguish WARNING from ERROR
+
+  dependencies: |
+    Requires: validation exists
+    Enables: runtime monitoring, mind doctor integration
+
+  quality_criteria: |
+    Good: "Compare max(narrative.energy) against 1.0 threshold after decay phase"
+    Bad: "Check if healthy"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: validation, in_space: "{space}" }
+        store_as: validations
+      - query: { find: narrative, type: health, in_space: "{space}" }
+        store_as: existing_health
+    purpose: "Load validations to link and existing health to check coverage"
+    next: check_prerequisites
+
+  check_prerequisites:
+    type: branch
+    checks:
+      - condition: "{validations | count} == 0"
+        action:
+          type: call_procedure
+          protocol: protocol_add_invariant
+          reason: "No validations exist to verify"
+          context: { space: "{space}" }
+          on_complete: reload_context
+      - condition: "ready"
+        action: { goto: gather_details }
+
+  gather_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Validations to cover: {validations | list with priority}
+      Existing health coverage: {existing_health | list with validates}
+
+      {contextual_knowledge.constraints}
+
+    questions:
+      - name: health_name
+        ask: "Health indicator name? Pattern: h_<module>_<what_measured>"
+        why_it_matters: "Consistent naming for health stream"
+        good_answer: "h_physics_energy_bounded"
+        bad_answer: "check1"
+        expects:
+          type: string
+          pattern: "^h_[a-z_]+$"
+
+      - name: validates
+        ask: "Which validation does this verify?"
+        why_it_matters: "Links health to invariant it checks"
+        expects:
+          type: id
+          from: "{validations}"
+
+      - name: mechanism
+        ask: "How is this checked? Be specific about measurement."
+        why_it_matters: "Must be implementable"
+        good_answer: "Query max(n.energy) for all narratives after tick phase"
+        bad_answer: "Check the values"
+        expects: { type: string, min_length: 20 }
+
+      - name: input_dock
+        ask: "Input dock: where is value observed? (file:symbol)"
+        why_it_matters: "Code location for observation"
+        expects: { type: string, pattern: ".*:.*" }
+
+      - name: output_dock
+        ask: "Output dock: where is result checked? (file:symbol)"
+        why_it_matters: "Code location for verification"
+        expects: { type: string, pattern: ".*:.*" }
+
+      - name: warning_threshold
+        ask: "Warning threshold value?"
+        why_it_matters: "When to raise warning"
+        expects: { type: string }
+
+      - name: error_threshold
+        ask: "Error threshold value?"
+        why_it_matters: "When to raise error"
+        expects: { type: string }
+
+    moment:
+      agent_provides: [mechanism]
+    next: create_health_cluster
+
+  create_health_cluster:
+    type: create
+    nodes:
+      - id: "health_{health_name}"
+        node_type: narrative
+        type: health
+        name: "{health_name}"
+        mechanism: "{mechanism}"
+        warning_threshold: "{warning_threshold}"
+        error_threshold: "{error_threshold}"
+
+      - id: "dock_input_{health_name}"
+        node_type: thing
+        type: dock
+        name: "input_dock"
+        location: "{input_dock}"
+        direction: input
+
+      - id: "dock_output_{health_name}"
+        node_type: thing
+        type: dock
+        name: "output_dock"
+        location: "{output_dock}"
+        direction: output
+
+      - id: "moment_create_health_{timestamp}"
+        node_type: moment
+        type: procedure_create
+        prose: "Created health indicator {health_name} verifying {validates}"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "health_{health_name}"
+      - type: relates
+        from: "health_{health_name}"
+        to: "{validates}"
+        properties:
+          direction: verifies      - type: attached_to
+        from: "dock_input_{health_name}"
+        to: "health_{health_name}"
+      - type: attached_to
+        from: "dock_output_{health_name}"
+        to: "health_{health_name}"
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_create_health_{timestamp}"
+      - type: about
+        from: "moment_create_health_{timestamp}"
+        to: "health_{health_name}"
+
+    next: $complete
+
+output:
+  cluster:
+    health_id: "health_{health_name}"
+    input_dock: "dock_input_{health_name}"
+    output_dock: "dock_output_{health_name}"
+    verifies: "{validates}"
+  moment: "moment_create_health_{timestamp}"

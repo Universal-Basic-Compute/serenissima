@@ -1,0 +1,147 @@
+procedure: protocol_update_sync
+version: "1.0"
+description: Update SYNC narrative with current state
+
+triggers:
+  - event: "Work session completed"
+  - event: "State change needs recording"
+
+requires_skills:
+  - "SKILL_Update_Module_Sync_State_And_Record_Markers.md"
+
+contextual_knowledge:
+  domain: |
+    SYNC narratives track current state for handoff:
+    - What changed recently
+    - Current maturity (DESIGNING, CANONICAL, etc)
+    - Next steps for next agent
+    - Open markers (TODOs, escalations, propositions)
+
+  constraints: |
+    - Must update after every significant change
+    - Must capture handoff info for next agent
+    - Must list all open markers
+
+  dependencies: |
+    Requires: space exists, work was done
+    Enables: continuity between sessions
+
+  quality_criteria: |
+    Good: "Status: DESIGNING. Completed: decay phase impl. Next: flow phase. Blockers: unclear how to handle cycles."
+    Bad: "Updated stuff"
+
+steps:
+  load_current:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: sync, in_space: "{space}" }
+        store_as: current_sync
+      - query: { find: moment, about_space: "{space}", limit: 5 }
+        store_as: recent_moments
+    next: gather_update
+
+  gather_update:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Current SYNC: {current_sync | content}
+      Recent work: {recent_moments | summarize}
+
+    questions:
+      - name: status
+        ask: "Current maturity status?"
+        expects:
+          type: enum
+          options: [DESIGNING, CANONICAL, PROPOSED, DEPRECATED]
+
+      - name: recent_changes
+        ask: "What changed in this session?"
+        expects: { type: string }
+
+      - name: current_state
+        ask: "What is the current state? What works, what doesn't?"
+        expects: { type: string }
+
+      - name: next_steps
+        ask: "What should the next agent do?"
+        expects: { type: string }
+
+      - name: open_todos
+        ask: "Open TODOs?"
+        expects: { type: string_list, min: 0 }
+
+      - name: escalations
+        ask: "Open escalations/blockers?"
+        expects: { type: string_list, min: 0 }
+
+      - name: propositions
+        ask: "Open propositions/suggestions?"
+        expects: { type: string_list, min: 0 }
+
+    next: update_or_create_sync
+
+  update_or_create_sync:
+    type: branch
+    checks:
+      - condition: "{current_sync | count} > 0"
+        action: { goto: update_sync }
+      - condition: "ready"
+        action: { goto: create_sync }
+
+  update_sync:
+    type: update
+    target: "{current_sync | first | id}"
+    set:
+      status: "{status}"
+      recent_changes: "{recent_changes}"
+      current_state: "{current_state}"
+      next_steps: "{next_steps}"
+      open_todos: "{open_todos}"
+      escalations: "{escalations}"
+      propositions: "{propositions}"
+      updated_at: "{timestamp}"
+    next: create_moment
+
+  create_sync:
+    type: create
+    nodes:
+      - id: "sync_{space}"
+        node_type: narrative
+        type: sync
+        name: "SYNC for {space}"
+        status: "{status}"
+        recent_changes: "{recent_changes}"
+        current_state: "{current_state}"
+        next_steps: "{next_steps}"
+        open_todos: "{open_todos}"
+        escalations: "{escalations}"
+        propositions: "{propositions}"
+    links:
+      - type: contains
+        from: "{space}"
+        to: "sync_{space}"
+    next: create_moment
+
+  create_moment:
+    type: create
+    nodes:
+      - id: "moment_update_sync_{timestamp}"
+        node_type: moment
+        type: sync_update
+        prose: "Updated SYNC for {space}: {recent_changes}"
+        status: completed
+    links:
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_update_sync_{timestamp}"
+      - type: about
+        from: "moment_update_sync_{timestamp}"
+        to: "{space}"
+    next: $complete
+
+output:
+  sync_updated: true
+  status: "{status}"
+  moment: "moment_update_sync_{timestamp}"

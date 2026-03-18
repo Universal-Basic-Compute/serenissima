@@ -1,0 +1,109 @@
+procedure: protocol_add_objectives
+version: "1.0"
+description: Add objectives and non-objectives to a space
+
+triggers:
+  - gap: "Space exists without objectives"
+  - event: "Module scope being defined"
+
+requires_skills:
+  - "SKILL_Define_Module_Boundaries_Objectives_And_Scope.md"
+
+contextual_knowledge:
+  domain: |
+    Objectives = what the module optimizes for, ranked.
+    Non-objectives = what is explicitly out of scope.
+    Tradeoffs = when objectives conflict, which wins.
+    Links: objectives RELATES to space with direction=optimizes.
+
+  constraints: |
+    - Must have at least one objective
+    - Should have at least one non-objective (clarity)
+    - Objectives should be ranked (1 = highest priority)
+    - Tradeoffs explain conflicts
+
+  dependencies: |
+    Requires: space exists
+    Enables: scope clarity, design decisions
+
+  quality_criteria: |
+    Good: "1. Correctness (energy bounds), 2. Performance (tick speed), 3. Readability"
+    Bad: "Be good"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: objective, in_space: "{space}" }
+        store_as: existing_objectives
+    next: gather_objectives
+
+  gather_objectives:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Existing objectives: {existing_objectives | list}
+
+    questions:
+      - name: objectives
+        ask: "What are the ranked objectives? List in priority order."
+        why_it_matters: "Guides all design decisions"
+        good_answer: "1. Correctness (energy bounds)\n2. Performance (tick speed)\n3. Readability"
+        expects: { type: string, min_length: 20 }
+
+      - name: non_objectives
+        ask: "What is explicitly out of scope?"
+        why_it_matters: "Prevents scope creep"
+        good_answer: "Distributed execution, real-time updates, persistence"
+        expects: { type: string }
+
+      - name: tradeoffs
+        ask: "When objectives conflict, how to decide?"
+        why_it_matters: "Resolves tension"
+        good_answer: "Correctness over performance: never skip validation for speed"
+        expects: { type: string }
+
+    moment:
+      agent_provides: [objectives, tradeoffs]
+    next: create_objectives
+
+  create_objectives:
+    type: create
+    nodes:
+      - id: "obj_{space}_objectives"
+        node_type: narrative
+        type: objective
+        name: "Objectives for {space}"
+        content: "{objectives}"
+        non_objectives: "{non_objectives}"
+        tradeoffs: "{tradeoffs}"
+
+      - id: "moment_create_objectives_{timestamp}"
+        node_type: moment
+        type: procedure_create
+        prose: "Defined objectives for {space}"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "obj_{space}_objectives"
+      - type: relates
+        from: "obj_{space}_objectives"
+        to: "{space}"
+        properties:
+          direction: optimizes
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_create_objectives_{timestamp}"
+      - type: about
+        from: "moment_create_objectives_{timestamp}"
+        to: "obj_{space}_objectives"
+
+    next: $complete
+
+output:
+  created: "obj_{space}_objectives"
+  moment: "moment_create_objectives_{timestamp}"

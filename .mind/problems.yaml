@@ -1,0 +1,1236 @@
+# Problems Registry
+# Each problem is self-contained with use cases, triggers, and resolution strategy
+
+UNDOCUMENTED:
+  category: docs
+  description: >
+    A code file exists in the repository without a linked documentation file.
+    The file header has no DOCS: marker pointing to an IMPLEMENTATION.md or other doc chain file.
+  use_cases:
+    - "Developer adds new Python module but forgets to create documentation"
+    - "Legacy code was never documented during initial development"
+    - "Refactored code lost its doc link during file move"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor scans all code files and checks for DOCS: header marker"
+    - type: event
+      source: new_file_added
+      explanation: "File watcher detects new .py/.ts/.js file without doc link"
+    - type: ci
+      source: pull_request
+      explanation: "CI pipeline runs doctor check on PR, blocks merge if undocumented"
+  resolution:
+    summary: >
+      Create a documentation chain for the module, starting with PATTERNS.md to capture
+      design intent, then IMPLEMENTATION.md to link to the code. Requires understanding
+      the code's purpose and making design decisions about documentation structure.
+    method: agent
+    justification: >
+      Requires reading and understanding code semantics, making judgment calls about
+      what to document and how to structure it. Cannot be automated with simple scripts.
+    agent: voice
+    procedures:
+      - create_doc_chain
+      - add_implementation
+    steps:
+      - Read code file to understand its purpose and responsibilities
+      - Identify which module it belongs to (existing or new)
+      - Create PATTERNS.md explaining design rationale
+      - Create IMPLEMENTATION.md with IMPL links to code
+      - Add DOCS marker to code file header
+      - Link documentation to module space in graph
+
+STALE_SYNC:
+  category: docs
+  description: >
+    A SYNC file has not been updated in more than 14 days. The LAST_UPDATED field
+    is outdated, indicating the module state documentation may not reflect current reality.
+  use_cases:
+    - "Team worked on module but forgot to update SYNC after completing work"
+    - "Module has been stable, but SYNC should still be refreshed to confirm status"
+    - "Handoff notes are outdated and don't reflect recent decisions"
+  triggers:
+    - type: cron
+      schedule: "0 0 * * *"
+      explanation: "Daily check compares LAST_UPDATED to current date"
+    - type: command
+      source: mind doctor
+      explanation: "Doctor parses SYNC headers and flags files older than threshold"
+  resolution:
+    summary: >
+      Review the module's recent changes and update the SYNC file with current state.
+      This is a structured task that follows a template - read changes, update fields,
+      write handoff notes.
+    method: procedure
+    justification: >
+      Follows a predictable pattern: check git log, update date, write summary.
+      Does not require creative judgment, just systematic review and fill-in.
+    procedure: update_sync
+    steps:
+      - Check git log for recent changes in module
+      - Update LAST_UPDATED to today's date
+      - Update STATUS if module state changed
+      - Add bullet points summarizing recent work
+      - Write HANDOFF section for next agent
+
+INCOMPLETE_CHAIN:
+  category: docs
+  description: >
+    A module's documentation chain is missing one or more required files.
+    The chain should be: OBJECTIVES → PATTERNS → BEHAVIORS → ALGORITHM → VALIDATION → IMPLEMENTATION → SYNC.
+    At minimum, PATTERNS and SYNC are required.
+  use_cases:
+    - "New module was created with only PATTERNS.md, other docs not yet written"
+    - "VALIDATION.md was deleted during cleanup but module still needs it"
+    - "Module evolved and now needs ALGORITHM.md that wasn't originally created"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor scans module directories and checks for required doc types"
+    - type: event
+      source: new_module
+      explanation: "When mind init creates a module, it flags missing chain files as tasks"
+  resolution:
+    summary: >
+      Create missing documentation files from templates, filling them with content
+      derived from existing code and docs. Requires understanding what each doc type
+      should contain and how it relates to the module.
+    method: agent
+    justification: >
+      Each doc type requires different content and analysis. ALGORITHM needs code reading,
+      VALIDATION needs invariant identification, BEHAVIORS needs usage analysis.
+      Too varied for a simple script.
+    agent: voice
+    procedures:
+      - create_doc_chain
+      - add_algorithm
+      - add_behaviors
+      - add_validation
+    steps:
+      - Identify which doc types are missing from chain
+      - Prioritize: PATTERNS first, then IMPLEMENTATION, then others
+      - For each missing doc, read existing docs and code
+      - Create doc from template with appropriate content
+      - Add IMPLEMENTS links between consecutive chain docs
+      - Verify chain completeness
+
+ORPHAN_DOCS:
+  category: docs
+  description: >
+    A documentation file exists but has no corresponding code reference.
+    No code file contains a DOCS: marker pointing to this doc, and no IMPL:
+    marker in the doc points to existing code.
+  use_cases:
+    - "Code was deleted but documentation was left behind"
+    - "Refactor moved code to new location, doc IMPL links now broken"
+    - "Documentation was created speculatively for code that was never written"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor checks all docs for valid IMPL links and reverse DOCS links"
+    - type: event
+      source: post_refactor
+      explanation: "After refactor command, validate all doc links still resolve"
+  resolution:
+    summary: >
+      Either find the correct code to link to, or delete the orphan documentation.
+      This is a simple decision tree that can be scripted.
+    method: script
+    justification: >
+      Binary decision: if code exists elsewhere, update link; if not, delete doc.
+      No creative judgment needed, just file system checks and updates.
+    script: fix_orphan_docs
+    steps:
+      - Search codebase for code that matches doc topic
+      - If found, update IMPL link in doc and DOCS link in code
+      - If not found, archive or delete orphan doc
+      - Update graph to remove orphan node
+
+PLACEHOLDER:
+  category: docs
+  description: >
+    A documentation file contains placeholder text like TODO, TBD, [PLACEHOLDER],
+    or template instructions that were never replaced with real content.
+  use_cases:
+    - "Developer created doc from template but didn't fill in all sections"
+    - "Draft documentation was committed with intent to complete later"
+    - "Template copy-paste left instruction text in the doc"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor regex scans doc content for placeholder patterns"
+  resolution:
+    summary: >
+      Replace placeholder text with actual content based on code analysis and
+      module understanding. Requires reading related code and making decisions
+      about what content is appropriate.
+    method: agent
+    justification: >
+      Placeholders need to be replaced with meaningful content that requires
+      understanding context. Cannot be automated - each placeholder needs
+      different content based on what it's placeholder for.
+    agent: voice
+    procedures:
+      - add_patterns
+      - add_behaviors
+      - add_algorithm
+    steps:
+      - Identify all placeholder locations in doc
+      - For each, determine what content is needed
+      - Read code and existing docs for context
+      - Write appropriate content to replace placeholder
+      - Validate doc against template requirements
+
+DOC_GAPS:
+  category: docs
+  description: >
+    An @mind:gap marker exists in documentation, indicating the author
+    identified missing content that needs to be filled in.
+  use_cases:
+    - "Author knew something was missing but didn't have time to research it"
+    - "Reviewer flagged a gap during PR review"
+    - "Agent identified missing information during documentation task"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor scans for @mind:gap markers in all docs"
+    - type: command
+      source: mind solve-markers
+      explanation: "Marker solver presents gaps for resolution"
+  resolution:
+    summary: >
+      Research the gap topic and fill in the missing content. The gap marker
+      usually includes context about what's needed. Requires investigation
+      and content creation.
+    method: agent
+    justification: >
+      Gaps require research and judgment about what content is appropriate.
+      Each gap is unique and needs contextual understanding to fill properly.
+    agent: voice
+    steps:
+      - Read gap marker and surrounding context
+      - Identify what information is needed
+      - Research in codebase, docs, or external sources
+      - Write content to fill the gap
+      - Remove @mind:gap marker
+      - Update SYNC with note about gap resolution
+
+DOC_DUPLICATION:
+  category: docs
+  description: >
+    Similar or identical content appears in multiple documentation files.
+    This creates maintenance burden and risk of inconsistency when one
+    copy is updated but others are not.
+  use_cases:
+    - "Same concept explained in multiple module docs"
+    - "Copy-paste of sections between related docs"
+    - "Shared functionality documented in each consumer's docs"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor computes content similarity between docs, flags high overlap"
+  resolution:
+    summary: >
+      Consolidate duplicated content into a single canonical source, then
+      reference it from other locations. Requires deciding which location
+      is canonical and how to structure cross-references.
+    method: agent
+    justification: >
+      Requires judgment about which source should be canonical, how to
+      restructure content, and what references to use. Not a mechanical
+      transformation.
+    agent: steward
+    steps:
+      - Identify all locations with duplicated content
+      - Determine which should be the canonical source
+      - Move content to canonical location if needed
+      - Replace duplicates with references/links
+      - Verify all references resolve correctly
+      - Update graph links
+
+DOC_TEMPLATE_DRIFT:
+  category: docs
+  description: >
+    A documentation file's structure no longer matches the current template
+    for its type. Sections may be missing, renamed, or in wrong order.
+  use_cases:
+    - "Template was updated but existing docs weren't migrated"
+    - "Doc was manually edited and structure diverged from template"
+    - "Different authors used different conventions"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor compares doc structure to template, flags missing sections"
+    - type: event
+      source: template_update
+      explanation: "When template changes, all docs of that type are rechecked"
+  resolution:
+    summary: >
+      Update the document structure to match the current template while
+      preserving existing content. This is a mechanical restructuring task.
+    method: procedure
+    justification: >
+      Follows predictable pattern: compare to template, add missing sections,
+      reorder as needed. Content is preserved, only structure changes.
+    procedure: fix_template
+    steps:
+      - Load current template for doc type
+      - Compare doc sections to template sections
+      - Add any missing required sections (empty)
+      - Reorder sections to match template order
+      - Flag newly empty sections as placeholders
+
+LARGE_DOC_MODULE:
+  category: docs
+  description: >
+    A documentation file exceeds 200 lines, making it difficult to navigate
+    and maintain. Large docs should be split or archived.
+  use_cases:
+    - "SYNC file accumulated months of updates without archiving"
+    - "ALGORITHM doc grew as implementation expanded"
+    - "Single doc covers too broad a scope"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor counts lines in each doc, flags those over threshold"
+  resolution:
+    summary: >
+      Split the document into smaller, focused pieces or archive old content.
+      Requires judgment about natural split points and what to archive vs keep.
+    method: agent
+    justification: >
+      Deciding where to split and what to archive requires understanding
+      the content and its relevance. Not a mechanical operation.
+    agent: steward
+    procedures:
+      - update_sync
+    steps:
+      - Analyze doc content for natural split points
+      - For SYNC files, archive old entries to SYNC_archive
+      - For other docs, consider splitting into sub-modules
+      - Update references to point to new locations
+      - Verify doc is under line threshold
+
+STUB_IMPL:
+  category: impl
+  description: >
+    An implementation file contains stub code - functions that exist but
+    have placeholder implementations like `pass`, `TODO`, `raise NotImplementedError`,
+    or empty bodies.
+  use_cases:
+    - "Interface was defined but implementation deferred"
+    - "Test-driven development created stubs not yet implemented"
+    - "Partial implementation committed to unblock other work"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor scans code for stub patterns (pass, NotImplementedError, etc.)"
+  resolution:
+    summary: >
+      Implement the stub function based on its specification in ALGORITHM.md
+      or inferred from usage. Requires understanding what the function should
+      do and writing correct code.
+    method: agent
+    justification: >
+      Writing code requires understanding requirements, making design decisions,
+      and ensuring correctness. Cannot be automated.
+    agent: groundwork
+    procedures:
+      - add_implementation
+    steps:
+      - Read function signature and docstring for intent
+      - Check ALGORITHM.md for specification
+      - Check tests for expected behavior
+      - Implement the function
+      - Run tests to verify correctness
+      - Update SYNC with implementation note
+
+INCOMPLETE_IMPL:
+  category: impl
+  description: >
+    An implementation file has partial code - some functions are complete
+    but others are marked incomplete or have TODO comments indicating
+    unfinished work.
+  use_cases:
+    - "Feature was partially shipped, rest deferred"
+    - "Refactor started but not finished"
+    - "Edge cases not yet handled"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor scans for TODO/FIXME markers indicating incomplete code"
+  resolution:
+    summary: >
+      Complete the unfinished implementation based on requirements and
+      existing patterns in the codebase.
+    method: agent
+    justification: >
+      Completing code requires understanding context, requirements, and
+      making implementation decisions. Requires reasoning.
+    agent: groundwork
+    steps:
+      - Identify all incomplete sections (TODOs, FIXMEs)
+      - Prioritize by dependency order
+      - For each, read context and requirements
+      - Implement the missing functionality
+      - Test and verify
+      - Remove incomplete markers
+
+UNDOC_IMPL:
+  category: impl
+  description: >
+    An IMPLEMENTATION.md file exists but there is no corresponding ALGORITHM.md
+    explaining how the code works. The "what" is documented but not the "how".
+  use_cases:
+    - "Quick implementation skipped algorithm documentation"
+    - "Algorithm was obvious to author but not documented for others"
+    - "Legacy code has impl doc but algorithm was never written"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor checks that IMPLEMENTATION.md files have matching ALGORITHM.md"
+  resolution:
+    summary: >
+      Read the implementation code and extract/document the algorithm
+      in a new ALGORITHM.md file. Requires understanding the code logic
+      and explaining it clearly.
+    method: agent
+    justification: >
+      Extracting algorithm from code and writing clear documentation
+      requires comprehension and communication skills. Not automatable.
+    agent: voice
+    procedures:
+      - add_algorithm
+    steps:
+      - Read implementation code thoroughly
+      - Identify key algorithms and data flows
+      - Create ALGORITHM.md from template
+      - Document each algorithm with pseudocode or explanation
+      - Add IMPL links between ALGORITHM and IMPLEMENTATION
+      - Verify doc chain is complete
+
+BROKEN_IMPL_LINK:
+  category: impl
+  description: >
+    An IMPL: marker in a documentation file points to a code file that
+    does not exist. The link is broken due to file move, rename, or deletion.
+  use_cases:
+    - "Code file was moved but doc IMPL link not updated"
+    - "Code file was renamed during refactor"
+    - "Code file was deleted but doc remains"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor resolves all IMPL: paths and flags those that don't exist"
+    - type: event
+      source: file_moved
+      explanation: "Refactor command checks for broken links after move"
+  resolution:
+    summary: >
+      Find the correct file path and update the IMPL link, or remove the
+      link if the code was deleted. This is a mechanical path resolution task.
+    method: script
+    justification: >
+      Simple file system operation: search for file by name, update path.
+      No judgment needed, just path resolution.
+    script: fix_impl_links
+    steps:
+      - Parse IMPL link to get filename
+      - Search codebase for file with that name
+      - If found, update IMPL path to new location
+      - If not found, remove IMPL link or flag doc as orphan
+      - Update graph links
+
+STALE_IMPL:
+  category: impl
+  description: >
+    Code has changed (per git history) but the corresponding documentation
+    has not been updated. The docs describe an old version of the implementation.
+  use_cases:
+    - "Bug fix changed behavior but docs still describe old behavior"
+    - "Refactor changed algorithm but ALGORITHM.md not updated"
+    - "New parameters added but not documented"
+  triggers:
+    - type: hook
+      source: post-commit
+      explanation: "Post-commit hook compares modified files to their linked docs"
+    - type: command
+      source: mind doctor
+      explanation: "Doctor compares code mtime to doc mtime for linked files"
+  resolution:
+    summary: >
+      Review the code changes and update documentation to accurately
+      describe the current implementation. Requires understanding what
+      changed and how to reflect it in docs.
+    method: agent
+    justification: >
+      Understanding code changes and translating them to doc updates
+      requires comprehension. Cannot be automated.
+    agent: voice
+    procedures:
+      - update_sync
+      - add_algorithm
+    steps:
+      - Get git diff for the code file
+      - Identify what changed (new functions, changed behavior, etc.)
+      - Update relevant doc sections (ALGORITHM, BEHAVIORS, etc.)
+      - Add change note to SYNC
+      - Update LAST_UPDATED in SYNC
+
+NEW_UNDOC_CODE:
+  category: impl
+  description: >
+    A recent commit added new code files that have no documentation.
+    The files were committed without creating corresponding doc chain.
+  use_cases:
+    - "Developer added feature without documentation"
+    - "Urgent fix committed without time for docs"
+    - "Generated code was committed without doc links"
+  triggers:
+    - type: hook
+      source: post-commit
+      explanation: "Post-commit hook checks if new files have DOCS markers"
+    - type: ci
+      source: pull_request
+      explanation: "CI blocks PRs with new undocumented code files"
+  resolution:
+    summary: >
+      Create documentation for the new code, either adding to existing
+      module or creating new module if appropriate.
+    method: agent
+    justification: >
+      Deciding documentation structure and writing content requires
+      understanding the code. Cannot be automated.
+    agent: voice
+    procedures:
+      - create_doc_chain
+      - add_implementation
+    steps:
+      - Identify new files from git diff
+      - Determine which module they belong to
+      - If new module needed, create doc chain
+      - If existing module, add to IMPLEMENTATION.md
+      - Add DOCS marker to new code files
+      - Update SYNC with note about new code
+
+MISSING_TESTS:
+  category: tests
+  description: >
+    A module has no test files or test coverage. The VALIDATION.md may
+    define invariants but no tests verify them.
+  use_cases:
+    - "Module was created without tests"
+    - "Tests were deleted during cleanup"
+    - "Legacy code predates testing practices"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor checks for test files matching module naming pattern"
+  resolution:
+    summary: >
+      Write tests based on the invariants defined in VALIDATION.md and
+      the behaviors described in BEHAVIORS.md. Requires understanding
+      what to test and how.
+    method: agent
+    justification: >
+      Writing meaningful tests requires understanding the code, identifying
+      edge cases, and making decisions about coverage. Creative task.
+    agent: keeper
+    procedures:
+      - add_health_coverage
+    steps:
+      - Read VALIDATION.md for invariants to test
+      - Read BEHAVIORS.md for expected behaviors
+      - Create test file with appropriate structure
+      - Write test for each invariant
+      - Add VALIDATES marker linking test to invariant
+      - Run tests to verify they pass
+
+INVARIANT_UNTESTED:
+  category: tests
+  description: >
+    A VALIDATION.md file defines an invariant that has no corresponding
+    test with a VALIDATES marker. The rule exists but isn't verified.
+  use_cases:
+    - "New invariant added to VALIDATION but test not written yet"
+    - "Test exists but missing VALIDATES marker"
+    - "Invariant too complex to test simply"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor cross-references VALIDATION invariants with VALIDATES markers in tests"
+  resolution:
+    summary: >
+      Write a test that validates the invariant and add a VALIDATES marker
+      linking them. Requires understanding the invariant and how to test it.
+    method: agent
+    justification: >
+      Writing a test for a specific invariant requires understanding what
+      the invariant means and designing a test that properly verifies it.
+    agent: keeper
+    procedures:
+      - add_health_coverage
+      - add_invariant
+    steps:
+      - Read invariant definition in VALIDATION.md
+      - Understand what condition must hold
+      - Design test case(s) that verify the condition
+      - Write test with VALIDATES marker
+      - Run test to confirm it passes
+      - Update SYNC with coverage note
+
+HEALTH_FAILED:
+  category: tests
+  description: >
+    A health check defined in HEALTH.md returned an error or failure.
+    The system is not meeting its defined health criteria.
+  use_cases:
+    - "Deployment broke a health check"
+    - "External dependency became unavailable"
+    - "Data corruption triggered health failure"
+  triggers:
+    - type: cron
+      schedule: "0 * * * *"
+      explanation: "Hourly health check runs all HEALTH.md defined checks"
+    - type: ci
+      source: pipeline
+      explanation: "CI runs health checks as part of deployment verification"
+  resolution:
+    summary: >
+      Investigate the health check failure, identify root cause, and fix
+      the underlying issue. Requires diagnostic skills and problem-solving.
+    method: agent
+    justification: >
+      Diagnosing failures requires investigation, hypothesis testing, and
+      creative problem-solving. Cannot be scripted.
+    agent: fixer
+    steps:
+      - Read health check output and error message
+      - Identify which health signal failed
+      - Trace to root cause (logs, state, dependencies)
+      - Fix the underlying issue
+      - Re-run health check to verify fix
+      - Update SYNC with incident note
+
+TEST_NO_VALIDATES:
+  category: tests
+  description: >
+    A test file exists but tests don't have VALIDATES markers linking
+    them to invariants in VALIDATION.md. Tests exist but coverage is untracked.
+  use_cases:
+    - "Legacy tests predate VALIDATES convention"
+    - "Tests written without reading VALIDATION.md"
+    - "Markers forgotten during test creation"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor scans test files for VALIDATES markers, flags tests without them"
+  resolution:
+    summary: >
+      Add VALIDATES markers to tests linking them to appropriate invariants.
+      This is a mechanical annotation task.
+    method: script
+    justification: >
+      Adding markers is mechanical: match test to invariant by name/content,
+      add comment. No creative judgment needed.
+    script: add_validates_markers
+    steps:
+      - List all tests without VALIDATES markers
+      - For each, find matching invariant in VALIDATION.md
+      - Add VALIDATES: invariant_id comment to test
+      - Update test index
+
+MONOLITH:
+  category: quality
+  description: >
+    A code file exceeds 500 lines, indicating it likely has too many
+    responsibilities and should be split into smaller, focused modules.
+  use_cases:
+    - "Feature grew organically without refactoring"
+    - "Multiple concerns accumulated in one file"
+    - "Utility file became a dumping ground"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor counts lines in each code file, flags those over threshold"
+  resolution:
+    summary: >
+      Analyze the file structure and split into smaller, cohesive modules.
+      Requires understanding the code organization and making architectural
+      decisions about module boundaries.
+    method: agent
+    justification: >
+      Deciding how to split code requires understanding responsibilities,
+      dependencies, and cohesion. Architectural judgment needed.
+    agent: architect
+    steps:
+      - Analyze file to identify distinct responsibilities
+      - Group related functions/classes
+      - Design new module structure
+      - Create new files with appropriate names
+      - Move code to new files
+      - Update imports throughout codebase
+      - Update documentation to reflect new structure
+
+MAGIC_VALUES:
+  category: quality
+  description: >
+    Code contains hardcoded numeric or string literals that should be
+    named constants. Values like 86400, "localhost", or 0.5 appear without
+    explanation.
+  use_cases:
+    - "Developer used literal instead of constant"
+    - "Quick fix hardcoded a value"
+    - "Configuration value embedded in code"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor pattern-matches for suspicious literals in code"
+  resolution:
+    summary: >
+      Extract magic values to named constants or configuration. This is
+      a mechanical refactoring task.
+    method: script
+    justification: >
+      Simple extraction: identify value, create constant, replace occurrences.
+      Name can be inferred from context or prompted.
+    script: extract_constants
+    steps:
+      - Identify magic value and its context
+      - Create named constant with descriptive name
+      - Replace all occurrences with constant reference
+      - Add to config file if environment-dependent
+
+HARDCODED_SECRET:
+  category: quality
+  description: >
+    Code contains what appears to be a secret: API key, password, token,
+    or credential embedded in source code.
+  use_cases:
+    - "Developer committed secret accidentally"
+    - "Test credential left in production code"
+    - "Quick fix hardcoded credential"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor regex scans for secret patterns (API keys, passwords, etc.)"
+    - type: ci
+      source: security_scan
+      explanation: "Security scanner in CI flags potential secrets"
+  resolution:
+    summary: >
+      Remove secret from code, rotate it if exposed, and use environment
+      variables or secrets manager instead. Critical security fix.
+    method: script
+    justification: >
+      Mechanical extraction: remove value, add env var read, update .env.
+      Must be fast, no judgment needed.
+    script: extract_secrets
+    steps:
+      - Identify the secret and what it's used for
+      - Remove secret from code immediately
+      - Add environment variable read in its place
+      - Add to .env.example with placeholder
+      - Add .env to .gitignore if not already
+      - Rotate the secret if it was committed to git
+      - Update SYNC with security incident note
+
+LONG_PROMPT:
+  category: quality
+  description: >
+    A prompt or system message exceeds 4000 characters, making it expensive
+    and potentially hitting context limits. Should be compressed or split.
+  use_cases:
+    - "Prompt accumulated instructions over time"
+    - "Too much context embedded in prompt"
+    - "Redundant explanations in prompt"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor measures prompt lengths in agent configs and code"
+  resolution:
+    summary: >
+      Analyze prompt structure and reduce length through compression,
+      splitting into components, or using references. Requires understanding
+      what's essential vs redundant.
+    method: agent
+    justification: >
+      Deciding what to cut from a prompt requires understanding its purpose
+      and what information is essential. Judgment needed.
+    agent: voice
+    steps:
+      - Read prompt and identify its purpose
+      - Identify redundant or verbose sections
+      - Compress language without losing meaning
+      - Extract reusable parts to separate files
+      - Use references instead of inline content
+      - Verify prompt still achieves its purpose
+
+LONG_SQL:
+  category: quality
+  description: >
+    A SQL query exceeds complexity threshold (length or join count),
+    indicating it should be refactored into views or smaller queries.
+  use_cases:
+    - "Report query grew in complexity over time"
+    - "Multiple concerns combined in single query"
+    - "Nested subqueries instead of CTEs"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor measures SQL query complexity in code files"
+  resolution:
+    summary: >
+      Refactor the query by extracting views for common subqueries,
+      using CTEs, or splitting into multiple queries. Requires SQL
+      optimization knowledge.
+    method: agent
+    justification: >
+      SQL refactoring requires understanding query semantics and making
+      performance/readability tradeoffs. Expert judgment needed.
+    agent: architect
+    steps:
+      - Analyze query structure and purpose
+      - Identify repeated subqueries or complex joins
+      - Create views for reusable subqueries
+      - Refactor to use CTEs where appropriate
+      - Split into multiple queries if needed
+      - Document in ALGORITHM.md
+      - Test that results are unchanged
+
+NAMING_CONVENTION:
+  category: quality
+  description: >
+    A file, class, function, or variable doesn't follow the project's
+    naming conventions. Inconsistent naming hurts readability.
+  use_cases:
+    - "Developer unfamiliar with conventions"
+    - "Legacy code predates conventions"
+    - "Copy-paste from external source"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor checks names against convention patterns"
+  resolution:
+    summary: >
+      Rename to follow conventions and update all references. This is
+      a mechanical refactoring operation.
+    method: script
+    justification: >
+      Simple rename: determine correct name from conventions, rename,
+      update references. No judgment needed.
+    script: rename_to_convention
+    steps:
+      - Identify incorrect name and what convention it violates
+      - Determine correct name per conventions
+      - Use mind refactor rename to update
+      - Verify all references updated
+
+ESCALATION:
+  category: markers
+  description: >
+    An @mind:escalation marker indicates the author is blocked and needs
+    a decision or input from someone else to proceed.
+  use_cases:
+    - "Design decision needed from architect"
+    - "Ambiguous requirements need clarification"
+    - "Conflicting constraints need resolution"
+  triggers:
+    - type: command
+      source: mind solve-markers
+      explanation: "Marker solver presents escalations for decision"
+    - type: command
+      source: mind doctor
+      explanation: "Doctor counts escalations as unresolved issues"
+  resolution:
+    summary: >
+      Review the escalation context, analyze the options, make a decision,
+      and document the rationale. Requires judgment and authority.
+    method: agent
+    justification: >
+      Escalations require understanding context, weighing tradeoffs, and
+      making authoritative decisions. Cannot be automated.
+    agent: architect
+    procedures:
+      - resolve_blocker
+      - capture_decision
+    steps:
+      - Read escalation marker and surrounding context
+      - Understand what decision is needed
+      - Analyze options and tradeoffs
+      - Make decision with rationale
+      - Document decision in appropriate place
+      - Remove escalation marker
+      - Update SYNC with decision note
+
+SUGGESTION:
+  category: markers
+  description: >
+    An @mind:proposition marker indicates the author has an improvement
+    idea that should be reviewed for potential implementation.
+  use_cases:
+    - "Developer had idea while working on something else"
+    - "Code review surfaced improvement opportunity"
+    - "Technical debt noted for future work"
+  triggers:
+    - type: command
+      source: mind solve-markers
+      explanation: "Marker solver presents propositions for review"
+    - type: cron
+      schedule: "0 10 * * 1"
+      explanation: "Weekly review of accumulated propositions"
+  resolution:
+    summary: >
+      Evaluate the proposition for feasibility and value, then accept,
+      reject, or modify it. If accepted, create a task for implementation.
+    method: agent
+    justification: >
+      Evaluating ideas requires understanding context, assessing value,
+      and making prioritization decisions. Judgment needed.
+    agent: architect
+    procedures:
+      - capture_decision
+      - add_todo
+    steps:
+      - Read proposition and context
+      - Evaluate feasibility and effort
+      - Assess value and priority
+      - Decide: accept, reject, or defer
+      - If accepted, create task with details
+      - Document decision rationale
+      - Remove proposition marker
+
+LEGACY_MARKER:
+  category: markers
+  description: >
+    Old-style markers like TODO, FIXME, HACK, or XXX exist in code,
+    indicating technical debt that should be addressed or tracked.
+  use_cases:
+    - "Legacy code has accumulated TODOs"
+    - "Quick fix added HACK that was never cleaned"
+    - "FIXME from debugging was never resolved"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor scans for legacy marker patterns in code"
+  resolution:
+    summary: >
+      Either fix the issue noted by the marker, or convert to a tracked
+      task and remove the inline marker. Requires understanding if the
+      issue is still relevant.
+    method: agent
+    justification: >
+      Must read context to understand if issue is still relevant and what
+      the fix would be. Requires judgment.
+    agent: fixer
+    procedures:
+      - add_todo
+    steps:
+      - Read marker and surrounding code context
+      - Determine if issue is still relevant
+      - If obsolete, remove marker
+      - If still relevant, either fix now or create task
+      - If creating task, add to proper tracking
+      - Remove inline marker after tracking elsewhere
+
+UNRESOLVED_QUESTION:
+  category: markers
+  description: >
+    A question marker (?) or @mind:question exists without an answer,
+    indicating uncertainty that needs resolution.
+  use_cases:
+    - "Author wasn't sure about correct approach"
+    - "Documentation has unanswered question"
+    - "Code comment questions a decision"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor scans for question patterns in docs and code"
+  resolution:
+    summary: >
+      Research the question and document the answer. May require code
+      analysis, external research, or asking domain experts.
+    method: agent
+    justification: >
+      Answering questions requires research, analysis, and sometimes
+      expert consultation. Cannot be automated.
+    agent: witness
+    steps:
+      - Read question and context
+      - Research answer in codebase, docs, or externally
+      - If uncertain, escalate to expert
+      - Document answer in appropriate location
+      - Remove or update question marker
+
+YAML_DRIFT:
+  category: sync
+  description: >
+    The modules.yaml file is out of sync with actual files in the docs
+    directory. Modules listed don't exist or existing modules aren't listed.
+  use_cases:
+    - "New module created but modules.yaml not updated"
+    - "Module renamed but modules.yaml has old name"
+    - "Manual edit of modules.yaml introduced typo"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor compares modules.yaml to actual directory structure"
+    - type: watch
+      patterns: ["docs/**/*.md"]
+      explanation: "File watcher detects changes that might invalidate modules.yaml"
+  resolution:
+    summary: >
+      Regenerate modules.yaml from actual file system structure. This is
+      a mechanical scan and generate operation.
+    method: script
+    justification: >
+      Simple directory scan and YAML generation. No judgment needed,
+      just reflect reality.
+    script: regenerate_modules_yaml
+    steps:
+      - Scan docs directory for module directories
+      - Generate modules.yaml with correct structure
+      - Compare to existing modules.yaml
+      - Replace if different
+
+DOCS_NOT_INGESTED:
+  category: sync
+  description: >
+    Documentation files exist on disk but have not been ingested into
+    the graph database. They exist but aren't queryable.
+  use_cases:
+    - "Docs created but mind sync not run"
+    - "Ingestion failed silently for some files"
+    - "New installation hasn't run initial ingest"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor checks which docs are in graph vs on disk"
+    - type: command
+      source: mind sync
+      explanation: "Sync command ingests docs and reports what was added"
+  resolution:
+    summary: >
+      Run the document ingestion process to add missing docs to graph.
+      This is an automated ingestion operation.
+    method: script
+    justification: >
+      Running ingestion is mechanical: read files, create nodes, add links.
+      No judgment needed.
+    script: ingest_docs
+    steps:
+      - Run ingest_docs_to_graph for target directory
+      - Verify new nodes created in graph
+      - Check links established correctly
+      - Report ingestion statistics
+
+MODULE_BLOCKED:
+  category: sync
+  description: >
+    A module's SYNC file indicates STATUS: BLOCKED, meaning work cannot
+    proceed due to some dependency or decision.
+  use_cases:
+    - "Waiting on external dependency"
+    - "Blocked by unresolved escalation"
+    - "Predecessor module not complete"
+  triggers:
+    - type: command
+      source: mind status
+      explanation: "Status command highlights blocked modules"
+  resolution:
+    summary: >
+      Investigate the blocker, resolve it or escalate, and update the
+      module status. Requires understanding the blocking issue.
+    method: agent
+    justification: >
+      Understanding and resolving blockers requires investigation and
+      problem-solving. Cannot be automated.
+    agent: architect
+    procedures:
+      - resolve_blocker
+      - raise_escalation
+    steps:
+      - Read SYNC file for blocker description
+      - Investigate what's causing the block
+      - If resolvable, take action to unblock
+      - If not, escalate to appropriate party
+      - Update SYNC with new status
+      - Remove BLOCKED status when resolved
+
+MEMBRANE_NO_PROTOCOLS:
+  category: membrane
+  description: >
+    No procedure YAML files exist in .mind/procedures/. The membrane
+    system has nothing to execute.
+  use_cases:
+    - "New project initialized without procedures"
+    - "Procedures deleted accidentally"
+    - "Wrong directory configured"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor checks for procedure files in expected location"
+  resolution:
+    summary: >
+      Copy procedure templates to the project and customize as needed.
+      This is a template copying operation.
+    method: procedure
+    justification: >
+      Copying templates is mechanical, but some customization may be
+      needed for project-specific procedures.
+    procedure: create_procedure
+    steps:
+      - Copy procedure templates from mind-platform
+      - Customize project-specific values
+      - Validate YAML syntax
+      - Test procedure execution
+
+MEMBRANE_PARSE_ERROR:
+  category: membrane
+  description: >
+    A procedure YAML file has syntax errors that prevent it from being
+    parsed. The procedure cannot be loaded or executed.
+  use_cases:
+    - "Manual edit introduced YAML syntax error"
+    - "Merge conflict left invalid YAML"
+    - "Incomplete copy-paste"
+  triggers:
+    - type: command
+      source: mind protocol validate
+      explanation: "Protocol validator attempts to parse all procedure files"
+    - type: command
+      source: mind doctor
+      explanation: "Doctor includes protocol validation in checks"
+  resolution:
+    summary: >
+      Fix the YAML syntax error. This is a mechanical fix based on
+      parser error messages.
+    method: script
+    justification: >
+      YAML syntax errors have clear error messages pointing to the problem.
+      Fix is mechanical.
+    script: validate_yaml
+    steps:
+      - Parse YAML to get error message with line number
+      - Fix syntax error at indicated location
+      - Re-validate until clean
+
+MEMBRANE_INVALID_STEP:
+  category: membrane
+  description: >
+    A procedure step has invalid structure - missing required fields,
+    wrong field types, or unknown action type.
+  use_cases:
+    - "Step missing required 'type' field"
+    - "Action has wrong parameter types"
+    - "Custom step not registered"
+  triggers:
+    - type: command
+      source: mind protocol validate
+      explanation: "Validator checks step structure against schema"
+  resolution:
+    summary: >
+      Fix the step structure to match the schema requirements. This is
+      a mechanical schema compliance fix.
+    method: script
+    justification: >
+      Schema validation gives clear error messages. Fix is mechanical
+      based on schema requirements.
+    steps:
+      - Read validation error message
+      - Compare step to schema requirements
+      - Add missing fields or fix types
+      - Re-validate
+
+MEMBRANE_MISSING_FIELDS:
+  category: membrane
+  description: >
+    A procedure definition is missing required fields like name, steps,
+    or required metadata.
+  use_cases:
+    - "Procedure template not fully filled in"
+    - "Required field deleted accidentally"
+    - "New required field added to schema"
+  triggers:
+    - type: command
+      source: mind protocol validate
+      explanation: "Validator checks for required fields"
+  resolution:
+    summary: >
+      Add the missing required fields with appropriate values.
+    method: script
+    justification: >
+      Adding required fields is mechanical based on schema definition.
+    steps:
+      - Identify missing fields from validation error
+      - Look up default values or required format
+      - Add fields to procedure YAML
+      - Re-validate
+
+LOG_ERROR:
+  category: runtime
+  description: >
+    An error was detected in recent log files. Something failed during
+    runtime that should be investigated.
+  use_cases:
+    - "Exception thrown during operation"
+    - "External service returned error"
+    - "Validation failed at runtime"
+  triggers:
+    - type: stream
+      source: ".mind/logs/*.log"
+      explanation: "Log monitor watches for ERROR level entries"
+    - type: cron
+      schedule: "0 * * * *"
+      explanation: "Hourly log scan for errors"
+  resolution:
+    summary: >
+      Investigate the error, trace to root cause, and fix the underlying
+      issue. Requires diagnostic skills.
+    method: agent
+    justification: >
+      Diagnosing errors requires reading logs, understanding context,
+      forming hypotheses, and testing fixes. Cannot be automated.
+    agent: witness
+    procedures:
+      - investigate
+    steps:
+      - Read error log entry and stack trace
+      - Identify when and where error occurred
+      - Trace to root cause (code, data, or external)
+      - Determine fix
+      - Implement fix
+      - Verify error no longer occurs
+      - Update SYNC with incident note
+
+HOOK_UNDOC:
+  category: runtime
+  description: >
+    A hook (pre-commit, post-commit, etc.) exists but is not documented
+    in BEHAVIORS.md or similar. Its trigger and behavior are unclear.
+  use_cases:
+    - "Hook added without documentation"
+    - "Legacy hook from previous setup"
+    - "Hook copied from another project"
+  triggers:
+    - type: command
+      source: mind doctor
+      explanation: "Doctor scans for hook files and checks for documentation"
+  resolution:
+    summary: >
+      Document the hook's trigger conditions and behavior. Requires
+      reading the hook code and understanding what it does.
+    method: agent
+    justification: >
+      Understanding hook behavior and writing clear documentation
+      requires reading code and explaining it. Cannot be automated.
+    agent: voice
+    procedures:
+      - add_behaviors
+    steps:
+      - Read hook code to understand what it does
+      - Identify trigger conditions
+      - Document in BEHAVIORS.md
+      - Add any configuration options
+      - Update SYNC with documentation note

@@ -1,0 +1,123 @@
+procedure: protocol_add_behaviors
+version: "1.0"
+description: Document observable behaviors for a module
+
+triggers:
+  - gap: "Module has objectives but no documented behaviors"
+  - event: "New functionality added that should be documented"
+
+requires_skills:
+  - "SKILL_Define_Module_Boundaries_Objectives_And_Scope.md"
+
+contextual_knowledge:
+  domain: |
+    Behaviors = observable effects (WHAT the module does, not HOW).
+    Behaviors link to objectives they satisfy.
+    Format: Given/When/Then or "On X, Y happens".
+    Behaviors are testable claims about system behavior.
+
+  constraints: |
+    - Behaviors must be observable from outside
+    - Each behavior links to an objective
+    - Avoid implementation details
+
+  dependencies: |
+    Requires: objectives exist (behaviors serve objectives)
+    Enables: validation design, test writing
+
+  quality_criteria: |
+    Good: "On decay tick, all connection weights above 0.1 reduce by 5%. Serves: performance_objective."
+    Bad: "Uses exponential decay algorithm"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: objective, in_space: "{space}" }
+        store_as: objectives
+      - query: { find: narrative, type: behaviors, in_space: "{space}" }
+        store_as: existing_behaviors
+    next: check_objectives
+
+  check_objectives:
+    type: branch
+    checks:
+      - condition: "{objectives | count} == 0"
+        action:
+          type: call_procedure
+          protocol: protocol_add_objectives
+          context:
+            space: "{space}"
+            actor_id: "{actor_id}"
+          on_complete: gather_behaviors
+      - condition: "ready"
+        action: { goto: gather_behaviors }
+
+  gather_behaviors:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+      Objectives: {objectives | list}
+      Existing behaviors: {existing_behaviors | content_summary}
+
+    questions:
+      - name: behavior_description
+        ask: "Describe the behavior (Given/When/Then or 'On X, Y happens')?"
+        expects: { type: string }
+
+      - name: serves_objective
+        ask: "Which objective does this behavior serve?"
+        expects:
+          type: reference
+          from: objectives
+
+      - name: observable_at
+        ask: "Where is this observable? (API endpoint, UI, log, metric)"
+        expects: { type: string }
+
+      - name: additional_behaviors
+        ask: "Any more behaviors to document? (list, or empty)"
+        expects: { type: string_list, min: 0 }
+
+    next: create_behaviors
+
+  create_behaviors:
+    type: create
+    nodes:
+      - id: "doc_behaviors_{space}"
+        node_type: narrative
+        type: behaviors
+        name: "BEHAVIORS for {space}"
+        behaviors:
+          - description: "{behavior_description}"
+            serves: "{serves_objective}"
+            observable_at: "{observable_at}"
+
+      - id: "moment_add_behaviors_{timestamp}"
+        node_type: moment
+        type: documentation
+        prose: "Documented behaviors for {space}"
+        status: completed
+
+    links:
+      - type: contains
+        from: "{space}"
+        to: "doc_behaviors_{space}"
+      - type: serves
+        from: "doc_behaviors_{space}"
+        to: "{serves_objective}"
+      - type: expresses
+        from: "{actor_id}"
+        to: "moment_add_behaviors_{timestamp}"
+      - type: about
+        from: "moment_add_behaviors_{timestamp}"
+        to: "doc_behaviors_{space}"
+
+    next: $complete
+
+output:
+  behaviors_doc: "doc_behaviors_{space}"
+  linked_objective: "{serves_objective}"
+  moment: "moment_add_behaviors_{timestamp}"

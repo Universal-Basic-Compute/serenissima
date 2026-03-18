@@ -1,0 +1,503 @@
+# Protocol: capture_decision
+# Record a significant decision with alternatives and rationale
+
+procedure: capture_decision
+version: "2.0"
+description: Create a decision narrative with alternatives considered and rationale for choice - rich format
+
+triggers:
+  - event: "Significant design decision made"
+  - event: "Investigation reveals decision point"
+  - event: "Need to document why we chose X over Y"
+
+requires_skills:
+  - SKILL_Debug_Investigate_And_Fix_Issues_With_Evidence_First.md
+
+contextual_knowledge:
+  domain: |
+    Decisions in mind:
+    - Decision = recorded choice with alternatives and rationale
+    - Different from escalation: decision is already made, not blocked
+    - Links to what it affects via `relates[affects]`
+
+    Decision structure:
+    - Question: what was being decided
+    - Alternatives: what was considered
+    - Choice: what was selected
+    - Rationale: why this choice
+    - Affects: what nodes are impacted
+
+    Use decisions when:
+    - Recording architectural choices
+    - Documenting why code is shaped a certain way
+    - Creating traceable design history
+  constraints: |
+    - Must capture the question being answered
+    - Must list alternatives (at least 2)
+    - Must explain why this choice over alternatives
+    - Should link to affected nodes
+  quality_criteria: |
+    Good decision: "Question: How to validate coverage? Alternatives: (A) Manual review, (B) YAML spec + validator, (C) Database with UI. Choice: B. Rationale: Machine-checkable, diffable, no extra infrastructure."
+    Bad decision: "Decided to use YAML"
+
+steps:
+  identify_context:
+    type: ask
+    auto_fetch:
+      - query: { find: space }
+        store_as: available_spaces
+    context: |
+      Decisions record significant choices with rationale.
+      This creates traceable design history.
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Space ID
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: space_id
+        ask: "Which space/module does this decision affect?"
+        why: "Links the decision to the correct organizational area."
+        guidance: "Select the primary space impacted by this choice."
+        expects:
+          type: id
+          node_type: space
+    next: capture_question
+
+  capture_question:
+    type: ask
+    context: |
+      Space: {space_id}
+
+      Frame the decision as a question that was answered.
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Decision Question
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: decision_question
+        ask: "What question was being decided?"
+        why: "Frames the decision as a choice to be made."
+        guidance: "Be specific and concise. Example: 'How should we validate doctor detections?'"
+        good_answer: "How should we validate that every doctor detection has a complete path to graph mutation?"
+        expects:
+          type: string
+          min_length: 10
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Decision Context
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: decision_context
+        ask: "What context led to this decision point?"
+        why: "Provides background for understanding the constraints and needs."
+        guidance: "Explain the circumstances that made this decision necessary."
+        expects:
+          type: string
+          min_length: 20
+    next: capture_alternatives
+
+  capture_alternatives:
+    type: ask
+    questions:
+      - name: alternative_count
+        ask: "How many alternatives were considered? (2-5)"
+        why: "Determines the number of options to be documented."
+        expects:
+          type: number
+          min: 2
+          max: 5
+    next: alternatives_loop
+
+  alternatives_loop:
+    type: loop
+    count: "{alternative_count}"
+    step:
+      type: ask
+      questions:
+        - name: alt_label
+          ask: "Alternative {loop_index} label?"
+          why: "Short identifier for the option."
+          expects:
+            type: string
+        - name: alt_description
+          ask: "What is this alternative?"
+          why: "Describes the technical or procedural approach."
+          expects:
+            type: string
+            min_length: 10
+        - name: alt_pros
+          ask: "Pros of this alternative?"
+          why: "Documents the benefits of this option."
+          expects:
+            type: string
+        - name: alt_cons
+          ask: "Cons of this alternative?"
+          why: "Documents the drawbacks or risks of this option."
+          expects:
+            type: string
+    collect_as: alternatives
+    next: capture_choice
+
+  capture_choice:
+    type: ask
+    context: |
+      Question: {decision_question}
+
+      Alternatives:
+      {alternatives | format_numbered}
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Choice
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: choice
+        ask: "Which alternative was chosen?"
+        why: "Records the actual decision made."
+        guidance: "Select one of the considered alternatives."
+        expects:
+          type: string
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Rationale
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: rationale
+        ask: "Why this choice over the alternatives?"
+        why: "Captures the reasoning and tradeoffs involved."
+        guidance: "Explain why this option is superior in this context."
+        good_answer: "YAML spec + validator is machine-checkable, version-controlled, and requires no infrastructure."
+        expects:
+          type: string
+          min_length: 20
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Decided By
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: decided_by
+        ask: "Who made this decision?"
+        why: "Attribution for future context and accountability."
+        expects:
+          type: string
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Decision Date
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: decision_date
+        ask: "When was this decided? (or 'now')"
+        why: "Temporal context for the decision."
+        expects:
+          type: string
+          default: "now"
+    next: identify_affects
+
+  identify_affects:
+    type: ask
+    auto_fetch:
+      - query:
+          find: narrative
+          in_space: "{space_id}"
+        store_as: space_contents
+    context: |
+      This decision may affect other nodes in the graph.
+
+      Contents of {space_id}:
+      {space_contents | format_list}
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Affected Nodes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: affected_nodes
+        ask: "Which nodes does this decision affect? (IDs, or empty)"
+        why: "Creates semantic links to impacted entities."
+        guidance: "List IDs of nodes directly or indirectly affected by this choice."
+        creates: "decision ─[affects]→ node"
+        expects:
+          type: id_list
+          required: false
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Affects Description
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: affects_description
+        ask: "How does it affect them? (or empty)"
+        why: "Explains the nature of the impact."
+        expects:
+          type: string
+          required: false
+
+    # Capture reasoning for the decision capture
+    moment:
+      agent_provides:
+        - description: "Summary of decision recorded"
+        - reasoning: "Why this decision was made and its broader implications"
+
+    next: gather_thoughts
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before creating the decision, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this capture_decision protocol?"
+        expects:
+          type: string
+          required: false
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW for {space_id}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: narrative_decision_{decision_question | slugify | truncate(30)}_{timestamp}
+
+      Nodes to create: 2
+        - narrative_decision_*
+        - moment_decision_*
+
+      Links to create: 3 + {affected_nodes | count}
+        - space ─[contains]→ decision
+        - decision ─[affects]→ {affected_nodes | format_ids}
+        - actor ─[expresses]→ moment
+        - moment ─[about]→ decision
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Record this decision?"
+        expects:
+          type: enum
+          options: [record, revise, cancel]
+
+    next: route_confirm
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Decision (Narrative)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_decision_{decision_question | slugify | truncate(30)}_{timestamp}"
+        node_type: narrative
+        type: decision
+        name: "{decision_question | truncate(50)}"
+        question: "{decision_question}"
+        context: "{decision_context}"
+        alternatives: "{alternatives | to_json}"
+        choice: "{choice}"
+        rationale: "{rationale}"
+        decided_by: "{decided_by}"
+        decision_date: "{decision_date}"
+        affects_description: "{affects_description}"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "narrative_decision_{decision_question | slugify | truncate(30)}_{timestamp}"
+        #   WHAT: Unique identifier for this decision
+        #   WHY: Used to query and reference this decision
+        #   FORMAT: narrative_decision_<slug>_<timestamp>
+        #
+        # node_type: narrative
+        #   WHAT: Persistent story/record (vs moment = event)
+        #   WHY: Decisions are permanent records, not events
+        #   ALTERNATIVES: moment (point-in-time), space (container)
+        #
+        # type: decision
+        #   WHAT: Categorization within narratives
+        #   WHY: Enables queries like "show all decisions"
+        #   OTHER_TYPES: escalation, todo, investigation
+        #
+        # name: "{decision_question | truncate(50)}"
+        #   WHAT: Short human-readable title
+        #   WHY: Displayed in lists and summaries
+        #   LENGTH: Truncated to 50 chars for scanability
+        #
+        # question: "{decision_question}"
+        #   WHAT: The question being decided
+        #   WHY: Frames the decision as a choice to be made
+        #   QUALITY: Should be specific, answerable question
+        #
+        # context: "{decision_context}"
+        #   WHAT: What led to this decision point
+        #   WHY: Provides background for understanding the choice
+        #   LENGTH: 20+ chars, specific about circumstances
+        #
+        # alternatives: "{alternatives | to_json}"
+        #   WHAT: JSON array of options considered
+        #   WHY: Shows what was evaluated, not just what was chosen
+        #   FORMAT: [{"label": "A", "description": "...", "pros": "...", "cons": "..."}]
+        #
+        # choice: "{choice}"
+        #   WHAT: Which alternative was selected
+        #   WHY: Records the actual decision made
+        #   QUALITY: Should reference specific alternative
+        #
+        # rationale: "{rationale}"
+        #   WHAT: Why this choice over alternatives
+        #   WHY: Captures reasoning for future reference
+        #   LENGTH: 20+ chars, explains tradeoffs
+        #
+        # decided_by: "{decided_by}"
+        #   WHAT: Who made this decision
+        #   WHY: Attribution for accountability and context
+        #   EXAMPLE: "Nicolas", "Architecture Team"
+        #
+        # decision_date: "{decision_date}"
+        #   WHAT: When this was decided
+        #   WHY: Temporal context for understanding constraints
+        #   FORMAT: ISO date or "now"
+        #
+        # affects_description: "{affects_description}"
+        #   WHAT: How this decision impacts other nodes
+        #   WHY: Explains ripple effects and dependencies
+        #   USAGE: Helps understand decision's scope
+        #
+        # weight: 0.85
+        #   WHAT: Importance score (0.0-1.0)
+        #   WHY: Decisions are high priority (0.85)
+        #   RANGE: 0.9 for escalations, 0.85 for decisions, 0.7 for todos
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Decision Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_decision_{timestamp}"
+        node_type: moment
+        type: decision_recorded
+        text: |
+          Decision recorded: {decision_question | truncate(50)}
+
+          Choice: {choice}
+          Rationale: {rationale | truncate(100)}
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_decision_{timestamp}"
+        #   WHAT: Unique ID with timestamp for ordering
+        #   WHY: Moments are ordered chronologically
+        #   FORMAT: moment_<action>_<timestamp>
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event record
+        #   WHY: Creates history that can be queried
+        #   CONTRAST: narratives persist, moments are events
+        #
+        # type: decision_recorded
+        #   WHAT: Categorizes this moment type
+        #   WHY: Enables queries like "show all decision events"
+        #   OTHER_TYPES: escalation_raised, escalation_resolved
+        #
+        # text: "Decision recorded..."
+        #   WHAT: Human-readable description
+        #   WHY: Displayed in activity feeds and history
+        #   FORMAT: Past tense, includes choice + rationale
+        #
+        # status: completed
+        #   WHAT: Moment state
+        #   WHY: "completed" = action finished successfully
+        #   OPTIONS: completed, pending, cancelled
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Space Contains Decision
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space_id}"
+        to: "narrative_decision_{decision_question | slugify | truncate(30)}_{timestamp}"
+        nature: "contains"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: contains
+        #   WHAT: Parent-child relationship
+        #   WHY: Establishes hierarchy - space contains decision
+        #   QUERY: "What decisions are in space X?" follows contains
+        #   DIRECTION: from=space, to=decision
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Decision Affects Nodes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: affected_nodes
+        from: "narrative_decision_{decision_question | slugify | truncate(30)}_{timestamp}"
+        to: "{item}"
+        nature: "affects"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: affects
+        #   WHAT: Semantic relationship indicating impact
+        #   WHY: "affects" is a specific semantic relationship
+        #   QUERY: "What decisions affect node X?" follows affects inversely
+        #   DIRECTION: from=decision, to=affected_node
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Decision
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_decision_{timestamp}"
+        to: "narrative_decision_{decision_question | slugify | truncate(30)}_{timestamp}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what the moment relates to
+        #   QUERY: "What happened to decision X?" follows about
+        #   DIRECTION: from=moment, to=decision
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_decision_{timestamp}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what space this event relates to
+        #   QUERY: "What happened in space X?" follows about
+        #   DIRECTION: from=moment, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_decision_{timestamp}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who/what created this decision
+        #   QUERY: "What did agent X decide?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+    moment:
+      agent_provides: [description]
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space_id}"
+      task_id: "capture_decision_{decision_question | slugify | truncate(30)}_{timestamp}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - narrative_decision
+      - moment
+    links:
+      - contains (space → decision)
+      - relates[affects] (decision → affected nodes)
+      - about (moment → decision, space)
+      - expresses (actor → moment)
+  summary: "Recorded decision: {decision_question | truncate(50)} → {choice}"
+  returns:
+    decision_id: "narrative_decision_{decision_question | slugify | truncate(30)}_{timestamp}"
+    moment_id: "moment_decision_{timestamp}"

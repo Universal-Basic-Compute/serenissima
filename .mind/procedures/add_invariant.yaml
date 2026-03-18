@@ -1,0 +1,533 @@
+# Protocol: add_invariant
+# Create a validation invariant with full context and links
+
+procedure: add_invariant
+version: "2.0"
+description: Create a validation invariant with rich questions and dense linking
+
+triggers:
+  - gap: "Behavior exists without validation coverage"
+  - event: "New constraint discovered during implementation"
+
+requires_skills:
+  - SKILL_Define_And_Verify_Health_Signals_Mapped_To_Validation_Invariants.md
+
+contextual_knowledge:
+  domain: |
+    Validations = invariants that must always hold.
+    Priority: HIGH (system breaks), MED (degraded), LOW (inconvenience).
+    Link to behaviors via RELATES with direction=ensures.
+    Name pattern: V-<AREA>-<INVARIANT> (e.g., V-ENERGY-BOUNDED).
+    Failure mode = what breaks if violated.
+
+  constraints: |
+    - Must have failure_mode (what breaks)
+    - Should link to at least one behavior
+    - Name must follow V-<AREA>-<INVARIANT> pattern
+    - Priority required
+
+  dependencies: |
+    Requires: space exists, behaviors exist (optional but recommended)
+    Enables: health coverage, test generation
+
+  quality_criteria: |
+    Good: "Energy values must remain in [0,1] range after every tick phase"
+    Bad: "Energy should be valid"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: behavior, in_space: "{space}" }
+        store_as: behaviors
+      - query: { find: narrative, type: validation, in_space: "{space}" }
+        store_as: existing_validations
+      - query: { find: narrative, type: pattern, in_space: "{space}" }
+        store_as: patterns
+      - query: { find: narrative, type: objective, in_space: "{space}" }
+        store_as: objectives
+    purpose: "Load behaviors, patterns, objectives for dense linking"
+    next: check_exists
+
+  check_exists:
+    type: branch
+    checks:
+      - condition: "{existing_validations | contains name: '{validation_name}'}"
+        action:
+          type: complete
+          message: "Validation {validation_name} already exists"
+      - condition: "ready"
+        action: { goto: gather_details }
+
+  gather_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+
+      ━━━ EXISTING GRAPH STATE ━━━
+
+      Behaviors (what this validation can ensure):
+      {behaviors | format_with_ids}
+
+      Patterns (related design decisions):
+      {patterns | format_list}
+
+      Objectives (what this validation supports):
+      {objectives | format_list}
+
+      Existing validations:
+      {existing_validations | format_with_priority}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 1: Validation ID
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: validation_id
+        ask: "What is the validation ID?"
+
+        why: |
+          The ID becomes the canonical name for this invariant.
+          It's used in queries, health indicators, and test references.
+          The pattern V-<AREA>-<INVARIANT> enables grouping by area.
+
+        context: |
+          Existing validations in this space:
+          {existing_validations | format_names}
+
+          Name pattern: V-<AREA>-<INVARIANT>
+          - AREA = domain (ENERGY, LINKS, NODES, SCHEMA)
+          - INVARIANT = what must hold (BOUNDED, EXISTS, VALID)
+
+        guidance: |
+          Choose an ID that:
+          - Follows V-<AREA>-<INVARIANT> pattern
+          - Describes WHAT must hold, not HOW it's checked
+          - Is unique within this space
+          - Groups logically with related validations
+
+          Examples:
+          - V-ENERGY-BOUNDED (energy stays in range)
+          - V-LINKS-ENDPOINTS-EXIST (link targets must exist)
+          - V-SCHEMA-REQUIRED-FIELDS (required fields present)
+
+        creates: |
+          Primary node: narrative_VALIDATION_{id}
+          This becomes the anchor for health coverage.
+
+        good_answer: "V-ENERGY-BOUNDED"
+        bad_answer: "energy_check"
+        expects:
+          type: string
+          pattern: "^V-[A-Z]+-[A-Z-]+$"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 2: Invariant Statement
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: invariant_statement
+        ask: "What must always hold? State the invariant precisely."
+
+        why: |
+          This is the core constraint being validated.
+          It must be precise enough to verify.
+          Vague invariants ("be valid") can't be tested.
+
+        context: |
+          You're defining an invariant for: {space}
+          Related behaviors: {behaviors | format_names}
+
+        guidance: |
+          Write an invariant that is:
+          - SPECIFIC: exact values, conditions, ranges
+          - MEASURABLE: can be checked programmatically
+          - UNIVERSAL: must hold in ALL cases
+          - TEMPORAL: specify WHEN it must hold (after X, during Y)
+
+          Pattern: "<Subject> must <condition> <when>"
+
+        creates: |
+          validation.content = "{your answer}"
+          This becomes the spec for health indicators.
+
+        good_answer: "Energy values must remain in [0,1] range after every tick phase"
+        bad_answer: "Energy should be valid"
+        expects: { type: string, min_length: 20 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 3: Priority
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: priority
+        ask: "What is the priority of this validation?"
+
+        why: |
+          Priority determines how urgently violations are addressed.
+          It affects health check thresholds and alerting.
+          HIGH validations block deployment; LOW are informational.
+
+        context: |
+          Priority levels:
+          - HIGH: System breaks if violated (data corruption, crashes)
+          - MED: Degraded performance or experience
+          - LOW: Inconvenience, cosmetic issues
+
+          Existing validations by priority:
+          {existing_validations | group_by_priority}
+
+        guidance: |
+          Ask: "If this validation fails, what happens?"
+          - System crashes or corrupts data → HIGH
+          - Performance degrades or features break → MED
+          - Minor issues, can work around → LOW
+
+        creates: |
+          validation.priority = "{your answer}"
+          Affects health check urgency.
+
+        expects:
+          type: enum
+          options: [HIGH, MED, LOW]
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 4: Failure Mode
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: failure_mode
+        ask: "What breaks if this validation fails? Be specific."
+
+        why: |
+          The failure mode explains WHY this validation matters.
+          It's the justification for the invariant.
+          It helps prioritize fixes when violations occur.
+
+        context: |
+          You're defining: {invariant_statement}
+          Priority: {priority}
+
+        guidance: |
+          Describe the concrete consequence:
+          - What component fails?
+          - What user experience degrades?
+          - What data gets corrupted?
+          - What downstream systems break?
+
+          Be specific: not "things break" but "physics simulation diverges"
+
+        creates: |
+          validation.failure_mode = "{your answer}"
+          Used in alerts and incident response.
+
+        expects: { type: string, min_length: 10 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 5: Linked Behaviors
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: linked_behaviors
+        ask: "Which behaviors does this validation ensure?"
+
+        why: |
+          Linking to behaviors creates traceability:
+          objective → behavior → validation → health
+
+          This answers: "What observable effect does this protect?"
+          Without this link, the validation is orphaned.
+
+        context: |
+          Behaviors in this space:
+          {behaviors | format_with_objectives}
+
+          Your validation: {invariant_statement}
+
+          Pick behaviors that DEPEND on this invariant.
+
+        guidance: |
+          Ask: "If this invariant is violated, which behavior breaks?"
+          Those are the behaviors to link.
+
+          Multiple selections encouraged.
+          More links = denser cluster = better traceability.
+
+        creates: |
+          For each behavior you select:
+            validation ─[ensures]→ behavior
+
+          This makes the dependency queryable.
+
+        expects:
+          type: id_list
+          from: "{behaviors}"
+          min: 0
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 6: Related Pattern
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: related_pattern
+        ask: "Which design pattern does this validation relate to?"
+
+        why: |
+          Linking to patterns connects validation to design decisions.
+          This shows WHY the invariant exists at the design level.
+          It creates cross-cutting traceability.
+
+        context: |
+          Patterns in this space:
+          {patterns | format_list}
+
+          Your validation: {invariant_statement}
+
+        guidance: |
+          Ask: "Which design decision requires this invariant?"
+          That's the pattern to link.
+
+          Optional but recommended for dense clusters.
+
+        creates: |
+          validation ─[relates: elaborates]→ pattern
+
+        expects:
+          type: id
+          from: "{patterns}"
+          required: false
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 7: Supporting Objective
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: supports_objective
+        ask: "Which objective does this validation support?"
+
+        why: |
+          Linking to objectives creates full traceability back to goals.
+          This answers: "Why does this constraint exist?"
+
+        context: |
+          Objectives in this space:
+          {objectives | format_list}
+
+          Your validation protects: {linked_behaviors | format_names}
+
+        guidance: |
+          Ask: "If this validation fails, which objective is at risk?"
+          That's the objective to link.
+
+        creates: |
+          validation ─[supports]→ objective
+
+        expects:
+          type: id
+          from: "{objectives}"
+          required: false
+
+    # Capture reasoning
+    moment:
+      agent_provides:
+        - description: "Summary of the validation"
+        - reasoning: "Why these behaviors and patterns were linked"
+
+    next: capture_decisions
+
+  capture_decisions:
+    type: create
+    purpose: "Capture agent reasoning as decision moments"
+    nodes:
+      - id: "moment_DECISION_validation-behaviors_{timestamp_short}"
+        node_type: moment
+        type: decision
+        text: "{agent.behaviors_reasoning}"
+        status: spoken
+
+    links:
+      - for_each: linked_behaviors
+        from: "moment_DECISION_validation-behaviors_{timestamp_short}"
+        to: "{item}"
+        nature: "is about"
+
+      - from: "{actor_id}"
+        to: "moment_DECISION_validation-behaviors_{timestamp_short}"
+        nature: "expresses"
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: narrative_VALIDATION_{validation_id}
+
+      Nodes to create: 2
+        - narrative_VALIDATION_{validation_id}
+        - moment_CREATE_validation_{validation_id}
+
+      Links to create:
+        Internal (2):
+          - moment ─[about]→ validation
+          - actor ─[expresses]→ moment
+
+        External ({linked_behaviors | count} + 2):
+          - space ─[contains]→ validation
+          - validation ─[ensures]→ {linked_behaviors | format_ids}
+          {related_pattern | if_present: "- validation ─[relates]→ {related_pattern}"}
+          {supports_objective | if_present: "- validation ─[supports]→ {supports_objective}"}
+
+      CONNECTION METRICS:
+        Nodes: 2
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Optional: Found {peer_validation_count} peer validations you could link to:
+      {peer_validation_suggestions | format_list}
+
+    questions:
+      - name: add_peer_links
+        ask: "Add peer links to related validations? (relates: peer)"
+        expects:
+          type: id_list
+          from: "{existing_validations}"
+          required: false
+
+      - name: confirmed
+        ask: "Create this validation cluster?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_validation
+      revise: gather_details
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Validation creation cancelled"
+
+  create_validation:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Validation Narrative
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_VALIDATION_{validation_id | slugify}"
+        node_type: narrative
+        type: validation
+        name: "{validation_id}"
+        content: "{invariant_statement}"
+        priority: "{priority}"
+        failure_mode: "{failure_mode}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Creation Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_CREATE_validation_{validation_id | slugify}_{timestamp_short}"
+        node_type: moment
+        type: procedure_create
+        prose: |
+          Created validation {validation_id}
+          Invariant: {invariant_statement}
+          Priority: {priority}
+          Ensures: {linked_behaviors | format_names}
+        status: completed
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # STRUCTURAL: Space Contains Validation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space}"
+        to: "narrative_VALIDATION_{validation_id | slugify}"
+        nature: "contains"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # SEMANTIC: Validation Ensures Behaviors
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: linked_behaviors
+        from: "narrative_VALIDATION_{validation_id | slugify}"
+        to: "{item}"
+        nature: "ensures"
+      # SEMANTIC: Validation Relates to Pattern
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_VALIDATION_{validation_id | slugify}"
+        to: "{related_pattern}"
+        nature: "elaborates"
+        condition: "{related_pattern | is_present}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # SEMANTIC: Validation Supports Objective
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_VALIDATION_{validation_id | slugify}"
+        to: "{supports_objective}"
+        nature: "supports"
+        condition: "{supports_objective | is_present}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PEER: Links to Related Validations
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: add_peer_links
+        from: "narrative_VALIDATION_{validation_id | slugify}"
+        to: "{item}"
+        nature: "peer"
+        condition: "{add_peer_links | is_present}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PROVENANCE: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_CREATE_validation_{validation_id | slugify}_{timestamp_short}"
+        nature: "expresses"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PROVENANCE: Moment About Validation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_CREATE_validation_{validation_id | slugify}_{timestamp_short}"
+        to: "narrative_VALIDATION_{validation_id | slugify}"
+        nature: "is about"
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space}"
+      task_id: "add_invariant_{validation_id}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - narrative_VALIDATION_{validation_id}
+      - moment_CREATE_validation
+      - moment_DECISION_validation-behaviors (reasoning)
+    links:
+      - contains (space → validation)
+      - ensures (validation → behaviors)
+      - elaborates (validation → pattern)
+      - supports (validation → objective)
+      - peer (validation → other validations)
+      - expresses (actor → moments)
+      - about (moments → subjects)
+
+  connection:
+    min_nodes: 2
+    min_links: 4
+    min_external: 2
+    expected_ratio: "75%+"
+
+  summary: |
+    Created validation {validation_id}
+    - Invariant: {invariant_statement}
+    - Priority: {priority}
+    - Ensures: {linked_behaviors | count} behaviors
+    - Connection: {links_per_node} links/node, {external_ratio}% external

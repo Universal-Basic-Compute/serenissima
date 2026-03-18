@@ -1,0 +1,64 @@
+# =============================================================================
+# MODULE MANIFEST
+# =============================================================================
+#
+# This file maps code to documentation and carries rich context about each module.
+#
+# WHEN TO UPDATE:
+# - Creating new code directories → add module mapping
+# - Creating new doc modules → add mapping
+# - Refactoring/moving code → update patterns
+# - Changing module maturity → update status
+#
+# VALIDATION:
+# `mind validate` warns about unmapped code directories.
+#
+# =============================================================================
+
+modules:
+  # ---------------------------------------------------------------------------
+  # EXAMPLE MODULE (delete or modify)
+  # ---------------------------------------------------------------------------
+  # example:
+  #   code: "src/example/**"           # Glob pattern for source files
+  #   docs: "docs/area/example/"       # Path to documentation
+  #   tests: "tests/example/"          # Path to tests (optional)
+  #
+  #   maturity: DESIGNING              # DESIGNING | CANONICAL | PROPOSED | DEPRECATED
+  #   owner: agent                     # agent | human | team-name
+  #
+  #   entry_points:                    # Main files to start reading (optional)
+  #     - index.ts
+  #     - Example.tsx
+  #
+  #   internal:                        # Implementation details, not public API (optional)
+  #     - helpers.ts
+  #     - utils.ts
+  #
+  #   depends_on:                      # Other modules this requires (optional)
+  #     - types
+  #     - utils
+  #
+  #   patterns:                        # Conventions to follow (optional)
+  #     - "React functional components"
+  #     - "Tailwind styling"
+  #
+  #   notes: |                         # Quick context (optional)
+  #     Brief description of what this module does
+  #     and any important context for working with it.
+
+# =============================================================================
+# YOUR MODULES
+# =============================================================================
+
+# Uncomment and modify as you create modules:
+
+# types:
+#   code: "src/types/**"
+#   docs: "docs/core/types/"
+#   maturity: CANONICAL
+#   owner: human
+#   notes: |
+#     Core type definitions. Changes affect entire codebase.
+
+# Add more modules as they emerge...

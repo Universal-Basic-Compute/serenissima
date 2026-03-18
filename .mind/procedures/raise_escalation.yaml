@@ -1,0 +1,552 @@
+# Protocol: raise_escalation
+# Flag a blocker that needs external input
+
+procedure: raise_escalation
+version: "2.0"
+description: Create an escalation node when progress is blocked and external input is needed - rich format
+
+triggers:
+  - event: "Investigation reveals blocker needing human/external decision"
+  - event: "Stuck on ambiguous requirements"
+  - event: "Resource or permission needed"
+
+requires_skills:
+  - SKILL_Debug_Investigate_And_Fix_Issues_With_Evidence_First.md
+
+contextual_knowledge:
+  domain: |
+    Escalations in mind:
+    - Escalation = blocker that needs external input to resolve
+    - Always includes: context, options, recommendation
+    - Links to affected nodes via `about`
+    - Linked FROM investigation moment that raised it
+
+    Escalation lifecycle:
+    1. Raised (this protocol)
+    2. Acknowledged (human sees it)
+    3. Resolved (resolve_blocker protocol)
+
+    Never-stop principle:
+    - If blocked, escalate AND propose a path forward
+    - Don't just stop; make progress while waiting
+  constraints: |
+    - Must describe what's blocking
+    - Must provide options (at least 2)
+    - Must include recommended path
+    - Should link to affected nodes
+  quality_criteria: |
+    Good escalation: "Need decision on auth approach. Options: (A) JWT with refresh tokens, (B) Session-based with cookies. Recommend A for API-first architecture. Blocked: can't implement auth module without this decision."
+    Bad escalation: "Need help with auth"
+
+steps:
+  identify_context:
+    type: ask
+    auto_fetch:
+      - query: { find: space }
+        store_as: available_spaces
+      - query:
+          find: moment
+          type: investigation
+          limit: 5
+        store_as: recent_investigations
+    context: |
+      Escalations flag blockers that need external input.
+      First, identify the context.
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Space ID
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: space_id
+        ask: "Which space/module is affected?"
+        why: "Links the escalation to the correct organisational container."
+        guidance: "Select the primary space impacted by the blocker."
+        expects:
+          type: id
+          node_type: space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: From Investigation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: from_investigation
+        ask: "Is this from a recent investigation? (select ID or empty)"
+        why: "Establishes a causal link to the investigative process."
+        guidance: "Pick the investigation moment that surfaced this blocker."
+        creates: "investigation ─[sequence]→ escalation_moment"
+        expects:
+          type: id
+          node_type: moment
+          required: false
+    # Auto-derive module_name from space_id for ID generation
+    computed:
+      module_name: "{space_id | strip_prefix('space_MODULE_') | strip_prefix('space_AREA_') | strip_prefix('space_CONCEPT_') | strip_prefix('space_PROJECT_')}"
+    moment:
+      agent_provides: [description]
+    next: describe_blocker
+
+  describe_blocker:
+    type: ask
+    context: |
+      Space: {space_id}
+      Investigation: {from_investigation | default("none")}
+
+      Describe what's blocking progress clearly enough that someone
+      unfamiliar with your context can understand.
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Blocker Title
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: blocker_title
+        ask: "Short title for this escalation?"
+        why: "Used as a concise identifier in lists and IDs."
+        good_answer: "Auth approach decision needed"
+        expects:
+          type: string
+          min_length: 5
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Blocker Description
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: blocker_description
+        ask: "What is blocking progress? (full context)"
+        why: "Provides the complete technical or procedural context for resolution."
+        good_answer: "Cannot implement auth module without deciding between JWT and session-based authentication."
+        expects:
+          type: string
+          min_length: 30
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Affected Nodes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: affected_nodes
+        ask: "Which specific nodes are affected? (IDs, or empty)"
+        why: "Creates semantic links to nodes whose progress is stalled."
+        guidance: "List IDs of relevant narratives or things."
+        creates: "escalation ─[about]→ node"
+        expects:
+          type: id_list
+          required: false
+    moment:
+      agent_provides: [description, reasoning]
+    next: provide_options
+
+  provide_options:
+    type: ask
+    context: |
+      Blocker: {blocker_title}
+
+      Always provide options - never just "I'm stuck".
+      Include at least 2 paths forward.
+    questions:
+      - name: option_count
+        ask: "How many options? (2-4)"
+        expects:
+          type: number
+          min: 2
+          max: 4
+    next: options_loop
+
+  options_loop:
+    type: loop
+    count: "{option_count}"
+    step:
+      type: ask
+      questions:
+        - name: option_label
+          ask: "Option {loop_index} label? (e.g., 'A', 'Use JWT')"
+          expects:
+            type: string
+        - name: option_description
+          ask: "What does this option entail?"
+          expects:
+            type: string
+            min_length: 10
+        - name: option_tradeoffs
+          ask: "Tradeoffs of this option?"
+          expects:
+            type: string
+    collect_as: options
+    next: recommend
+
+  recommend:
+    type: ask
+    context: |
+      Options:
+      {options | format_numbered}
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Recommendation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: recommendation
+        ask: "Which option do you recommend?"
+        why: "Guides the resolver with the agent's analysis."
+        expects:
+          type: string
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Recommendation Rationale
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: recommendation_rationale
+        ask: "Why this recommendation?"
+        why: "Captures the reasoning behind the suggested path."
+        expects:
+          type: string
+          min_length: 10
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Proceed Anyway
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: proceed_anyway
+        ask: "Can progress continue while waiting? What would you do?"
+        why: "Adheres to the never-stop principle."
+        guidance: "Propose a way to stay productive while blocked."
+        expects:
+          type: string
+    moment:
+      agent_provides: [description, reasoning]
+    next: set_priority
+
+  set_priority:
+    type: ask
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Priority
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: priority
+        ask: "Priority? (how urgently is this blocking)"
+        why: "Determines triage order and urgency."
+        expects:
+          type: enum
+          options: [critical, high, medium, low]
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION: Deadline
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: deadline
+        ask: "Deadline for decision? (or empty)"
+        why: "Provides temporal constraints for the resolution."
+        expects:
+          type: string
+          required: false
+
+    # Capture reasoning for the escalation
+    moment:
+      agent_provides:
+        - description: "Summary of escalation raised"
+        - reasoning: "Why this blocker requires external input and how the recommendation was derived"
+
+    next: gather_thoughts
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      ESCALATION PREVIEW for {space_id}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: narrative_ESCALATION_{module_name}-{blocker_title | slugify}_{timestamp_short}
+
+      Nodes to create: 2
+        - narrative_ESCALATION_*
+        - moment_RAISE-ESCALATION_*
+
+      Links to create: 3 + {affected_nodes | count} + {from_investigation | if_present: 1}
+        - space ─[about]→ escalation
+        - escalation ─[about]→ {affected_nodes | format_ids}
+        - actor ─[expresses]→ moment
+        - moment ─[about]→ escalation
+        - {from_investigation | if_present: "investigation ─[sequence]→ moment"}
+
+      CONNECTION METRICS:
+        Nodes: {nodes_count}
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Raise this escalation?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: gather_thoughts
+      revise: identify_context
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Escalation not raised"
+
+  gather_thoughts:
+    type: ask
+    context: |
+      ## Protocol Reflection
+
+      Before creating the escalation, share any thoughts on this protocol.
+    questions:
+      - name: protocol_thoughts
+        ask: "Any thoughts or suggestions on how to improve this raise_escalation protocol?"
+        why_it_matters: "Continuous improvement through reflection"
+        good_answer: "Could auto-detect related escalations to avoid duplicates. Could suggest priority based on affected nodes."
+        expects:
+          type: string
+          required: false
+
+      - name: context_observations
+        ask: "Anything about the context or process that could be better?"
+        expects:
+          type: string
+          required: false
+
+    next: create_escalation
+
+  create_escalation:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Escalation (Narrative)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_ESCALATION_{module_name}-{blocker_title | slugify}_{timestamp_short}"
+        node_type: narrative
+        type: escalation
+        name: "{blocker_title}"
+        content: "{blocker_description}"
+        status: open
+        priority: "{priority}"
+        deadline: "{deadline}"
+        options: "{options | to_json}"
+        recommendation: "{recommendation}"
+        recommendation_rationale: "{recommendation_rationale}"
+        proceed_while_waiting: "{proceed_anyway}"
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "narrative_ESCALATION_{module_name}-{title}_{hash}"
+        #   WHAT: Unique identifier with SUBTYPE in ALLCAPS
+        #   WHY: Used to query, resolve, and reference this blocker
+        #   FORMAT: narrative_ESCALATION_<module>-<slug>_<hash>
+        #   Example: narrative_ESCALATION_auth-jwt-vs-session_a7
+        #
+        # node_type: narrative
+        #   WHAT: Persistent story/record (vs moment = event)
+        #   WHY: Escalations exist over time, track state changes
+        #   ALTERNATIVES: moment (point-in-time), space (container)
+        #
+        # type: escalation
+        #   WHAT: Categorization within narratives
+        #   WHY: Enables queries like "show all open escalations"
+        #   OTHER_TYPES: todo, decision, investigation
+        #
+        # name: "{blocker_title}"
+        #   WHAT: Short human-readable title
+        #   WHY: Displayed in lists and summaries
+        #   LENGTH: 5-50 chars, should be scannable
+        #
+        # content: "{blocker_description}"
+        #   WHAT: Full description of what's blocking
+        #   WHY: Provides complete context for resolver
+        #   LENGTH: 30+ chars, specific not vague
+        #
+        # status: open
+        #   WHAT: Escalation state
+        #   WHY: Tracks lifecycle: open → resolved
+        #   OPTIONS: open, acknowledged, resolved
+        #
+        # priority: "{priority}"
+        #   WHAT: Urgency level
+        #   WHY: Helps humans triage what to address first
+        #   OPTIONS: critical, high, medium, low
+        #
+        # options: "{options | to_json}"
+        #   WHAT: JSON array of possible solutions
+        #   WHY: Escalations must present options, not just problems
+        #   FORMAT: [{"label": "A", "description": "...", "tradeoffs": "..."}]
+        #
+        # recommendation: "{recommendation}"
+        #   WHAT: Agent's suggested option
+        #   WHY: Escalations should guide, not just ask
+        #   QUALITY: Should reference specific option
+        #
+        # proceed_while_waiting: "{proceed_anyway}"
+        #   WHAT: How to make progress during resolution
+        #   WHY: Never-stop principle - always have a path forward
+        #   EXAMPLE: "Can stub auth module, implement later"
+        #
+        # weight: 0.9
+        #   WHAT: Importance score (0.0-1.0)
+        #   WHY: Escalations are high priority (0.9)
+        #   RANGE: 0.9 for escalations, lower for todos
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Escalation Raised Event)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_RAISE-ESCALATION_{module_name}_{timestamp_short}"
+        node_type: moment
+        type: escalation_raised
+        prose: |
+          Raised escalation: {blocker_title}
+
+          Blocking: {blocker_description | truncate(100)}
+
+          Recommendation: {recommendation}
+        status: completed
+        # ━━━ ATTRIBUTE EXPLANATIONS ━━━
+        #
+        # id: "moment_RAISE-ESCALATION_{module_name}_{timestamp_short}"
+        #   WHAT: Unique ID with SUBTYPE in ALLCAPS
+        #   WHY: Moments are ordered chronologically
+        #   FORMAT: moment_RAISE-ESCALATION_<module>_<hash>
+        #   Example: moment_RAISE-ESCALATION_auth_a7
+        #
+        # node_type: moment
+        #   WHAT: Point-in-time event record
+        #   WHY: Creates history that can be queried
+        #   CONTRAST: narratives persist, moments are events
+        #
+        # type: escalation_raised
+        #   WHAT: Categorizes this moment type
+        #   WHY: Enables queries like "show all raised escalations"
+        #   OTHER_TYPES: escalation_resolved, decision_recorded
+        #
+        # text: "Raised escalation..."
+        #   WHAT: Human-readable description
+        #   WHY: Displayed in activity feeds and history
+        #   FORMAT: Past tense, includes key details
+        #
+        # status: completed
+        #   WHAT: Moment state
+        #   WHY: "completed" = action finished successfully
+        #   OPTIONS: completed, pending, cancelled
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Escalation About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_ESCALATION_{module_name}-{blocker_title | slugify}_{timestamp_short}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what space is affected by this escalation
+        #   QUERY: "What escalations affect space X?" follows about
+        #   DIRECTION: from=escalation, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Escalation About Affected Nodes
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: affected_nodes
+        from: "narrative_ESCALATION_{module_name}-{blocker_title | slugify}_{timestamp_short}"
+        to: "{item}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records which specific nodes are blocked
+        #   QUERY: "What's blocking node X?" follows about inversely
+        #   DIRECTION: from=escalation, to=affected_node
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment Triggers Escalation
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_RAISE-ESCALATION_{module_name}_{timestamp_short}"
+        to: "narrative_ESCALATION_{module_name}-{blocker_title | slugify}_{timestamp_short}"
+        nature: "triggers"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: triggers
+        #   WHAT: Causation relationship
+        #   WHY: Records that this moment created the escalation
+        #   QUERY: "What created this escalation?" follows triggers inversely
+        #   DIRECTION: from=moment, to=escalation
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_RAISE-ESCALATION_{module_name}_{timestamp_short}"
+        to: "{space_id}"
+        nature: "is about"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: is about
+        #   WHAT: Topic/subject relationship
+        #   WHY: Records what space this event relates to
+        #   QUERY: "What happened in space X?" follows about
+        #   DIRECTION: from=moment, to=space
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_RAISE-ESCALATION_{module_name}_{timestamp_short}"
+        nature: "expresses"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: expresses
+        #   WHAT: Attribution link
+        #   WHY: Records who/what raised this escalation
+        #   QUERY: "What did agent X escalate?" follows expresses
+        #   DIRECTION: from=actor, to=moment
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Investigation Sequence to Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{from_investigation}"
+        to: "moment_RAISE-ESCALATION_{module_name}_{timestamp_short}"
+        nature: "follows"
+        condition: "{from_investigation} is not empty"
+        # ━━━ LINK EXPLANATION ━━━
+        #
+        # nature: follows
+        #   WHAT: Temporal ordering relationship
+        #   WHY: Shows this escalation followed an investigation
+        #   QUERY: "What came after investigation X?" follows sequence
+        #   DIRECTION: from=investigation_moment, to=escalation_moment
+        #
+        # condition: "{from_investigation} is not empty"
+        #   WHAT: Only create link if investigation specified
+        #   WHY: Not all escalations come from investigations
+        #   ALTERNATIVE: Could link to generic "blocked" moment
+
+    moment:
+      agent_provides: [description]
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space_id}"
+      task_id: "raise_escalation_{module_name}_{timestamp_short}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - narrative_ESCALATION
+      - moment_RAISE-ESCALATION
+    links:
+      - about (escalation → space, affected nodes)
+      - triggers (moment → escalation)
+      - expresses (actor → moment)
+      - sequence (investigation → moment, optional)
+  summary: "Raised escalation: {blocker_title} ({priority})"
+  returns:
+    escalation_id: "narrative_ESCALATION_{module_name}-{blocker_title | slugify}_{timestamp_short}"
+    moment_id: "moment_RAISE-ESCALATION_{module_name}_{timestamp_short}"
+
+# ID Convention Reference:
+# See docs/schema/PATTERNS_Schema.md section 3 for full ID format specification.
+# Format: {node-type}_{SUBTYPE}_{instance-context}_{disambiguator}

@@ -1,0 +1,310 @@
+# Protocol: add_objectives
+# Define ranked goals for a module/space
+
+procedure: add_objectives
+version: "2.0"
+description: Define primary objective, secondary objectives, and non-objectives for a space - rich format
+
+triggers:
+  - gap: "D-NO-OBJECTIVES: Missing OBJECTIVES for module"
+  - event: "Defining new module boundaries"
+
+requires_skills:
+  - SKILL_Define_Module_Boundaries_Objectives_And_Scope.md
+
+contextual_knowledge:
+  domain: |
+    Objectives in mind:
+    - Primary objective = THE thing this module optimizes for (singular)
+    - Secondary objectives = goals that support the primary (0-5)
+    - Non-objectives = explicit scope boundaries (what it doesn't do)
+
+    Structure:
+    - narrative.objective (primary) ← relates[supports] ← narrative.objective (secondary)
+    - narrative.objective (primary) ← relates[bounds] ← narrative.non_objective
+
+    Every module needs at least:
+    1. One primary objective
+    2. One non-objective (prevents scope creep)
+  constraints: |
+    - Primary must be singular and clear
+    - Secondary must support primary (not tangential)
+    - Non-objectives must be plausible (things someone might ask for)
+    - Avoid vague objectives ("be good", "work well")
+  quality_criteria: |
+    Good primary: "Minimize context window usage while maintaining task completion quality"
+    Bad primary: "Be efficient"
+
+    Good non-objective: "Real-time streaming (use batch processing instead)"
+    Bad non-objective: "Don't break"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query:
+          find: narrative
+          type: objective
+          in_space: "{space}"
+        store_as: existing_objectives
+      - query:
+          find: narrative
+          type: non_objective
+          in_space: "{space}"
+        store_as: existing_non_objectives
+    purpose: "Check what objectives already exist"
+    # Auto-derive module_name from space
+    computed:
+      module_name: "{space | strip_prefix('space_MODULE_') | strip_prefix('space_AREA_')}"
+    next: route_existing
+
+  route_existing:
+    type: branch
+    condition: "len({existing_objectives}) > 0"
+    then: show_existing
+    else: gather_primary_details
+
+  show_existing:
+    type: ask
+    context: |
+      Existing objectives for {space}:
+      {existing_objectives | format_list}
+
+      Existing non-objectives:
+      {existing_non_objectives | format_list}
+    questions:
+      - name: action
+        ask: "Add more objectives, replace existing, or cancel?"
+        expects:
+          type: enum
+          options: [add_more, replace, cancel]
+    next: route_action
+
+  route_action:
+    type: branch
+    on: "{action}"
+    cases:
+      add_more: gather_secondary_details
+      replace: gather_primary_details
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Objectives unchanged"
+
+  gather_primary_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+
+      The primary objective is THE thing this module optimizes for.
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 1: Primary Objective
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: primary_objective
+        ask: "What is the ONE thing this module optimizes for?"
+
+        why: |
+          The primary objective is the singular focus of the module.
+          All design decisions (patterns, algorithms) must trace back to this.
+
+        guidance: |
+          It should be:
+          - SINGULAR: Only one primary optimization goal.
+          - SPECIFIC: Avoid vague terms like "be efficient".
+          - MEASURABLE: We should be able to tell if we achieved it.
+
+        good_answer: "Ensure complete traceability from doctor detections through skills to protocols to graph mutations"
+        bad_answer: "Make it work well"
+        expects: { type: string, min_length: 20 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 2: Rationale
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: primary_rationale
+        ask: "Why is this the primary objective?"
+        expects: { type: string, min_length: 10 }
+
+    next: gather_secondary_details
+
+  gather_secondary_details:
+    type: ask
+    context: |
+      Primary objective: {primary_objective}
+
+      Secondary objectives SUPPORT the primary. They are not independent goals.
+    questions:
+      - name: secondary_objectives
+        ask: "What are the secondary objectives? (Enter descriptions)"
+        expects: { type: string_list, min: 0, max: 5 }
+
+    next: gather_non_objectives
+
+  gather_non_objectives:
+    type: ask
+    context: |
+      Non-objectives define scope boundaries.
+      These are things someone MIGHT reasonably ask for, but this module won't do.
+
+      At least one non-objective is required to prevent scope creep.
+    questions:
+      - name: non_objectives
+        ask: "What are the non-objectives? (Enter descriptions)"
+        expects: { type: string_list, min: 1, max: 5 }
+
+    # Capture reasoning
+    moment:
+      agent_provides:
+        - description: "Summary of the objectives"
+        - reasoning: "Why this primary objective was chosen and how secondary objectives support it"
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW for {space}
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      PRIMARY:
+        {primary_objective}
+
+      SECONDARY:
+        {secondary_objectives | format_numbered}
+
+      NON-OBJECTIVES:
+        {non_objectives | format_numbered}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      - name: confirmed
+        ask: "Create these objectives?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_objectives
+      revise: gather_primary_details
+      cancel: cancelled
+
+  create_objectives:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Primary Objective
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_OBJECTIVE_{module_name}-primary"
+        node_type: narrative
+        type: objective
+        subtype: primary
+        name: "Primary Objective"
+        content: "{primary_objective}"
+        rationale: "{primary_rationale}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Secondary Objectives
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: secondary_objectives
+        id: "narrative_OBJECTIVE_{module_name}-secondary_{loop_index | pad2}"
+        node_type: narrative
+        type: objective
+        subtype: secondary
+        name: "Secondary Objective {loop_index}"
+        content: "{item}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Non-Objectives
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: non_objectives
+        id: "narrative_NON-OBJECTIVE_{module_name}_{loop_index | pad2}"
+        node_type: narrative
+        type: non_objective
+        name: "Non-Objective {loop_index}"
+        content: "{item}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Moment (Creation Event)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_DEFINE-OBJECTIVES_{module_name}_{timestamp_short}"
+        node_type: moment
+        type: procedure_create
+        prose: |
+          Defined objectives for {space}:
+          - Primary: {primary_objective}
+          - Secondary: {secondary_objectives | count}
+          - Non-objectives: {non_objectives | count}
+        status: spoken
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Space Contains Objectives
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space}"
+        to: "narrative_OBJECTIVE_{module_name}-primary"
+        nature: "contains"
+
+      - for_each: secondary_objectives
+        from: "{space}"
+        to: "narrative_OBJECTIVE_{module_name}-secondary_{loop_index | pad2}"
+        nature: "contains"
+
+      - for_each: non_objectives
+        from: "{space}"
+        to: "narrative_NON-OBJECTIVE_{module_name}_{loop_index | pad2}"
+        nature: "contains"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Secondary Supports Primary
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: secondary_objectives
+        from: "narrative_OBJECTIVE_{module_name}-secondary_{loop_index | pad2}"
+        to: "narrative_OBJECTIVE_{module_name}-primary"
+        nature: "supports"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Non-Objectives Bound Primary
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: non_objectives
+        from: "narrative_NON-OBJECTIVE_{module_name}_{loop_index | pad2}"
+        to: "narrative_OBJECTIVE_{module_name}-primary"
+        nature: "bounds"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_DEFINE-OBJECTIVES_{module_name}_{timestamp_short}"
+        nature: "expresses"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # LINK: Moment About Space
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_DEFINE-OBJECTIVES_{module_name}_{timestamp_short}"
+        to: "{space}"
+        nature: "is about"
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space}"
+      task_id: "add_objectives_{module_name}"
+    next: $complete
+
+output:
+  primary_id: "narrative_OBJECTIVE_{module_name}-primary"
+  moment: "moment_DEFINE-OBJECTIVES_{module_name}_{timestamp_short}"

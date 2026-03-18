@@ -1,0 +1,678 @@
+# Protocol: add_health_coverage
+# Create health indicator with docks linked to validation
+
+procedure: add_health_coverage
+version: "2.0"
+description: Create health indicator with docks linked to validation - rich question format
+
+triggers:
+  - gap: "Validation exists without health coverage"
+  - event: "Runtime verification needed for invariant"
+
+requires_skills:
+  - SKILL_Define_And_Verify_Health_Signals_Mapped_To_Validation_Invariants.md
+
+contextual_knowledge:
+  domain: |
+    Health indicators verify runtime behavior tests can't catch:
+    drift, ratio degradation, production-only states.
+    Link to validations via RELATES with direction=verifies.
+    Docks = observation points attached via ATTACHED_TO.
+    - Input dock: where value is observed
+    - Output dock: where result is checked
+    Thresholds: warning vs error levels.
+
+  constraints: |
+    - Must verify at least one validation
+    - Must have input dock AND output dock
+    - Mechanism must be specific enough to implement
+    - Thresholds must distinguish WARNING from ERROR
+
+  dependencies: |
+    Requires: validation exists
+    Enables: runtime monitoring, mind doctor integration
+
+  quality_criteria: |
+    Good: "Compare max(narrative.energy) against 1.0 threshold after decay phase"
+    Bad: "Check if healthy"
+
+steps:
+  load_context:
+    type: query
+    auto_fetch:
+      - query: { find: narrative, type: validation, in_space: "{space}" }
+        store_as: validations
+      - query: { find: narrative, type: health, in_space: "{space}" }
+        store_as: existing_health
+      - query: { find: narrative, type: algorithm, in_space: "{space}" }
+        store_as: algorithms
+      - query: { find: narrative, type: objective, in_space: "{space}" }
+        store_as: objectives
+      - query: { find: thing, type: func, in_space: "{space}" }
+        store_as: functions
+    purpose: "Load validations, algorithms, objectives, and functions for dense linking"
+    next: check_prerequisites
+
+  check_prerequisites:
+    type: branch
+    checks:
+      - condition: "{validations | count} == 0"
+        action:
+          type: call_procedure
+          protocol: add_invariant
+          reason: "No validations exist to verify"
+          context: { space: "{space}" }
+          on_complete: reload_context
+      - condition: "ready"
+        action: { goto: gather_details }
+
+  gather_details:
+    type: ask
+    context: |
+      {contextual_knowledge.domain}
+
+      Space: {space}
+
+      ━━━ EXISTING GRAPH STATE ━━━
+
+      Validations (what this health indicator can verify):
+      {validations | format_with_coverage_status}
+
+      Algorithms (what this health indicator can check):
+      {algorithms | format_list}
+
+      Objectives (what this health indicator can support):
+      {objectives | format_list}
+
+      Functions (potential observation points):
+      {functions | format_with_locations}
+
+      Existing health indicators:
+      {existing_health | format_with_links}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    questions:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 1: Health Name
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: health_name
+        ask: "What should this health indicator be called?"
+
+        why: |
+          The name determines how this indicator appears in health streams,
+          doctor reports, and monitoring dashboards. It should describe
+          WHAT is being measured, not HOW it's measured.
+
+        context: |
+          Existing health indicators in this space:
+          {existing_health | format_names}
+
+          Name pattern: h_<module>_<what_measured>
+
+        guidance: |
+          Choose a name that:
+          - Describes the invariant being verified (not the mechanism)
+          - Follows the h_<module>_<measurement> pattern
+          - Is unique within this space
+          - Would make sense in an alert: "h_physics_energy_bounded is WARNING"
+
+        creates: |
+          Primary node: narrative_HEALTH_{name}
+          This becomes the anchor for the entire health cluster.
+
+        good_answer: "h_physics_energy_bounded"
+        bad_answer: "check1"
+        expects:
+          type: string
+          pattern: "^h_[a-z_]+$"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 2: Validations to Verify
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: validates
+        ask: "Which validations does this health indicator verify?"
+
+        why: |
+          Health indicators exist to verify that validations hold at runtime.
+          Without this link, we don't know what invariant this indicator protects.
+          Without this link, we can't query "which validations have coverage?"
+
+        context: |
+          Validations in this space:
+          {validations | format_with_coverage}
+
+          Coverage status:
+          - UNCOVERED validations need health indicators
+          - Already covered validations can have additional coverage
+
+          You should prioritize uncovered validations.
+
+        guidance: |
+          Pick validations that this indicator can actually verify.
+          Consider: what does the observation point (dock) actually check?
+
+          If it queries nodes and checks fields → link to field validations
+          If it checks link structure → link to link validations
+          If it checks value ranges → link to range validations
+
+          Multiple selections encouraged. One indicator can verify several validations.
+
+          Write your reasoning in the comment field.
+
+        creates: |
+          For each validation you select:
+            health ─[verifies]→ validation
+
+          This makes the coverage queryable.
+
+        expects:
+          type: id_list
+          from: "{validations}"
+          min: 1
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 3: Algorithm to Check
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: checks_algorithm
+        ask: "Which algorithm does this health indicator check?"
+
+        why: |
+          Health indicators verify that algorithms work correctly at runtime.
+          The algorithm link tells us WHAT logic this indicator is monitoring.
+          Without this link, we can't trace from health back to design.
+
+        context: |
+          Algorithms in this space:
+          {algorithms | format_with_behaviors}
+
+          Each algorithm implements specific behaviors.
+          Your health indicator should check ONE algorithm.
+
+        guidance: |
+          Pick the algorithm whose correctness this indicator verifies.
+
+          Ask: "If this health check fails, which algorithm has a bug?"
+          The answer to that question is the algorithm to link.
+
+          Only ONE algorithm per health indicator.
+
+        creates: |
+          health ─[checks]→ algorithm
+
+          This creates the design-to-runtime traceability.
+
+        expects:
+          type: id
+          from: "{algorithms}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 4: Mechanism
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: mechanism
+        ask: "How is this health check performed? Describe the measurement."
+
+        why: |
+          The mechanism must be specific enough to implement.
+          Vague mechanisms ("check if healthy") can't be coded.
+          This field becomes the implementation spec.
+
+        context: |
+          You're verifying: {validates | format_names}
+          By checking: {checks_algorithm}
+
+          The mechanism should describe:
+          1. What value is observed
+          2. How it's measured
+          3. What constitutes pass/fail
+
+        guidance: |
+          Be specific about:
+          - WHAT is queried (which nodes, which fields)
+          - WHEN it's measured (after which phase)
+          - HOW the result is computed (aggregation, comparison)
+
+          Think: Could a developer implement this from your description?
+
+        creates: |
+          health.mechanism = "{your answer}"
+
+          This becomes the implementation specification.
+
+        good_answer: "Query max(n.energy) for all narratives after tick phase. Compare against 1.0 threshold."
+        bad_answer: "Check the values"
+        expects: { type: string, min_length: 20 }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 5: Input Dock
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: input_dock
+        ask: "Where is the input value observed? (file:function format)"
+
+        why: |
+          The input dock is the observation point where data is READ.
+          This grounds the health indicator to actual code.
+          Without this, we can't implement the check.
+
+        context: |
+          Functions in this space that might be observation points:
+          {functions | format_with_locations}
+
+          The input dock should be where the value originates or is transformed.
+
+        guidance: |
+          Trace the data flow:
+          1. Where does the value you're checking originate?
+          2. What function actually produces/transforms it?
+          3. Pick the most specific point where you can observe.
+
+          Format: file.py:function_name
+
+          For input dock: Where data is READ
+
+        creates: |
+          thing_DOCK_input_{health_name}
+            ─[attached_to]→ health
+            ─[observes]→ thing_FUNC_{function}
+
+        expects: { type: string, pattern: ".*:.*" }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 6: Output Dock
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: output_dock
+        ask: "Where is the result checked? (file:function format)"
+
+        why: |
+          The output dock is where the health result is VERIFIED.
+          This is where we compare against thresholds.
+          This grounds the verification to actual code.
+
+        context: |
+          Functions in this space:
+          {functions | format_with_locations}
+
+          The output dock should be where the result is verified.
+
+        guidance: |
+          Trace the verification flow:
+          1. Where is the computed value checked?
+          2. What function compares against thresholds?
+          3. Pick where the pass/fail decision is made.
+
+          Format: file.py:function_name
+
+          For output dock: Where result is VERIFIED
+
+        creates: |
+          thing_DOCK_output_{health_name}
+            ─[attached_to]→ health
+            ─[observes]→ thing_FUNC_{function}
+
+        expects: { type: string, pattern: ".*:.*" }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 7: Warning Threshold
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: warning_threshold
+        ask: "Warning threshold value?"
+
+        why: |
+          Warning threshold triggers early detection before critical failure.
+          This is the "approaching limit" signal.
+
+        guidance: |
+          Set warning at a value that:
+          - Gives time to investigate before error
+          - Isn't so sensitive it produces false positives
+
+          Typically: 80-90% of the error threshold
+
+        creates: |
+          health.warning_threshold = "{your answer}"
+
+        expects: { type: string }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 8: Error Threshold
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: error_threshold
+        ask: "Error threshold value?"
+
+        why: |
+          Error threshold is the invariant violation point.
+          This is where the validation is actually broken.
+
+        guidance: |
+          Set error at the exact boundary of the invariant.
+
+          If the validation says "energy <= 1.0", error at 1.0.
+          If the validation says "response < 500ms", error at 500.
+
+        creates: |
+          health.error_threshold = "{your answer}"
+
+        expects: { type: string }
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # QUESTION 9: Supporting Objective
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: supports_objective
+        ask: "Which objective does this health indicator support?"
+
+        why: |
+          Linking to objectives creates full traceability:
+          objective → behavior → validation → health
+
+          This answers: "Why does this health check exist?"
+
+        context: |
+          Objectives in this space:
+          {objectives | format_list}
+
+          Pick the objective that would be harmed if this health check fails.
+
+        guidance: |
+          Ask: "If this health indicator is red, which objective is at risk?"
+          That's the objective to link.
+
+        creates: |
+          health ─[supports]→ objective
+
+        expects:
+          type: id
+          from: "{objectives}"
+          required: false
+
+    # Capture reasoning for all answers
+    moment:
+      agent_provides:
+        - description: "Summary of what was created"
+        - reasoning: "Why these specific validations, algorithm, and docks were chosen"
+
+    next: capture_decisions
+
+  capture_decisions:
+    type: create
+    purpose: "Capture agent reasoning as decision moments"
+    nodes:
+      - id: "moment_DECISION_health-validations_{timestamp_short}"
+        node_type: moment
+        type: decision
+        text: "{agent.validates_reasoning}"
+        status: spoken
+
+      - id: "moment_DECISION_health-algorithm_{timestamp_short}"
+        node_type: moment
+        type: decision
+        text: "{agent.algorithm_reasoning}"
+        status: spoken
+
+      - id: "moment_DECISION_health-docks_{timestamp_short}"
+        node_type: moment
+        type: decision
+        text: "{agent.docks_reasoning}"
+        status: spoken
+
+    links:
+      # Decision about validations
+      - from: "moment_DECISION_health-validations_{timestamp_short}"
+        to: "{validates}"
+        nature: "is about"
+        for_each: validates
+
+      # Decision about algorithm
+      - from: "moment_DECISION_health-algorithm_{timestamp_short}"
+        to: "{checks_algorithm}"
+        nature: "is about"
+
+      # Actor expresses decisions
+      - from: "{actor_id}"
+        to: "moment_DECISION_health-validations_{timestamp_short}"
+        nature: "expresses"
+      - from: "{actor_id}"
+        to: "moment_DECISION_health-algorithm_{timestamp_short}"
+        nature: "expresses"
+      - from: "{actor_id}"
+        to: "moment_DECISION_health-docks_{timestamp_short}"
+        nature: "expresses"
+
+    next: show_connection_preview
+
+  show_connection_preview:
+    type: ask
+    context: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      CLUSTER PREVIEW
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Primary: narrative_HEALTH_{health_name}
+
+      Nodes to create: 4
+        - narrative_HEALTH_{health_name}
+        - thing_DOCK_input_{health_name}
+        - thing_DOCK_output_{health_name}
+        - moment_CREATE_health_{health_name}
+
+      Links to create:
+        Internal (4):
+          - dock_input ─[attached_to]→ health
+          - dock_output ─[attached_to]→ health
+          - moment ─[about]→ health
+          - actor ─[expresses]→ moment
+
+        External ({validates | count} + 4):
+          - space ─[contains]→ health
+          - space ─[contains]→ dock_input
+          - space ─[contains]→ dock_output
+          - health ─[verifies]→ {validates | format_ids}
+          - health ─[checks]→ {checks_algorithm}
+          {supports_objective | if_present: "- health ─[supports]→ {supports_objective}"}
+
+      CONNECTION METRICS:
+        Nodes: 4
+        Links: {total_links}
+        External links: {external_links}
+        Links/node: {links_per_node}
+        External ratio: {external_ratio}%
+        Status: {connection_status}
+
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      Optional: Found {peer_health_count} peer health indicators you could link to:
+      {peer_health_suggestions | format_list}
+
+    questions:
+      - name: add_peer_links
+        ask: "Add peer links to other health indicators? (relates: peer)"
+        expects:
+          type: id_list
+          from: "{existing_health}"
+          required: false
+
+      - name: confirmed
+        ask: "Create this health cluster?"
+        expects:
+          type: enum
+          options: [create, revise, cancel]
+
+    next: route_confirm
+
+  route_confirm:
+    type: branch
+    on: "{confirmed}"
+    cases:
+      create: create_health_cluster
+      revise: gather_details
+      cancel: cancelled
+
+  cancelled:
+    type: complete
+    status: cancelled
+    message: "Health coverage creation cancelled"
+
+  create_health_cluster:
+    type: create
+    nodes:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Health Narrative
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "narrative_HEALTH_{health_name}"
+        node_type: narrative
+        type: health
+        name: "{health_name}"
+        mechanism: "{mechanism}"
+        warning_threshold: "{warning_threshold}"
+        error_threshold: "{error_threshold}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Input Dock
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "thing_DOCK_input_{health_name}"
+        node_type: thing
+        type: dock
+        name: "input_dock"
+        location: "{input_dock}"
+        direction: input
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Output Dock
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "thing_DOCK_output_{health_name}"
+        node_type: thing
+        type: dock
+        name: "output_dock"
+        location: "{output_dock}"
+        direction: output
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # NODE: Creation Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - id: "moment_CREATE_health_{health_name}_{timestamp_short}"
+        node_type: moment
+        type: procedure_create
+        prose: |
+          Created health indicator {health_name}
+          Verifies: {validates | format_names}
+          Checks: {checks_algorithm}
+          Mechanism: {mechanism}
+        status: completed
+
+    links:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # STRUCTURAL: Space Contains
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{space}"
+        to: "narrative_HEALTH_{health_name}"
+        nature: "contains"
+
+      - from: "{space}"
+        to: "thing_DOCK_input_{health_name}"
+        nature: "contains"
+
+      - from: "{space}"
+        to: "thing_DOCK_output_{health_name}"
+        nature: "contains"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # SEMANTIC: Health Verifies Validations
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: validates
+        from: "narrative_HEALTH_{health_name}"
+        to: "{item}"
+        nature: "verifies"
+      # SEMANTIC: Health Checks Algorithm
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_HEALTH_{health_name}"
+        to: "{checks_algorithm}"
+        nature: "checks"
+      # SEMANTIC: Health Supports Objective (if provided)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "narrative_HEALTH_{health_name}"
+        to: "{supports_objective}"
+        nature: "supports"
+        condition: "{supports_objective | is_present}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # ATTACHMENT: Docks Attached To Health
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "thing_DOCK_input_{health_name}"
+        to: "narrative_HEALTH_{health_name}"
+        nature: "attached to"
+
+      - from: "thing_DOCK_output_{health_name}"
+        to: "narrative_HEALTH_{health_name}"
+        nature: "attached to"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PEER: Links to Other Health Indicators (if selected)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - for_each: add_peer_links
+        from: "narrative_HEALTH_{health_name}"
+        to: "{item}"
+        nature: "peer"
+        condition: "{add_peer_links | is_present}"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PROVENANCE: Actor Expresses Moment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "{actor_id}"
+        to: "moment_CREATE_health_{health_name}_{timestamp_short}"
+        nature: "expresses"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PROVENANCE: Moment About Health
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_CREATE_health_{health_name}_{timestamp_short}"
+        to: "narrative_HEALTH_{health_name}"
+        nature: "is about"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # PROVENANCE: Moment About Algorithm (context)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - from: "moment_CREATE_health_{health_name}_{timestamp_short}"
+        to: "{checks_algorithm}"
+        nature: "is about"
+
+    next: call_handoff
+
+  call_handoff:
+    type: call_procedure
+    protocol: completion_handoff
+    inputs:
+      space_id: "{space}"
+      task_id: "add_health_coverage_{health_name}"
+    next: $complete
+
+output:
+  cluster:
+    nodes:
+      - narrative_HEALTH_{health_name}
+      - thing_DOCK_input_{health_name}
+      - thing_DOCK_output_{health_name}
+      - moment_CREATE_health_{health_name}
+      - moment_DECISION_health-validations (reasoning)
+      - moment_DECISION_health-algorithm (reasoning)
+      - moment_DECISION_health-docks (reasoning)
+    links:
+      - contains (space → health, docks)
+      - verifies (health → validations)
+      - checks (health → algorithm)
+      - supports (health → objective)
+      - attached_to (docks → health)
+      - peer (health → other health)
+      - expresses (actor → moments)
+      - about (moments → subjects)
+
+  connection:
+    min_nodes: 4
+    min_links: 9
+    min_external: 5
+    expected_ratio: "70%+"
+
+  summary: |
+    Created health indicator {health_name}
+    - Verifies: {validates | count} validations
+    - Checks: {checks_algorithm}
+    - Docks: input at {input_dock}, output at {output_dock}
+    - Connection: {links_per_node} links/node, {external_ratio}% external
