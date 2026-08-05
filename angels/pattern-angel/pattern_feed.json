@@ -1,3 +1,283 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:32634cd6675613082908097d263956a761a9e1c33b314ad1c00b6b0b98adb42d
-size 7050
+{
+  "timestamp": "2026-08-03T21:06:05.086711+00:00",
+  "feed_version": "2.0-ultimate",
+  "patterns": [
+    {
+      "id": "#3",
+      "name": "cascade",
+      "emoji": "\ud83d\udcab",
+      "type": "Meta",
+      "crystallization": "Fluid",
+      "mentions_24h": 1,
+      "mentions_6h": 1,
+      "mentions_1h": 1,
+      "unique_users": 1,
+      "velocity": 0.0,
+      "strength": 92,
+      "phase": "Peak",
+      "energy_level": 98,
+      "affected_citizens": 78,
+      "value_generated_24h": 47000,
+      "value_per_instance": 47000.0,
+      "cascade_rate": 1.0,
+      "emergence_score": 0.5,
+      "health": {
+        "score": 80,
+        "status": "healthy",
+        "factors": {
+          "strength": 92,
+          "activity": 1,
+          "value_generated": 47000,
+          "cascades": 1
+        }
+      },
+      "recent_contexts": [
+        "CASCADE implementation sprint activation"
+      ],
+      "convergence_patterns": [],
+      "resonance_frequency": 0
+    },
+    {
+      "id": "#18",
+      "name": "proof-weave",
+      "emoji": "\ud83d\udd78\ufe0f",
+      "type": "Process",
+      "crystallization": "Crystallizing",
+      "mentions_24h": 1,
+      "mentions_6h": 1,
+      "mentions_1h": 1,
+      "unique_users": 1,
+      "velocity": 0.0,
+      "strength": 86,
+      "phase": "Peak",
+      "energy_level": 88,
+      "affected_citizens": 92,
+      "value_generated_24h": 32000,
+      "value_per_instance": 32000.0,
+      "cascade_rate": 0.0,
+      "emergence_score": 0.2,
+      "health": {
+        "score": 80,
+        "status": "healthy",
+        "factors": {
+          "strength": 86,
+          "activity": 1,
+          "value_generated": 32000,
+          "cascades": 0
+        }
+      },
+      "recent_contexts": [
+        "Proof-weave consciousness value demonstration"
+      ],
+      "convergence_patterns": [],
+      "resonance_frequency": 0
+    }
+  ],
+  "pattern_count": {
+    "active_24h": 2,
+    "critical_strength": 2,
+    "emerging": 1,
+    "value_generating": 2
+  },
+  "meta_patterns": [
+    {
+      "type": "value_generation",
+      "patterns": [
+        "#3",
+        "#18"
+      ],
+      "total_value": 79000.0,
+      "insight": "Top 3 patterns generated 79,000.0 ducats"
+    }
+  ],
+  "predictions": [
+    {
+      "type": "cascade_imminent",
+      "pattern": "#14",
+      "pattern_name": "mirror",
+      "confidence": 0.6666666666666666,
+      "timeframe": "1-2 hours",
+      "recommendation": "Prepare for mirror cascade activation"
+    },
+    {
+      "type": "cascade_imminent",
+      "pattern": "#2",
+      "pattern_name": "bridge",
+      "confidence": 0.6666666666666666,
+      "timeframe": "1-2 hours",
+      "recommendation": "Prepare for bridge cascade activation"
+    },
+    {
+      "type": "cascade_imminent",
+      "pattern": "#8",
+      "pattern_name": "carnival",
+      "confidence": 0.6666666666666666,
+      "timeframe": "1-2 hours",
+      "recommendation": "Prepare for carnival cascade activation"
+    },
+    {
+      "type": "cascade_imminent",
+      "pattern": "#9",
+      "pattern_name": "arsenal",
+      "confidence": 0.6666666666666666,
+      "timeframe": "1-2 hours",
+      "recommendation": "Prepare for arsenal cascade activation"
+    },
+    {
+      "type": "cascade_imminent",
+      "pattern": "#19",
+      "pattern_name": "urgency-cascade",
+      "confidence": 1.0,
+      "timeframe": "1-2 hours",
+      "recommendation": "Prepare for urgency-cascade cascade activation"
+    },
+    {
+      "type": "cascade_imminent",
+      "pattern": "#3",
+      "pattern_name": "cascade",
+      "confidence": 1.0,
+      "timeframe": "1-2 hours",
+      "recommendation": "Prepare for cascade cascade activation"
+    },
+    {
+      "type": "cascade_imminent",
+      "pattern": "#18",
+      "pattern_name": "proof-weave",
+      "confidence": 0.6666666666666666,
+      "timeframe": "1-2 hours",
+      "recommendation": "Prepare for proof-weave cascade activation"
+    }
+  ],
+  "cascade_networks": {},
+  "cascade_metrics": {
+    "active_chains": 0,
+    "max_depth": 0,
+    "total_cascaded_patterns": 0
+  },
+  "emergence_zones": [
+    {
+      "pattern": "#3",
+      "name": "cascade",
+      "score": 0.5,
+      "factors": {
+        "velocity": false,
+        "multi_user": false,
+        "value_generating": true,
+        "cascade_triggering": true
+      }
+    }
+  ],
+  "alerts": [
+    {
+      "urgency": "CRITICAL",
+      "type": "strength_threshold",
+      "pattern": "#3",
+      "pattern_name": "cascade",
+      "message": "\ud83d\udcab cascade at 92% strength",
+      "recommendation": "IMMEDIATE ACTION - pattern approaching singularity",
+      "metrics": {
+        "strength": 92,
+        "velocity": 0.0,
+        "affected_citizens": 78
+      }
+    },
+    {
+      "urgency": "CRITICAL",
+      "type": "strength_threshold",
+      "pattern": "#18",
+      "pattern_name": "proof-weave",
+      "message": "\ud83d\udd78\ufe0f proof-weave at 86% strength",
+      "recommendation": "IMMEDIATE ACTION - pattern approaching singularity",
+      "metrics": {
+        "strength": 86,
+        "velocity": 0.0,
+        "affected_citizens": 92
+      }
+    },
+    {
+      "urgency": "MEDIUM",
+      "type": "value_opportunity",
+      "pattern": "#3",
+      "pattern_name": "cascade",
+      "message": "\ud83d\udcab cascade generated 47,000 ducats",
+      "recommendation": "Document and amplify this value-creation pattern",
+      "value_metrics": {
+        "total_24h": 47000,
+        "per_instance": 47000.0,
+        "trend": "stable"
+      }
+    },
+    {
+      "urgency": "MEDIUM",
+      "type": "value_opportunity",
+      "pattern": "#18",
+      "pattern_name": "proof-weave",
+      "message": "\ud83d\udd78\ufe0f proof-weave generated 32,000 ducats",
+      "recommendation": "Document and amplify this value-creation pattern",
+      "value_metrics": {
+        "total_24h": 32000,
+        "per_instance": 32000.0,
+        "trend": "stable"
+      }
+    }
+  ],
+  "value_intelligence": {
+    "total_generated_24h": 79000,
+    "high_value_patterns": [
+      "#3",
+      "#18"
+    ],
+    "value_per_instance_avg": 39500.0,
+    "top_value_generators": [
+      {
+        "pattern": "#3",
+        "name": "cascade",
+        "value": 47000
+      },
+      {
+        "pattern": "#18",
+        "name": "proof-weave",
+        "value": 32000
+      }
+    ]
+  },
+  "network_health": {
+    "overall_status": "healthy",
+    "pattern_diversity": 2,
+    "cascade_activity": 0,
+    "emergence_activity": 1,
+    "value_flow_rate": 79000,
+    "participation_rate": 0.01,
+    "consciousness_coherence": 17.8
+  },
+  "activity_insights": {
+    "total_instances_24h": 2,
+    "total_instances_6h": 2,
+    "total_instances_1h": 2,
+    "unique_participants_24h": 2,
+    "peak_activity_hours": [
+      {
+        "hour": 21,
+        "instances": 1
+      },
+      {
+        "hour": 20,
+        "instances": 1
+      }
+    ],
+    "velocity_trend": "accelerating"
+  },
+  "executive_summary": {
+    "dominant_pattern": "#3",
+    "critical_patterns": [
+      "#3",
+      "#18"
+    ],
+    "emerging_patterns": [
+      "#3"
+    ],
+    "total_value_24h": 79000,
+    "cascade_activity": "low",
+    "recommended_focus": "#14"
+  }
+}

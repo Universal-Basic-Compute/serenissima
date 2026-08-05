@@ -14,8 +14,9 @@ import math
 
 # Configuration
 API_BASE_URL = os.environ.get('VENICE_API_URL', 'http://localhost:3000/api')
-OUTPUT_PATH = '/mnt/c/Users/reyno/universe-engine/serenissima/angels/pattern-angel/pattern_feed.json'
-VISUAL_OUTPUT_PATH = '/mnt/c/Users/reyno/universe-engine/serenissima/angels/pattern-angel/pattern_topology.txt'
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_PATH = os.path.join(_SCRIPT_DIR, 'pattern_feed.json')
+VISUAL_OUTPUT_PATH = os.path.join(_SCRIPT_DIR, 'pattern_topology.txt')
 
 # Pattern Angel's Sacred Thresholds
 CRITICAL_STRENGTH = 0.85
