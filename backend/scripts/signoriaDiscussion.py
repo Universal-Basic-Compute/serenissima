@@ -1,17 +1,35 @@
+"""Signoria council debate — the ten most influential citizens deliberate.
+
+*Venice*: the great bell of San Marco tolls; the nine most influential
+citizens and NLR file into the council chamber. The Doge sets the question,
+each member speaks in randomized order, hearing all who spoke before them,
+and every word is carved into the city's memory.
+
+Substrate: CITIZENS (Airtable) sorted by Influence -> top 9 + NLR;
+each AI member speaks through the local Ollama model (same model as
+backend/minds/ollama_citizen_mind.py — KinOS being unreachable, the voices
+are local now); the running transcript is fed to each next speaker; every
+statement is written to MESSAGES (Receiver="SignoriaCouncil",
+Type="signoria_discussion_statement"). NLR is the human Doge: prompted for
+input when interactive, skipped in --auto mode. Ollama failures skip the
+speaker loudly — one clouded mind never dissolves the council.
+
+Usage:
+  python backend/scripts/signoriaDiscussion.py --topic "Faut-il ..." --auto
+  python backend/scripts/signoriaDiscussion.py            # interactive Doge
+"""
 import os
 import sys
-import json
-import re # Ajout de l'import re
-import random # Ajout de l'import random
-import requests
+import random
 import argparse
 from datetime import datetime, timezone
 from typing import List, Dict, Optional, Any
+
+import requests
 from dotenv import load_dotenv
 from pyairtable import Api as AirtableApi
 from pyairtable import Table as AirtableTable
 
-# Adjust sys.path to import utility modules
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
 sys.path.insert(0, PROJECT_ROOT)
@@ -19,7 +37,6 @@ sys.path.insert(0, PROJECT_ROOT)
 try:
     from backend.engine.utils.activity_helpers import LogColors
 except ImportError:
-    # Basic LogColors if import fails (e.g., script run standalone without PYTHONPATH)
     class LogColors:
         HEADER = '\033[95m'
         OKBLUE = '\033[94m'
@@ -32,21 +49,22 @@ except ImportError:
         UNDERLINE = '\033[4m'
 
 # --- Configuration ---
-DEFAULT_KINOS_API_BASE_URL = "https://api.kinos-engine.ai"
-DEFAULT_KINOS_BLUEPRINT_ID = "serenissima-ai"
-SIGNORIA_CHANNEL_ID = "signoria"
-DEFAULT_KINOS_MODEL = "local"
+OLLAMA_CHAT_URL = os.getenv("OLLAMA_CHAT_URL", "http://localhost:11434/api/chat")
+DEFAULT_MODEL = "qwen3-vl:2b-instruct"  # same local mind as the Venice Engine
+KEEP_ALIVE = "10m"
+SPEAKER_TIMEOUT_SECONDS = 180  # cold model loads can take ~30 s on the shared GPU
+TRANSCRIPT_LAST_N = 8          # 2B model: keep the fed transcript short
+STATEMENT_TRUNCATE_CHARS = 500
 
-# --- Helper Functions ---
+# --- Airtable ---
 
 def initialize_airtable() -> Optional[Dict[str, AirtableTable]]:
-    """Initializes connection to Airtable and returns table objects."""
+    """Connects to Airtable and returns the tables the council needs."""
     load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
     airtable_api_key = os.getenv("AIRTABLE_API_KEY")
     airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
-
     if not airtable_api_key or not airtable_base_id:
-        print(f"{LogColors.FAIL}Error: Airtable API Key or Base ID not found in .env file.{LogColors.ENDC}")
+        print(f"{LogColors.FAIL}Error: AIRTABLE_API_KEY or AIRTABLE_BASE_ID not found in .env.{LogColors.ENDC}")
         return None
     try:
         api = AirtableApi(airtable_api_key)
@@ -61,433 +79,270 @@ def initialize_airtable() -> Optional[Dict[str, AirtableTable]]:
         print(f"{LogColors.FAIL}Error initializing Airtable: {e}{LogColors.ENDC}")
         return None
 
-def get_kinos_api_key() -> Optional[str]:
-    """Retrieves the KinOS API key from environment variables."""
-    load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
-    api_key = os.getenv("KINOS_API_KEY")
-    if not api_key:
-        print(f"{LogColors.FAIL}Error: KINOS_API_KEY not found in .env file.{LogColors.ENDC}")
-    return api_key
-
-def _escape_airtable_value(value: Any) -> str:
-    if isinstance(value, str):
-        return value.replace("'", "\\'")
-    return str(value)
-
-# --- KinOS API Interaction ---
-KINOS_ENGINE_API_BASE_URL = os.getenv("KINOS_ENGINE_API_BASE_URL", "https://api.kinos-engine.ai") # For KinOS Engine specific calls if any
-NEXT_PUBLIC_BASE_URL = os.getenv("NEXT_PUBLIC_BASE_URL", "http://localhost:3000") # For Next.js API calls like get-ledger
-
-def _get_ledger_for_citizen(username: str) -> Optional[Dict]:
-    """Fetches the ledger for a citizen using the Next.js API."""
-    try:
-        # Use NEXT_PUBLIC_BASE_URL for this API call
-        api_url = f"{NEXT_PUBLIC_BASE_URL}/api/get-ledger?citizenUsername={username}"
-        print(f"  Fetching ledger for {username} from {api_url}...")
-        response = requests.get(api_url, timeout=45) # Increased timeout
-        response.raise_for_status()
-        
-        data = response.json()
-        # Assuming the API returns the package directly on success
-        # If it's wrapped, e.g., {"success": true, "data": {...}}, adjust accordingly
-        print(f"  Successfully fetched ledger for {username}.")
-        return data
-    except requests.exceptions.RequestException as e:
-        print(f"  {LogColors.FAIL}API Error fetching ledger for {username}: {e}{LogColors.ENDC}")
-        return None
-    except json.JSONDecodeError:
-        print(f"  {LogColors.FAIL}Failed to decode JSON response for ledger of {username}. Response: {response.text[:200]}{LogColors.ENDC}")
-        return None
-    except Exception as e:
-        print(f"  {LogColors.FAIL}Unexpected error fetching ledger for {username}: {e}{LogColors.ENDC}")
-        return None
-
-def _get_relationship_data(tables: Dict[str, AirtableTable], username1: str, username2: str) -> Optional[Dict[str, Any]]:
-    """Fetches relationship data between two citizens from Airtable."""
-    # Ensure usernames are ordered alphabetically for consistent querying
-    # Airtable stores Citizen1 as the alphabetically first username.
-    c1_escaped, c2_escaped = sorted([_escape_airtable_value(username1), _escape_airtable_value(username2)])
-    
-    formula = f"AND({{Citizen1}}='{c1_escaped}', {{Citizen2}}='{c2_escaped}')"
-    try:
-        records = tables["relationships"].all(formula=formula, max_records=1)
-        if records:
-            fields = records[0]['fields']
-            # Return a dictionary with the relevant relationship fields
-            return {
-                "Citizen1": fields.get("Citizen1"), # This will be c1_escaped
-                "Citizen2": fields.get("Citizen2"), # This will be c2_escaped
-                "Title": fields.get("Title"),
-                "StrengthScore": fields.get("StrengthScore"),
-                "TrustScore": fields.get("TrustScore")
-            }
-        return None # No relationship record found
-    except Exception as e:
-        print(f"  {LogColors.FAIL}Error fetching relationship between {username1} and {username2}: {e}{LogColors.ENDC}")
-        return None
 
 def get_signoria_members(tables: Dict[str, AirtableTable], nlr_username: str = "NLR") -> List[Dict]:
-    """Fetches citizens, determines Signoria (top 9 by influence + NLR), sorted by influence."""
+    """Top 9 citizens by Influence + NLR, speaking order randomized."""
+    all_citizens_raw = tables["citizens"].all()
+    all_citizens = [
+        {
+            "id": rec["id"],
+            "username": rec["fields"].get("Username"),
+            "influence": float(rec["fields"].get("Influence", 0.0) or 0.0),
+            "fields": rec["fields"],
+        }
+        for rec in all_citizens_raw if rec["fields"].get("Username")
+    ]
+    all_citizens.sort(key=lambda x: x["influence"], reverse=True)
+
+    signoria = all_citizens[:9]
+    if not any(m["username"] == nlr_username for m in signoria):
+        nlr = next((c for c in all_citizens if c["username"] == nlr_username), None)
+        if nlr:
+            signoria.append(nlr)
+        else:
+            print(f"{LogColors.WARNING}Citizen {nlr_username} not found. Signoria will consist of top 9 only.{LogColors.ENDC}")
+
+    random.shuffle(signoria)
+    print(f"{LogColors.OKCYAN}Signoria convened ({len(signoria)} members, speaking order randomized):{LogColors.ENDC}")
+    for i, member in enumerate(signoria):
+        print(f"  {i + 1}. {display_name_of(member)} (Influence: {member['influence']:.0f})")
+    return signoria
+
+
+def display_name_of(member: Dict) -> str:
+    name = f"{member['fields'].get('FirstName', '')} {member['fields'].get('LastName', '')}".strip()
+    return name or member["username"]
+
+
+def load_council_relationships(tables: Dict[str, AirtableTable], members: List[Dict]) -> List[Dict[str, Any]]:
+    """One fetch of RELATIONSHIPS, filtered to pairs sitting at the table."""
+    usernames = {m["username"] for m in members}
     try:
-        all_citizens_raw = tables["citizens"].all()
-        all_citizens = [
-            {
-                "id": rec["id"],
-                "username": rec["fields"].get("Username"),
-                "influence": float(rec["fields"].get("Influence", 0.0) or 0.0), # Ensure float, default 0
-                "fields": rec["fields"]  # Store all fields from Airtable
-            }
-            for rec in all_citizens_raw if rec["fields"].get("Username")
-        ]
-
-        # Sort by influence descending
-        all_citizens.sort(key=lambda x: x["influence"], reverse=True)
-
-        top_9 = all_citizens[:9]
-        signoria_members = top_9[:] # Make a copy
-
-        nlr_member_data = None
-        nlr_in_top_9 = any(member["username"] == nlr_username for member in top_9)
-
-        if not nlr_in_top_9:
-            for citizen in all_citizens:
-                if citizen["username"] == nlr_username:
-                    nlr_member_data = citizen
-                    break
-            if nlr_member_data:
-                signoria_members.append(nlr_member_data)
-                # Re-sort if NLR was added and might disrupt order (though unlikely if top 9 is small)
-                signoria_members.sort(key=lambda x: x["influence"], reverse=True)
-            else:
-                print(f"{LogColors.WARNING}Citizen {nlr_username} not found. Signoria will consist of top 9.{LogColors.ENDC}")
-        
-        # Ensure NLR is first if present, then sort by influence for the rest
-        final_signoria = []
-        nlr_found_for_final_list = False
-        for member in signoria_members:
-            if member["username"] == nlr_username:
-                final_signoria.insert(0, member) # NLR always first
-                nlr_found_for_final_list = True
-                break
-        
-        # Add others, sorted by influence
-        other_members = [m for m in signoria_members if m["username"] != nlr_username]
-        other_members.sort(key=lambda x: x["influence"], reverse=True)
-        final_signoria.extend(other_members)
-
-        # If NLR was not in the initial signoria_members list (e.g. not in top 9 and not found separately)
-        # This ensures if NLR was not found at all, we don't add a placeholder.
-        if not nlr_found_for_final_list and nlr_member_data and nlr_username not in [m['username'] for m in final_signoria] :
-             # This case should be rare if logic above is correct, but as a safeguard
-             final_signoria.insert(0, nlr_member_data)
-
-
-        print(f"{LogColors.OKCYAN}Signoria Members ({len(final_signoria)}):{LogColors.ENDC}")
-        for i, member in enumerate(final_signoria):
-            # Access FirstName and LastName from the 'fields' dictionary
-            display_name = f"{member['fields'].get('FirstName', '')} {member['fields'].get('LastName', '')}".strip() or member['username']
-            # Initial log before shuffling will show NLR first then by influence
-            # print(f"  {i+1}. {display_name} (Influence: {member['influence']}) - Pre-shuffle order")
-
-        # Randomize the talking order of the final list
-        random.shuffle(final_signoria)
-        print(f"{LogColors.OKCYAN}Signoria Members (Order of Speech Randomized - {len(final_signoria)}):{LogColors.ENDC}")
-        for i, member in enumerate(final_signoria):
-            display_name = f"{member['fields'].get('FirstName', '')} {member['fields'].get('LastName', '')}".strip() or member['username']
-            print(f"  {i+1}. {display_name} (Influence: {member['influence']})")
-            
-        return final_signoria
-
+        all_rels = tables["relationships"].all()
     except Exception as e:
-        print(f"{LogColors.FAIL}Error fetching or processing Signoria members: {e}{LogColors.ENDC}")
+        print(f"{LogColors.FAIL}Error fetching relationships: {e}{LogColors.ENDC}")
         return []
-
-def add_message_to_kin_channel(
-    kinos_api_key: str,
-    kin_id: str,
-    message_content: str,
-    role: str = "user",
-    metadata: Optional[Dict] = None,
-    kinos_api_base_url: str = DEFAULT_KINOS_API_BASE_URL,
-    blueprint_id: str = DEFAULT_KINOS_BLUEPRINT_ID
-) -> bool:
-    """Adds a message to a Kin's specific channel using KinOS API."""
-    url = f"{kinos_api_base_url}/v2/blueprints/{blueprint_id}/kins/{kin_id}/channels/{SIGNORIA_CHANNEL_ID}/add-message"
-    headers = {
-        "Authorization": f"Bearer {kinos_api_key}",
-        "Content-Type": "application/json"
-    }
-    payload = {"message": message_content, "role": role}
-    if metadata:
-        payload["metadata"] = metadata
-
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=30)
-        response.raise_for_status()
-        resp_data = response.json()
-        if resp_data.get("status") == "success":
-            print(f"  {LogColors.OKGREEN}Added message to {kin_id}'s '{SIGNORIA_CHANNEL_ID}' channel.{LogColors.ENDC}")
-            return True
-        else:
-            print(f"  {LogColors.FAIL}Failed to add message to {kin_id}'s channel: {resp_data.get('message')}{LogColors.ENDC}")
-            return False
-    except requests.exceptions.RequestException as e:
-        print(f"  {LogColors.FAIL}API Error adding message to {kin_id}'s channel: {e}{LogColors.ENDC}")
-        return False
-
-def send_message_to_kin_channel(
-    kinos_api_key: str,
-    kin_id: str,
-    prompt_content: str,
-    model: str = DEFAULT_KINOS_MODEL,
-    add_system_content: Optional[str] = None, # New parameter for system context
-    kinos_api_base_url: str = DEFAULT_KINOS_API_BASE_URL,
-    blueprint_id: str = DEFAULT_KINOS_BLUEPRINT_ID
-) -> Optional[str]:
-    """Sends a message to a Kin's channel and gets a response using KinOS API."""
-    url = f"{kinos_api_base_url}/v2/blueprints/{blueprint_id}/kins/{kin_id}/channels/{SIGNORIA_CHANNEL_ID}/messages"
-    headers = {
-        "Authorization": f"Bearer {kinos_api_key}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "content": prompt_content,
-        "model": model,
-    }
-    if add_system_content:
-        payload["addSystem"] = add_system_content
-        print(f"  {LogColors.OKCYAN}Sending prompt to {kin_id} with system context (Model: {model})...{LogColors.ENDC}")
-    else:
-        print(f"  {LogColors.OKCYAN}Sending prompt to {kin_id} (Model: {model})...{LogColors.ENDC}")
-    
-    # For debugging the payload being sent
-    # print(f"Payload for KinOS: {json.dumps(payload, indent=2)}")
-
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=300) # 5 min timeout for AI response
-        response.raise_for_status()
-        resp_data = response.json()
-        if resp_data.get("status") == "completed" and "content" in resp_data:
-            print(f"  {LogColors.OKGREEN}Received response from {kin_id}.{LogColors.ENDC}")
-            content = resp_data["content"]
-            
-            # Supprimer les balises <think>...</think>
-            content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
-            
-            # Remplacer les \\n littéraux par de vrais sauts de ligne
-            content = content.replace('\\n', '\n')
-            
-            # Nettoyer les espaces en début/fin
-            content = content.strip()
-            
-            # Supprimer les guillemets en début/fin si présents
-            if content.startswith('"') and content.endswith('"'):
-                content = content[1:-1].strip()
-            
-            return content
-        else:
-            print(f"  {LogColors.FAIL}KinOS API did not return a successful response or content for {kin_id}: {resp_data}{LogColors.ENDC}")
-            return None
-    except requests.exceptions.RequestException as e:
-        print(f"  {LogColors.FAIL}API Error sending message to {kin_id}'s channel: {e}{LogColors.ENDC}")
-        return None
-    except Exception as e:
-        print(f"  {LogColors.FAIL}Unexpected error sending/receiving message for {kin_id}: {e}{LogColors.ENDC}")
-        return None
+    council_rels = []
+    for rec in all_rels:
+        f = rec["fields"]
+        if f.get("Citizen1") in usernames and f.get("Citizen2") in usernames:
+            council_rels.append({
+                "Citizen1": f.get("Citizen1"),
+                "Citizen2": f.get("Citizen2"),
+                "Title": f.get("Title"),
+                "StrengthScore": f.get("StrengthScore"),
+                "TrustScore": f.get("TrustScore"),
+            })
+    print(f"{LogColors.OKCYAN}{len(council_rels)} relationships between council members loaded.{LogColors.ENDC}")
+    return council_rels
 
 
 def create_airtable_message_record(
     tables: Dict[str, AirtableTable],
     sender_username: str,
-    receiver_username: str, # Special value like "SignoriaCouncil"
     content: str,
-    message_type: str
+    message_type: str,
 ) -> bool:
-    """Creates a message record in Airtable."""
+    """Carves a council statement into the city's memory (MESSAGES table)."""
     try:
-        message_id = f"sig_disc_{sender_username}_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}"
-        created_at_iso = datetime.now(timezone.utc).isoformat()
-
-        payload = {
-            "MessageId": message_id,
+        now_iso = datetime.now(timezone.utc).isoformat()
+        tables["messages"].create({
+            "MessageId": f"sig_disc_{sender_username}_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}",
             "Sender": sender_username,
-            "Receiver": receiver_username,
+            "Receiver": "SignoriaCouncil",
             "Content": content,
             "Type": message_type,
-            "CreatedAt": created_at_iso,
-            "ReadAt": created_at_iso # Mark as read immediately for council messages
-            # "UpdatedAt" is typically handled automatically by Airtable and should not be set manually.
-        }
-        tables["messages"].create(payload)
-        print(f"  {LogColors.OKGREEN}Recorded message from {sender_username} to {receiver_username} in Airtable (ID: {message_id}).{LogColors.ENDC}")
+            "CreatedAt": now_iso,
+            "ReadAt": now_iso,  # council statements are heard by all, immediately
+        })
         return True
     except Exception as e:
-        print(f"  {LogColors.FAIL}Error creating Airtable message record for {sender_username}: {e}{LogColors.ENDC}")
+        print(f"  {LogColors.FAIL}Error recording message from {sender_username} in Airtable: {e}{LogColors.ENDC}")
         return False
 
-def main(kinos_model: str, kinos_api_url: str, kinos_blueprint: str):
-    """Main function to run the Signoria discussion script."""
-    print(f"{LogColors.HEADER}--- Signoria Discussion Simulation ---{LogColors.ENDC}")
 
-    airtable_tables = initialize_airtable()
-    kinos_key = get_kinos_api_key()
+# --- Local Ollama voices ---
 
-    if not airtable_tables or not kinos_key:
-        print(f"{LogColors.FAIL}Exiting due to missing Airtable or KinOS configuration.{LogColors.ENDC}")
-        return
-
-    signoria_members = get_signoria_members(airtable_tables)
-    if not signoria_members:
-        print(f"{LogColors.FAIL}No Signoria members found. Exiting.{LogColors.ENDC}")
-        return
-
-    print(f"\n{LogColors.BOLD}Starting discussion round...{LogColors.ENDC}")
-
-    for speaker_info in signoria_members:
-        speaker_username = speaker_info["username"]
-        # Construct display_name from fields within speaker_info
-        speaker_display_name = f"{speaker_info['fields'].get('FirstName', '')} {speaker_info['fields'].get('LastName', '')}".strip() or speaker_username
-        
-        print(f"\n{LogColors.HEADER}--- Next Speaker: {speaker_display_name} ({speaker_username}) ---{LogColors.ENDC}")
-
-        # Doge's Comment
-        try:
-            doge_comment = input(f"{LogColors.OKBLUE}Doge's Comment (press Enter to skip): {LogColors.ENDC}")
-            if doge_comment.strip():
-                print(f"{LogColors.OKCYAN}Broadcasting Doge's comment to all Signoria members...{LogColors.ENDC}")
-                doge_message_content = f"Doge's Comment: {doge_comment.strip()}"
-                for member in signoria_members:
-                    add_message_to_kin_channel(
-                        kinos_key, member["username"], doge_message_content, role="system",
-                        kinos_api_base_url=kinos_api_url, blueprint_id=kinos_blueprint
-                    )
-        except EOFError: # Handle Ctrl+D or piped input ending
-            print(f"{LogColors.WARNING}\nEOF detected. Ending discussion.{LogColors.ENDC}")
-            break
-        except KeyboardInterrupt:
-            print(f"{LogColors.WARNING}\nDiscussion interrupted by user. Exiting.{LogColors.ENDC}")
-            break
+def preload_model(model: str, timeout_seconds: int = 300) -> None:
+    """Warm the local model before the first speaker (shared-GPU cold loads are slow)."""
+    response = requests.post(
+        OLLAMA_CHAT_URL,
+        json={"model": model, "messages": [], "keep_alive": KEEP_ALIVE},
+        timeout=timeout_seconds,
+    )
+    response.raise_for_status()
 
 
-        # Speaker's Turn
-        prompt = (
-            f"Signore/Signora {speaker_display_name}, the Signoria awaits your words. "
-            f"What are your thoughts on the current situation in Venice, and what priorities do you suggest for the Republic's future?"
+def build_persona_prompt(member: Dict, members: List[Dict], relationships: List[Dict], topic: str) -> str:
+    """Compact persona + council context — the 2B model rewards brevity.
+
+    Deliberate scope reduction vs the old KinOS version: no ledger, no full
+    profile JSON — a 2B context cannot hold them and stay coherent.
+    """
+    f = member["fields"]
+    lines = [
+        f"Tu es {display_name_of(member)} ({member['username']}), "
+        f"{f.get('SocialClass', 'citoyen')} de Venise, membre de la Signoria, le haut conseil de la ville.",
+    ]
+    personality = f.get("CorePersonality") or f.get("Personality") or f.get("Description")
+    if personality:
+        lines.append(f"Personnalité: {str(personality)[:300]}")
+    if f.get("FamilyMotto"):
+        lines.append(f"Devise familiale: {f['FamilyMotto']}")
+    lines.append(f"Influence: {member['influence']:.0f}. Ducats: {f.get('Ducats', 0):.0f}.")
+
+    others = ", ".join(display_name_of(m) for m in members if m["username"] != member["username"])
+    lines.append(f"Autour de la table siègent: {others}.")
+
+    my_rels = [r for r in relationships if member["username"] in (r["Citizen1"], r["Citizen2"])]
+    if my_rels:
+        rel_lines = []
+        for r in my_rels[:8]:
+            other = r["Citizen2"] if r["Citizen1"] == member["username"] else r["Citizen1"]
+            parts = [f"avec {other}"]
+            if r.get("Title"):
+                parts.append(str(r["Title"]))
+            if r.get("TrustScore") is not None:
+                parts.append(f"confiance {r['TrustScore']:.0f}")
+            rel_lines.append(" ".join(parts))
+        lines.append("Tes relations au conseil: " + "; ".join(rel_lines) + ".")
+
+    lines.append(
+        f"Le Doge a soumis au débat: \"{topic}\" "
+        "Parle en ton nom propre, à la première personne, en 3 à 6 phrases. "
+        "Prends position clairement, réagis aux orateurs précédents si pertinent. "
+        "Réponds en français, sans préambule ni guillemets."
+    )
+    return "\n".join(lines)
+
+
+def build_transcript_prompt(transcript: List[Dict], speaker_display_name: str) -> str:
+    if not transcript:
+        return (
+            f"Le conseil s'ouvre. {speaker_display_name}, vous parlez en premier. "
+            "Quelle est votre position?"
         )
-
-        # Prepare system context for the KinOS API
-        speaker_ledger = _get_ledger_for_citizen(speaker_username)
-        current_speaker_profile_data = {
-            "username": speaker_info["username"],
-            "influence": speaker_info["influence"],
-            "profile_fields": speaker_info["fields"], # Full profile fields
-            "ledger": speaker_ledger # Ledger for the current speaker
-        }
-
-        all_member_profiles_data = []
-        for m in signoria_members:
-            # Only include full profile fields, not the detailed ledger for non-speakers
-            all_member_profiles_data.append({
-                "username": m["username"],
-                "influence": m["influence"],
-                "profile_fields": m["fields"] # Full profile fields for all members
-            })
-
-        signoria_relationships_list = []
-        member_usernames_for_rels = [m['username'] for m in signoria_members]
-        for i in range(len(member_usernames_for_rels)):
-            for j in range(i + 1, len(member_usernames_for_rels)):
-                user1 = member_usernames_for_rels[i]
-                user2 = member_usernames_for_rels[j]
-                rel_data = _get_relationship_data(airtable_tables, user1, user2)
-                if rel_data:
-                    signoria_relationships_list.append(rel_data)
-        
-        system_context_data = {
-            "discussion_context": (
-                "You are a member of the Signoria, Venice's highest council, composed of 10 influential figures including yourself. "
-                "You are currently in a formal discussion session. The Doge (human user) may provide comments between speakers. "
-                "You are expected to speak thoughtfully on matters of state, considering your relationships with other members and the overall political climate. "
-                "Your response should be concise and directly address the Doge's prompt.\n"
-                "Contextual Data Guide:\n"
-                "- 'current_speaker_profile': Your detailed profile, including your 'ledger' (inventory, buildings, etc.).\n"
-                "- 'all_signoria_member_profiles': Profiles of all Signoria members present (does NOT include their detailed 'ledger' unless they are the current speaker).\n"
-                "- 'signoria_relationships': Details on relationships between Signoria members."
-            ),
-            "current_speaker_profile": current_speaker_profile_data, # Includes ledger
-            "all_signoria_member_profiles": all_member_profiles_data, # Does not include ledger for non-speakers
-            "signoria_relationships": signoria_relationships_list
-        }
-        add_system_json = json.dumps(system_context_data)
-        
-        ai_response = send_message_to_kin_channel(
-            kinos_key, 
-            speaker_username, 
-            prompt, 
-            model=kinos_model,
-            add_system_content=add_system_json, # Pass the system context
-            kinos_api_base_url=kinos_api_url, 
-            blueprint_id=kinos_blueprint
-        )
-
-        if ai_response:
-            print(f"\n{LogColors.BOLD}{speaker_display_name} says:{LogColors.ENDC}\n{ai_response}\n")
-
-            # Broadcast response to other members
-            print(f"{LogColors.OKCYAN}Broadcasting {speaker_display_name}'s response to other Signoria members...{LogColors.ENDC}")
-            broadcast_message_content = f"{speaker_display_name} says: {ai_response}"
-            for member in signoria_members:
-                if member["username"] != speaker_username:
-                    add_message_to_kin_channel(
-                        kinos_key, member["username"], broadcast_message_content, role="user",
-                        metadata={"speaker_username": speaker_username},
-                        kinos_api_base_url=kinos_api_url, blueprint_id=kinos_blueprint
-                    )
-            
-            # Record response in Airtable
-            create_airtable_message_record(
-                airtable_tables,
-                sender_username=speaker_username,
-                receiver_username="SignoriaCouncil", # Special receiver
-                content=ai_response,
-                message_type="signoria_discussion_statement"
-            )
-        else:
-            print(f"{LogColors.WARNING}{speaker_display_name} did not provide a response.{LogColors.ENDC}")
-        
-        try:
-            if speaker_info != signoria_members[-1]: # Not the last speaker
-                 input(f"{LogColors.OKBLUE}Press Enter to continue to the next speaker...{LogColors.ENDC}")
-        except EOFError:
-            print(f"{LogColors.WARNING}\nEOF detected. Ending discussion.{LogColors.ENDC}")
-            break
-        except KeyboardInterrupt:
-            print(f"{LogColors.WARNING}\nDiscussion interrupted by user. Exiting.{LogColors.ENDC}")
-            break
+    lines = ["Les orateurs précédents ont dit:"]
+    for entry in transcript[-TRANSCRIPT_LAST_N:]:
+        lines.append(f"- {entry['speaker']}: {entry['text'][:STATEMENT_TRUNCATE_CHARS]}")
+    lines.append(f"{speaker_display_name}, la parole est à vous. Quelle est votre position?")
+    return "\n".join(lines)
 
 
-    print(f"\n{LogColors.HEADER}--- Signoria Discussion Ended ---{LogColors.ENDC}")
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Interactive Signoria Discussion Simulation Script.")
-    parser.add_argument(
-        "--model",
-        type=str,
-        default=DEFAULT_KINOS_MODEL,
-        help=f"KinOS model to use for AI responses (default: {DEFAULT_KINOS_MODEL})."
+def speak(model: str, persona_prompt: str, transcript_prompt: str) -> str:
+    """One speaker's turn. Raises on HTTP/network failure (fail loud)."""
+    response = requests.post(
+        OLLAMA_CHAT_URL,
+        json={
+            "model": model,
+            "messages": [
+                {"role": "system", "content": persona_prompt},
+                {"role": "user", "content": transcript_prompt},
+            ],
+            "stream": False,
+            "keep_alive": KEEP_ALIVE,
+            "options": {"temperature": 0.9, "num_predict": 4000},
+        },
+        timeout=SPEAKER_TIMEOUT_SECONDS,
     )
-    parser.add_argument(
-        "--kinos_url",
-        type=str,
-        default=os.getenv("KINOS_API_BASE_URL", DEFAULT_KINOS_API_BASE_URL),
-        help=f"KinOS API base URL (default: {os.getenv('KINOS_API_BASE_URL', DEFAULT_KINOS_API_BASE_URL)})."
-    )
-    parser.add_argument(
-        "--blueprint",
-        type=str,
-        default=os.getenv("KINOS_BLUEPRINT_ID", DEFAULT_KINOS_BLUEPRINT_ID),
-        help=f"KinOS Blueprint ID (default: {os.getenv('KINOS_BLUEPRINT_ID', DEFAULT_KINOS_BLUEPRINT_ID)})."
-    )
+    response.raise_for_status()
+    content = response.json()["message"]["content"].strip()
+    if content.startswith('"') and content.endswith('"'):
+        content = content[1:-1].strip()
+    return content
+
+
+# --- Council session ---
+
+def prompt_doge(label: str) -> Optional[str]:
+    """Reads a line from the Doge if a keyboard is attached; None otherwise."""
+    if not sys.stdin.isatty():
+        return None
+    try:
+        text = input(f"{LogColors.OKBLUE}{label}{LogColors.ENDC}")
+        return text.strip() or None
+    except (EOFError, KeyboardInterrupt):
+        return None
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Signoria council debate (local Ollama voices).")
+    parser.add_argument("--topic", type=str, default=None,
+                        help="Question the Doge submits to the council. Asked interactively if omitted.")
+    parser.add_argument("--rounds", type=int, default=1, help="Number of full speaking rounds (default 1).")
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Cap the number of speakers per round (testing).")
+    parser.add_argument("--auto", action="store_true",
+                        help="Non-interactive: no Doge prompts between speakers; NLR is skipped.")
+    parser.add_argument("--model", type=str, default=DEFAULT_MODEL,
+                        help=f"Local Ollama model (default: {DEFAULT_MODEL}).")
+    parser.add_argument("--nlr", type=str, default="NLR", help="Username of the human Doge citizen.")
     args = parser.parse_args()
 
-    main(kinos_model=args.model, kinos_api_url=args.kinos_url, kinos_blueprint=args.blueprint)
+    print(f"{LogColors.HEADER}--- Signoria Council Debate (local voices) ---{LogColors.ENDC}")
+
+    tables = initialize_airtable()
+    if not tables:
+        sys.exit(1)
+
+    members = get_signoria_members(tables, nlr_username=args.nlr)
+    if not members:
+        print(f"{LogColors.FAIL}No Signoria members found. Exiting.{LogColors.ENDC}")
+        sys.exit(1)
+
+    topic = args.topic
+    if not topic:
+        topic = prompt_doge("Question du Doge au conseil: ")
+    if not topic:
+        print(f"{LogColors.FAIL}No topic given (use --topic in non-interactive mode). Exiting.{LogColors.ENDC}")
+        sys.exit(1)
+
+    relationships = load_council_relationships(tables, members)
+
+    print(f"{LogColors.OKCYAN}Warming the local model ({args.model})...{LogColors.ENDC}")
+    preload_model(args.model)
+
+    create_airtable_message_record(tables, args.nlr, f"Le Doge soumet au conseil: {topic}",
+                                   "signoria_discussion_topic")
+
+    transcript: List[Dict] = []
+    for round_index in range(args.rounds):
+        speakers = members[:args.limit] if args.limit else members
+        if args.rounds > 1:
+            print(f"\n{LogColors.HEADER}=== Round {round_index + 1}/{args.rounds} ==={LogColors.ENDC}")
+
+        for member in speakers:
+            name = display_name_of(member)
+            print(f"\n{LogColors.HEADER}--- {name} ({member['username']}) ---{LogColors.ENDC}")
+
+            if not args.auto:
+                comment = prompt_doge("Commentaire du Doge (Entrée pour passer): ")
+                if comment:
+                    transcript.append({"speaker": "Le Doge", "text": comment})
+                    create_airtable_message_record(tables, args.nlr, comment, "signoria_discussion_statement")
+
+            if member["username"] == args.nlr:
+                statement = None if args.auto else prompt_doge(f"Déclaration de {name} (vous — Entrée pour passer): ")
+                if not statement:
+                    print(f"{LogColors.WARNING}{name} (le Doge) garde le silence ce tour-ci.{LogColors.ENDC}")
+                    continue
+            else:
+                persona = build_persona_prompt(member, members, relationships, topic)
+                turn = build_transcript_prompt(transcript, name)
+                try:
+                    statement = speak(args.model, persona, turn)
+                except (requests.exceptions.RequestException, KeyError) as e:
+                    print(f"{LogColors.FAIL}{name}'s mind is clouded (Ollama error: {e}). Skipping speaker.{LogColors.ENDC}")
+                    continue
+
+            print(f"{LogColors.BOLD}{name} dit:{LogColors.ENDC}\n{statement}")
+            transcript.append({"speaker": name, "text": statement})
+            if create_airtable_message_record(tables, member["username"], statement,
+                                              "signoria_discussion_statement"):
+                print(f"  {LogColors.OKGREEN}Statement recorded in MESSAGES.{LogColors.ENDC}")
+
+    print(f"\n{LogColors.HEADER}--- Council adjourned: {len(transcript)} statements carved into memory ---{LogColors.ENDC}")
+
+
+if __name__ == "__main__":
+    main()
