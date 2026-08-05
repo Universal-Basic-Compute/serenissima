@@ -90,7 +90,7 @@ export async function GET(request: Request) {
     const guilds: Guild[] = records.map(record => {
       let emblemPath = record.get('GuildEmblem') as string | undefined;
       let bannerPath = record.get('GuildBanner') as string | undefined;
-      const backendBaseUrl = 'https://backend.serenissima.ai/public_assets';
+      const backendBaseUrl = '/public_assets';
 
       if (emblemPath) {
         if (emblemPath.startsWith('images/guilds/')) {

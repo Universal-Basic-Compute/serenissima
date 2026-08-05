@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
           username: username,
           firstName: record.get('FirstName') as string || '',
           lastName: record.get('LastName') as string || '',
-          coatOfArmsImageUrl: username ? `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${username}.png` : null,
+          coatOfArmsImageUrl: username ? `/public_assets/images/coat-of-arms/${username}.png` : null,
           position: positionStr,
         });
       }

@@ -1,3 +1,34 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:61ed4badd819764cfe81ff9b377ab8eb4cd2660044628c2a63b0162637a01cda
-size 2505
+{
+  "name": "Art Gallery",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "retail_goods",
+  "size": 2,
+ "calculationsAnalysis": "The Art Gallery balances cultural curation with commercial viability in Venice's art market. The construction cost of 6,000,000 ducats reflects specialized exhibition spaces, climate control, and security systems required for valuable artworks. The income of 35,000 ducats (0.58% return) represents commissions from art sales (20-30%), exhibition fees from artists, and private event hosting. The maintenance cost of 40,000 ducats exceeds income, creating a realistic scenario where cultural institutions require patronage or must carefully curate high-value exhibitions to remain profitable. The employment capacity of 25 represents curators, gallery assistants, security staff, and art handlers. The construction time of 14 days reflects the specialized requirements for proper lighting, wall systems, and climate control. This building creates a strategic cultural hub that connects artists with collectors, enhances Venice's artistic reputation, and provides a marketplace for the emerging art economy.",
+ "shortDescription": "Professional exhibition space for displaying and selling paintings, sculptures, and fine arts.",
+ "fullDescription": "Serving as Venice's premier art marketplace, galleries provide sophisticated exhibition spaces where established and emerging artists can display their works to discerning collectors. Featuring adjustable lighting systems, climate-controlled environments, flexible wall configurations, and elegant viewing areas, these spaces create the perfect setting for artistic appreciation and commercial transactions. Gallery owners act as cultural curators, selecting exhibitions that shape Venice's artistic tastes while facilitating connections between creators and patrons.",
+ "flavorText": "Art without audience is like a song unheard—here we transform private creation into public culture, where vision meets patron and beauty finds its rightful home.",
+  "constructionCosts": {
+    "ducats": 6000000,
+    "timber": 780,
+    "bricks": 1570,
+    "stone": 2090,
+    "glass": 420,
+    "marble": 520
+  },
+  "maintenanceCost": 3000,
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 100,
+    "stores": [
+      "paintings"
+    ],
+    "sells": [
+      "paintings"
+    ]
+  },
+  "buildTier": 3,
+  "workTier": 4,
+  "consumeTier": 4,
+  "constructionMinutes": 20160
+}

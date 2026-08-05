@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:be0afab52f4eba226e69e53d67bed00c924201f094254a686476f47710a6d3cc
-size 302
+{
+  "id": "rope",
+  "name": "Rope",
+  "category": "processed_materials",
+  "subCategory": "naval_supplies",
+  "description": "Strong, durable cordage essential for maritime activities and construction.",
+  "importPrice": 531.0,
+  "lifetimeHours": 8775,
+  "consumptionHours": 58,
+  "tier": 1
+}

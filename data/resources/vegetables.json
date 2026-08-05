@@ -1,3 +1,16 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:cb9ba27e4fdc6895f52c305237d8d6ea04067d8952d17e62ef0571b50e808a27
-size 718
+{
+  "id": "vegetables",
+  "name": "Vegetables",
+  "category": "raw_materials",
+  "subCategory": "food",
+  "description": "Assorted fresh vegetables, essential for daily meals, stews, and providing vital nutrients. Sourced from local gardens and regional farms.",
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "Vegetables formed a core part of the Venetian diet, especially for the common populace. The islands of the lagoon were famous for their market gardens.",
+    "culturalContext": "Seasonal vegetables were a highlight of market days, influencing daily cooking."
+  },
+  "importPrice": 450.0,
+  "lifetimeHours": 1800,
+  "consumptionHours": 1,
+  "tier": 1
+}

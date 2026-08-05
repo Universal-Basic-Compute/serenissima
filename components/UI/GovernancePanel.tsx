@@ -237,7 +237,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
           influence: citizen.influence || 0,
           socialClass: citizen.socialClass,
           coatOfArmsImageUrl: citizen.coatOfArmsImageUrl || 
-            `https://backend.serenissima.ai/public/assets/images/coat-of-arms/${citizen.username}.png`,
+            `/public/assets/images/coat-of-arms/${citizen.username}.png`,
           familyMotto: citizen.familyMotto || '',
           isCurrentUser: citizen.username === currentUsername
         }));
@@ -283,7 +283,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
           influence: citizen.influence || 0,
           socialClass: citizen.socialClass,
           coatOfArmsImageUrl: citizen.coatOfArmsImageUrl || 
-            `https://backend.serenissima.ai/public/assets/images/coat-of-arms/${citizen.username}.png`,
+            `/public/assets/images/coat-of-arms/${citizen.username}.png`,
           familyMotto: citizen.familyMotto || '',
           isCurrentUser: citizen.username === currentUsername
         }));
@@ -973,12 +973,12 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                         {/* Main citizen image */}
                         <div className="w-20 h-20 mr-4 rounded-lg border-2 border-amber-600 shadow-md overflow-hidden flex-shrink-0">
                           <img 
-                            src={`https://backend.serenissima.ai/public_assets/images/citizens/${player.username || 'default'}.jpg`}
+                            src={`/public_assets/images/citizens/${player.username || 'default'}.jpg`}
                             alt={`${player.firstName} ${player.lastName}`}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               // Fallback to default image if the specific one doesn't exist
-                              (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
+                              (e.target as HTMLImageElement).src = '/public_assets/images/citizens/default.jpg';
                             }}
                           />
                         </div>
@@ -1005,7 +1005,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
                                     // Fallback to default coat of arms
-                                    (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public/assets/images/coat-of-arms/default.png';
+                                    (e.target as HTMLImageElement).src = '/public/assets/images/coat-of-arms/default.png';
                                   }}
                                 />
                               </div>
@@ -1146,10 +1146,10 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                                 <div className="h-10 w-10 flex-shrink-0">
                                   <img 
                                     className="h-10 w-10 rounded-full border border-amber-300"
-                                    src={`https://backend.serenissima.ai/public_assets/images/citizens/${player.username || 'default'}.jpg`}
+                                    src={`/public_assets/images/citizens/${player.username || 'default'}.jpg`}
                                     alt={`${player.firstName} ${player.lastName}`}
                                     onError={(e) => {
-                                      (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
+                                      (e.target as HTMLImageElement).src = '/public_assets/images/citizens/default.jpg';
                                     }}
                                   />
                                 </div>
@@ -1293,7 +1293,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                                 {report.affectedResources.map((resource) => (
                                   <span key={resource} className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full flex items-center">
                                     <img 
-                                      src={`https://backend.serenissima.ai/public_assets/images/resources/${resource.toLowerCase().replace(/ /g, '_')}.png`}
+                                      src={`/public_assets/images/resources/${resource.toLowerCase().replace(/ /g, '_')}.png`}
                                       alt=""
                                       className="w-4 h-4 mr-1"
                                       onError={(e) => {
@@ -1317,7 +1317,7 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                                   <div key={`price-${change.resource}`} className="flex items-center">
                                     <span className="mr-2 flex items-center">
                                       <img 
-                                        src={`https://backend.serenissima.ai/public_assets/images/resources/${change.resource.toLowerCase().replace(/ /g, '_')}.png`}
+                                        src={`/public_assets/images/resources/${change.resource.toLowerCase().replace(/ /g, '_')}.png`}
                                         alt=""
                                         className="w-4 h-4 mr-1"
                                         onError={(e) => {

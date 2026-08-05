@@ -1,3 +1,17 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:3e9a243475b2b935e71de914a5f1b5b05620cfdad8cdd5cf427e3d0c18a76ef7
-size 200
+[
+  "building_materials",
+  "clay",
+  "water",
+  "flax",
+  "glass",
+  "grain",
+  "iron",
+  "limestone",
+  "olives",
+  "rags",
+  "sand",
+  "soap",
+  "stone",
+  "war_galley",
+  "water"
+]

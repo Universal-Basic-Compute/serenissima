@@ -1,3 +1,24 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:ab0824c8d2ccefa78a1ca82d51815e6316c930fbf27b338b7b7dbdea72bc1715
-size 889
+{
+  "id": "fine_glassware",
+  "name": "Fine Glassware",
+  "category": "finished_goods",
+  "subCategory": "luxury_goods",
+  "description": "Exquisite Venetian glassware, renowned throughout Europe for its clarity and craftsmanship. Each piece showcases the mastery of Murano glassblowers.",
+  "historicalNotes": {
+    "introductionYear": 1290,
+    "notableProducers": [
+      "Angelo Barovier",
+      "Murano Guild"
+    ],
+    "historicalSignificance": "Venetian glassware became one of the Republic's most prestigious exports. The secrets of its production were closely guarded, with glassmakers confined to Murano island and forbidden from leaving the Republic.",
+    "historicalContracts": [
+      "European nobility",
+      "Ottoman court",
+      "Papal states"
+    ]
+  },
+  "importPrice": 5839.2,
+  "lifetimeHours": null,
+  "consumptionHours": 584,
+  "tier": 4
+}

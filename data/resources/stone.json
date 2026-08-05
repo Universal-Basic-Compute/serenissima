@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:762402c2b61b7f9dfff21829b7a13bf76ce163b2e7e6d34af0108010d7f90471
-size 308
+{
+  "id": "stone",
+  "name": "Stone",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": "Durable building material quarried from the mainland, essential for Venetian construction.",
+  "importPrice": 180.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

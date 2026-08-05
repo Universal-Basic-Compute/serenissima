@@ -1,3 +1,25 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:caf14f9e12d881f9e5ca81df7652bd9753e9340ae8614b227f3aaf961adc88eb
-size 1400
+{
+  "id": "war_galley",
+  "name": "War Galley",
+  "category": "finished_goods",
+  "subCategory": "naval_vessels",
+  "description": "A powerful Venetian warship combining oars and sails, designed for naval combat and patrol duties. With reinforced hull, multiple cannon emplacements, and space for marines, these vessels project Venetian military power throughout the Mediterranean.",
+  "historicalNotes": {
+    "introductionYear": 1280,
+    "notableProducers": [
+      "Venetian Arsenal",
+      "Republic Naval Yards"
+    ],
+    "historicalSignificance": "The war galley represented the backbone of Venetian naval power, allowing the Republic to maintain control over vital trade routes and project military force throughout the Mediterranean. The standardized construction methods of the Venetian Arsenal allowed Venice to produce these vessels at an unprecedented rate, with some accounts claiming a complete galley could be assembled in as little as a day once all components were prepared. This industrial efficiency gave Venice a crucial advantage in rapidly replacing combat losses during conflicts.",
+    "historicalBattles": [
+      "Battle of Curzola (1298)",
+      "Battle of Chioggia (1380)",
+      "Battle of Zonchio (1499)",
+      "Battle of Lepanto (1571)"
+    ]
+  },
+  "importPrice": 1177329.6,
+  "lifetimeHours": null,
+  "consumptionHours": 1168,
+  "tier": 4
+}

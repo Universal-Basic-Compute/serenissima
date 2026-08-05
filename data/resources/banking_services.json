@@ -1,3 +1,12 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:06f6f9e929db3fb39650231343df87e2f434cd3552936e9c7d1f7b1196e087d6
-size 1489
+{
+  "id": "banking_services",
+  "name": "Banking Services",
+  "category": "utility_resources",
+  "subCategory": "financial",
+  "description": "Financial services provided by Venetian banks, including loans, deposits, currency exchange, and trade financing. Essential infrastructure for Venice's commercial empire.",
+  "historicalNotes": "Venetian banking evolved from the needs of its maritime trade, developing sophisticated financial instruments to manage risk and capital. The city pioneered concepts like double-entry bookkeeping and bills of exchange that facilitated long-distance trade. The Banco della Piazza di Rialto, founded in 1587, became one of Europe's first public banks, providing secure deposits and regulated exchange services. Unlike some banking centers, Venice maintained tight state oversight of financial activities, viewing them as extensions of the Republic's commercial policy rather than independent enterprises. This integration of banking with state interests helped finance Venice's commercial and military power while providing stability during periods of European financial turbulence.\n\nWhile Florence may claim the birth of modern banking, Venice perfected its practical application. The city's banks financed trade voyages, managed public debt, and created financial instruments that oiled the wheels of commerce across the Mediterranean and beyond.",
+  "importPrice": 1800.0,
+  "lifetimeHours": null,
+  "consumptionHours": 10,
+  "tier": 3
+}

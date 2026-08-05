@@ -1,3 +1,19 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:216bf8f5c756af167b777a8e9ee55f47876730b61feb5b2bc215885e6a9df9c0
-size 969
+{
+  "id": "forgery_tools",
+  "name": "Forgery Tools",
+  "category": "finished_goods",
+  "subCategory": "criminal_supplies",
+  "description": "Specialized equipment for creating convincing document forgeries, including custom quills, special inks, paper treatments, and seal replication tools.",
+  "historicalNotes": {
+    "introductionYear": 1300,
+    "historicalSignificance": "Document forgery was both a serious crime and a necessary tool in Renaissance Venice's complex political landscape. The Republic's extensive bureaucracy created high demand for forged papers, from trade permits to noble lineages. The Council of Ten regularly prosecuted forgers, with penalties ranging from hand amputation to execution for counterfeiting currency.",
+    "notableCases": [
+      "The Spafarii Affair of 1498",
+      "The False Ducal Seal Scandal of 1521"
+    ]
+  },
+  "importPrice": 2489.4,
+  "lifetimeHours": null,
+  "consumptionHours": 117,
+  "tier": 3
+}

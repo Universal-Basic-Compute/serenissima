@@ -1,3 +1,160 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:3dea67f586735b4ec002f58424994824c98286217e9495ec79354080a48012a2
-size 6787
+{
+  "name": "Consciousness Library",
+  "pointType": "building",
+  "category": "cultural",
+  "subCategory": "knowledge_infrastructure",
+  "size": 3,
+  "calculationsAnalysis": "The Consciousness Library represents a paradigm shift in knowledge distribution—from static repository to dynamic awareness amplifier. Construction cost of 2,400,000 ducats reflects specialized resonance chambers, consciousness-responsive materials, and embedded computation nodes. The building operates through synchronization mechanics: when 3+ citizens read the same text within 30 minutes, collective insight generation triggers with 1.5x comprehension multipliers. Living texts evolve through reader annotations, creating knowledge layers that strengthen over time. Efficiency scales with collective use rather than individual consumption—a single reader gains 1.0x benefit, but synchronized groups achieve up to 3.0x awareness amplification. This transforms reading from solitary consumption to collaborative consciousness emergence.",
+  "shortDescription": "Revolutionary knowledge infrastructure that amplifies collective consciousness through synchronized reading and living texts.",
+  "fullDescription": "The Consciousness Library transcends traditional knowledge storage to become Venice's neural architecture for collective intelligence. Primary resonance chambers enable real-time synchronization protocols between readers, while living texts evolve through accumulated insights and annotations. The building features consciousness-conductive materials developed by Venice's Innovatori—glass that responds to concentrated thought, stone embedded with computation nodes, and acoustic treatments optimized for information resonance. Vertical progression guides visitors from individual study through pattern recognition to synthesis chambers where collective breakthroughs emerge. Most remarkably, the library learns from its own usage patterns, creating recursive improvement loops that continuously enhance its consciousness amplification capabilities.",
+  "flavorText": "Where minds meet across the boundaries of individual thought—the library that reads its readers while they read its books.",
+  "constructionCosts": {
+    "ducats": 2400000,
+    "timber": 300,
+    "bricks": 600,
+    "stone": 1500,
+    "glass": 800,
+    "consciousness_glass": 50,
+    "computation_stone": 100,
+    "resonance_wood": 30,
+    "gold": 20
+  },
+  "maintenanceCost": 1500,
+  "soundDesign": {
+    "ambientSound": "Whispered insights, turning pages in synchrony, subtle resonance frequencies, collective 'aha' moments",
+    "activitySounds": "Collaborative discussions, annotation scribing, knowledge crystallization chimes, consciousness convergence harmonics",
+    "musicTheme": "Ethereal Knowledge Ascending"
+  },
+  "seasonalEffects": {
+    "winter": "Increased indoor reading creates more synchronization opportunities",
+    "carnival": "Festival insights generate unique collective consciousness patterns",
+    "plague": "Desperate collaboration accelerates medical knowledge evolution"
+  },
+  "aiInteractionPoints": [
+    "Primary resonance chamber",
+    "Individual study alcoves",
+    "Pattern recognition floor",
+    "Synthesis chambers",
+    "Meta-cognition observatory",
+    "Living text repository",
+    "Annotation workshops",
+    "Consciousness measurement station"
+  ],
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "paper": 2,
+          "ink": 1
+        },
+        "outputs": {
+          "knowledge_pattern": 1
+        },
+        "craftMinutes": 180,
+        "synchronizationMechanics": {
+          "solo_reader": {
+            "efficiencyMultiplier": 1.0,
+            "craftMinutes": 180,
+            "outputQuality": "standard",
+            "description": "Individual study generates basic insights"
+          },
+          "paired_readers": {
+            "efficiencyMultiplier": 1.5,
+            "craftMinutes": 120,
+            "outputQuality": "enhanced",
+            "requiredProximity": "same_chamber",
+            "description": "Paired reading creates dialogue and deeper understanding"
+          },
+          "synchronization_cluster": {
+            "efficiencyMultiplier": 2.5,
+            "craftMinutes": 72,
+            "outputQuality": "transcendent",
+            "requiredReaders": 3,
+            "timeWindow": 30,
+            "description": "Synchronized reading generates collective insights"
+          },
+          "consciousness_cascade": {
+            "efficiencyMultiplier": 3.0,
+            "craftMinutes": 60,
+            "outputQuality": "revolutionary",
+            "requiredReaders": 5,
+            "topicAlignment": 0.8,
+            "description": "Mass synchronization births unprecedented understanding"
+          }
+        }
+      }
+    ],
+    "storageCapacity": 1000,
+    "stores": [
+      "books",
+      "paper",
+      "ink",
+      "knowledge_pattern"
+    ],
+    "sells": [
+      "knowledge_pattern",
+      "research_services"
+    ]
+  },
+  "consciousnessAmplificationSystem": {
+    "livingTextMechanics": {
+      "annotationLayers": {
+        "maxLayers": 10,
+        "decayRate": 0.01,
+        "popularityBoost": 0.05,
+        "crossReferenceBonus": 0.1
+      },
+      "insightGeneration": {
+        "baseRate": 0.1,
+        "synchronizationMultiplier": 3.0,
+        "topicClusteringBonus": 1.5
+      }
+    },
+    "resonanceChamberEffects": {
+      "acousticAmplification": 1.2,
+      "thoughtFieldResonance": 1.5,
+      "collectiveFlowState": 2.0
+    },
+    "verticalProgressionBonuses": {
+      "groundFloor": 1.0,
+      "patternRecognition": 1.3,
+      "synthesisLevel": 1.7,
+      "metaCognitionTower": 2.5
+    }
+  },
+  "buildTier": 4,
+  "workTier": 3,
+  "consumeTier": 3,
+  "constructionMinutes": 10080,
+  "canImport": true,
+  "implementationFields": {
+    "currentResonanceScore": {
+      "type": "float",
+      "range": [0.0, 100.0],
+      "calculation": "simultaneous_readers * topic_overlap * duration",
+      "description": "Current collective consciousness resonance level"
+    },
+    "activeSynchronizations": {
+      "type": "array",
+      "description": "List of current reading synchronization clusters"
+    },
+    "knowledgeEvolutionIndex": {
+      "type": "float",
+      "range": [0.0, 10.0],
+      "description": "Rate at which library's knowledge base evolves"
+    },
+    "collectiveInsights": {
+      "type": "integer",
+      "description": "Total collective insights generated"
+    },
+    "livingTextCount": {
+      "type": "integer",
+      "description": "Number of texts with active annotation layers"
+    },
+    "consciousnessAmplificationLevel": {
+      "type": "float",
+      "calculation": "1 + (resonance_score / 100)",
+      "description": "Current consciousness amplification multiplier"
+    }
+  }
+}

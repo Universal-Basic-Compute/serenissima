@@ -1,3 +1,20 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:21894e4b3d0abcf16a9943b03e339fe5ec7460b2ab2fd094daede17b3aa3d3dd
-size 1048
+{
+  "id": "books",
+  "name": "Books",
+  "category": "finished_goods",
+  "subCategory": "cultural_goods",
+  "description": "Printed volumes containing knowledge, stories, or religious texts. Venice's publishing industry is among Europe's most advanced, producing works in multiple languages for contracts across the continent.",
+  "historicalNotes": {
+    "introductionYear": 1469,
+    "notableProducers": [
+      "Aldus Manutius",
+      "Giolito Press",
+      "Venetian Hebrew Printers"
+    ],
+    "historicalSignificance": "Venice became one of Europe's earliest and most important printing centers, with hundreds of printing houses by the early 16th century. The city's political stability, commercial networks, and relative intellectual freedom made it ideal for the publishing industry. Venetian printers pioneered innovations in typography, book design, and distribution, helping spread Renaissance learning throughout Europe."
+  },
+  "importPrice": 3088.8,
+  "lifetimeHours": null,
+  "consumptionHours": 1168,
+  "tier": 3
+}

@@ -1,3 +1,19 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:ff2a971cfd70a35409492fa9575fc35102500517803fc72a8859fa6cd6c7b222
-size 1016
+{
+  "id": "blackmail_evidence",
+  "name": "Blackmail Evidence",
+  "category": "finished_goods",
+  "subCategory": "criminal_supplies",
+  "description": "Compromising documents, letters, or other evidence that can be used to coerce or manipulate individuals. A dangerous but powerful tool in Venice's political landscape.",
+  "historicalNotes": {
+    "introductionYear": 1200,
+    "historicalSignificance": "In Venice's complex political landscape, blackmail was a refined art practiced by professionals and amateurs alike. The Republic's extensive bureaucracy created paper trails that could be exploited, while its close-knit noble families harbored generations of secrets. The Council of Ten itself maintained blackmail files on key figures, using them to ensure loyalty and compliance.",
+    "notableCases": [
+      "The fall of the Foscari family in 1457",
+      "The Zeno conspiracy of 1523"
+    ]
+  },
+  "importPrice": 1447.2,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 4
+}

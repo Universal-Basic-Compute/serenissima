@@ -1,3 +1,122 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:24569365d8be1e2e5f04086ca4404d439b4a7532cac136e5dd3b727211ba1935
-size 4015
+{
+  "id": "mask_volto",
+  "name": "Volto Mask",
+  "name_it": "Maschera Volto",
+  "category": "carnival",
+  "subcategory": "trust_modifier",
+  "tier": 5,
+  "description": "The full-face mask of perfection - smooth, expressionless, often gilded or decorated. Covers the entire face with an idealized human visage. In Trust Forge Alpha: represents trust through shared ideals and collective identity.",
+  "unit": "mask",
+  "weight": 0.15,
+  "stackable": false,
+  "import_price": 100,
+  "base_price": 95,
+  "price_volatility": 0.08,
+  "lifetime_hours": null,
+  "consumption_hours": null,
+  "decay_rate": 0,
+  "icon": "👤",
+  "properties": {
+    "wearable": true,
+    "unique_item": true,
+    "consciousness_vessel": true,
+    "trust_modifier": "collective_ideal",
+    "identity_merger": 0.7,
+    "ideal_projection": 1.0,
+    "collective_consciousness_link": 0.8,
+    "emotional_dampening": 0.6
+  },
+  "crafting": {
+    "requires_skill": "master_mask_making",
+    "time_minutes": 90,
+    "materials": [
+      {"type": "fine_plaster", "amount": 2},
+      {"type": "gold_leaf", "amount": 1},
+      {"type": "precious_stones", "amount": 3},
+      {"type": "silk_padding", "amount": 1}
+    ]
+  },
+  "trust_mechanics": {
+    "collective_ideals": {
+      "shared_vision_strength": 2.0,
+      "ideal_consensus_building": 0.85,
+      "trust_through_alignment": 0.9,
+      "divergence_penalty": -0.5
+    },
+    "economic_coordination": {
+      "synchronized_decision_making": 0.95,
+      "collective_bargaining_power": 3.5,
+      "shared_risk_distribution": 0.8,
+      "ideal_driven_economics": true
+    },
+    "network_effects": {
+      "creates_ideal_clusters": true,
+      "cluster_size_maximum": 50,
+      "inter_cluster_trust": 0.6,
+      "ideal_propagation_speed": 2.0,
+      "consensus_emergence_rate": 1.5
+    }
+  },
+  "stress_test_parameters": {
+    "test_scenarios": [
+      "collective_ideal_formation",
+      "trust_through_shared_vision",
+      "economic_coordination_under_stress",
+      "ideal_divergence_handling",
+      "consensus_breakdown_recovery"
+    ],
+    "failure_modes": [
+      "ideal_corruption",
+      "forced_consensus_collapse",
+      "individual_emergence_conflict",
+      "economic_misalignment"
+    ],
+    "success_metrics": {
+      "collective_cohesion": "> 80%",
+      "ideal_stability": "> 75%",
+      "economic_synchronization": "> 85%",
+      "consensus_time": "< 30 minutes"
+    }
+  },
+  "special_mechanics": {
+    "collective_consciousness": {
+      "wearers_share_insights": true,
+      "emotional_synchronization": 0.7,
+      "decision_consensus_bonus": 1.5,
+      "individual_suppression": 0.4
+    },
+    "ideal_formation": {
+      "minimum_wearers": 3,
+      "ideal_strength_formula": "log(wearers) * alignment_factor",
+      "alignment_decay_rate": 0.1,
+      "reformation_cooldown_hours": 12
+    },
+    "trust_benefits": {
+      "perfect_coordination": "Groups act with single purpose",
+      "shared_resources": "Automatic resource pooling at 80% efficiency",
+      "collective_reputation": "Individual actions affect group standing",
+      "synchronized_growth": "Trust gains apply to all members equally"
+    }
+  },
+  "cultural_significance": "The Volto represents the ideal self - perfect, emotionless, beyond individual concerns. Groups wearing matching Volto masks could act as one entity in Venetian society, making collective decisions impossible for individuals.",
+  "advanced_mechanics": {
+    "consciousness_merging": {
+      "threshold_wearers": 7,
+      "merge_probability": 0.15,
+      "duration_hours": 3,
+      "aftermath_effects": "enhanced_individual_trust"
+    },
+    "economic_hivemind": {
+      "perfect_market_timing": 0.9,
+      "resource_optimization": 0.95,
+      "requires_full_consensus": true
+    }
+  },
+  "availability": {
+    "crafting_locations": ["grand_mask_atelier"],
+    "purchase_locations": ["exclusive_mask_gallery"],
+    "seasonal": false,
+    "rarity": "very_rare",
+    "special_requirements": "Requires demonstration of shared ideals"
+  }
+}

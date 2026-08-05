@@ -3136,7 +3136,7 @@ export class TransportService {
         // Add path from startPoint to startDockRef.position
         pathSegments.push({ ...startPoint, type: 'center', transportMode: 'walking', polygonId: startPolygon.id });
         this.addIntermediatePoints(pathSegments, startPoint, startDockRef.position, 'walking', this.calculateDistance(startPoint, startDockRef.position));
-        pathSegments.push({ ...startDockRef.position, type: 'building', buildingType: 'dock', buildingId: startDockRef.id, transportMode: 'walking', polygonId: startDockRef.land_id || startPolygon.id });
+        pathSegments.push({ ...startDockRef.position, type: 'building', buildingType: 'dock', buildingId: startDockRef.buildingId || startDockRef.id, transportMode: 'walking', polygonId: startDockRef.land_id || startPolygon.id });
       } else {
         // Start is in water
         console.log('Start point is in water.');
@@ -3248,7 +3248,7 @@ export class TransportService {
       this.addIntermediatePoints(pathSegments, closestEndWaterNode.position, effectiveEndForWaterNet, modeFromWaterNodeEnd, distToClosestEndWaterNode);
       
       if (endPolygon) {
-        pathSegments.push({ ...endDockRef.position, type: 'building', buildingType: 'dock', buildingId: endDockRef.id, transportMode: 'walking', polygonId: endDockRef.land_id || endPolygon.id });
+        pathSegments.push({ ...endDockRef.position, type: 'building', buildingType: 'dock', buildingId: endDockRef.buildingId || endDockRef.id, transportMode: 'walking', polygonId: endDockRef.land_id || endPolygon.id });
         this.addIntermediatePoints(pathSegments, endDockRef.position, endPoint, 'walking', this.calculateDistance(endDockRef.position, endPoint));
         pathSegments.push({ ...endPoint, type: 'center', transportMode: 'walking', polygonId: endPolygon.id });
       } else {

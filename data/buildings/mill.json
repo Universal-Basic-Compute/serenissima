@@ -1,3 +1,63 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:53e16827b1f98afbebf0e82f46b656a196207c7ecf2516e954a9ebf410ac1e05
-size 3008
+{
+  "name": "Mill",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "industrial",
+  "size": 2,
+  "calculationsAnalysis": "The Mill represents essential food processing infrastructure bridging grain storage and bread production. The construction cost of 1,800,000 ducats reflects the specialized grinding equipment, millstones, and robust construction required for continuous operation. The income of 15,000 ducats (0.83% return) comes from milling fees charged to bakers and households. The maintenance cost of 12,000 ducats (80% of income) reflects the constant wear on grinding stones and machinery, creating realistic thin margins for this essential service. The employment capacity of 6 represents the miller, mechanics, loaders, and clerks needed for operations. The construction time of 5 days (432000000ms) reflects the specialized equipment installation. This building creates a critical link in the food supply chain, historically regulated to prevent exploitation of Venice's bread supply.",
+  "shortDescription": "Industrial facility that grinds grain into flour, essential for bread production.",
+  "fullDescription": "The mill serves as the vital intermediary between imported grain and daily bread, transforming raw wheat and other grains into usable flour. Featuring large millstones, sifting equipment, storage areas, and loading facilities, these establishments operate continuously to supply bakeries and households. In Venice, mills often utilized water power from canals or animal power, representing significant technological investments in food processing.",
+  "flavorText": "Between the golden grain and daily bread stands the miller—master of stones that turn sustenance from promise into provision.",
+  "constructionCosts": {
+    "ducats": 1800000,
+    "timber": 420,
+    "bricks": 850,
+    "stone": 1200,
+    "iron": 280
+  },
+  "maintenanceCost": 1200,
+  "soundDesign": {
+    "ambientSound": "Grinding stones turning, grain pouring, mechanical creaking",
+    "activitySounds": "Sacks being loaded, flour sifting, quality testing",
+    "musicTheme": "Rialto Mercante"
+  },
+  "seasonalEffects": {
+    "harvest": "Peak activity processing new grain shipments",
+    "winter": "Steady operations maintaining city flour supply",
+    "humidity": "Careful storage management to prevent spoilage"
+  },
+  "aiInteractionPoints": [
+    "Grinding floor",
+    "Grain receiving area",
+    "Flour storage",
+    "Loading dock",
+    "Quality testing station",
+    "Miller's office"
+  ],
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "grain": 3
+        },
+        "outputs": {
+          "flour": 5
+        },
+        "craftMinutes": 120
+      }
+    ],
+    "storageCapacity": 200,
+    "stores": [
+      "grain",
+      "flour"
+    ],
+    "sells": [
+      "flour"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 7200,
+  "canImport": false
+}

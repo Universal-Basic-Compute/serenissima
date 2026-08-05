@@ -1,3 +1,15 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:97da0c9f8e91ca587e4a432049e23fa6efc419e6f2d5b1a31e207c1323f6df15
-size 755
+{
+  "id": "dyestuffs",
+  "name": "Dyestuffs",
+  "category": "raw_materials",
+  "subCategory": "colorants",
+  "description": {
+    "short": "Rare colorants for textile dyeing.",
+    "full": "Precious natural substances imported from around the world that provide vibrant, lasting colors for Venetian textiles. These rare materials are a cornerstone of Venice's luxury textile industry.",
+    "flavor": "Each shade represents a journey across seas and continentsâ€”the crimson of kermes beetles, the purple of murex shells, the blue of distant indigo plants. In these tiny grains of color lies the secret to Venice's most splendid fabrics."
+  },
+  "importPrice": 2880.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": null,
+  "tier": 0
+}

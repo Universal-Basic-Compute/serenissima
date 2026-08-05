@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:95051eeb663c3b982ebb9d10374bc6c312e0cc501333e5c79d865363070c37bd
-size 273
+{
+  "id": "flour",
+  "name": "Flour",
+  "category": "processed_materials",
+  "subCategory": "food",
+  "description": "Milled grain ready for baking into bread and pastries.",
+  "importPrice": 228.0,
+  "lifetimeHours": 2175,
+  "consumptionHours": 10,
+  "tier": 0
+}

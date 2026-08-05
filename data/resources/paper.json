@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:b15e87ac8ec89632689b298633d0cf0b89491488d98c420388bed75189ad9fc0
-size 294
+{
+  "id": "paper",
+  "name": "Paper",
+  "category": "processed_materials",
+  "subCategory": "publishing",
+  "description": "Processed sheets ready for printing, writing, and document creation.",
+  "importPrice": 144.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": 10,
+  "tier": 3
+}

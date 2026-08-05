@@ -1,3 +1,25 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:460877ebd1c273ed1464dc73a15c2742108790910d8774c43c62e55081a78404
-size 1080
+{
+  "id": "luxury_silk_garments",
+  "name": "Luxury Silk Garments",
+  "category": "finished_goods",
+  "subCategory": "luxury_goods",
+  "description": "Exquisite clothing crafted from the finest Venetian silk, featuring intricate embroidery and adorned with precious elements. These garments are sought by nobility across Europe.",
+  "historicalNotes": {
+    "introductionYear": 1300,
+    "notableProducers": [
+      "Venetian Tailor Guild",
+      "Court Tailors of the Doge"
+    ],
+    "historicalSignificance": "Venetian silk garments were coveted status symbols throughout Europe. Their distinctive styles and sumptuous materials made them favorites among nobility, and they were frequent diplomatic gifts between states. The Republic strictly regulated their production and export to maintain quality and exclusivity.",
+    "historicalContracts": [
+      "European royal courts",
+      "Venetian nobility",
+      "Papal court",
+      "Ottoman elite"
+    ]
+  },
+  "importPrice": 49392.0,
+  "lifetimeHours": 87600,
+  "consumptionHours": 234,
+  "tier": 4
+}

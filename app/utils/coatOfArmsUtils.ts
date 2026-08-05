@@ -12,7 +12,7 @@ export async function generateCoatOfArmsImageUrl(description: string, username?:
   // Production URL for the AI service that generates images
   const aiServiceUrl = 'https://serenissima.ai';
   // Base URL for where coat of arms are stored and served from
-  const coatOfArmsStorageBaseUrl = 'https://backend.serenissima.ai/public_assets/images/coat-of-arms';
+  const coatOfArmsStorageBaseUrl = '/public_assets/images/coat-of-arms';
   
   // First, generate the image using the AI service
   const generateResponse = await fetch(`${aiServiceUrl}/api/generate-coat-of-arms`, {
@@ -100,7 +100,7 @@ export async function fetchCoatOfArmsImageUrl(imageUrl: string): Promise<string>
     throw new Error('Please provide a coat of arms image URL');
   }
   
-  const backendStorageBaseUrl = 'https://backend.serenissima.ai/public_assets/images/coat-of-arms';
+  const backendStorageBaseUrl = '/public_assets/images/coat-of-arms';
   let processedImageUrl = imageUrl;
 
   if (!processedImageUrl.startsWith('http')) {

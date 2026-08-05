@@ -1,3 +1,16 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:60c9ecbc2900e9c11720a879937cd244eb00e94b949eddfc00d878737d2dfdb5
-size 684
+{
+  "id": "meat",
+  "name": "Meat",
+  "category": "raw_materials",
+  "subCategory": "food",
+  "description": "Common cuts of meat such as beef, pork, or lamb, typically requiring cooking before consumption. A primary source of protein.",
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "Meat consumption varied by social class, with wealthier citizens enjoying more frequent and better quality cuts. Butchery was a regulated trade.",
+    "culturalContext": "Specific types of meat were often associated with feast days or celebrations."
+  },
+  "importPrice": 900.0,
+  "lifetimeHours": 3600,
+  "consumptionHours": 1,
+  "tier": 3
+}

@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:3a48b6ba59081772e9b5b0f1fecd12b98b81e0bd489831d3348576dadfad8177
-size 303
+{
+  "id": "mortar",
+  "name": "Mortar",
+  "category": "processed_materials",
+  "subCategory": "construction",
+  "description": "Binding material used to hold bricks and stones together in construction.",
+  "importPrice": 279.0,
+  "lifetimeHours": 150,
+  "consumptionHours": null,
+  "tier": 0
+}

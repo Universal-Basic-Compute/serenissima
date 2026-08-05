@@ -1,3 +1,30 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:d437a5905c42221010b826117ea44ebdcce49ccae00c3ca1e1823f108c2d8a93
-size 1421
+{
+  "id": "marble",
+  "name": "Marble",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": {
+    "short": "Fine decorative stone for prestigious buildings.",
+    "full": "High-quality decorative stone quarried from mainland territories and imported from across the Mediterranean. Used in Venice's finest buildings and monuments.",
+    "flavor": "In these veined stones we capture eternity, turning the weight of mountains into the lightness of art that will outlast us all."
+  },
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "notableProducers": [
+      "Carrara quarries",
+      "Greek islands",
+      "Istrian peninsula"
+    ],
+    "historicalSignificance": "Marble was essential to Venice's architectural grandeur, despite the city having no natural stone resources of its own. The Republic's ability to import and use this heavy material on unstable lagoon foundations demonstrated both its wealth and engineering prowess.",
+    "historicalContracts": [
+      "Venetian construction industry",
+      "Sculptors' workshops",
+      "Church commissions"
+    ],
+    "culturalContext": "The use of colored marbles from different regions became a status symbol in Venetian architecture, with specific varieties reserved for the most prestigious buildings."
+  },
+  "importPrice": 4320.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 4
+}

@@ -1,3 +1,12 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:400f829c79ea2e4ef3edf273fc16c6d4a11fec624d0bd6e0aec7c6a35185a0d8
-size 698
+{
+  "id": "building_materials",
+  "name": "Building Materials",
+  "category": "processed_materials",
+  "subCategory": "construction",
+  "description": "Prepared materials ready for construction, including cut stone, bricks, mortar, and timber.",
+  "historicalNotes": "Venetian construction required specialized materials adapted to the lagoon environment. Buildings were typically constructed on wooden piles driven into the clay beneath the lagoon, with brick and stone structures above. The scarcity of land meant that building materials were often salvaged and reused from older structures.",
+  "importPrice": 1900.8,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

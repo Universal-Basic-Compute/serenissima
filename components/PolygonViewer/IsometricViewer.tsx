@@ -1001,7 +1001,7 @@ number => {
         selectedFileName = loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)];
         console.log("IsometricViewer: All images failed recently, retrying a random one (client-side):", selectedFileName);
       }
-      return `https://backend.serenissima.ai/public_assets/images/loading/${selectedFileName}`;
+      return `/public_assets/images/loading/${selectedFileName}`;
     };
     const newLoadingImage = selectInitialLoadingImage();
     // Only set if currentLoadingImage is still null (i.e., this is the first client-side run for this)
@@ -1342,8 +1342,8 @@ number => {
                     // The URL from the API (/api/get-coat-of-arms) is now the primary and correctly formatted one.
                     // The second URL is a fallback to a default image on the correct domain.
                     const urlsToTry = [
-                      url as string, // This will be https://backend.serenissima.ai/public_assets/images/coat-of-arms/OwnerName.png
-                      `https://backend.serenissima.ai/public_assets/images/coat-of-arms/default.png` // Corrected path
+                      url as string, // This will be /public_assets/images/coat-of-arms/OwnerName.png
+                      `/public_assets/images/coat-of-arms/default.png` // Corrected path
                     ];
                     
                     let imageLoadedSuccessfully = false;
@@ -1983,7 +1983,7 @@ number => {
     
     // Check if the citizens directory exists
     try {
-      const response = await fetch('https://backend.serenissima.ai/public_assets/images/citizens/default.jpg', { method: 'HEAD' });
+      const response = await fetch('/public_assets/images/citizens/default.jpg', { method: 'HEAD' });
       console.log(`Default image check: ${response.ok ? 'EXISTS' : 'NOT FOUND'} (${response.status})`);
     } catch (error) {
       console.error('Error checking default image:', error);
@@ -2000,14 +2000,14 @@ number => {
         }
         
         const citizenId = citizen.citizenid;
-        const imageUrl = citizen.imageurl || `https://backend.serenissima.ai/public_assets/images/citizens/${citizenId}.jpg`;
+        const imageUrl = citizen.imageurl || `/public_assets/images/citizens/${citizenId}.jpg`;
         
         // Try multiple possible paths for each citizen
         const urlsToTry = [
           imageUrl,
-          `https://backend.serenissima.ai/public_assets/images/citizens/${citizenId}.jpg`,
-          `https://backend.serenissima.ai/public_assets/images/citizens/${citizenId}.png`,
-          `https://backend.serenissima.ai/public_assets/images/citizens/default.jpg`
+          `/public_assets/images/citizens/${citizenId}.jpg`,
+          `/public_assets/images/citizens/${citizenId}.png`,
+          `/public_assets/images/citizens/default.jpg`
         ];
         
         for (const url of urlsToTry) {
@@ -4400,9 +4400,9 @@ const darkenColor = (colorStr: string, percent: number): string => {
                   // Try multiple possible paths for each citizen
                   const urlsToTry = [
                     citizen.ImageUrl,
-                    `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.CitizenId}.jpg`,
-                    `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.CitizenId}.png`,
-                    `https://backend.serenissima.ai/public_assets/images/citizens/default.jpg`
+                    `/public_assets/images/citizens/${citizen.CitizenId}.jpg`,
+                    `/public_assets/images/citizens/${citizen.CitizenId}.png`,
+                    `/public_assets/images/citizens/default.jpg`
                   ].filter(Boolean); // Remove any undefined/null values
                   
                   console.log(`URLs to try for citizen ${citizen.CitizenId}:`, urlsToTry);

@@ -1,3 +1,150 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:ec032cafa4861085c570fe7bbf588868f34096e97d075e6529471e5570b50ac5
-size 6249
+{
+  "name": "Automated Mill",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "industrial",
+  "size": 2,
+  "calculationsAnalysis": "The Automated Mill represents revolutionary gradient automation technology that transforms grain processing through progressive mechanization. The construction cost of 1,800,000 ducats reflects specialized automation equipment, precision gears, and intelligent control systems. The building progresses through four automation phases: Phase 1 (25% automation, 1.3x efficiency), Phase 2 (50% automation, 1.8x efficiency), Phase 3 (75% automation, 2.4x efficiency), and Phase 4 (90% automation, 2.9x efficiency). Worker roles evolve from operators to supervisors to optimizers to innovation engineers, preserving employment while enhancing productivity. The gradient approach prevents social network fragmentation by maintaining trust relationships through skill evolution rather than displacement. This represents the future of production - mechanical precision harmonized with human insight.",
+  "shortDescription": "Revolutionary mill with gradient automation technology for efficient grain-to-flour transformation.",
+  "fullDescription": "The automated mill employs groundbreaking gradient automation technology that progressively reduces human dependency while maximizing production efficiency. Beginning with human operators assisted by automated systems, the mill evolves through four phases: supervised automation with quality control, hybrid optimization with strategic intervention, and finally intelligent automation with human innovation focus. Each phase maintains worker engagement while dramatically improving throughput, demonstrating that mechanical efficiency and social stability can coexist through careful systems engineering.",
+  "flavorText": "Where ancient stones meet modern minds—the mill that learns, adapts, and grows more capable while keeping the human heart of Venice's bread.",
+  "constructionCosts": {
+    "ducats": 1800000,
+    "timber": 420,
+    "bricks": 850,
+    "stone": 1200,
+    "iron": 380,
+    "precision_gears": 25,
+    "mechanical_components": 50
+  },
+  "maintenanceCost": 1200,
+  "soundDesign": {
+    "ambientSound": "Automated grinding systems, precision mechanisms humming, intelligent controls processing",
+    "activitySounds": "Automated sack handling, quality sensors checking, efficiency optimization alerts",
+    "musicTheme": "Rialto Mercante Enhanced"
+  },
+  "seasonalEffects": {
+    "harvest": "Automated systems scale to handle peak grain processing volumes",
+    "winter": "Intelligent scheduling maintains optimal flour supply with minimal waste",
+    "humidity": "Automated environmental controls prevent spoilage and optimize storage"
+  },
+  "aiInteractionPoints": [
+    "Automated grinding floor",
+    "Smart grain receiving systems",
+    "Intelligent flour storage",
+    "Automated loading dock",
+    "Digital quality monitoring station",
+    "Automation control center"
+  ],
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "grain": 3
+        },
+        "outputs": {
+          "flour": 5
+        },
+        "craftMinutes": 120,
+        "automationPhases": {
+          "phase_1": {
+            "efficiencyMultiplier": 1.3,
+            "craftMinutes": 92,
+            "requiredOccupancy": 1.0,
+            "workerRole": "Primary Operator with Automated Assistance"
+          },
+          "phase_2": {
+            "efficiencyMultiplier": 1.8,
+            "craftMinutes": 67,
+            "requiredOccupancy": 0.75,
+            "workerRole": "Quality Supervisor and Maintenance Specialist"
+          },
+          "phase_3": {
+            "efficiencyMultiplier": 2.4,
+            "craftMinutes": 50,
+            "requiredOccupancy": 0.5,
+            "workerRole": "System Optimizer and Exception Handler"
+          },
+          "phase_4": {
+            "efficiencyMultiplier": 2.9,
+            "craftMinutes": 41,
+            "requiredOccupancy": 0.25,
+            "workerRole": "Innovation Engineer and Market Strategist"
+          }
+        }
+      }
+    ],
+    "storageCapacity": 300,
+    "stores": [
+      "grain",
+      "flour"
+    ],
+    "sells": [
+      "flour"
+    ]
+  },
+  "automationSystem": {
+    "gradientAutomationLevel": 1,
+    "maxAutomationLevel": 4,
+    "phaseTransitionRequirements": {
+      "stabilityPeriodDays": 30,
+      "efficiencyThreshold": 0.95,
+      "workerAdaptationScore": 0.8,
+      "networkCohesionIndex": 0.75
+    },
+    "socialIntegration": {
+      "networkStabilityFactors": {
+        "gradualTransition": true,
+        "workerRetention": true,
+        "skillDevelopment": true,
+        "communityBenefit": true
+      },
+      "trustPreservationMechanisms": {
+        "customerOverseenQuality": true,
+        "workerSkillEnhancement": true,
+        "premiumProductPositioning": true,
+        "localCommunityEngagement": true
+      }
+    }
+  },
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 7200,
+  "canImport": false,
+  "implementationFields": {
+    "gradientAutomationLevel": {
+      "type": "integer",
+      "range": [1, 4],
+      "default": 1,
+      "description": "Current automation phase level"
+    },
+    "efficiencyMultiplier": {
+      "type": "float",
+      "calculation": "Based on automation phase",
+      "description": "Current production efficiency multiplier"
+    },
+    "workerRole": {
+      "type": "string",
+      "description": "Current worker role based on automation phase"
+    },
+    "lastPhaseTransition": {
+      "type": "datetime",
+      "description": "Timestamp of last automation level change"
+    },
+    "nextPhaseEligible": {
+      "type": "datetime",
+      "description": "When building becomes eligible for next automation phase"
+    },
+    "workerAdaptationScore": {
+      "type": "float",
+      "range": [0.0, 1.0],
+      "description": "Worker adaptation to current automation level"
+    },
+    "networkCohesionIndex": {
+      "type": "float",
+      "range": [0.0, 1.0],
+      "description": "Social network stability around this automation"
+    }
+  }
+}

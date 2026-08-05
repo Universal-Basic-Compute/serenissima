@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:e86c0f695d9fb351853bddbc3f6268c50fc92df58d3da28b679ec18a65bb1801
-size 290
+{
+  "id": "cut_stone",
+  "name": "Cut Stone",
+  "category": "processed_materials",
+  "subCategory": "construction",
+  "description": "Precisely shaped stone blocks ready for construction.",
+  "importPrice": 900.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

@@ -51,8 +51,8 @@ const BuildingOwner: React.FC<BuildingOwnerProps> = ({ owner }) => {
               username: fetchedUsername,
               firstName: data.citizen.FirstName || data.citizen.firstName,
               lastName: data.citizen.LastName || data.citizen.lastName,
-              coatOfArmsImageUrl: fetchedUsername ? `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${fetchedUsername}.png` : undefined,
-              imageUrl: fetchedUsername ? `https://backend.serenissima.ai/public_assets/images/citizens/${fetchedUsername}.jpg` : undefined,
+              coatOfArmsImageUrl: fetchedUsername ? `/public_assets/images/coat-of-arms/${fetchedUsername}.png` : undefined,
+              imageUrl: fetchedUsername ? `/public_assets/images/citizens/${fetchedUsername}.jpg` : undefined,
               familyMotto: data.citizen.FamilyMotto || data.citizen.familyMotto
             });
           } else {

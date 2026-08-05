@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:16ae01baa1ace97c3554597c2c7bf9453bf017fa52089fbcfbec063bf51646bc
-size 286
+{
+  "id": "rags",
+  "name": "Rags",
+  "category": "raw_materials",
+  "subCategory": "textile",
+  "description": "Discarded cloth collected for paper production and other recycled uses.",
+  "importPrice": 60.0,
+  "lifetimeHours": 8775,
+  "consumptionHours": null,
+  "tier": 0
+}

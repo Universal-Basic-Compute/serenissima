@@ -1,3 +1,14 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:2b6cd07ca689d7f3c879c37a2c257a376fb30414c076b28b6396f18d4ca869af
-size 1098
+{
+ "id": "paintings",
+ "name": "Paintings",
+ "category": "finished_goods",
+ "subCategory": "art",
+ "description": "Oil and tempera paintings on wood panels or canvas, ranging from religious altarpieces to secular portraits and mythological scenes. Venetian painters are renowned for their mastery of color, light, and atmospheric effects that capture the unique luminosity of the lagoon city.",
+ "historicalNotes": {
+   "historicalSignificance": "Venice developed a distinctive painting tradition that emphasized color over the linear approach favored in Florence. The city's wealth from trade allowed for extensive patronage of religious institutions, noble families, and merchant princes. Venetian painters pioneered oil painting techniques in Italy and created innovations in perspective, color harmony, and atmospheric effects. The scuole (confraternities) and churches provided steady commissions, while the growing merchant class created demand for secular portraits and decorative works."
+ },
+ "importPrice": 4200,
+ "lifetimeHours": null,
+ "consumptionHours": null,
+ "tier": 3
+}

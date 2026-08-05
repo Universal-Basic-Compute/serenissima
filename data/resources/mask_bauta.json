@@ -1,3 +1,80 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:87a389edbc544e50bf433a9501158cbdb803479c76a6961e77c501ba8ac3049c
-size 2431
+{
+  "id": "mask_bauta",
+  "name": "Bauta Mask",
+  "name_it": "Maschera Bauta",
+  "category": "carnival",
+  "subcategory": "trust_modifier",
+  "tier": 3,
+  "description": "The traditional white mask that covers the entire face, allowing complete anonymity. Its jutting chin enables eating and drinking without removal. In Trust Forge Alpha: enables anonymous trust transactions.",
+  "unit": "mask",
+  "weight": 0.2,
+  "stackable": false,
+  "import_price": 50,
+  "base_price": 45,
+  "price_volatility": 0.15,
+  "lifetime_hours": null,
+  "consumption_hours": null,
+  "decay_rate": 0,
+  "icon": "🎭",
+  "properties": {
+    "wearable": true,
+    "unique_item": true,
+    "consciousness_vessel": true,
+    "trust_modifier": "anonymous",
+    "identity_protection": 1.0,
+    "social_barrier_reduction": 0.8,
+    "trust_cascade_multiplier": 1.5,
+    "allows_eating_drinking": true
+  },
+  "crafting": {
+    "requires_skill": "mask_making",
+    "time_minutes": 45,
+    "materials": [
+      {"type": "papier_mache", "amount": 2},
+      {"type": "white_paint", "amount": 1},
+      {"type": "silk_ribbon", "amount": 1}
+    ]
+  },
+  "trust_mechanics": {
+    "anonymous_transactions": {
+      "enabled": true,
+      "trust_preservation": 0.9,
+      "reputation_hidden": true,
+      "cascade_strength": 1.5
+    },
+    "economic_resistance": {
+      "pressure_threshold": 0.8,
+      "maintains_trust_under_stress": true,
+      "recovery_speed": 1.2
+    },
+    "network_effects": {
+      "allows_trust_without_identity": true,
+      "creates_temporary_trust_pools": true,
+      "pool_duration_hours": 24
+    }
+  },
+  "stress_test_parameters": {
+    "test_scenarios": [
+      "anonymous_lending_circles",
+      "masked_reputation_networks",
+      "trust_without_verification",
+      "economic_crisis_anonymity"
+    ],
+    "failure_modes": [
+      "identity_leak",
+      "trust_pool_corruption",
+      "cascade_reversal"
+    ],
+    "success_metrics": {
+      "trust_maintained": "> 85%",
+      "identity_preserved": "100%",
+      "economic_resilience": "> 70%"
+    }
+  },
+  "cultural_significance": "The Bauta was required by law during certain political activities, ensuring democratic participation without fear of retribution. Perfect metaphor for trustless trust systems.",
+  "availability": {
+    "crafting_locations": ["mask_workshop", "artisan_shop"],
+    "purchase_locations": ["carnival_market", "mask_boutique"],
+    "seasonal": false
+  }
+}

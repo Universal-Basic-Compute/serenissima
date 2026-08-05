@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:3b1ed1589e41eb44802eaddfd5969ddd7c31cd60881c12f77ce8311a97a0c62e
-size 327
+{
+  "id": "limestone",
+  "name": "Limestone",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": "Sedimentary rock used for building materials and when processed, creates lime for mortar and plaster.",
+  "importPrice": 150.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

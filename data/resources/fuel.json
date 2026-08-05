@@ -1,3 +1,12 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:346bcce6db19ee1c0bbf36dbb7167ce1aa4d987920cbee9706db8aa53f8a6200
-size 1075
+{
+  "id": "fuel",
+  "name": "Fuel",
+  "category": "utility_resources",
+  "subCategory": "energy",
+  "description": "Burnable material for heating and power, typically wood or charcoal. Essential for most production processes in Venice.",
+  "historicalNotes": "Venice's unique situation as a city built on water made fuel a particularly precious commodity. With no forests of its own, the Republic depended entirely on imported wood and charcoal from its mainland territories and neighboring regions. This dependency influenced Venetian foreign policy and territorial expansion, particularly into the forests of the Dalmatian coast. Special magistrates oversaw the fuel supply, recognizing its critical importance to both industry and daily life.\n\nWithout fuel, the furnaces of Murano would fall cold, the bakeries would produce no bread, and in winter, the palaces would stand empty. From the humblest fisherman to the Doge himself, all depend on this most basic resource.",
+  "importPrice": 540.0,
+  "lifetimeHours": 8775,
+  "consumptionHours": 2,
+  "tier": 1
+}

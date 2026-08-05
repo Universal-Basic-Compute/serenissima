@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:2871b17c13db5167cf911e028d4e481ccd7599ab6fd111d3fc49725a8b80dd13
-size 290
+{
+  "id": "molten_glass",
+  "name": "Molten Glass",
+  "category": "processed_materials",
+  "subCategory": "glass",
+  "description": "Heated glass ready for shaping by skilled glassblowers.",
+  "importPrice": 1270.8,
+  "lifetimeHours": 75,
+  "consumptionHours": null,
+  "tier": 0
+}

@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:214b8607d69f786ee2e7b53be0adbcb6b57bb75b9a72363dd80382d36369fb76
-size 299
+{
+  "id": "iron_fittings",
+  "name": "Iron Fittings",
+  "category": "processed_materials",
+  "subCategory": "metallurgy",
+  "description": "Forged iron hardware for construction and shipbuilding.",
+  "importPrice": 1342.8,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

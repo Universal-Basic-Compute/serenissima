@@ -155,7 +155,8 @@ async function fetchTransporterDetails(path: any[]): Promise<string | null> {
           return p.id;
         }
         return null;
-      }).filter(id => id !== null)
+      // waterpoint_* ids are virtual water-graph nodes, not buildings — skip them
+      }).filter(id => id !== null && !String(id).startsWith('waterpoint_'))
     )];
 
     if (dockIds.length > 0) {

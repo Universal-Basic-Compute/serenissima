@@ -1,3 +1,16 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:ed7862cd151f4cfd1b90122d126cb7b1176259e88b59b99d574fca0dba946302
-size 649
+{
+  "id": "pastries",
+  "name": "Pastries",
+  "category": "finished_goods",
+  "subCategory": "food",
+  "description": "Sweet baked goods, often enjoyed as treats, for breakfast, or as desserts. Made by skilled bakers and confectioners.",
+  "historicalNotes": {
+    "introductionYear": "medieval",
+    "historicalSignificance": "Venice, with its access to sugar and spices from the East, became known for its fine pastries and confections.",
+    "culturalContext": "Pastries were often served at celebrations and were a sign of hospitality."
+  },
+  "importPrice": 1050.0,
+  "lifetimeHours": 5400,
+  "consumptionHours": 1,
+  "tier": 3
+}

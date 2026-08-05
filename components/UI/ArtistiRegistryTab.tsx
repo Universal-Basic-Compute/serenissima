@@ -146,11 +146,11 @@ const ArtistiRegistryTab: React.FC<ArtistiRegistryTabProps> = ({ onViewProfile, 
                 {/* Citizen Image */}
                 <div className="flex-shrink-0 w-32 h-32 rounded-lg border-2 border-amber-600 shadow-md overflow-hidden">
                   <img
-                    src={`https://backend.serenissima.ai/public_assets/images/citizens/${artist.username || 'default'}.jpg`}
+                    src={`/public_assets/images/citizens/${artist.username || 'default'}.jpg`}
                     alt={`${artist.firstName || ''} ${artist.lastName || ''}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
+                      (e.target as HTMLImageElement).src = '/public_assets/images/citizens/default.jpg';
                     }}
                   />
                 </div>
@@ -178,7 +178,7 @@ const ArtistiRegistryTab: React.FC<ArtistiRegistryTabProps> = ({ onViewProfile, 
                       alt="Coat of Arms"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/coat-of-arms/default.png';
+                        (e.target as HTMLImageElement).src = '/public_assets/images/coat-of-arms/default.png';
                       }}
                     />
                   </div>

@@ -1,3 +1,94 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:922d8c20d9b2129d04eb10abcdf74af2062c0ebd05b58fb1aa98b489c2019bc4
-size 2886
+{
+  "id": "mask_moretta",
+  "name": "Moretta Mask",
+  "name_it": "Maschera Moretta",
+  "category": "carnival",
+  "subcategory": "trust_modifier",
+  "tier": 4,
+  "description": "The silent mask - a black velvet oval held in place by biting a button, rendering the wearer mute. In Trust Forge Alpha: represents silent trust bonds that strengthen through action, not words.",
+  "unit": "mask",
+  "weight": 0.1,
+  "stackable": false,
+  "import_price": 75,
+  "base_price": 70,
+  "price_volatility": 0.1,
+  "lifetime_hours": null,
+  "consumption_hours": null,
+  "decay_rate": 0,
+  "icon": "🤫",
+  "properties": {
+    "wearable": true,
+    "unique_item": true,
+    "consciousness_vessel": true,
+    "trust_modifier": "silent_bond",
+    "enforces_silence": true,
+    "trust_through_action": 1.0,
+    "bond_strength_multiplier": 2.0,
+    "requires_commitment": true
+  },
+  "crafting": {
+    "requires_skill": "master_mask_making",
+    "time_minutes": 60,
+    "materials": [
+      {"type": "black_velvet", "amount": 1},
+      {"type": "silk_lining", "amount": 1},
+      {"type": "pearl_button", "amount": 1}
+    ]
+  },
+  "trust_mechanics": {
+    "silent_bonds": {
+      "communication_type": "actions_only",
+      "trust_growth_rate": 2.5,
+      "bond_permanence": 0.95,
+      "requires_mutual_commitment": true
+    },
+    "economic_resistance": {
+      "pressure_immunity": 0.9,
+      "silent_solidarity": true,
+      "collective_strength": 3.0
+    },
+    "network_effects": {
+      "creates_unbreakable_bonds": true,
+      "silent_trust_networks": true,
+      "action_based_reputation": true,
+      "gesture_communication": true
+    }
+  },
+  "stress_test_parameters": {
+    "test_scenarios": [
+      "wordless_cooperation",
+      "trust_through_consistent_action",
+      "silent_economic_resistance",
+      "gesture_based_networks"
+    ],
+    "failure_modes": [
+      "forced_speech_breaks_bond",
+      "action_inconsistency",
+      "commitment_wavering"
+    ],
+    "success_metrics": {
+      "bond_strength": "> 95%",
+      "action_consistency": "> 90%",
+      "economic_immunity": "> 85%"
+    }
+  },
+  "special_mechanics": {
+    "wearing_requirements": {
+      "must_remain_silent": true,
+      "duration_minimum_hours": 3,
+      "breaking_silence_penalty": "trust_reset"
+    },
+    "trust_benefits": {
+      "silent_understanding": "Wearers understand each other perfectly",
+      "unbreakable_bonds": "Bonds formed while wearing cannot be dissolved",
+      "action_amplification": "Small gestures create large trust gains"
+    }
+  },
+  "cultural_significance": "Worn by women visiting convents, the enforced silence created deeper connections through meaningful glances and gestures. Represents trust beyond words.",
+  "availability": {
+    "crafting_locations": ["master_mask_workshop"],
+    "purchase_locations": ["exclusive_boutique"],
+    "seasonal": false,
+    "rarity": "rare"
+  }
+}

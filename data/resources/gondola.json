@@ -1,3 +1,25 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:8ff2309764da62c5463200a761c7993a1e8baa83b063cd44cee7efe1444597fa
-size 1233
+{
+  "id": "gondola",
+  "name": "Gondola",
+  "category": "finished_goods",
+  "subCategory": "transportation",
+  "description": "The iconic Venetian boat designed for canal transportation. With its asymmetrical design and skilled gondolier, it serves as the primary means of passenger transport through Venice's narrow waterways.",
+  "historicalNotes": {
+    "introductionYear": 1100,
+    "notableProducers": [
+      "Venetian Boat Builders Guild",
+      "Squero di San Trovaso"
+    ],
+    "historicalSignificance": "The gondola evolved over centuries to become perfectly adapted to Venice's unique environment. Its asymmetrical design allows a single gondolier to propel and steer it through narrow canals. Originally colorful, a 16th-century decree mandated the now-iconic black color. Gondolas served as the primary transportation method for Venetians of all classes before becoming more associated with wealthy citizens and tourists in later centuries.",
+    "historicalContracts": [
+      "Venetian transportation system",
+      "Ducatsy families",
+      "Ceremonial functions"
+    ]
+  },
+  "importPrice": 41868.0,
+  "lifetimeHours": null,
+  "consumptionHours": 1168,
+  "tier": 3,
+  "storageCapacity": 10
+}

@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:5bbc161e7636749428ab957821d50af0737c715b5470d390f364073c0f1dcc06
-size 297
+{
+  "id": "silk_fabric",
+  "name": "Silk Fabric",
+  "category": "processed_materials",
+  "subCategory": "textile",
+  "description": "Finely woven silk fabric ready for dyeing or garment making.",
+  "importPrice": 8262.0,
+  "lifetimeHours": 43800,
+  "consumptionHours": 117,
+  "tier": 3
+}

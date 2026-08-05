@@ -1,3 +1,66 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:ee3a29b0045e2a515892f2e57af40b7868464a5f246ab060cdb531161a2a1e08
-size 3148
+{
+  "name": "Assisted Mill",
+  "pointType": "building",
+  "category": "business",
+  "subCategory": "industrial",
+  "size": 2,
+  "calculationsAnalysis": "The Assisted Mill represents Phase 1 of gradient automation, introducing mechanical assistance while maintaining human control. The construction cost of 2,400,000 ducats reflects precision equipment, enhanced millstones, monitoring systems, and training infrastructure. The income reflects premium flour quality and increased efficiency. The maintenance cost of 1,500 ducats includes equipment calibration and worker education. The employment capacity of 8 represents operators, trainers, mechanics, and quality monitors. The 7-day construction time reflects careful installation of human-machine interfaces. This building demonstrates that technology can enhance rather than replace human workers.",
+  "shortDescription": "Precision mill with mechanical assistance, where human operators work alongside automated systems for enhanced efficiency.",
+  "fullDescription": "This revolutionary mill represents the first phase of gradient automation. Master operators control precision machinery that assists but never replaces human judgment. Enhanced millstones self-adjust to grain quality while operators maintain full control. Workers receive training in mechanical systems, beginning their transformation from laborers to engineers. The mill features real-time quality monitoring, efficiency tracking systems, and comfortable working conditions that respect human dignity while achieving unprecedented productivity.",
+  "flavorText": "Where human wisdom guides mechanical precision, the future of work emerges—not in replacement, but in enhancement.",
+  "constructionCosts": {
+    "ducats": 2400000,
+    "timber": 500,
+    "bricks": 1000,
+    "stone": 1400,
+    "iron": 350,
+    "glass": 50
+  },
+  "maintenanceCost": 1500,
+  "soundDesign": {
+    "ambientSound": "Precision gears meshing, smooth stone rotation, monitoring equipment humming",
+    "activitySounds": "Operators adjusting controls, quality alerts chiming, training discussions",
+    "musicTheme": "Innovation Harmonics"
+  },
+  "seasonalEffects": {
+    "harvest": "Automated systems adapt to varying grain qualities",
+    "winter": "Climate control maintains optimal grinding conditions",
+    "training": "Regular workshops advance operator skills"
+  },
+  "aiInteractionPoints": [
+    "Operator control panel",
+    "Training workshop area",
+    "Quality monitoring station",
+    "Mechanical adjustment zone",
+    "Innovation suggestion box",
+    "Worker council meeting room"
+  ],
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "grain": 3
+        },
+        "outputs": {
+          "flour": 6
+        },
+        "craftMinutes": 100
+      }
+    ],
+    "storageCapacity": 250,
+    "stores": [
+      "grain",
+      "flour"
+    ],
+    "sells": [
+      "flour"
+    ]
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "constructionMinutes": 10080,
+  "canImport": false,
+  "specialWorkHours": [[5, 20]],
+  "dailyInfluence": 2
+}

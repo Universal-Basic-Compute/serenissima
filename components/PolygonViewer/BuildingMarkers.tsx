@@ -187,8 +187,8 @@ export default function BuildingMarkers({
         
         // Define icon type and URLs
         const iconType = building.type ? building.type.toLowerCase().replace(/\s+/g, '_') : 'default';
-        const iconUrl = `https://backend.serenissima.ai/public_assets/images/buildings/icons/${iconType}.png`;
-        const defaultIconUrl = 'https://backend.serenissima.ai/public_assets/images/buildings/icons/default.png';
+        const iconUrl = `/public_assets/images/buildings/icons/${iconType}.png`;
+        const defaultIconUrl = '/public_assets/images/buildings/icons/default.png';
           
         // URL pour l'image d'intérieur
         const interiorUrl = `/images/interiors/${iconType}.png`;

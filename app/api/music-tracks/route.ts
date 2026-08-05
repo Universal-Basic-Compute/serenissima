@@ -30,7 +30,7 @@ export async function GET() {
       );
     }
     
-    const backendAssetBaseUrl = process.env.BACKEND_PUBLIC_ASSETS_URL || 'https://backend.serenissima.ai/public_assets';
+    const backendAssetBaseUrl = process.env.BACKEND_PUBLIC_ASSETS_URL || '/public_assets';
 
     // Construct full URLs for each track
     const tracks = data.files.map((file: string) => `${backendAssetBaseUrl}/music/${file}`);

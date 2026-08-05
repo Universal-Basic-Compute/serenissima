@@ -1,3 +1,15 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:84c2babda2f6e07ce63976f1b3e0a0657b0aec674313dadcff12117389c0504b
-size 617
+{
+  "id": "gold",
+  "name": "Gold",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": {
+    "short": "Precious metal valued for its beauty and rarity.",
+    "full": "Refined gold in ingot or powder form, used for creating jewelry, ornamentation, and gold leaf. Primarily imported from African and Eastern sources.",
+    "flavor": "In this metal we trust, trade, and transformâ€”the universal language of wealth that makes Venice's voice heard from Constantinople to London."
+  },
+  "importPrice": 10800.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 4
+}

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
-import { withCitizenAccess } from '../../../lib/middleware';
+import { withStandardMiddleware } from '../../../lib/middleware';
 
 // Configure Airtable
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -324,4 +324,4 @@ async function getCitizens(request: Request, context: any) {
 }
 
 // Apply security middleware
-export const GET = withCitizenAccess(getCitizens);
+export const GET = withStandardMiddleware(getCitizens);

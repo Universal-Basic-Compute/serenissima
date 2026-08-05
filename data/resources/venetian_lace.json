@@ -1,3 +1,35 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:1b3a0b69c7c0e8dc42accb346f69c0bce2b60d94b9f0502c7af95ddd2739d7cb
-size 1575
+{
+  "id": "venetian_lace",
+  "name": "Venetian Lace",
+  "category": "finished_goods",
+  "subCategory": "luxury_goods",
+  "description": "Exquisite handmade lace renowned throughout Europe for its intricate patterns and delicate craftsmanship. Primarily produced on the island of Burano, this prestigious textile represents the pinnacle of Venetian decorative arts.",
+  "historicalNotes": {
+    "introductionYear": 1400,
+    "notableProducers": [
+      "Burano Lace Guild",
+      "Jesurum",
+      "Lace School of Burano"
+    ],
+    "historicalSignificance": "Venetian lace, particularly from Burano, became one of Venice's most prestigious luxury exports from the 15th century onwards. The techniques were carefully guarded, with designs treated as valuable intellectual property. The industry's development was supported by the Dogaressa Morosina Morosini in the late 16th century, who established a lace school and guild to formalize production. Venetian lace adorned both secular and religious attire throughout Europe, becoming symbols of status and refinement.",
+    "historicalContracts": [
+      "European royal courts",
+      "Venetian nobility",
+      "Catholic Church",
+      "Ducatsy merchant families"
+    ],
+    "declineFactors": [
+      "Cost of production",
+      "Rise of machine-made lace",
+      "Changing fashion"
+    ],
+    "revivalInitiatives": [
+      "Burano Lace School (1872)",
+      "Contemporary artisan revival"
+    ]
+  },
+  "importPrice": 30096.0,
+  "lifetimeHours": null,
+  "consumptionHours": 350,
+  "tier": 4
+}

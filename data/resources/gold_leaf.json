@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:d35621c294de24988150c8a5296f6d2c9ed2544fb6fe294a0bf0e5f092e1f98e
-size 298
+{
+  "id": "gold_leaf",
+  "name": "Gold Leaf",
+  "category": "processed_materials",
+  "subCategory": "decorative",
+  "description": "Extremely thin sheets of gold used for decoration and gilding.",
+  "importPrice": 13204.8,
+  "lifetimeHours": null,
+  "consumptionHours": 117,
+  "tier": 4
+}

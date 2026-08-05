@@ -228,7 +228,7 @@ export default function TwoDPage() {
         selectedFileName = loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)];
         console.log("App Page: All images failed recently, retrying a random one (client-side):", selectedFileName);
       }
-      return `https://backend.serenissima.ai/public_assets/images/loading/${selectedFileName}`;
+      return `/public_assets/images/loading/${selectedFileName}`;
     };
     setCurrentLoadingImage(selectInitialLoadingImage());
   }, []); // Empty dependency array ensures this runs only once on mount

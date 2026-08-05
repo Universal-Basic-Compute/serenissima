@@ -1,3 +1,16 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:9ec6fe638778ec25edae85af9bc98d1862f855805b663c1a63a4da62dac56270
-size 678
+{
+  "id": "cheese",
+  "name": "Cheese",
+  "category": "finished_goods",
+  "subCategory": "food",
+  "description": "Aged dairy product, available in various textures and flavors. A versatile food, eaten alone, with bread, or used in cooking.",
+  "historicalNotes": {
+    "introductionYear": "ancient",
+    "historicalSignificance": "Cheese was an important source of protein and a valuable trade good. Venetian merchants imported and exported various types of cheese.",
+    "culturalContext": "Different social classes consumed different qualities and types of cheese."
+  },
+  "importPrice": 1200.0,
+  "lifetimeHours": 12600,
+  "consumptionHours": 1,
+  "tier": 2
+}

@@ -1,3 +1,26 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:d32d3859cd2a728d958edb3a481bf1c869ee768a708733fbeb1f7f04554011c6
-size 1234
+{
+  "id": "merchant_galley",
+  "name": "Merchant Galley",
+  "category": "finished_goods",
+  "subCategory": "naval_vessels",
+  "description": "A versatile Venetian trading vessel combining oars and sails, capable of long-distance Mediterranean voyages with significant cargo capacity. The backbone of Venice's commercial maritime power.",
+  "historicalNotes": {
+    "introductionYear": 1250,
+    "notableProducers": [
+      "Venetian Arsenal",
+      "Republic Shipyards"
+    ],
+    "historicalSignificance": "The merchant galley was a crucial innovation that gave Venice commercial dominance in the Mediterranean. Its combination of sail and oar power made it versatile in varied weather conditions, while its design allowed for substantial cargo capacity without sacrificing too much speed. The standardized construction methods pioneered at the Venetian Arsenal allowed for efficient production that astounded foreign visitors.",
+    "historicalContracts": [
+      "Venice's maritime trade routes",
+      "Eastern Mediterranean",
+      "Black Sea",
+      "North African coast"
+    ]
+  },
+  "importPrice": 202950.0,
+  "lifetimeHours": null,
+  "consumptionHours": 1168,
+  "tier": 3,
+  "storageCapacity": 2500
+}

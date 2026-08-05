@@ -153,7 +153,7 @@ export const HoverTooltip: React.FC = () => {
         lastName: typeof citizen.lastName === 'string' ? citizen.lastName : '',
         socialClass: typeof citizen.socialClass === 'string' ? citizen.socialClass : '',
         // Construct imageUrl based on username
-        imageUrl: typeof citizen.username === 'string' && citizen.username !== '' ? `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.username}.jpg` : null,
+        imageUrl: typeof citizen.username === 'string' && citizen.username !== '' ? `/public_assets/images/citizens/${citizen.username}.jpg` : null,
         // Ensure 'id' is present for fallback or other uses, prefer 'id' then 'citizenid' from the source 'citizen' object
         id: typeof citizen.id === 'string' ? citizen.id : (typeof citizen.citizenid === 'string' ? citizen.citizenid : ''),
         // Explicitly add username if it exists on 'citizen' (which is state.data.citizen)
@@ -223,7 +223,7 @@ export const HoverTooltip: React.FC = () => {
         <div className="w-96 h-80 mb-2 overflow-hidden rounded">
           <img 
             src={(() => {
-              const baseAssetUrl = 'https://backend.serenissima.ai/public_assets/';
+              const baseAssetUrl = '/public_assets/';
               let finalImagePath: string;
 
               if (buildingImagePath) { // buildingImagePath comes from state, which is from assetService
@@ -256,7 +256,7 @@ export const HoverTooltip: React.FC = () => {
             onError={(e) => {
               console.log(`Failed to load building image: ${e.currentTarget.src}`);
               // Fallback to default image if the specific one doesn't exist
-              e.currentTarget.src = 'https://backend.serenissima.ai/public_assets/images/buildings/contract_stall.png';
+              e.currentTarget.src = '/public_assets/images/buildings/contract_stall.png';
             }}
           />
         </div>
@@ -298,7 +298,7 @@ export const HoverTooltip: React.FC = () => {
       let imageUrl;
       if (citizen.imageUrl) { // citizen.imageUrl is from safeCitizen, so it's a non-empty string or null
         if (citizen.imageUrl.startsWith('/')) {
-          imageUrl = `https://backend.serenissima.ai/public_assets${citizen.imageUrl}`;
+          imageUrl = `/public_assets${citizen.imageUrl}`;
         } else {
           // Assumed to be a full URL or already correctly formed relative path not starting with '/'
           imageUrl = citizen.imageUrl; 
@@ -306,7 +306,7 @@ export const HoverTooltip: React.FC = () => {
       } else { // If citizen.imageUrl is null (or was empty and became null via safeCitizen)
         // Prioritize citizen.username for the image path, then citizen.id, then 'default'
         const identifierForImage = citizen.username || citizen.id || 'default';
-        imageUrl = `https://backend.serenissima.ai/public_assets/images/citizens/${identifierForImage}.jpg`;
+        imageUrl = `/public_assets/images/citizens/${identifierForImage}.jpg`;
       }
     
       // This console.log can be removed or kept, but the one above is more comprehensive now.
@@ -330,7 +330,7 @@ export const HoverTooltip: React.FC = () => {
               onError={(e) => {
                 console.log(`TOOLTIP: Failed to load citizen image: ${imageUrl}, trying fallback`);
                 // Fallback to default image if the specific one doesn't exist
-                e.currentTarget.src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
+                e.currentTarget.src = '/public_assets/images/citizens/default.jpg';
               }}
             />
           </div>
@@ -505,11 +505,11 @@ export const HoverTooltip: React.FC = () => {
                     <div className="flex items-center">
                       <div className="w-6 h-6 mr-2 bg-amber-800/50 rounded overflow-hidden flex items-center justify-center">
                         <img 
-                          src={`https://backend.serenissima.ai/public_assets/images/resources/${resource.name.toLowerCase().replace(/\s+/g, '_')}.png`}
+                          src={`/public_assets/images/resources/${resource.name.toLowerCase().replace(/\s+/g, '_')}.png`}
                           alt={resource.name}
                           className="w-5 h-5 object-contain"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/resources/default.png';
+                            (e.target as HTMLImageElement).src = '/public_assets/images/resources/default.png';
                           }}
                         />
                       </div>
@@ -541,11 +541,11 @@ export const HoverTooltip: React.FC = () => {
                   <div className="flex items-center">
                     <div className="w-6 h-6 mr-2 bg-amber-800/50 rounded overflow-hidden flex items-center justify-center">
                       <img 
-                        src={`https://backend.serenissima.ai/public_assets/images/resources/${resource.icon}`}
+                        src={`/public_assets/images/resources/${resource.icon}`}
                         alt={resource.name}
                         className="w-5 h-5 object-contain"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/resources/default.png';
+                          (e.target as HTMLImageElement).src = '/public_assets/images/resources/default.png';
                         }}
                       />
                     </div>

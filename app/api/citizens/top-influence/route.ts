@@ -83,7 +83,7 @@ export async function GET(request: Request) {
         lastName: "Gritti",
         influence: 25000,
         socialClass: "Nobili",
-        coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/doge_andrea.png",
+        coatOfArmsImageUrl: "/public/assets/images/coat-of-arms/doge_andrea.png",
         familyMotto: "Fortitudine et Prudentia",
         ducats: 500000,
         isAi: true
@@ -94,7 +94,7 @@ export async function GET(request: Request) {
         lastName: "de' Medici",
         influence: 22500,
         socialClass: "Nobili",
-        coatOfArmsImageUrl: "https://backend.serenissima.ai/public/assets/images/coat-of-arms/lorenzo_medici.png",
+        coatOfArmsImageUrl: "/public/assets/images/coat-of-arms/lorenzo_medici.png",
         familyMotto: "Arte et Ingenio",
         ducats: 450000,
         isAi: true

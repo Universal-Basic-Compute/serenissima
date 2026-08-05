@@ -1,3 +1,12 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:1fcbbedd87fabcf32082c3d9940af85f98b35382e4ed4cd963181a4c146c72ad
-size 634
+{
+  "id": "glass",
+  "name": "Glass",
+  "category": "processed_materials",
+  "subCategory": "crafted",
+  "description": "Transparent material produced in Murano, used for windows, mirrors, and decorative items.",
+  "historicalNotes": "Venetian glass production was centered on the island of Murano, where glassmakers were both privileged and confined to protect trade secrets. The cristallo technique, producing exceptionally clear glass, was a closely guarded Venetian innovation that brought wealth and influence to the Republic.",
+  "importPrice": 504.0,
+  "lifetimeHours": null,
+  "consumptionHours": 234,
+  "tier": 2
+}

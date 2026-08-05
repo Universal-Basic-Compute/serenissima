@@ -63,10 +63,10 @@ export async function GET(request: NextRequest) {
       if (username && coatOfArmsImageUrl && !coatOfArmsImageUrl.startsWith('http')) {
         // Assuming coatOfArmsImageUrl might be a relative path or just a filename
         // We'll construct the full URL based on the username for consistency
-        coatOfArmsImageUrl = `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${username}.png`;
+        coatOfArmsImageUrl = `/public_assets/images/coat-of-arms/${username}.png`;
       } else if (username && !coatOfArmsImageUrl) {
         // If no URL is provided but we have a username, construct the default path
-        coatOfArmsImageUrl = `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${username}.png`;
+        coatOfArmsImageUrl = `/public_assets/images/coat-of-arms/${username}.png`;
       }
 
       return {

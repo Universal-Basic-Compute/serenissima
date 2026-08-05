@@ -1,3 +1,25 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:71e7a122694396c487e119f3a3fa5dca8368992eb094ed71acb74d6081abea39
-size 1134
+{
+  "id": "jewelry",
+  "name": "Jewelry",
+  "category": "finished_goods",
+  "subCategory": "luxury_goods",
+  "description": "Exquisite ornamental pieces crafted from precious metals and gems. Venetian jewelry combines Byzantine, Islamic, and European influences into distinctive styles sought by elites across the Mediterranean.",
+  "historicalNotes": {
+    "introductionYear": 1100,
+    "notableProducers": [
+      "Venetian Goldsmiths Guild",
+      "Rialto Jewelers"
+    ],
+    "historicalSignificance": "Venetian jewelry represented a fusion of Eastern and Western styles, reflecting the city's position as a crossroads of cultures. The goldsmith trade was strictly regulated, with high standards enforced to maintain Venice's reputation for quality. Jewelry served not only as personal adornment but as portable wealth, diplomatic gifts, and markers of social status.",
+    "historicalContracts": [
+      "Venetian nobility",
+      "European courts",
+      "Byzantine elites",
+      "Ottoman nobility"
+    ]
+  },
+  "importPrice": 140544.0,
+  "lifetimeHours": null,
+  "consumptionHours": 2336,
+  "tier": 4
+}

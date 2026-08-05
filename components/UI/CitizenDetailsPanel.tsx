@@ -1171,7 +1171,7 @@ Your response:`;
     // Always construct the path based on username.
     // The onError handler in the <img> tag will manage the default image.
     if (citizen?.username) {
-      return `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${citizen.username}.png`;
+      return `/public_assets/images/coat-of-arms/${citizen.username}.png`;
     }
     // If no username, no custom coat of arms can be determined.
     // The <img> tag's onError will use the default.

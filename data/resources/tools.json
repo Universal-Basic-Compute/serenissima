@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:ec40be0d05aa2879b7f987824f0d1fdac722619d66ce1e389ddc6bb835ddcfda
-size 296
+{
+  "id": "tools",
+  "name": "Tools",
+  "category": "processed_materials",
+  "subCategory": "equipment",
+  "description": "Crafted implements for construction, shipbuilding, and artisanal work.",
+  "importPrice": 1098.0,
+  "lifetimeHours": null,
+  "consumptionHours": 350,
+  "tier": 2
+}

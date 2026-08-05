@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:264c1d5bf2aee9e554c4eaf242d0c82fa1887b655d10fccdb26d40908df75928
-size 292
+{
+  "id": "olive_oil",
+  "name": "Olive Oil",
+  "category": "processed_materials",
+  "subCategory": "food",
+  "description": "Pressed oil from olives, used in cooking and various industries.",
+  "importPrice": 768.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": 19,
+  "tier": 2
+}

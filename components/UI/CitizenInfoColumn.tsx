@@ -356,10 +356,10 @@ const CitizenInfoColumn: React.FC<CitizenInfoColumnProps> = ({
                   {transportResources.map((transport, index) => (
                     <div key={transport.id || index} className="bg-amber-100 rounded-lg p-2 text-sm flex items-center">
                       <img 
-                        src={`https://backend.serenissima.ai/public_assets/images/resources/${(transport.Name || transport.name || 'default_boat').toLowerCase().replace(/\s+/g, '_')}.png`} 
+                        src={`/public_assets/images/resources/${(transport.Name || transport.name || 'default_boat').toLowerCase().replace(/\s+/g, '_')}.png`} 
                         alt={transport.Name || transport.name} 
                         className="w-8 h-8 mr-3 object-contain"
-                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/resources/default_boat.png';}}
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/public_assets/images/resources/default_boat.png';}}
                       />
                       <div>
                         <div className="font-medium text-amber-800">{transport.Name || transport.name}</div>

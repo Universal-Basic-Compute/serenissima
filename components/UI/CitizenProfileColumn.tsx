@@ -59,12 +59,12 @@ const CitizenProfileColumn: React.FC<CitizenProfileColumnProps> = ({
       <div className="w-full mb-6 flex-shrink-0">
         <div className="w-full aspect-square relative mb-4 overflow-hidden rounded-lg border-2 border-amber-600 shadow-lg">
           <img 
-            src={citizen.username ? `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.username}.jpg` : `https://backend.serenissima.ai/public_assets/images/citizens/default_citizen.png`}
+            src={citizen.username ? `/public_assets/images/citizens/${citizen.username}.jpg` : `/public_assets/images/citizens/default_citizen.png`}
             alt={`${citizen.firstName} ${citizen.lastName}`} 
             className="w-full h-full object-cover"
             onError={(e) => {
               console.warn(`Failed to load citizen image for ${citizen.username}: ${(e.target as HTMLImageElement).src}. Falling back to default.`);
-              (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/citizens/default_citizen.png';
+              (e.target as HTMLImageElement).src = '/public_assets/images/citizens/default_citizen.png';
               (e.target as HTMLImageElement).onerror = () => {
                 const parent = (e.target as HTMLImageElement).parentElement;
                 if (parent) {
@@ -87,7 +87,7 @@ const CitizenProfileColumn: React.FC<CitizenProfileColumnProps> = ({
                 alt="Coat of Arms"
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://backend.serenissima.ai/public_assets/images/coat-of-arms/default.png';
+                  (e.target as HTMLImageElement).src = '/public_assets/images/coat-of-arms/default.png';
                 }}
               />
             </div>

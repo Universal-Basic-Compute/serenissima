@@ -26,8 +26,8 @@ const ChatCitizenDisplay: React.FC<ChatCitizenDisplayProps> = ({ citizen, title 
 
   const displayName = `${citizen.firstName || ''} ${citizen.lastName || ''}`.trim() || citizen.username;
   // Construct image URLs based on username
-  const mainImage = citizen.username ? `https://backend.serenissima.ai/public_assets/images/citizens/${citizen.username}.jpg` : undefined;
-  const coatOfArms = citizen.username ? `https://backend.serenissima.ai/public_assets/images/coat-of-arms/${citizen.username}.png` : undefined;
+  const mainImage = citizen.username ? `/public_assets/images/citizens/${citizen.username}.jpg` : undefined;
+  const coatOfArms = citizen.username ? `/public_assets/images/coat-of-arms/${citizen.username}.png` : undefined;
 
   const handleCitizenClick = () => {
     if (citizen) {
@@ -55,7 +55,7 @@ const ChatCitizenDisplay: React.FC<ChatCitizenDisplayProps> = ({ citizen, title 
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.onerror = null; 
-              target.src = 'https://backend.serenissima.ai/public_assets/images/citizens/default.jpg';
+              target.src = '/public_assets/images/citizens/default.jpg';
             }}
           />
         ) : (

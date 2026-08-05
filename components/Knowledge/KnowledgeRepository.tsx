@@ -48,7 +48,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/project-presentation.png" 
+                  src="/public_assets/images/knowledge/project-presentation.png" 
                   alt="Project Presentation" 
                   width={800}
                   height={400}
@@ -78,7 +78,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/project-roadmap.png" 
+                  src="/public_assets/images/knowledge/project-roadmap.png" 
                   alt="Project Roadmap" 
                   width={800}
                   height={400}
@@ -119,7 +119,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/resource-tree.png" 
+                  src="/public_assets/images/knowledge/resource-tree.png" 
                   alt="Resource Tree" 
                   width={800}
                   height={400}
@@ -157,7 +157,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/beginners-guide.png" 
+                  src="/public_assets/images/knowledge/beginners-guide.png" 
                   alt="Beginner's Guide" 
                   width={800}
                   height={400}
@@ -186,7 +186,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/economic-system.png" 
+                  src="/public_assets/images/knowledge/economic-system.png" 
                   alt="Economic System" 
                   width={800}
                   height={400}
@@ -215,7 +215,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/landowner-guide.png" 
+                  src="/public_assets/images/knowledge/landowner-guide.png" 
                   alt="Land Owner Guide" 
                   width={800}
                   height={400}
@@ -244,7 +244,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/building-owners-guide.png" 
+                  src="/public_assets/images/knowledge/building-owners-guide.png" 
                   alt="Building Owner's Guide" 
                   width={800}
                   height={400}
@@ -273,7 +273,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/business-owners-guide.png" 
+                  src="/public_assets/images/knowledge/business-owners-guide.png" 
                   alt="Business Owner's Guide" 
                   width={800}
                   height={400}
@@ -302,7 +302,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/strategies-article.png" 
+                  src="/public_assets/images/knowledge/strategies-article.png" 
                   alt="Strategies Article" 
                   width={800}
                   height={400}
@@ -331,7 +331,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/decrees-governance.png" 
+                  src="/public_assets/images/knowledge/decrees-governance.png" 
                   alt="Decrees & Governance" 
                   width={800}
                   height={400}
@@ -360,7 +360,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/unified-citizen-model.png" 
+                  src="/public_assets/images/knowledge/unified-citizen-model.png" 
                   alt="Unified Citizen Model" 
                   width={800}
                   height={400}
@@ -389,7 +389,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
             <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
               <div className="h-48 overflow-hidden">
                 <Image 
-                  src="https://backend.serenissima.ai/public_assets/images/knowledge/citizen-activities.png" // Placeholder - replace with actual image
+                  src="/public_assets/images/knowledge/citizen-activities.png" // Placeholder - replace with actual image
                   alt="Citizen Activities & Needs" 
                   width={800}
                   height={400}

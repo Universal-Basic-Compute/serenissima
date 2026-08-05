@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:decb22ed3aad3c1125c4cecfa8b393a679f01bc8c535892c749670879ab69eb9
-size 299
+{
+  "id": "pitch",
+  "name": "Pitch",
+  "category": "processed_materials",
+  "subCategory": "naval_supplies",
+  "description": "Sticky, waterproof tar essential for shipbuilding and maintenance.",
+  "importPrice": 1020.0,
+  "lifetimeHours": 26250,
+  "consumptionHours": null,
+  "tier": 0
+}

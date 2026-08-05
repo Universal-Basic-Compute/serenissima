@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:5cb48ba85598996ac0db515b5e004da7797eeb9270a85afbb40028859220cc06
-size 293
+{
+  "id": "sand",
+  "name": "Sand",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": "Fine granular material essential for glass production and construction mortar.",
+  "importPrice": 30.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

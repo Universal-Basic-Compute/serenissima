@@ -138,7 +138,7 @@ const UndercutStratagemPanel = forwardRef<StratagemSpecificPanelRef, StratagemSp
                     className="p-2 hover:bg-amber-100 cursor-pointer text-amber-800 flex items-center"
                   >
                     <img 
-                      src={`https://backend.serenissima.ai/public_assets/images/resources/${rt.id}.png`} 
+                      src={`/public_assets/images/resources/${rt.id}.png`} 
                       alt={rt.name} 
                       className="w-5 h-5 mr-2 object-contain" 
                     />

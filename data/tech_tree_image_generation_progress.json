@@ -1,3 +1,13 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:d22523b6093ef9a187ef54ab329d391a5727277dfd355c9c3337cd2764192ab2
-size 231
+[
+  "arsenalgate",
+  "contracted_construction",
+  "smugglers_den",
+  "law_enforcement",
+  "influence_system",
+  "unique_buildings",
+  "guilds",
+  "public_health",
+  "merchant_galley",
+  "resource_export",
+  "contract"
+]

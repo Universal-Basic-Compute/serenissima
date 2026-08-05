@@ -1,3 +1,63 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:6086fe61869c7c6a19fe95844ebb9b992ab226dbf550a063d602754ac85e00f6
-size 2397
+{
+  "name": "House of Natural Sciences",
+  "pointType": "building",
+  "category": "science",
+  "subCategory": "Educational Buildings",
+  "size": 3,
+  "shortDescription": "Grand institution for natural philosophy, mathematics, and experimental sciences.",
+  "fullDescription": "A prestigious center of learning where scholars pursue the mysteries of the natural world through observation, experimentation, and mathematical reasoning. The building houses laboratories for alchemical experiments, chambers for astronomical observations, collections of specimens from distant lands, and a library of mathematical treatises. Here, Venice's Scientisti class develops new understanding of nature's laws while carefully navigating the boundaries of acceptable inquiry.",
+  "flavorText": "Within these walls, men dare to measure God's creation—though whether this brings them closer to divine truth or dangerous heresy remains to be seen.",
+  "constructionCosts": {
+    "ducats": 12500000,
+    "timber": 600,
+    "bricks": 850,
+    "stone": 500,
+    "glass": 300,
+    "marble": 200,
+    "gold_leaf": 50
+  },
+  "maintenanceCost": 6000,
+  "soundDesign": {
+    "ambientSound": "Bubbling alchemical vessels, scratching quills, turning pages",
+    "activitySounds": "Scientific debates, glass instruments clinking, mathematical calculations",
+    "musicTheme": "Musica Universalis"
+  },
+  "seasonalEffects": {
+    "academic season": "Increased activity, visiting scholars, public demonstrations",
+    "summer": "Astronomical observations, specimen collection expeditions",
+    "winter": "Indoor experiments, theoretical work, instrument crafting"
+  },
+  "aiInteractionPoints": [
+    "Grand entrance hall",
+    "Mathematical library",
+    "Alchemical laboratory",
+    "Astronomical observation deck",
+    "Specimen collection rooms",
+    "Lecture amphitheater",
+    "Instrument workshop",
+    "Scholar's private studies"
+  ],
+  "productionInformation": {
+    "Arti": [],
+    "storageCapacity": 500,
+    "stores": [
+      "books",
+      "paper",
+      "glass",
+      "maps",
+      "gold",
+      "fine_metal",
+      "scientific_instruments",
+      "preserved_specimens"
+    ],
+    "sells": [
+      "books",
+      "maps",
+      "scientific_instruments"
+    ]
+  },
+  "buildTier": 4,
+  "workTier": 4,
+  "consumeTier": 3,
+  "constructionMinutes": 43200
+}

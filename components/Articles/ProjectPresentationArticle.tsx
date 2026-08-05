@@ -29,7 +29,7 @@ const ProjectPresentationArticle: React.FC<ProjectPresentationArticleProps> = ({
         
         <div className="aspect-w-16 aspect-h-9 mb-8 rounded-lg overflow-hidden">
           <Image
-            src="https://backend.serenissima.ai/public_assets/images/knowledge/presentation.jpg"
+            src="/public_assets/images/knowledge/presentation.jpg"
             alt="Venice Grand Canal"
             width={800}
             height={450}

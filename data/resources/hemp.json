@@ -1,3 +1,15 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:3f6349022d5abd7e8ac542b4ac27fd661c60356667873e8f8f00821ec7dbbd04
-size 626
+{
+  "id": "hemp",
+  "name": "Hemp",
+  "category": "raw_materials",
+  "subCategory": "textile_fiber",
+  "description": {
+    "short": "Strong natural fiber used for rope and sailcloth.",
+    "full": "Durable plant fibers harvested from hemp plants grown on the Venetian mainland and imported from surrounding regions. Essential for maritime industries.",
+    "flavor": "Without these humble fibers, no ship would sail, no cargo would be secured, and Venice's maritime empire would unravel like a poorly spun thread."
+  },
+  "importPrice": 210.0,
+  "lifetimeHours": 17550,
+  "consumptionHours": null,
+  "tier": 0
+}

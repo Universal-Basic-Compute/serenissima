@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:a43dfbb906514a871cb1388ef266cc0a32caaf49a33fd93fe4857bd29da28931
-size 301
+{
+  "id": "water",
+  "name": "Water",
+  "category": "raw_materials",
+  "subCategory": "natural",
+  "description": "Fresh water collected from wells and cisterns, essential for daily life and many crafts.",
+  "importPrice": 30.0,
+  "lifetimeHours": 150,
+  "consumptionHours": 1,
+  "tier": 1
+}

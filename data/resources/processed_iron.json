@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:047b6d653adb430923ea5f8342e12005b7d80959e615d67696b7994ed875ce08
-size 299
+{
+  "id": "processed_iron",
+  "name": "Processed Iron",
+  "category": "processed_materials",
+  "subCategory": "metallurgy",
+  "description": "Refined iron ingots and bars ready for blacksmithing.",
+  "importPrice": 1959.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}

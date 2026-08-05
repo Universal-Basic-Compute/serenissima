@@ -1,3 +1,15 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:5868dd84895f9af57a88d9909ad591fdb1062dddb9dec74548f44ba41964bb94
-size 666
+{
+  "id": "timber",
+  "name": "Timber",
+  "category": "raw_materials",
+  "subCategory": "forestry",
+  "description": {
+    "short": "Processed wood for construction and crafting.",
+    "full": "Logs cut from the forests of the Venetian mainland and Dalmatian coast, processed into usable timber. Essential for building construction and shipbuilding.",
+    "flavor": "The lifeblood of a maritime empire isn't gold or spice, but timberâ€”without the strength of these mainland forests, Venice would be nothing more than scattered huts upon the lagoon."
+  },
+  "importPrice": 360.0,
+  "lifetimeHours": 43800,
+  "consumptionHours": null,
+  "tier": 0
+}

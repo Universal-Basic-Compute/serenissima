@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:a2f54b947e0f74a86488565f18d29e0b13fa68f677665a6283667640e49309ff
-size 300
+{
+  "id": "dyed_textiles",
+  "name": "Dyed Textiles",
+  "category": "processed_materials",
+  "subCategory": "textile",
+  "description": "Vibrant colored fabrics ready for tailoring into garments.",
+  "importPrice": 16443.0,
+  "lifetimeHours": 43800,
+  "consumptionHours": 117,
+  "tier": 3
+}

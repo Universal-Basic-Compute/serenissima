@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:fcc1ec7271bbd27bab101fc14fc9e90cf4845e33ecbee09354d630bcbcb6abbb
-size 277
+{
+  "id": "clay",
+  "name": "Clay",
+  "category": "raw_materials",
+  "subCategory": "mineral",
+  "description": "Malleable earth material used for bricks, tiles, and pottery.",
+  "importPrice": 120.0,
+  "lifetimeHours": null,
+  "consumptionHours": null,
+  "tier": 0
+}
