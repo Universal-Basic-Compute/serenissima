@@ -1694,7 +1694,8 @@ def get_tables() -> Dict[str, Table]:
             'relevancies': 'RELEVANCIES',
             'relationships': 'RELATIONSHIPS',
             'stratagems': 'STRATAGEMS',
-            'processes': 'PROCESSES'
+            'processes': 'PROCESSES',
+            'inference_requests': 'INFERENCE_REQUESTS'
         }
         
         # Initialize tables

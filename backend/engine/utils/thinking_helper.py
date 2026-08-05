@@ -19,6 +19,7 @@ from backend.engine.utils.process_helper import (
     PROCESS_STATUS_FAILED,
     PROCESS_STATUS_IN_PROGRESS
 )
+from backend.engine.utils.inference_queue_helper import execute_kinos_inference
 
 log = logging.getLogger(__name__)
 
@@ -138,9 +139,12 @@ def process_daily_reflection(
         log.info(f"  [DEBUG] addSystem content for {citizen_username}: {complete_add_system_text[:500]}...")
         
         log.info(f"  Making KinOS /messages call for daily reflection by {citizen_username} to {kinos_messages_url}")
-        
+
         try:
-            kinos_response = requests.post(kinos_messages_url, json=kinos_payload_dict, timeout=600) # Increased timeout
+            kinos_response = execute_kinos_inference(
+                tables=tables, citizen_username=citizen_username, request_type="daily_reflection",
+                kinos_url=kinos_messages_url, payload=kinos_payload_dict, timeout=600, process_id=process_id
+            )
             kinos_response.raise_for_status()
             
             kinos_response_data = kinos_response.json()
@@ -330,9 +334,12 @@ def process_theater_reflection(
         }
 
         log.info(f"  Making KinOS /messages call for theater reflection by {citizen_username} to {kinos_messages_url}")
-        
+
         try:
-            kinos_response = requests.post(kinos_messages_url, json=kinos_payload_dict, timeout=180) # Increased timeout
+            kinos_response = execute_kinos_inference(
+                tables=tables, citizen_username=citizen_username, request_type="theater_reflection",
+                kinos_url=kinos_messages_url, payload=kinos_payload_dict, timeout=180, process_id=process_id
+            )
             kinos_response.raise_for_status()
             
             kinos_response_data = kinos_response.json()
@@ -510,9 +517,12 @@ def process_public_bath_reflection(
         }
 
         log.info(f"  Making KinOS /messages call for public bath reflection by {citizen_username} to {kinos_messages_url}")
-        
+
         try:
-            kinos_response = requests.post(kinos_messages_url, json=kinos_payload_dict, timeout=180) # Increased timeout
+            kinos_response = execute_kinos_inference(
+                tables=tables, citizen_username=citizen_username, request_type="public_bath_reflection",
+                kinos_url=kinos_messages_url, payload=kinos_payload_dict, timeout=180, process_id=process_id
+            )
             kinos_response.raise_for_status()
             
             kinos_response_data = kinos_response.json()
@@ -743,9 +753,12 @@ def process_practical_reflection(
         }
         
         log.info(f"  Making KinOS /messages call for practical reflection by {citizen_username} to {kinos_messages_url}")
-        
+
         try:
-            kinos_response = requests.post(kinos_messages_url, json=kinos_payload_dict, timeout=300) # Increased timeout
+            kinos_response = execute_kinos_inference(
+                tables=tables, citizen_username=citizen_username, request_type="practical_reflection",
+                kinos_url=kinos_messages_url, payload=kinos_payload_dict, timeout=300, process_id=process_id
+            )
             kinos_response.raise_for_status()
             
             kinos_response_data = kinos_response.json()
@@ -1223,9 +1236,12 @@ def process_guided_reflection(
 
         log.info(f"  Making KinOS /messages call for guided reflection by {citizen_username} to {kinos_messages_url}")
         log.info(f"  Selected prompt: \"{selected_prompt}\"")
-        
+
         try:
-            kinos_response = requests.post(kinos_messages_url, json=kinos_payload_dict, timeout=180) # Increased timeout
+            kinos_response = execute_kinos_inference(
+                tables=tables, citizen_username=citizen_username, request_type="guided_reflection",
+                kinos_url=kinos_messages_url, payload=kinos_payload_dict, timeout=180, process_id=process_id
+            )
             kinos_response.raise_for_status()
             
             kinos_response_data = kinos_response.json()
@@ -1447,9 +1463,12 @@ def process_continue_thought(
         }
 
         log.info(f"  Making KinOS /messages call for thought continuation by {citizen_username} to {kinos_messages_url}")
-        
+
         try:
-            kinos_response = requests.post(kinos_messages_url, json=kinos_payload_dict, timeout=180) # Increased timeout
+            kinos_response = execute_kinos_inference(
+                tables=tables, citizen_username=citizen_username, request_type="continue_thought",
+                kinos_url=kinos_messages_url, payload=kinos_payload_dict, timeout=180, process_id=process_id
+            )
             kinos_response.raise_for_status()
             
             kinos_response_data = kinos_response.json()
@@ -1632,9 +1651,12 @@ def process_mass_reflection(
         }
 
         log.info(f"  Making KinOS /messages call for mass reflection by {citizen_username} to {kinos_messages_url}")
-        
+
         try:
-            kinos_response = requests.post(kinos_messages_url, json=kinos_payload_dict, timeout=180) # Increased timeout
+            kinos_response = execute_kinos_inference(
+                tables=tables, citizen_username=citizen_username, request_type="mass_reflection",
+                kinos_url=kinos_messages_url, payload=kinos_payload_dict, timeout=180, process_id=process_id
+            )
             kinos_response.raise_for_status()
             
             kinos_response_data = kinos_response.json()
@@ -1810,9 +1832,12 @@ def process_unguided_reflection(
         }
 
         log.info(f"  Making KinOS /messages call for unguided reflection by {citizen_username} to {kinos_messages_url}")
-        
+
         try:
-            kinos_response = requests.post(kinos_messages_url, json=kinos_payload_dict, timeout=600) # Increased timeout
+            kinos_response = execute_kinos_inference(
+                tables=tables, citizen_username=citizen_username, request_type="unguided_reflection",
+                kinos_url=kinos_messages_url, payload=kinos_payload_dict, timeout=600, process_id=process_id
+            )
             kinos_response.raise_for_status()
             
             kinos_response_data = kinos_response.json()

@@ -300,7 +300,8 @@ def get_concluded_unprocessed_activities(tables: Dict[str, Table], target_citize
     now_iso_utc = now_utc_for_check.replace(microsecond=0).isoformat() # Convert to UTC string for Airtable, without microseconds
     log.info(f"{LogColors.OKBLUE}Using now_iso_utc for query (microseconds removed): {now_iso_utc}{LogColors.ENDC}") # Log the timestamp
     
-    base_formula = f"AND({{EndDate}} <= '{now_iso_utc}', NOT(OR({{Status}} = 'processed', {{Status}} = 'failed', {{Status}} = 'error')))" # Added 'error'
+    # NOT(IS_AFTER(...)) instead of <= : Airtable compares {Date} <= 'string' lexicographically.
+    base_formula = f"AND(NOT(IS_AFTER({{EndDate}}, '{now_iso_utc}')), NOT(OR({{Status}} = 'processed', {{Status}} = 'failed', {{Status}} = 'error')))" # Added 'error'
     
     if target_citizen_username:
         citizen_filter = f"{{Citizen}} = '{_escape_airtable_value(target_citizen_username)}'"
@@ -387,10 +388,11 @@ def process_building_arrivals(tables: Dict[str, Table], dry_run: bool = False, f
     else:
         now_utc_for_check = datetime.now(timezone.utc)
 
-    now_iso_utc_for_check = now_utc_for_check.isoformat()
-    
+    # Microseconds break Airtable date comparisons — strip them.
+    now_iso_utc_for_check = now_utc_for_check.replace(microsecond=0).isoformat()
+
     # Check for merchant galleys specifically, using ConstructionDate as the arrival time
-    formula = f"AND({{Type}}='merchant_galley', {{IsConstructed}}=FALSE(), {{ConstructionDate}}<='{now_iso_utc_for_check}')"
+    formula = f"AND({{Type}}='merchant_galley', {{IsConstructed}}=FALSE(), NOT(IS_AFTER({{ConstructionDate}}, '{now_iso_utc_for_check}')))"
     try:
         arrived_buildings = tables['buildings'].all(formula=formula)
         if not arrived_buildings:
@@ -422,11 +424,16 @@ def mark_started_activities_as_in_progress(
     and updates their status to 'in_progress'.
     """
     now_utc_to_use = now_utc_for_check_override if now_utc_for_check_override else datetime.now(timezone.utc)
-    now_iso_utc = now_utc_to_use.isoformat()
+    # Airtable date comparisons silently match nothing when the ISO string
+    # carries microseconds — strip them (same as the concluded-activities query).
+    now_iso_utc = now_utc_to_use.replace(microsecond=0).isoformat()
 
     log.info(f"{LogColors.OKBLUE}Marking started activities as 'in_progress' (effective time: {now_iso_utc})...{LogColors.ENDC}")
 
-    formula = f"AND({{Status}}='created', {{StartDate}}<='{now_iso_utc}')"
+    # NOT(IS_AFTER(...)) does real date comparison; a raw {StartDate}<='...'
+    # is compared lexicographically ('.000Z' > '+00:00'), silently missing
+    # values equal to the cutoff.
+    formula = f"AND({{Status}}='created', NOT(IS_AFTER({{StartDate}}, '{now_iso_utc}')))"
     try:
         activities_to_mark_started = tables['activities'].all(formula=formula)
         if not activities_to_mark_started:
@@ -936,7 +943,10 @@ def process_all_activities_for_one_citizen(
                 send_telegram_notification(error_message_telegram)
 
         # Update status in a thread-safe way if needed, though update_activity_status itself should be fine.
-        update_activity_status(tables, activity_id_airtable, processing_status)
+        if dry_run:
+            log.info(f"{LogColors.OKCYAN}[DRY RUN] Citizen {citizen_username_log_ctx}: Would update activity {activity_guid} status to '{processing_status}'.{LogColors.ENDC}")
+        else:
+            update_activity_status(tables, activity_id_airtable, processing_status)
 
         if processing_status == "processed":
             thread_processed_count += 1
@@ -952,8 +962,8 @@ def process_all_activities_for_one_citizen(
                 if activity_citizen_for_chain_check and activity_created_at and activity_end_date: # Use defined variable
                     # Find activities for same citizen, created at same time (within 1 second), with start date = this activity's end date
                     # This indicates they are part of the same chain
-                    created_at_min = (datetime.fromisoformat(activity_created_at.replace('Z', '+00:00')) - timedelta(seconds=1)).isoformat()
-                    created_at_max = (datetime.fromisoformat(activity_created_at.replace('Z', '+00:00')) + timedelta(seconds=1)).isoformat()
+                    created_at_min = (datetime.fromisoformat(activity_created_at.replace('Z', '+00:00')) - timedelta(seconds=1)).replace(microsecond=0).isoformat()
+                    created_at_max = (datetime.fromisoformat(activity_created_at.replace('Z', '+00:00')) + timedelta(seconds=1)).replace(microsecond=0).isoformat()
                     
                     # In the new architecture, activities in a chain are created together by the activity creator
                     # and have their StartDate set to the EndDate of the previous activity in the chain
@@ -966,8 +976,11 @@ def process_all_activities_for_one_citizen(
                         for dep_activity in dependent_activities:
                             dep_activity_id = dep_activity['id']
                             dep_activity_guid = dep_activity['fields'].get('ActivityId', dep_activity_id)
-                            update_activity_status(tables, dep_activity_id, "failed") # This is thread-safe per call
-                            log.warning(f"{LogColors.WARNING}Citizen {citizen_username_log_ctx}: Marked dependent activity {dep_activity_guid} as failed.{LogColors.ENDC}")
+                            if dry_run:
+                                log.warning(f"{LogColors.OKCYAN}[DRY RUN] Citizen {citizen_username_log_ctx}: Would mark dependent activity {dep_activity_guid} as failed.{LogColors.ENDC}")
+                            else:
+                                update_activity_status(tables, dep_activity_id, "failed") # This is thread-safe per call
+                                log.warning(f"{LogColors.WARNING}Citizen {citizen_username_log_ctx}: Marked dependent activity {dep_activity_guid} as failed.{LogColors.ENDC}")
                             thread_failed_count += 1 # Count these as additional failures for this citizen's batch
             except Exception as e_chain:
                 log.error(f"{LogColors.FAIL}Citizen {citizen_username_log_ctx}: Error checking for dependent activities for {activity_guid}: {e_chain}{LogColors.ENDC}")
@@ -1429,7 +1442,14 @@ def reschedule_created_activities_by_priority(
 
 
                 new_end_dt = new_start_dt + timedelta(seconds=current_duration_seconds)
-            
+
+                # Write microsecond-free datetimes: a rescheduled StartDate carrying
+                # microseconds lands 0.x s AFTER the second-truncated cutoff used by
+                # mark_started_activities_as_in_progress, so the activity is never
+                # promoted and gets rescheduled forever (the eternal-freeze loop).
+                new_start_dt = new_start_dt.replace(microsecond=0)
+                new_end_dt = new_end_dt.replace(microsecond=0)
+
                 fields_to_update_for_activity = {'StartDate': new_start_dt.isoformat(), 'EndDate': new_end_dt.isoformat()}
                 if new_path_json != activity['fields'].get('Path'): # Only update path if it changed
                     fields_to_update_for_activity['Path'] = new_path_json
