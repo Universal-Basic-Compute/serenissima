@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "cascade-site",
+      "runtimeExecutable": "backend/venv/Scripts/python.exe",
+      "runtimeArgs": ["-m", "http.server", "8899", "--directory", "rialto_cascade-platform/ponte-di-rialto_landing_page/MerchantPrince/cascade-website"],
+      "port": 8899
     }
   ]
 }

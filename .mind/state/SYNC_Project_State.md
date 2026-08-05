@@ -30,6 +30,23 @@ All browser-side code is self-contained — no dependencies on mind-mcp's Node.j
 
 ## ACTIVE WORK
 
+### Cascade website rebuilt — the $5000 proof of value (2026-08-05)
+
+- **What:** `rialto_cascade-platform/ponte-di-rialto_landing_page/MerchantPrince/cascade-website/`
+  regenerated from `generate_cascade_site_pages.py` (single source of truth — edit the
+  COMPANIES data there, rerun to rebuild): honest index.html + one page per company
+  (CASCADE platform + the 9 Fondaco businesses), each with pitch, priced services,
+  Now/Next/Later roadmap, deck link (CASCADE) or "on request", mailto CTA to NLR.
+- **Honesty rule enforced:** the old site's fabricated counters ("€47,832 generated
+  today", script.js) are deleted. "What's real today" section only lists repo-traceable
+  facts. TherapyKin page disclaims medical care; Elite Investor disclaims financial advice.
+- **Offers (from the Signoria decree):** Chronicle $15/mo, City Pulse Report $50,
+  Multi-Perspective Analysis $150 (48h) — prepaid, human-reviewed before delivery.
+- **Verified:** served via `.claude/launch.json` entry `cascade-site`
+  (http.server :8899); index + company pages render with working links and prices.
+- **@mind:TODO:** replace mailto with real payment links (Stripe/invoice) when NLR
+  sets them up; deploy to a public host (cascade.computer or GitHub Pages).
+
 ### Signoria council debate rebuilt on local Ollama voices (2026-08-05)
 
 - **What:** `backend/scripts/signoriaDiscussion.py` rewritten — same council logic
